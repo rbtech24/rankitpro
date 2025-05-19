@@ -96,9 +96,11 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
     
     // Send email notification
     try {
-      const emailSent = await emailService.sendBlogPostNotification(blogPost);
+      const emailSent = await emailService.sendBlogPostNotification(blogPost, user.email);
       if (!emailSent) {
         log('Failed to send blog post notification email', 'warning');
+      } else {
+        log(`Blog post notification email sent to ${user.email}`, 'info');
       }
     } catch (error) {
       console.error('Error sending blog post notification email:', error);

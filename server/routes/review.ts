@@ -81,11 +81,30 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
     const reviewRequest = await storage.createReviewRequest(reviewRequestData);
     
     // Send email notification
-    if (method === 'email') {
+    if (method === 'email' && reviewRequest.email) {
       try {
-        const emailSent = await emailService.sendReviewRequest(reviewRequest, technician);
+        // Get company info for the email
+        const company = await storage.getCompany(user.companyId!);
+        const companyName = company ? company.name : "Our Service Company";
+        
+        // Generate review link/URL
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const host = req.headers['x-forwarded-host'] || req.get('host');
+        const baseUrl = `${protocol}://${host}`;
+        const reviewLink = `${baseUrl}/review/${reviewRequest.id}/${Buffer.from(reviewRequest.customerName).toString('base64')}`;
+        
+        const emailSent = await emailService.sendReviewRequest(
+          reviewRequest,
+          technician,
+          reviewRequest.email,
+          companyName,
+          reviewLink
+        );
+        
         if (!emailSent) {
           log('Failed to send review request email', 'warning');
+        } else {
+          log(`Review request email sent to ${reviewRequest.email}`, 'info');
         }
       } catch (error) {
         console.error('Error sending review request email:', error);

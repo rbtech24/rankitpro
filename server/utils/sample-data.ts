@@ -149,13 +149,13 @@ export async function createSampleData() {
             technicianName: technician.name
           });
           
-          // Create blog post
+          // Create blog post - ensure photos property is not undefined
           const blogPost = await storage.createBlogPost({
             title: blogResult.title,
             content: blogResult.content,
             companyId: demoCompany.id,
             checkInId: checkIn.id,
-            photos: checkIn.photos
+            photos: checkIn.photos || []
           });
           
           log(`Created demo blog post: "${blogPost.title}"`, 'info');

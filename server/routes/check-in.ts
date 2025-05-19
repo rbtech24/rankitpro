@@ -50,7 +50,14 @@ router.post('/', isAuthenticated, async (req: Request, res: Response) => {
     }
 
     // Send email notification (will use logging if SendGrid is not set up)
-    const emailSent = await emailService.sendCheckInNotification(checkIn, technician);
+    const checkInWithTechnician = { ...checkIn, technician };
+    const companyAdminEmail = user.email; // Using current user's email as recipient
+    
+    const emailSent = await emailService.sendCheckInNotification(
+      checkInWithTechnician, 
+      companyAdminEmail
+    );
+    
     if (!emailSent) {
       log('Failed to send check-in notification email', 'warning');
     }
@@ -77,7 +84,7 @@ router.post('/', isAuthenticated, async (req: Request, res: Response) => {
         });
 
         // Send blog post notification
-        await emailService.sendBlogPostNotification(blogPost);
+        await emailService.sendBlogPostNotification(blogPost, user.email);
 
         // Mark the check-in as having been made into a blog post
         await storage.updateCheckIn(checkIn.id, { isBlog: true });
@@ -104,7 +111,23 @@ router.post('/', isAuthenticated, async (req: Request, res: Response) => {
         });
 
         // Send the review request email/notification
-        await emailService.sendReviewRequest(reviewRequest, technician);
+        const customerEmail = req.body.customerEmail;
+        if (customerEmail) {
+          // Get company info for the email
+          const company = await storage.getCompany(user.companyId!);
+          const companyName = company ? company.name : "Our Service Company";
+          
+          // Create review link (in a real app, this would be a unique URL)
+          const reviewLink = `https://checkin-platform.com/reviews/${reviewRequest.id}`;
+          
+          await emailService.sendReviewRequest(
+            reviewRequest,
+            technician,
+            customerEmail,
+            companyName,
+            reviewLink
+          );
+        }
       } catch (error) {
         console.error('Error creating review request:', error);
         // Don't fail the whole request if review request creation fails
