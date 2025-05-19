@@ -48,10 +48,8 @@ export default function Billing() {
   });
   
   // State for subscription management and payment modal
-  const [currentPlan, setCurrentPlan] = useState(auth?.company?.plan || "starter");
+  const [currentPlan, setCurrentPlan] = useState<string>("starter");
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
@@ -102,20 +100,16 @@ export default function Billing() {
     },
     onSuccess: (data) => {
       setIsLoading(false);
-      if (data.clientSecret) {
-        setClientSecret(data.clientSecret);
-        setIsPaymentModalOpen(true);
-      } else {
-        // If no client secret is returned, the subscription was updated without requiring payment
-        toast({
-          title: "Subscription Updated",
-          description: `Your subscription has been updated to the ${selectedPlan} plan.`,
-          variant: "default",
-        });
-        queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
-        setSelectedPlan(null);
-      }
+      
+      toast({
+        title: "Subscription Updated",
+        description: `Your subscription plan has been updated.`,
+        variant: "default",
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+      setSelectedPlan(null);
     },
     onError: (error) => {
       setIsLoading(false);
@@ -191,25 +185,6 @@ export default function Billing() {
     }
   };
   
-  const handlePaymentSuccess = () => {
-    setIsPaymentModalOpen(false);
-    setClientSecret(null);
-    toast({
-      title: "Payment Successful",
-      description: `Your subscription has been updated to the ${selectedPlan} plan.`,
-      variant: "default",
-    });
-    queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
-    queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
-    setSelectedPlan(null);
-  };
-  
-  const handlePaymentCancel = () => {
-    setIsPaymentModalOpen(false);
-    setClientSecret(null);
-    setSelectedPlan(null);
-  };
-  
   const formatFeatureValue = (value: string | boolean) => {
     if (typeof value === "boolean") {
       return value ? (
@@ -227,9 +202,9 @@ export default function Billing() {
   };
 
   return (
-    <>
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Payment Modal */}
-      <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
+      <Dialog open={!!clientSecret} onOpenChange={(open) => !open && setClientSecret(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Complete Your Payment</DialogTitle>
@@ -242,7 +217,17 @@ export default function Billing() {
               <Elements stripe={stripePromise} options={{ clientSecret }}>
                 <PaymentForm 
                   clientSecret={clientSecret}
-                  onSuccess={handlePaymentSuccess}
+                  onSuccess={() => {
+                    setClientSecret(null);
+                    toast({
+                      title: "Payment Successful",
+                      description: `Your subscription has been updated to the ${selectedPlan} plan.`,
+                      variant: "default",
+                    });
+                    queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
+                    queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+                    setSelectedPlan(null);
+                  }}
                   buttonText="Complete Payment"
                   isSubscription={true}
                 />
@@ -256,11 +241,10 @@ export default function Billing() {
         </DialogContent>
       </Dialog>
       
-      <div className="flex h-screen overflow-hidden bg-gray-50">
-        <Sidebar className={`fixed inset-0 z-40 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:translate-x-0 md:relative`} />
-        
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <TopNav onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <Sidebar className={`fixed inset-0 z-40 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:translate-x-0 md:relative`} />
+      
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <TopNav onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="mb-6">
@@ -269,6 +253,7 @@ export default function Billing() {
           </div>
           
           <div className="space-y-6">
+            {/* Current Plan Card */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -363,217 +348,108 @@ export default function Billing() {
               </CardFooter>
             </Card>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment Method</CardTitle>
-                <CardDescription>Manage your payment methods on file.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isLoadingSubscription ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  </div>
-                ) : paymentMethods.length > 0 ? (
-                  paymentMethods.map((method, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-md">
-                      <div className="flex items-center">
-                        <div className="rounded-md bg-gray-100 p-2 mr-4">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-700">
-                            <rect width="20" height="14" x="2" y="5" rx="2"/>
-                            <line x1="2" x2="22" y1="10" y2="10"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="font-medium">{method.brand.charAt(0).toUpperCase() + method.brand.slice(1)} ending in {method.last4}</p>
-                          <p className="text-sm text-gray-500">Expires {method.expMonth}/{method.expYear}</p>
-                        </div>
-                      </div>
-                      {method.isDefault && <Badge>Default</Badge>}
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-4 text-gray-500">
-                    No payment methods on file
-                  </div>
-                )}
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" onClick={() => {
-                  if (subscriptionStatus === 'active') {
-                    window.location.href = '/update-payment-method'; // You can implement this page later
-                  } else {
-                    toast({
-                      title: "No Active Subscription",
-                      description: "You need an active subscription to update payment methods.",
-                      variant: "default",
-                    });
-                  }
-                }}>
-                  {paymentMethods.length > 0 ? 'Update Payment Method' : 'Add Payment Method'}
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Billing History</CardTitle>
-                <CardDescription>View your previous invoices and payments.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Invoice</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>May 15, 2024</TableCell>
-                      <TableCell>Monthly Subscription - Starter Plan</TableCell>
-                      <TableCell>$29.00</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Paid</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                          </svg>
-                          Download
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Apr 15, 2024</TableCell>
-                      <TableCell>Monthly Subscription - Starter Plan</TableCell>
-                      <TableCell>$29.00</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Paid</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                          </svg>
-                          Download
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Mar 15, 2024</TableCell>
-                      <TableCell>Monthly Subscription - Starter Plan</TableCell>
-                      <TableCell>$29.00</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Paid</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                          </svg>
-                          Download
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-            
+            {/* Available Plans */}
             <Card>
               <CardHeader>
                 <CardTitle>Available Plans</CardTitle>
-                <CardDescription>Compare plans and choose the best option for your business.</CardDescription>
+                <CardDescription>Choose the plan that works best for your business.</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Feature</TableHead>
-                        <TableHead>Starter<br /><span className="font-normal text-xs">$29/month</span></TableHead>
-                        <TableHead>Pro<br /><span className="font-normal text-xs">$79/month</span></TableHead>
-                        <TableHead>Agency<br /><span className="font-normal text-xs">$199/month</span></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {planFeatures.map((feature, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">{feature.name}</TableCell>
-                          <TableCell className="text-center">{formatFeatureValue(feature.starter)}</TableCell>
-                          <TableCell className="text-center">{formatFeatureValue(feature.pro)}</TableCell>
-                          <TableCell className="text-center">{formatFeatureValue(feature.agency)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                  <Card className={`border-2 ${currentPlan === "starter" ? "border-primary" : "border-gray-200"}`}>
-                    <CardHeader className="py-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Starter Plan */}
+                  <Card className={`border-2 ${currentPlan === 'starter' ? 'border-primary' : 'border-gray-200'}`}>
+                    <CardHeader>
                       <CardTitle>Starter</CardTitle>
-                      <CardDescription>Perfect for small businesses</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-0 pb-4">
-                      <div className="text-3xl font-bold mb-2">$29<span className="text-sm font-normal text-gray-500">/month</span></div>
-                      <Button 
-                        className="w-full" 
-                        variant={currentPlan === "starter" ? "outline" : "default"}
-                        onClick={() => handleChangePlan("starter")}
-                        disabled={currentPlan === "starter"}
-                      >
-                        {currentPlan === "starter" ? "Current Plan" : "Switch to Starter"}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className={`border-2 ${currentPlan === "pro" ? "border-primary" : "border-gray-200"}`}>
-                    <CardHeader className="py-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle>Pro</CardTitle>
-                          <CardDescription>For growing businesses</CardDescription>
-                        </div>
-                        <Badge>Popular</Badge>
+                      <CardDescription>For small businesses just getting started</CardDescription>
+                      <div className="mt-2">
+                        <span className="text-3xl font-bold">$29</span>
+                        <span className="text-gray-500">/month</span>
                       </div>
                     </CardHeader>
-                    <CardContent className="pt-0 pb-4">
-                      <div className="text-3xl font-bold mb-2">$79<span className="text-sm font-normal text-gray-500">/month</span></div>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {planFeatures.map((feature, index) => (
+                          <li key={index} className="flex items-center">
+                            <span className="mr-2">{formatFeatureValue(feature.starter)}</span>
+                            <span>{typeof feature.starter === 'boolean' ? feature.name : `${feature.name}: ${feature.starter}`}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                    <CardFooter>
                       <Button 
                         className="w-full" 
-                        variant={currentPlan === "pro" ? "outline" : "default"}
-                        onClick={() => handleChangePlan("pro")}
-                        disabled={currentPlan === "pro"}
+                        variant={currentPlan === 'starter' ? 'outline' : 'default'}
+                        onClick={() => handleChangePlan('starter')}
+                        disabled={currentPlan === 'starter' || isLoading}
                       >
-                        {currentPlan === "pro" ? "Current Plan" : "Switch to Pro"}
+                        {currentPlan === 'starter' ? 'Current Plan' : 'Select Plan'}
                       </Button>
-                    </CardContent>
+                    </CardFooter>
                   </Card>
                   
-                  <Card className={`border-2 ${currentPlan === "agency" ? "border-primary" : "border-gray-200"}`}>
-                    <CardHeader className="py-4">
-                      <CardTitle>Agency</CardTitle>
-                      <CardDescription>For large teams and agencies</CardDescription>
+                  {/* Pro Plan */}
+                  <Card className={`border-2 ${currentPlan === 'pro' ? 'border-primary' : 'border-gray-200'}`}>
+                    <CardHeader>
+                      <CardTitle>Pro</CardTitle>
+                      <CardDescription>For growing businesses with more needs</CardDescription>
+                      <div className="mt-2">
+                        <span className="text-3xl font-bold">$79</span>
+                        <span className="text-gray-500">/month</span>
+                      </div>
                     </CardHeader>
-                    <CardContent className="pt-0 pb-4">
-                      <div className="text-3xl font-bold mb-2">$199<span className="text-sm font-normal text-gray-500">/month</span></div>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {planFeatures.map((feature, index) => (
+                          <li key={index} className="flex items-center">
+                            <span className="mr-2">{formatFeatureValue(feature.pro)}</span>
+                            <span>{typeof feature.pro === 'boolean' ? feature.name : `${feature.name}: ${feature.pro}`}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                    <CardFooter>
                       <Button 
                         className="w-full" 
-                        variant={currentPlan === "agency" ? "outline" : "default"}
-                        onClick={() => handleChangePlan("agency")}
-                        disabled={currentPlan === "agency"}
+                        variant={currentPlan === 'pro' ? 'outline' : 'default'}
+                        onClick={() => handleChangePlan('pro')}
+                        disabled={currentPlan === 'pro' || isLoading}
                       >
-                        {currentPlan === "agency" ? "Current Plan" : "Switch to Agency"}
+                        {currentPlan === 'pro' ? 'Current Plan' : 'Select Plan'}
                       </Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  {/* Agency Plan */}
+                  <Card className={`border-2 ${currentPlan === 'agency' ? 'border-primary' : 'border-gray-200'}`}>
+                    <CardHeader>
+                      <CardTitle>Agency</CardTitle>
+                      <CardDescription>For larger businesses with advanced needs</CardDescription>
+                      <div className="mt-2">
+                        <span className="text-3xl font-bold">$199</span>
+                        <span className="text-gray-500">/month</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {planFeatures.map((feature, index) => (
+                          <li key={index} className="flex items-center">
+                            <span className="mr-2">{formatFeatureValue(feature.agency)}</span>
+                            <span>{typeof feature.agency === 'boolean' ? feature.name : `${feature.name}: ${feature.agency}`}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </CardContent>
+                    <CardFooter>
+                      <Button 
+                        className="w-full" 
+                        variant={currentPlan === 'agency' ? 'outline' : 'default'}
+                        onClick={() => handleChangePlan('agency')}
+                        disabled={currentPlan === 'agency' || isLoading}
+                      >
+                        {currentPlan === 'agency' ? 'Current Plan' : 'Select Plan'}
+                      </Button>
+                    </CardFooter>
                   </Card>
                 </div>
               </CardContent>
