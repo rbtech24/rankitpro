@@ -27,12 +27,22 @@ import {
   Loader2,
   MapPin,
   UploadCloud,
-  XCircle
+  XCircle,
+  Bell
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+import { AuthState, getCurrentUser } from "@/lib/auth";
+import NotificationBadge from "@/components/notifications/notification-badge";
 
 export default function TechnicianMobile() {
   const { toast } = useToast();
+  
+  // Get authentication state
+  const { data: auth, isLoading: isLoadingAuth } = useQuery({
+    queryKey: ["/api/auth/me"],
+    queryFn: getCurrentUser
+  });
   
   // Form state
   const [jobType, setJobType] = useState("");
@@ -277,9 +287,12 @@ export default function TechnicianMobile() {
 
   return (
     <div className="container max-w-md mx-auto p-4 pb-20">
-      <header className="text-center mb-6">
-        <h1 className="text-2xl font-bold">Technician Check-In</h1>
-        <p className="text-muted-foreground">Submit your job details</p>
+      <header className="flex flex-col mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold">Technician Check-In</h1>
+          {auth?.user && <NotificationBadge auth={auth} />}
+        </div>
+        <p className="text-muted-foreground text-center">Submit your job details</p>
       </header>
 
       {isSuccess ? (
