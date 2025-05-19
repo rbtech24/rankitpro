@@ -15,6 +15,7 @@ import reviewRoutes from "./routes/review";
 import blogRoutes from "./routes/blog";
 import demoRoutes from "./routes/demo";
 import reviewRequestRoutes from "./routes/review-request";
+import reviewResponseRoutes from "./routes/review-response";
 import wordpressRoutes from "./routes/wordpress-integration";
 import jsWidgetRoutes from "./routes/js-widget";
 import billingRoutes from "./routes/billing";

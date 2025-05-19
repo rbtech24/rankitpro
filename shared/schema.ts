@@ -93,6 +93,7 @@ export const reviewRequests = pgTable("review_requests", {
   method: text("method", { enum: ["email", "sms"] }).notNull(),
   jobType: text("job_type"),
   customMessage: text("custom_message"),
+  token: text("token"),
   status: text("status", { enum: ["pending", "sent", "failed"] }).notNull().default("pending"),
   sentAt: timestamp("sent_at").defaultNow(),
   technicianId: integer("technician_id").references(() => technicians.id).notNull(),
