@@ -13,6 +13,7 @@ import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
 import Technicians from "@/pages/technicians";
+import Users from "@/pages/users";
 import Integrations from "@/pages/integrations";
 import Settings from "@/pages/settings";
 import Billing from "@/pages/billing";
@@ -122,6 +123,9 @@ function Router() {
       {/* Admin Pages */}
       <Route path="/technicians">
         <PrivateRoute component={Technicians} path="/technicians" role="company_admin" />
+      </Route>
+      <Route path="/users">
+        <PrivateRoute component={Users} path="/users" role="company_admin" />
       </Route>
       <Route path="/integrations">
         <PrivateRoute component={Integrations} path="/integrations" role="company_admin" />
