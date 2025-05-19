@@ -114,17 +114,66 @@ export default function TechnicianMobile() {
     }
   }, []);
 
-  // Helper function to get current location
-  const getLocation = () => {
+  // Helper function to get current location with reverse geocoding
+  const getLocation = async () => {
     setIsGettingLocation(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLatitude(position.coords.latitude.toString());
-        setLongitude(position.coords.longitude.toString());
-        setIsGettingLocation(false);
+      async (position) => {
+        const lat = position.coords.latitude.toString();
+        const lng = position.coords.longitude.toString();
+        setLatitude(lat);
+        setLongitude(lng);
         
-        // In a full implementation, you might use reverse geocoding here
-        // to convert coordinates to an address
+        // Attempt to reverse geocode the coordinates
+        try {
+          // Using OpenStreetMap Nominatim for reverse geocoding (free, no API key required)
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Extract address components
+            const addressData = data.address || {};
+            const street = addressData.road || '';
+            const houseNumber = addressData.house_number || '';
+            const cityName = addressData.city || addressData.town || addressData.village || '';
+            const stateName = addressData.state || '';
+            const postalCode = addressData.postcode || '';
+            
+            // Set form values based on geocoded data
+            const fullAddress = `${houseNumber} ${street}`.trim();
+            setAddress(fullAddress);
+            setCity(cityName);
+            setState(stateName);
+            setZipCode(postalCode);
+            
+            // Store the full address for verification
+            setAddressFromGPS(`${fullAddress}, ${cityName}, ${stateName} ${postalCode}`);
+            setLocationVerified(true);
+            
+            toast({
+              title: "Location verified",
+              description: `Address found: ${fullAddress}, ${cityName}, ${stateName}`,
+            });
+          } else {
+            throw new Error('Unable to reverse geocode location');
+          }
+        } catch (error) {
+          console.error('Reverse geocoding error:', error);
+          setLocationVerified(false);
+          
+          // Still store the coordinates even if geocoding fails
+          toast({
+            title: "Location coordinates captured",
+            description: `Coordinates: ${lat.slice(0, 6)}, ${lng.slice(0, 6)}. Unable to determine address.`,
+            variant: "warning",
+          });
+        } finally {
+          setIsGettingLocation(false);
+        }
       },
       (error) => {
         console.error("Error getting location:", error);
@@ -135,8 +184,43 @@ export default function TechnicianMobile() {
           variant: "destructive",
         });
       },
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
+  };
+  
+  // Verify location when user manually enters an address
+  const verifyManualLocation = () => {
+    if (!address || !city || !state || !zipCode) {
+      setLocationAlertMessage("Please fill out all address fields before verifying");
+      setShowLocationAlert(true);
+      return;
+    }
+    
+    const manualAddress = `${address}, ${city}, ${state} ${zipCode}`;
+    
+    // If we have both GPS and manual addresses, compare them
+    if (addressFromGPS) {
+      // Check if addresses are similar (basic check)
+      const normalizedGPS = addressFromGPS.toLowerCase().replace(/[^\w\s]/g, '');
+      const normalizedManual = manualAddress.toLowerCase().replace(/[^\w\s]/g, '');
+      
+      // If addresses seem different, show warning
+      if (!normalizedGPS.includes(normalizedManual.substring(0, 5)) && 
+          !normalizedManual.includes(normalizedGPS.substring(0, 5))) {
+        setLocationAlertMessage(
+          "The address you entered seems different from your GPS location. Which address should be used?"
+        );
+        setShowLocationAlert(true);
+        return;
+      }
+    }
+    
+    // If addresses match or no GPS data, consider verified
+    setLocationVerified(true);
+    toast({
+      title: "Address verified",
+      description: "The address has been verified successfully",
+    });
   };
 
   // Handle photo upload for generic photos
