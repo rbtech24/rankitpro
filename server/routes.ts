@@ -9,7 +9,7 @@ import { insertUserSchema, insertCompanySchema, insertTechnicianSchema, insertCh
 import { isAuthenticated, isCompanyAdmin, isSuperAdmin, belongsToCompany } from "./middleware/auth";
 import multer from "multer";
 import { z } from "zod";
-import integrationRoutes from "./routes/integration";
+import integrationsRoutes from "./routes/integrations";
 import checkInRoutes from "./routes/check-in";
 import reviewRoutes from "./routes/review";
 import blogRoutes from "./routes/blog";
@@ -779,7 +779,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Register integration routes (WordPress, JavaScript embed, AI providers)
-  app.use("/api/integration", integrationRoutes);
+  app.use("/api/integrations", integrationsRoutes);
   app.use("/api/check-ins", checkInRoutes);
   app.use("/api/reviews", reviewRoutes);
   app.use("/api/blogs", blogRoutes);
