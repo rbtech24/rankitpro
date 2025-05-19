@@ -59,6 +59,27 @@ export default function ReviewRequests() {
   const [activeTab, setActiveTab] = useState('settings');
   const { toast } = useToast();
   
+  // Fetch review request settings
+  const { 
+    data: settingsData, 
+    isLoading: isLoadingSettings 
+  } = useReviewRequestSettings();
+  
+  // Fetch review requests
+  const { 
+    data: requestData = [], 
+    isLoading: isLoadingRequests 
+  } = useReviewRequests();
+  
+  // Create a request
+  const sendRequestMutation = useSendReviewRequest();
+  
+  // Resend a request
+  const resendRequestMutation = useResendReviewRequest();
+  
+  // Update settings
+  const updateSettingsMutation = useUpdateReviewRequestSettings();
+  
   // Review request settings form state
   const [autoSendReviews, setAutoSendReviews] = useState(true);
   const [delayHours, setDelayHours] = useState(24);
@@ -67,6 +88,19 @@ export default function ReviewRequests() {
   const [smsTemplate, setSmsTemplate] = useState('default');
   const [includeTechnicianName, setIncludeTechnicianName] = useState(true);
   const [includeJobDetails, setIncludeJobDetails] = useState(true);
+  
+  // Update settings form when data is loaded
+  useEffect(() => {
+    if (settingsData) {
+      setAutoSendReviews(settingsData.autoSendReviews);
+      setDelayHours(settingsData.delayHours);
+      setContactPreference(settingsData.contactPreference);
+      setEmailTemplate(settingsData.emailTemplate);
+      setSmsTemplate(settingsData.smsTemplate);
+      setIncludeTechnicianName(settingsData.includeTechnicianName);
+      setIncludeJobDetails(settingsData.includeJobDetails);
+    }
+  }, [settingsData]);
   
   // Manual request form
   const [customerName, setCustomerName] = useState('');
@@ -467,41 +501,70 @@ export default function ReviewRequests() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {reviewRequests.map((request) => (
-                      <TableRow key={request.id}>
-                        <TableCell className="font-medium">{request.id}</TableCell>
-                        <TableCell>{request.customer}</TableCell>
-                        <TableCell>
-                          {request.method === 'email' ? (
-                            <div className="flex items-center">
-                              <Mail className="mr-1 h-4 w-4" />
-                              <span>Email</span>
-                            </div>
-                          ) : (
-                            <div className="flex items-center">
-                              <MessageSquare className="mr-1 h-4 w-4" />
-                              <span>SMS</span>
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            request.status === 'sent' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {request.status}
-                          </span>
-                        </TableCell>
-                        <TableCell>{formatDate(request.sentAt)}</TableCell>
-                        <TableCell>{request.technician}</TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            Resend
-                          </Button>
+                    {isLoadingRequests ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-4">
+                          <div className="flex justify-center items-center">
+                            <Loader2 className="h-5 w-5 animate-spin mr-2 text-primary" />
+                            <span>Loading review requests...</span>
+                          </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : requestData.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-4 text-gray-500">
+                          No review requests found. Try sending some using the "Send Request" tab.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      requestData.map((request) => (
+                        <TableRow key={request.id}>
+                          <TableCell className="font-medium">{request.id}</TableCell>
+                          <TableCell>{request.customerName}</TableCell>
+                          <TableCell>
+                            {request.method === 'email' ? (
+                              <div className="flex items-center">
+                                <Mail className="mr-1 h-4 w-4" />
+                                <span>Email</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center">
+                                <MessageSquare className="mr-1 h-4 w-4" />
+                                <span>SMS</span>
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              request.status === 'sent' 
+                                ? 'bg-green-100 text-green-800' 
+                                : request.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {request.status}
+                            </span>
+                          </TableCell>
+                          <TableCell>{formatDate(request.sentAt)}</TableCell>
+                          <TableCell>{request.technicianName}</TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleResendRequest(request.id)}
+                              disabled={request.status === 'pending' || resendRequestMutation.isPending}
+                            >
+                              {resendRequestMutation.isPending && resendRequestMutation.variables === request.id ? (
+                                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                              ) : (
+                                <SendHorizonal className="h-4 w-4 mr-1" />
+                              )}
+                              Resend
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
