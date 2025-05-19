@@ -1,8 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { toast } from "@/hooks/use-toast";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 
-// Types for review requests
 export interface ReviewRequestSettings {
   autoSendReviews: boolean;
   delayHours: number;
@@ -48,7 +46,7 @@ export interface SendReviewRequestParams {
   customMessage?: string;
 }
 
-// Hook to get review request settings
+// Hook to fetch review request settings
 export function useReviewRequestSettings() {
   return useQuery({
     queryKey: ['/api/review-requests/settings'],
@@ -66,27 +64,16 @@ export function useUpdateReviewRequestSettings() {
   
   return useMutation({
     mutationFn: async (settings: ReviewRequestSettings) => {
-      const response = await apiRequest('POST', '/api/review-requests/settings', settings);
+      const response = await apiRequest('PUT', '/api/review-requests/settings', settings);
       return response.json();
     },
     onSuccess: () => {
-      toast({
-        title: 'Settings updated',
-        description: 'Your review request settings have been saved.',
-      });
       queryClient.invalidateQueries({ queryKey: ['/api/review-requests/settings'] });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Settings update failed',
-        description: error.message || 'An error occurred while saving settings.',
-        variant: 'destructive',
-      });
     }
   });
 }
 
-// Hook to get all review requests
+// Hook to fetch review requests
 export function useReviewRequests() {
   return useQuery({
     queryKey: ['/api/review-requests'],
@@ -104,22 +91,12 @@ export function useSendReviewRequest() {
   
   return useMutation({
     mutationFn: async (params: SendReviewRequestParams) => {
-      const response = await apiRequest('POST', '/api/review-requests/send', params);
+      const response = await apiRequest('POST', '/api/review-requests', params);
       return response.json();
     },
     onSuccess: () => {
-      toast({
-        title: 'Review request sent',
-        description: 'The review request has been sent successfully.',
-      });
       queryClient.invalidateQueries({ queryKey: ['/api/review-requests'] });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Failed to send review request',
-        description: error.message || 'An error occurred while sending the review request.',
-        variant: 'destructive',
-      });
+      queryClient.invalidateQueries({ queryKey: ['/api/review-requests/stats'] });
     }
   });
 }
@@ -130,27 +107,17 @@ export function useResendReviewRequest() {
   
   return useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest('POST', `/api/review-requests/resend/${id}`);
+      const response = await apiRequest('POST', `/api/review-requests/${id}/resend`);
       return response.json();
     },
     onSuccess: () => {
-      toast({
-        title: 'Review request resent',
-        description: 'The review request has been resent successfully.',
-      });
       queryClient.invalidateQueries({ queryKey: ['/api/review-requests'] });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Failed to resend review request',
-        description: error.message || 'An error occurred while resending the review request.',
-        variant: 'destructive',
-      });
+      queryClient.invalidateQueries({ queryKey: ['/api/review-requests/stats'] });
     }
   });
 }
 
-// Hook to get review request stats
+// Hook to fetch review request statistics
 export function useReviewRequestStats() {
   return useQuery({
     queryKey: ['/api/review-requests/stats'],

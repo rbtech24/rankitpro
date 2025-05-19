@@ -1,5 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  useReviewRequestSettings, 
+  useUpdateReviewRequestSettings,
+  useReviewRequests,
+  useSendReviewRequest,
+  useResendReviewRequest,
+  useReviewRequestStats,
+  type ReviewRequestSettings
+} from "@/hooks/use-review-requests";
 import {
   Card,
   CardContent,
@@ -45,7 +54,11 @@ import { DashboardLayout } from "../components/layout/DashboardLayout";
 export default function ReviewRequests() {
   const { toast } = useToast();
   
-  // State for review request settings
+  // Fetch review request settings from API
+  const { data: settingsData, isLoading: isLoadingSettings } = useReviewRequestSettings();
+  const updateSettingsMutation = useUpdateReviewRequestSettings();
+  
+  // Local state for settings form
   const [autoSendReviews, setAutoSendReviews] = useState(true);
   const [delayHours, setDelayHours] = useState(24);
   const [contactPreference, setContactPreference] = useState<"email" | "sms" | "both" | "customer-preference">("email");
@@ -57,6 +70,19 @@ export default function ReviewRequests() {
   );
   const [includeTechnicianName, setIncludeTechnicianName] = useState(true);
   const [includeJobDetails, setIncludeJobDetails] = useState(true);
+  
+  // Load settings data when available
+  useEffect(() => {
+    if (settingsData) {
+      setAutoSendReviews(settingsData.autoSendReviews);
+      setDelayHours(settingsData.delayHours);
+      setContactPreference(settingsData.contactPreference);
+      setEmailTemplate(settingsData.emailTemplate);
+      setSmsTemplate(settingsData.smsTemplate);
+      setIncludeTechnicianName(settingsData.includeTechnicianName);
+      setIncludeJobDetails(settingsData.includeJobDetails);
+    }
+  }, [settingsData]);
   
   // State for sending a new review request
   const [customerName, setCustomerName] = useState("");
@@ -84,12 +110,22 @@ export default function ReviewRequests() {
       smsTemplate,
       includeTechnicianName,
       includeJobDetails
-    };
+    } as ReviewRequestSettings;
     
-    // Will be connected to API when implemented
-    toast({
-      title: 'Settings saved',
-      description: 'Your review request settings have been updated.',
+    updateSettingsMutation.mutate(settings, {
+      onSuccess: () => {
+        toast({
+          title: 'Settings saved',
+          description: 'Your review request settings have been updated.',
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: 'Error saving settings',
+          description: 'There was a problem saving your settings. Please try again.',
+          variant: 'destructive',
+        });
+      }
     });
   };
   
