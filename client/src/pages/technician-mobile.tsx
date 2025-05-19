@@ -186,6 +186,7 @@ export default function TechnicianMobile() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Enhanced form validation
     if (!jobType) {
       toast({
         title: "Missing information",
@@ -213,11 +214,47 @@ export default function TechnicianMobile() {
       return;
     }
 
+    // Validate email format if provided
+    if (customerEmail && !/^\S+@\S+\.\S+$/.test(customerEmail)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate phone format if provided
+    if (customerPhone && !/^[\d\s\(\)\-\+]+$/.test(customerPhone)) {
+      toast({
+        title: "Invalid phone number",
+        description: "Please enter a valid phone number",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       // In a real implementation, you would upload the photos to storage
       // and get back their URLs to include in the check-in data
+      
+      // Create FormData for file uploads
+      const formData = new FormData();
+      
+      // Append all photos
+      photos.forEach(photo => {
+        formData.append('photos', photo);
+      });
+      
+      beforePhotos.forEach(photo => {
+        formData.append('beforePhotos', photo);
+      });
+      
+      afterPhotos.forEach(photo => {
+        formData.append('afterPhotos', photo);
+      });
 
       const checkInData = {
         jobType,
@@ -228,13 +265,51 @@ export default function TechnicianMobile() {
         notes,
         latitude,
         longitude,
-        photoUrls: [], // Would be filled with actual URLs after upload
+        photoUrls: [], // Will be populated by the server after upload
         beforePhotoUrls: [],
         afterPhotoUrls: [],
         sendReviewRequest,
         generateBlogPost
       };
 
+      // First upload photos if any exist
+      let photoUploadResponse;
+      if (photos.length > 0 || beforePhotos.length > 0 || afterPhotos.length > 0) {
+        try {
+          // Add JSON data to formData
+          Object.entries(checkInData).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+              formData.append(key, value.toString());
+            }
+          });
+          
+          // Make multipart form request for file upload
+          photoUploadResponse = await fetch("/api/check-ins/upload-photos", {
+            method: "POST",
+            body: formData,
+            credentials: "include"
+          });
+          
+          if (!photoUploadResponse.ok) {
+            throw new Error("Failed to upload photos");
+          }
+          
+          const uploadData = await photoUploadResponse.json();
+          
+          // Update photo URLs with the ones returned from server
+          checkInData.photoUrls = uploadData.photoUrls || [];
+          checkInData.beforePhotoUrls = uploadData.beforePhotoUrls || [];
+          checkInData.afterPhotoUrls = uploadData.afterPhotoUrls || [];
+        } catch (error) {
+          console.error("Error uploading photos:", error);
+          toast({
+            title: "Photo upload failed",
+            description: "There was a problem uploading your photos. Check-in will continue without photos.",
+            variant: "destructive",
+          });
+        }
+      }
+      
       // Make API request to create check-in
       const response = await apiRequest("POST", "/api/check-ins", checkInData);
       
@@ -244,14 +319,14 @@ export default function TechnicianMobile() {
         setIsSuccess(true);
         toast({
           title: "Check-in successful",
-          description: "Your check-in has been submitted successfully",
+          description: `Your check-in for ${jobType} has been submitted successfully`,
         });
 
-        // Reset form after 2 seconds
+        // Reset form after 3 seconds
         setTimeout(() => {
           resetForm();
           setIsSuccess(false);
-        }, 2000);
+        }, 3000);
       } else {
         throw new Error("Failed to submit check-in");
       }

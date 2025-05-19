@@ -78,16 +78,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('WebSocket connection closed');
       
       // Remove from user connections
-      for (const [userId, connection] of userConnections.entries()) {
+      Array.from(userConnections.entries()).forEach(([userId, connection]) => {
         if (connection === ws) {
           userConnections.delete(userId);
           console.log(`User ${userId} disconnected`);
-          break;
         }
-      }
+      });
       
       // Remove from company connections
-      for (const [companyId, connections] of companyConnections.entries()) {
+      Array.from(companyConnections.entries()).forEach(([companyId, connections]) => {
         if (connections.has(ws)) {
           connections.delete(ws);
           console.log(`Client unsubscribed from company ${companyId} updates`);
@@ -97,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             companyConnections.delete(companyId);
           }
         }
-      }
+      });
     });
   });
   
@@ -128,7 +127,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Add isAuthenticated method to req
   app.use((req: Request, _res: Response, next) => {
-    req.isAuthenticated = () => !!req.session?.userId;
+    // Extend the session type for TypeScript
+    req.isAuthenticated = () => {
+      return !!req.session && 'userId' in req.session;
+    };
     next();
   });
   
