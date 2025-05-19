@@ -10,6 +10,10 @@ import { isAuthenticated, isCompanyAdmin, isSuperAdmin, belongsToCompany } from 
 import multer from "multer";
 import { z } from "zod";
 import integrationRoutes from "./routes/integration";
+import checkInRoutes from "./routes/check-in";
+import reviewRoutes from "./routes/review";
+import blogRoutes from "./routes/blog";
+import emailService from "./services/email-service";
 import { fromZodError } from "zod-validation-error";
 
 const SessionStore = MemoryStore(session);
@@ -672,6 +676,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register integration routes (WordPress, JavaScript embed, AI providers)
   app.use("/api/integration", integrationRoutes);
+  app.use("/api/check-ins", checkInRoutes);
+  app.use("/api/reviews", reviewRoutes);
+  app.use("/api/blogs", blogRoutes);
   
   // Create HTTP server
   const httpServer = createServer(app);

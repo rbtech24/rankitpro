@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Camera, Check, MapPin, ArrowLeft } from "lucide-react";
+import { Loader2, Camera, Check, MapPin, ArrowLeft, Star, Clock, Inbox } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth";
 import { useLocation } from "wouter";
 
 import {
@@ -28,6 +29,10 @@ const formSchema = z.object({
   notes: z.string().min(10, "Please provide more details about the job"),
   location: z.string().optional(),
   photos: z.any().optional(),
+  createBlogPost: z.boolean().default(false),
+  sendReviewRequest: z.boolean().default(false),
+  customerName: z.string().optional().or(z.literal("")),
+  customerEmail: z.string().email("Invalid email address").optional().or(z.literal("")),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -43,13 +48,32 @@ const TechnicianMobileView = () => {
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
 
+  const { data: authData, isLoading: isAuthLoading } = useQuery({
+    queryKey: ["/api/auth/me"],
+    queryFn: getCurrentUser
+  });
+
+  const { data: recentCheckIns, isLoading: isCheckInsLoading } = useQuery({
+    queryKey: ["/api/check-ins", { limit: 5 }],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/check-ins?limit=5");
+      if (!res.ok) throw new Error("Failed to fetch recent check-ins");
+      return res.json();
+    },
+    enabled: !!authData
+  });
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       jobType: "",
       notes: "",
       location: "",
-      photos: []
+      photos: [],
+      createBlogPost: false,
+      sendReviewRequest: false,
+      customerName: "",
+      customerEmail: ""
     },
   });
 
@@ -123,12 +147,27 @@ const TechnicianMobileView = () => {
       };
       return apiRequest("POST", "/api/check-ins", checkInData);
     },
-    onSuccess: () => {
+    onSuccess: (_, formData) => {
       toast({
         title: "Check-in Successful",
-        description: "Your check-in has been recorded successfully.",
+        description: formData.sendReviewRequest 
+          ? "Your check-in was recorded and a review request will be sent." 
+          : formData.createBlogPost 
+            ? "Your check-in was recorded and a blog post will be created." 
+            : "Your check-in has been recorded successfully.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/check-ins"] });
+      
+      // If blog post was created, invalidate blog posts queries too
+      if (formData.createBlogPost) {
+        queryClient.invalidateQueries({ queryKey: ["/api/blogs"] });
+      }
+      
+      // If review request was sent, invalidate review requests queries too
+      if (formData.sendReviewRequest) {
+        queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
+      }
+      
       form.reset();
       setPhotos([]);
       setLocation(null);
@@ -296,6 +335,86 @@ const TechnicianMobileView = () => {
                     </div>
                   </div>
                 </div>
+                
+                <FormField
+                  control={form.control}
+                  name="createBlogPost"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4"
+                          checked={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1">
+                        <FormLabel className="font-medium">Generate Blog Post</FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          Automatically create a blog post about this job for SEO
+                        </p>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="sendReviewRequest"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4"
+                          checked={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1">
+                        <FormLabel className="font-medium">Request Customer Review</FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          Send a review request to the customer
+                        </p>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                
+                {form.watch("sendReviewRequest") && (
+                  <div className="space-y-4 border rounded-md p-4 bg-gray-50">
+                    <h3 className="font-medium text-sm">Customer Information</h3>
+                    
+                    <FormField
+                      control={form.control}
+                      name="customerName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Customer Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John Doe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="customerEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Customer Email</FormLabel>
+                          <FormControl>
+                            <Input placeholder="customer@example.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
                 
                 <Button 
                   type="submit" 
