@@ -1,6 +1,15 @@
 import { log } from '../vite';
 import sgMail from '@sendgrid/mail';
-import { CheckInWithTechnician, Technician, BlogPost, ReviewRequest } from '@shared/schema';
+import { CheckInWithTechnician, Technician, BlogPost, ReviewRequest, Company } from '@shared/schema';
+import { 
+  checkInNotificationTemplate, 
+  blogPostNotificationTemplate, 
+  reviewRequestTemplate,
+  welcomeEmailTemplate,
+  passwordResetTemplate,
+  getCompanyTemplateVariables,
+  createDefaultCompany
+} from './email-templates';
 
 /**
  * Email service for sending notifications and review requests
@@ -53,7 +62,8 @@ class EmailService {
    */
   async sendCheckInNotification(
     checkIn: CheckInWithTechnician, 
-    recipientEmail: string
+    recipientEmail: string,
+    company?: Company
   ): Promise<boolean> {
     if (!this.initialized) {
       log('Email service not initialized, skipping check-in notification', 'warn');
@@ -63,30 +73,42 @@ class EmailService {
     try {
       const subject = `New Check-In: ${checkIn.jobType} by ${checkIn.technician.name}`;
       
-      let content = `
-        <h2>New Technician Check-In</h2>
-        <p><strong>Technician:</strong> ${checkIn.technician.name}</p>
-        <p><strong>Job Type:</strong> ${checkIn.jobType}</p>
-        <p><strong>Location:</strong> ${checkIn.location || 'Not specified'}</p>
-        <p><strong>Date/Time:</strong> ${new Date(checkIn.createdAt!).toLocaleString()}</p>
-        <p><strong>Notes:</strong></p>
-        <p>${checkIn.notes || 'No notes provided'}</p>
-      `;
-
-      if (checkIn.latitude && checkIn.longitude) {
-        content += `
-          <p><strong>GPS Location:</strong> 
-          <a href="https://maps.google.com/?q=${checkIn.latitude},${checkIn.longitude}" target="_blank">
-            View on map
-          </a></p>
-        `;
+      // Create photo URLs array if photos are available
+      const photoUrls: string[] = [];
+      if (checkIn.photos) {
+        try {
+          const photos = JSON.parse(checkIn.photos as string);
+          if (Array.isArray(photos)) {
+            photoUrls.push(...photos);
+          }
+        } catch (e) {
+          // If photos can't be parsed, just continue without them
+        }
       }
+      
+      // Generate map URL if GPS coordinates are available
+      let checkInUrl = `/check-ins/${checkIn.id}`;
+      
+      // Create template variables
+      const templateVars = {
+        ...getCompanyTemplateVariables(company || { id: 0, name: this.companyName, createdAt: new Date() }),
+        technicianName: checkIn.technician.name,
+        jobType: checkIn.jobType,
+        location: checkIn.location || 'Not specified',
+        notes: checkIn.notes || 'No notes provided',
+        dateTime: new Date(checkIn.createdAt!).toLocaleString(),
+        checkInUrl: checkInUrl,
+        photoUrls: photoUrls
+      };
+      
+      // Generate HTML using template
+      const html = checkInNotificationTemplate(templateVars);
 
       const msg = {
         to: recipientEmail,
         from: this.fromEmail,
         subject,
-        html: content,
+        html,
       };
 
       await sgMail.send(msg);
@@ -103,7 +125,13 @@ class EmailService {
    */
   async sendBlogPostNotification(
     blogPost: BlogPost,
-    recipientEmail: string
+    recipientEmail: string,
+    technicianName: string,
+    jobType: string,
+    location: string,
+    checkInDate: Date,
+    company?: Company,
+    featuredImageUrl?: string
   ): Promise<boolean> {
     if (!this.initialized) {
       log('Email service not initialized, skipping blog post notification', 'warn');
@@ -111,22 +139,37 @@ class EmailService {
     }
 
     try {
-      const subject = `New Blog Post Published: ${blogPost.title}`;
+      const subject = `New Blog Post Created: ${blogPost.title}`;
       
-      const content = `
-        <h2>New Blog Post Published</h2>
-        <p><strong>Title:</strong> ${blogPost.title}</p>
-        <p><strong>Date/Time:</strong> ${new Date(blogPost.createdAt!).toLocaleString()}</p>
-        <p><strong>Summary:</strong></p>
-        <p>${blogPost.content.substring(0, 200)}...</p>
-        <p>Login to your dashboard to view the full post.</p>
-      `;
+      // Create excerpt from blog post content (first 200 chars)
+      const excerpt = blogPost.content.length > 200 
+        ? `${blogPost.content.substring(0, 200)}...` 
+        : blogPost.content;
+      
+      // Blog post URL
+      const blogPostUrl = `/blog-posts/${blogPost.id}`;
+      
+      // Create template variables
+      const templateVars = {
+        ...getCompanyTemplateVariables(company || { id: 0, name: this.companyName, createdAt: new Date() }),
+        title: blogPost.title,
+        excerpt: excerpt,
+        technicianName: technicianName,
+        jobType: jobType,
+        location: location || 'Not specified',
+        dateTime: checkInDate.toLocaleString(),
+        blogPostUrl: blogPostUrl,
+        featuredImageUrl: featuredImageUrl
+      };
+      
+      // Generate HTML using template
+      const html = blogPostNotificationTemplate(templateVars);
 
       const msg = {
         to: recipientEmail,
         from: this.fromEmail,
         subject,
-        html: content,
+        html,
       };
 
       await sgMail.send(msg);
