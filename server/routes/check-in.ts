@@ -7,8 +7,82 @@ import { log } from '../vite';
 import { insertCheckInSchema } from '../../shared/schema';
 import { generateSummary, generateBlogPost } from '../ai/index';
 import type { AIProviderType } from '../ai/types';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
+
+// Configure multer storage for file uploads
+const storage_config = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(process.cwd(), 'server', 'public', 'uploads');
+    
+    // Ensure upload directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // Create unique filename
+    const uniqueFilename = `${uuidv4()}-${Date.now()}${path.extname(file.originalname)}`;
+    cb(null, uniqueFilename);
+  }
+});
+
+// Filter to only allow image files
+const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+
+const upload = multer({ 
+  storage: storage_config, 
+  fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max file size
+    files: 10 // Max 10 files
+  }
+});
+
+// Upload photos endpoint
+router.post('/upload-photos', isAuthenticated, upload.array('photos', 10), async (req: Request, res: Response) => {
+  try {
+    if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+      return res.status(400).json({ message: 'No files uploaded' });
+    }
+
+    // Extract photo categories from form data
+    const category = req.body.category || 'general'; // general, before, after
+    
+    // Base URL for serving static files
+    const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
+    
+    // Create URLs for uploaded files
+    const photoUrls = (req.files as Express.Multer.File[]).map(file => ({
+      url: `${baseUrl}${file.filename}`,
+      category
+    }));
+    
+    // Organize photos by category
+    const photosByCategory = {
+      photoUrls: photoUrls.filter(p => p.category === 'general').map(p => ({ url: p.url })),
+      beforePhotoUrls: photoUrls.filter(p => p.category === 'before').map(p => ({ url: p.url })),
+      afterPhotoUrls: photoUrls.filter(p => p.category === 'after').map(p => ({ url: p.url }))
+    };
+    
+    res.json(photosByCategory);
+  } catch (error) {
+    console.error('Error uploading photos:', error);
+    res.status(500).json({ message: 'Failed to upload photos' });
+  }
+});
 
 // Get check-ins for the current user's company
 router.get('/', isAuthenticated, async (req: Request, res: Response) => {
