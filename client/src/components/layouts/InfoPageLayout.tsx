@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'wouter';
+import { Logo } from '../ui/logo';
 
 interface InfoPageLayoutProps {
   title: string;
@@ -20,10 +21,9 @@ export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({
           <div className="flex justify-between items-center">
             <Link href="/">
               <div className="flex items-center space-x-2 cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                </svg>
-                <span className="text-xl font-bold">CheckIn Pro</span>
+                <div className="flex items-center">
+                  <Logo size="md" />
+                </div>
               </div>
             </Link>
             <nav className="hidden md:flex space-x-6">
@@ -51,7 +51,7 @@ export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({
       </header>
 
       {/* Page Header */}
-      <div className="bg-gradient-to-r from-primary to-primary/70 text-white py-12 px-6">
+      <div className="bg-gradient-to-r from-[#0088d2] to-[#00b05c] text-white py-12 px-6">
         <div className="container mx-auto">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">{title}</h1>
           {description && <p className="text-lg md:text-xl text-white/90 max-w-3xl">{description}</p>}
@@ -69,13 +69,10 @@ export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                </svg>
-                <span className="text-lg font-bold text-white">CheckIn Pro</span>
+                <Logo size="sm" />
               </div>
               <p className="text-sm text-slate-400 mb-4">
-                The all-in-one platform for home service businesses to transform field operations into powerful marketing content.
+                The all-in-one platform for home service businesses to boost local SEO with field service visits, automated content creation, and review management.
               </p>
             </div>
             <div>
