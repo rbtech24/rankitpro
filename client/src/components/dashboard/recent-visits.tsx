@@ -5,7 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { format, formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import CheckinCard from "@/components/checkin/checkin-card";
+import VisitCard from "@/components/visit/visit-card";
 
 interface Technician {
   id: number;
@@ -14,7 +14,7 @@ interface Technician {
   specialty?: string;
 }
 
-interface CheckIn {
+interface Visit {
   id: number;
   jobType: string;
   notes?: string;
@@ -26,22 +26,22 @@ interface CheckIn {
   longitude?: number;
 }
 
-export default function RecentCheckins() {
+export default function RecentVisits() {
   const { toast } = useToast();
   
-  const { data: checkIns, isLoading } = useQuery<CheckIn[]>({
-    queryKey: ["/api/check-ins", { limit: 5 }],
+  const { data: visits, isLoading } = useQuery<Visit[]>({
+    queryKey: ["/api/visits", { limit: 5 }],
     queryFn: async () => {
-      const res = await apiRequest("GET", "/api/check-ins?limit=5");
+      const res = await apiRequest("GET", "/api/visits?limit=5");
       return res.json();
     }
   });
   
-  const handleCreatePost = async (checkInId: number) => {
+  const handleCreatePost = async (visitId: number) => {
     try {
       // Generate blog post content
       const contentRes = await apiRequest("POST", "/api/generate-content", {
-        checkInId,
+        visitId,
         contentType: "blog"
       });
       const contentData = await contentRes.json();
@@ -50,7 +50,7 @@ export default function RecentCheckins() {
       await apiRequest("POST", "/api/blog-posts", {
         title: contentData.title,
         content: contentData.content,
-        checkInId
+        visitId
       });
       
       toast({
@@ -67,7 +67,7 @@ export default function RecentCheckins() {
     }
   };
   
-  const handleRequestReview = async (checkInId: number, technicianId: number) => {
+  const handleRequestReview = async (visitId: number, technicianId: number) => {
     try {
       // This would open a modal to collect customer information
       // For now, we'll just show a success toast
@@ -89,7 +89,7 @@ export default function RecentCheckins() {
     <Card className="bg-white shadow-card col-span-4">
       <CardHeader className="px-6 py-5 border-b border-gray-200">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-medium text-gray-900">Recent Check-ins</CardTitle>
+          <CardTitle className="text-lg font-medium text-gray-900">Recent Visits</CardTitle>
           <Button variant="link" size="sm" className="text-primary-600">View all</Button>
         </div>
       </CardHeader>
@@ -121,19 +121,19 @@ export default function RecentCheckins() {
               </div>
             ))}
           </div>
-        ) : checkIns && checkIns.length > 0 ? (
-          checkIns.map((checkIn) => (
-            <CheckinCard
-              key={checkIn.id}
-              checkIn={checkIn}
-              onCreatePost={() => handleCreatePost(checkIn.id)}
-              onRequestReview={() => handleRequestReview(checkIn.id, checkIn.technician.id)}
+        ) : visits && visits.length > 0 ? (
+          visits.map((visit) => (
+            <VisitCard
+              key={visit.id}
+              visit={visit}
+              onCreatePost={() => handleCreatePost(visit.id)}
+              onRequestReview={() => handleRequestReview(visit.id, visit.technician.id)}
             />
           ))
         ) : (
           <div className="p-6 text-center">
-            <p className="text-gray-500">No check-ins found. Create your first check-in to get started.</p>
-            <Button className="mt-4">Create Check-in</Button>
+            <p className="text-gray-500">No visits found. Create your first visit to get started.</p>
+            <Button className="mt-4">Create Visit</Button>
           </div>
         )}
       </div>
