@@ -371,7 +371,7 @@ const Home = () => {
                     </li>
                     <li className="flex items-center">
                       <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                      <span>50 check-ins/month</span>
+                      <span>50 visits/month</span>
                     </li>
                     <li className="flex items-center">
                       <CheckCircle className="h-5 w-5 text-primary mr-2" />
@@ -406,7 +406,7 @@ const Home = () => {
                     </li>
                     <li className="flex items-center">
                       <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                      <span>200 check-ins/month</span>
+                      <span>200 visits/month</span>
                     </li>
                     <li className="flex items-center">
                       <CheckCircle className="h-5 w-5 text-primary mr-2" />
@@ -442,7 +442,7 @@ const Home = () => {
                     </li>
                     <li className="flex items-center">
                       <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                      <span>Unlimited check-ins</span>
+                      <span>Unlimited visits</span>
                     </li>
                     <li className="flex items-center">
                       <CheckCircle className="h-5 w-5 text-primary mr-2" />
@@ -547,7 +547,7 @@ const Home = () => {
           
           <div className="pt-8 mt-8 border-t border-slate-800 text-sm text-slate-400">
             <div className="flex flex-col md:flex-row justify-between items-center">
-              <p>&copy; 2025 CheckIn Pro. All rights reserved.</p>
+              <p>&copy; 2025 Rank it Pro. All rights reserved.</p>
               <div className="mt-4 md:mt-0 flex items-center">
                 <a href="#" className="text-slate-400 hover:text-primary mr-4">Privacy Policy</a>
                 <a href="#" className="text-slate-400 hover:text-primary mr-4">Terms of Service</a>
