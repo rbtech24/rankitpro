@@ -7,6 +7,7 @@ export interface ContentGenerationParams {
   notes: string;
   location?: string;
   technicianName: string;
+  customInstructions?: string;
 }
 
 export interface BlogPostResult {
