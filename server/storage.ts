@@ -101,6 +101,7 @@ export class MemStorage implements IStorage {
     this.checkIns = new Map();
     this.blogPosts = new Map();
     this.reviewRequests = new Map();
+    this.reviewResponses = new Map();
     
     this.userId = 1;
     this.companyId = 1;
@@ -108,6 +109,7 @@ export class MemStorage implements IStorage {
     this.checkInId = 1;
     this.blogPostId = 1;
     this.reviewRequestId = 1;
+    this.reviewResponseId = 1;
     
     // Add a default super admin
     this.createUser({
@@ -388,11 +390,104 @@ export class MemStorage implements IStorage {
   }
   
   // Stats operations
+  // Review response operations
+  async getReviewResponse(id: number): Promise<ReviewResponse | undefined> {
+    return this.reviewResponses.get(id);
+  }
+
+  async getReviewResponsesByCompany(companyId: number): Promise<ReviewResponse[]> {
+    return Array.from(this.reviewResponses.values())
+      .filter(response => response.companyId === companyId)
+      .sort((a, b) => {
+        // Sort by most recent respondedAt date
+        if (a.respondedAt && b.respondedAt) {
+          return b.respondedAt.getTime() - a.respondedAt.getTime();
+        }
+        return 0;
+      });
+  }
+
+  async getReviewResponsesByTechnician(technicianId: number): Promise<ReviewResponse[]> {
+    return Array.from(this.reviewResponses.values())
+      .filter(response => response.technicianId === technicianId)
+      .sort((a, b) => {
+        // Sort by most recent respondedAt date
+        if (a.respondedAt && b.respondedAt) {
+          return b.respondedAt.getTime() - a.respondedAt.getTime();
+        }
+        return 0;
+      });
+  }
+
+  async getReviewResponseForRequest(reviewRequestId: number): Promise<ReviewResponse | undefined> {
+    const responses = Array.from(this.reviewResponses.values());
+    return responses.find(response => response.reviewRequestId === reviewRequestId);
+  }
+
+  async createReviewResponse(reviewResponse: InsertReviewResponse): Promise<ReviewResponse> {
+    const id = this.reviewResponseId++;
+    const respondedAt = new Date();
+    
+    const newReviewResponse: ReviewResponse = { ...reviewResponse, id, respondedAt };
+    this.reviewResponses.set(id, newReviewResponse);
+    
+    return newReviewResponse;
+  }
+
+  async updateReviewResponse(id: number, updates: Partial<ReviewResponse>): Promise<ReviewResponse | undefined> {
+    const reviewResponse = this.reviewResponses.get(id);
+    
+    if (!reviewResponse) {
+      return undefined;
+    }
+    
+    const updatedResponse = { ...reviewResponse, ...updates };
+    this.reviewResponses.set(id, updatedResponse);
+    
+    return updatedResponse;
+  }
+
+  async getReviewStats(companyId: number): Promise<{
+    averageRating: number;
+    totalResponses: number;
+    ratingDistribution: { [key: number]: number };
+  }> {
+    const responses = await this.getReviewResponsesByCompany(companyId);
+    
+    if (responses.length === 0) {
+      return {
+        averageRating: 0,
+        totalResponses: 0,
+        ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+      };
+    }
+    
+    // Calculate the average rating
+    const sum = responses.reduce((total, response) => total + response.rating, 0);
+    const averageRating = sum / responses.length;
+    
+    // Calculate the rating distribution
+    const ratingDistribution: { [key: number]: number } = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    responses.forEach(response => {
+      if (response.rating >= 1 && response.rating <= 5) {
+        ratingDistribution[response.rating]++;
+      }
+    });
+    
+    return {
+      averageRating,
+      totalResponses: responses.length,
+      ratingDistribution
+    };
+  }
+
   async getCompanyStats(companyId: number): Promise<{
     totalCheckins: number;
     activeTechs: number;
     blogPosts: number;
     reviewRequests: number;
+    reviewResponses: number;
+    averageRating: number;
   }> {
     const totalCheckins = Array.from(this.checkIns.values()).filter(
       checkIn => checkIn.companyId === companyId
@@ -410,11 +505,25 @@ export class MemStorage implements IStorage {
       request => request.companyId === companyId
     ).length;
     
+    // Get review responses data
+    const responses = Array.from(this.reviewResponses.values()).filter(
+      response => response.companyId === companyId
+    );
+    
+    const reviewResponsesCount = responses.length;
+    
+    // Calculate average rating
+    const averageRating = reviewResponsesCount > 0 
+      ? responses.reduce((sum, response) => sum + response.rating, 0) / reviewResponsesCount 
+      : 0;
+    
     return {
       totalCheckins,
       activeTechs,
       blogPosts: blogPostsCount,
-      reviewRequests: reviewRequestsCount
+      reviewRequests: reviewRequestsCount,
+      reviewResponses: reviewResponsesCount,
+      averageRating
     };
   }
 }
