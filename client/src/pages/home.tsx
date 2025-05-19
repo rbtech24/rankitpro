@@ -530,7 +530,10 @@ const Home = () => {
                 <a href="#" className="text-slate-400 hover:text-primary mr-4">Terms of Service</a>
                 <Link to="/login?admin=true" className="text-xs text-slate-600 hover:text-primary transition-colors duration-200 ml-2">
                   <span className="flex items-center">
-                    <Lock className="h-3 w-3 mr-1" />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
                     Admin
                   </span>
                 </Link>
