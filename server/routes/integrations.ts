@@ -176,7 +176,9 @@ router.post('/wordpress/test-connection', isAuthenticated, isCompanyAdmin, async
     
     // Test connection
     const wpService = new WordPressService({
-      ...config,
+      siteUrl: config.siteUrl,
+      username: config.username,
+      password: config.applicationPassword, // Use application password as password
       companyId
     });
     const connectionSuccess = await wpService.testConnection();

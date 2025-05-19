@@ -8,7 +8,7 @@ import { BlogPost, CheckIn } from '@shared/schema';
 export interface WordPressCredentials {
   siteUrl: string;
   username: string;
-  password: string; // Application password
+  password?: string; // Application password
   applicationPassword?: string; // Alternative name for password (for compatibility)
   categories?: number[]; // WP category IDs to assign
   tags?: number[]; // WP tag IDs to assign
@@ -90,7 +90,7 @@ export class WordPressService {
       const response = await axios.get(`${this.apiBase}/categories`, {
         auth: {
           username: this.credentials.username,
-          password: this.credentials.password
+          password: this.credentials.password || ''
         },
         params: {
           per_page: 100
@@ -355,7 +355,7 @@ export class WordPressService {
   /**
    * Publish a blog post to WordPress
    */
-  async publishBlogPost(blogPost: BlogPost): Promise<WordPressPostResult> {
+  async publishBlogPost(blogPost: BlogPost, options?: WordPressPublishOptions): Promise<WordPressPostResult> {
     try {
       let photoUrls: string[] = [];
       let mediaIds: number[] = [];
@@ -363,22 +363,37 @@ export class WordPressService {
       // Parse the photos if available
       if (blogPost.photos) {
         try {
-          photoUrls = JSON.parse(blogPost.photos as string);
+          if (typeof blogPost.photos === 'string') {
+            photoUrls = JSON.parse(blogPost.photos);
+          } else if (Array.isArray(blogPost.photos)) {
+            photoUrls = blogPost.photos;
+          }
         } catch (error) {
           console.error('Failed to parse photo URLs:', error);
         }
       }
       
-      // Create the post
+      // Create the post with advanced fields support
       const postData = {
         title: blogPost.title,
         content: blogPost.content,
-        status: 'publish',
-        categories: this.credentials.categories,
-        tags: this.credentials.tags,
+        status: options?.status || 'publish',
+        categories: options?.categories || this.credentials.categories || [1], // Default to Uncategorized
+        tags: options?.tags || this.credentials.tags || [],
         meta: {
+          // Standard meta fields
           blog_post_id: blogPost.id,
-          check_in_id: blogPost.checkInId
+          check_in_id: blogPost.checkInId,
+          
+          // SEO optimizations
+          _yoast_wpseo_metadesc: blogPost.title,
+          _yoast_wpseo_title: `${blogPost.title} | Blog Post`,
+          
+          // Custom fields from options
+          ...(options?.customFields || {}),
+          
+          // ACF fields if provided
+          ...(options?.acfFields ? { acf: options.acfFields } : {})
         }
       };
       
