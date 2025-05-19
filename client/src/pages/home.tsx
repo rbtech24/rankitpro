@@ -525,9 +525,15 @@ const Home = () => {
           <div className="pt-8 mt-8 border-t border-slate-800 text-sm text-slate-400">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <p>&copy; 2025 CheckIn Pro. All rights reserved.</p>
-              <div className="mt-4 md:mt-0">
+              <div className="mt-4 md:mt-0 flex items-center">
                 <a href="#" className="text-slate-400 hover:text-primary mr-4">Privacy Policy</a>
-                <a href="#" className="text-slate-400 hover:text-primary">Terms of Service</a>
+                <a href="#" className="text-slate-400 hover:text-primary mr-4">Terms of Service</a>
+                <Link to="/login?admin=true" className="text-xs text-slate-600 hover:text-primary transition-colors duration-200 ml-2">
+                  <span className="flex items-center">
+                    <Lock className="h-3 w-3 mr-1" />
+                    Admin
+                  </span>
+                </Link>
               </div>
             </div>
           </div>
