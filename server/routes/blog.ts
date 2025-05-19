@@ -94,13 +94,43 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
     
     const blogPost = await storage.createBlogPost(blogPostData);
     
-    // Send email notification
+    // Send email notification to company stakeholders
     try {
-      const emailSent = await emailService.sendBlogPostNotification(blogPost, user.email);
-      if (!emailSent) {
-        log('Failed to send blog post notification email', 'warning');
-      } else {
-        log(`Blog post notification email sent to ${user.email}`, 'info');
+      // Get the company for email notifications
+      const company = await storage.getCompany(user.companyId!);
+      
+      if (company) {
+        // Find company admin emails and other subscribers
+        const companyAdmins = await storage.getUsersByCompanyAndRole(company.id, 'company_admin');
+        const adminEmails = companyAdmins.map(admin => admin.email).filter(Boolean) as string[];
+        
+        // Add current user's email if not already included and if it exists
+        if (user.email && !adminEmails.includes(user.email)) {
+          adminEmails.push(user.email);
+        }
+        
+        // Generate a short excerpt from the content for the email
+        const excerpt = blogPost.content.length > 300 
+          ? blogPost.content.substring(0, 297) + '...' 
+          : blogPost.content;
+        
+        if (adminEmails.length > 0) {
+          // Send the notification email
+          const emailSent = await emailService.sendBlogPostNotification({
+            to: adminEmails,
+            companyName: company.name,
+            title: blogPost.title,
+            excerpt: excerpt,
+            authorName: user.username || 'Admin',
+            blogPostId: blogPost.id
+          });
+          
+          if (!emailSent) {
+            log('Failed to send blog post notification email', 'warning');
+          } else {
+            log(`Blog post notification emails sent to ${adminEmails.length} recipients`, 'info');
+          }
+        }
       }
     } catch (error) {
       console.error('Error sending blog post notification email:', error);

@@ -199,15 +199,74 @@ router.post('/send', isAuthenticated, async (req: Request, res: Response) => {
     }
     
     // Update the review request status
-    await storage.updateReviewRequest(reviewRequest.id, {
+    const updatedReviewRequest = await storage.updateReviewRequest(reviewRequest.id, {
       status: sendResult ? 'sent' : 'failed'
     });
+    
+    // Send notification to company admins about the new review request
+    try {
+      // Find company admin emails
+      const companyAdmins = await storage.getUsersByCompanyAndRole(companyId, 'company_admin');
+      const adminEmails = companyAdmins.map(admin => admin.email).filter(Boolean) as string[];
+      
+      // Add current user's email if not already included and if it exists
+      if (req.user.email && !adminEmails.includes(req.user.email)) {
+        adminEmails.push(req.user.email);
+      }
+      
+      if (adminEmails.length > 0) {
+        // Create a custom notification email for admins about the review request
+        const emailSubject = `New Review Request: ${customerName}`;
+        const emailHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>New Review Request Notification</h2>
+            <p>A new review request has been sent in the ${company.name} system.</p>
+            
+            <div style="background-color: #f7f7f7; padding: 15px; border-radius: 5px; margin: 15px 0;">
+              <p><strong>Customer:</strong> ${customerName}</p>
+              <p><strong>Technician:</strong> ${technician.name}</p>
+              <p><strong>Job Type:</strong> ${jobType || 'Service'}</p>
+              <p><strong>Contact Method:</strong> ${method}</p>
+              <p><strong>Status:</strong> ${sendResult ? 'Sent Successfully' : 'Sending Failed'}</p>
+            </div>
+            
+            <p>
+              <a href="https://checkin.app/review-requests/${reviewRequest.id}" 
+                 style="background-color: #4a7aff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                View Review Request Details
+              </a>
+            </p>
+          </div>
+        `;
+        
+        // Send email to all admin recipients
+        for (const recipient of adminEmails) {
+          const msg = {
+            to: recipient,
+            from: `notifications@${company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.checkin.app`,
+            subject: emailSubject,
+            html: emailHtml,
+          };
+          
+          try {
+            await emailService.sendEmail(msg);
+            console.log(`Review request notification email sent to ${recipient}`);
+          } catch (emailError) {
+            console.error(`Error sending review request notification to ${recipient}:`, emailError);
+            // Continue with other recipients even if one fails
+          }
+        }
+      }
+    } catch (notificationError) {
+      console.error('Error sending admin notifications for review request:', notificationError);
+      // Don't fail the whole request if notifications fail
+    }
     
     res.json({ 
       message: sendResult ? 'Review request sent successfully' : 'Failed to send review request',
       success: sendResult,
       reviewRequest: {
-        ...reviewRequest,
+        ...updatedReviewRequest || reviewRequest,
         status: sendResult ? 'sent' : 'failed'
       }
     });

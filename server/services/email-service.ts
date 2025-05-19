@@ -142,8 +142,29 @@ class EmailService {
   }
 
   /**
-   * Sends a notification email about a new blog post
+   * General purpose method to send any email
    */
+  async sendEmail(msg: {
+    to: string;
+    from: string;
+    subject: string;
+    html: string;
+    text?: string;
+  }): Promise<boolean> {
+    if (!this.isAvailable()) {
+      console.warn('Email service unavailable: SENDGRID_API_KEY not set or service not initialized');
+      return false;
+    }
+
+    try {
+      await sgMail.send(msg);
+      return true;
+    } catch (error) {
+      console.error('Error sending email:', error);
+      return false;
+    }
+  }
+
   async sendBlogPostNotification(params: {
     to: string[];
     companyName: string;
