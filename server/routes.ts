@@ -17,6 +17,7 @@ import demoRoutes from "./routes/demo";
 import reviewRequestRoutes from "./routes/review-request";
 import reviewResponseRoutes from "./routes/review-response";
 import wordpressRoutes from "./routes/wordpress-integration";
+import wordpressCustomFieldsRoutes from "./routes/wordpress-custom-fields";
 import jsWidgetRoutes from "./routes/js-widget";
 import billingRoutes from "./routes/billing";
 import userRoutes from "./routes/users";

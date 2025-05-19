@@ -173,7 +173,7 @@ router.get("/stats/:companyId", isAuthenticated, isCompanyAdmin, async (req, res
 /**
  * Get reviews for a specific technician
  */
-router.get("/technician/:technicianId", authenticateCompany, async (req, res) => {
+router.get("/technician/:technicianId", isAuthenticated, isCompanyAdmin, async (req, res) => {
   try {
     const technicianId = parseInt(req.params.technicianId);
     
