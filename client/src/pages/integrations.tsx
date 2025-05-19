@@ -1,391 +1,488 @@
-import React, { useState } from "react";
-import Sidebar from "@/components/layout/sidebar";
-import TopNav from "@/components/layout/top-nav";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { AuthState, getCurrentUser } from "@/lib/auth";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Copy, Globe, Code, FileCode, Check, AlertCircle, Copy as CopyIcon } from "lucide-react";
 
-export default function Integrations() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+type WordPressIntegration = {
+  siteUrl: string;
+  apiKey: string;
+  autoPublish: boolean;
+  includePhotos: boolean;
+  addSchemaMarkup: boolean;
+  displayMap: boolean;
+  postType: "post" | "check_in" | "custom";
+  category?: string;
+  status: "connected" | "disconnected";
+  lastSync?: string;
+};
+
+type EmbedIntegration = {
+  token: string;
+  embedCode: string;
+  settings: {
+    showTechPhotos: boolean;
+    showCheckInPhotos: boolean;
+    maxCheckIns: number;
+    linkFullPosts: boolean;
+    customCss?: string;
+    width: "full" | "fixed";
+    fixedWidth?: number;
+  };
+};
+
+function IntegrationsPage() {
   const { toast } = useToast();
-  const [wordpressUrl, setWordpressUrl] = useState("");
-  const [wordpressKey, setWordpressKey] = useState("");
-  const [autoPublish, setAutoPublish] = useState(true);
-  const [embedCode, setEmbedCode] = useState("");
   
-  const { data: auth } = useQuery<AuthState>({
-    queryKey: ["/api/auth/me"],
-    queryFn: getCurrentUser
+  const [copied, setCopied] = useState<{wordpress?: boolean, embed?: boolean}>({});
+  
+  // WordPress integration
+  const { data: wordpressData, isLoading: wpLoading, refetch: refetchWordPress } = useQuery({
+    queryKey: ['/api/integration/wordpress'],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/integration/wordpress");
+      return res.json() as Promise<WordPressIntegration>;
+    },
+    retry: false,
+    staleTime: 30000,
+    gcTime: 60000
   });
   
-  // Initialize embed code with company data when auth info is loaded
-  React.useEffect(() => {
-    if (auth?.company) {
-      const companySlug = auth.company.name.toLowerCase().replace(/\s+/g, '-');
-      setEmbedCode(`<script src="https://checkin-pro.app/embed/${companySlug}?token=a1b2c3d4e5f6g7"></script>`);
+  const [wordpressForm, setWordpressForm] = useState<Partial<WordPressIntegration>>({
+    siteUrl: "",
+    autoPublish: true,
+    includePhotos: true,
+    addSchemaMarkup: true,
+    displayMap: true,
+    postType: "check_in",
+    category: ""
+  });
+  
+  // Set form data from API response
+  useEffect(() => {
+    if (wordpressData) {
+      setWordpressForm({
+        siteUrl: wordpressData.siteUrl,
+        autoPublish: wordpressData.autoPublish,
+        includePhotos: wordpressData.includePhotos,
+        addSchemaMarkup: wordpressData.addSchemaMarkup,
+        displayMap: wordpressData.displayMap,
+        postType: wordpressData.postType,
+        category: wordpressData.category
+      });
     }
-  }, [auth]);
+  }, [wordpressData]);
   
-  const handleConnectWordPress = (e: React.FormEvent) => {
+  const handleWordPressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "WordPress Connection",
-      description: "Successfully connected to WordPress site.",
-      variant: "default",
-    });
-  };
-  
-  const handleCopyEmbedCode = () => {
-    navigator.clipboard.writeText(embedCode);
-    toast({
-      title: "Copied!",
-      description: "Embed code copied to clipboard.",
-      duration: 3000,
-    });
-  };
-  
-  const handleRegenerateToken = () => {
-    toast({
-      title: "Token Regenerated",
-      description: "Your embed token has been regenerated.",
-      variant: "default",
-    });
-  };
-
-  return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar className={`fixed inset-0 z-40 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:translate-x-0 md:relative`} />
+    
+    try {
+      const res = await apiRequest("POST", "/api/integration/wordpress", wordpressForm);
+      const data = await res.json();
       
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <TopNav onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      toast({
+        title: "WordPress integration updated",
+        description: "Your WordPress integration settings have been saved.",
+      });
+      
+      refetchWordPress();
+    } catch (error) {
+      toast({
+        title: "Error updating WordPress integration",
+        description: "There was a problem saving your settings. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // JS Embed integration
+  const { data: embedData, isLoading: embedLoading, refetch: refetchEmbed } = useQuery({
+    queryKey: ['/api/integration/embed'],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/integration/embed");
+      return res.json() as Promise<EmbedIntegration>;
+    },
+    retry: false,
+    staleTime: 30000,
+    gcTime: 60000
+  });
+  
+  const [embedForm, setEmbedForm] = useState<EmbedIntegration["settings"]>({
+    showTechPhotos: true,
+    showCheckInPhotos: true,
+    maxCheckIns: 5,
+    linkFullPosts: true,
+    width: "full"
+  });
+  
+  // Set form data from API response
+  useEffect(() => {
+    if (embedData?.settings) {
+      setEmbedForm(embedData.settings);
+    }
+  }, [embedData]);
+  
+  const handleEmbedSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const res = await apiRequest("POST", "/api/integration/embed/settings", embedForm);
+      const data = await res.json();
+      
+      toast({
+        title: "Embed settings updated",
+        description: "Your embed widget settings have been saved.",
+      });
+      
+      refetchEmbed();
+    } catch (error) {
+      toast({
+        title: "Error updating embed settings",
+        description: "There was a problem saving your settings. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const regenerateEmbedToken = async () => {
+    try {
+      const res = await apiRequest("POST", "/api/integration/embed/regenerate-token");
+      const data = await res.json();
+      
+      toast({
+        title: "Embed token regenerated",
+        description: "Your embed token has been updated. Update your embed code on your website.",
+      });
+      
+      refetchEmbed();
+    } catch (error) {
+      toast({
+        title: "Error regenerating token",
+        description: "There was a problem generating a new token. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const copyToClipboard = (text: string, type: 'wordpress' | 'embed') => {
+    navigator.clipboard.writeText(text);
+    setCopied({ ...copied, [type]: true });
+    
+    toast({
+      title: "Copied to clipboard",
+      description: "You can now paste it into your website.",
+    });
+    
+    setTimeout(() => {
+      setCopied({ ...copied, [type]: false });
+    }, 2000);
+  };
+  
+  return (
+    <div className="container mx-auto py-8">
+      <h1 className="text-4xl font-bold mb-8">Integrations</h1>
+      
+      <Tabs defaultValue="wordpress" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="wordpress">WordPress Integration</TabsTrigger>
+          <TabsTrigger value="embed">JavaScript Embed</TabsTrigger>
+        </TabsList>
         
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Website Integrations</h1>
-            <p className="text-sm text-gray-500">Connect CheckIn Pro to your website and start publishing content.</p>
-          </div>
-          
-          <Tabs defaultValue="wordpress" className="space-y-6">
-            <TabsList className="mb-2">
-              <TabsTrigger value="wordpress">WordPress Plugin</TabsTrigger>
-              <TabsTrigger value="embed">JavaScript Embed</TabsTrigger>
-              <TabsTrigger value="api">API Access</TabsTrigger>
-            </TabsList>
+        <TabsContent value="wordpress" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Globe className="mr-2 h-5 w-5" />
+                WordPress Integration
+              </CardTitle>
+              <CardDescription>
+                Automatically publish your technician check-ins to your WordPress website for SEO benefits.
+              </CardDescription>
+            </CardHeader>
             
-            <TabsContent value="wordpress" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>WordPress Plugin</CardTitle>
-                      <CardDescription>Connect our plugin to automatically publish check-ins to your WordPress site.</CardDescription>
-                    </div>
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Connected</Badge>
+            <CardContent>
+              <form onSubmit={handleWordPressSubmit}>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="wordpress-url">WordPress Site URL</Label>
+                    <Input 
+                      id="wordpress-url" 
+                      placeholder="https://yoursite.com" 
+                      value={wordpressForm.siteUrl || ''}
+                      onChange={(e) => setWordpressForm({...wordpressForm, siteUrl: e.target.value})}
+                    />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleConnectWordPress} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="wordpress-url">WordPress Site URL</Label>
-                      <Input 
-                        id="wordpress-url" 
-                        placeholder="https://example.com" 
-                        value={wordpressUrl} 
-                        onChange={(e) => setWordpressUrl(e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="wordpress-key">WordPress API Key</Label>
-                      <Input 
-                        id="wordpress-key" 
-                        placeholder="wp_api_key_xxxxx" 
-                        value={wordpressKey} 
-                        onChange={(e) => setWordpressKey(e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
+                  
+                  <div className="flex flex-col space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="auto-publish">Auto-publish check-ins</Label>
                       <Switch 
                         id="auto-publish" 
-                        checked={autoPublish} 
-                        onCheckedChange={setAutoPublish} 
+                        checked={wordpressForm.autoPublish}
+                        onCheckedChange={(checked) => setWordpressForm({...wordpressForm, autoPublish: checked})}
                       />
-                      <Label htmlFor="auto-publish">Automatically publish new check-ins as blog posts</Label>
                     </div>
-                  </form>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <div className="text-sm text-gray-500">
-                    <p>Connected to: <span className="font-medium text-gray-900">{auth?.company?.name?.toLowerCase() || 'yoursite'}.com</span></p>
-                    <p>Last sync: <span className="font-medium text-gray-900">Today, 2:45 PM</span></p>
-                  </div>
-                  <Button>Update Connection</Button>
-                </CardFooter>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Plugin Settings</CardTitle>
-                  <CardDescription>Configure how check-ins appear on your WordPress site.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <h4 className="text-sm font-medium">Publish as Custom Post Type</h4>
-                      <p className="text-xs text-gray-500">Creates a "Check-Ins" post type on your site</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <h4 className="text-sm font-medium">Include photos</h4>
-                      <p className="text-xs text-gray-500">Add check-in photos to your blog posts</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <h4 className="text-sm font-medium">Add Schema Markup</h4>
-                      <p className="text-xs text-gray-500">Improve SEO with structured data</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <h4 className="text-sm font-medium">Display Map</h4>
-                      <p className="text-xs text-gray-500">Show service location on a map</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="embed" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>JavaScript Embed</CardTitle>
-                  <CardDescription>Add this code to any website to display your check-ins.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="embed-code">Your Embed Code</Label>
-                    <div className="relative">
-                      <textarea 
-                        id="embed-code" 
-                        rows={3} 
-                        className="block w-full pr-10 border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 sm:text-sm" 
-                        readOnly
-                        value={embedCode}
+                    
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="include-photos">Include photos</Label>
+                      <Switch 
+                        id="include-photos" 
+                        checked={wordpressForm.includePhotos} 
+                        onCheckedChange={(checked) => setWordpressForm({...wordpressForm, includePhotos: checked})}
                       />
-                      <button 
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                        onClick={handleCopyEmbedCode}
-                        title="Copy to clipboard"
-                        aria-label="Copy to clipboard"
-                      >
-                        <svg 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          width="20" 
-                          height="20" 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          strokeWidth="2" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          className="text-gray-400 hover:text-gray-500"
-                        >
-                          <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-                          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-                        </svg>
-                      </button>
                     </div>
-                  </div>
-                  
-                  <div className="flex flex-col space-y-2">
-                    <Label>Embed Preview</Label>
-                    <div className="border rounded-md p-4 bg-white">
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Recent Check-Ins</h3>
-                        <div className="border-t border-b py-3">
-                          <div className="flex items-center">
-                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">R</div>
-                            <div className="ml-3">
-                              <p className="text-sm font-medium">Robert Wilson</p>
-                              <p className="text-xs text-gray-500">Water Heater Installation</p>
-                            </div>
-                          </div>
-                          <p className="text-sm mt-2">Replaced 50-gallon water heater for customer. Old unit was leaking from the bottom...</p>
-                        </div>
-                        <div className="border-b py-3">
-                          <div className="flex items-center">
-                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">S</div>
-                            <div className="ml-3">
-                              <p className="text-sm font-medium">Sarah Johnson</p>
-                              <p className="text-xs text-gray-500">AC Maintenance</p>
-                            </div>
-                          </div>
-                          <p className="text-sm mt-2">Performed annual maintenance on 3-ton Carrier AC unit. Cleaned coils, replaced filter...</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline" onClick={handleRegenerateToken}>Regenerate Token</Button>
-                  <div>
-                    <Button variant="outline" className="mr-2">Customize Layout</Button>
-                    <Button>Preview Fullscreen</Button>
-                  </div>
-                </CardFooter>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Embed Options</CardTitle>
-                  <CardDescription>Customize how your embedded check-ins appear.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <h4 className="text-sm font-medium">Show Technician Photos</h4>
-                      <p className="text-xs text-gray-500">Display technician profile photos with check-ins</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <h4 className="text-sm font-medium">Show Check-in Photos</h4>
-                      <p className="text-xs text-gray-500">Display photos taken during check-ins</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <h4 className="text-sm font-medium">Maximum Check-ins</h4>
-                      <p className="text-xs text-gray-500">Number of check-ins to display</p>
-                    </div>
-                    <Input className="w-20" defaultValue="5" />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <h4 className="text-sm font-medium">Link to Full Posts</h4>
-                      <p className="text-xs text-gray-500">Allow visitors to click through to full blog posts</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="api" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>API Access</CardTitle>
-                  <CardDescription>Access your check-in data programmatically using our REST API.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="api-key">Your API Key</Label>
-                    <div className="relative">
-                      <Input 
-                        id="api-key" 
-                        className="pr-20" 
-                        value="ck_api_xxxxxxxxxxxxx" 
-                        readOnly 
+                    
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="schema-markup">Add Schema.org markup</Label>
+                      <Switch 
+                        id="schema-markup" 
+                        checked={wordpressForm.addSchemaMarkup} 
+                        onCheckedChange={(checked) => setWordpressForm({...wordpressForm, addSchemaMarkup: checked})}
                       />
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="absolute right-0 top-0 h-full"
-                        onClick={() => {
-                          navigator.clipboard.writeText("ck_api_xxxxxxxxxxxxx");
-                          toast({
-                            title: "Copied!",
-                            description: "API key copied to clipboard.",
-                            duration: 3000,
-                          });
-                        }}
-                      >
-                        Copy
-                      </Button>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="display-map">Display map on posts</Label>
+                      <Switch 
+                        id="display-map" 
+                        checked={wordpressForm.displayMap} 
+                        onCheckedChange={(checked) => setWordpressForm({...wordpressForm, displayMap: checked})}
+                      />
                     </div>
                   </div>
                   
-                  <div className="rounded-md bg-slate-50 p-4">
-                    <h4 className="text-sm font-medium mb-2">Example Request</h4>
-                    <pre className="text-xs overflow-x-auto p-2 bg-slate-100 rounded">
-                      {`curl -X GET https://api.checkin-pro.app/v1/check-ins \\
-  -H "Authorization: Bearer ck_api_xxxxxxxxxxxxx" \\
-  -H "Content-Type: application/json"`}
-                    </pre>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" onClick={handleRegenerateToken}>Regenerate API Key</Button>
-                  <Button className="ml-auto">View API Documentation</Button>
-                </CardFooter>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Webhooks</CardTitle>
-                  <CardDescription>Receive real-time notifications for new check-ins and other events.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="webhook-url">Webhook URL</Label>
+                    <Label htmlFor="post-type">Post Type</Label>
+                    <Select 
+                      value={wordpressForm.postType} 
+                      onValueChange={(value: "post" | "check_in" | "custom") => setWordpressForm({...wordpressForm, postType: value})}
+                    >
+                      <SelectTrigger id="post-type">
+                        <SelectValue placeholder="Select a post type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="post">Standard WordPress Post</SelectItem>
+                        <SelectItem value="check_in">Check-In Custom Post Type</SelectItem>
+                        <SelectItem value="custom">Custom Post Type</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category (optional)</Label>
                     <Input 
-                      id="webhook-url" 
-                      placeholder="https://yourwebsite.com/webhook" 
+                      id="category" 
+                      placeholder="e.g., Service Calls" 
+                      value={wordpressForm.category || ''}
+                      onChange={(e) => setWordpressForm({...wordpressForm, category: e.target.value})}
+                    />
+                  </div>
+                  
+                  <Button type="submit" className="w-full">Save WordPress Settings</Button>
+                </div>
+              </form>
+              
+              {wordpressData?.apiKey && (
+                <div className="mt-8">
+                  <Separator className="my-4" />
+                  <h3 className="text-lg font-medium mb-4">API Key</h3>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-md">
+                    <code className="text-sm font-mono">{wordpressData.apiKey}</code>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => copyToClipboard(wordpressData.apiKey, 'wordpress')}
+                    >
+                      {copied.wordpress ? <Check className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Use this API key in your WordPress plugin to authenticate.
+                  </p>
+                  
+                  {wordpressData.lastSync && (
+                    <p className="text-sm text-muted-foreground mt-4">
+                      Last synced: {new Date(wordpressData.lastSync).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="embed" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Code className="mr-2 h-5 w-5" />
+                JavaScript Embed Widget
+              </CardTitle>
+              <CardDescription>
+                Add a check-in feed widget to any website with a simple JavaScript embed code.
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent>
+              {embedData?.embedCode && (
+                <div className="mb-6 space-y-2">
+                  <Label htmlFor="embed-code">Embed Code</Label>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-md">
+                    <code className="text-sm font-mono break-all">{embedData.embedCode}</code>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => copyToClipboard(embedData.embedCode, 'embed')}
+                    >
+                      {copied.embed ? <Check className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Add this code to your website where you want the check-in widget to appear.
+                  </p>
+                </div>
+              )}
+              
+              <form onSubmit={handleEmbedSubmit}>
+                <div className="space-y-6">
+                  <div className="flex flex-col space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="tech-photos">Show technician photos</Label>
+                      <Switch 
+                        id="tech-photos" 
+                        checked={embedForm.showTechPhotos} 
+                        onCheckedChange={(checked) => setEmbedForm({...embedForm, showTechPhotos: checked})}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="checkin-photos">Show check-in photos</Label>
+                      <Switch 
+                        id="checkin-photos" 
+                        checked={embedForm.showCheckInPhotos} 
+                        onCheckedChange={(checked) => setEmbedForm({...embedForm, showCheckInPhotos: checked})}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="link-posts">Link to full posts</Label>
+                      <Switch 
+                        id="link-posts" 
+                        checked={embedForm.linkFullPosts} 
+                        onCheckedChange={(checked) => setEmbedForm({...embedForm, linkFullPosts: checked})}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="max-checkins">Maximum check-ins to display</Label>
+                    <Input 
+                      id="max-checkins" 
+                      type="number" 
+                      min="1" 
+                      max="20" 
+                      value={embedForm.maxCheckIns} 
+                      onChange={(e) => setEmbedForm({...embedForm, maxCheckIns: parseInt(e.target.value) || 5})}
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium">Events to Trigger Webhook</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <Label>Widget Width</Label>
+                    <div className="space-y-2">
                       <div className="flex items-center space-x-2">
-                        <Switch id="event-new-checkin" defaultChecked />
-                        <Label htmlFor="event-new-checkin">New Check-in</Label>
+                        <input 
+                          type="radio" 
+                          id="width-full" 
+                          name="widget-width" 
+                          value="full"
+                          checked={embedForm.width === "full"}
+                          onChange={() => setEmbedForm({...embedForm, width: "full"})}
+                          className="h-4 w-4"
+                        />
+                        <Label htmlFor="width-full" className="cursor-pointer">
+                          Full width (responsive)
+                        </Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Switch id="event-new-blog" defaultChecked />
-                        <Label htmlFor="event-new-blog">New Blog Post</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch id="event-new-review" />
-                        <Label htmlFor="event-new-review">New Review Request</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch id="event-new-tech" />
-                        <Label htmlFor="event-new-tech">New Technician</Label>
+                        <input 
+                          type="radio" 
+                          id="width-fixed" 
+                          name="widget-width" 
+                          value="fixed"
+                          checked={embedForm.width === "fixed"}
+                          onChange={() => setEmbedForm({...embedForm, width: "fixed"})}
+                          className="h-4 w-4"
+                        />
+                        <Label htmlFor="width-fixed" className="cursor-pointer">
+                          Fixed width
+                        </Label>
                       </div>
                     </div>
                   </div>
-                </CardContent>
-                <CardFooter>
-                  <Button>Save Webhook Settings</Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </main>
-      </div>
+                  
+                  {embedForm.width === "fixed" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="fixed-width">Fixed width (pixels)</Label>
+                      <Input 
+                        id="fixed-width" 
+                        type="number" 
+                        min="200" 
+                        max="1200" 
+                        value={embedForm.fixedWidth || 400} 
+                        onChange={(e) => setEmbedForm({...embedForm, fixedWidth: parseInt(e.target.value) || 400})}
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="custom-css">Custom CSS (optional)</Label>
+                    <Textarea 
+                      id="custom-css" 
+                      placeholder=".checkin-pro-widget { /* your custom styles */ }" 
+                      value={embedForm.customCss || ''}
+                      onChange={(e) => setEmbedForm({...embedForm, customCss: e.target.value})}
+                      className="font-mono text-sm"
+                      rows={4}
+                    />
+                  </div>
+                  
+                  <Button type="submit" className="w-full">Save Embed Settings</Button>
+                </div>
+              </form>
+              
+              {embedData?.token && (
+                <div className="mt-8">
+                  <Separator className="my-4" />
+                  <div className="flex flex-col space-y-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={regenerateEmbedToken}
+                      className="w-full"
+                    >
+                      Regenerate Embed Token
+                    </Button>
+                    <p className="text-sm text-muted-foreground">
+                      Regenerating the token will invalidate any existing embed codes. You'll need to update your website with the new code.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
+
+export default IntegrationsPage;

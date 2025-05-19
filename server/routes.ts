@@ -4,11 +4,12 @@ import { storage } from "./storage";
 import session from "express-session";
 import MemoryStore from "memorystore";
 import bcrypt from "bcrypt";
-import { generateSummary, generateBlogPost } from "./openai";
+import { generateSummary, generateBlogPost } from "./ai-service";
 import { insertUserSchema, insertCompanySchema, insertTechnicianSchema, insertCheckInSchema, insertBlogPostSchema, insertReviewRequestSchema } from "@shared/schema";
 import { isAuthenticated, isCompanyAdmin, isSuperAdmin, belongsToCompany } from "./middleware/auth";
 import multer from "multer";
 import { z } from "zod";
+import integrationRoutes from "./routes/integration";
 import { fromZodError } from "zod-validation-error";
 
 const SessionStore = MemoryStore(session);
@@ -668,6 +669,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
+  
+  // Register integration routes (WordPress, JavaScript embed, AI providers)
+  app.use("/api/integration", integrationRoutes);
   
   // Create HTTP server
   const httpServer = createServer(app);
