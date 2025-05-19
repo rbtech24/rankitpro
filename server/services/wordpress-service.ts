@@ -558,35 +558,35 @@ class Check_In_Integration {
     public function enqueue_styles() {
         // Add some basic styles
         wp_add_inline_style('wp-block-library', '
-            .checkin-list {
+            .rankitpro-visit-list {
                 list-style: none;
                 padding: 0;
                 margin: 0 0 20px 0;
             }
-            .checkin-item {
+            .rankitpro-visit-item {
                 border: 1px solid #e5e5e5;
                 border-radius: 5px;
                 padding: 15px;
                 margin-bottom: 15px;
                 background: #f9f9f9;
             }
-            .checkin-meta {
+            .rankitpro-visit-meta {
                 font-size: 0.8em;
                 color: #666;
                 margin-top: 10px;
             }
-            .checkin-title {
+            .rankitpro-visit-title {
                 font-weight: bold;
                 font-size: 1.1em;
                 margin-bottom: 10px;
             }
-            .checkin-photos {
+            .rankitpro-visit-photos {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 10px;
                 margin-top: 10px;
             }
-            .checkin-photo {
+            .rankitpro-visit-photo {
                 width: 100px;
                 height: 100px;
                 object-fit: cover;
@@ -604,21 +604,21 @@ class Check_In_Integration {
         $check_ins = $this->get_check_ins($atts['limit'], $atts['type']);
         
         if (empty($check_ins)) {
-            return '<p>No recent check-ins available.</p>';
+            return '<p>No recent visits available.</p>';
         }
         
-        $output = '<div class="check-ins-container">';
-        $output .= '<ul class="checkin-list">';
+        $output = '<div class="rankitpro-visits-container">';
+        $output .= '<ul class="rankitpro-visit-list">';
         
         foreach ($check_ins as $check_in) {
             $date = date('F j, Y', strtotime($check_in->createdAt));
             $time = date('g:i A', strtotime($check_in->createdAt));
             
-            $output .= '<li class="checkin-item">';
-            $output .= '<div class="checkin-title">' . esc_html($check_in->jobType) . '</div>';
+            $output .= '<li class="rankitpro-visit-item">';
+            $output .= '<div class="rankitpro-visit-title">' . esc_html($check_in->jobType) . '</div>';
             
             if (!empty($check_in->notes)) {
-                $output .= '<div class="checkin-notes">' . esc_html($check_in->notes) . '</div>';
+                $output .= '<div class="rankitpro-visit-notes">' . esc_html($check_in->notes) . '</div>';
             }
             
             if (!empty($check_in->location)) {
