@@ -214,5 +214,8 @@ router.get('/profile', isAuthenticated, async (req, res) => {
 // Mount the sub-routers
 router.use('/check-ins', mobileCheckInsRouter);
 router.use('/notifications', mobileNotificationsRouter);
+router.use('/schedule', require('./mobile/schedule').default);
+router.use('/customers', require('./mobile/customers').default);
+router.use('/settings', require('./mobile/settings').default);
 
 export default router;
