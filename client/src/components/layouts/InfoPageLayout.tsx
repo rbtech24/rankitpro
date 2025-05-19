@@ -22,7 +22,7 @@ export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({
             <Link href="/">
               <div className="flex items-center space-x-2 cursor-pointer">
                 <div className="flex items-center">
-                  <Logo size="md" />
+                  <Logo size="md" linkDisabled={true} />
                 </div>
               </div>
             </Link>
@@ -69,7 +69,7 @@ export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center mb-4">
-                <Logo size="sm" textVisible={true} className="footer" />
+                <Logo size="sm" textVisible={true} className="footer" linkDisabled={true} />
               </div>
               <p className="text-sm text-slate-400 mb-4">
                 The all-in-one platform for home service businesses to boost local SEO with field service visits, automated content creation, and review management.
