@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNotifications } from '@/context/NotificationContext';
 import { 
-  Button,
   Sheet,
   SheetContent,
   SheetHeader,
@@ -10,6 +9,7 @@ import {
   SheetFooter,
   SheetClose,
 } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { Bell, X, CheckCircle2, Settings, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

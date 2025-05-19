@@ -16,7 +16,7 @@ import {
   X,
   LogOut
 } from 'lucide-react';
-import { NotificationBell } from '@/components/notifications/NotificationBell';
+import NotificationBell from '@/components/notifications/NotificationBell';
 import { Button } from '@/components/ui/button';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
