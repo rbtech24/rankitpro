@@ -78,6 +78,113 @@ const Home = () => {
             </div>
           </div>
         </section>
+        
+        {/* SEO Benefits Section */}
+        <section className="py-16 px-6 bg-white">
+          <div className="container mx-auto max-w-5xl">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Supercharge Your Website's SEO</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Turn every technician check-in into valuable website content that boosts your search rankings and attracts more customers.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
+              <div className="space-y-4">
+                <div className="h-12 w-12 rounded-lg flex items-center justify-center bg-primary/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold">Fresh, Relevant Content</h3>
+                <p className="text-muted-foreground">
+                  Google rewards websites that regularly publish relevant, high-quality content. Each technician check-in automatically generates fresh content about your services in specific locations, signaling to search engines that your site is active and authoritative.
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="h-12 w-12 rounded-lg flex items-center justify-center bg-primary/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold">Local SEO Dominance</h3>
+                <p className="text-muted-foreground">
+                  Each blog post is automatically optimized with local keywords, service types, and location data from check-ins. This helps your business rank higher in local search results when homeowners search for services in your service areas.
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="h-12 w-12 rounded-lg flex items-center justify-center bg-primary/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                    <line x1="4" y1="22" x2="4" y2="15"></line>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold">Long-Tail Keyword Targeting</h3>
+                <p className="text-muted-foreground">
+                  Our AI content generation automatically incorporates long-tail keywords related to specific services, problems, and solutions. This helps your website appear in more specific search queries where competition is lower but conversion intent is higher.
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="h-12 w-12 rounded-lg flex items-center justify-center bg-primary/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold">Increased User Engagement</h3>
+                <p className="text-muted-foreground">
+                  Blog posts created from real service visits keep potential customers on your site longer, reducing bounce rates and increasing engagement metrics that search engines use to determine your site's value and relevance.
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="h-12 w-12 rounded-lg flex items-center justify-center bg-primary/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold">Social Proof & Reviews</h3>
+                <p className="text-muted-foreground">
+                  Automated review requests tied to check-ins help build a consistent stream of positive reviews. These reviews improve your local search rankings and build trust with potential customers, improving both SEO and conversion rates.
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="h-12 w-12 rounded-lg flex items-center justify-center bg-primary/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold">Zero Effort Required</h3>
+                <p className="text-muted-foreground">
+                  Unlike traditional content marketing that requires hours of writing and planning, our system automatically transforms technician check-ins into SEO-optimized content. Your team does their normal work, and your website gets all the SEO benefits.
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-12 p-6 bg-slate-50 rounded-lg border border-slate-200">
+              <div className="flex flex-col md:flex-row items-center">
+                <div className="mb-6 md:mb-0 md:mr-8">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold mb-2">The SEO Performance Difference</h3>
+                  <p className="text-muted-foreground">
+                    Our customers see an average 30% improvement in organic search traffic within the first 3 months. With each technician performing multiple check-ins daily, your website quickly builds a content library that outranks competitors and positions you as the authority in your service area.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Features Section */}
         <section id="features" className="py-16 px-6 bg-slate-50">
