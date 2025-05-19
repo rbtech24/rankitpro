@@ -22,29 +22,29 @@ export function Logo({ className = "", size = 'md', textVisible = true }: LogoPr
       
       {/* White location marker */}
       <path 
-        d="M50 20c-12 0-20 8-20 18C30 48 50 80 50 80s20-32 20-42c0-10-8-18-20-18z"
+        d="M50 12c-17 0-28 12-28 25C22 49 50 88 50 88s28-39 28-51c0-13-11-25-28-25z"
         fill="white"
       />
       
       {/* Green checkmark circle */}
-      <circle cx="50" cy="40" r="15" fill="#00b05c" />
+      <circle cx="50" cy="37" r="18" fill="#00b05c" />
       <path 
-        d="M43 40l5 5 10-10" 
+        d="M40 37l7 7 13-13" 
         stroke="white" 
-        strokeWidth="4" 
+        strokeWidth="5" 
         fill="none" 
         strokeLinecap="round" 
         strokeLinejoin="round"
       />
       
-      {/* Chart bars */}
-      <rect x="60" y="60" width="5" height="20" fill="white" />
-      <rect x="70" y="50" width="5" height="30" fill="white" />
-      <rect x="80" y="65" width="5" height="15" fill="white" />
+      {/* Chart bars - positioned to match the image */}
+      <rect x="60" y="65" width="7" height="20" fill="white" />
+      <rect x="72" y="55" width="7" height="30" fill="white" />
+      <rect x="84" y="70" width="7" height="15" fill="white" />
       
-      {/* Chat bubble */}
-      <rect x="75" y="20" width="15" height="15" rx="2" fill="white" />
-      <path d="M78 25h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2z" fill="#0088d2" />
+      {/* Chat bubble - more rectangular with pointer */}
+      <rect x="69" y="15" width="23" height="16" rx="3" fill="white" />
+      <path d="M75 31l-4 6h8z" fill="white" />
     </svg>
   );
 

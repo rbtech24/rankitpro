@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import StatsOverview from "@/components/dashboard/stats-overview";
-import RecentCheckins from "@/components/dashboard/recent-checkins";
+import RecentVisits from "@/components/dashboard/recent-visits";
 import QuickActions from "@/components/dashboard/quick-actions";
 import AIWriter from "@/components/dashboard/ai-writer";
 import TechnicianPerformance from "@/components/dashboard/technician-performance";
 import WebsiteIntegration from "@/components/dashboard/website-integration";
-import CheckinModal from "@/components/modals/checkin-modal";
+import VisitModal from "@/components/modals/visit-modal";
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -36,7 +36,7 @@ export default function Dashboard() {
               ? "Super admin dashboard with system-wide overview."
               : isAdmin 
               ? "Welcome back! Here's what's happening with your company."
-              : "Welcome back! Here's what's happening with your check-ins."}
+              : "Welcome back! Here's what's happening with your visits."}
           </p>
         </div>
         
