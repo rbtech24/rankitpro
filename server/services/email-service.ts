@@ -1,145 +1,205 @@
-import { CheckIn, Technician, ReviewRequest, BlogPost } from '../../shared/schema';
 import { log } from '../vite';
+import sgMail from '@sendgrid/mail';
+import { CheckInWithTechnician, Technician, BlogPost, ReviewRequest } from '@shared/schema';
 
-// Email service interface
-export interface EmailService {
-  sendCheckInNotification(checkIn: CheckIn, technician: Technician): Promise<boolean>;
-  sendBlogPostNotification(blogPost: BlogPost): Promise<boolean>;
-  sendReviewRequest(reviewRequest: ReviewRequest, technician: Technician): Promise<boolean>;
-}
+/**
+ * Email service for sending notifications and review requests
+ */
+class EmailService {
+  private initialized: boolean = false;
+  private fromEmail: string = 'no-reply@checkin-platform.com';
+  private companyName: string = 'Check-In Platform';
 
-// Implementation that just logs instead of sending emails (for development)
-export class LoggingEmailService implements EmailService {
-  async sendCheckInNotification(checkIn: CheckIn, technician: Technician): Promise<boolean> {
-    log(`[EMAIL] Check-in notification: Technician ${technician.name} (${technician.email}) checked in for job: ${checkIn.jobType} at ${checkIn.location || 'unknown location'}`);
-    log(`[EMAIL] Check-in details: ${checkIn.notes}`);
-    return true;
-  }
-
-  async sendBlogPostNotification(blogPost: BlogPost): Promise<boolean> {
-    log(`[EMAIL] Blog post published: "${blogPost.title}"`);
-    log(`[EMAIL] Blog post snippet: ${blogPost.content.substring(0, 100)}...`);
-    return true;
-  }
-
-  async sendReviewRequest(reviewRequest: ReviewRequest, technician: Technician): Promise<boolean> {
-    const recipient = reviewRequest.method === 'email' 
-      ? `email: ${reviewRequest.email}` 
-      : `phone: ${reviewRequest.phone}`;
-    
-    log(`[EMAIL] Review request sent to ${reviewRequest.customerName} (${recipient})`);
-    log(`[EMAIL] Regarding technician: ${technician.name}`);
-    return true;
-  }
-}
-
-// SendGrid implementation (will be used when API key is available)
-export class SendGridEmailService implements EmailService {
-  private apiKey: string;
-  private fromEmail: string;
-  
-  constructor(apiKey: string, fromEmail: string = 'notifications@checkinpro.com') {
-    this.apiKey = apiKey;
-    this.fromEmail = fromEmail;
-  }
-  
-  async sendCheckInNotification(checkIn: CheckIn, technician: Technician): Promise<boolean> {
+  /**
+   * Initialize the email service with API key
+   */
+  initialize(apiKey?: string): boolean {
     try {
-      if (!this.apiKey) {
-        log('SENDGRID_API_KEY not set, falling back to logging');
-        return new LoggingEmailService().sendCheckInNotification(checkIn, technician);
+      if (!apiKey) {
+        const envApiKey = process.env.SENDGRID_API_KEY;
+        if (!envApiKey) {
+          log('SendGrid API key not provided, email service will not send actual emails', 'warn');
+          return false;
+        }
+        apiKey = envApiKey;
       }
+
+      sgMail.setApiKey(apiKey);
+      this.initialized = true;
+      log('Email service initialized successfully', 'info');
+      return true;
+    } catch (error) {
+      log(`Failed to initialize email service: ${error}`, 'error');
+      return false;
+    }
+  }
+
+  /**
+   * Set the default from email address
+   */
+  setFromEmail(email: string): void {
+    this.fromEmail = email;
+  }
+
+  /**
+   * Set the company name for email templates
+   */
+  setCompanyName(name: string): void {
+    this.companyName = name;
+  }
+
+  /**
+   * Send a check-in notification to the company
+   */
+  async sendCheckInNotification(
+    checkIn: CheckInWithTechnician, 
+    recipientEmail: string
+  ): Promise<boolean> {
+    if (!this.initialized) {
+      log('Email service not initialized, skipping check-in notification', 'warn');
+      return false;
+    }
+
+    try {
+      const subject = `New Check-In: ${checkIn.jobType} by ${checkIn.technician.name}`;
       
-      // The actual SendGrid implementation would go here
-      // This would use the @sendgrid/mail package
-      
-      // Example SendGrid implementation (commented out until API key is available):
-      /*
-      const sgMail = require('@sendgrid/mail');
-      sgMail.setApiKey(this.apiKey);
-      
+      let content = `
+        <h2>New Technician Check-In</h2>
+        <p><strong>Technician:</strong> ${checkIn.technician.name}</p>
+        <p><strong>Job Type:</strong> ${checkIn.jobType}</p>
+        <p><strong>Location:</strong> ${checkIn.location || 'Not specified'}</p>
+        <p><strong>Date/Time:</strong> ${new Date(checkIn.createdAt!).toLocaleString()}</p>
+        <p><strong>Notes:</strong></p>
+        <p>${checkIn.notes || 'No notes provided'}</p>
+      `;
+
+      if (checkIn.latitude && checkIn.longitude) {
+        content += `
+          <p><strong>GPS Location:</strong> 
+          <a href="https://maps.google.com/?q=${checkIn.latitude},${checkIn.longitude}" target="_blank">
+            View on map
+          </a></p>
+        `;
+      }
+
       const msg = {
-        to: 'admin@example.com', // Company admin email
+        to: recipientEmail,
         from: this.fromEmail,
-        subject: `New Check-In: ${technician.name} - ${checkIn.jobType}`,
-        text: `
-          Technician ${technician.name} has checked in for a ${checkIn.jobType} job.
-          
-          Location: ${checkIn.location || 'Not specified'}
-          Notes: ${checkIn.notes}
-          
-          Time: ${new Date(checkIn.createdAt).toLocaleString()}
-        `,
-        html: `
-          <h2>New Technician Check-In</h2>
-          <p><strong>Technician:</strong> ${technician.name}</p>
-          <p><strong>Job Type:</strong> ${checkIn.jobType}</p>
-          <p><strong>Location:</strong> ${checkIn.location || 'Not specified'}</p>
-          <p><strong>Notes:</strong> ${checkIn.notes}</p>
-          <p><strong>Time:</strong> ${new Date(checkIn.createdAt).toLocaleString()}</p>
-        `,
+        subject,
+        html: content,
       };
-      
+
       await sgMail.send(msg);
-      */
-      
+      log(`Check-in notification email sent to ${recipientEmail}`, 'info');
       return true;
     } catch (error) {
-      console.error('Failed to send check-in notification email:', error);
+      log(`Failed to send check-in notification: ${error}`, 'error');
       return false;
     }
   }
 
-  async sendBlogPostNotification(blogPost: BlogPost): Promise<boolean> {
+  /**
+   * Send a blog post notification to the company
+   */
+  async sendBlogPostNotification(
+    blogPost: BlogPost,
+    recipientEmail: string
+  ): Promise<boolean> {
+    if (!this.initialized) {
+      log('Email service not initialized, skipping blog post notification', 'warn');
+      return false;
+    }
+
     try {
-      if (!this.apiKey) {
-        log('SENDGRID_API_KEY not set, falling back to logging');
-        return new LoggingEmailService().sendBlogPostNotification(blogPost);
-      }
+      const subject = `New Blog Post Published: ${blogPost.title}`;
       
-      // The actual SendGrid implementation would go here
-      
+      const content = `
+        <h2>New Blog Post Published</h2>
+        <p><strong>Title:</strong> ${blogPost.title}</p>
+        <p><strong>Date/Time:</strong> ${new Date(blogPost.createdAt!).toLocaleString()}</p>
+        <p><strong>Summary:</strong></p>
+        <p>${blogPost.content.substring(0, 200)}...</p>
+        <p>Login to your dashboard to view the full post.</p>
+      `;
+
+      const msg = {
+        to: recipientEmail,
+        from: this.fromEmail,
+        subject,
+        html: content,
+      };
+
+      await sgMail.send(msg);
+      log(`Blog post notification email sent to ${recipientEmail}`, 'info');
       return true;
     } catch (error) {
-      console.error('Failed to send blog post notification email:', error);
+      log(`Failed to send blog post notification: ${error}`, 'error');
       return false;
     }
   }
 
-  async sendReviewRequest(reviewRequest: ReviewRequest, technician: Technician): Promise<boolean> {
+  /**
+   * Send a review request to the customer
+   */
+  async sendReviewRequest(
+    reviewRequest: ReviewRequest,
+    technician: Technician,
+    recipientEmail: string,
+    companyName: string,
+    reviewLink: string
+  ): Promise<boolean> {
+    if (!this.initialized) {
+      log('Email service not initialized, skipping review request', 'warn');
+      return false;
+    }
+
+    if (!recipientEmail) {
+      log('No recipient email provided for review request', 'error');
+      return false;
+    }
+
     try {
-      if (!this.apiKey) {
-        log('SENDGRID_API_KEY not set, falling back to logging');
-        return new LoggingEmailService().sendReviewRequest(reviewRequest, technician);
-      }
+      const actualCompanyName = companyName || this.companyName;
+      const subject = `How was your experience with ${actualCompanyName}?`;
       
-      // Only proceed if this is an email-based review request
-      if (reviewRequest.method !== 'email' || !reviewRequest.email) {
-        log('Not an email review request or missing email address');
-        return false;
-      }
-      
-      // The actual SendGrid implementation would go here
-      
+      const content = `
+        <h2>Thank you for choosing ${actualCompanyName}!</h2>
+        <p>Hello ${reviewRequest.customerName},</p>
+        <p>Thank you for choosing ${actualCompanyName} for your recent service. 
+        Your technician, ${technician.name}, would appreciate your feedback on their work.</p>
+        
+        <div style="margin: 30px 0; text-align: center;">
+          <a href="${reviewLink}" style="background-color: #4CAF50; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 4px;">
+            Leave a Review
+          </a>
+        </div>
+        
+        <p>Your feedback helps us improve our service and helps others in your community 
+        find reliable help for their needs.</p>
+        
+        <p>Thank you for your time!</p>
+        
+        <p>Best regards,<br>
+        The team at ${actualCompanyName}</p>
+      `;
+
+      const msg = {
+        to: recipientEmail,
+        from: this.fromEmail,
+        subject,
+        html: content,
+      };
+
+      await sgMail.send(msg);
+      log(`Review request email sent to ${recipientEmail}`, 'info');
       return true;
     } catch (error) {
-      console.error('Failed to send review request email:', error);
+      log(`Failed to send review request: ${error}`, 'error');
       return false;
     }
   }
 }
 
-// Factory function to get the appropriate email service
-export function getEmailService(): EmailService {
-  const sendgridApiKey = process.env.SENDGRID_API_KEY;
-  
-  if (sendgridApiKey) {
-    return new SendGridEmailService(sendgridApiKey);
-  }
-  
-  // Fall back to logging service if no API key is available
-  return new LoggingEmailService();
-}
-
-// Default export
-export default getEmailService();
+// Export a singleton instance
+const emailService = new EmailService();
+export default emailService;

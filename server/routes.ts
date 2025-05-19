@@ -13,6 +13,7 @@ import integrationRoutes from "./routes/integration";
 import checkInRoutes from "./routes/check-in";
 import reviewRoutes from "./routes/review";
 import blogRoutes from "./routes/blog";
+import demoRoutes from "./routes/demo";
 import emailService from "./services/email-service";
 import { fromZodError } from "zod-validation-error";
 
@@ -679,6 +680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/check-ins", checkInRoutes);
   app.use("/api/reviews", reviewRoutes);
   app.use("/api/blogs", blogRoutes);
+  app.use("/api/demo", demoRoutes);
   
   // Create HTTP server
   const httpServer = createServer(app);

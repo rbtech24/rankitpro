@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
+import emailService from "./services/email-service";
 
 const app = express();
 app.use(express.json());
@@ -70,6 +71,18 @@ async function createSuperAdminIfNotExists() {
 (async () => {
   // Create default super admin user if needed
   await createSuperAdminIfNotExists();
+  
+  // Initialize email service
+  if (process.env.SENDGRID_API_KEY) {
+    const emailInitialized = emailService.initialize();
+    if (emailInitialized) {
+      log("Email service initialized successfully", "info");
+    } else {
+      log("Email service initialization failed - notifications will be disabled", "warn");
+    }
+  } else {
+    log("SENDGRID_API_KEY not found - email notifications will be disabled", "warn");
+  }
   
   const server = await registerRoutes(app);
 

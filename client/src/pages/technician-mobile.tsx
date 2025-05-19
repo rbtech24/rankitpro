@@ -33,7 +33,19 @@ const formSchema = z.object({
   sendReviewRequest: z.boolean().default(false),
   customerName: z.string().optional().or(z.literal("")),
   customerEmail: z.string().email("Invalid email address").optional().or(z.literal("")),
-});
+}).refine(
+  (data) => {
+    // If sending a review request, customer name and email are required
+    if (data.sendReviewRequest) {
+      return !!data.customerName && !!data.customerEmail;
+    }
+    return true;
+  },
+  {
+    message: "Customer name and email are required when requesting a review",
+    path: ["customerName"], // Error will show on the name field
+  }
+);
 
 type FormValues = z.infer<typeof formSchema>;
 
