@@ -17,6 +17,7 @@ import Settings from "@/pages/settings";
 import Billing from "@/pages/billing";
 import TechApp from "@/pages/tech-app";
 import AISettings from "@/pages/ai-settings";
+import Home from "@/pages/home";
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
 // Authenticated route that redirects to login if not authenticated
@@ -67,7 +68,7 @@ function Router() {
         {auth?.user ? <Redirect to="/dashboard" /> : <Register />}
       </Route>
       <Route path="/">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Redirect to="/login" />}
+        {auth?.user ? <Redirect to="/dashboard" /> : <Home />}
       </Route>
       
       {/* Dashboard Pages */}
