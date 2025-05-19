@@ -62,6 +62,9 @@ export default function TechnicianMobile() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zipCode, setZipCode] = useState("");
   const [notes, setNotes] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoURLs, setPhotoURLs] = useState<string[]>([]);
@@ -71,11 +74,15 @@ export default function TechnicianMobile() {
   const [afterPhotoURLs, setAfterPhotoURLs] = useState<string[]>([]);
   const [latitude, setLatitude] = useState<string | null>(null);
   const [longitude, setLongitude] = useState<string | null>(null);
+  const [addressFromGPS, setAddressFromGPS] = useState<string | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [locationVerified, setLocationVerified] = useState(false);
   const [sendReviewRequest, setSendReviewRequest] = useState(true);
   const [generateBlogPost, setGenerateBlogPost] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showLocationAlert, setShowLocationAlert] = useState(false);
+  const [locationAlertMessage, setLocationAlertMessage] = useState("");
   
   // Job type options - in a real implementation, these would come from an API
   const jobTypes = [
@@ -493,15 +500,70 @@ export default function TechnicianMobile() {
                 </div>
               )}
 
-              <div>
-                <Label htmlFor="address" className="text-base">Address (optional)</Label>
-                <Textarea
-                  id="address"
-                  placeholder="Enter job address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  rows={3}
-                />
+              <div className="space-y-3">
+                <Label htmlFor="address" className="text-base">Job Location</Label>
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <Label htmlFor="street-address">Street Address</Label>
+                    <Input
+                      id="street-address"
+                      placeholder="123 Main St"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        placeholder="City"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="state">State</Label>
+                      <Input
+                        id="state"
+                        placeholder="State"
+                        value={state}
+                        onChange={(e) => setState(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="zip">ZIP Code</Label>
+                    <Input
+                      id="zip"
+                      placeholder="ZIP Code"
+                      value={zipCode}
+                      onChange={(e) => setZipCode(e.target.value)}
+                    />
+                  </div>
+                  
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={verifyManualLocation}
+                    className="w-full"
+                    disabled={!address || !city || !state || !zipCode}
+                  >
+                    {locationVerified ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
+                        Address Verified
+                      </>
+                    ) : (
+                      <>
+                        <Navigation className="h-4 w-4 mr-2" />
+                        Verify Address
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
