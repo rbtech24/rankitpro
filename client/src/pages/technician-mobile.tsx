@@ -111,7 +111,7 @@ const TechnicianMobileView = () => {
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="check-in" className="p-6 focus:outline-none">
+              <TabsContent value="check-in" className="p-4 focus:outline-none">
                 {userCompanyId && userTechnicianId && (
                   <CheckInForm 
                     companyId={userCompanyId}
@@ -149,7 +149,7 @@ const TechnicianMobileView = () => {
                         </CardHeader>
                         <CardContent className="p-4 pt-0">
                           <p className="text-sm text-muted-foreground line-clamp-2">
-                            {checkIn.notes || 'No notes provided'}
+                            {checkIn.workPerformed || checkIn.notes || 'No notes provided'}
                           </p>
                           <div className="flex items-center mt-2 text-xs text-muted-foreground">
                             <Clock className="h-3 w-3 mr-1" />
@@ -161,6 +161,14 @@ const TechnicianMobileView = () => {
                               </>
                             )}
                           </div>
+                          
+                          {checkIn.followUpRequired && (
+                            <div className="mt-2">
+                              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                                Follow-up Required
+                              </Badge>
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     ))}
