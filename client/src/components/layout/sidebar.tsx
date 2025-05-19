@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
+import { Logo } from "@/components/ui/logo";
 
 interface SidebarProps {
   className?: string;
@@ -20,16 +21,7 @@ export default function Sidebar({ className }: SidebarProps) {
   return (
     <aside className={cn("w-64 bg-white shadow-md z-10 h-screen flex flex-col", className)}>
       <div className="p-4 border-b">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-hammer">
-              <path d="M15 12l-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9"/>
-              <path d="M17.64 15 22 10.64"/>
-              <path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 4.6a5.56 5.56 0 0 0-3.94-1.64H9l.92.82A6.18 6.18 0 0 1 12 8.4v1.56l2 2h2.47l2.26 1.91"/>
-            </svg>
-          </div>
-          <h1 className="text-lg font-bold text-secondary-900">CheckIn Pro</h1>
-        </div>
+        <Logo size="lg" className="mx-auto my-2" />
       </div>
       
       <div className="p-4 border-b">
@@ -78,16 +70,16 @@ export default function Sidebar({ className }: SidebarProps) {
               Dashboard
             </a>
           </Link>
-          <Link href="/check-ins">
+          <Link href="/visits">
             <a className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1",
-              isActive("/check-ins") && "bg-blue-50 border-l-3 border-blue-600"
+              isActive("/visits") && "bg-blue-50 border-l-3 border-blue-600"
             )}>
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
                 <path d="M9 11l3 3l8-8"/>
                 <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>
               </svg>
-              Check-ins
+              Visits
             </a>
           </Link>
           <Link href="/blog-posts">

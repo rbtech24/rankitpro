@@ -797,21 +797,22 @@ new RankItPro_Visit_Integration();
   // Style for the widget
   const style = document.createElement('style');
   style.textContent = \`
-    #check-in-container {
+    #rankitpro-visits-container {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       max-width: 100%;
     }
-    .checkin-list {
+    .visit-list {
       list-style: none;
       padding: 0;
       margin: 0 0 20px 0;
     }
-    .checkin-item {
+    .visit-item {
       border: 1px solid #e5e5e5;
-      border-radius: 5px;
+      border-radius: 8px;
       padding: 15px;
       margin-bottom: 15px;
       background: #f9f9f9;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     .checkin-meta {
       font-size: 0.8em;
