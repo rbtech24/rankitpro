@@ -891,6 +891,12 @@ new RankItPro_Visit_Integration();
       });
       
       html += '</ul>';
+      
+      // Add branded footer with attribution
+      html += '<div style="text-align: right; font-size: 11px; margin-top: 10px; color: #666;">';
+      html += 'Powered by <a href="https://rankitpro.com" style="color: #0088d2; text-decoration: none; font-weight: bold;" target="_blank">Rank it Pro</a>';
+      html += '</div>';
+      
       container.innerHTML = html;
     })
     .catch(error => {
