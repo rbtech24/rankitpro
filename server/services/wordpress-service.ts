@@ -9,8 +9,11 @@ export interface WordPressCredentials {
   siteUrl: string;
   username: string;
   password: string; // Application password
+  applicationPassword?: string; // Alternative name for password (for compatibility)
   categories?: number[]; // WP category IDs to assign
   tags?: number[]; // WP tag IDs to assign
+  defaultCategory?: string; // Default category name/ID
+  defaultStatus?: 'draft' | 'publish'; // Default publishing status
 }
 
 /**
@@ -69,12 +72,11 @@ export class WordPressService {
       });
       
       return response.status === 200;
-    } catch (error) {
-      console.error('WordPress connection test failed:', error);
+    } catch (error: any) {
+      console.error('WordPress connection test failed:', error.message || error);
       return false;
     }
   }
-  
   /**
    * Get WordPress categories
    */
@@ -233,14 +235,14 @@ export class WordPressService {
         content += `<h4>Notes</h4><p>${checkIn.notes}</p>`;
       }
       
-      if (checkIn.additionalServices) {
-        content += `<h4>Additional Services</h4><p>${checkIn.additionalServices}</p>`;
+      if (checkIn.materialsUsed) {
+        content += `<h4>Materials Used</h4><p>${checkIn.materialsUsed}</p>`;
       }
       
       // Add date
       const checkInDate = checkIn.createdAt instanceof Date 
         ? checkIn.createdAt 
-        : new Date(checkIn.createdAt);
+        : new Date(checkIn.createdAt || Date.now());
       
       content += `<p><em>Check-in date: ${checkInDate.toLocaleDateString()} at ${checkInDate.toLocaleTimeString()}</em></p>`;
       
@@ -425,24 +427,38 @@ export class WordPressService {
   }
 
   /**
-   * Test the WordPress connection
+   * Get available WordPress templates
    */
-  async testConnection(): Promise<boolean> {
+  async getTemplates(): Promise<Array<{file: string, name: string}>> {
     try {
-      const response = await axios.get(
-        `${this.apiBase}/users/me`,
-        {
-          auth: {
-            username: this.credentials.username,
-            password: this.credentials.password
-          }
+      // Try to access WordPress templates API (if the WP REST API Template endpoint is available)
+      const response = await axios.get(`${this.apiBase}/templates`, {
+        auth: {
+          username: this.credentials.username,
+          password: this.credentials.password
         }
-      );
+      });
       
-      return response.status === 200;
-    } catch (error) {
-      console.error('Error testing WordPress connection:', error);
-      return false;
+      if (response.status === 200 && Array.isArray(response.data)) {
+        return response.data.map((template: any) => ({
+          file: template.slug,
+          name: template.title?.rendered || template.slug
+        }));
+      }
+      
+      // Return default templates if API doesn't support templates endpoint
+      return [
+        { file: 'single.php', name: 'Default Post Template' },
+        { file: 'page.php', name: 'Default Page Template' }
+      ];
+    } catch (error: any) {
+      console.error('Error fetching WordPress templates:', error.message || error);
+      
+      // Return default templates
+      return [
+        { file: 'single.php', name: 'Default Post Template' },
+        { file: 'page.php', name: 'Default Page Template' }
+      ];
     }
   }
 
