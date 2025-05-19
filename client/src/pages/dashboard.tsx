@@ -14,7 +14,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 // import CompanyOverview from "@/components/dashboard/company-overview";
 
 export default function Dashboard() {
-  const [checkInModalOpen, setCheckInModalOpen] = useState(false);
+  const [visitModalOpen, setVisitModalOpen] = useState(false);
   
   const { data: auth } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
@@ -44,8 +44,8 @@ export default function Dashboard() {
         <StatsOverview />
         
         <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 mb-6">
-          {/* Recent check-ins shown to all users */}
-          <RecentCheckins />
+          {/* Recent visits shown to all users */}
+          <RecentVisits />
           
           <div className="lg:col-span-2 space-y-6">
             {/* Quick actions shown to all users, but with different options */}
