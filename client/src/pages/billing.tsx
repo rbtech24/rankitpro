@@ -51,6 +51,7 @@ export default function Billing() {
   const [currentPlan, setCurrentPlan] = useState<string>("starter");
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -101,15 +102,21 @@ export default function Billing() {
     onSuccess: (data) => {
       setIsLoading(false);
       
-      toast({
-        title: "Subscription Updated",
-        description: `Your subscription plan has been updated.`,
-        variant: "default",
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
-      setSelectedPlan(null);
+      // If we have a clientSecret, open the payment modal
+      if (data.clientSecret) {
+        setClientSecret(data.clientSecret);
+      } else {
+        // Otherwise, just update the subscription
+        toast({
+          title: "Subscription Updated",
+          description: `Your subscription plan has been updated.`,
+          variant: "default",
+        });
+        
+        queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+        setSelectedPlan(null);
+      }
     },
     onError: (error) => {
       setIsLoading(false);
@@ -164,6 +171,7 @@ export default function Billing() {
     
     // Confirm plan change
     if (window.confirm(`Are you sure you want to change your subscription to the ${plan} plan?`)) {
+      setIsLoading(true);
       updateSubscription.mutate(plan);
     } else {
       setSelectedPlan(null);
