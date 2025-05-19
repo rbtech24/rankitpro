@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { storage } from "./storage";
+import bcrypt from "bcrypt";
 
 const app = express();
 app.use(express.json());
@@ -36,7 +38,39 @@ app.use((req, res, next) => {
   next();
 });
 
+// Function to create a super admin user if one doesn't exist
+async function createSuperAdminIfNotExists() {
+  try {
+    // Check if a super admin already exists
+    const existingUser = await storage.getUserByEmail("superadmin@example.com");
+    
+    if (!existingUser) {
+      // Create a super admin user
+      const hashedPassword = await bcrypt.hash("admin123", 10);
+      
+      await storage.createUser({
+        username: "superadmin",
+        email: "superadmin@example.com",
+        password: hashedPassword,
+        role: "super_admin",
+        companyId: null,
+        stripeCustomerId: null,
+        stripeSubscriptionId: null
+      });
+      
+      log("Created default super admin account");
+      log("Username: superadmin");
+      log("Password: admin123");
+    }
+  } catch (error) {
+    console.error("Error creating super admin user:", error);
+  }
+}
+
 (async () => {
+  // Create default super admin user if needed
+  await createSuperAdminIfNotExists();
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
