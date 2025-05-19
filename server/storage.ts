@@ -10,6 +10,8 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUsersByCompanyAndRole(companyId: number, role: string): Promise<User[]>;
+  getUsersByCompany(companyId: number): Promise<User[]>;
+  getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   updateUserStripeInfo(userId: number, stripeInfo: { customerId: string, subscriptionId: string }): Promise<User | undefined>;
@@ -115,6 +117,15 @@ export class MemStorage implements IStorage {
   async getUsersByCompanyAndRole(companyId: number, role: string): Promise<User[]> {
     return Array.from(this.users.values())
       .filter(user => user.companyId === companyId && user.role === role);
+  }
+  
+  async getUsersByCompany(companyId: number): Promise<User[]> {
+    return Array.from(this.users.values())
+      .filter(user => user.companyId === companyId);
+  }
+  
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
   }
   
   async createUser(user: InsertUser): Promise<User> {

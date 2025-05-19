@@ -12,6 +12,7 @@ export const users = pgTable("users", {
   companyId: integer("company_id").references(() => companies.id),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
+  active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
