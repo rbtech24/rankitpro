@@ -541,8 +541,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Send real-time notification to all clients subscribed to this company
       if (companyConnections.has(companyId)) {
-        const checkInNotification = {
-          type: 'new_check_in',
+        const visitNotification = {
+          type: 'new_visit',
           data: {
             ...checkIn,
             technician: technician ? {
@@ -552,7 +552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         };
         
-        const message = JSON.stringify(checkInNotification);
+        const message = JSON.stringify(visitNotification);
         
         // Send to all connected clients for this company
         companyConnections.get(companyId)?.forEach(client => {
@@ -562,7 +562,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      res.status(201).json(checkIn);
+      res.status(201).json(checkIn); // Return the created visit
     } catch (error) {
       if (error instanceof z.ZodError) {
         const validationError = fromZodError(error);
