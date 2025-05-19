@@ -25,6 +25,7 @@ Job Type: ${params.jobType}
 Location: ${params.location || 'Not specified'}
 Technician: ${params.technicianName}
 Notes: ${params.notes}
+${params.customInstructions ? `\nCustom Instructions: ${params.customInstructions}` : ''}
 
 Please provide a professional, 2-3 paragraph summary that highlights the job performed, 
 any key findings, and the resolution. This will be displayed publicly on a website, 
@@ -64,6 +65,7 @@ Job Type: ${params.jobType}
 Location: ${params.location || 'Not specified'}
 Technician: ${params.technicianName}
 Notes: ${params.notes}
+${params.customInstructions ? `\nCustom Instructions: ${params.customInstructions}` : ''}
 
 The blog post should:
 1. Have an engaging title and introduction that mentions the service type and location

@@ -25,6 +25,7 @@ Job Type: ${params.jobType}
 Location: ${params.location || 'Not specified'}
 Technician: ${params.technicianName}
 Notes: ${params.notes}
+${params.customInstructions ? `\nCustom Instructions: ${params.customInstructions}` : ''}
 
 Please provide a professional, 2-3 paragraph summary that highlights the job performed, 
 any key findings, and the resolution. This will be displayed publicly on a website, 
@@ -44,7 +45,7 @@ a homeowner might not understand.`;
       });
 
       return response.choices[0].message.content || '';
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating summary with Grok:", error);
       throw new Error(`Failed to generate summary with Grok: ${error.message}`);
     }
@@ -59,6 +60,7 @@ Job Type: ${params.jobType}
 Location: ${params.location || 'Not specified'}
 Technician: ${params.technicianName}
 Notes: ${params.notes}
+${params.customInstructions ? `\nCustom Instructions: ${params.customInstructions}` : ''}
 
 The blog post should:
 1. Have an engaging title and introduction that mentions the service type and location
@@ -98,11 +100,11 @@ FORMAT YOUR RESPONSE AS JSON:
           title: parsedContent.title,
           content: parsedContent.content
         };
-      } catch (parseError) {
+      } catch (parseError: any) {
         console.error("Error parsing Grok response:", parseError);
         throw new Error("Failed to parse Grok response as JSON");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating blog post with Grok:", error);
       throw new Error(`Failed to generate blog post with Grok: ${error.message}`);
     }
