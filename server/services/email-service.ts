@@ -1,5 +1,9 @@
 import sgMail from '@sendgrid/mail';
-import { getReviewRequestTemplate } from './email-templates';
+import { 
+  getReviewRequestTemplate,
+  getCheckInNotificationTemplate,
+  getBlogPostNotificationTemplate
+} from './email-templates';
 
 /**
  * Email service for sending notifications and review requests
@@ -88,6 +92,7 @@ class EmailService {
     customerName?: string;
     location?: string;
     notes?: string;
+    photos?: Array<{url: string}>;
     checkInId: number;
   }): Promise<boolean> {
     if (!this.isAvailable()) {
@@ -96,31 +101,24 @@ class EmailService {
     }
 
     try {
-      const { to, companyName, technicianName, jobType, customerName, location, notes, checkInId } = params;
+      const { to, companyName, technicianName, jobType, customerName, location, notes, photos, checkInId } = params;
       
-      // Simple notification email
-      const subject = `New Check-In: ${technicianName} - ${jobType}`;
-      const html = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>New Check-In Notification</h2>
-          <p>A new check-in has been recorded in the ${companyName} system.</p>
-          
-          <div style="background-color: #f7f7f7; padding: 15px; border-radius: 5px; margin: 15px 0;">
-            <p><strong>Technician:</strong> ${technicianName}</p>
-            <p><strong>Job Type:</strong> ${jobType}</p>
-            ${customerName ? `<p><strong>Customer:</strong> ${customerName}</p>` : ''}
-            ${location ? `<p><strong>Location:</strong> ${location}</p>` : ''}
-            ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ''}
-          </div>
-          
-          <p>
-            <a href="https://checkin.app/check-ins/${checkInId}" 
-               style="background-color: #4a7aff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              View Check-In Details
-            </a>
-          </p>
-        </div>
-      `;
+      // Generate the check-in URL (in a real app, this would be a valid URL to your application)
+      const checkInUrl = `https://checkin.app/check-ins/${checkInId}`;
+      
+      // Use the enhanced template
+      const { subject, html } = getCheckInNotificationTemplate({
+        companyName,
+        technicianName,
+        jobType,
+        customerName,
+        location,
+        notes,
+        photos,
+        checkInId,
+        checkInUrl,
+        checkInDate: new Date()
+      });
 
       // Send email to all recipients
       for (const recipient of to) {
@@ -137,6 +135,56 @@ class EmailService {
       return true;
     } catch (error) {
       console.error('Error sending check-in notification emails:', error);
+      return false;
+    }
+  }
+  /**
+   * Sends a notification email about a new blog post
+   */
+  async sendBlogPostNotification(params: {
+    to: string[];
+    companyName: string;
+    title: string;
+    excerpt: string;
+    authorName: string;
+    blogPostId: number;
+  }): Promise<boolean> {
+    if (!this.isAvailable()) {
+      console.warn('Email service unavailable: SENDGRID_API_KEY not set or service not initialized');
+      return false;
+    }
+
+    try {
+      const { to, companyName, title, excerpt, authorName, blogPostId } = params;
+      
+      // Generate the blog post URL
+      const postUrl = `https://checkin.app/blog/${blogPostId}`;
+      
+      // Use the blog post notification template
+      const { subject, html } = getBlogPostNotificationTemplate({
+        companyName,
+        title,
+        excerpt,
+        authorName,
+        postUrl,
+        postDate: new Date()
+      });
+
+      // Send email to all recipients
+      for (const recipient of to) {
+        const msg = {
+          to: recipient,
+          from: `blog@${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.checkin.app`,
+          subject,
+          html,
+        };
+        await sgMail.send(msg);
+      }
+      
+      console.log(`Blog post notification emails sent to ${to.length} recipients`);
+      return true;
+    } catch (error) {
+      console.error('Error sending blog post notification emails:', error);
       return false;
     }
   }
