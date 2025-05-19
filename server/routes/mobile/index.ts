@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import checkInsRoutes from './check-ins';
+import notificationsRoutes from './notifications';
 import { z } from 'zod';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -156,7 +158,9 @@ router.get('/profile', isAuthenticated, async (req, res) => {
     }
     
     // Get technician details
-    const technician = await storage.getTechnician(req.user.id);
+    const technicians = await storage.getTechniciansByCompany(user.companyId);
+    const technician = technicians.find(tech => tech.userId === userId);
+    
     if (!technician) {
       return res.status(404).json({ message: 'Technician not found' });
     }
@@ -200,5 +204,9 @@ router.get('/profile', isAuthenticated, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// Mount the sub-routers
+router.use('/check-ins', checkInsRoutes);
+router.use('/notifications', notificationsRoutes);
 
 export default router;
