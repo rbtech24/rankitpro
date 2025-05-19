@@ -49,7 +49,7 @@ export default function Dashboard() {
           
           <div className="lg:col-span-2 space-y-6">
             {/* Quick actions shown to all users, but with different options */}
-            <QuickActions onOpenCheckInModal={() => setCheckInModalOpen(true)} />
+            <QuickActions onOpenVisitModal={() => setVisitModalOpen(true)} />
             
             {/* AI Writer only shown to admins */}
             {isAdmin && <AIWriter />}
@@ -76,9 +76,9 @@ export default function Dashboard() {
         )}
       </div>
       
-      <CheckinModal 
-        isOpen={checkInModalOpen} 
-        onClose={() => setCheckInModalOpen(false)} 
+      <VisitModal 
+        isOpen={visitModalOpen} 
+        onClose={() => setVisitModalOpen(false)} 
       />
     </DashboardLayout>
   );
