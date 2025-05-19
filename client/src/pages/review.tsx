@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
-import { Button } from '@/components/ui/button';
+import { useParams } from 'wouter';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Card, 
   CardContent, 
@@ -9,229 +10,308 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-import { Star, ThumbsUp } from 'lucide-react';
+import { Star, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
+import rankItProLogo from "@assets/rank it pro logo.png";
 
-export default function ReviewSubmission() {
-  const [location, setLocation] = useLocation();
+export default function Review() {
+  const { token } = useParams();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [reviewData, setReviewData] = useState<any>(null);
-  const [rating, setRating] = useState<number>(5);
-  const [feedback, setFeedback] = useState<string>('');
-  const [publicDisplay, setPublicDisplay] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [reviewData, setReviewData] = useState<any>(null);
+  
+  // Review form state
+  const [rating, setRating] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const [publicDisplay, setPublicDisplay] = useState(true);
+  const [hoverRating, setHoverRating] = useState(0);
 
-  // Get the token from the URL
-  const token = location.split('/').pop();
-
+  // Fetch the review request details using the token
   useEffect(() => {
-    if (!token) {
-      setError('Invalid review link. Please check the URL and try again.');
-      return;
-    }
-
-    // Fetch the review request data
-    const fetchReviewData = async () => {
+    async function fetchReviewRequest() {
       try {
-        const response = await apiRequest('GET', `/api/review-response/${token}`);
+        setLoading(true);
+        setError(null);
+        
+        const response = await apiRequest('GET', `/api/review-response/request/${token}`);
+        
         if (!response.ok) {
-          // If the response status is not OK, throw an error
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to load review information');
+          if (response.status === 404) {
+            setError('This review link is invalid or has expired.');
+          } else {
+            setError('Failed to load review information. Please try again later.');
+          }
+          return;
         }
         
         const data = await response.json();
         setReviewData(data);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load review information. Please try again later.');
+      } catch (err) {
+        setError('An error occurred. Please try again later.');
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-    };
-
-    fetchReviewData();
+    }
+    
+    if (token) {
+      fetchReviewRequest();
+    }
   }, [token]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Submit the review
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const response = await apiRequest('POST', '/api/review-response/submit', {
-        token,
-        rating,
-        feedback: feedback.trim() || null,
-        publicDisplay
+    
+    if (rating === 0) {
+      toast({
+        title: "Rating Required",
+        description: "Please provide a star rating before submitting.",
+        variant: "destructive",
       });
-
+      return;
+    }
+    
+    try {
+      setSubmitting(true);
+      
+      const response = await apiRequest('POST', `/api/review-response/submit/${token}`, {
+        rating,
+        feedback,
+        publicDisplay,
+      });
+      
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to submit review');
       }
-
-      // Show success message
-      toast({
-        title: 'Review Submitted',
-        description: 'Thank you for your feedback!',
-        variant: 'default',
-      });
       
-      setIsSubmitted(true);
+      // Success!
+      setSuccess(true);
+      window.scrollTo(0, 0);
+      
     } catch (err: any) {
       toast({
-        title: 'Error',
-        description: err.message || 'Failed to submit your review. Please try again.',
-        variant: 'destructive',
+        title: "Submission Failed",
+        description: err.message || "There was a problem submitting your review. Please try again.",
+        variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setSubmitting(false);
     }
-  };
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+          <p className="text-muted-foreground">Loading review information...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center text-red-600">Error</CardTitle>
+          <CardHeader className="text-center">
+            <img 
+              src={rankItProLogo} 
+              alt="Rank It Pro" 
+              className="h-12 mx-auto mb-4" 
+            />
+            <CardTitle className="text-2xl">Review Not Available</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center mb-4">{error}</p>
-            <div className="flex justify-center">
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.href = '/'}
-                className="mt-2"
-              >
-                Return to Home
-              </Button>
-            </div>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           </CardContent>
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-muted-foreground">
+              If you believe this is an error, please contact the business directly.
+            </p>
+          </CardFooter>
         </Card>
       </div>
     );
   }
 
-  if (isSubmitted) {
+  if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center text-green-600">Thank You!</CardTitle>
+          <CardHeader className="text-center">
+            <img 
+              src={rankItProLogo} 
+              alt="Rank It Pro" 
+              className="h-12 mx-auto mb-4" 
+            />
+            <CardTitle className="text-2xl">Thank You!</CardTitle>
+            <CardDescription>
+              Your review has been submitted successfully.
+            </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
+            <CheckCircle className="h-16 w-16 text-primary mx-auto mb-4" />
+            <p className="mb-4">
+              We appreciate you taking the time to share your feedback about your experience.
+            </p>
             <div className="flex justify-center mb-4">
-              <ThumbsUp className="h-16 w-16 text-green-500" />
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`h-8 w-8 ${
+                    star <= rating
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
+                  }`}
+                />
+              ))}
             </div>
-            <p className="text-lg mb-2">Your review has been submitted successfully.</p>
-            <p>We appreciate your feedback and the time you took to share your experience.</p>
+            {feedback && (
+              <div className="text-left bg-muted p-3 rounded-md">
+                <p className="italic">"{feedback}"</p>
+              </div>
+            )}
           </CardContent>
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-muted-foreground">
+              Thank you for your business!
+            </p>
+          </CardFooter>
         </Card>
       </div>
     );
   }
 
-  if (!reviewData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
-      </div>
-    );
-  }
-
-  const { company, technician, reviewRequest } = reviewData;
-
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">
-            How was your experience with {company.name}?
-          </CardTitle>
-          <CardDescription>
-            Service provided by {technician.name} on {new Date(reviewRequest.sentAt).toLocaleDateString()}
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="rating" className="text-lg font-medium">
-                Your Rating
-              </Label>
-              <div className="flex justify-center my-4">
-                <RadioGroup 
-                  defaultValue="5" 
-                  className="flex space-x-2" 
-                  onValueChange={(value) => setRating(parseInt(value))}
-                >
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <div key={value} className="flex flex-col items-center space-y-1">
-                      <RadioGroupItem 
-                        value={value.toString()} 
-                        id={`rating-${value}`} 
-                        className="sr-only peer"
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-md mx-auto">
+        <Card>
+          <CardHeader className="text-center">
+            <img 
+              src={rankItProLogo} 
+              alt="Rank It Pro" 
+              className="h-12 mx-auto mb-4" 
+            />
+            <CardTitle className="text-2xl">Share Your Feedback</CardTitle>
+            <CardDescription>
+              {reviewData?.companyName && (
+                <>How was your experience with {reviewData.companyName}?</>
+              )}
+              {reviewData?.technicianName && (
+                <> Your technician was {reviewData.technicianName}.</>
+              )}
+              {reviewData?.jobType && (
+                <div className="mt-1">Service: {reviewData.jobType}</div>
+              )}
+            </CardDescription>
+          </CardHeader>
+          
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="text-center mb-2">
+                  <Label htmlFor="rating" className="text-lg font-medium">
+                    Rate your experience:
+                  </Label>
+                </div>
+                
+                <div className="flex justify-center">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      className="focus:outline-none transition-transform hover:scale-110"
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      onClick={() => setRating(star)}
+                    >
+                      <Star
+                        className={`h-10 w-10 ${
+                          star <= (hoverRating || rating)
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-300"
+                        }`}
                       />
-                      <Label
-                        htmlFor={`rating-${value}`}
-                        className="cursor-pointer p-2 rounded-full hover:bg-gray-100 peer-checked:text-primary peer-checked:font-semibold"
-                      >
-                        <Star 
-                          className={`h-8 w-8 ${rating >= value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
-                        />
-                        <span className="sr-only">{value} Star{value !== 1 ? 's' : ''}</span>
-                      </Label>
-                      <span className="text-xs">{value}</span>
-                    </div>
+                    </button>
                   ))}
-                </RadioGroup>
+                </div>
+                
+                <div className="text-center mt-1 h-5">
+                  {rating > 0 && (
+                    <span className="text-sm font-medium">
+                      {rating === 1 && "Poor"}
+                      {rating === 2 && "Fair"}
+                      {rating === 3 && "Good"}
+                      {rating === 4 && "Very Good"}
+                      {rating === 5 && "Excellent"}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="feedback" className="text-lg font-medium">
-                Your Feedback (Optional)
-              </Label>
-              <Textarea
-                id="feedback"
-                placeholder="Share details about your experience..."
-                className="min-h-[100px]"
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="public-display" 
-                checked={publicDisplay}
-                onCheckedChange={(checked) => setPublicDisplay(checked as boolean)}
-              />
-              <Label htmlFor="public-display" className="text-sm">
-                I allow my review to be displayed publicly on {company.name}'s website
-              </Label>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button 
-              type="submit" 
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                  Submitting...
-                </>
-              ) : 'Submit Review'}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
+              
+              <div className="space-y-2">
+                <Label htmlFor="feedback">
+                  Share more about your experience (optional):
+                </Label>
+                <Textarea
+                  id="feedback"
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Tell us what you liked or how we could improve..."
+                  rows={5}
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="publicDisplay"
+                  checked={publicDisplay}
+                  onCheckedChange={(checked) => setPublicDisplay(checked as boolean)}
+                />
+                <Label htmlFor="publicDisplay" className="text-sm font-normal cursor-pointer">
+                  Allow this review to be displayed publicly (your name will be shown)
+                </Label>
+              </div>
+            </CardContent>
+            
+            <CardFooter>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Review"
+                )}
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
-import { useAuth } from '@/context/AuthContext';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -43,35 +42,43 @@ import {
 
 export default function ReviewsDashboard() {
   const [_, setLocation] = useLocation();
-  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('all');
+  
+  // Get auth information from query cache
+  const { data: auth } = useQuery<any>({
+    queryKey: ['/api/auth/me'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/auth/me');
+      return response.json();
+    }
+  });
   const [sortOrder, setSortOrder] = useState('newest');
   const [starFilter, setStarFilter] = useState<number | null>(null);
 
   // Fetch review responses for the company
   const { data: reviews, isLoading } = useQuery({
-    queryKey: ['/api/review-response/company', user?.companyId],
+    queryKey: ['/api/review-response/company', auth?.user?.companyId],
     queryFn: async () => {
-      const response = await apiRequest('GET', `/api/review-response/company/${user?.companyId}`);
+      const response = await apiRequest('GET', `/api/review-response/company/${auth?.user?.companyId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch reviews');
       }
       return response.json();
     },
-    enabled: !!user?.companyId,
+    enabled: !!auth?.user?.companyId,
   });
 
   // Fetch review statistics
   const { data: stats, isLoading: isLoadingStats } = useQuery({
-    queryKey: ['/api/review-response/stats', user?.companyId],
+    queryKey: ['/api/review-response/stats', auth?.user?.companyId],
     queryFn: async () => {
-      const response = await apiRequest('GET', `/api/review-response/stats/${user?.companyId}`);
+      const response = await apiRequest('GET', `/api/review-response/stats/${auth?.user?.companyId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch review statistics');
       }
       return response.json();
     },
-    enabled: !!user?.companyId,
+    enabled: !!auth?.user?.companyId,
   });
 
   // Filter and sort reviews based on current settings
