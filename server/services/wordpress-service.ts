@@ -534,7 +534,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-class Check_In_Integration {
+class RankItPro_Visit_Integration {
     private $apiKey;
     private $apiEndpoint;
 
@@ -595,7 +595,7 @@ class Check_In_Integration {
         ');
     }
     
-    public function check_ins_shortcode($atts) {
+    public function rankitpro_visits_shortcode($atts) {
         $atts = shortcode_atts(array(
             'limit' => 5,
             'type' => 'all'
@@ -622,19 +622,19 @@ class Check_In_Integration {
             }
             
             if (!empty($check_in->location)) {
-                $output .= '<div class="checkin-location">Location: ' . esc_html($check_in->location) . '</div>';
+                $output .= '<div class="rankitpro-visit-location">Location: ' . esc_html($check_in->location) . '</div>';
             }
             
             // Display photos if available
             if (!empty($check_in->photoUrls) && is_array($check_in->photoUrls)) {
-                $output .= '<div class="checkin-photos">';
+                $output .= '<div class="rankitpro-visit-photos">';
                 foreach ($check_in->photoUrls as $photoUrl) {
-                    $output .= '<img class="checkin-photo" src="' . esc_url($photoUrl) . '" alt="Check-in photo" />';
+                    $output .= '<img class="rankitpro-visit-photo" src="' . esc_url($photoUrl) . '" alt="Visit photo" />';
                 }
                 $output .= '</div>';
             }
             
-            $output .= '<div class="checkin-meta">' . $date . ' at ' . $time . '</div>';
+            $output .= '<div class="rankitpro-visit-meta">' . $date . ' at ' . $time . '</div>';
             $output .= '</li>';
         }
         
