@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { storage } from "../storage";
-import { authenticateCompany } from "../middleware/auth";
+import { isAuthenticated, isCompanyAdmin } from "../middleware/auth";
 
 const router = Router();
 
@@ -117,7 +117,7 @@ router.post("/submit/:token", async (req, res) => {
 /**
  * Get all review responses for a company (admin only)
  */
-router.get("/company/:companyId", authenticateCompany, async (req, res) => {
+router.get("/company/:companyId", isAuthenticated, isCompanyAdmin, async (req, res) => {
   try {
     const companyId = parseInt(req.params.companyId);
     
@@ -151,7 +151,7 @@ router.get("/company/:companyId", authenticateCompany, async (req, res) => {
 /**
  * Get review statistics for a company
  */
-router.get("/stats/:companyId", authenticateCompany, async (req, res) => {
+router.get("/stats/:companyId", isAuthenticated, isCompanyAdmin, async (req, res) => {
   try {
     const companyId = parseInt(req.params.companyId);
     

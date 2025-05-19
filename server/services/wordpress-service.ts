@@ -213,36 +213,52 @@ export class WordPressService {
    */
   async publishCheckIn(checkIn: CheckIn, options?: WordPressPublishOptions): Promise<WordPressPostResult> {
     try {
-      // Format the content
-      const title = `Job Check-In: ${checkIn.jobType} at ${checkIn.location || 'Customer Location'}`;
+      // Format the content based on template or use default
+      let title = `Job Check-In: ${checkIn.jobType} at ${checkIn.location || 'Customer Location'}`;
       let content = `<h3>Check-In Details</h3>`;
       
-      if (checkIn.customerName) {
-        content += `<p><strong>Customer:</strong> ${checkIn.customerName}</p>`;
+      // Use custom title template if provided
+      if (options?.customFields?.title_template) {
+        let templateTitle = String(options.customFields.title_template);
+        templateTitle = templateTitle.replace(/{job_type}/g, checkIn.jobType || '');
+        templateTitle = templateTitle.replace(/{location}/g, checkIn.location || 'Customer Location');
+        templateTitle = templateTitle.replace(/{date}/g, new Date().toLocaleDateString());
+        templateTitle = templateTitle.replace(/{technician_name}/g, options?.customFields?.technician_name?.toString() || '');
+        title = templateTitle;
       }
       
-      if (checkIn.location) {
-        content += `<p><strong>Location:</strong> ${checkIn.location}</p>`;
-      }
-      
-      if (checkIn.address) {
-        content += `<p><strong>Address:</strong> ${checkIn.address}</p>`;
-      }
-      
-      if (checkIn.jobType) {
-        content += `<p><strong>Job Type:</strong> ${checkIn.jobType}</p>`;
-      }
-      
-      if (checkIn.workPerformed) {
-        content += `<h4>Work Performed</h4><p>${checkIn.workPerformed}</p>`;
-      }
-      
-      if (checkIn.notes) {
-        content += `<h4>Notes</h4><p>${checkIn.notes}</p>`;
-      }
-      
-      if (checkIn.materialsUsed) {
-        content += `<h4>Materials Used</h4><p>${checkIn.materialsUsed}</p>`;
+      // Use custom content template if provided
+      if (options?.customFields?.content_template) {
+        content = String(options.customFields.content_template);
+      } else {
+        // Default content generation
+        if (checkIn.customerName) {
+          content += `<p><strong>Customer:</strong> ${checkIn.customerName}</p>`;
+        }
+        
+        if (checkIn.location) {
+          content += `<p><strong>Location:</strong> ${checkIn.location}</p>`;
+        }
+        
+        if (checkIn.address) {
+          content += `<p><strong>Address:</strong> ${checkIn.address}</p>`;
+        }
+        
+        if (checkIn.jobType) {
+          content += `<p><strong>Job Type:</strong> ${checkIn.jobType}</p>`;
+        }
+        
+        if (checkIn.workPerformed) {
+          content += `<h4>Work Performed</h4><p>${checkIn.workPerformed}</p>`;
+        }
+        
+        if (checkIn.notes) {
+          content += `<h4>Notes</h4><p>${checkIn.notes}</p>`;
+        }
+        
+        if (checkIn.materialsUsed) {
+          content += `<h4>Materials Used</h4><p>${checkIn.materialsUsed}</p>`;
+        }
       }
       
       // Add date
@@ -250,18 +266,56 @@ export class WordPressService {
         ? checkIn.createdAt 
         : new Date(checkIn.createdAt || Date.now());
       
-      content += `<p><em>Check-in date: ${checkInDate.toLocaleDateString()} at ${checkInDate.toLocaleTimeString()}</em></p>`;
+      if (!options?.customFields?.content_template) {
+        content += `<p><em>Check-in date: ${checkInDate.toLocaleDateString()} at ${checkInDate.toLocaleTimeString()}</em></p>`;
+      }
       
-      // Add photos if available
+      // Add photos if available and not using a completely custom template
       let photoUrls: string[] = [];
       let mediaIds: number[] = [];
       
-      if (checkIn.photos) {
+      if (checkIn.photos && (!options?.customFields?.content_template || options?.customFields?.include_photos)) {
         try {
           photoUrls = JSON.parse(checkIn.photos as string);
           
+          // Upload photos to WordPress if requested
+          if (options?.customFields?.upload_photos_to_wp === true && photoUrls.length > 0) {
+            for (const photoUrl of photoUrls) {
+              try {
+                // Download the image
+                const imageResponse = await axios.get(photoUrl, { responseType: 'arraybuffer' });
+                const imageBuffer = Buffer.from(imageResponse.data, 'binary');
+                
+                // Upload to WordPress
+                const formData = new FormData();
+                const fileName = `check-in-photo-${checkIn.id}-${Date.now()}.jpg`;
+                formData.append('file', new Blob([imageBuffer]), fileName);
+                
+                const uploadResponse = await axios.post(
+                  `${this.apiBase}/media`,
+                  formData,
+                  {
+                    auth: {
+                      username: this.credentials.username,
+                      password: this.credentials.password
+                    },
+                    headers: {
+                      'Content-Type': 'multipart/form-data',
+                    }
+                  }
+                );
+                
+                if (uploadResponse.data && uploadResponse.data.id) {
+                  mediaIds.push(uploadResponse.data.id);
+                }
+              } catch (error) {
+                console.error('Failed to upload photo to WordPress:', error);
+              }
+            }
+          }
+          
           // We'll add the photos to the content directly
-          if (photoUrls && photoUrls.length > 0) {
+          if (photoUrls && photoUrls.length > 0 && !options?.customFields?.upload_photos_to_wp) {
             content += `<h4>Photos</h4>`;
             content += `<div class="check-in-photos">`;
             
@@ -276,13 +330,38 @@ export class WordPressService {
         }
       }
       
+      // Handle Advanced Custom Fields (ACF) if provided
+      let acfData = {};
+      if (options?.acfFields) {
+        acfData = options.acfFields;
+      } else {
+        // Create default ACF fields based on check-in data
+        acfData = {
+          check_in_id: checkIn.id,
+          job_type: checkIn.jobType,
+          check_in_date: checkInDate.toISOString(),
+          location: checkIn.location,
+          address: checkIn.address,
+          notes: checkIn.notes,
+          customer_name: checkIn.customerName,
+          technician_id: checkIn.technicianId,
+          latitude: checkIn.latitude,
+          longitude: checkIn.longitude
+        };
+      }
+      
       // Create the post with advanced custom fields
-      const postData = {
+      const postData: any = {
         title,
         content,
-        status: options?.status || 'publish',
+        status: options?.status || this.credentials.defaultStatus || 'publish',
         categories: options?.categories || this.credentials.categories || [1], // Default to Uncategorized
         tags: options?.tags || this.credentials.tags || [],
+        
+        // Set featured image if we uploaded any
+        ...(mediaIds.length > 0 ? { featured_media: mediaIds[0] } : {}),
+        
+        // Meta fields (standard WordPress custom fields)
         meta: {
           // Standard custom fields
           check_in_id: checkIn.id,
@@ -316,7 +395,7 @@ export class WordPressService {
             "name": checkIn.jobType,
             "provider": {
               "@type": "LocalBusiness",
-              "name": "Service Provider",
+              "name": options?.customFields?.company_name || "Service Provider",
               "address": {
                 "@type": "PostalAddress",
                 "addressLocality": checkIn.location || ""
@@ -330,6 +409,11 @@ export class WordPressService {
           ...(options?.customFields || {})
         }
       };
+      
+      // Add ACF fields if they exist
+      if (Object.keys(acfData).length > 0) {
+        postData.acf = acfData;
+      }
       
       const response = await axios.post(
         `${this.apiBase}/posts`,
