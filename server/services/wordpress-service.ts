@@ -654,7 +654,7 @@ class Check_In_Integration {
         $response = wp_remote_get($url);
         
         if (is_wp_error($response)) {
-            error_log('Check-In Integration: API request failed - ' . $response->get_error_message());
+            error_log('Rank it Pro Integration: API request failed - ' . $response->get_error_message());
             return array();
         }
         
@@ -674,8 +674,8 @@ class Check_In_Integration {
     
     public function add_admin_menu() {
         add_options_page(
-            'Check-In Settings',
-            'Check-In Settings',
+            'Rank it Pro Settings',
+            'Rank it Pro Settings',
             'manage_options',
             'check-in-settings',
             array($this, 'display_settings_page')
@@ -685,17 +685,17 @@ class Check_In_Integration {
     public function display_settings_page() {
         ?>
         <div class="wrap">
-            <h1>Check-In Integration Settings</h1>
+            <h1>Rank it Pro Integration Settings</h1>
             <div class="card">
                 <h2>How to Use</h2>
-                <p>Use the <code>[check_ins]</code> shortcode to display your recent check-ins anywhere on your site.</p>
+                <p>Use the <code>[rankitpro_visits]</code> shortcode to display your recent technician visits anywhere on your site.</p>
                 <h3>Shortcode Options</h3>
                 <ul>
-                    <li><code>limit</code> - Number of check-ins to display (default: 5)</li>
+                    <li><code>limit</code> - Number of visits to display (default: 5)</li>
                     <li><code>type</code> - Filter by job type (default: 'all')</li>
                 </ul>
                 <h3>Example</h3>
-                <p><code>[check_ins limit="3" type="Plumbing"]</code></p>
+                <p><code>[rankitpro_visits limit="3" type="Plumbing"]</code></p>
             </div>
             <div class="card" style="margin-top: 20px;">
                 <h2>API Connection</h2>
@@ -728,8 +728,8 @@ class Check_Ins_Widget extends WP_Widget {
     public function __construct() {
         parent::__construct(
             'check_ins_widget',
-            'Recent Check-Ins',
-            array('description' => 'Display your recent check-ins')
+            'Recent Visits',
+            array('description' => 'Display your recent technician visits')
         );
     }
     
