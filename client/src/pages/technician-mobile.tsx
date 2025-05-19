@@ -768,6 +768,56 @@ export default function TechnicianMobile() {
           </Button>
         </form>
       )}
+      
+      {/* Location Verification Alert Dialog */}
+      <AlertDialog open={showLocationAlert} onOpenChange={setShowLocationAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                Location Verification
+              </div>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {locationAlertMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            {addressFromGPS ? (
+              <>
+                <AlertDialogCancel onClick={() => setShowLocationAlert(false)}>
+                  Use Manual Address
+                </AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={() => {
+                    // Reset manual entry to match GPS data
+                    const parts = (addressFromGPS || '').split(',');
+                    if (parts.length >= 3) {
+                      setAddress(parts[0].trim());
+                      setCity(parts[1].trim());
+                      
+                      const stateZip = parts[2].trim().split(' ');
+                      if (stateZip.length >= 2) {
+                        setState(stateZip[0]);
+                        setZipCode(stateZip[1]);
+                      }
+                    }
+                    setLocationVerified(true);
+                    setShowLocationAlert(false);
+                  }}
+                >
+                  Use GPS Location
+                </AlertDialogAction>
+              </>
+            ) : (
+              <AlertDialogAction onClick={() => setShowLocationAlert(false)}>
+                Continue
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
