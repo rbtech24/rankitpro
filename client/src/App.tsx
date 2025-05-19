@@ -105,6 +105,9 @@ function Router() {
       <Route path="/privacy-policy"><PrivacyPolicy /></Route>
       <Route path="/terms-of-service"><TermsOfService /></Route>
       <Route path="/wordpress-integration"><WordPressIntegration /></Route>
+      <Route path="/wordpress-custom-fields">
+        <PrivateRoute component={WordPressCustomFields} path="/wordpress-custom-fields" role="company_admin" />
+      </Route>
       <Route path="/review/:token"><Review /></Route>
       
       {/* Dashboard Pages */}
