@@ -84,6 +84,7 @@ router.post('/wordpress/config', isAuthenticated, isCompanyAdmin, async (req: Re
     // Test connection before saving
     const wpService = new WordPressService({
       ...config,
+      password: config.applicationPassword || config.password,
       companyId
     });
     

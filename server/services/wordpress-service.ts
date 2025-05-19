@@ -47,7 +47,11 @@ export class WordPressService {
   private companyId?: number;
 
   constructor(options: WordPressCredentials & { companyId?: number }) {
-    this.credentials = options;
+    this.credentials = {
+      ...options,
+      // Handle password compatibility with applicationPassword field
+      password: options.password || options.applicationPassword || ''
+    };
     this.companyId = options.companyId;
     
     // Ensure the site URL ends with a slash
@@ -64,7 +68,7 @@ export class WordPressService {
    */
   async testConnection(): Promise<boolean> {
     try {
-      const response = await axios.get(`${this.apiBase}/categories`, {
+      const response = await axios.get(`${this.apiBase}/users/me`, {
         auth: {
           username: this.credentials.username,
           password: this.credentials.password
@@ -341,7 +345,7 @@ export class WordPressService {
         link: response.data.link,
         status: response.data.status
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error publishing check-in to WordPress:', error);
       throw new Error('Failed to publish check-in to WordPress: ' + (error.response?.data?.message || error.message));
     }
@@ -393,7 +397,7 @@ export class WordPressService {
         link: response.data.link,
         status: response.data.status
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error publishing blog post to WordPress:', error);
       throw new Error('Failed to publish blog post to WordPress: ' + (error.response?.data?.message || error.message));
     }
@@ -420,7 +424,7 @@ export class WordPressService {
       );
       
       return response.data.source_url;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading media to WordPress:', error);
       throw new Error('Failed to upload media to WordPress: ' + (error.response?.data?.message || error.message));
     }
