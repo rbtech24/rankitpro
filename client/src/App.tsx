@@ -18,6 +18,7 @@ import Billing from "@/pages/billing";
 import TechApp from "@/pages/tech-app";
 import AISettings from "@/pages/ai-settings";
 import Home from "@/pages/home";
+import TechnicianMobile from "@/pages/technician-mobile";
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
 // Authenticated route that redirects to login if not authenticated
@@ -102,9 +103,12 @@ function Router() {
         <PrivateRoute component={AISettings} path="/ai-settings" role="company_admin" />
       </Route>
       
-      {/* Technician App */}
+      {/* Technician Apps */}
       <Route path="/tech-app">
         <PrivateRoute component={TechApp} path="/tech-app" />
+      </Route>
+      <Route path="/tech-mobile">
+        <PrivateRoute component={TechnicianMobile} path="/tech-mobile" role="technician" />
       </Route>
       
       {/* Fallback to 404 */}
