@@ -39,6 +39,7 @@ import Careers from "@/pages/careers";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import WordPressIntegration from "@/pages/wordpress-integration";
+import WordPressCustomFields from "@/pages/wordpress-custom-fields";
 
 // Authenticated route that redirects to login if not authenticated
 function PrivateRoute({ component: Component, role, ...rest }: { component: React.ComponentType<any>, role?: string, path: string }) {
