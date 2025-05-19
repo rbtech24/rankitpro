@@ -49,17 +49,43 @@ router.post('/', isAuthenticated, async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Technician not found' });
     }
 
-    // Send email notification (will use logging if SendGrid is not set up)
-    const checkInWithTechnician = { ...checkIn, technician };
-    const companyAdminEmail = user.email; // Using current user's email as recipient
-    
-    const emailSent = await emailService.sendCheckInNotification(
-      checkInWithTechnician, 
-      companyAdminEmail
-    );
-    
-    if (!emailSent) {
-      log('Failed to send check-in notification email', 'warning');
+    // Send email notification to company admins
+    try {
+      // Get the company for email notifications
+      const company = await storage.getCompany(user.companyId!);
+      
+      if (company) {
+        // Find company admin emails
+        const companyAdmins = await storage.getUsersByCompanyAndRole(company.id, 'company_admin');
+        const adminEmails = companyAdmins.map(admin => admin.email).filter(Boolean) as string[];
+        
+        // Add current user's email if not already included and if it exists
+        if (user.email && !adminEmails.includes(user.email)) {
+          adminEmails.push(user.email);
+        }
+        
+        if (adminEmails.length > 0) {
+          // Send the notification email
+          const emailSent = await emailService.sendCheckInNotification({
+            to: adminEmails,
+            companyName: company.name,
+            technicianName: technician.name,
+            jobType: checkIn.jobType,
+            customerName: checkIn.customerName,
+            location: checkIn.location,
+            notes: checkIn.notes,
+            photos: checkIn.photos,
+            checkInId: checkIn.id
+          });
+          
+          if (!emailSent) {
+            log('Failed to send check-in notification email', 'warning');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error sending check-in notification:', error);
+      // Don't fail the check-in creation if notification fails
     }
 
     // If this check-in should be published as a blog post

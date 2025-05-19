@@ -19,6 +19,7 @@ class EmailService {
       try {
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         this.initialized = true;
+        console.log('[info] Email service initialized successfully');
         return true;
       } catch (error) {
         console.error('Failed to initialize SendGrid:', error);
@@ -26,6 +27,7 @@ class EmailService {
         return false;
       }
     }
+    console.warn('Email service not initialized: SENDGRID_API_KEY is not set');
     return false;
   }
 
@@ -138,6 +140,7 @@ class EmailService {
       return false;
     }
   }
+
   /**
    * Sends a notification email about a new blog post
    */
