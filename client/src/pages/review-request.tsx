@@ -1,30 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 import {
   Table,
@@ -35,106 +30,109 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
-  Star, 
-  Mail, 
-  MessageSquare, 
-  SendHorizonal,
+import {
   Clock,
+  Mail,
+  Loader2,
+  MessageSquare,
+  SendHorizonal,
+  Star,
+  ThumbsUp,
   Users,
-  ListChecks,
-  Loader2
 } from "lucide-react";
-import { useToast } from '@/hooks/use-toast';
-import { 
-  useReviewRequestSettings, 
-  useUpdateReviewRequestSettings,
-  useReviewRequests,
-  useSendReviewRequest,
-  useResendReviewRequest,
-  useReviewRequestStats
-} from '@/hooks/use-review-requests';
+import { DashboardLayout } from "../components/layout/DashboardLayout";
 
 export default function ReviewRequests() {
-  const [activeTab, setActiveTab] = useState('settings');
   const { toast } = useToast();
   
-  // Fetch review request settings
-  const { 
-    data: settingsData, 
-    isLoading: isLoadingSettings 
-  } = useReviewRequestSettings();
-  
-  // Fetch review requests
-  const { 
-    data: requestData = [], 
-    isLoading: isLoadingRequests 
-  } = useReviewRequests();
-  
-  // Create a request
-  const sendRequestMutation = useSendReviewRequest();
-  
-  // Resend a request
-  const resendRequestMutation = useResendReviewRequest();
-  
-  // Update settings
-  const updateSettingsMutation = useUpdateReviewRequestSettings();
-  
-  // Review request settings form state
+  // State for review request settings
   const [autoSendReviews, setAutoSendReviews] = useState(true);
   const [delayHours, setDelayHours] = useState(24);
-  const [contactPreference, setContactPreference] = useState('customer-preference');
-  const [emailTemplate, setEmailTemplate] = useState('default');
-  const [smsTemplate, setSmsTemplate] = useState('default');
+  const [contactPreference, setContactPreference] = useState<"email" | "sms" | "both" | "customer-preference">("email");
+  const [emailTemplate, setEmailTemplate] = useState(
+    "Hello {{customer_name}},\n\nThank you for choosing our service. {{technician_name}} enjoyed working on your {{job_type}} job today.\n\nWe would appreciate it if you could take a moment to review our service.\n\nBest regards,\nYour Company"
+  );
+  const [smsTemplate, setSmsTemplate] = useState(
+    "Thanks for choosing us, {{customer_name}}! Would you mind leaving a quick review of our service? {{review_link}}"
+  );
   const [includeTechnicianName, setIncludeTechnicianName] = useState(true);
   const [includeJobDetails, setIncludeJobDetails] = useState(true);
   
-  // Update settings form when data is loaded
-  useEffect(() => {
-    if (settingsData) {
-      setAutoSendReviews(settingsData.autoSendReviews);
-      setDelayHours(settingsData.delayHours);
-      setContactPreference(settingsData.contactPreference);
-      setEmailTemplate(settingsData.emailTemplate);
-      setSmsTemplate(settingsData.smsTemplate);
-      setIncludeTechnicianName(settingsData.includeTechnicianName);
-      setIncludeJobDetails(settingsData.includeJobDetails);
-    }
-  }, [settingsData]);
+  // State for sending a new review request
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [contactMethod, setContactMethod] = useState<"email" | "sms">("email");
+  const [jobType, setJobType] = useState("");
+  const [selectedTechnician, setSelectedTechnician] = useState("");
   
-  // Manual request form
-  const [customerName, setCustomerName] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [jobType, setJobType] = useState('');
-  const [selectedTechnician, setSelectedTechnician] = useState('');
-  const [contactMethod, setContactMethod] = useState('email');
-  
-  // Sample data for technicians
+  // Sample data - would be replaced with API calls
   const technicians = [
-    { id: 1, name: 'Mike Johnson', specialty: 'HVAC' },
-    { id: 2, name: 'David Miller', specialty: 'Plumbing' },
+    { id: 1, name: 'John Smith', specialty: 'Plumbing' },
+    { id: 2, name: 'Robert Johnson', specialty: 'HVAC' },
     { id: 3, name: 'Laura Wilson', specialty: 'Electrical' },
     { id: 4, name: 'Sarah Thomas', specialty: 'General Repairs' },
   ];
   
+  // Save review request settings
   const handleSaveSettings = () => {
+    const settings = {
+      autoSendReviews,
+      delayHours,
+      contactPreference,
+      emailTemplate,
+      smsTemplate,
+      includeTechnicianName,
+      includeJobDetails
+    };
+    
+    // Will be connected to API when implemented
     toast({
       title: 'Settings saved',
       description: 'Your review request settings have been updated.',
     });
   };
   
+  // Send a new review request
   const handleSendReviewRequest = () => {
-    if (!customerName || (!customerEmail && !customerPhone)) {
+    // Validate form
+    if (!customerName) {
       toast({
         title: 'Missing information',
-        description: 'Please provide customer name and either email or phone.',
+        description: 'Please provide a customer name.',
         variant: 'destructive',
       });
       return;
     }
     
+    if (contactMethod === 'email' && !customerEmail) {
+      toast({
+        title: 'Missing information',
+        description: 'Please provide an email address for email requests.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    if (contactMethod === 'sms' && !customerPhone) {
+      toast({
+        title: 'Missing information',
+        description: 'Please provide a phone number for SMS requests.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    if (!selectedTechnician) {
+      toast({
+        title: 'Missing information',
+        description: 'Please select a technician.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // In real implementation, this would call the API
     toast({
       title: 'Review request sent',
       description: `Request sent to ${customerName} via ${contactMethod}.`,
@@ -148,24 +146,29 @@ export default function ReviewRequests() {
     setSelectedTechnician('');
   };
   
+  // Resend a review request
+  const handleResendRequest = (id: number) => {
+    toast({
+      title: 'Review request resent',
+      description: `Request #${id} has been resent.`,
+    });
+  };
+  
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
-  
+
   return (
     <DashboardLayout>
-      <div className="container py-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Review Requests</h1>
-          <p className="text-sm text-gray-500">Manage customer review requests to improve your online reputation and gather feedback.</p>
-        </div>
+      <div className="container mx-auto py-6">
+        <h1 className="text-3xl font-bold mb-6">Review Request Management</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="col-span-1">
             <CardHeader className="pb-2">
-              <CardTitle className="text-2xl">15</CardTitle>
-              <CardDescription>Requests Sent (This Week)</CardDescription>
+              <CardTitle className="text-2xl">24</CardTitle>
+              <CardDescription>Total Requests Sent</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-sm font-medium flex items-center">
@@ -212,19 +215,119 @@ export default function ReviewRequests() {
             </CardHeader>
             <CardContent>
               <div className="text-sm font-medium flex items-center">
-                <ListChecks className="mr-1 h-4 w-4 text-muted-foreground" />
+                <ThumbsUp className="mr-1 h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">11 of 12 responses</span>
               </div>
             </CardContent>
           </Card>
         </div>
         
-        <Tabs defaultValue="settings" onValueChange={setActiveTab} className="mb-12">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="send">
+          <TabsList className="mb-4">
+            <TabsTrigger value="send">Send Request</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
-            <TabsTrigger value="manual">Send Request</TabsTrigger>
-            <TabsTrigger value="history">Request History</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
+          
+          {/* Send Request Tab */}
+          <TabsContent value="send">
+            <Card>
+              <CardHeader>
+                <CardTitle>Send Review Request</CardTitle>
+                <CardDescription>
+                  Send a review request to a customer
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="customer-name">Customer Name</Label>
+                    <Input
+                      id="customer-name"
+                      placeholder="Jane Doe"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Contact Method</Label>
+                    <Select 
+                      value={contactMethod} 
+                      onValueChange={(value) => setContactMethod(value as "email" | "sms")}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select contact method" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="sms">SMS</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {contactMethod === 'email' && (
+                    <div>
+                      <Label htmlFor="customer-email">Customer Email</Label>
+                      <Input
+                        id="customer-email"
+                        type="email"
+                        placeholder="customer@example.com"
+                        value={customerEmail}
+                        onChange={(e) => setCustomerEmail(e.target.value)}
+                      />
+                    </div>
+                  )}
+                  
+                  {contactMethod === 'sms' && (
+                    <div>
+                      <Label htmlFor="customer-phone">Customer Phone</Label>
+                      <Input
+                        id="customer-phone"
+                        placeholder="+1 (555) 123-4567"
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                      />
+                    </div>
+                  )}
+                  
+                  <div>
+                    <Label htmlFor="job-type">Job Type</Label>
+                    <Input
+                      id="job-type"
+                      placeholder="Plumbing, HVAC, Electrical, etc."
+                      value={jobType}
+                      onChange={(e) => setJobType(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="technician">Technician</Label>
+                    <Select
+                      value={selectedTechnician}
+                      onValueChange={(value) => setSelectedTechnician(value)}
+                    >
+                      <SelectTrigger id="technician">
+                        <SelectValue placeholder="Select technician" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {technicians.map((tech) => (
+                          <SelectItem key={tech.id} value={tech.id.toString()}>
+                            {tech.name} - {tech.specialty}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleSendReviewRequest}>
+                  Send Review Request
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
           
           {/* Settings Tab */}
           <TabsContent value="settings">
@@ -232,247 +335,107 @@ export default function ReviewRequests() {
               <CardHeader>
                 <CardTitle>Review Request Settings</CardTitle>
                 <CardDescription>
-                  Configure how and when review requests are sent to your customers
+                  Configure how and when review requests are sent
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="auto-send" 
-                      checked={autoSendReviews} 
-                      onCheckedChange={(checked) => setAutoSendReviews(checked === true)}
-                    />
-                    <Label htmlFor="auto-send">Automatically send review requests after check-ins</Label>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="delay-hours" className="mb-2 block">Hours to wait after service</Label>
-                      <Input
-                        id="delay-hours"
-                        type="number"
-                        value={delayHours}
-                        onChange={(e) => setDelayHours(parseInt(e.target.value))}
-                        min="0"
-                        max="240"
-                        disabled={!autoSendReviews}
-                      />
-                      <p className="text-xs text-slate-500 mt-1">
-                        Recommended: 24-48 hours after service completion
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="contact-preference" className="mb-2 block">Preferred Contact Method</Label>
-                      <Select defaultValue="email">
-                        <SelectTrigger id="contact-preference">
-                          <SelectValue placeholder="Select contact method" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="email">Email Only</SelectItem>
-                          <SelectItem value="sms">SMS Only</SelectItem>
-                          <SelectItem value="both">Email & SMS</SelectItem>
-                          <SelectItem value="customer-preference">Customer Preference</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                    <div>
-                      <Label htmlFor="email-template" className="mb-2 block">Email Template</Label>
-                      <Select 
-                        value={emailTemplate}
-                        onValueChange={setEmailTemplate}
-                      >
-                        <SelectTrigger id="email-template">
-                          <SelectValue placeholder="Select email template" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="default">Default Template</SelectItem>
-                          <SelectItem value="professional">Professional</SelectItem>
-                          <SelectItem value="casual">Casual & Friendly</SelectItem>
-                          <SelectItem value="minimal">Minimal</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="sms-template" className="mb-2 block">SMS Template</Label>
-                      <Select 
-                        value={smsTemplate}
-                        onValueChange={setSmsTemplate}
-                      >
-                        <SelectTrigger id="sms-template">
-                          <SelectValue placeholder="Select SMS template" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="default">Default Template</SelectItem>
-                          <SelectItem value="brief">Brief</SelectItem>
-                          <SelectItem value="conversational">Conversational</SelectItem>
-                          <SelectItem value="direct">Direct</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4">
-                    <Label className="mb-2 block">Template Preview</Label>
-                    <div className="p-4 bg-slate-50 rounded-md border border-slate-200">
-                      <h3 className="text-sm font-semibold mb-2">Email Subject: Your Recent Service with [Company Name]</h3>
-                      <div className="text-sm text-slate-600">
-                        <p className="mb-2">Hello [Customer Name],</p>
-                        <p className="mb-2">Thank you for choosing [Company Name] for your recent [Service Type] service. We hope you were satisfied with the work performed by [Technician Name].</p>
-                        <p className="mb-2">We'd appreciate if you could take a moment to share your experience with us. Your feedback helps us improve our service.</p>
-                        <p className="mb-2">[Review Link Button]</p>
-                        <p>Thank you for your business!</p>
-                        <p>- The [Company Name] Team</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2 pt-4">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="include-technician" 
-                        checked={includeTechnicianName}
-                        onCheckedChange={(checked) => setIncludeTechnicianName(checked === true)}
-                      />
-                      <Label htmlFor="include-technician">Include technician name in request</Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="include-job-details" 
-                        checked={includeJobDetails}
-                        onCheckedChange={(checked) => setIncludeJobDetails(checked === true)}
-                      />
-                      <Label htmlFor="include-job-details">Include job details in request</Label>
-                    </div>
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="auto-send" 
+                    checked={autoSendReviews} 
+                    onCheckedChange={(checked) => setAutoSendReviews(checked === true)}
+                  />
+                  <Label htmlFor="auto-send">Automatically send review requests after check-ins</Label>
                 </div>
-              </CardContent>
-              <CardFooter className="flex justify-end">
-                <Button onClick={handleSaveSettings}>
-                  Save Settings
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-          
-          {/* Manual Request Tab */}
-          <TabsContent value="manual">
-            <Card>
-              <CardHeader>
-                <CardTitle>Send Review Request</CardTitle>
-                <CardDescription>
-                  Manually send a review request to a customer
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 gap-2">
-                    <Label htmlFor="customer-name">Customer Name</Label>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="delay-hours" className="mb-2 block">Hours to wait after service</Label>
                     <Input
-                      id="customer-name"
-                      placeholder="John Smith"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
+                      id="delay-hours"
+                      type="number"
+                      value={delayHours}
+                      onChange={(e) => setDelayHours(parseInt(e.target.value))}
+                      min="0"
+                      max="240"
+                      disabled={!autoSendReviews}
                     />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="customer-email" className="mb-2 block">Customer Email</Label>
-                      <Input
-                        id="customer-email"
-                        type="email"
-                        placeholder="john@example.com"
-                        value={customerEmail}
-                        onChange={(e) => setCustomerEmail(e.target.value)}
-                        disabled={contactMethod === 'sms'}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="customer-phone" className="mb-2 block">Customer Phone</Label>
-                      <Input
-                        id="customer-phone"
-                        placeholder="(555) 123-4567"
-                        value={customerPhone}
-                        onChange={(e) => setCustomerPhone(e.target.value)}
-                        disabled={contactMethod === 'email'}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="job-type" className="mb-2 block">Service Type</Label>
-                      <Input
-                        id="job-type"
-                        placeholder="HVAC Repair"
-                        value={jobType}
-                        onChange={(e) => setJobType(e.target.value)}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="technician" className="mb-2 block">Technician</Label>
-                      <Select value={selectedTechnician} onValueChange={setSelectedTechnician}>
-                        <SelectTrigger id="technician">
-                          <SelectValue placeholder="Select technician" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {technicians.map((tech) => (
-                            <SelectItem key={tech.id} value={tech.id.toString()}>
-                              {tech.name} ({tech.specialty})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Recommended: 24-48 hours after service completion
+                    </p>
                   </div>
                   
                   <div>
-                    <Label htmlFor="contact-method" className="mb-2 block">Contact Method</Label>
-                    <Select value={contactMethod} onValueChange={setContactMethod}>
-                      <SelectTrigger id="contact-method">
+                    <Label htmlFor="contact-preference" className="mb-2 block">Preferred Contact Method</Label>
+                    <Select 
+                      value={contactPreference}
+                      onValueChange={(value) => setContactPreference(value as "email" | "sms" | "both" | "customer-preference")}
+                    >
+                      <SelectTrigger id="contact-preference">
                         <SelectValue placeholder="Select contact method" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="email">
-                          <div className="flex items-center">
-                            <Mail className="mr-2 h-4 w-4" />
-                            <span>Email</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="sms">
-                          <div className="flex items-center">
-                            <MessageSquare className="mr-2 h-4 w-4" />
-                            <span>SMS</span>
-                          </div>
-                        </SelectItem>
+                        <SelectItem value="email">Email Only</SelectItem>
+                        <SelectItem value="sms">SMS Only</SelectItem>
+                        <SelectItem value="both">Email & SMS</SelectItem>
+                        <SelectItem value="customer-preference">Customer Preference</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  
-                  <div>
-                    <Label htmlFor="custom-message" className="mb-2 block">Custom Message (Optional)</Label>
-                    <Textarea
-                      id="custom-message"
-                      placeholder="Add a personalized message to the review request..."
-                      rows={3}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email-template" className="mb-2 block">Email Template</Label>
+                  <Textarea
+                    id="email-template"
+                    placeholder="Enter your email template with placeholders like {{customer_name}}, {{technician_name}}, etc."
+                    value={emailTemplate}
+                    onChange={(e) => setEmailTemplate(e.target.value)}
+                    rows={5}
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-slate-500">
+                    Available placeholders: {{customer_name}}, {{technician_name}}, {{job_type}}, {{review_link}}
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="sms-template" className="mb-2 block">SMS Template</Label>
+                  <Textarea
+                    id="sms-template"
+                    placeholder="Enter your SMS template with placeholders like {{customer_name}}, {{review_link}}, etc."
+                    value={smsTemplate}
+                    onChange={(e) => setSmsTemplate(e.target.value)}
+                    rows={3}
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-slate-500">
+                    Keep SMS messages under 160 characters for best delivery rates
+                  </p>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="include-tech-name" 
+                      checked={includeTechnicianName} 
+                      onCheckedChange={(checked) => setIncludeTechnicianName(checked === true)}
                     />
+                    <Label htmlFor="include-tech-name">Include technician name in requests</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="include-job-details" 
+                      checked={includeJobDetails} 
+                      onCheckedChange={(checked) => setIncludeJobDetails(checked === true)}
+                    />
+                    <Label htmlFor="include-job-details">Include job details in requests</Label>
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-end">
-                <Button onClick={handleSendReviewRequest}>
-                  <SendHorizonal className="mr-2 h-4 w-4" />
-                  Send Review Request
-                </Button>
+              <CardFooter>
+                <Button onClick={handleSaveSettings}>Save Settings</Button>
               </CardFooter>
             </Card>
           </TabsContent>
@@ -501,70 +464,35 @@ export default function ReviewRequests() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {isLoadingRequests ? (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-4">
-                          <div className="flex justify-center items-center">
-                            <Loader2 className="h-5 w-5 animate-spin mr-2 text-primary" />
-                            <span>Loading review requests...</span>
+                    {technicians.map((tech) => (
+                      <TableRow key={tech.id}>
+                        <TableCell className="font-medium">{tech.id}</TableCell>
+                        <TableCell>Sample Customer</TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            <Mail className="mr-1 h-4 w-4" />
+                            <span>Email</span>
                           </div>
                         </TableCell>
-                      </TableRow>
-                    ) : requestData.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-4 text-gray-500">
-                          No review requests found. Try sending some using the "Send Request" tab.
+                        <TableCell>
+                          <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                            sent
+                          </span>
+                        </TableCell>
+                        <TableCell>{formatDate(new Date().toISOString())}</TableCell>
+                        <TableCell>{tech.name}</TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleResendRequest(tech.id)}
+                          >
+                            <SendHorizonal className="h-4 w-4 mr-1" />
+                            Resend
+                          </Button>
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      requestData.map((request) => (
-                        <TableRow key={request.id}>
-                          <TableCell className="font-medium">{request.id}</TableCell>
-                          <TableCell>{request.customerName}</TableCell>
-                          <TableCell>
-                            {request.method === 'email' ? (
-                              <div className="flex items-center">
-                                <Mail className="mr-1 h-4 w-4" />
-                                <span>Email</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center">
-                                <MessageSquare className="mr-1 h-4 w-4" />
-                                <span>SMS</span>
-                              </div>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              request.status === 'sent' 
-                                ? 'bg-green-100 text-green-800' 
-                                : request.status === 'pending'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {request.status}
-                            </span>
-                          </TableCell>
-                          <TableCell>{formatDate(request.sentAt)}</TableCell>
-                          <TableCell>{request.technicianName}</TableCell>
-                          <TableCell className="text-right">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleResendRequest(request.id)}
-                              disabled={request.status === 'pending' || resendRequestMutation.isPending}
-                            >
-                              {resendRequestMutation.isPending && resendRequestMutation.variables === request.id ? (
-                                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                              ) : (
-                                <SendHorizonal className="h-4 w-4 mr-1" />
-                              )}
-                              Resend
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
