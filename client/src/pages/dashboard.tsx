@@ -9,6 +9,7 @@ import WebsiteIntegration from "@/components/dashboard/website-integration";
 import CheckinModal from "@/components/modals/checkin-modal";
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 // Will implement company overview later
 // import CompanyOverview from "@/components/dashboard/company-overview";
 
