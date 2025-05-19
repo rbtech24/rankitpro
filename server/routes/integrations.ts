@@ -186,14 +186,21 @@ router.get('/wordpress/categories', isAuthenticated, isCompanyAdmin, async (req:
       return res.status(400).json({ message: 'Company ID is required' });
     }
     
-    // Get WordPress service for the company
-    const wpService = await getWordPressService(companyId);
-    if (!wpService) {
+    // Get company configuration
+    const company = await storage.getCompany(companyId);
+    if (!company || !company.wordpressConfig) {
       return res.status(400).json({ message: 'WordPress is not configured for this company' });
     }
     
-    // Get categories
-    const categories = await wpService.getCategories();
+    try {
+      const config = JSON.parse(company.wordpressConfig);
+      const wpService = new WordPressService({
+        ...config,
+        companyId
+      });
+    
+      // Get categories
+      const categories = await wpService.getCategories();
     res.json(categories);
   } catch (error) {
     console.error('Error fetching WordPress categories:', error);
