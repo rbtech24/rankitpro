@@ -540,13 +540,13 @@ class RankItPro_Visit_Integration {
 
     public function __construct() {
         $this->apiKey = '${apiKey}';
-        $this->apiEndpoint = '${apiEndpoint}api/wordpress/public/check-ins';
+        $this->apiEndpoint = '${apiEndpoint}api/wordpress/public/visits';
         
         // Register shortcode
-        add_shortcode('check_ins', array($this, 'check_ins_shortcode'));
+        add_shortcode('rankitpro_visits', array($this, 'rankitpro_visits_shortcode'));
         
         // Register widget
-        add_action('widgets_init', array($this, 'register_check_ins_widget'));
+        add_action('widgets_init', array($this, 'register_rankitpro_visits_widget'));
         
         // Add settings page
         add_action('admin_menu', array($this, 'add_admin_menu'));
@@ -668,8 +668,8 @@ class RankItPro_Visit_Integration {
         return $data;
     }
     
-    public function register_check_ins_widget() {
-        register_widget('Check_Ins_Widget');
+    public function register_rankitpro_visits_widget() {
+        register_widget('RankItPro_Visits_Widget');
     }
     
     public function add_admin_menu() {
@@ -677,7 +677,7 @@ class RankItPro_Visit_Integration {
             'Rank it Pro Settings',
             'Rank it Pro Settings',
             'manage_options',
-            'check-in-settings',
+            'rankitpro-visits-settings',
             array($this, 'display_settings_page')
         );
     }
