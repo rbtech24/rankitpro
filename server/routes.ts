@@ -14,6 +14,7 @@ import checkInRoutes from "./routes/check-in";
 import reviewRoutes from "./routes/review";
 import blogRoutes from "./routes/blog";
 import demoRoutes from "./routes/demo";
+import reviewRequestRoutes from "./routes/review-request";
 import emailService from "./services/email-service";
 import { fromZodError } from "zod-validation-error";
 import { WebSocketServer, WebSocket } from 'ws';

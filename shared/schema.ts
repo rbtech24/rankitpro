@@ -23,6 +23,7 @@ export const companies = pgTable("companies", {
   usageLimit: integer("usage_limit").notNull().default(50),
   wordpressConfig: text("wordpress_config"),
   javaScriptEmbedConfig: text("javascript_embed_config"),
+  reviewSettings: text("review_settings"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -85,6 +86,9 @@ export const reviewRequests = pgTable("review_requests", {
   email: text("email"),
   phone: text("phone"),
   method: text("method", { enum: ["email", "sms"] }).notNull(),
+  jobType: text("job_type"),
+  customMessage: text("custom_message"),
+  status: text("status", { enum: ["pending", "sent", "failed"] }).notNull().default("pending"),
   sentAt: timestamp("sent_at").defaultNow(),
   technicianId: integer("technician_id").references(() => technicians.id).notNull(),
   companyId: integer("company_id").references(() => companies.id).notNull(),

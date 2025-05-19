@@ -47,6 +47,7 @@ export interface IStorage {
   getReviewRequest(id: number): Promise<ReviewRequest | undefined>;
   getReviewRequestsByCompany(companyId: number): Promise<ReviewRequest[]>;
   createReviewRequest(reviewRequest: InsertReviewRequest): Promise<ReviewRequest>;
+  updateReviewRequest(id: number, updates: Partial<ReviewRequest>): Promise<ReviewRequest | undefined>;
   
   // Stats operations
   getCompanyStats(companyId: number): Promise<{
@@ -333,6 +334,18 @@ export class MemStorage implements IStorage {
     
     this.reviewRequests.set(id, newReviewRequest);
     return newReviewRequest;
+  }
+  
+  async updateReviewRequest(id: number, updates: Partial<ReviewRequest>): Promise<ReviewRequest | undefined> {
+    const reviewRequest = this.reviewRequests.get(id);
+    if (!reviewRequest) {
+      return undefined;
+    }
+    
+    const updatedReviewRequest = { ...reviewRequest, ...updates };
+    this.reviewRequests.set(id, updatedReviewRequest);
+    
+    return updatedReviewRequest;
   }
   
   // Stats operations
