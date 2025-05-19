@@ -99,6 +99,19 @@ export const reviewRequests = pgTable("review_requests", {
   companyId: integer("company_id").references(() => companies.id).notNull(),
 });
 
+// Review responses table to track customer feedback
+export const reviewResponses = pgTable("review_responses", {
+  id: serial("id").primaryKey(),
+  reviewRequestId: integer("review_request_id").references(() => reviewRequests.id).notNull(),
+  rating: integer("rating").notNull(), // 1-5 star rating
+  feedback: text("feedback"), // Optional text feedback
+  customerName: text("customer_name").notNull(),
+  technicianId: integer("technician_id").references(() => technicians.id).notNull(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  publicDisplay: boolean("public_display").default(false), // Whether this can be displayed publicly
+  respondedAt: timestamp("responded_at").defaultNow(),
+});
+
 // Schema validation
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertCompanySchema = createInsertSchema(companies).omit({ id: true, createdAt: true });

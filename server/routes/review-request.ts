@@ -4,6 +4,7 @@ import { storage } from '../storage';
 import { z } from 'zod';
 import { insertReviewRequestSchema } from '../../shared/schema';
 import emailService from '../services/email-service';
+import smsService from '../services/sms-service';
 
 const router = Router();
 
@@ -194,8 +195,20 @@ router.post('/send', isAuthenticated, async (req: Request, res: Response) => {
         customMessage: customMessage || ''
       });
     } else if (method === 'sms' && phone) {
-      // TODO: Implement SMS sending
-      sendResult = true;
+      // Initialize SMS service if not already initialized
+      if (!smsService.isAvailable()) {
+        smsService.initialize();
+      }
+      
+      // Send SMS through SMS service
+      sendResult = await smsService.sendReviewRequest({
+        to: phone,
+        customerName,
+        companyName: company.name,
+        technicianName: technician.name,
+        jobType: jobType || 'service',
+        customMessage: customMessage || ''
+      });
     }
     
     // Update the review request status
@@ -323,8 +336,20 @@ router.post('/resend/:id', isAuthenticated, async (req: Request, res: Response) 
         customMessage: reviewRequest.customMessage || ''
       });
     } else if (reviewRequest.method === 'sms' && reviewRequest.phone) {
-      // TODO: Implement SMS sending
-      sendResult = true;
+      // Initialize SMS service if not already initialized
+      if (!smsService.isAvailable()) {
+        smsService.initialize();
+      }
+      
+      // Send SMS through SMS service
+      sendResult = await smsService.sendReviewRequest({
+        to: reviewRequest.phone,
+        customerName: reviewRequest.customerName,
+        companyName: company.name,
+        technicianName: technician ? technician.name : 'our technician',
+        jobType: reviewRequest.jobType || 'service',
+        customMessage: reviewRequest.customMessage || ''
+      });
     }
     
     // Update the review request status and sent time
