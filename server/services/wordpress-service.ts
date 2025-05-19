@@ -46,6 +46,7 @@ export class WordPressService {
   private credentials: WordPressCredentials;
   private apiBase: string;
   private companyId?: number;
+  private authConfig: { username: string; password: string };
 
   constructor(options: WordPressCredentials & { companyId?: number }) {
     this.credentials = {
@@ -54,6 +55,12 @@ export class WordPressService {
       password: options.password || options.applicationPassword || ''
     };
     this.companyId = options.companyId;
+    
+    // Create authentication config for API requests
+    this.authConfig = {
+      username: options.username,
+      password: options.password || options.applicationPassword || ''
+    };
     
     // Ensure the site URL ends with a slash
     let siteUrl = options.siteUrl;
@@ -70,10 +77,7 @@ export class WordPressService {
   async testConnection(): Promise<boolean> {
     try {
       const response = await axios.get(`${this.apiBase}/users/me`, {
-        auth: {
-          username: this.credentials.username,
-          password: this.credentials.password
-        }
+        auth: this.authConfig
       });
       
       return response.status === 200;
@@ -88,10 +92,7 @@ export class WordPressService {
   async getCategories(): Promise<Array<{id: number, name: string, count: number}>> {
     try {
       const response = await axios.get(`${this.apiBase}/categories`, {
-        auth: {
-          username: this.credentials.username,
-          password: this.credentials.password || ''
-        },
+        auth: this.authConfig,
         params: {
           per_page: 100
         }
