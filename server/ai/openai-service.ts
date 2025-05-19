@@ -1,91 +1,105 @@
-import OpenAI from "openai";
-import { AIService, ContentGenerationParams, BlogPostResult } from "./ai-interface";
+import { AIService, BlogPostResult, ContentGenerationParams } from './ai-interface';
+import OpenAI from 'openai';
 
 export class OpenAIService implements AIService {
   private openai: OpenAI;
-  
-  constructor(apiKey: string) {
-    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-    this.openai = new OpenAI({ apiKey });
-  }
-  
-  getName(): string {
-    return "OpenAI";
-  }
-  
-  async generateSummary(params: ContentGenerationParams): Promise<string> {
-    const { jobType, notes, location, technicianName } = params;
-    
-    const prompt = `
-      Generate a professional summary for a home service job:
-      
-      Job Type: ${jobType}
-      Technician: ${technicianName}
-      Location: ${location || 'Not specified'}
-      Notes: ${notes}
-      
-      Create a concise, SEO-friendly summary that describes the job. Use professional language suitable for a home service business website. Include technical details when relevant. 
-      Maximum length: 2 paragraphs.
-    `;
 
+  constructor(apiKey: string) {
+    this.openai = new OpenAI({
+      apiKey
+    });
+  }
+
+  getName(): string {
+    return "OpenAI (GPT-4o)";
+  }
+
+  async generateSummary(params: ContentGenerationParams): Promise<string> {
     try {
+      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      const prompt = `
+As a professional content writer for a home services company, create a clear, concise summary 
+of this technician check-in for a client's website.
+
+Job Type: ${params.jobType}
+Location: ${params.location || 'Not specified'}
+Technician: ${params.technicianName}
+Notes: ${params.notes}
+
+Please provide a professional, 2-3 paragraph summary that highlights the job performed, 
+any key findings, and the resolution. This will be displayed publicly on a website, 
+so maintain a professional and positive tone. Do not include any technical jargon that 
+a homeowner might not understand.`;
+
       const response = await this.openai.chat.completions.create({
         model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 300,
+        messages: [
+          {
+            role: "system",
+            content: "You are a professional content writer specializing in creating clear, concise, and compelling summaries for home service businesses."
+          },
+          { role: "user", content: prompt }
+        ],
+        max_tokens: 500
       });
 
-      return response.choices[0].message.content || "Error generating content";
-    } catch (error) {
+      return response.choices[0].message.content || '';
+    } catch (error: any) {
       console.error("Error generating summary with OpenAI:", error);
-      return "Unable to generate summary at this time.";
+      throw new Error(`Failed to generate summary with OpenAI: ${error.message}`);
     }
   }
-  
-  async generateBlogPost(params: ContentGenerationParams): Promise<BlogPostResult> {
-    const { jobType, notes, location, technicianName } = params;
-    
-    const prompt = `
-      Generate a professional blog post for a home service job:
-      
-      Job Type: ${jobType}
-      Technician: ${technicianName}
-      Location: ${location || 'Not specified'}
-      Notes: ${notes}
-      
-      Create a detailed, SEO-friendly blog post that describes the job. Use professional language suitable for a home service business website. Include technical details, benefits to the customer, and any relevant maintenance tips.
-      
-      Format the post with a catchy title, an introduction, several informative paragraphs with subheadings, and a conclusion.
-      
-      Include schema markup for the content in JSON-LD format at the end.
-      
-      Respond with JSON in this format:
-      {
-        "title": "Engaging title for the blog post",
-        "content": "The complete blog post content with HTML formatting"
-      }
-    `;
 
+  async generateBlogPost(params: ContentGenerationParams): Promise<BlogPostResult> {
     try {
+      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      const prompt = `
+Create a detailed, professional blog post for a home service business based on this technician check-in:
+
+Job Type: ${params.jobType}
+Location: ${params.location || 'Not specified'}
+Technician: ${params.technicianName}
+Notes: ${params.notes}
+
+The blog post should:
+1. Have an engaging title and introduction that mentions the service type and location
+2. Include 4-6 paragraphs of helpful content related to the service performed
+3. Offer tips for homeowners related to this type of service
+4. End with a call-to-action encouraging readers to contact the company for similar services
+5. Use a friendly, authoritative tone
+6. Include relevant SEO keywords related to the service and location`;
+
       const response = await this.openai.chat.completions.create({
         model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
+        messages: [
+          {
+            role: "system",
+            content: "You are a professional content writer specializing in creating SEO-optimized blog posts for home service businesses. Output your response in JSON format with 'title' and 'content' fields."
+          },
+          { role: "user", content: prompt }
+        ],
         response_format: { type: "json_object" },
-        max_tokens: 1000,
+        max_tokens: 1500
       });
 
-      const result = JSON.parse(response.choices[0].message.content);
-      
-      return {
-        title: result.title || `${jobType} Service Completed`,
-        content: result.content || "Error generating content"
-      };
-    } catch (error) {
+      const content = response.choices[0].message.content;
+      if (!content) {
+        throw new Error("Empty response from OpenAI");
+      }
+
+      try {
+        const parsedContent = JSON.parse(content);
+        return {
+          title: parsedContent.title,
+          content: parsedContent.content
+        };
+      } catch (parseError: any) {
+        console.error("Error parsing OpenAI response:", parseError);
+        throw new Error("Failed to parse OpenAI response as JSON");
+      }
+    } catch (error: any) {
       console.error("Error generating blog post with OpenAI:", error);
-      return {
-        title: `${jobType} Service`,
-        content: "Unable to generate blog post content at this time."
-      };
+      throw new Error(`Failed to generate blog post with OpenAI: ${error.message}`);
     }
   }
 }

@@ -1,456 +1,584 @@
-import { Router } from "express";
+import express, { Request, Response } from "express";
 import { isAuthenticated, isCompanyAdmin } from "../middleware/auth";
-import crypto from "crypto";
-import { z } from "zod";
-import { fromZodError } from "zod-validation-error";
-import { generateSummary, generateBlogPost, getAvailableAIProviders, AIProviderType } from "../ai-service";
+import { storage } from "../storage";
+import { generateBlogPost, generateSummary, getAvailableAIProviders } from "../ai";
+import { AIProviderType } from "../ai/types";
 
-// Schema for WordPress integration
-const wordpressIntegrationSchema = z.object({
-  siteUrl: z.string().url(),
-  apiKey: z.string().optional(),
-  autoPublish: z.boolean().default(true),
-  includePhotos: z.boolean().default(true),
-  addSchemaMarkup: z.boolean().default(true),
-  displayMap: z.boolean().default(true),
-  postType: z.enum(["post", "check_in", "custom"]).default("check_in"),
-  category: z.string().optional(),
-});
+const router = express.Router();
 
-// Schema for JavaScript embed
-const embedIntegrationSchema = z.object({
-  showTechPhotos: z.boolean().default(true),
-  showCheckInPhotos: z.boolean().default(true),
-  maxCheckIns: z.number().int().min(1).max(20).default(5),
-  linkFullPosts: z.boolean().default(true),
-  customCss: z.string().optional(),
-  width: z.enum(["full", "fixed"]).default("full"),
-  fixedWidth: z.number().int().min(200).max(1200).optional(),
-});
+// WordPress integration settings
+interface WordPressIntegration {
+  siteUrl: string;
+  apiKey: string;
+  autoPublish: boolean;
+}
 
-// Content generation schema
-const contentGenerationSchema = z.object({
-  jobType: z.string(),
-  notes: z.string(),
-  location: z.string().optional(),
-  technicianName: z.string(),
-  provider: z.enum(["openai", "anthropic", "xai"] as const).default("openai")
-});
+// JavaScript embed integration settings
+interface EmbedIntegration {
+  settings: {
+    showTechPhotos: boolean;
+    showCheckInPhotos: boolean;
+    theme: "light" | "dark" | "auto";
+    style: "modern" | "classic" | "minimal";
+    autoRefresh: boolean;
+    refreshInterval: number; // in seconds
+  };
+  scriptCode: string;
+  styleCode: string;
+}
 
-// API routes
-const router = Router();
+// ===== WordPress Integration =====
 
-// Get available AI providers
-router.get("/ai/providers", isAuthenticated, async (req, res) => {
+// Get WordPress integration settings
+router.get("/wordpress", isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
   try {
-    const providers = getAvailableAIProviders();
-    res.json({ providers });
-  } catch (error) {
-    console.error("Error fetching AI providers:", error);
-    res.status(500).json({ message: "Failed to fetch AI providers" });
-  }
-});
+    const user = req.user;
+    if (!user || !user.companyId) {
+      return res.status(400).json({ message: "User does not belong to a company" });
+    }
 
-// Generate content with AI
-router.post("/ai/generate-summary", isAuthenticated, async (req, res) => {
-  try {
-    const data = contentGenerationSchema.parse(req.body);
-    
-    const summary = await generateSummary(
-      {
-        jobType: data.jobType,
-        notes: data.notes,
-        location: data.location,
-        technicianName: data.technicianName
-      },
-      data.provider as AIProviderType
-    );
-    
-    res.json({ 
-      summary,
-      provider: data.provider
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const validationError = fromZodError(error);
-      return res.status(400).json({ message: validationError.message });
-    }
-    
-    console.error("Error generating summary:", error);
-    res.status(500).json({ message: "Failed to generate summary" });
-  }
-});
-
-router.post("/ai/generate-blog-post", isAuthenticated, async (req, res) => {
-  try {
-    const data = contentGenerationSchema.parse(req.body);
-    
-    const blogPost = await generateBlogPost(
-      {
-        jobType: data.jobType,
-        notes: data.notes,
-        location: data.location,
-        technicianName: data.technicianName
-      },
-      data.provider as AIProviderType
-    );
-    
-    res.json({ 
-      ...blogPost,
-      provider: data.provider
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const validationError = fromZodError(error);
-      return res.status(400).json({ message: validationError.message });
-    }
-    
-    console.error("Error generating blog post:", error);
-    res.status(500).json({ message: "Failed to generate blog post" });
-  }
-});
-
-// WordPress integration routes
-router.get("/wordpress", isAuthenticated, isCompanyAdmin, async (req, res) => {
-  try {
-    const companyId = req.user.companyId;
-    
-    if (!companyId) {
-      return res.status(400).json({ message: "No company associated with this user" });
-    }
-    
-    // In a real implementation, fetch from database
-    // For now, return mock integration data
-    const integration = {
-      siteUrl: "https://example.com",
-      apiKey: "wp_" + crypto.randomBytes(16).toString('hex'),
-      autoPublish: true,
-      includePhotos: true,
-      addSchemaMarkup: true,
-      displayMap: true,
-      postType: "check_in",
-      category: "service",
-      status: "connected",
-      lastSync: new Date().toISOString()
-    };
-    
-    res.json(integration);
-  } catch (error) {
-    console.error("Error fetching WordPress integration:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-router.post("/wordpress", isAuthenticated, isCompanyAdmin, async (req, res) => {
-  try {
-    const companyId = req.user.companyId;
-    
-    if (!companyId) {
-      return res.status(400).json({ message: "No company associated with this user" });
-    }
-    
-    // Validate input
-    const data = wordpressIntegrationSchema.parse(req.body);
-    
-    // Generate API key if not provided
-    const apiKey = data.apiKey || "wp_" + crypto.randomBytes(16).toString('hex');
-    
-    // In a real implementation, save to database
-    // For now, just echo back the data with the API key
-    res.status(201).json({
-      ...data,
-      apiKey,
-      status: "connected",
-      lastSync: new Date().toISOString()
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const validationError = fromZodError(error);
-      return res.status(400).json({ message: validationError.message });
-    }
-    
-    console.error("Error saving WordPress integration:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// WordPress API for website to fetch data
-router.get("/wordpress/checkins/:apiKey", async (req, res) => {
-  try {
-    const { apiKey } = req.params;
-    
-    // In a real implementation, validate API key and fetch check-ins
-    // For now, return mock data
-    if (!apiKey || !apiKey.startsWith("wp_")) {
-      return res.status(401).json({ message: "Invalid API key" });
-    }
-    
-    const checkIns = [
-      {
-        id: 1,
-        title: "Water Heater Installation",
-        content: "Replaced 50-gallon water heater for customer. Old unit was leaking from the bottom. New unit installed with expansion tank and brought up to current code requirements.",
-        technician: "Robert Wilson",
-        jobType: "Installation",
-        date: new Date().toISOString(),
-        photos: [
-          { url: "https://example.com/images/water-heater-1.jpg", alt: "New water heater installation" },
-          { url: "https://example.com/images/water-heater-2.jpg", alt: "Completed installation" }
-        ],
-        location: "Portland, OR",
-        schema: {
-          "@context": "https://schema.org",
-          "@type": "HomeAndConstructionBusiness",
-          "name": "Example Plumbing",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Portland",
-            "addressRegion": "OR"
-          },
-          "review": {
-            "@type": "Review",
-            "reviewRating": {
-              "@type": "Rating",
-              "ratingValue": "5",
-              "bestRating": "5"
-            },
-            "author": {
-              "@type": "Person",
-              "name": "Customer"
-            }
-          }
-        }
-      }
-    ];
-    
-    res.json(checkIns);
-  } catch (error) {
-    console.error("Error fetching check-ins for WordPress:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// JavaScript embed integration routes
-router.get("/embed", isAuthenticated, isCompanyAdmin, async (req, res) => {
-  try {
-    const companyId = req.user.companyId;
-    
-    if (!companyId) {
-      return res.status(400).json({ message: "No company associated with this user" });
-    }
-    
-    // In a real implementation, fetch from database
-    // For now, return mock integration data
-    const company = await import("../storage").then(m => m.storage.getCompany(companyId));
-    
+    const company = await storage.getCompany(user.companyId);
     if (!company) {
       return res.status(404).json({ message: "Company not found" });
     }
+
+    // In a real implementation, we would retrieve this from the database
+    // For now, we'll use a placeholder
+    const wordpressIntegration: WordPressIntegration = {
+      siteUrl: "https://example.com",
+      apiKey: "wp_" + Math.random().toString(36).substring(2, 15),
+      autoPublish: true
+    };
+
+    return res.json(wordpressIntegration);
+  } catch (error) {
+    console.error("Error fetching WordPress integration:", error);
+    return res.status(500).json({ message: "Error fetching WordPress integration" });
+  }
+});
+
+// Update WordPress integration settings
+router.post("/wordpress", isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    if (!user || !user.companyId) {
+      return res.status(400).json({ message: "User does not belong to a company" });
+    }
+
+    const { siteUrl, autoPublish } = req.body as Partial<WordPressIntegration>;
     
-    const companySlug = company.name.toLowerCase().replace(/\s+/g, '-');
-    const token = "embed_" + crypto.randomBytes(16).toString('hex');
-    
-    const integration = {
-      token,
-      embedCode: `<script src="https://checkin-pro.app/embed/${companySlug}?token=${token}"></script>`,
+    if (!siteUrl) {
+      return res.status(400).json({ message: "Site URL is required" });
+    }
+
+    // Generate a new API key if one is not provided
+    const apiKey = "wp_" + Math.random().toString(36).substring(2, 15);
+
+    // In a real implementation, we would save this to the database
+    const wordpressIntegration: WordPressIntegration = {
+      siteUrl,
+      apiKey,
+      autoPublish: autoPublish ?? true
+    };
+
+    return res.json(wordpressIntegration);
+  } catch (error) {
+    console.error("Error updating WordPress integration:", error);
+    return res.status(500).json({ message: "Error updating WordPress integration" });
+  }
+});
+
+// ===== JavaScript Embed Integration =====
+
+// Get JavaScript embed code and settings
+router.get("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    if (!user || !user.companyId) {
+      return res.status(400).json({ message: "User does not belong to a company" });
+    }
+
+    const company = await storage.getCompany(user.companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    // In a real implementation, we would retrieve this from the database
+    // For now, we'll generate a placeholder
+    const scriptCode = `
+<div id="checkin-widget-${company.id}" class="checkin-widget"></div>
+<script>
+  (function() {
+    var script = document.createElement('script');
+    script.src = '${req.protocol}://${req.get('host')}/api/integration/embed/widget.js';
+    script.async = true;
+    script.onload = function() {
+      CheckInWidget.init({
+        targetSelector: '#checkin-widget-${company.id}',
+        companyId: ${company.id},
+        theme: 'light',
+        style: 'modern',
+        showTechPhotos: true,
+        showCheckInPhotos: true,
+        autoRefresh: true,
+        refreshInterval: 300
+      });
+    };
+    document.head.appendChild(script);
+  })();
+</script>`;
+
+    const styleCode = `
+.checkin-widget {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}`;
+
+    const embedIntegration: EmbedIntegration = {
       settings: {
         showTechPhotos: true,
         showCheckInPhotos: true,
-        maxCheckIns: 5,
-        linkFullPosts: true,
-        width: "full"
-      }
+        theme: "light",
+        style: "modern",
+        autoRefresh: true,
+        refreshInterval: 300
+      },
+      scriptCode,
+      styleCode
     };
-    
-    res.json(integration);
+
+    return res.json(embedIntegration);
   } catch (error) {
     console.error("Error fetching embed integration:", error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Error fetching embed integration" });
   }
 });
 
-router.post("/embed/settings", isAuthenticated, isCompanyAdmin, async (req, res) => {
+// Update JavaScript embed settings
+router.post("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
   try {
-    const companyId = req.user.companyId;
-    
-    if (!companyId) {
-      return res.status(400).json({ message: "No company associated with this user" });
+    const user = req.user;
+    if (!user || !user.companyId) {
+      return res.status(400).json({ message: "User does not belong to a company" });
     }
-    
-    // Validate input
-    const data = embedIntegrationSchema.parse(req.body);
-    
-    // In a real implementation, save to database
-    // For now, just echo back the data
-    res.status(200).json({
-      settings: data,
-      updated: true
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const validationError = fromZodError(error);
-      return res.status(400).json({ message: validationError.message });
-    }
-    
-    console.error("Error saving embed settings:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
 
-router.post("/embed/regenerate-token", isAuthenticated, isCompanyAdmin, async (req, res) => {
-  try {
-    const companyId = req.user.companyId;
+    const settings = req.body.settings as EmbedIntegration["settings"];
     
-    if (!companyId) {
-      return res.status(400).json({ message: "No company associated with this user" });
+    if (!settings) {
+      return res.status(400).json({ message: "Settings are required" });
     }
-    
-    // In a real implementation, update token in database
-    const token = "embed_" + crypto.randomBytes(16).toString('hex');
-    
-    const company = await import("../storage").then(m => m.storage.getCompany(companyId));
-    
+
+    const company = await storage.getCompany(user.companyId);
     if (!company) {
       return res.status(404).json({ message: "Company not found" });
     }
-    
-    const companySlug = company.name.toLowerCase().replace(/\s+/g, '-');
-    
-    res.json({
-      token,
-      embedCode: `<script src="https://checkin-pro.app/embed/${companySlug}?token=${token}"></script>`
-    });
+
+    // Update the script code with the new settings
+    const scriptCode = `
+<div id="checkin-widget-${company.id}" class="checkin-widget"></div>
+<script>
+  (function() {
+    var script = document.createElement('script');
+    script.src = '${req.protocol}://${req.get('host')}/api/integration/embed/widget.js';
+    script.async = true;
+    script.onload = function() {
+      CheckInWidget.init({
+        targetSelector: '#checkin-widget-${company.id}',
+        companyId: ${company.id},
+        theme: '${settings.theme}',
+        style: '${settings.style}',
+        showTechPhotos: ${settings.showTechPhotos},
+        showCheckInPhotos: ${settings.showCheckInPhotos},
+        autoRefresh: ${settings.autoRefresh},
+        refreshInterval: ${settings.refreshInterval}
+      });
+    };
+    document.head.appendChild(script);
+  })();
+</script>`;
+
+    // Update the style code based on the selected style
+    let styleCode = `
+.checkin-widget {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 8px;
+}`;
+
+    if (settings.style === "modern") {
+      styleCode += `
+.checkin-widget {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}`;
+    } else if (settings.style === "classic") {
+      styleCode += `
+.checkin-widget {
+  border: 1px solid #ddd;
+}`;
+    }
+
+    if (settings.theme === "dark") {
+      styleCode += `
+.checkin-widget {
+  background-color: #222;
+  color: #fff;
+}`;
+    }
+
+    // In a real implementation, we would save this to the database
+    const embedIntegration: EmbedIntegration = {
+      settings,
+      scriptCode,
+      styleCode
+    };
+
+    return res.json(embedIntegration);
   } catch (error) {
-    console.error("Error regenerating embed token:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error updating embed integration:", error);
+    return res.status(500).json({ message: "Error updating embed integration" });
   }
 });
 
-// JavaScript embed endpoint (public)
-router.get("/embed/:companySlug", async (req, res) => {
+// Serve the widget.js file
+router.get("/embed/widget.js", async (_req: Request, res: Response) => {
+  // This would be a client-side JavaScript file that renders the check-ins widget
+  const widgetJs = `
+const CheckInWidget = (function() {
+  let config = {};
+  
+  function init(options) {
+    config = options || {};
+    fetchCheckIns();
+    
+    if (config.autoRefresh) {
+      setInterval(fetchCheckIns, (config.refreshInterval || 300) * 1000);
+    }
+  }
+  
+  function fetchCheckIns() {
+    fetch('/api/integration/embed/data?companyId=' + config.companyId)
+      .then(response => response.json())
+      .then(data => {
+        renderWidget(data);
+      })
+      .catch(error => {
+        console.error('Error fetching check-ins:', error);
+      });
+  }
+  
+  function renderWidget(data) {
+    const container = document.querySelector(config.targetSelector);
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    // Apply theme
+    container.classList.add('checkin-theme-' + (config.theme || 'light'));
+    container.classList.add('checkin-style-' + (config.style || 'modern'));
+    
+    // Header
+    const header = document.createElement('div');
+    header.className = 'checkin-header';
+    header.innerHTML = '<h3>Recent Service Check-Ins</h3>';
+    container.appendChild(header);
+    
+    // Check-ins
+    const checkInsContainer = document.createElement('div');
+    checkInsContainer.className = 'checkin-list';
+    
+    if (data.checkIns && data.checkIns.length > 0) {
+      data.checkIns.forEach(checkIn => {
+        const checkInElement = document.createElement('div');
+        checkInElement.className = 'checkin-item';
+        
+        let technicianInfo = '';
+        if (config.showTechPhotos && checkIn.technician && checkIn.technician.photo) {
+          technicianInfo += \`<img src="\${checkIn.technician.photo}" alt="\${checkIn.technician.name}" class="technician-photo">\`;
+        }
+        technicianInfo += \`<span class="technician-name">\${checkIn.technician ? checkIn.technician.name : 'Technician'}</span>\`;
+        
+        let checkInPhotos = '';
+        if (config.showCheckInPhotos && checkIn.photos && checkIn.photos.length > 0) {
+          checkInPhotos = '<div class="checkin-photos">';
+          checkIn.photos.forEach(photo => {
+            checkInPhotos += \`<img src="\${photo}" alt="Check-in photo" class="checkin-photo">\`;
+          });
+          checkInPhotos += '</div>';
+        }
+        
+        checkInElement.innerHTML = \`
+          <div class="checkin-header">
+            <div class="technician-info">\${technicianInfo}</div>
+            <div class="checkin-time">\${new Date(checkIn.createdAt).toLocaleDateString()}</div>
+          </div>
+          <div class="checkin-job-type">\${checkIn.jobType}</div>
+          <div class="checkin-location">\${checkIn.location || ''}</div>
+          <div class="checkin-notes">\${checkIn.notes || ''}</div>
+          \${checkInPhotos}
+        \`;
+        
+        checkInsContainer.appendChild(checkInElement);
+      });
+    } else {
+      checkInsContainer.innerHTML = '<div class="checkin-empty">No recent check-ins available.</div>';
+    }
+    
+    container.appendChild(checkInsContainer);
+    
+    // Footer
+    const footer = document.createElement('div');
+    footer.className = 'checkin-footer';
+    footer.innerHTML = '<a href="https://checkin.example.com" target="_blank">Powered by Check-In SaaS</a>';
+    container.appendChild(footer);
+    
+    // Apply styles
+    applyStyles();
+  }
+  
+  function applyStyles() {
+    if (!document.getElementById('checkin-widget-styles')) {
+      const styleElement = document.createElement('style');
+      styleElement.id = 'checkin-widget-styles';
+      
+      let css = \`
+        .checkin-widget {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          max-width: 100%;
+          margin: 0 auto;
+          padding: 20px;
+          border-radius: 8px;
+        }
+        
+        .checkin-theme-light {
+          background-color: #fff;
+          color: #333;
+        }
+        
+        .checkin-theme-dark {
+          background-color: #222;
+          color: #fff;
+        }
+        
+        .checkin-style-modern {
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .checkin-style-classic {
+          border: 1px solid #ddd;
+        }
+        
+        .checkin-style-minimal {
+          border: none;
+          box-shadow: none;
+          padding: 0;
+        }
+        
+        .checkin-header h3 {
+          margin-top: 0;
+          margin-bottom: 1rem;
+        }
+        
+        .checkin-item {
+          margin-bottom: 1.5rem;
+          padding-bottom: 1.5rem;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .checkin-theme-dark .checkin-item {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .checkin-item:last-child {
+          border-bottom: none;
+          margin-bottom: 0;
+          padding-bottom: 0;
+        }
+        
+        .checkin-header {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 0.5rem;
+        }
+        
+        .technician-info {
+          display: flex;
+          align-items: center;
+          font-weight: bold;
+        }
+        
+        .technician-photo {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          margin-right: 0.5rem;
+          object-fit: cover;
+        }
+        
+        .checkin-time {
+          font-size: 0.85em;
+          opacity: 0.7;
+        }
+        
+        .checkin-job-type {
+          font-weight: bold;
+          margin-bottom: 0.25rem;
+        }
+        
+        .checkin-location {
+          font-size: 0.9em;
+          margin-bottom: 0.25rem;
+          opacity: 0.8;
+        }
+        
+        .checkin-notes {
+          margin-bottom: 0.5rem;
+          white-space: pre-line;
+        }
+        
+        .checkin-photos {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-top: 0.5rem;
+        }
+        
+        .checkin-photo {
+          width: 80px;
+          height: 80px;
+          object-fit: cover;
+          border-radius: 4px;
+        }
+        
+        .checkin-footer {
+          margin-top: 1rem;
+          text-align: right;
+          font-size: 0.8em;
+          opacity: 0.7;
+        }
+        
+        .checkin-footer a {
+          text-decoration: none;
+          color: inherit;
+        }
+        
+        .checkin-empty {
+          padding: 2rem 0;
+          text-align: center;
+          opacity: 0.7;
+        }
+      \`;
+      
+      styleElement.textContent = css;
+      document.head.appendChild(styleElement);
+    }
+  }
+  
+  return {
+    init
+  };
+})();`;
+
+  // Set the appropriate content type and send the JavaScript
+  res.setHeader('Content-Type', 'application/javascript');
+  res.send(widgetJs);
+});
+
+// Endpoint to get the check-ins data for the widget
+router.get("/embed/data", async (req: Request, res: Response) => {
   try {
-    const { companySlug } = req.params;
-    const { token } = req.query;
+    const companyId = Number(req.query.companyId);
     
-    // In a real implementation, validate token and fetch check-ins by company slug
-    // For now, return mock HTML
-    if (!token || !token.toString().startsWith("embed_")) {
-      return res.status(401).json({ message: "Invalid token" });
+    if (isNaN(companyId)) {
+      return res.status(400).json({ message: "Invalid company ID" });
     }
-    
-    // In a real implementation, lookup company by slug
-    // For now, use the slug as company name
-    const companyName = companySlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    
-    const htmlContent = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    .checkin-pro-widget {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      max-width: 100%;
-      margin: 0 auto;
-    }
-    .checkin-pro-widget h3 {
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-    }
-    .checkin-pro-widget .checkin-item {
-      border-top: 1px solid #eaeaea;
-      border-bottom: 1px solid #eaeaea;
-      padding: 1rem 0;
-      margin-bottom: 1rem;
-    }
-    .checkin-pro-widget .checkin-header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-    .checkin-pro-widget .tech-avatar {
-      width: 2rem;
-      height: 2rem;
-      border-radius: 50%;
-      background-color: #e6f7ff;
-      color: #1890ff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      margin-right: 0.75rem;
-    }
-    .checkin-pro-widget .tech-info {
-      display: flex;
-      flex-direction: column;
-    }
-    .checkin-pro-widget .tech-name {
-      font-weight: 500;
-      font-size: 0.9rem;
-    }
-    .checkin-pro-widget .job-type {
-      font-size: 0.8rem;
-      color: #666;
-    }
-    .checkin-pro-widget .checkin-content {
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-    .checkin-pro-widget .checkin-footer {
-      margin-top: 0.5rem;
-      text-align: right;
-      font-size: 0.8rem;
-    }
-    .checkin-pro-widget .checkin-footer a {
-      color: #1890ff;
-      text-decoration: none;
-    }
-  </style>
-</head>
-<body>
-  <div class="checkin-pro-widget">
-    <h3>Recent Check-Ins from ${companyName}</h3>
-    <div class="checkin-item">
-      <div class="checkin-header">
-        <div class="tech-avatar">R</div>
-        <div class="tech-info">
-          <div class="tech-name">Robert Wilson</div>
-          <div class="job-type">Water Heater Installation</div>
-        </div>
-      </div>
-      <div class="checkin-content">
-        Replaced 50-gallon water heater for customer. Old unit was leaking from the bottom. New unit installed with expansion tank and brought up to current code requirements.
-      </div>
-      <div class="checkin-footer">
-        <a href="#" target="_blank">Read full post</a>
-      </div>
-    </div>
-    <div class="checkin-item">
-      <div class="checkin-header">
-        <div class="tech-avatar">S</div>
-        <div class="tech-info">
-          <div class="tech-name">Sarah Johnson</div>
-          <div class="job-type">AC Maintenance</div>
-        </div>
-      </div>
-      <div class="checkin-content">
-        Performed annual maintenance on 3-ton Carrier AC unit. Cleaned coils, replaced filter, checked refrigerant levels, and tested operation. System is running efficiently.
-      </div>
-      <div class="checkin-footer">
-        <a href="#" target="_blank">Read full post</a>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
-    `;
-    
-    res.setHeader('Content-Type', 'text/html');
-    res.send(htmlContent);
+
+    // Get recent check-ins for the company
+    const checkIns = await storage.getCheckInsByCompany(companyId, 5);
+
+    // Format the response with only the necessary information
+    const formattedCheckIns = checkIns.map(checkIn => ({
+      id: checkIn.id,
+      jobType: checkIn.jobType,
+      notes: checkIn.notes,
+      location: checkIn.location,
+      createdAt: checkIn.createdAt,
+      technician: {
+        name: checkIn.technician.name,
+        specialty: checkIn.technician.specialty
+        // In a real implementation, we would include photo URLs
+      },
+      photos: [] // In a real implementation, we would include photo URLs
+    }));
+
+    return res.json({ checkIns: formattedCheckIns });
   } catch (error) {
-    console.error("Error serving embed content:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error fetching embed data:", error);
+    return res.status(500).json({ message: "Error fetching embed data" });
+  }
+});
+
+// ===== AI Integration =====
+
+// Get available AI providers
+router.get("/ai/providers", isAuthenticated, isCompanyAdmin, async (_req: Request, res: Response) => {
+  try {
+    const providers = getAvailableAIProviders();
+    return res.json({ providers });
+  } catch (error) {
+    console.error("Error fetching AI providers:", error);
+    return res.status(500).json({ message: "Error fetching AI providers" });
+  }
+});
+
+// Generate a summary using AI
+router.post("/ai/generate-summary", isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const { jobType, notes, location, technicianName, provider } = req.body;
+    
+    if (!jobType || !notes || !technicianName) {
+      return res.status(400).json({ message: "Missing required parameters" });
+    }
+
+    const summary = await generateSummary({
+      jobType,
+      notes,
+      location,
+      technicianName
+    }, provider as AIProviderType);
+
+    return res.json({ summary });
+  } catch (error) {
+    console.error("Error generating summary:", error);
+    return res.status(500).json({ message: "Error generating summary" });
+  }
+});
+
+// Generate a blog post using AI
+router.post("/ai/generate-blog-post", isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const { jobType, notes, location, technicianName, provider } = req.body;
+    
+    if (!jobType || !notes || !technicianName) {
+      return res.status(400).json({ message: "Missing required parameters" });
+    }
+
+    const blogPost = await generateBlogPost({
+      jobType,
+      notes,
+      location,
+      technicianName
+    }, provider as AIProviderType);
+
+    return res.json(blogPost);
+  } catch (error) {
+    console.error("Error generating blog post:", error);
+    return res.status(500).json({ message: "Error generating blog post" });
   }
 });
 
