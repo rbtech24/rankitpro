@@ -16,6 +16,7 @@ import blogRoutes from "./routes/blog";
 import demoRoutes from "./routes/demo";
 import reviewRequestRoutes from "./routes/review-request";
 import wordpressRoutes from "./routes/wordpress-integration";
+import jsWidgetRoutes from "./routes/js-widget";
 import emailService from "./services/email-service";
 import { fromZodError } from "zod-validation-error";
 import { WebSocketServer, WebSocket } from 'ws';
