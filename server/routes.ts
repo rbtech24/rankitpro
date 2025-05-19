@@ -19,6 +19,8 @@ import wordpressRoutes from "./routes/wordpress-integration";
 import jsWidgetRoutes from "./routes/js-widget";
 import billingRoutes from "./routes/billing";
 import userRoutes from "./routes/users";
+import aiProvidersRoutes from "./routes/ai-providers";
+import generateContentRoutes from "./routes/generate-content";
 import emailService from "./services/email-service";
 import { fromZodError } from "zod-validation-error";
 import { WebSocketServer, WebSocket } from 'ws';
@@ -799,6 +801,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/wordpress", wordpressRoutes);
   app.use("/api/billing", billingRoutes);
   app.use("/api/users", userRoutes);
+  app.use("/api/ai-providers", aiProvidersRoutes);
+  app.use("/api/generate-content", generateContentRoutes);
   
   // Create HTTP server
   const httpServer = createServer(app);
