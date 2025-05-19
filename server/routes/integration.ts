@@ -334,7 +334,7 @@ const CheckInWidget = (function() {
     // Footer
     const footer = document.createElement('div');
     footer.className = 'checkin-footer';
-    footer.innerHTML = '<a href="https://checkin.example.com" target="_blank">Powered by Check-In SaaS</a>';
+    footer.innerHTML = '<a href="https://rankitpro.com" target="_blank">Powered by Rank it Pro</a>';
     container.appendChild(footer);
     
     // Apply styles

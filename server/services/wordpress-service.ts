@@ -524,10 +524,10 @@ export class WordPressService {
     
     return `<?php
 /**
- * Plugin Name: Check-In Integration
- * Description: Integrates with Check-In SaaS to display technician check-ins on your website
+ * Plugin Name: Rank it Pro Integration
+ * Description: Integrates with Rank it Pro to display technician visits on your website
  * Version: 1.0.0
- * Author: Check-In SaaS
+ * Author: Rank it Pro
  */
 
 if (!defined('ABSPATH')) {

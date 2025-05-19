@@ -237,7 +237,7 @@ router.get('/js-widget/embed-code', async (req: Request, res: Response) => {
     
     // Generate embed code
     const embedCode = `
-<!-- Check-In SaaS Widget -->
+<!-- Rank it Pro Widget -->
 <div id="checkin-widget" class="ci-widget"></div>
 <script>
 (function() {
