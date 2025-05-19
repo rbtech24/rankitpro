@@ -179,7 +179,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password, ...userWithoutPassword } = user;
       
       // Set session
-      req.session.userId = user.id;
+      if (req.session) {
+        (req.session as any).userId = user.id;
+      }
       
       res.status(201).json(userWithoutPassword);
     } catch (error) {
@@ -214,7 +216,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Set session
-      req.session.userId = user.id;
+      if (req.session) {
+        (req.session as any).userId = user.id;
+      }
       
       // Remove password from response
       const { password: _, ...userWithoutPassword } = user;
