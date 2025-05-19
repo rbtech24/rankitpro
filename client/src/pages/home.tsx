@@ -69,10 +69,10 @@ const Home = () => {
         <section className="py-16 md:py-24 px-6">
           <div className="container mx-auto text-center max-w-4xl">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-purple-600 text-transparent bg-clip-text">
-              Turn Technician Check-Ins Into Powerful Marketing
+              Turn Technician Visits Into Powerful Marketing
             </h1>
             <p className="text-lg md:text-xl mb-8 text-muted-foreground max-w-3xl mx-auto">
-              Boost your home service business's online presence with automated content generation, website integration, and review collection from every technician check-in.
+              Boost your home service business's online presence with automated content generation, website integration, and review collection from every technician visit.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/register">
@@ -91,7 +91,7 @@ const Home = () => {
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-primary">10,000+</h3>
-                  <p className="text-sm text-muted-foreground">Check-Ins Generated</p>
+                  <p className="text-sm text-muted-foreground">Visits Documented</p>
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-primary">30%</h3>

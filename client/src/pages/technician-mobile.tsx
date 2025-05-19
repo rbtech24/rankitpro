@@ -516,7 +516,7 @@ export default function TechnicianMobile() {
     <div className="container max-w-md mx-auto p-4 pb-20">
       <header className="flex flex-col mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">Technician Check-In</h1>
+          <h1 className="text-2xl font-bold">Technician Visit</h1>
           {auth?.user && <NotificationBadge auth={auth} />}
         </div>
         <p className="text-muted-foreground text-center">Submit your job details</p>
@@ -526,7 +526,7 @@ export default function TechnicianMobile() {
         <Card className="border-green-500 bg-green-50">
           <CardContent className="pt-6 flex flex-col items-center justify-center">
             <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Check-In Successful!</h2>
+            <h2 className="text-xl font-semibold mb-2">Visit Recorded Successfully!</h2>
             <p className="text-center text-muted-foreground">
               Your job details have been submitted successfully.
             </p>
@@ -825,7 +825,7 @@ export default function TechnicianMobile() {
                 ) : (
                   <>
                     <CheckCircle2 className="mr-2 h-5 w-5" />
-                    Submit Check-In
+                    Submit Visit
                   </>
                 )}
               </Button>
