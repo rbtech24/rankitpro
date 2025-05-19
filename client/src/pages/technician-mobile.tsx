@@ -36,6 +36,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
 import NotificationBadge from "@/components/notifications/notification-badge";
+import PhotoGallery from "@/components/photo-upload/photo-gallery";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -660,130 +661,40 @@ export default function TechnicianMobile() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div>
-                <Label className="text-base mb-2 block">Job Photos</Label>
-                <div className="flex items-center gap-2">
-                  <Label 
-                    htmlFor="photo-upload" 
-                    className="cursor-pointer flex items-center justify-center h-12 w-full border-2 border-dashed rounded-md hover:bg-muted transition"
-                  >
-                    <Camera className="h-4 w-4 mr-2" />
-                    Add Photos
-                  </Label>
-                  <Input
-                    id="photo-upload"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                  />
-                </div>
-                {photoURLs.length > 0 && (
-                  <div className="mt-3 grid grid-cols-3 gap-2">
-                    {photoURLs.map((url, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={url}
-                          alt={`Photo ${index + 1}`}
-                          className="h-24 w-full object-cover rounded-md"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removePhoto(index, 'general')}
-                          className="absolute top-1 right-1 bg-black bg-opacity-50 rounded-full p-1"
-                        >
-                          <XCircle className="h-5 w-5 text-white" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <PhotoGallery
+                title="Job Photos" 
+                description="Add photos documenting the job"
+                photos={photos}
+                photoURLs={photoURLs}
+                onUpload={handlePhotoUpload}
+                onRemove={(index) => removePhoto(index, 'general')}
+                inputId="photo-upload"
+                maxPhotos={10}
+              />
 
               <Separator />
 
-              <div>
-                <Label className="text-base mb-2 block">Before Photos</Label>
-                <div className="flex items-center gap-2">
-                  <Label 
-                    htmlFor="before-photo-upload" 
-                    className="cursor-pointer flex items-center justify-center h-12 w-full border-2 border-dashed rounded-md hover:bg-muted transition"
-                  >
-                    <Camera className="h-4 w-4 mr-2" />
-                    Add Before Photos
-                  </Label>
-                  <Input
-                    id="before-photo-upload"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleBeforePhotoUpload}
-                    className="hidden"
-                  />
-                </div>
-                {beforePhotoURLs.length > 0 && (
-                  <div className="mt-3 grid grid-cols-3 gap-2">
-                    {beforePhotoURLs.map((url, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={url}
-                          alt={`Before Photo ${index + 1}`}
-                          className="h-24 w-full object-cover rounded-md"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removePhoto(index, 'before')}
-                          className="absolute top-1 right-1 bg-black bg-opacity-50 rounded-full p-1"
-                        >
-                          <XCircle className="h-5 w-5 text-white" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <PhotoGallery
+                title="Before Photos" 
+                description="Document the condition before work"
+                photos={beforePhotos}
+                photoURLs={beforePhotoURLs}
+                onUpload={handleBeforePhotoUpload}
+                onRemove={(index) => removePhoto(index, 'before')}
+                inputId="before-photo-upload"
+                maxPhotos={5}
+              />
 
-              <div>
-                <Label className="text-base mb-2 block">After Photos</Label>
-                <div className="flex items-center gap-2">
-                  <Label 
-                    htmlFor="after-photo-upload" 
-                    className="cursor-pointer flex items-center justify-center h-12 w-full border-2 border-dashed rounded-md hover:bg-muted transition"
-                  >
-                    <Camera className="h-4 w-4 mr-2" />
-                    Add After Photos
-                  </Label>
-                  <Input
-                    id="after-photo-upload"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleAfterPhotoUpload}
-                    className="hidden"
-                  />
-                </div>
-                {afterPhotoURLs.length > 0 && (
-                  <div className="mt-3 grid grid-cols-3 gap-2">
-                    {afterPhotoURLs.map((url, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={url}
-                          alt={`After Photo ${index + 1}`}
-                          className="h-24 w-full object-cover rounded-md"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removePhoto(index, 'after')}
-                          className="absolute top-1 right-1 bg-black bg-opacity-50 rounded-full p-1"
-                        >
-                          <XCircle className="h-5 w-5 text-white" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <PhotoGallery
+                title="After Photos" 
+                description="Show the completed work"
+                photos={afterPhotos}
+                photoURLs={afterPhotoURLs}
+                onUpload={handleAfterPhotoUpload}
+                onRemove={(index) => removePhoto(index, 'after')}
+                inputId="after-photo-upload"
+                maxPhotos={5}
+              />
             </CardContent>
           </Card>
 
