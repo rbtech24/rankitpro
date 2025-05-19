@@ -15,6 +15,7 @@ import reviewRoutes from "./routes/review";
 import blogRoutes from "./routes/blog";
 import demoRoutes from "./routes/demo";
 import reviewRequestRoutes from "./routes/review-request";
+import wordpressRoutes from "./routes/wordpress-integration";
 import emailService from "./services/email-service";
 import { fromZodError } from "zod-validation-error";
 import { WebSocketServer, WebSocket } from 'ws';
@@ -786,6 +787,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/blogs", blogRoutes);
   app.use("/api/demo", demoRoutes);
   app.use("/api/review-requests", reviewRequestRoutes);
+  app.use("/api/wordpress", wordpressRoutes);
   
   // Create HTTP server
   const httpServer = createServer(app);

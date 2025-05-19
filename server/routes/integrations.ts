@@ -2,12 +2,7 @@ import { Router, Request, Response } from 'express';
 import { isAuthenticated, isCompanyAdmin } from '../middleware/auth';
 import { z } from 'zod';
 import { storage } from '../storage';
-import { 
-  WordPressService, 
-  WordPressConfig, 
-  getWordPressConfigFromRequest,
-  getWordPressService
-} from '../services/wordpress-service';
+import { WordPressService } from '../services/wordpress-service';
 
 const router = Router();
 
@@ -146,14 +141,23 @@ router.delete('/wordpress/config', isAuthenticated, isCompanyAdmin, async (req: 
 // Test WordPress connection
 router.post('/wordpress/test-connection', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
   try {
-    // Get configuration from request
-    const config = getWordPressConfigFromRequest(req);
-    if (!config) {
-      return res.status(400).json({ message: 'Invalid WordPress configuration' });
+    // Validate configuration
+    const parsedConfig = wordpressConfigSchema.safeParse(req.body);
+    if (!parsedConfig.success) {
+      return res.status(400).json({ 
+        message: 'Invalid WordPress configuration', 
+        errors: parsedConfig.error.format() 
+      });
     }
     
+    const config = parsedConfig.data;
+    const companyId = req.user.companyId;
+    
     // Test connection
-    const wpService = new WordPressService(config);
+    const wpService = new WordPressService({
+      ...config,
+      companyId
+    });
     const connectionSuccess = await wpService.testConnection();
     
     if (connectionSuccess) {

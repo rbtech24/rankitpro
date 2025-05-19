@@ -16,6 +16,7 @@ export interface IStorage {
   // Company operations
   getCompany(id: number): Promise<Company | undefined>;
   getCompanyByName(name: string): Promise<Company | undefined>;
+  getAllCompanies(): Promise<Company[]>;
   createCompany(company: InsertCompany): Promise<Company>;
   updateCompany(id: number, updates: Partial<Company>): Promise<Company | undefined>;
   
@@ -149,6 +150,10 @@ export class MemStorage implements IStorage {
   
   async getCompanyByName(name: string): Promise<Company | undefined> {
     return Array.from(this.companies.values()).find(company => company.name === name);
+  }
+  
+  async getAllCompanies(): Promise<Company[]> {
+    return Array.from(this.companies.values());
   }
   
   async createCompany(company: InsertCompany): Promise<Company> {
