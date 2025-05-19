@@ -2,8 +2,9 @@ import React from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, Wrench, BarChart2, Globe, Edit3, Star } from "lucide-react";
+import { CheckCircle, BarChart2, Globe, Edit3, Star, Wrench, Zap } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Logo } from "@/components/ui/logo";
 
 const Home = () => {
   const isMobile = useIsMobile();
@@ -13,9 +14,8 @@ const Home = () => {
       {/* Header */}
       <header className="w-full py-4 px-6 border-b bg-white sticky top-0 z-10">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Wrench className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-600 text-transparent bg-clip-text">CheckIn Pro</span>
+          <div className="flex items-center">
+            <Logo size="md" />
           </div>
           <nav className="hidden md:flex items-center space-x-6">
             <a href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</a>

@@ -27,12 +27,12 @@ export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({
               </div>
             </Link>
             <nav className="hidden md:flex space-x-6">
-              <Link href="/"><span className="text-slate-600 hover:text-primary cursor-pointer">Home</span></Link>
-              <Link href="/case-studies"><span className="text-slate-600 hover:text-primary cursor-pointer">Case Studies</span></Link>
-              <Link href="/testimonials"><span className="text-slate-600 hover:text-primary cursor-pointer">Testimonials</span></Link>
-              <Link href="/resources"><span className="text-slate-600 hover:text-primary cursor-pointer">Resources</span></Link>
-              <Link href="/about"><span className="text-slate-600 hover:text-primary cursor-pointer">About</span></Link>
-              <Link href="/login"><span className="text-slate-600 hover:text-primary cursor-pointer">Login</span></Link>
+              <Link href="/"><span className="text-slate-600 hover:text-[#0088d2] cursor-pointer">Home</span></Link>
+              <Link href="/case-studies"><span className="text-slate-600 hover:text-[#0088d2] cursor-pointer">Case Studies</span></Link>
+              <Link href="/testimonials"><span className="text-slate-600 hover:text-[#0088d2] cursor-pointer">Testimonials</span></Link>
+              <Link href="/resources"><span className="text-slate-600 hover:text-[#0088d2] cursor-pointer">Resources</span></Link>
+              <Link href="/about"><span className="text-slate-600 hover:text-[#0088d2] cursor-pointer">About</span></Link>
+              <Link href="/login"><span className="text-slate-600 hover:text-[#0088d2] cursor-pointer">Login</span></Link>
             </nav>
             <div className="flex space-x-4">
               <Link href="/register">
@@ -105,7 +105,7 @@ export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({
           
           <div className="pt-8 mt-8 border-t border-slate-800 text-sm text-slate-400">
             <div className="flex flex-col md:flex-row justify-between items-center">
-              <p>&copy; 2025 CheckIn Pro. All rights reserved.</p>
+              <p>&copy; 2025 Rank it Pro. All rights reserved.</p>
               <div className="mt-4 md:mt-0 flex items-center">
                 <Link href="/privacy-policy"><span className="text-slate-400 hover:text-primary mr-4 cursor-pointer">Privacy Policy</span></Link>
                 <Link href="/terms-of-service"><span className="text-slate-400 hover:text-primary mr-4 cursor-pointer">Terms of Service</span></Link>
