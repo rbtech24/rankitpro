@@ -108,7 +108,7 @@ const Home = () => {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">Supercharge Your Website's SEO</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Turn every technician check-in into valuable website content that boosts your search rankings and attracts more customers.
+                Turn every technician visit into valuable website content that boosts your search rankings and attracts more customers.
               </p>
             </div>
             
@@ -121,7 +121,7 @@ const Home = () => {
                 </div>
                 <h3 className="text-xl font-bold">Fresh, Relevant Content</h3>
                 <p className="text-muted-foreground">
-                  Google rewards websites that regularly publish relevant, high-quality content. Each technician check-in automatically generates fresh content about your services in specific locations, signaling to search engines that your site is active and authoritative.
+                  Google rewards websites that regularly publish relevant, high-quality content. Each technician visit automatically generates fresh content about your services in specific locations, signaling to search engines that your site is active and authoritative.
                 </p>
               </div>
               
@@ -135,7 +135,7 @@ const Home = () => {
                 </div>
                 <h3 className="text-xl font-bold">Local SEO Dominance</h3>
                 <p className="text-muted-foreground">
-                  Each blog post is automatically optimized with local keywords, service types, and location data from check-ins. This helps your business rank higher in local search results when homeowners search for services in your service areas.
+                  Each blog post is automatically optimized with local keywords, service types, and location data from visits. This helps your business rank higher in local search results when homeowners search for services in your service areas.
                 </p>
               </div>
               
@@ -172,7 +172,7 @@ const Home = () => {
                 </div>
                 <h3 className="text-xl font-bold">Social Proof & Reviews</h3>
                 <p className="text-muted-foreground">
-                  Automated review requests tied to check-ins help build a consistent stream of positive reviews. These reviews improve your local search rankings and build trust with potential customers, improving both SEO and conversion rates.
+                  Automated review requests tied to visits help build a consistent stream of positive reviews. These reviews improve your local search rankings and build trust with potential customers, improving both SEO and conversion rates.
                 </p>
               </div>
               
@@ -186,7 +186,7 @@ const Home = () => {
                 </div>
                 <h3 className="text-xl font-bold">Zero Effort Required</h3>
                 <p className="text-muted-foreground">
-                  Unlike traditional content marketing that requires hours of writing and planning, our system automatically transforms technician check-ins into SEO-optimized content. Your team does their normal work, and your website gets all the SEO benefits.
+                  Unlike traditional content marketing that requires hours of writing and planning, our system automatically transforms technician visits into SEO-optimized content. Your team does their normal work, and your website gets all the SEO benefits.
                 </p>
               </div>
             </div>
@@ -201,7 +201,7 @@ const Home = () => {
                 <div>
                   <h3 className="text-xl font-bold mb-2">The SEO Performance Difference</h3>
                   <p className="text-muted-foreground">
-                    Our customers see an average 30% improvement in organic search traffic within the first 3 months. With each technician performing multiple check-ins daily, your website quickly builds a content library that outranks competitors and positions you as the authority in your service area.
+                    Our customers see an average 30% improvement in organic search traffic within the first 3 months. With each technician performing multiple visits daily, your website quickly builds a content library that outranks competitors and positions you as the authority in your service area.
                   </p>
                 </div>
               </div>
@@ -226,9 +226,9 @@ const Home = () => {
                   <div className="h-12 w-12 rounded-lg flex items-center justify-center bg-primary/10 mb-4">
                     <CheckCircle className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2">GPS Check-Ins</h3>
+                  <h3 className="text-xl font-bold mb-2">GPS Visits</h3>
                   <p className="text-muted-foreground">
-                    Technicians can easily check in with GPS location, photos, and job notes from any mobile device.
+                    Technicians can easily log visits with GPS location, photos, and job notes from any mobile device.
                   </p>
                 </CardContent>
               </Card>
@@ -241,7 +241,7 @@ const Home = () => {
                   </div>
                   <h3 className="text-xl font-bold mb-2">AI Content Generation</h3>
                   <p className="text-muted-foreground">
-                    Automatically create SEO-optimized blog posts and summaries from check-ins using advanced AI technology.
+                    Automatically create SEO-optimized blog posts and summaries from visits using advanced AI technology.
                   </p>
                 </CardContent>
               </Card>
@@ -254,7 +254,7 @@ const Home = () => {
                   </div>
                   <h3 className="text-xl font-bold mb-2">Website Integration</h3>
                   <p className="text-muted-foreground">
-                    Seamlessly publish check-ins and blog posts to your WordPress site or embed on any website.
+                    Seamlessly publish visits and blog posts to your WordPress site or embed on any website.
                   </p>
                 </CardContent>
               </Card>
@@ -328,7 +328,7 @@ const Home = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-2">AI Content Creation</h3>
                 <p className="text-muted-foreground">
-                  Our AI automatically transforms check-in data into professional blog posts and summaries.
+                  Our AI automatically transforms visit data into professional blog posts and summaries.
                 </p>
               </div>
               
