@@ -16,10 +16,87 @@ import blogRoutes from "./routes/blog";
 import demoRoutes from "./routes/demo";
 import emailService from "./services/email-service";
 import { fromZodError } from "zod-validation-error";
+import { WebSocketServer, WebSocket } from 'ws';
 
 const SessionStore = MemoryStore(session);
 
+// Map to store active WebSocket connections by company ID
+const companyConnections = new Map<number, Set<WebSocket>>();
+// Map to store active WebSocket connections by user ID
+const userConnections = new Map<number, WebSocket>();
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Create HTTP server to be returned
+  const server = createServer(app);
+  
+  // Initialize WebSocket server on /ws path
+  const wss = new WebSocketServer({ 
+    server: server, 
+    path: '/ws'
+  });
+  
+  // Handle WebSocket connections
+  wss.on('connection', (ws, req) => {
+    console.log('WebSocket connection established');
+    
+    // Handle messages from clients (for authentication and subscribing to company updates)
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        
+        // Handle authentication message
+        if (data.type === 'auth') {
+          const { userId, companyId } = data;
+          
+          if (userId) {
+            // Store connection by user ID
+            userConnections.set(parseInt(userId), ws);
+            console.log(`User ${userId} connected via WebSocket`);
+          }
+          
+          if (companyId) {
+            // Store connection by company ID
+            const companyId = parseInt(data.companyId);
+            if (!companyConnections.has(companyId)) {
+              companyConnections.set(companyId, new Set());
+            }
+            companyConnections.get(companyId)?.add(ws);
+            console.log(`Client subscribed to company ${companyId} updates`);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing WebSocket message:', error);
+      }
+    });
+    
+    // Handle connection close
+    ws.on('close', () => {
+      console.log('WebSocket connection closed');
+      
+      // Remove from user connections
+      for (const [userId, connection] of userConnections.entries()) {
+        if (connection === ws) {
+          userConnections.delete(userId);
+          console.log(`User ${userId} disconnected`);
+          break;
+        }
+      }
+      
+      // Remove from company connections
+      for (const [companyId, connections] of companyConnections.entries()) {
+        if (connections.has(ws)) {
+          connections.delete(ws);
+          console.log(`Client unsubscribed from company ${companyId} updates`);
+          
+          // Clean up empty sets
+          if (connections.size === 0) {
+            companyConnections.delete(companyId);
+          }
+        }
+      }
+    });
+  });
+  
   // Setup session middleware
   app.use(
     session({
@@ -434,8 +511,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (technician) {
           const blogContent = await generateBlogPost({
             jobType: data.jobType,
-            notes: data.notes,
-            location: data.location,
+            notes: data.notes || "",
+            location: data.location || "",
             technicianName: technician.name
           });
           
@@ -447,6 +524,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
             companyId
           });
         }
+      }
+      
+      // Get technician details for the notification
+      const technician = await storage.getTechnician(technicianId);
+      
+      // Send real-time notification to all clients subscribed to this company
+      if (companyConnections.has(companyId)) {
+        const checkInNotification = {
+          type: 'new_check_in',
+          data: {
+            ...checkIn,
+            technician: technician ? {
+              id: technician.id,
+              name: technician.name,
+            } : null
+          }
+        };
+        
+        const message = JSON.stringify(checkInNotification);
+        
+        // Send to all connected clients for this company
+        companyConnections.get(companyId)?.forEach(client => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+          }
+        });
       }
       
       res.status(201).json(checkIn);
