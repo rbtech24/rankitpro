@@ -741,7 +741,7 @@ class RankItPro_Visits_Widget extends WP_Widget {
         echo $args['before_widget'];
         echo $args['before_title'] . esc_html($title) . $args['after_title'];
         
-        echo do_shortcode('[check_ins limit="' . esc_attr($limit) . '" type="' . esc_attr($type) . '"]');
+        echo do_shortcode('[rankitpro_visits limit="' . esc_attr($limit) . '" type="' . esc_attr($type) . '"]');
         
         echo $args['after_widget'];
     }
@@ -757,7 +757,7 @@ class RankItPro_Visits_Widget extends WP_Widget {
             <input class="widefat" id="<?php echo esc_attr($this->get_field_id('title')); ?>" name="<?php echo esc_attr($this->get_field_name('title')); ?>" type="text" value="<?php echo esc_attr($title); ?>">
         </p>
         <p>
-            <label for="<?php echo esc_attr($this->get_field_id('limit')); ?>">Number of check-ins to show:</label>
+            <label for="<?php echo esc_attr($this->get_field_id('limit')); ?>">Number of visits to show:</label>
             <input class="tiny-text" id="<?php echo esc_attr($this->get_field_id('limit')); ?>" name="<?php echo esc_attr($this->get_field_name('limit')); ?>" type="number" step="1" min="1" value="<?php echo esc_attr($limit); ?>" size="3">
         </p>
         <p>
@@ -778,7 +778,7 @@ class RankItPro_Visits_Widget extends WP_Widget {
 }
 
 // Initialize the plugin
-new Check_In_Integration();
+new RankItPro_Visit_Integration();
 `;
   }
 
@@ -791,7 +791,7 @@ new Check_In_Integration();
       apiEndpoint += '/';
     }
     
-    return `<div id="check-in-container" data-api-key="${apiKey}" data-limit="5" data-type="all"></div>
+    return `<div id="rankitpro-visits-container" data-api-key="${apiKey}" data-limit="5" data-type="all"></div>
 <script>
 (function() {
   // Style for the widget
