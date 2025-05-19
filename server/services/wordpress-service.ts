@@ -724,17 +724,17 @@ class Check_In_Integration {
     }
 }
 
-class Check_Ins_Widget extends WP_Widget {
+class RankItPro_Visits_Widget extends WP_Widget {
     public function __construct() {
         parent::__construct(
-            'check_ins_widget',
+            'rankitpro_visits_widget',
             'Recent Visits',
             array('description' => 'Display your recent technician visits')
         );
     }
     
     public function widget($args, $instance) {
-        $title = !empty($instance['title']) ? $instance['title'] : 'Recent Check-Ins';
+        $title = !empty($instance['title']) ? $instance['title'] : 'Recent Visits';
         $limit = !empty($instance['limit']) ? $instance['limit'] : 3;
         $type = !empty($instance['type']) ? $instance['type'] : 'all';
         
@@ -747,7 +747,7 @@ class Check_Ins_Widget extends WP_Widget {
     }
     
     public function form($instance) {
-        $title = !empty($instance['title']) ? $instance['title'] : 'Recent Check-Ins';
+        $title = !empty($instance['title']) ? $instance['title'] : 'Recent Visits';
         $limit = !empty($instance['limit']) ? $instance['limit'] : 3;
         $type = !empty($instance['type']) ? $instance['type'] : 'all';
         
