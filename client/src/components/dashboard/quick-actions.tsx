@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 interface QuickActionsProps {
-  onOpenCheckInModal: () => void;
+  onOpenVisitModal: () => void;
   onOpenTechnicianModal?: () => void;
   onOpenBlogPostModal?: () => void;
   onOpenReviewRequestModal?: () => void;
 }
 
 export default function QuickActions({
-  onOpenCheckInModal,
+  onOpenVisitModal,
   onOpenTechnicianModal,
   onOpenBlogPostModal,
   onOpenReviewRequestModal
@@ -20,8 +20,8 @@ export default function QuickActions({
   
   const handleAction = (actionType: string) => {
     switch (actionType) {
-      case "check-in":
-        onOpenCheckInModal();
+      case "visit":
+        onOpenVisitModal();
         break;
       case "technician":
         if (onOpenTechnicianModal) {
@@ -74,13 +74,13 @@ export default function QuickActions({
         <div className="space-y-3">
           <Button 
             className="w-full flex items-center justify-center"
-            onClick={() => handleAction("check-in")}
+            onClick={() => handleAction("visit")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
               <path d="M5 12h14"/>
               <path d="M12 5v14"/>
             </svg>
-            New Check-in
+            New Visit
           </Button>
           
           <Button 
