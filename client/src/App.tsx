@@ -20,6 +20,7 @@ import TechApp from "@/pages/tech-app";
 import AISettings from "@/pages/ai-settings";
 import Home from "@/pages/home";
 import TechnicianMobile from "@/pages/technician-mobile";
+import ReviewRequest from "@/pages/review-request";
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
 // Informational Pages
@@ -113,6 +114,9 @@ function Router() {
       </Route>
       <Route path="/reviews">
         <PrivateRoute component={Reviews} path="/reviews" />
+      </Route>
+      <Route path="/review-requests">
+        <PrivateRoute component={ReviewRequest} path="/review-requests" role="company_admin" />
       </Route>
       
       {/* Admin Pages */}

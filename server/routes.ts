@@ -785,6 +785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/reviews", reviewRoutes);
   app.use("/api/blogs", blogRoutes);
   app.use("/api/demo", demoRoutes);
+  app.use("/api/review-requests", reviewRequestRoutes);
   
   // Create HTTP server
   const httpServer = createServer(app);
