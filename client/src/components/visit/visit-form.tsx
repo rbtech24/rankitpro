@@ -465,9 +465,9 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
         <div className="flex justify-end space-x-3">
           <Button 
             type="submit" 
-            disabled={createCheckinMutation.isPending}
+            disabled={createVisitMutation.isPending}
           >
-            {createCheckinMutation.isPending ? (
+            {createVisitMutation.isPending ? (
               <>
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -475,7 +475,7 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
                 </svg>
                 Submitting...
               </>
-            ) : "Submit Check-in"}
+            ) : "Submit Visit"}
           </Button>
         </div>
       </form>
