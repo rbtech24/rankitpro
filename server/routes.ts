@@ -810,6 +810,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/users", userRoutes);
   app.use("/api/ai-providers", aiProvidersRoutes);
   app.use("/api/generate-content", generateContentRoutes);
+  app.use("/api/mobile/v1", mobileRoutes);
   
   // Create HTTP server
   const httpServer = createServer(app);
