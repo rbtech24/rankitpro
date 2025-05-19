@@ -68,7 +68,7 @@ const Home = () => {
         {/* Hero Section */}
         <section className="py-16 md:py-24 px-6">
           <div className="container mx-auto text-center max-w-4xl">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-purple-600 text-transparent bg-clip-text">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#0088d2] to-[#00b05c] text-transparent bg-clip-text">
               Turn Technician Visits Into Powerful Marketing
             </h1>
             <p className="text-lg md:text-xl mb-8 text-muted-foreground max-w-3xl mx-auto">
@@ -76,9 +76,9 @@ const Home = () => {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/register">
-                <Button size="lg" className="w-full sm:w-auto">Get Started Free</Button>
+                <Button size="lg" className="w-full sm:w-auto bg-[#0088d2] hover:bg-[#0077b8]">Get Started Free</Button>
               </Link>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto border-[#00b05c] text-[#00b05c] hover:bg-[#00b05c]/10">
                 Watch Demo
               </Button>
             </div>
@@ -289,7 +289,7 @@ const Home = () => {
                 <div className="h-2 bg-primary"></div>
                 <CardContent className="p-6">
                   <div className="h-12 w-12 rounded-lg flex items-center justify-center bg-primary/10 mb-4">
-                    <Wrench className="h-6 w-6 text-primary" />
+                    <Zap className="h-6 w-6 text-[#0088d2]" />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Multiple AI Providers</h3>
                   <p className="text-muted-foreground">
@@ -489,8 +489,8 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <Wrench className="h-6 w-6 text-primary" />
-                <span className="text-lg font-bold text-white">CheckIn Pro</span>
+                <Logo size="sm" textVisible={false} />
+                <span className="text-lg font-bold text-white">Rank it Pro</span>
               </div>
               <p className="text-sm text-slate-400 mb-4">
                 The all-in-one platform for home service businesses to transform field operations into powerful marketing content.
