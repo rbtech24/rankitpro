@@ -20,7 +20,30 @@ const Home = () => {
           <nav className="hidden md:flex items-center space-x-6">
             <a href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</a>
             <a href="#how-it-works" className="text-sm font-medium hover:text-primary transition-colors">How It Works</a>
+            <a href="#seo-benefits" className="text-sm font-medium hover:text-primary transition-colors">SEO Benefits</a>
             <a href="#pricing" className="text-sm font-medium hover:text-primary transition-colors">Pricing</a>
+            <div className="relative group">
+              <button className="text-sm font-medium hover:text-primary transition-colors flex items-center">
+                Resources
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div className="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md overflow-hidden z-20 transform scale-0 group-hover:scale-100 transition-transform origin-top">
+                <Link to="/case-studies">
+                  <span className="block px-4 py-2 text-sm hover:bg-slate-100">Case Studies</span>
+                </Link>
+                <Link to="/testimonials">
+                  <span className="block px-4 py-2 text-sm hover:bg-slate-100">Testimonials</span>
+                </Link>
+                <Link to="/resources">
+                  <span className="block px-4 py-2 text-sm hover:bg-slate-100">Resources</span>
+                </Link>
+                <Link to="/blog">
+                  <span className="block px-4 py-2 text-sm hover:bg-slate-100">Blog</span>
+                </Link>
+              </div>
+            </div>
             <Link to="/login">
               <Button variant="outline" size="sm">Login</Button>
             </Link>

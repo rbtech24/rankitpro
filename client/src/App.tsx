@@ -21,6 +21,19 @@ import Home from "@/pages/home";
 import TechnicianMobile from "@/pages/technician-mobile";
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
+// Informational Pages
+import About from "@/pages/about";
+import CaseStudies from "@/pages/case-studies";
+import Testimonials from "@/pages/testimonials";
+import Resources from "@/pages/resources";
+import Documentation from "@/pages/documentation";
+import HelpCenter from "@/pages/help-center";
+import Blog from "@/pages/blog";
+import API from "@/pages/api";
+import Careers from "@/pages/careers";
+import PrivacyPolicy from "@/pages/privacy-policy";
+import TermsOfService from "@/pages/terms-of-service";
+
 // Authenticated route that redirects to login if not authenticated
 function PrivateRoute({ component: Component, role, ...rest }: { component: React.ComponentType<any>, role?: string, path: string }) {
   const { data: auth, isLoading } = useQuery<AuthState>({
@@ -71,6 +84,19 @@ function Router() {
       <Route path="/">
         {auth?.user ? <Redirect to="/dashboard" /> : <Home />}
       </Route>
+      
+      {/* Informational Pages */}
+      <Route path="/about"><About /></Route>
+      <Route path="/case-studies"><CaseStudies /></Route>
+      <Route path="/testimonials"><Testimonials /></Route>
+      <Route path="/resources"><Resources /></Route>
+      <Route path="/documentation"><Documentation /></Route>
+      <Route path="/help-center"><HelpCenter /></Route>
+      <Route path="/blog"><Blog /></Route>
+      <Route path="/api"><API /></Route>
+      <Route path="/careers"><Careers /></Route>
+      <Route path="/privacy-policy"><PrivacyPolicy /></Route>
+      <Route path="/terms-of-service"><TermsOfService /></Route>
       
       {/* Dashboard Pages */}
       <Route path="/dashboard">
