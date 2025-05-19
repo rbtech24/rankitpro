@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { 
   Card, 
@@ -42,17 +42,27 @@ import {
   SendHorizonal,
   Clock,
   Users,
-  ListChecks
+  ListChecks,
+  Loader2
 } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
+import { 
+  useReviewRequestSettings, 
+  useUpdateReviewRequestSettings,
+  useReviewRequests,
+  useSendReviewRequest,
+  useResendReviewRequest,
+  useReviewRequestStats
+} from '@/hooks/use-review-requests';
 
 export default function ReviewRequests() {
   const [activeTab, setActiveTab] = useState('settings');
   const { toast } = useToast();
   
-  // Review request settings
+  // Review request settings form state
   const [autoSendReviews, setAutoSendReviews] = useState(true);
   const [delayHours, setDelayHours] = useState(24);
+  const [contactPreference, setContactPreference] = useState('customer-preference');
   const [emailTemplate, setEmailTemplate] = useState('default');
   const [smsTemplate, setSmsTemplate] = useState('default');
   const [includeTechnicianName, setIncludeTechnicianName] = useState(true);
@@ -65,15 +75,6 @@ export default function ReviewRequests() {
   const [jobType, setJobType] = useState('');
   const [selectedTechnician, setSelectedTechnician] = useState('');
   const [contactMethod, setContactMethod] = useState('email');
-  
-  // Sample data for review requests history
-  const reviewRequests = [
-    { id: 1, customer: 'John Smith', method: 'email', status: 'sent', sentAt: '2025-05-18T14:30:00', technician: 'Mike Johnson' },
-    { id: 2, customer: 'Sarah Wilson', method: 'sms', status: 'sent', sentAt: '2025-05-17T10:15:00', technician: 'David Miller' },
-    { id: 3, customer: 'Robert Brown', method: 'email', status: 'failed', sentAt: '2025-05-17T09:45:00', technician: 'Mike Johnson' },
-    { id: 4, customer: 'Emily Davis', method: 'email', status: 'sent', sentAt: '2025-05-16T16:20:00', technician: 'Laura Wilson' },
-    { id: 5, customer: 'Michael Jones', method: 'sms', status: 'sent', sentAt: '2025-05-15T11:00:00', technician: 'David Miller' },
-  ];
   
   // Sample data for technicians
   const technicians = [
