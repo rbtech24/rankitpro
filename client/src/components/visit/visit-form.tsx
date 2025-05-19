@@ -90,10 +90,10 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
     },
   });
   
-  // Create checkin mutation
-  const createCheckinMutation = useMutation({
+  // Create visit mutation
+  const createVisitMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const res = await fetch("/api/check-ins", {
+      const res = await fetch("/api/visits", {
         method: "POST",
         body: data,
         credentials: "include"
@@ -107,12 +107,12 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/check-ins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/visits"] });
       queryClient.invalidateQueries({ queryKey: ["/api/company-stats"] });
       
       toast({
-        title: "Check-in Submitted",
-        description: "Your check-in was successfully recorded.",
+        title: "Visit Submitted",
+        description: "Your visit was successfully recorded.",
         variant: "default",
       });
       
@@ -230,7 +230,7 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
     });
     
     // Submit the form
-    createCheckinMutation.mutate(formData);
+    createVisitMutation.mutate(formData);
     
     // If send review request is checked, we would handle that here
     // This would typically open a modal to collect customer information
