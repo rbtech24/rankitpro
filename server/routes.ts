@@ -799,6 +799,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/blogs", blogRoutes);
   app.use("/api/demo", demoRoutes);
   app.use("/api/review-requests", reviewRequestRoutes);
+  app.use("/api/review-response", reviewResponseRoutes);
   app.use("/api/wordpress", wordpressRoutes);
   app.use("/api/billing", billingRoutes);
   app.use("/api/users", userRoutes);

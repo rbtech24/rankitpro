@@ -22,6 +22,8 @@ import AISettings from "@/pages/ai-settings";
 import Home from "@/pages/home";
 import TechnicianMobile from "@/pages/technician-mobile";
 import ReviewRequest from "@/pages/review-request";
+import Review from "@/pages/review";
+import ReviewsDashboard from "@/pages/reviews-dashboard";
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
 // Informational Pages
@@ -102,6 +104,7 @@ function Router() {
       <Route path="/privacy-policy"><PrivacyPolicy /></Route>
       <Route path="/terms-of-service"><TermsOfService /></Route>
       <Route path="/wordpress-integration"><WordPressIntegration /></Route>
+      <Route path="/review/:token"><Review /></Route>
       
       {/* Dashboard Pages */}
       <Route path="/dashboard">
@@ -118,6 +121,9 @@ function Router() {
       </Route>
       <Route path="/review-requests">
         <PrivateRoute component={ReviewRequest} path="/review-requests" role="company_admin" />
+      </Route>
+      <Route path="/reviews-dashboard">
+        <PrivateRoute component={ReviewsDashboard} path="/reviews-dashboard" role="company_admin" />
       </Route>
       
       {/* Admin Pages */}
