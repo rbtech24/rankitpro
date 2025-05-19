@@ -201,10 +201,14 @@ router.get('/wordpress/categories', isAuthenticated, isCompanyAdmin, async (req:
     
       // Get categories
       const categories = await wpService.getCategories();
-    res.json(categories);
+      res.json(categories);
+    } catch (error) {
+      console.error('Error fetching WordPress categories:', error);
+      res.status(500).json({ message: 'Error fetching WordPress categories' });
+    }
   } catch (error) {
-    console.error('Error fetching WordPress categories:', error);
-    res.status(500).json({ message: 'Error fetching WordPress categories' });
+    console.error('Error in WordPress categories route:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

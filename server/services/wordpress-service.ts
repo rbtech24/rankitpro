@@ -23,17 +23,32 @@ export interface WordPressPostResult {
 }
 
 /**
+ * Options for publishing content to WordPress with custom fields
+ */
+export interface WordPressPublishOptions {
+  status?: 'draft' | 'publish' | 'pending' | 'private';
+  categories?: number[];
+  tags?: number[];
+  customFields?: Record<string, string | number | boolean>;
+  template?: string;
+  featuredImage?: string;
+  acfFields?: Record<string, any>; // Advanced Custom Fields
+}
+
+/**
  * WordPress service for publishing content to WordPress
  */
 export class WordPressService {
   private credentials: WordPressCredentials;
   private apiBase: string;
+  private companyId?: number;
 
-  constructor(credentials: WordPressCredentials) {
-    this.credentials = credentials;
+  constructor(options: WordPressCredentials & { companyId?: number }) {
+    this.credentials = options;
+    this.companyId = options.companyId;
     
     // Ensure the site URL ends with a slash
-    let siteUrl = credentials.siteUrl;
+    let siteUrl = options.siteUrl;
     if (!siteUrl.endsWith('/')) {
       siteUrl += '/';
     }
@@ -42,9 +57,153 @@ export class WordPressService {
   }
 
   /**
-   * Publish a check-in to WordPress as a post
+   * Test connection to WordPress site
    */
-  async publishCheckIn(checkIn: CheckIn): Promise<WordPressPostResult> {
+  async testConnection(): Promise<boolean> {
+    try {
+      const response = await axios.get(`${this.apiBase}/categories`, {
+        auth: {
+          username: this.credentials.username,
+          password: this.credentials.password
+        }
+      });
+      
+      return response.status === 200;
+    } catch (error) {
+      console.error('WordPress connection test failed:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * Get WordPress categories
+   */
+  async getCategories(): Promise<Array<{id: number, name: string, count: number}>> {
+    try {
+      const response = await axios.get(`${this.apiBase}/categories`, {
+        auth: {
+          username: this.credentials.username,
+          password: this.credentials.password
+        },
+        params: {
+          per_page: 100
+        }
+      });
+      
+      return response.data.map((category: any) => ({
+        id: category.id,
+        name: category.name,
+        count: category.count
+      }));
+    } catch (error) {
+      console.error('Error fetching WordPress categories:', error);
+      return [];
+    }
+  }
+  
+  /**
+   * Get WordPress tags
+   */
+  async getTags(): Promise<Array<{id: number, name: string, count: number}>> {
+    try {
+      const response = await axios.get(`${this.apiBase}/tags`, {
+        auth: {
+          username: this.credentials.username,
+          password: this.credentials.password
+        },
+        params: {
+          per_page: 100
+        }
+      });
+      
+      return response.data.map((tag: any) => ({
+        id: tag.id,
+        name: tag.name,
+        count: tag.count
+      }));
+    } catch (error) {
+      console.error('Error fetching WordPress tags:', error);
+      return [];
+    }
+  }
+  
+  /**
+   * Get available custom fields in WordPress (ACF)
+   */
+  async getCustomFields(): Promise<Array<{key: string, name: string, type: string}>> {
+    try {
+      // Try to access ACF REST API
+      const response = await axios.get(`${this.credentials.siteUrl}/wp-json/acf/v3/posts`, {
+        auth: {
+          username: this.credentials.username,
+          password: this.credentials.password
+        }
+      });
+      
+      if (response.status === 200) {
+        // Get field groups
+        const groupsResponse = await axios.get(`${this.credentials.siteUrl}/wp-json/acf/v3/field-groups`, {
+          auth: {
+            username: this.credentials.username,
+            password: this.credentials.password
+          }
+        });
+        
+        const fields: Array<{key: string, name: string, type: string}> = [];
+        
+        // Extract field information from each group
+        if (groupsResponse.data && Array.isArray(groupsResponse.data)) {
+          for (const group of groupsResponse.data) {
+            const fieldsResponse = await axios.get(`${this.credentials.siteUrl}/wp-json/acf/v3/field-groups/${group.id}/fields`, {
+              auth: {
+                username: this.credentials.username,
+                password: this.credentials.password
+              }
+            });
+            
+            if (fieldsResponse.data && Array.isArray(fieldsResponse.data)) {
+              for (const field of fieldsResponse.data) {
+                fields.push({
+                  key: field.key,
+                  name: field.name,
+                  type: field.type
+                });
+              }
+            }
+          }
+        }
+        
+        return fields;
+      }
+      
+      // Fallback to standard meta fields
+      return [
+        { key: 'check_in_id', name: 'Check-In ID', type: 'number' },
+        { key: 'check_in_company_id', name: 'Company ID', type: 'number' },
+        { key: 'job_type', name: 'Job Type', type: 'text' },
+        { key: 'location', name: 'Location', type: 'text' },
+        { key: 'technician_name', name: 'Technician Name', type: 'text' },
+        { key: 'customer_name', name: 'Customer Name', type: 'text' },
+      ];
+    } catch (error) {
+      console.error('Error fetching WordPress custom fields:', error);
+      
+      // Return default custom fields
+      return [
+        { key: 'check_in_id', name: 'Check-In ID', type: 'number' },
+        { key: 'check_in_company_id', name: 'Company ID', type: 'number' },
+        { key: 'job_type', name: 'Job Type', type: 'text' },
+        { key: 'location', name: 'Location', type: 'text' },
+        { key: 'technician_name', name: 'Technician Name', type: 'text' },
+        { key: 'customer_name', name: 'Customer Name', type: 'text' },
+      ];
+    }
+  }
+
+  /**
+   * Publish a check-in to WordPress as a post with custom fields
+   */
+  async publishCheckIn(checkIn: CheckIn, options?: WordPressPublishOptions): Promise<WordPressPostResult> {
     try {
       // Format the content
       const title = `Job Check-In: ${checkIn.jobType} at ${checkIn.location || 'Customer Location'}`;
@@ -74,8 +233,8 @@ export class WordPressService {
         content += `<h4>Notes</h4><p>${checkIn.notes}</p>`;
       }
       
-      if (checkIn.recommendedServices) {
-        content += `<h4>Recommended Services</h4><p>${checkIn.recommendedServices}</p>`;
+      if (checkIn.additionalServices) {
+        content += `<h4>Additional Services</h4><p>${checkIn.additionalServices}</p>`;
       }
       
       // Add date
@@ -109,17 +268,58 @@ export class WordPressService {
         }
       }
       
-      // Create the post
+      // Create the post with advanced custom fields
       const postData = {
         title,
         content,
-        status: 'publish',
-        categories: this.credentials.categories,
-        tags: this.credentials.tags,
+        status: options?.status || 'publish',
+        categories: options?.categories || this.credentials.categories || [1], // Default to Uncategorized
+        tags: options?.tags || this.credentials.tags || [],
         meta: {
+          // Standard custom fields
           check_in_id: checkIn.id,
           job_type: checkIn.jobType,
-          check_in_date: checkInDate.toISOString()
+          check_in_date: checkInDate.toISOString(),
+          
+          // Location data
+          location: checkIn.location,
+          address: checkIn.address,
+          latitude: checkIn.latitude,
+          longitude: checkIn.longitude,
+          
+          // Customer information
+          customer_name: checkIn.customerName,
+          customer_email: checkIn.customerEmail,
+          customer_phone: checkIn.customerPhone,
+          
+          // Job details
+          work_performed: checkIn.workPerformed,
+          materials_used: checkIn.materialsUsed,
+          technician_id: checkIn.technicianId,
+          
+          // Custom SEO metadata
+          _yoast_wpseo_metadesc: `${checkIn.jobType} service check-in at ${checkIn.location || 'customer location'} - ${checkIn.notes?.substring(0, 100) || ''}`,
+          _yoast_wpseo_title: `${checkIn.jobType} Service Check-In | ${checkIn.location || 'Customer Location'}`,
+          
+          // Schema.org structured data for SEO
+          _wp_schema_markup: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Service",
+            "name": checkIn.jobType,
+            "provider": {
+              "@type": "LocalBusiness",
+              "name": "Service Provider",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": checkIn.location || ""
+              }
+            },
+            "serviceType": checkIn.jobType,
+            "description": checkIn.notes || ""
+          }),
+          
+          // Add any additional custom fields from options
+          ...(options?.customFields || {})
         }
       };
       
