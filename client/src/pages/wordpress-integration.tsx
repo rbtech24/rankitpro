@@ -482,6 +482,12 @@ export default function WordPressIntegration() {
                           <>Save Configuration</>
                         )}
                       </Button>
+                      {isConfigured && (
+                        <Button variant="secondary" onClick={() => window.location.href = "/wordpress-custom-fields"}>
+                          Advanced Custom Fields
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </CardFooter>
                 </Card>
