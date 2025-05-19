@@ -1,215 +1,219 @@
-import { Router, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import { isAuthenticated, isCompanyAdmin } from '../middleware/auth';
+import { stripeService } from '../services/stripe-service';
 import { storage } from '../storage';
-import { z } from 'zod';
-import stripeService from '../services/stripe-service';
 
-const router = Router();
+const router = express.Router();
 
-// Pricing plan IDs (would normally come from environment variables or database)
-const STRIPE_PRICE_IDS = {
-  starter: 'price_1OvXyzExample123Starter',
-  pro: 'price_1OvXyzExample123Pro',
-  agency: 'price_1OvXyzExample123Agency'
-};
-
-// Get subscription details
+/**
+ * Get subscription information for the current user's company
+ */
 router.get('/subscription', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
   try {
-    const user = req.user;
-    if (!user.companyId) {
-      return res.status(400).json({ message: 'User is not associated with a company' });
-    }
-
-    const company = await storage.getCompany(user.companyId);
-    if (!company) {
-      return res.status(404).json({ message: 'Company not found' });
-    }
-
-    // If user has no Stripe customer ID, return basic information
-    if (!user.stripeCustomerId) {
-      return res.json({
-        plan: company.plan || 'starter',
-        status: 'inactive',
-        usage: await getUsageStats(company.id)
-      });
-    }
-
-    // If user has a Stripe customer ID but no subscription, return customer info
-    if (!user.stripeSubscriptionId) {
-      return res.json({
-        plan: company.plan || 'starter',
-        status: 'inactive',
-        customerId: user.stripeCustomerId,
-        usage: await getUsageStats(company.id)
-      });
-    }
-
-    // Get subscription details from Stripe
-    const subscription = await stripeService.getSubscription(user.stripeSubscriptionId);
+    // @ts-ignore - userId does exist on req.user
+    const userId = req.user.id;
     
-    // Get payment methods
-    const paymentMethods = await stripeService.getCustomerPaymentMethods(user.stripeCustomerId);
+    // Get subscription data
+    const subscriptionData = await stripeService.getSubscriptionData(userId);
     
-    // Get invoices
-    const invoices = await stripeService.getCustomerInvoices(user.stripeCustomerId);
-
-    res.json({
-      plan: company.plan || 'starter',
-      status: subscription.status,
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      paymentMethods: paymentMethods.map(pm => ({
-        id: pm.id,
-        brand: pm.card?.brand || 'unknown',
-        last4: pm.card?.last4 || '****',
-        expMonth: pm.card?.exp_month || 0,
-        expYear: pm.card?.exp_year || 0,
-        isDefault: pm.id === subscription.default_payment_method
-      })),
-      invoices: invoices.map(invoice => ({
-        id: invoice.id,
-        number: invoice.number,
-        amount: invoice.amount_paid / 100,
-        status: invoice.status,
-        date: new Date(invoice.created * 1000),
-        url: invoice.hosted_invoice_url
-      })),
-      usage: await getUsageStats(company.id)
+    // Return subscription data
+    res.json(subscriptionData);
+  } catch (error: any) {
+    console.error('Error getting subscription data:', error);
+    res.status(500).json({ 
+      error: 'Failed to retrieve subscription information',
+      message: error.message
     });
-  } catch (error) {
-    console.error('Error fetching subscription details:', error);
-    res.status(500).json({ message: 'Error fetching subscription details' });
   }
 });
 
-// Create or update subscription
+/**
+ * Create or update a subscription for the current user's company
+ */
 router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
   try {
-    const planSchema = z.object({
-      plan: z.enum(['starter', 'pro', 'agency'])
-    });
-
-    const parsedData = planSchema.safeParse(req.body);
-    if (!parsedData.success) {
-      return res.status(400).json({ 
-        message: 'Invalid plan data', 
-        errors: parsedData.error.format() 
+    const { plan } = req.body;
+    
+    if (!plan || !['starter', 'pro', 'agency'].includes(plan)) {
+      return res.status(400).json({ error: 'Invalid plan specified' });
+    }
+    
+    // @ts-ignore - userId does exist on req.user
+    const userId = req.user.id;
+    
+    // Create or update subscription
+    const result = await stripeService.getOrCreateSubscription(userId, plan);
+    
+    // If the user is already subscribed to this plan
+    if (result.alreadySubscribed) {
+      return res.json({ 
+        message: 'Already subscribed to this plan',
+        alreadySubscribed: true,
+        subscriptionId: result.subscriptionId
       });
     }
-
-    const { plan } = parsedData.data;
-    const user = req.user;
     
-    if (!user.companyId) {
-      return res.status(400).json({ message: 'User is not associated with a company' });
-    }
-
-    const company = await storage.getCompany(user.companyId);
-    if (!company) {
-      return res.status(404).json({ message: 'Company not found' });
-    }
-
-    // Set the stripe price ID based on the plan
-    const priceId = STRIPE_PRICE_IDS[plan];
-    if (!priceId) {
-      return res.status(400).json({ message: 'Invalid plan selected' });
-    }
-
-    let clientSecret: string | null = null;
-    let customerId: string | null = null;
-    let subscriptionId: string | null = null;
-
-    // If no customer ID exists, create a new customer
-    if (!user.stripeCustomerId) {
-      customerId = await stripeService.createCustomer(user, company);
-      await storage.updateUser(user.id, { stripeCustomerId: customerId });
-      user.stripeCustomerId = customerId;
-    } else {
-      customerId = user.stripeCustomerId;
-    }
-
-    // If no subscription exists, create a new one
-    if (!user.stripeSubscriptionId) {
-      const result = await stripeService.createSubscription(customerId, priceId);
-      clientSecret = result.clientSecret;
-      subscriptionId = result.subscriptionId;
-      
-      // Update user with subscription ID
-      await storage.updateUser(user.id, { stripeSubscriptionId: subscriptionId });
-      
+    // If there's no client secret, subscription was updated without requiring payment
+    if (!result.clientSecret) {
       // Update company plan
-      await storage.updateCompany(company.id, { plan });
-    } else {
-      // Update existing subscription
-      const result = await stripeService.updateSubscription(user.stripeSubscriptionId, priceId);
-      clientSecret = result.clientSecret;
-      subscriptionId = result.subscriptionId;
+      await stripeService.updateCompanyPlan(userId);
       
-      // Update company plan
-      await storage.updateCompany(company.id, { plan });
+      return res.json({ 
+        message: 'Subscription updated successfully',
+        subscriptionId: result.subscriptionId
+      });
     }
-
-    res.json({
-      message: 'Subscription updated successfully',
-      clientSecret,
-      subscriptionId,
-      plan
+    
+    // Return the client secret for the frontend to complete the payment
+    res.json({ 
+      clientSecret: result.clientSecret,
+      subscriptionId: result.subscriptionId
     });
-  } catch (error) {
-    console.error('Error updating subscription:', error);
-    res.status(500).json({ message: 'Error updating subscription' });
+  } catch (error: any) {
+    console.error('Error creating subscription:', error);
+    res.status(500).json({ 
+      error: 'Failed to create or update subscription',
+      message: error.message
+    });
   }
 });
 
-// Cancel subscription
+/**
+ * Cancel the current user's subscription
+ */
 router.post('/subscription/cancel', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
   try {
-    const user = req.user;
+    // @ts-ignore - userId does exist on req.user
+    const userId = req.user.id;
     
-    if (!user.stripeSubscriptionId) {
-      return res.status(400).json({ message: 'No active subscription found' });
-    }
-
-    // Cancel the subscription at the end of the current period
-    const subscription = await stripeService.getSubscription(user.stripeSubscriptionId);
-    
-    if (subscription.cancel_at_period_end) {
-      return res.json({ 
-        message: 'Subscription is already set to cancel at the end of the billing period',
-        cancelDate: new Date(subscription.current_period_end * 1000)
-      });
-    }
-
-    // Cancel the subscription at the end of the current period
-    await stripeService.cancelSubscription(user.stripeSubscriptionId);
+    // Cancel subscription
+    const result = await stripeService.cancelSubscription(userId);
     
     res.json({ 
-      message: 'Subscription will be canceled at the end of the current billing period',
-      cancelDate: new Date(subscription.current_period_end * 1000)
+      message: 'Subscription canceled successfully',
+      cancelDate: result.cancelDate
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error canceling subscription:', error);
-    res.status(500).json({ message: 'Error canceling subscription' });
+    res.status(500).json({ 
+      error: 'Failed to cancel subscription',
+      message: error.message
+    });
   }
 });
 
-// Helper function to get usage statistics
+/**
+ * Create a payment intent for a one-time payment
+ */
+router.post('/payment-intent', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const { amount, currency } = req.body;
+    
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid amount specified' });
+    }
+    
+    // @ts-ignore - userId does exist on req.user
+    const userId = req.user.id;
+    const user = await storage.getUser(userId);
+    
+    // Create payment intent
+    const clientSecret = await stripeService.createPaymentIntent(
+      amount,
+      currency || 'usd',
+      user?.stripeCustomerId || undefined
+    );
+    
+    res.json({ clientSecret });
+  } catch (error: any) {
+    console.error('Error creating payment intent:', error);
+    res.status(500).json({ 
+      error: 'Failed to create payment intent',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Get usage statistics for the current user's company
+ */
+router.get('/usage', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore - userId does exist on req.user
+    const userId = req.user.id;
+    const user = await storage.getUser(userId);
+    
+    if (!user || !user.companyId) {
+      return res.status(400).json({ error: 'No company associated with this user' });
+    }
+    
+    // Get usage statistics
+    const stats = await getUsageStats(user.companyId);
+    
+    res.json(stats);
+  } catch (error: any) {
+    console.error('Error getting usage stats:', error);
+    res.status(500).json({ 
+      error: 'Failed to retrieve usage statistics',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Get detailed usage statistics for a company
+ */
 async function getUsageStats(companyId: number) {
+  const company = await storage.getCompany(companyId);
+  if (!company) {
+    throw new Error('Company not found');
+  }
+  
+  // Get company stats from storage
   const stats = await storage.getCompanyStats(companyId);
   
+  // Get plan limits
+  const planLimits = {
+    starter: {
+      checkins: 50,
+      blogPosts: 20,
+      technicians: 2
+    },
+    pro: {
+      checkins: 200,
+      blogPosts: 50,
+      technicians: 5
+    },
+    agency: {
+      checkins: 500,
+      blogPosts: 100,
+      technicians: 15
+    }
+  };
+  
+  // Set plan to starter if not defined
+  const plan = company.plan || 'starter';
+  const limits = planLimits[plan];
+  
+  // Format the response
   return {
-    checkins: {
-      used: stats.totalCheckins,
-      limit: 50 // This would be based on the plan
-    },
-    blogPosts: {
-      used: stats.blogPosts,
-      limit: 20 // This would be based on the plan
-    },
-    technicians: {
-      used: stats.activeTechs,
-      limit: 2 // This would be based on the plan
+    plan,
+    usage: {
+      checkins: {
+        used: stats.totalCheckins,
+        limit: limits.checkins,
+        percentage: Math.round((stats.totalCheckins / limits.checkins) * 100)
+      },
+      blogPosts: {
+        used: stats.blogPosts,
+        limit: limits.blogPosts,
+        percentage: Math.round((stats.blogPosts / limits.blogPosts) * 100)
+      },
+      technicians: {
+        used: stats.activeTechs,
+        limit: limits.technicians,
+        percentage: Math.round((stats.activeTechs / limits.technicians) * 100)
+      }
     }
   };
 }

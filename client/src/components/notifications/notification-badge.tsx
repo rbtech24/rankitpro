@@ -47,8 +47,8 @@ export default function NotificationBadge({ auth }: NotificationBadgeProps) {
       // Send authentication message with user ID
       ws.send(JSON.stringify({ 
         type: 'authenticate', 
-        userId: auth.user.id,
-        companyId: auth.user.companyId || null
+        userId: auth.user?.id,
+        companyId: auth.user?.companyId || null
       }));
     };
     

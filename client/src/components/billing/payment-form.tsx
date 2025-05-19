@@ -1,101 +1,103 @@
-import React, { useState, useEffect } from 'react';
-import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { useState } from 'react';
+import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import { Button } from '@/components/ui/button';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface PaymentFormProps {
-  clientSecret: string;
-  plan: string;
+  clientSecret?: string;
   onSuccess: () => void;
-  onCancel: () => void;
+  buttonText?: string;
+  isSubscription?: boolean;
 }
 
-export default function PaymentForm({ clientSecret, plan, onSuccess, onCancel }: PaymentFormProps) {
+export default function PaymentForm({ 
+  clientSecret, 
+  onSuccess, 
+  buttonText = 'Submit Payment', 
+  isSubscription = false 
+}: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!stripe) {
-      return;
-    }
-
-    if (!clientSecret) {
-      return;
-    }
-  }, [stripe, clientSecret]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!stripe || !elements) {
-      // Stripe.js hasn't yet loaded.
+    if (!stripe || !elements || !clientSecret) {
       return;
     }
 
-    setIsLoading(true);
-    setErrorMessage(null);
+    setIsProcessing(true);
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: window.location.origin + '/billing',
-      },
-      redirect: 'if_required'
-    });
+    try {
+      const cardElement = elements.getElement(CardElement);
+      
+      if (!cardElement) {
+        throw new Error('Card element not found');
+      }
 
-    if (error) {
-      setErrorMessage(error.message || 'An error occurred with your payment.');
-      setIsLoading(false);
-    } else {
-      // Payment succeeded
-      setIsLoading(false);
-      onSuccess();
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+        },
+      });
+
+      if (error) {
+        toast({
+          title: 'Payment failed',
+          description: error.message || 'An unexpected error occurred',
+          variant: 'destructive',
+        });
+      } else if (paymentIntent.status === 'succeeded') {
+        toast({
+          title: 'Payment successful',
+          description: isSubscription 
+            ? 'Your subscription has been activated' 
+            : 'Your payment has been processed successfully',
+        });
+        onSuccess();
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Payment error',
+        description: error.message || 'An unexpected error occurred',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-muted/50 p-4 rounded-lg mb-4">
-        <h3 className="text-lg font-medium mb-2">Subscription Summary</h3>
-        <p className="text-sm text-muted-foreground">
-          You are subscribing to the <span className="font-semibold capitalize">{plan}</span> plan.
-        </p>
+      <div className="p-4 border rounded-md bg-background">
+        <CardElement 
+          options={{
+            style: {
+              base: {
+                fontSize: '16px',
+                color: '#424770',
+                '::placeholder': {
+                  color: '#aab7c4',
+                },
+              },
+              invalid: {
+                color: '#9e2146',
+              },
+            },
+          }}
+        />
       </div>
-
-      {errorMessage && (
-        <Alert variant="destructive">
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
       
-      <PaymentElement />
-      
-      <div className="flex justify-between pt-4">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={onCancel}
-          disabled={isLoading}
-        >
-          Cancel
-        </Button>
-        <Button 
-          type="submit" 
-          disabled={!stripe || isLoading}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            `Subscribe to ${plan.charAt(0).toUpperCase() + plan.slice(1)}`
-          )}
-        </Button>
-      </div>
+      <Button 
+        type="submit" 
+        disabled={isProcessing || !stripe || !elements || !clientSecret}
+        className="w-full"
+      >
+        {isProcessing ? 'Processing...' : buttonText}
+      </Button>
     </form>
   );
 }

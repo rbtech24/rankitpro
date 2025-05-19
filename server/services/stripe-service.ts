@@ -1,211 +1,327 @@
-import Stripe from 'stripe';
-import { User, Company } from '../../shared/schema';
+import Stripe from "stripe";
+import { storage } from "../storage";
+import { User, Company } from "@shared/schema";
 
-// Initialize Stripe with the secret key
+// Check if Stripe API key is available
 if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn('STRIPE_SECRET_KEY not set. Stripe functionality will be disabled.');
+  console.warn("Warning: STRIPE_SECRET_KEY environment variable is not set. Stripe functionality will be limited.");
 }
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
-const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: '2023-10-16',
+// Initialize Stripe client with type assertion to handle TypeScript API version issues
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2023-10-16" as any,
 });
 
-class StripeService {
-  private isAvailable(): boolean {
-    return !!process.env.STRIPE_SECRET_KEY;
+// Define price IDs for different subscription plans
+const PRICE_IDS = {
+  starter: "price_starter", // Replace these with actual Stripe price IDs
+  pro: "price_pro",
+  agency: "price_agency"
+};
+
+// Monthly usage limits for each plan
+const PLAN_LIMITS = {
+  starter: {
+    checkins: 50,
+    blogPosts: 20,
+    technicians: 2
+  },
+  pro: {
+    checkins: 200,
+    blogPosts: 50,
+    technicians: 5
+  },
+  agency: {
+    checkins: 500,
+    blogPosts: 100,
+    technicians: 15
   }
+};
 
+export class StripeService {
   /**
-   * Create a new customer in Stripe
+   * Get or create a subscription for a user
    */
-  async createCustomer(user: User, company: Company): Promise<string> {
-    if (!this.isAvailable()) {
-      throw new Error('Stripe service is not available');
-    }
-
-    try {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        name: company.name,
-        metadata: {
-          userId: String(user.id),
-          companyId: String(company.id)
-        }
-      });
-
-      return customer.id;
-    } catch (error) {
-      console.error('Error creating Stripe customer:', error);
-      throw new Error('Failed to create Stripe customer');
-    }
-  }
-
-  /**
-   * Create a subscription for a customer
-   */
-  async createSubscription(
-    customerId: string,
-    planId: string,
-    trialDays = 0
-  ): Promise<{
-    subscriptionId: string;
-    clientSecret: string | null;
+  async getOrCreateSubscription(userId: number, plan: string): Promise<{
+    clientSecret?: string;
+    subscriptionId?: string;
+    alreadySubscribed?: boolean;
   }> {
-    if (!this.isAvailable()) {
-      throw new Error('Stripe service is not available');
-    }
-
     try {
+      const user = await storage.getUser(userId);
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // If user already has a subscription, retrieve it
+      if (user.stripeSubscriptionId) {
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        
+        // If user is already subscribed to this plan, return early
+        if (subscription.items.data[0].price.id === PRICE_IDS[plan as keyof typeof PRICE_IDS]) {
+          return { 
+            subscriptionId: subscription.id,
+            alreadySubscribed: true
+          };
+        }
+        
+        // Otherwise, update the subscription with the new plan
+        const updatedSubscription = await stripe.subscriptions.update(subscription.id, {
+          items: [{
+            id: subscription.items.data[0].id,
+            price: PRICE_IDS[plan as keyof typeof PRICE_IDS],
+          }],
+          payment_behavior: 'default_incomplete',
+          proration_behavior: 'create_prorations',
+          expand: ['latest_invoice.payment_intent'],
+        });
+        
+        // Update the user in the database
+        await storage.updateUserStripeInfo(user.id, {
+          customerId: user.stripeCustomerId || '', 
+          subscriptionId: updatedSubscription.id
+        });
+        
+        // @ts-ignore - Property 'payment_intent' exists on type 'Invoice' even if TypeScript doesn't recognize it
+        const clientSecret = updatedSubscription.latest_invoice?.payment_intent?.client_secret;
+        
+        return {
+          subscriptionId: updatedSubscription.id,
+          clientSecret: clientSecret
+        };
+      }
+      
+      // If the user doesn't have a stripe customer ID, create one
+      let customerId = user.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: user.username,
+          metadata: {
+            userId: user.id.toString()
+          }
+        });
+        
+        customerId = customer.id;
+        await storage.updateUser(user.id, { stripeCustomerId: customerId });
+      }
+      
+      // Create a new subscription
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
-        items: [{ price: planId }],
+        items: [{
+          price: PRICE_IDS[plan as keyof typeof PRICE_IDS],
+        }],
         payment_behavior: 'default_incomplete',
-        payment_settings: { save_default_payment_method: 'on_subscription' },
         expand: ['latest_invoice.payment_intent'],
-        trial_period_days: trialDays > 0 ? trialDays : undefined,
       });
-
-      // Get the client secret from the latest invoice's payment intent
-      const invoice = subscription.latest_invoice as Stripe.Invoice;
-      const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
-      const clientSecret = paymentIntent?.client_secret || null;
-
+      
+      // Update the user with the subscription ID
+      await storage.updateUserStripeInfo(user.id, {
+        customerId: customerId,
+        subscriptionId: subscription.id
+      });
+      
+      // @ts-ignore - Property 'payment_intent' exists on type 'Invoice' even if TypeScript doesn't recognize it
+      const clientSecret = subscription.latest_invoice?.payment_intent?.client_secret;
+      
       return {
         subscriptionId: subscription.id,
-        clientSecret
+        clientSecret: clientSecret
       };
-    } catch (error) {
-      console.error('Error creating Stripe subscription:', error);
-      throw new Error('Failed to create subscription');
+    } catch (error: any) {
+      console.error('Stripe subscription error:', error);
+      throw new Error(`Failed to create subscription: ${error.message}`);
     }
   }
-
+  
   /**
-   * Update a subscription's price
+   * Cancel a user's subscription
    */
-  async updateSubscription(
-    subscriptionId: string,
-    planId: string
-  ): Promise<{
-    subscriptionId: string;
-    clientSecret: string | null;
-  }> {
-    if (!this.isAvailable()) {
-      throw new Error('Stripe service is not available');
+  async cancelSubscription(userId: number): Promise<{ success: boolean; cancelDate: string }> {
+    const user = await storage.getUser(userId);
+    if (!user || !user.stripeSubscriptionId) {
+      throw new Error("No active subscription found");
     }
-
+    
     try {
-      // Get the subscription items
-      const subscriptionItems = await stripe.subscriptionItems.list({
-        subscription: subscriptionId,
+      const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        cancel_at_period_end: true
       });
-
-      // Update the subscription with the new price
-      if (subscriptionItems.data.length > 0) {
-        const itemId = subscriptionItems.data[0].id;
-        await stripe.subscriptionItems.update(itemId, {
-          price: planId,
-        });
-      }
-
-      // Create a new invoice immediately to capture the change
-      const invoice = await stripe.invoices.create({
-        customer: (await stripe.subscriptions.retrieve(subscriptionId)).customer as string,
-        subscription: subscriptionId,
-        auto_advance: true,
-      });
-
-      // Return the subscription ID and client secret (if available)
-      let clientSecret = null;
-      if (invoice.payment_intent) {
-        const paymentIntent = await stripe.paymentIntents.retrieve(
-          invoice.payment_intent as string
-        );
-        clientSecret = paymentIntent.client_secret;
-      }
-
+      
+      // Get the current_period_end as number (timestamps in Stripe are in seconds)
+      const periodEnd = subscription.current_period_end as unknown as number;
+      
       return {
-        subscriptionId,
-        clientSecret
+        success: true,
+        cancelDate: new Date(periodEnd * 1000).toISOString()
       };
-    } catch (error) {
-      console.error('Error updating Stripe subscription:', error);
-      throw new Error('Failed to update subscription');
+    } catch (error: any) {
+      console.error('Stripe cancellation error:', error);
+      throw new Error(`Failed to cancel subscription: ${error.message}`);
     }
   }
-
+  
   /**
-   * Cancel a subscription
+   * Get a user's subscription data
    */
-  async cancelSubscription(subscriptionId: string): Promise<boolean> {
-    if (!this.isAvailable()) {
-      throw new Error('Stripe service is not available');
+  async getSubscriptionData(userId: number) {
+    const user = await storage.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
     }
-
+    
+    // If user doesn't have a subscription, return empty data
+    if (!user.stripeSubscriptionId) {
+      return {
+        status: "inactive",
+        plan: "starter",
+        currentPeriodEnd: null,
+        cancelAtPeriodEnd: false,
+        paymentMethods: [],
+        invoices: []
+      };
+    }
+    
     try {
-      const subscription = await stripe.subscriptions.cancel(subscriptionId);
-      return subscription.status === 'canceled';
-    } catch (error) {
-      console.error('Error canceling Stripe subscription:', error);
-      throw new Error('Failed to cancel subscription');
+      // Get subscription details
+      const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+      
+      // Get the company for usage data
+      const company = user.companyId ? await storage.getCompany(user.companyId) : null;
+      
+      // Get payment methods
+      const paymentMethods = user.stripeCustomerId 
+        ? await stripe.paymentMethods.list({
+            customer: user.stripeCustomerId,
+            type: 'card'
+          })
+        : { data: [] };
+      
+      // Get invoices
+      const invoices = user.stripeCustomerId 
+        ? await stripe.invoices.list({
+            customer: user.stripeCustomerId,
+            limit: 5
+          })
+        : { data: [] };
+      
+      // Get company usage statistics
+      const companyStats = company 
+        ? await storage.getCompanyStats(company.id)
+        : { totalCheckins: 0, activeTechs: 0, blogPosts: 0, reviewRequests: 0 };
+      
+      // Determine the plan from the subscription
+      const planId = subscription.items.data[0].price.id;
+      let plan = "starter";
+      for (const [key, value] of Object.entries(PRICE_IDS)) {
+        if (value === planId) {
+          plan = key;
+          break;
+        }
+      }
+      
+      const limits = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS];
+      
+      // Format invoice data
+      const formattedInvoices = invoices.data.map(invoice => ({
+        id: invoice.id,
+        date: new Date(invoice.created * 1000).toISOString(),
+        amount: invoice.amount_paid / 100,
+        status: invoice.status,
+        url: invoice.hosted_invoice_url || '#'
+      }));
+      
+      // Format payment method data
+      const formattedPaymentMethods = paymentMethods.data.map(pm => ({
+        id: pm.id,
+        brand: pm.card?.brand || 'unknown',
+        last4: pm.card?.last4 || '****',
+        expMonth: pm.card?.exp_month || 0,
+        expYear: pm.card?.exp_year || 0,
+        isDefault: pm.id === subscription.default_payment_method
+      }));
+      
+      // Get the current_period_end as number (timestamps in Stripe are in seconds)
+      const periodEnd = subscription.current_period_end as unknown as number;
+      
+      return {
+        status: subscription.status,
+        plan,
+        currentPeriodEnd: new Date(periodEnd * 1000).toISOString(),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        paymentMethods: formattedPaymentMethods,
+        invoices: formattedInvoices,
+        usage: {
+          checkins: {
+            used: companyStats.totalCheckins,
+            limit: limits.checkins
+          },
+          blogPosts: {
+            used: companyStats.blogPosts,
+            limit: limits.blogPosts
+          },
+          technicians: {
+            used: companyStats.activeTechs,
+            limit: limits.technicians
+          }
+        }
+      };
+    } catch (error: any) {
+      console.error('Error getting subscription data:', error);
+      throw new Error(`Failed to get subscription data: ${error.message}`);
     }
   }
-
+  
   /**
-   * Get subscription details
+   * Create a payment intent for a one-time payment
    */
-  async getSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
-    if (!this.isAvailable()) {
-      throw new Error('Stripe service is not available');
-    }
-
+  async createPaymentIntent(amount: number, currency: string = 'usd', customerId?: string): Promise<string> {
     try {
-      return await stripe.subscriptions.retrieve(subscriptionId);
-    } catch (error) {
-      console.error('Error retrieving Stripe subscription:', error);
-      throw new Error('Failed to retrieve subscription details');
-    }
-  }
-
-  /**
-   * Get customer payment methods
-   */
-  async getCustomerPaymentMethods(customerId: string): Promise<Stripe.PaymentMethod[]> {
-    if (!this.isAvailable()) {
-      throw new Error('Stripe service is not available');
-    }
-
-    try {
-      const paymentMethods = await stripe.paymentMethods.list({
-        customer: customerId,
-        type: 'card',
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency,
+        ...(customerId && { customer: customerId }),
       });
-      return paymentMethods.data;
-    } catch (error) {
-      console.error('Error retrieving payment methods:', error);
-      throw new Error('Failed to retrieve payment methods');
+      
+      return paymentIntent.client_secret || '';
+    } catch (error: any) {
+      console.error('Error creating payment intent:', error);
+      throw new Error(`Failed to create payment intent: ${error.message}`);
     }
   }
-
+  
   /**
-   * Get customer invoices
+   * Update a company's plan based on a user's subscription
    */
-  async getCustomerInvoices(customerId: string): Promise<Stripe.Invoice[]> {
-    if (!this.isAvailable()) {
-      throw new Error('Stripe service is not available');
+  async updateCompanyPlan(userId: number): Promise<void> {
+    const user = await storage.getUser(userId);
+    if (!user || !user.companyId || !user.stripeSubscriptionId) {
+      return;
     }
-
+    
     try {
-      const invoices = await stripe.invoices.list({
-        customer: customerId,
+      const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+      const planId = subscription.items.data[0].price.id;
+      
+      let plan = "starter";
+      for (const [key, value] of Object.entries(PRICE_IDS)) {
+        if (value === planId) {
+          plan = key;
+          break;
+        }
+      }
+      
+      // Update company plan and usage limit
+      await storage.updateCompany(user.companyId, {
+        plan: plan as "starter" | "pro" | "agency",
+        usageLimit: PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS].checkins
       });
-      return invoices.data;
     } catch (error) {
-      console.error('Error retrieving invoices:', error);
-      throw new Error('Failed to retrieve invoices');
+      console.error('Error updating company plan:', error);
     }
   }
 }
 
-export default new StripeService();
+// Export a singleton instance
+export const stripeService = new StripeService();
