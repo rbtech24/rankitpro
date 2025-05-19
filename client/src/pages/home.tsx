@@ -488,9 +488,8 @@ const Home = () => {
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <Logo size="sm" textVisible={false} />
-                <span className="text-lg font-bold text-white">Rank it Pro</span>
+              <div className="flex items-center mb-4">
+                <Logo size="sm" textVisible={true} className="footer" />
               </div>
               <p className="text-sm text-slate-400 mb-4">
                 The all-in-one platform for home service businesses to transform field operations into powerful marketing content.

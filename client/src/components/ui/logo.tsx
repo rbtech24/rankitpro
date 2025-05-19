@@ -52,11 +52,11 @@ export function Logo({ className = "", size = 'md', textVisible = true }: LogoPr
 
   // Text that shows "RANK IT PRO" or nothing if textVisible is false
   const logoText = textVisible && (
-    <div className="ml-2">
-      <div className="flex flex-col font-black tracking-wide">
-        <span className="text-[#2e3538] text-2xl">RANK</span>
-        <span className="text-[#2e3538] text-2xl">IT</span>
-        <span className="text-[#2e3538] text-2xl">PRO</span>
+    <div className="ml-4">
+      <div className="flex flex-col font-black tracking-wide leading-none">
+        <span className={`${className.includes('footer') ? 'text-white' : 'text-[#2e3538]'} text-3xl`}>RANK</span>
+        <span className={`${className.includes('footer') ? 'text-white' : 'text-[#2e3538]'} text-3xl`}>IT</span>
+        <span className={`${className.includes('footer') ? 'text-white' : 'text-[#2e3538]'} text-3xl`}>PRO</span>
       </div>
     </div>
   );

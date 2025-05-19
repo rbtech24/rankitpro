@@ -68,8 +68,8 @@ export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <Logo size="sm" />
+              <div className="flex items-center mb-4">
+                <Logo size="sm" textVisible={true} className="footer" />
               </div>
               <p className="text-sm text-slate-400 mb-4">
                 The all-in-one platform for home service businesses to boost local SEO with field service visits, automated content creation, and review management.
