@@ -6,6 +6,23 @@ import { WordPressService } from '../services/wordpress-service';
 
 const router = Router();
 
+// Helper function to get WordPress service for a company
+const getWordPressService = async (companyId: number): Promise<WordPressService> => {
+  const company = await storage.getCompany(companyId);
+  if (!company || !company.wordpressConfig) {
+    throw new Error('WordPress integration not configured');
+  }
+  
+  const config = JSON.parse(company.wordpressConfig);
+  return new WordPressService({
+    siteUrl: config.siteUrl,
+    username: config.username,
+    password: config.applicationPassword, // Use application password as password
+    categories: config.defaultCategory ? [parseInt(config.defaultCategory, 10)] : undefined,
+    companyId
+  });
+};
+
 // The WordPress integration schema
 const wordpressConfigSchema = z.object({
   siteUrl: z.string().url(),
@@ -83,8 +100,11 @@ router.post('/wordpress/config', isAuthenticated, isCompanyAdmin, async (req: Re
     
     // Test connection before saving
     const wpService = new WordPressService({
-      ...config,
-      password: config.applicationPassword || config.password,
+      siteUrl: config.siteUrl,
+      username: config.username,
+      password: config.applicationPassword, // Use application password as password
+      categories: config.defaultCategory ? [parseInt(config.defaultCategory, 10)] : undefined,
+      defaultStatus: config.defaultStatus,
       companyId
     });
     

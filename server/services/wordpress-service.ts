@@ -22,6 +22,7 @@ export interface WordPressCredentials {
 export interface WordPressPostResult {
   id: number;
   link: string;
+  url?: string; // Alternative field name for link
   status: string;
 }
 
