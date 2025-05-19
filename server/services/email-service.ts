@@ -91,7 +91,7 @@ class EmailService {
       
       // Create template variables
       const templateVars = {
-        ...getCompanyTemplateVariables(company || { id: 0, name: this.companyName, createdAt: new Date() }),
+        ...getCompanyTemplateVariables(company || createDefaultCompany(this.companyName)),
         technicianName: checkIn.technician.name,
         jobType: checkIn.jobType,
         location: checkIn.location || 'Not specified',
@@ -151,7 +151,7 @@ class EmailService {
       
       // Create template variables
       const templateVars = {
-        ...getCompanyTemplateVariables(company || { id: 0, name: this.companyName, createdAt: new Date() }),
+        ...getCompanyTemplateVariables(company || createDefaultCompany(this.companyName)),
         title: blogPost.title,
         excerpt: excerpt,
         technicianName: technicianName,
@@ -189,7 +189,8 @@ class EmailService {
     technician: Technician,
     recipientEmail: string,
     companyName: string,
-    reviewLink: string
+    reviewLink: string,
+    company?: Company
   ): Promise<boolean> {
     if (!this.initialized) {
       log('Email service not initialized, skipping review request', 'warn');
@@ -205,32 +206,24 @@ class EmailService {
       const actualCompanyName = companyName || this.companyName;
       const subject = `How was your experience with ${actualCompanyName}?`;
       
-      const content = `
-        <h2>Thank you for choosing ${actualCompanyName}!</h2>
-        <p>Hello ${reviewRequest.customerName},</p>
-        <p>Thank you for choosing ${actualCompanyName} for your recent service. 
-        Your technician, ${technician.name}, would appreciate your feedback on their work.</p>
-        
-        <div style="margin: 30px 0; text-align: center;">
-          <a href="${reviewLink}" style="background-color: #4CAF50; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 4px;">
-            Leave a Review
-          </a>
-        </div>
-        
-        <p>Your feedback helps us improve our service and helps others in your community 
-        find reliable help for their needs.</p>
-        
-        <p>Thank you for your time!</p>
-        
-        <p>Best regards,<br>
-        The team at ${actualCompanyName}</p>
-      `;
+      // Create template variables
+      const templateVars = {
+        ...getCompanyTemplateVariables(company || createDefaultCompany(actualCompanyName)),
+        customerName: reviewRequest.customerName,
+        technicianName: technician.name,
+        jobType: 'recent service',
+        reviewUrl: reviewLink,
+        dateTime: new Date(reviewRequest.sentAt!).toLocaleString()
+      };
+      
+      // Generate HTML using template
+      const html = reviewRequestTemplate(templateVars);
 
       const msg = {
         to: recipientEmail,
         from: this.fromEmail,
         subject,
-        html: content,
+        html,
       };
 
       await sgMail.send(msg);
