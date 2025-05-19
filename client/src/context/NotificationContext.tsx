@@ -69,8 +69,8 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
       // Send authentication message
       const authMessage = {
         type: 'auth',
-        userId: userData.user.id,
-        companyId: userData.user.companyId,
+        userId: userData.user?.id,
+        companyId: userData.user?.companyId,
       };
       ws.send(JSON.stringify(authMessage));
     };
@@ -149,8 +149,8 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
           // Send authentication message
           const authMessage = {
             type: 'auth',
-            userId: userData.user.id,
-            companyId: userData.user.companyId,
+            userId: userData.user?.id,
+            companyId: userData.user?.companyId,
           };
           ws.send(JSON.stringify(authMessage));
         };
