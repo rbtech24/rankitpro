@@ -1,163 +1,203 @@
-import { Router } from 'express';
-import { storage } from '../storage';
-import { z } from 'zod';
-import { insertReviewResponseSchema } from '../../shared/schema';
+import { Router } from "express";
+import { z } from "zod";
+import { storage } from "../storage";
+import { authenticateCompany } from "../middleware/auth";
 
 const router = Router();
-
-// Define validation schema for submitting a review
-const submitReviewSchema = z.object({
-  token: z.string(),
-  rating: z.number().min(1).max(5),
-  feedback: z.string().optional().nullable(),
-  publicDisplay: z.boolean().optional().nullable()
-});
 
 /**
  * Get the public review submission page
  * Accessible by customers via a unique URL with token
  */
-router.get('/:token', async (req, res) => {
-  const { token } = req.params;
-  
+router.get("/request/:token", async (req, res) => {
   try {
-    // Find the review request with this token
-    const reviewRequests = await storage.getReviewRequestsByCompany(0); // Get all review requests initially
-    const reviewRequest = reviewRequests.find(request => request.token === token);
+    const { token } = req.params;
+    
+    if (!token) {
+      return res.status(400).json({ message: "Invalid request. Token is required." });
+    }
+    
+    // Get the review request using the token
+    const reviewRequests = await storage.getReviewRequestsByCompany(null); // Get all review requests
+    const reviewRequest = reviewRequests.find(req => req.token === token);
     
     if (!reviewRequest) {
-      return res.status(404).render('review-error', {
-        error: 'Review request not found or has expired.'
-      });
+      return res.status(404).json({ message: "Review request not found or has expired." });
     }
     
-    // Check if the review request has already been responded to
+    // Check if this request already has a response
     const existingResponse = await storage.getReviewResponseForRequest(reviewRequest.id);
     if (existingResponse) {
-      return res.status(400).render('review-submitted', {
-        message: 'You have already submitted a review. Thank you for your feedback!'
-      });
+      return res.status(400).json({ message: "This review has already been submitted." });
     }
     
-    // Get company info to display in the review form
+    // Get company and technician info
     const company = await storage.getCompany(reviewRequest.companyId);
     const technician = await storage.getTechnician(reviewRequest.technicianId);
     
     if (!company || !technician) {
-      return res.status(404).render('review-error', {
-        error: 'Company or technician information not found.'
-      });
+      return res.status(404).json({ message: "Company or technician information not found." });
     }
     
-    // Render the review submission form
-    return res.render('review-submission', {
-      company,
-      technician,
-      reviewRequest,
-      token
+    res.json({
+      companyId: company.id,
+      companyName: company.name,
+      technicianId: technician.id,
+      technicianName: technician.name,
+      jobType: reviewRequest.jobType,
+      customerName: reviewRequest.customerName,
+      requestId: reviewRequest.id
     });
+    
   } catch (error) {
-    console.error('Error fetching review request:', error);
-    return res.status(500).render('review-error', {
-      error: 'An error occurred while processing your review request.'
-    });
+    console.error("Error fetching review request details:", error);
+    res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });
 
 /**
  * Submit a customer review
  */
-router.post('/submit', async (req, res) => {
+router.post("/submit/:token", async (req, res) => {
   try {
-    const { token, rating, feedback, publicDisplay } = submitReviewSchema.parse(req.body);
+    const { token } = req.params;
     
-    // Find the review request with this token
-    const reviewRequests = await storage.getReviewRequestsByCompany(0); // Get all review requests initially
-    const reviewRequest = reviewRequests.find(request => request.token === token);
+    if (!token) {
+      return res.status(400).json({ message: "Invalid request. Token is required." });
+    }
+    
+    // Validate the submission data
+    const schema = z.object({
+      rating: z.number().min(1).max(5),
+      feedback: z.string().optional().nullable(),
+      publicDisplay: z.boolean().default(true)
+    });
+    
+    const validationResult = schema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ message: "Invalid review data", errors: validationResult.error.errors });
+    }
+    
+    const reviewData = validationResult.data;
+    
+    // Get the review request using the token
+    const reviewRequests = await storage.getReviewRequestsByCompany(null); // Get all review requests
+    const reviewRequest = reviewRequests.find(req => req.token === token);
     
     if (!reviewRequest) {
-      return res.status(404).json({
-        success: false,
-        message: 'Review request not found or has expired.'
-      });
+      return res.status(404).json({ message: "Review request not found or has expired." });
     }
     
-    // Check if the review request has already been responded to
+    // Check if this request already has a response
     const existingResponse = await storage.getReviewResponseForRequest(reviewRequest.id);
     if (existingResponse) {
-      return res.status(400).json({
-        success: false,
-        message: 'You have already submitted a review.'
-      });
+      return res.status(400).json({ message: "This review has already been submitted." });
     }
     
-    // Create a new review response
-    const newReviewResponse = await storage.createReviewResponse({
-      companyId: reviewRequest.companyId,
-      customerName: reviewRequest.customerName,
-      technicianId: reviewRequest.technicianId,
+    // Create the review response
+    const reviewResponse = await storage.createReviewResponse({
       reviewRequestId: reviewRequest.id,
-      rating,
-      feedback,
-      publicDisplay: publicDisplay ?? true
+      companyId: reviewRequest.companyId,
+      technicianId: reviewRequest.technicianId,
+      customerName: reviewRequest.customerName,
+      rating: reviewData.rating,
+      feedback: reviewData.feedback || null,
+      publicDisplay: reviewData.publicDisplay || null
     });
     
-    return res.json({
-      success: true,
-      message: 'Thank you for your review!',
-      reviewResponse: newReviewResponse
-    });
+    // Return the created review response
+    res.status(201).json(reviewResponse);
+    
   } catch (error) {
-    console.error('Error submitting review:', error);
-    let errorMessage = 'An error occurred while submitting your review.';
-    
-    if (error instanceof z.ZodError) {
-      errorMessage = 'Please provide a valid rating between 1 and 5.';
-    }
-    
-    return res.status(400).json({
-      success: false,
-      message: errorMessage
-    });
+    console.error("Error submitting review:", error);
+    res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });
 
 /**
  * Get all review responses for a company (admin only)
  */
-router.get('/company/:companyId', async (req, res) => {
-  // This would typically check authentication and authorization
-  // We'll leave that implementation for auth middleware
-  
+router.get("/company/:companyId", authenticateCompany, async (req, res) => {
   try {
     const companyId = parseInt(req.params.companyId);
-    const reviewResponses = await storage.getReviewResponsesByCompany(companyId);
     
-    return res.json(reviewResponses);
+    if (isNaN(companyId)) {
+      return res.status(400).json({ message: "Invalid company ID" });
+    }
+    
+    // Check if user has access to this company (already handled by authenticateCompany middleware)
+    
+    const reviews = await storage.getReviewResponsesByCompany(companyId);
+    
+    // Get technician names
+    const reviewsWithDetails = await Promise.all(
+      reviews.map(async (review) => {
+        const technician = await storage.getTechnician(review.technicianId);
+        return {
+          ...review,
+          technicianName: technician ? technician.name : "Unknown Technician"
+        };
+      })
+    );
+    
+    res.json(reviewsWithDetails);
+    
   } catch (error) {
-    console.error('Error fetching review responses:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'An error occurred while fetching review responses.'
-    });
+    console.error("Error fetching company reviews:", error);
+    res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });
 
 /**
  * Get review statistics for a company
  */
-router.get('/stats/:companyId', async (req, res) => {
+router.get("/stats/:companyId", authenticateCompany, async (req, res) => {
   try {
     const companyId = parseInt(req.params.companyId);
-    const stats = await storage.getReviewStats(companyId);
     
-    return res.json(stats);
+    if (isNaN(companyId)) {
+      return res.status(400).json({ message: "Invalid company ID" });
+    }
+    
+    // Check if user has access to this company (already handled by authenticateCompany middleware)
+    
+    const stats = await storage.getReviewStats(companyId);
+    res.json(stats);
+    
   } catch (error) {
-    console.error('Error fetching review stats:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'An error occurred while fetching review statistics.'
-    });
+    console.error("Error fetching review statistics:", error);
+    res.status(500).json({ message: "Server error occurred. Please try again later." });
+  }
+});
+
+/**
+ * Get reviews for a specific technician
+ */
+router.get("/technician/:technicianId", authenticateCompany, async (req, res) => {
+  try {
+    const technicianId = parseInt(req.params.technicianId);
+    
+    if (isNaN(technicianId)) {
+      return res.status(400).json({ message: "Invalid technician ID" });
+    }
+    
+    // Check if the technician belongs to the user's company
+    const technician = await storage.getTechnician(technicianId);
+    if (!technician) {
+      return res.status(404).json({ message: "Technician not found" });
+    }
+    
+    const user = req.user;
+    if (user.role !== "super_admin" && technician.companyId !== user.companyId) {
+      return res.status(403).json({ message: "You don't have access to this technician's reviews" });
+    }
+    
+    const reviews = await storage.getReviewResponsesByTechnician(technicianId);
+    res.json(reviews);
+    
+  } catch (error) {
+    console.error("Error fetching technician reviews:", error);
+    res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });
 
