@@ -119,6 +119,7 @@ export const insertTechnicianSchema = createInsertSchema(technicians).omit({ id:
 export const insertCheckInSchema = createInsertSchema(checkIns).omit({ id: true, createdAt: true });
 export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ id: true, createdAt: true });
 export const insertReviewRequestSchema = createInsertSchema(reviewRequests).omit({ id: true, sentAt: true });
+export const insertReviewResponseSchema = createInsertSchema(reviewResponses).omit({ id: true, respondedAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -138,6 +139,9 @@ export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 
 export type ReviewRequest = typeof reviewRequests.$inferSelect;
 export type InsertReviewRequest = z.infer<typeof insertReviewRequestSchema>;
+
+export type ReviewResponse = typeof reviewResponses.$inferSelect;
+export type InsertReviewResponse = z.infer<typeof insertReviewResponseSchema>;
 
 // Extended types that include related data
 export type CheckInWithTechnician = CheckIn & {

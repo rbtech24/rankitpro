@@ -1,7 +1,7 @@
 import { 
   User, InsertUser, Company, InsertCompany, Technician, InsertTechnician, 
   CheckIn, InsertCheckIn, BlogPost, InsertBlogPost, ReviewRequest, InsertReviewRequest,
-  CheckInWithTechnician, TechnicianWithStats
+  ReviewResponse, InsertReviewResponse, CheckInWithTechnician, TechnicianWithStats
 } from "@shared/schema";
 
 export interface IStorage {
@@ -53,12 +53,27 @@ export interface IStorage {
   createReviewRequest(reviewRequest: InsertReviewRequest): Promise<ReviewRequest>;
   updateReviewRequest(id: number, updates: Partial<ReviewRequest>): Promise<ReviewRequest | undefined>;
   
+  // Review response operations
+  getReviewResponse(id: number): Promise<ReviewResponse | undefined>;
+  getReviewResponsesByCompany(companyId: number): Promise<ReviewResponse[]>;
+  getReviewResponsesByTechnician(technicianId: number): Promise<ReviewResponse[]>;
+  getReviewResponseForRequest(reviewRequestId: number): Promise<ReviewResponse | undefined>;
+  createReviewResponse(reviewResponse: InsertReviewResponse): Promise<ReviewResponse>;
+  updateReviewResponse(id: number, updates: Partial<ReviewResponse>): Promise<ReviewResponse | undefined>;
+  getReviewStats(companyId: number): Promise<{
+    averageRating: number;
+    totalResponses: number;
+    ratingDistribution: { [key: number]: number };
+  }>;
+  
   // Stats operations
   getCompanyStats(companyId: number): Promise<{
     totalCheckins: number;
     activeTechs: number;
     blogPosts: number;
     reviewRequests: number;
+    reviewResponses: number;
+    averageRating: number;
   }>;
 }
 
@@ -69,6 +84,7 @@ export class MemStorage implements IStorage {
   private checkIns: Map<number, CheckIn>;
   private blogPosts: Map<number, BlogPost>;
   private reviewRequests: Map<number, ReviewRequest>;
+  private reviewResponses: Map<number, ReviewResponse>;
   
   private userId: number;
   private companyId: number;
@@ -76,6 +92,7 @@ export class MemStorage implements IStorage {
   private checkInId: number;
   private blogPostId: number;
   private reviewRequestId: number;
+  private reviewResponseId: number;
   
   constructor() {
     this.users = new Map();
