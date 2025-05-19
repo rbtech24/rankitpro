@@ -814,33 +814,35 @@ new RankItPro_Visit_Integration();
       background: #f9f9f9;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
-    .checkin-meta {
+    .visit-meta {
       font-size: 0.8em;
       color: #666;
       margin-top: 10px;
     }
-    .checkin-title {
+    .visit-title {
       font-weight: bold;
       font-size: 1.1em;
       margin-bottom: 10px;
+      color: #2e3538;
     }
-    .checkin-photos {
+    .visit-photos {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       margin-top: 10px;
     }
-    .checkin-photo {
+    .visit-photo {
       width: 100px;
       height: 100px;
       object-fit: cover;
-      border-radius: 3px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
   \`;
   document.head.appendChild(style);
 
   // Get the container
-  const container = document.getElementById('check-in-container');
+  const container = document.getElementById('rankitpro-visits-container');
   if (!container) return;
 
   // Get attributes
@@ -848,43 +850,43 @@ new RankItPro_Visit_Integration();
   const limit = container.getAttribute('data-limit') || 5;
   const type = container.getAttribute('data-type') || 'all';
 
-  // Fetch the check-ins
-  fetch('${apiEndpoint}api/wordpress/public/check-ins?apiKey=' + apiKey + '&limit=' + limit + '&type=' + type)
+  // Fetch the visits
+  fetch('${apiEndpoint}api/wordpress/public/visits?apiKey=' + apiKey + '&limit=' + limit + '&type=' + type)
     .then(response => response.json())
     .then(data => {
       if (!data || data.length === 0) {
-        container.innerHTML = '<p>No recent check-ins available.</p>';
+        container.innerHTML = '<p>No recent visits available.</p>';
         return;
       }
 
-      let html = '<ul class="checkin-list">';
+      let html = '<ul class="visit-list">';
       
-      data.forEach(checkIn => {
-        const date = new Date(checkIn.createdAt);
+      data.forEach(visit => {
+        const date = new Date(visit.createdAt);
         const formattedDate = date.toLocaleDateString();
         const formattedTime = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
         
-        html += '<li class="checkin-item">';
-        html += '<div class="checkin-title">' + escapeHtml(checkIn.jobType) + '</div>';
+        html += '<li class="visit-item">';
+        html += '<div class="visit-title">' + escapeHtml(visit.jobType) + '</div>';
         
-        if (checkIn.notes) {
-          html += '<div class="checkin-notes">' + escapeHtml(checkIn.notes) + '</div>';
+        if (visit.notes) {
+          html += '<div class="visit-notes">' + escapeHtml(visit.notes) + '</div>';
         }
         
-        if (checkIn.location) {
-          html += '<div class="checkin-location">Location: ' + escapeHtml(checkIn.location) + '</div>';
+        if (visit.location) {
+          html += '<div class="visit-location">Location: ' + escapeHtml(visit.location) + '</div>';
         }
         
         // Display photos if available
-        if (checkIn.photoUrls && checkIn.photoUrls.length > 0) {
-          html += '<div class="checkin-photos">';
-          checkIn.photoUrls.forEach(photoUrl => {
-            html += '<img class="checkin-photo" src="' + photoUrl + '" alt="Check-in photo" />';
+        if (visit.photoUrls && visit.photoUrls.length > 0) {
+          html += '<div class="visit-photos">';
+          visit.photoUrls.forEach(photoUrl => {
+            html += '<img class="visit-photo" src="' + photoUrl + '" alt="Visit photo" />';
           });
           html += '</div>';
         }
         
-        html += '<div class="checkin-meta">' + formattedDate + ' at ' + formattedTime + '</div>';
+        html += '<div class="visit-meta">' + formattedDate + ' at ' + formattedTime + '</div>';
         html += '</li>';
       });
       
@@ -892,8 +894,8 @@ new RankItPro_Visit_Integration();
       container.innerHTML = html;
     })
     .catch(error => {
-      console.error('Error fetching check-ins:', error);
-      container.innerHTML = '<p>Error loading check-ins.</p>';
+      console.error('Error fetching visits:', error);
+      container.innerHTML = '<p>Error loading visits.</p>';
     });
 
   // Helper function to escape HTML
