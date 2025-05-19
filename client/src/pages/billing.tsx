@@ -227,11 +227,40 @@ export default function Billing() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar className={`fixed inset-0 z-40 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:translate-x-0 md:relative`} />
+    <>
+      {/* Payment Modal */}
+      <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Complete Your Payment</DialogTitle>
+            <DialogDescription>
+              Please provide your payment details to {selectedPlan ? `switch to the ${selectedPlan} plan` : 'complete your subscription'}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {clientSecret && stripePromise ? (
+              <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <PaymentForm 
+                  clientSecret={clientSecret}
+                  onSuccess={handlePaymentSuccess}
+                  buttonText="Complete Payment"
+                  isSubscription={true}
+                />
+              </Elements>
+            ) : (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <TopNav onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <div className="flex h-screen overflow-hidden bg-gray-50">
+        <Sidebar className={`fixed inset-0 z-40 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:translate-x-0 md:relative`} />
+        
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <TopNav onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="mb-6">
@@ -262,45 +291,69 @@ export default function Billing() {
                   </div>
                   <div className="space-y-1">
                     <h4 className="text-sm font-medium text-gray-500">Next Renewal</h4>
-                    <p className="text-xl font-semibold">June 15, 2024</p>
+                    <p className="text-xl font-semibold">
+                      {renewalDate ? renewalDate.toLocaleDateString() : 'N/A'}
+                      {subscriptionStatus === 'canceled' && ' (Canceling)'}
+                    </p>
                   </div>
                 </div>
                 
                 <div className="mt-6 space-y-4">
                   <h4 className="text-sm font-medium">Usage</h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white rounded-lg border p-4">
-                      <div className="text-sm text-gray-500 mb-1">Check-ins</div>
-                      <div className="flex items-end justify-between">
-                        <div className="text-xl font-semibold">32</div>
-                        <div className="text-sm text-gray-500">/ 50</div>
+                    {isLoadingSubscription ? (
+                      <div className="col-span-3 flex justify-center py-8">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
                       </div>
-                      <div className="mt-2 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="bg-primary h-full" style={{ width: "64%" }}></div>
+                    ) : subscriptionData?.usage ? (
+                      <>
+                        <div className="bg-white rounded-lg border p-4">
+                          <div className="text-sm text-gray-500 mb-1">Check-ins</div>
+                          <div className="flex items-end justify-between">
+                            <div className="text-xl font-semibold">{subscriptionData.usage.checkins.used}</div>
+                            <div className="text-sm text-gray-500">/ {subscriptionData.usage.checkins.limit}</div>
+                          </div>
+                          <div className="mt-2 h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full ${subscriptionData.usage.checkins.used / subscriptionData.usage.checkins.limit > 0.9 ? 'bg-red-500' : 'bg-primary'}`} 
+                              style={{ width: `${Math.min(100, (subscriptionData.usage.checkins.used / subscriptionData.usage.checkins.limit) * 100)}%` }}>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-white rounded-lg border p-4">
+                          <div className="text-sm text-gray-500 mb-1">Blog Posts</div>
+                          <div className="flex items-end justify-between">
+                            <div className="text-xl font-semibold">{subscriptionData.usage.blogposts.used}</div>
+                            <div className="text-sm text-gray-500">/ {subscriptionData.usage.blogposts.limit}</div>
+                          </div>
+                          <div className="mt-2 h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full ${subscriptionData.usage.blogposts.used / subscriptionData.usage.blogposts.limit > 0.9 ? 'bg-red-500' : 'bg-primary'}`} 
+                              style={{ width: `${Math.min(100, (subscriptionData.usage.blogposts.used / subscriptionData.usage.blogposts.limit) * 100)}%` }}>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-white rounded-lg border p-4">
+                          <div className="text-sm text-gray-500 mb-1">Technicians</div>
+                          <div className="flex items-end justify-between">
+                            <div className="text-xl font-semibold">{subscriptionData.usage.technicians.used}</div>
+                            <div className="text-sm text-gray-500">/ {subscriptionData.usage.technicians.limit}</div>
+                          </div>
+                          <div className="mt-2 h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full ${subscriptionData.usage.technicians.used / subscriptionData.usage.technicians.limit > 0.9 ? 'bg-yellow-500' : 'bg-primary'}`}
+                              style={{ width: `${Math.min(100, (subscriptionData.usage.technicians.used / subscriptionData.usage.technicians.limit) * 100)}%` }}>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="col-span-3 text-center py-4 text-gray-500">
+                        Usage data not available
                       </div>
-                    </div>
-                    
-                    <div className="bg-white rounded-lg border p-4">
-                      <div className="text-sm text-gray-500 mb-1">Blog Posts</div>
-                      <div className="flex items-end justify-between">
-                        <div className="text-xl font-semibold">12</div>
-                        <div className="text-sm text-gray-500">/ 20</div>
-                      </div>
-                      <div className="mt-2 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="bg-primary h-full" style={{ width: "60%" }}></div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white rounded-lg border p-4">
-                      <div className="text-sm text-gray-500 mb-1">Technicians</div>
-                      <div className="flex items-end justify-between">
-                        <div className="text-xl font-semibold">2</div>
-                        <div className="text-sm text-gray-500">/ 2</div>
-                      </div>
-                      <div className="mt-2 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="bg-yellow-500 h-full" style={{ width: "100%" }}></div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -316,24 +369,48 @@ export default function Billing() {
                 <CardDescription>Manage your payment methods on file.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-md">
-                  <div className="flex items-center">
-                    <div className="rounded-md bg-gray-100 p-2 mr-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-700">
-                        <rect width="20" height="14" x="2" y="5" rx="2"/>
-                        <line x1="2" x2="22" y1="10" y2="10"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-medium">Visa ending in 4242</p>
-                      <p className="text-sm text-gray-500">Expires 12/2025</p>
-                    </div>
+                {isLoadingSubscription ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
-                  <Badge>Default</Badge>
-                </div>
+                ) : paymentMethods.length > 0 ? (
+                  paymentMethods.map((method, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 border rounded-md">
+                      <div className="flex items-center">
+                        <div className="rounded-md bg-gray-100 p-2 mr-4">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-700">
+                            <rect width="20" height="14" x="2" y="5" rx="2"/>
+                            <line x1="2" x2="22" y1="10" y2="10"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="font-medium">{method.brand.charAt(0).toUpperCase() + method.brand.slice(1)} ending in {method.last4}</p>
+                          <p className="text-sm text-gray-500">Expires {method.expMonth}/{method.expYear}</p>
+                        </div>
+                      </div>
+                      {method.isDefault && <Badge>Default</Badge>}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    No payment methods on file
+                  </div>
+                )}
               </CardContent>
               <CardFooter>
-                <Button variant="outline">Add Payment Method</Button>
+                <Button variant="outline" onClick={() => {
+                  if (subscriptionStatus === 'active') {
+                    window.location.href = '/update-payment-method'; // You can implement this page later
+                  } else {
+                    toast({
+                      title: "No Active Subscription",
+                      description: "You need an active subscription to update payment methods.",
+                      variant: "default",
+                    });
+                  }
+                }}>
+                  {paymentMethods.length > 0 ? 'Update Payment Method' : 'Add Payment Method'}
+                </Button>
               </CardFooter>
             </Card>
             
