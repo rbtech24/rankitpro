@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/layout/sidebar";
 import TopNav from "@/components/layout/top-nav";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import PaymentForm from "@/components/billing/payment-form";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
+
+// Initialize Stripe outside of the component
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 interface PlanFeature {
   name: string;
@@ -38,22 +47,167 @@ export default function Billing() {
     queryFn: getCurrentUser
   });
   
+  // State for subscription management and payment modal
   const [currentPlan, setCurrentPlan] = useState(auth?.company?.plan || "starter");
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [renewalDate, setRenewalDate] = useState<Date | null>(null);
+  
+  // Query for subscription data
+  const { data: subscriptionData, isLoading: isLoadingSubscription } = useQuery({
+    queryKey: ['/api/billing/subscription'],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('GET', '/api/billing/subscription');
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching subscription data:', error);
+        return null;
+      }
+    },
+    enabled: !!auth?.company
+  });
+  
+  // Update state based on subscription data
+  useEffect(() => {
+    if (subscriptionData) {
+      setCurrentPlan(subscriptionData.plan || "starter");
+      setSubscriptionStatus(subscriptionData.status || "inactive");
+      
+      if (subscriptionData.paymentMethods) {
+        setPaymentMethods(subscriptionData.paymentMethods);
+      }
+      
+      if (subscriptionData.invoices) {
+        setInvoices(subscriptionData.invoices);
+      }
+      
+      if (subscriptionData.currentPeriodEnd) {
+        setRenewalDate(new Date(subscriptionData.currentPeriodEnd));
+      }
+    }
+  }, [subscriptionData]);
+  
+  // Mutation for updating subscription
+  const updateSubscription = useMutation({
+    mutationFn: async (plan: string) => {
+      setIsLoading(true);
+      const response = await apiRequest('POST', '/api/billing/subscription', { plan });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setIsLoading(false);
+      if (data.clientSecret) {
+        setClientSecret(data.clientSecret);
+        setIsPaymentModalOpen(true);
+      } else {
+        // If no client secret is returned, the subscription was updated without requiring payment
+        toast({
+          title: "Subscription Updated",
+          description: `Your subscription has been updated to the ${selectedPlan} plan.`,
+          variant: "default",
+        });
+        queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+        setSelectedPlan(null);
+      }
+    },
+    onError: (error) => {
+      setIsLoading(false);
+      console.error('Error updating subscription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update your subscription. Please try again.",
+        variant: "destructive",
+      });
+      setSelectedPlan(null);
+    }
+  });
+  
+  // Mutation for canceling subscription
+  const cancelSubscription = useMutation({
+    mutationFn: async () => {
+      setIsLoading(true);
+      const response = await apiRequest('POST', '/api/billing/subscription/cancel');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setIsLoading(false);
+      toast({
+        title: "Subscription Canceled",
+        description: `Your subscription will be canceled at the end of the current billing period (${new Date(data.cancelDate).toLocaleDateString()}).`,
+        variant: "default",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
+    },
+    onError: (error) => {
+      setIsLoading(false);
+      console.error('Error canceling subscription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel your subscription. Please try again or contact support.",
+        variant: "destructive",
+      });
+    }
+  });
   
   const handleChangePlan = (plan: string) => {
-    toast({
-      title: "Redirecting to checkout",
-      description: `You'll be redirected to update your subscription to the ${plan} plan.`,
-      variant: "default",
-    });
+    setSelectedPlan(plan);
+    
+    if (plan === currentPlan) {
+      toast({
+        title: "Already Subscribed",
+        description: `You are already subscribed to the ${plan} plan.`,
+        variant: "default",
+      });
+      return;
+    }
+    
+    // Confirm plan change
+    if (window.confirm(`Are you sure you want to change your subscription to the ${plan} plan?`)) {
+      updateSubscription.mutate(plan);
+    } else {
+      setSelectedPlan(null);
+    }
   };
   
   const handleCancelSubscription = () => {
+    if (subscriptionStatus === 'active') {
+      // Confirm cancellation
+      if (window.confirm("Are you sure you want to cancel your subscription? Your service will continue until the end of your current billing period.")) {
+        cancelSubscription.mutate();
+      }
+    } else {
+      toast({
+        title: "No Active Subscription",
+        description: "You don't have an active subscription to cancel.",
+        variant: "default",
+      });
+    }
+  };
+  
+  const handlePaymentSuccess = () => {
+    setIsPaymentModalOpen(false);
+    setClientSecret(null);
     toast({
-      title: "Cancel Subscription",
-      description: "Please contact support to cancel your subscription.",
+      title: "Payment Successful",
+      description: `Your subscription has been updated to the ${selectedPlan} plan.`,
       variant: "default",
     });
+    queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+    setSelectedPlan(null);
+  };
+  
+  const handlePaymentCancel = () => {
+    setIsPaymentModalOpen(false);
+    setClientSecret(null);
+    setSelectedPlan(null);
   };
   
   const formatFeatureValue = (value: string | boolean) => {
