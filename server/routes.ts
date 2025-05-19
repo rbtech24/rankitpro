@@ -418,8 +418,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Check-in routes
-  app.get("/api/check-ins", isAuthenticated, async (req, res) => {
+  // Visit routes
+  app.get("/api/visits", isAuthenticated, async (req, res) => {
     try {
       const { limit } = req.query;
       const limitNum = limit ? parseInt(limit as string) : undefined;
@@ -434,11 +434,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ message: "Technician record not found" });
         }
         
-        const checkIns = await storage.getCheckInsByTechnician(technician.id, limitNum);
-        return res.json(checkIns);
+        const visits = await storage.getCheckInsByTechnician(technician.id, limitNum);
+        return res.json(visits);
       }
       
-      // For admins, return all company check-ins
+      // For admins, return all company visits
       const companyId = req.user.companyId;
       
       if (!companyId && req.user.role !== "super_admin") {
@@ -455,15 +455,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       
-      const checkIns = await storage.getCheckInsByCompany(queryCompanyId, limitNum);
-      res.json(checkIns);
+      const visits = await storage.getCheckInsByCompany(queryCompanyId, limitNum);
+      res.json(visits);
     } catch (error) {
-      console.error("Get check-ins error:", error);
+      console.error("Get visits error:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
   
-  app.post("/api/check-ins", isAuthenticated, upload.array("photos", 5), async (req, res) => {
+  app.post("/api/visits", isAuthenticated, upload.array("photos", 5), async (req, res) => {
     try {
       const companyId = req.user.companyId;
       
