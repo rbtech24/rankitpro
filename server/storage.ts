@@ -1,0 +1,370 @@
+import { 
+  User, InsertUser, Company, InsertCompany, Technician, InsertTechnician, 
+  CheckIn, InsertCheckIn, BlogPost, InsertBlogPost, ReviewRequest, InsertReviewRequest,
+  CheckInWithTechnician, TechnicianWithStats
+} from "@shared/schema";
+
+export interface IStorage {
+  // User operations
+  getUser(id: number): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
+  updateUserStripeInfo(userId: number, stripeInfo: { customerId: string, subscriptionId: string }): Promise<User | undefined>;
+  
+  // Company operations
+  getCompany(id: number): Promise<Company | undefined>;
+  getCompanyByName(name: string): Promise<Company | undefined>;
+  createCompany(company: InsertCompany): Promise<Company>;
+  updateCompany(id: number, updates: Partial<Company>): Promise<Company | undefined>;
+  
+  // Technician operations
+  getTechnician(id: number): Promise<Technician | undefined>;
+  getTechnicianByEmail(email: string): Promise<Technician | undefined>;
+  getTechniciansByCompany(companyId: number): Promise<Technician[]>;
+  getTechniciansWithStats(companyId: number): Promise<TechnicianWithStats[]>;
+  createTechnician(technician: InsertTechnician): Promise<Technician>;
+  updateTechnician(id: number, updates: Partial<Technician>): Promise<Technician | undefined>;
+  deleteTechnician(id: number): Promise<boolean>;
+  
+  // Check-in operations
+  getCheckIn(id: number): Promise<CheckIn | undefined>;
+  getCheckInsByCompany(companyId: number, limit?: number): Promise<CheckInWithTechnician[]>;
+  getCheckInsByTechnician(technicianId: number, limit?: number): Promise<CheckIn[]>;
+  createCheckIn(checkIn: InsertCheckIn): Promise<CheckIn>;
+  updateCheckIn(id: number, updates: Partial<CheckIn>): Promise<CheckIn | undefined>;
+  deleteCheckIn(id: number): Promise<boolean>;
+  
+  // Blog post operations
+  getBlogPost(id: number): Promise<BlogPost | undefined>;
+  getBlogPostsByCompany(companyId: number): Promise<BlogPost[]>;
+  createBlogPost(blogPost: InsertBlogPost): Promise<BlogPost>;
+  updateBlogPost(id: number, updates: Partial<BlogPost>): Promise<BlogPost | undefined>;
+  deleteBlogPost(id: number): Promise<boolean>;
+  
+  // Review request operations
+  getReviewRequest(id: number): Promise<ReviewRequest | undefined>;
+  getReviewRequestsByCompany(companyId: number): Promise<ReviewRequest[]>;
+  createReviewRequest(reviewRequest: InsertReviewRequest): Promise<ReviewRequest>;
+  
+  // Stats operations
+  getCompanyStats(companyId: number): Promise<{
+    totalCheckins: number;
+    activeTechs: number;
+    blogPosts: number;
+    reviewRequests: number;
+  }>;
+}
+
+export class MemStorage implements IStorage {
+  private users: Map<number, User>;
+  private companies: Map<number, Company>;
+  private technicians: Map<number, Technician>;
+  private checkIns: Map<number, CheckIn>;
+  private blogPosts: Map<number, BlogPost>;
+  private reviewRequests: Map<number, ReviewRequest>;
+  
+  private userId: number;
+  private companyId: number;
+  private technicianId: number;
+  private checkInId: number;
+  private blogPostId: number;
+  private reviewRequestId: number;
+  
+  constructor() {
+    this.users = new Map();
+    this.companies = new Map();
+    this.technicians = new Map();
+    this.checkIns = new Map();
+    this.blogPosts = new Map();
+    this.reviewRequests = new Map();
+    
+    this.userId = 1;
+    this.companyId = 1;
+    this.technicianId = 1;
+    this.checkInId = 1;
+    this.blogPostId = 1;
+    this.reviewRequestId = 1;
+    
+    // Add a default super admin
+    this.createUser({
+      username: "admin",
+      email: "admin@checkinpro.com",
+      password: "$2b$10$WOcqvEQUqkgQozHp4OYV0eFNB3jA3S.NtT2tgN1b3JfNXBXs0VUZW", // "adminpassword" hashed
+      role: "super_admin"
+    });
+  }
+  
+  // User operations
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.email === email);
+  }
+  
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.username === username);
+  }
+  
+  async createUser(user: InsertUser): Promise<User> {
+    const id = this.userId++;
+    const createdAt = new Date();
+    const newUser: User = { ...user, id, createdAt };
+    
+    this.users.set(id, newUser);
+    return newUser;
+  }
+  
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, ...updates };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  
+  async updateUserStripeInfo(userId: number, stripeInfo: { customerId: string, subscriptionId: string }): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    
+    const updatedUser = { 
+      ...user, 
+      stripeCustomerId: stripeInfo.customerId, 
+      stripeSubscriptionId: stripeInfo.subscriptionId 
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+  
+  // Company operations
+  async getCompany(id: number): Promise<Company | undefined> {
+    return this.companies.get(id);
+  }
+  
+  async getCompanyByName(name: string): Promise<Company | undefined> {
+    return Array.from(this.companies.values()).find(company => company.name === name);
+  }
+  
+  async createCompany(company: InsertCompany): Promise<Company> {
+    const id = this.companyId++;
+    const createdAt = new Date();
+    const newCompany: Company = { ...company, id, createdAt };
+    
+    this.companies.set(id, newCompany);
+    return newCompany;
+  }
+  
+  async updateCompany(id: number, updates: Partial<Company>): Promise<Company | undefined> {
+    const company = this.companies.get(id);
+    if (!company) return undefined;
+    
+    const updatedCompany = { ...company, ...updates };
+    this.companies.set(id, updatedCompany);
+    return updatedCompany;
+  }
+  
+  // Technician operations
+  async getTechnician(id: number): Promise<Technician | undefined> {
+    return this.technicians.get(id);
+  }
+  
+  async getTechnicianByEmail(email: string): Promise<Technician | undefined> {
+    return Array.from(this.technicians.values()).find(tech => tech.email === email);
+  }
+  
+  async getTechniciansByCompany(companyId: number): Promise<Technician[]> {
+    return Array.from(this.technicians.values()).filter(tech => tech.companyId === companyId);
+  }
+  
+  async getTechniciansWithStats(companyId: number): Promise<TechnicianWithStats[]> {
+    const technicians = await this.getTechniciansByCompany(companyId);
+    
+    return technicians.map(tech => {
+      const techCheckIns = Array.from(this.checkIns.values()).filter(
+        checkIn => checkIn.technicianId === tech.id
+      );
+      
+      const techReviews = Array.from(this.reviewRequests.values()).filter(
+        review => review.technicianId === tech.id
+      );
+      
+      // Simulate rating based on number of reviews (in a real app this would come from customer ratings)
+      const rating = techReviews.length > 0 
+        ? 4.5 + (Math.random() * 0.5) // Random rating between 4.5 and 5.0
+        : 0;
+      
+      return {
+        ...tech,
+        checkinsCount: techCheckIns.length,
+        reviewsCount: techReviews.length,
+        rating: rating
+      };
+    });
+  }
+  
+  async createTechnician(technician: InsertTechnician): Promise<Technician> {
+    const id = this.technicianId++;
+    const createdAt = new Date();
+    const newTechnician: Technician = { ...technician, id, createdAt };
+    
+    this.technicians.set(id, newTechnician);
+    return newTechnician;
+  }
+  
+  async updateTechnician(id: number, updates: Partial<Technician>): Promise<Technician | undefined> {
+    const technician = this.technicians.get(id);
+    if (!technician) return undefined;
+    
+    const updatedTechnician = { ...technician, ...updates };
+    this.technicians.set(id, updatedTechnician);
+    return updatedTechnician;
+  }
+  
+  async deleteTechnician(id: number): Promise<boolean> {
+    return this.technicians.delete(id);
+  }
+  
+  // Check-in operations
+  async getCheckIn(id: number): Promise<CheckIn | undefined> {
+    return this.checkIns.get(id);
+  }
+  
+  async getCheckInsByCompany(companyId: number, limit?: number): Promise<CheckInWithTechnician[]> {
+    const companyCheckIns = Array.from(this.checkIns.values())
+      .filter(checkIn => checkIn.companyId === companyId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    
+    const result = await Promise.all(
+      (limit ? companyCheckIns.slice(0, limit) : companyCheckIns).map(async checkIn => {
+        const technician = await this.getTechnician(checkIn.technicianId);
+        return {
+          ...checkIn,
+          technician: technician!
+        };
+      })
+    );
+    
+    return result;
+  }
+  
+  async getCheckInsByTechnician(technicianId: number, limit?: number): Promise<CheckIn[]> {
+    const techCheckIns = Array.from(this.checkIns.values())
+      .filter(checkIn => checkIn.technicianId === technicianId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    
+    return limit ? techCheckIns.slice(0, limit) : techCheckIns;
+  }
+  
+  async createCheckIn(checkIn: InsertCheckIn): Promise<CheckIn> {
+    const id = this.checkInId++;
+    const createdAt = new Date();
+    const newCheckIn: CheckIn = { ...checkIn, id, createdAt };
+    
+    this.checkIns.set(id, newCheckIn);
+    return newCheckIn;
+  }
+  
+  async updateCheckIn(id: number, updates: Partial<CheckIn>): Promise<CheckIn | undefined> {
+    const checkIn = this.checkIns.get(id);
+    if (!checkIn) return undefined;
+    
+    const updatedCheckIn = { ...checkIn, ...updates };
+    this.checkIns.set(id, updatedCheckIn);
+    return updatedCheckIn;
+  }
+  
+  async deleteCheckIn(id: number): Promise<boolean> {
+    return this.checkIns.delete(id);
+  }
+  
+  // Blog post operations
+  async getBlogPost(id: number): Promise<BlogPost | undefined> {
+    return this.blogPosts.get(id);
+  }
+  
+  async getBlogPostsByCompany(companyId: number): Promise<BlogPost[]> {
+    return Array.from(this.blogPosts.values())
+      .filter(post => post.companyId === companyId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+  
+  async createBlogPost(blogPost: InsertBlogPost): Promise<BlogPost> {
+    const id = this.blogPostId++;
+    const createdAt = new Date();
+    const newBlogPost: BlogPost = { ...blogPost, id, createdAt };
+    
+    this.blogPosts.set(id, newBlogPost);
+    return newBlogPost;
+  }
+  
+  async updateBlogPost(id: number, updates: Partial<BlogPost>): Promise<BlogPost | undefined> {
+    const blogPost = this.blogPosts.get(id);
+    if (!blogPost) return undefined;
+    
+    const updatedBlogPost = { ...blogPost, ...updates };
+    this.blogPosts.set(id, updatedBlogPost);
+    return updatedBlogPost;
+  }
+  
+  async deleteBlogPost(id: number): Promise<boolean> {
+    return this.blogPosts.delete(id);
+  }
+  
+  // Review request operations
+  async getReviewRequest(id: number): Promise<ReviewRequest | undefined> {
+    return this.reviewRequests.get(id);
+  }
+  
+  async getReviewRequestsByCompany(companyId: number): Promise<ReviewRequest[]> {
+    return Array.from(this.reviewRequests.values())
+      .filter(request => request.companyId === companyId)
+      .sort((a, b) => b.sentAt.getTime() - a.sentAt.getTime());
+  }
+  
+  async createReviewRequest(reviewRequest: InsertReviewRequest): Promise<ReviewRequest> {
+    const id = this.reviewRequestId++;
+    const sentAt = new Date();
+    const newReviewRequest: ReviewRequest = { ...reviewRequest, id, sentAt };
+    
+    this.reviewRequests.set(id, newReviewRequest);
+    return newReviewRequest;
+  }
+  
+  // Stats operations
+  async getCompanyStats(companyId: number): Promise<{
+    totalCheckins: number;
+    activeTechs: number;
+    blogPosts: number;
+    reviewRequests: number;
+  }> {
+    const totalCheckins = Array.from(this.checkIns.values()).filter(
+      checkIn => checkIn.companyId === companyId
+    ).length;
+    
+    const activeTechs = Array.from(this.technicians.values()).filter(
+      tech => tech.companyId === companyId
+    ).length;
+    
+    const blogPostsCount = Array.from(this.blogPosts.values()).filter(
+      post => post.companyId === companyId
+    ).length;
+    
+    const reviewRequestsCount = Array.from(this.reviewRequests.values()).filter(
+      request => request.companyId === companyId
+    ).length;
+    
+    return {
+      totalCheckins,
+      activeTechs,
+      blogPosts: blogPostsCount,
+      reviewRequests: reviewRequestsCount
+    };
+  }
+}
+
+export const storage = new MemStorage();
