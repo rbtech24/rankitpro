@@ -78,6 +78,8 @@ export default function TechnicianMobile() {
   const [addressFromGPS, setAddressFromGPS] = useState<string | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationVerified, setLocationVerified] = useState(false);
+  const [locationSource, setLocationSource] = useState<"gps" | "manual" | "both" | null>(null);
+  const [addressVerified, setAddressVerified] = useState(false);
   const [sendReviewRequest, setSendReviewRequest] = useState(true);
   const [generateBlogPost, setGenerateBlogPost] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -153,6 +155,8 @@ export default function TechnicianMobile() {
             
             // Store the full address for verification
             setAddressFromGPS(`${fullAddress}, ${cityName}, ${stateName} ${postalCode}`);
+            setLocationSource("gps");
+            setAddressVerified(true);
             setLocationVerified(true);
             
             toast({
@@ -165,12 +169,13 @@ export default function TechnicianMobile() {
         } catch (error) {
           console.error('Reverse geocoding error:', error);
           setLocationVerified(false);
+          setAddressVerified(false);
           
           // Still store the coordinates even if geocoding fails
           toast({
             title: "Location coordinates captured",
             description: `Coordinates: ${lat.slice(0, 6)}, ${lng.slice(0, 6)}. Unable to determine address.`,
-            variant: "warning",
+            variant: "destructive",
           });
         } finally {
           setIsGettingLocation(false);
@@ -218,6 +223,9 @@ export default function TechnicianMobile() {
     
     // If addresses match or no GPS data, consider verified
     setLocationVerified(true);
+    setAddressVerified(true);
+    setLocationSource(addressFromGPS ? "both" : "manual");
+    
     toast({
       title: "Address verified",
       description: "The address has been verified successfully",
@@ -341,9 +349,6 @@ export default function TechnicianMobile() {
     setIsSubmitting(true);
 
     try {
-      // In a real implementation, you would upload the photos to storage
-      // and get back their URLs to include in the check-in data
-      
       // Create FormData for file uploads
       const formData = new FormData();
       
@@ -366,9 +371,14 @@ export default function TechnicianMobile() {
         customerEmail: customerEmail || null,
         customerPhone: customerPhone || null,
         address,
+        city,
+        state,
+        zip: zipCode,
         notes,
         latitude,
         longitude,
+        addressVerified,
+        locationSource: locationSource || "manual",
         photoUrls: [], // Will be populated by the server after upload
         beforePhotoUrls: [],
         afterPhotoUrls: [],
@@ -453,6 +463,9 @@ export default function TechnicianMobile() {
     setCustomerEmail("");
     setCustomerPhone("");
     setAddress("");
+    setCity("");
+    setState("");
+    setZipCode("");
     setNotes("");
     setPhotos([]);
     setPhotoURLs([]);
@@ -460,8 +473,43 @@ export default function TechnicianMobile() {
     setBeforePhotoURLs([]);
     setAfterPhotos([]);
     setAfterPhotoURLs([]);
+    setLatitude(null);
+    setLongitude(null);
+    setAddressFromGPS(null);
+    setLocationVerified(false);
+    setAddressVerified(false);
+    setLocationSource(null);
     setSendReviewRequest(true);
     setGenerateBlogPost(true);
+  };
+
+  // Handle the location alert dialog responses
+  const handleUseGPSLocation = () => {
+    if (!addressFromGPS) return;
+    
+    // We already have the address from GPS, just set the verified flag
+    setLocationVerified(true);
+    setAddressVerified(true);
+    setLocationSource("gps");
+    setShowLocationAlert(false);
+    
+    toast({
+      title: "Using GPS location",
+      description: "Using location data from your device",
+    });
+  };
+
+  const handleUseManualLocation = () => {
+    // Keep the manually entered address, just set the verified flag
+    setLocationVerified(true);
+    setAddressVerified(true);
+    setLocationSource("manual");
+    setShowLocationAlert(false);
+    
+    toast({
+      title: "Using manual location",
+      description: "Using the address you entered manually",
+    });
   };
 
   return (
@@ -478,9 +526,9 @@ export default function TechnicianMobile() {
         <Card className="border-green-500 bg-green-50">
           <CardContent className="pt-6 flex flex-col items-center justify-center">
             <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
-            <h2 className="text-xl font-bold text-green-700">Check-in Successful!</h2>
-            <p className="text-center text-green-600 mt-2">
-              Your job details have been submitted successfully
+            <h2 className="text-xl font-semibold mb-2">Check-In Successful!</h2>
+            <p className="text-center text-muted-foreground">
+              Your job details have been submitted successfully.
             </p>
           </CardContent>
         </Card>
@@ -528,7 +576,7 @@ export default function TechnicianMobile() {
                   id="customer-email"
                   className="h-12"
                   type="email"
-                  placeholder="customer@example.com"
+                  placeholder="Enter customer email"
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
                 />
@@ -539,9 +587,21 @@ export default function TechnicianMobile() {
                 <Input
                   id="customer-phone"
                   className="h-12"
-                  placeholder="(555) 123-4567"
+                  type="tel"
+                  placeholder="Enter customer phone"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="notes" className="text-base">Notes</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Enter notes about the job"
+                  className="min-h-[100px]"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
                 />
               </div>
             </CardContent>
@@ -551,104 +611,117 @@ export default function TechnicianMobile() {
             <CardHeader>
               <CardTitle>Location</CardTitle>
               <CardDescription>
-                Capture your current location or enter an address
+                Enter the job location
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Button 
+              <div className="flex gap-2">
+                <Button
                   type="button"
-                  onClick={getLocation}
                   variant="outline"
                   className="flex-1 h-12"
+                  onClick={getLocation}
                   disabled={isGettingLocation}
                 >
                   {isGettingLocation ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Getting Location...
                     </>
                   ) : (
                     <>
-                      <MapPin className="h-4 w-4 mr-2" />
+                      <MapPin className="mr-2 h-4 w-4" />
                       Get Current Location
                     </>
                   )}
                 </Button>
+                
+                {latitude && longitude && (
+                  <div className="flex items-center px-3 bg-muted rounded-md">
+                    <Navigation className="h-4 w-4 mr-1" />
+                    <span className="text-xs">
+                      {latitude.substring(0, 6)},{longitude.substring(0, 6)}
+                    </span>
+                  </div>
+                )}
               </div>
-
-              {latitude && longitude && (
-                <div className="bg-muted p-3 rounded-md text-sm">
-                  <p className="font-medium">Current Location:</p>
-                  <p className="text-muted-foreground">Lat: {latitude}</p>
-                  <p className="text-muted-foreground">Long: {longitude}</p>
-                </div>
-              )}
-
+              
               <div className="space-y-3">
-                <Label htmlFor="address" className="text-base">Job Location</Label>
-                <div className="grid grid-cols-1 gap-3">
-                  <div>
-                    <Label htmlFor="street-address">Street Address</Label>
-                    <Input
-                      id="street-address"
-                      placeholder="123 Main St"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        placeholder="City"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="state">State</Label>
-                      <Input
-                        id="state"
-                        placeholder="State"
-                        value={state}
-                        onChange={(e) => setState(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="zip">ZIP Code</Label>
-                    <Input
-                      id="zip"
-                      placeholder="ZIP Code"
-                      value={zipCode}
-                      onChange={(e) => setZipCode(e.target.value)}
-                    />
-                  </div>
-                  
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    onClick={verifyManualLocation}
-                    className="w-full"
-                    disabled={!address || !city || !state || !zipCode}
-                  >
-                    {locationVerified ? (
-                      <>
-                        <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
-                        Address Verified
-                      </>
-                    ) : (
-                      <>
-                        <Navigation className="h-4 w-4 mr-2" />
-                        Verify Address
-                      </>
-                    )}
-                  </Button>
+                <div>
+                  <Label htmlFor="address" className="text-base">Street Address</Label>
+                  <Input
+                    id="address"
+                    className="h-12"
+                    placeholder="Enter street address"
+                    value={address}
+                    onChange={(e) => {
+                      setAddress(e.target.value);
+                      setLocationVerified(false);
+                    }}
+                  />
                 </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="city" className="text-base">City</Label>
+                    <Input
+                      id="city"
+                      className="h-12"
+                      placeholder="City"
+                      value={city}
+                      onChange={(e) => {
+                        setCity(e.target.value);
+                        setLocationVerified(false);
+                      }}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="state" className="text-base">State</Label>
+                    <Input
+                      id="state"
+                      className="h-12"
+                      placeholder="State"
+                      value={state}
+                      onChange={(e) => {
+                        setState(e.target.value);
+                        setLocationVerified(false);
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="zip-code" className="text-base">ZIP Code</Label>
+                  <Input
+                    id="zip-code"
+                    className="h-12"
+                    placeholder="ZIP Code"
+                    value={zipCode}
+                    onChange={(e) => {
+                      setZipCode(e.target.value);
+                      setLocationVerified(false);
+                    }}
+                  />
+                </div>
+                
+                {!locationVerified && address && city && state && zipCode && (
+                  <Button
+                    type="button"
+                    className="w-full mt-2"
+                    onClick={verifyManualLocation}
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    Verify Address
+                  </Button>
+                )}
+                
+                {locationVerified && (
+                  <div className="flex items-center px-3 py-2 bg-green-50 text-green-800 rounded-md border border-green-200">
+                    <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
+                    <span>Location verified</span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -700,41 +773,37 @@ export default function TechnicianMobile() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Job Notes</CardTitle>
+              <CardTitle>Additional Options</CardTitle>
               <CardDescription>
-                Add details about the work performed
+                Configure additional check-in options
               </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                placeholder="Describe the work done, materials used, etc."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={5}
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Options</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label htmlFor="review-request" className="cursor-pointer flex items-center">
-                  Send review request to customer
-                </Label>
+                <div>
+                  <Label htmlFor="review-request" className="text-base">
+                    Send Review Request
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Send an automated review request to the customer
+                  </p>
+                </div>
                 <Switch
                   id="review-request"
                   checked={sendReviewRequest}
                   onCheckedChange={setSendReviewRequest}
                 />
               </div>
-
+              
               <div className="flex items-center justify-between">
-                <Label htmlFor="blog-post" className="cursor-pointer flex items-center">
-                  Generate blog post from this check-in
-                </Label>
+                <div>
+                  <Label htmlFor="blog-post" className="text-base">
+                    Generate Blog Post
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Create a blog post from this check-in
+                  </p>
+                </div>
                 <Switch
                   id="blog-post"
                   checked={generateBlogPost}
@@ -742,72 +811,54 @@ export default function TechnicianMobile() {
                 />
               </div>
             </CardContent>
+            <CardFooter>
+              <Button
+                className="w-full h-12 text-lg"
+                disabled={isSubmitting}
+                type="submit"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="mr-2 h-5 w-5" />
+                    Submit Check-In
+                  </>
+                )}
+              </Button>
+            </CardFooter>
           </Card>
-
-          <Button 
-            type="submit" 
-            className="w-full h-14 text-lg" 
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              <>
-                <UploadCloud className="h-5 w-5 mr-2" />
-                Submit Check-In
-              </>
-            )}
-          </Button>
         </form>
       )}
       
-      {/* Location Verification Alert Dialog */}
       <AlertDialog open={showLocationAlert} onOpenChange={setShowLocationAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
-                Location Verification
-              </div>
-            </AlertDialogTitle>
+            <AlertDialogTitle>Location Verification</AlertDialogTitle>
             <AlertDialogDescription>
               {locationAlertMessage}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            {addressFromGPS ? (
+            {addressFromGPS && (
               <>
                 <AlertDialogCancel onClick={() => setShowLocationAlert(false)}>
-                  Use Manual Address
+                  Cancel
                 </AlertDialogCancel>
-                <AlertDialogAction 
-                  onClick={() => {
-                    // Reset manual entry to match GPS data
-                    const parts = (addressFromGPS || '').split(',');
-                    if (parts.length >= 3) {
-                      setAddress(parts[0].trim());
-                      setCity(parts[1].trim());
-                      
-                      const stateZip = parts[2].trim().split(' ');
-                      if (stateZip.length >= 2) {
-                        setState(stateZip[0]);
-                        setZipCode(stateZip[1]);
-                      }
-                    }
-                    setLocationVerified(true);
-                    setShowLocationAlert(false);
-                  }}
-                >
+                <AlertDialogAction onClick={handleUseGPSLocation}>
                   Use GPS Location
                 </AlertDialogAction>
+                <AlertDialogAction onClick={handleUseManualLocation}>
+                  Use Manual Address
+                </AlertDialogAction>
               </>
-            ) : (
+            )}
+            {!addressFromGPS && (
               <AlertDialogAction onClick={() => setShowLocationAlert(false)}>
-                Continue
+                OK
               </AlertDialogAction>
             )}
           </AlertDialogFooter>
