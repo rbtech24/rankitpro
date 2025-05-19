@@ -21,6 +21,8 @@ export const companies = pgTable("companies", {
   name: text("name").notNull(),
   plan: text("plan", { enum: ["starter", "pro", "agency"] }).notNull().default("starter"),
   usageLimit: integer("usage_limit").notNull().default(50),
+  wordpressConfig: text("wordpress_config"),
+  javaScriptEmbedConfig: text("javascript_embed_config"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
