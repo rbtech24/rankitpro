@@ -1,0 +1,131 @@
+import React from 'react';
+import { Link } from 'wouter';
+
+interface InfoPageLayoutProps {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}
+
+export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({ 
+  title, 
+  description, 
+  children 
+}) => {
+  return (
+    <div className="min-h-screen bg-slate-50">
+      {/* Header/Nav */}
+      <header className="bg-white shadow-sm">
+        <div className="container mx-auto py-4 px-6">
+          <div className="flex justify-between items-center">
+            <Link href="/">
+              <div className="flex items-center space-x-2 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                </svg>
+                <span className="text-xl font-bold">CheckIn Pro</span>
+              </div>
+            </Link>
+            <nav className="hidden md:flex space-x-6">
+              <Link href="/"><span className="text-slate-600 hover:text-primary cursor-pointer">Home</span></Link>
+              <Link href="/case-studies"><span className="text-slate-600 hover:text-primary cursor-pointer">Case Studies</span></Link>
+              <Link href="/testimonials"><span className="text-slate-600 hover:text-primary cursor-pointer">Testimonials</span></Link>
+              <Link href="/resources"><span className="text-slate-600 hover:text-primary cursor-pointer">Resources</span></Link>
+              <Link href="/about"><span className="text-slate-600 hover:text-primary cursor-pointer">About</span></Link>
+              <Link href="/login"><span className="text-slate-600 hover:text-primary cursor-pointer">Login</span></Link>
+            </nav>
+            <div className="flex space-x-4">
+              <Link href="/register">
+                <button className="px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors">
+                  Sign Up
+                </button>
+              </Link>
+              <button className="md:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Page Header */}
+      <div className="bg-gradient-to-r from-primary to-primary/70 text-white py-12 px-6">
+        <div className="container mx-auto">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">{title}</h1>
+          {description && <p className="text-lg md:text-xl text-white/90 max-w-3xl">{description}</p>}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <main className="container mx-auto py-12 px-6">
+        {children}
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-slate-900 text-slate-200 py-12 px-6">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                </svg>
+                <span className="text-lg font-bold text-white">CheckIn Pro</span>
+              </div>
+              <p className="text-sm text-slate-400 mb-4">
+                The all-in-one platform for home service businesses to transform field operations into powerful marketing content.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Product</h3>
+              <ul className="space-y-2">
+                <li><Link href="/case-studies"><span className="text-slate-400 hover:text-primary cursor-pointer">Case Studies</span></Link></li>
+                <li><Link href="/testimonials"><span className="text-slate-400 hover:text-primary cursor-pointer">Testimonials</span></Link></li>
+                <li><Link href="/resources"><span className="text-slate-400 hover:text-primary cursor-pointer">Resources</span></Link></li>
+                <li><Link href="/documentation"><span className="text-slate-400 hover:text-primary cursor-pointer">Documentation</span></Link></li>
+                <li><Link href="/help-center"><span className="text-slate-400 hover:text-primary cursor-pointer">Help Center</span></Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Company</h3>
+              <ul className="space-y-2">
+                <li><Link href="/about"><span className="text-slate-400 hover:text-primary cursor-pointer">About Us</span></Link></li>
+                <li><Link href="/careers"><span className="text-slate-400 hover:text-primary cursor-pointer">Careers</span></Link></li>
+                <li><Link href="/blog"><span className="text-slate-400 hover:text-primary cursor-pointer">Blog</span></Link></li>
+                <li><Link href="/api"><span className="text-slate-400 hover:text-primary cursor-pointer">API</span></Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Legal</h3>
+              <ul className="space-y-2">
+                <li><Link href="/privacy-policy"><span className="text-slate-400 hover:text-primary cursor-pointer">Privacy Policy</span></Link></li>
+                <li><Link href="/terms-of-service"><span className="text-slate-400 hover:text-primary cursor-pointer">Terms of Service</span></Link></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="pt-8 mt-8 border-t border-slate-800 text-sm text-slate-400">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p>&copy; 2025 CheckIn Pro. All rights reserved.</p>
+              <div className="mt-4 md:mt-0 flex items-center">
+                <Link href="/privacy-policy"><span className="text-slate-400 hover:text-primary mr-4 cursor-pointer">Privacy Policy</span></Link>
+                <Link href="/terms-of-service"><span className="text-slate-400 hover:text-primary mr-4 cursor-pointer">Terms of Service</span></Link>
+                <Link href="/login?admin=true" className="text-xs text-slate-600 hover:text-primary transition-colors duration-200 ml-2">
+                  <span className="flex items-center cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    Admin
+                  </span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
