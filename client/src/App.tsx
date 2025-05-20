@@ -120,38 +120,127 @@ function Router() {
       <Route path="/downloads/implementation-checklist"><ImplementationChecklist /></Route>
       <Route path="/downloads/technician-training-slides"><TechnicianTrainingSlides /></Route>
       
-      {/* Resource Pages */}
+      {/* Resource and Calculator Pages */}
       <Route path="/resources/mobile-check-in-best-practices">
-        <MobileCheckInBestPractices />
-      </Route>
-      <Route path="/resources/seo-impact-analysis">
-        <SEOImpactAnalysis />
-      </Route>
-      <Route path="/resources/maximizing-review-collection">
-        <MaximizingReviewCollection />
-      </Route>
-      <Route path="/resources/content-creation-templates">
-        <ContentCreationTemplates />
-      </Route>
-      <Route path="/resources/wordpress-integration-guide">
-        <WordpressIntegrationGuide />
-      </Route>
-      <Route path="/resources/client-communication-scripts">
-        <ClientCommunicationScripts />
+        <div className="p-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+            <h1 className="text-2xl font-bold mb-6">Mobile Check-In Best Practices</h1>
+            <p className="mb-4">Learn how to optimize your technicians' mobile check-in process for maximum efficiency and data quality.</p>
+            <div className="mt-8">
+              <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
+            </div>
+          </div>
+        </div>
       </Route>
       
-      {/* Calculator Pages */}
       <Route path="/resources/calculators/roi-calculator">
-        <RoiCalculator />
+        <div className="p-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+            <h1 className="text-2xl font-bold mb-6">ROI Calculator</h1>
+            <p className="mb-4">Calculate the return on investment from implementing Rank It Pro for your home service business.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Business Information</h2>
+                <ul className="space-y-2">
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Number of Technicians:</span>
+                    <span className="font-medium">5</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Average Check-ins Per Day:</span>
+                    <span className="font-medium">3</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Work Days Per Month:</span>
+                    <span className="font-medium">22</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Average Labor Rate:</span>
+                    <span className="font-medium">$75/hour</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Documentation Time:</span>
+                    <span className="font-medium">15 minutes/job</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Monthly Results</h2>
+                <div className="mb-4">
+                  <div className="text-3xl font-bold text-primary">367%</div>
+                  <p className="text-sm text-gray-600">Return on Investment</p>
+                </div>
+                <ul className="space-y-2">
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Time Saved:</span>
+                    <span className="font-medium">99 hours</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Labor Cost Savings:</span>
+                    <span className="font-medium">$7,425</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>New Revenue Generated:</span>
+                    <span className="font-medium">$5,250</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Total Monthly Value:</span>
+                    <span className="font-medium">$12,675</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6">
+              <p className="text-blue-800 text-sm">
+                <strong>Note:</strong> This simplified calculator provides estimated values. For a detailed analysis tailored to your business, 
+                please schedule a consultation with our team.
+              </p>
+            </div>
+            
+            <div className="mt-8">
+              <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
+            </div>
+          </div>
+        </div>
       </Route>
+      
       <Route path="/resources/calculators/seo-value-estimator">
-        <SeoValueEstimator />
+        <div className="p-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+            <h1 className="text-2xl font-bold mb-6">SEO Value Estimator</h1>
+            <p className="mb-4">This calculator is coming soon</p>
+            <div className="mt-8">
+              <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
+            </div>
+          </div>
+        </div>
       </Route>
+      
       <Route path="/resources/calculators/review-impact-calculator">
-        <ReviewImpactCalculator />
+        <div className="p-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+            <h1 className="text-2xl font-bold mb-6">Review Impact Calculator</h1>
+            <p className="mb-4">This calculator is coming soon</p>
+            <div className="mt-8">
+              <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
+            </div>
+          </div>
+        </div>
       </Route>
+      
       <Route path="/resources/calculators/technician-efficiency-tool">
-        <TechnicianEfficiencyTool />
+        <div className="p-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+            <h1 className="text-2xl font-bold mb-6">Technician Efficiency Tool</h1>
+            <p className="mb-4">This calculator is coming soon</p>
+            <div className="mt-8">
+              <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
+            </div>
+          </div>
+        </div>
       </Route>
       
       {/* Dashboard Pages */}
