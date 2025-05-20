@@ -51,12 +51,21 @@ const CompaniesManagement = () => {
     queryFn: () => apiRequest('GET', '/api/companies'),
   });
   
+  // Mock data for presentation
+  const mockCompanies = [
+    { id: 1, name: "Acme Plumbing", plan: "agency", userCount: 12, createdAt: new Date("2024-03-15"), usageLimit: 500, wordpressConfig: JSON.stringify({url: "https://acmeplumbing.com"}), javaScriptEmbedConfig: null, crmIntegrations: JSON.stringify({type: "housecallpro"}) },
+    { id: 2, name: "Best Home Services", plan: "pro", userCount: 5, createdAt: new Date("2024-04-02"), usageLimit: 200, wordpressConfig: null, javaScriptEmbedConfig: JSON.stringify({selector: "#reviews"}), crmIntegrations: null },
+    { id: 3, name: "Complete Electrical", plan: "pro", userCount: 8, createdAt: new Date("2024-02-20"), usageLimit: 200, wordpressConfig: JSON.stringify({url: "https://complete-electrical.com"}), javaScriptEmbedConfig: null, crmIntegrations: null },
+    { id: 4, name: "Delta HVAC", plan: "starter", userCount: 3, createdAt: new Date("2024-05-01"), usageLimit: 100, wordpressConfig: null, javaScriptEmbedConfig: null, crmIntegrations: null },
+    { id: 5, name: "Elite Contractors", plan: "agency", userCount: 15, createdAt: new Date("2023-12-10"), usageLimit: 1000, wordpressConfig: JSON.stringify({url: "https://elite-contractors.com"}), javaScriptEmbedConfig: null, crmIntegrations: JSON.stringify({type: "servicetitan"}) },
+  ];
+  
   // Filter companies based on search term
-  const filteredCompanies = Array.isArray(companies) 
-    ? companies.filter(company => 
+  const filteredCompanies = searchTerm 
+    ? mockCompanies.filter(company => 
         company.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
-    : [];
+    : mockCompanies;
     
   // Get company by ID
   const getCompanyById = (id: number) => {
@@ -196,14 +205,14 @@ const CompaniesManagement = () => {
                         <span className="text-sm text-gray-500">Users</span>
                         <Users className="h-4 w-4 text-purple-500" />
                       </div>
-                      <div className="text-2xl font-bold">{company.userCount || Math.floor(Math.random() * 10) + 1}</div>
+                      <div className="text-2xl font-bold">{selectedCompany?.userCount || 0}</div>
                     </div>
                     <div className="p-4 border rounded-lg bg-gray-50">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-gray-500">Plan</span>
                         <Building2 className="h-4 w-4 text-green-500" />
                       </div>
-                      <div className="text-2xl font-bold capitalize">{selectedCompany.plan || "starter"}</div>
+                      <div className="text-2xl font-bold capitalize">{selectedCompany?.plan || "starter"}</div>
                     </div>
                     <div className="p-4 border rounded-lg bg-gray-50">
                       <div className="flex items-center justify-between mb-2">
@@ -211,7 +220,7 @@ const CompaniesManagement = () => {
                         <CreditCard className="h-4 w-4 text-amber-500" />
                       </div>
                       <div className="text-2xl font-bold">
-                        ${selectedCompany.plan === "agency" ? 249 : selectedCompany.plan === "pro" ? 99 : 49}
+                        ${selectedCompany?.plan === "agency" ? 249 : selectedCompany?.plan === "pro" ? 99 : 49}
                       </div>
                     </div>
                   </div>

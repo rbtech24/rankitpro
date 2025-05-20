@@ -1,5 +1,5 @@
 import React from "react";
-import { useRouter } from "wouter";
+import { useLocation } from "wouter";
 import { 
   Card, 
   CardContent, 
@@ -23,49 +23,49 @@ import {
 } from "lucide-react";
 
 const AdminBusinessManagement = () => {
-  const [, navigate] = useRouter();
+  const [, setLocation] = useLocation();
 
   const managementSections = [
     {
       title: "Account Management",
       description: "Manage companies, users and roles",
       icon: <Users className="h-8 w-8 text-blue-500" />,
-      action: () => navigate("/users"),
+      action: () => setLocation("/users"),
       actionText: "Manage Users"
     },
     {
       title: "Billing & Subscriptions",
       description: "Manage billing, invoices and subscription plans",
       icon: <CreditCard className="h-8 w-8 text-green-500" />,
-      action: () => navigate("/billing"),
+      action: () => setLocation("/billing"),
       actionText: "Manage Billing"
     },
     {
       title: "Integrations",
       description: "Manage CRM, website and other integrations",
       icon: <Box className="h-8 w-8 text-purple-500" />,
-      action: () => navigate("/crm-integrations"),
+      action: () => setLocation("/crm-integrations"),
       actionText: "Manage Integrations"
     },
     {
       title: "System Settings",
       description: "Configure system-wide settings and defaults",
       icon: <Settings className="h-8 w-8 text-gray-500" />,
-      action: () => navigate("/settings"),
+      action: () => setLocation("/settings"),
       actionText: "System Settings"
     },
     {
       title: "Usage Analytics",
       description: "View system usage, API calls and performance",
       icon: <Activity className="h-8 w-8 text-red-500" />,
-      action: () => navigate("/analytics"),
+      action: () => setLocation("/analytics"),
       actionText: "View Analytics"
     },
     {
       title: "Security & Permissions",
       description: "Configure security settings and permissions",
       icon: <Lock className="h-8 w-8 text-amber-500" />,
-      action: () => navigate("/security"),
+      action: () => setLocation("/security"),
       actionText: "Security Settings"
     }
   ];
