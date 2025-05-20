@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   Card,
   CardContent,
@@ -476,7 +476,7 @@ export default function CRMIntegrationsPage() {
   // Fetch available CRMs
   const { data: availableCRMs } = useQuery({
     queryKey: ['/api/crm/available'],
-    queryFn: () => apiRequest<Array<{id: string, name: string, description: string}>>('GET', '/api/crm/available'),
+    queryFn: () => apiRequest('GET', '/api/crm/available'),
   });
   
   // Fetch configured CRMs
@@ -485,13 +485,7 @@ export default function CRMIntegrationsPage() {
     isLoading: isLoadingCRMs,
   } = useQuery({
     queryKey: ['/api/crm/configured'],
-    queryFn: () => apiRequest<Array<{
-      id: string, 
-      name: string, 
-      status: "active" | "inactive" | "error",
-      lastSyncedAt: string | null,
-      syncSettings: any
-    }>>('GET', '/api/crm/configured'),
+    queryFn: () => apiRequest('GET', '/api/crm/configured'),
   });
   
   // Fetch CRM sync history
@@ -500,15 +494,7 @@ export default function CRMIntegrationsPage() {
     isLoading: isLoadingHistory,
   } = useQuery({
     queryKey: ['/api/crm/sync-history'],
-    queryFn: () => apiRequest<Array<{
-      id: number,
-      crmType: string,
-      crmName: string,
-      status: "success" | "partial" | "failed", 
-      itemsProcessed: number,
-      errorCount: number,
-      timestamp: string
-    }>>('GET', '/api/crm/sync-history'),
+    queryFn: () => apiRequest('GET', '/api/crm/sync-history'),
   });
   
   // Save CRM configuration mutation
