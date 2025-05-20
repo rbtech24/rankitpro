@@ -501,7 +501,7 @@ export default function SeoValueEstimator() {
                   </p>
                   <ul className="list-disc pl-5 text-sm">
                     <li className="mb-1">
-                      Increase content production to {Math.round(monthlyJobs * 0.3)} pieces per month without additional staff
+                      Increase content production to {Math.round(monthlyContentCount * 1.5)} pieces per month without additional staff
                     </li>
                     <li className="mb-1">
                       Create hyper-local content targeting specific neighborhoods for improved local SEO
