@@ -28,6 +28,7 @@ import CRMIntegrations from "@/pages/crm-integrations";
 import LocalSeoGuide from "@/pages/downloads/local-seo-guide";
 import ImplementationChecklist from "@/pages/downloads/implementation-checklist";
 import TechnicianTrainingSlides from "@/pages/downloads/technician-training-slides";
+
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
 // Informational Pages
@@ -118,6 +119,40 @@ function Router() {
       <Route path="/downloads/local-seo-guide"><LocalSeoGuide /></Route>
       <Route path="/downloads/implementation-checklist"><ImplementationChecklist /></Route>
       <Route path="/downloads/technician-training-slides"><TechnicianTrainingSlides /></Route>
+      
+      {/* Resource Pages */}
+      <Route path="/resources/mobile-check-in-best-practices">
+        <MobileCheckInBestPractices />
+      </Route>
+      <Route path="/resources/seo-impact-analysis">
+        <SEOImpactAnalysis />
+      </Route>
+      <Route path="/resources/maximizing-review-collection">
+        <MaximizingReviewCollection />
+      </Route>
+      <Route path="/resources/content-creation-templates">
+        <ContentCreationTemplates />
+      </Route>
+      <Route path="/resources/wordpress-integration-guide">
+        <WordpressIntegrationGuide />
+      </Route>
+      <Route path="/resources/client-communication-scripts">
+        <ClientCommunicationScripts />
+      </Route>
+      
+      {/* Calculator Pages */}
+      <Route path="/resources/calculators/roi-calculator">
+        <RoiCalculator />
+      </Route>
+      <Route path="/resources/calculators/seo-value-estimator">
+        <SeoValueEstimator />
+      </Route>
+      <Route path="/resources/calculators/review-impact-calculator">
+        <ReviewImpactCalculator />
+      </Route>
+      <Route path="/resources/calculators/technician-efficiency-tool">
+        <TechnicianEfficiencyTool />
+      </Route>
       
       {/* Dashboard Pages */}
       <Route path="/dashboard">
