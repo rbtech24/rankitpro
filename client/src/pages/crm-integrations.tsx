@@ -825,7 +825,7 @@ export default function CRMIntegrationsPage() {
                     </div>
                   ) : configuredCRMs && configuredCRMs.length > 0 ? (
                     <div className="space-y-4">
-                      {configuredCRMs.map((crm) => (
+                      {configuredCRMs.map((crm: any) => (
                         <div key={crm.id} className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
                             <div className="flex items-center">
@@ -929,7 +929,7 @@ export default function CRMIntegrationsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {Array.isArray(availableCRMs) && availableCRMs.map((crm) => {
+                    {Array.isArray(availableCRMs) && availableCRMs.map((crm: CRM) => {
                       const isConfigured = Array.isArray(configuredCRMs) && configuredCRMs.some(
                         (configured: any) => configured.id === crm.id
                       );
@@ -1028,7 +1028,15 @@ export default function CRMIntegrationsPage() {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {syncHistory.map((history: any) => (
+                          {syncHistory.map((history: {
+                            id?: string | number;
+                            timestamp: string;
+                            crmName: string;
+                            status: 'success' | 'failed' | 'partial';
+                            itemsProcessed: number;
+                            errorCount: number;
+                            details?: string;
+                          }) => (
                             <tr key={history.id || `sync-${history.timestamp}`}>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 {history.crmName}
