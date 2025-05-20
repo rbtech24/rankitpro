@@ -7,6 +7,9 @@ import { storage } from '../storage';
 import { isAuthenticated } from '../middleware/auth';
 import mobileCheckInsRouter from './mobile/check-ins';
 import mobileNotificationsRouter from './mobile/notifications';
+import mobileScheduleRouter from './mobile/schedule';
+import mobileCustomersRouter from './mobile/customers';
+import mobileSettingsRouter from './mobile/settings';
 
 const router = Router();
 
@@ -214,8 +217,9 @@ router.get('/profile', isAuthenticated, async (req, res) => {
 // Mount the sub-routers
 router.use('/check-ins', mobileCheckInsRouter);
 router.use('/notifications', mobileNotificationsRouter);
-router.use('/schedule', require('./mobile/schedule').default);
-router.use('/customers', require('./mobile/customers').default);
-router.use('/settings', require('./mobile/settings').default);
+
+router.use('/schedule', mobileScheduleRouter);
+router.use('/customers', mobileCustomersRouter);
+router.use('/settings', mobileSettingsRouter);
 
 export default router;
