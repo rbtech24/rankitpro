@@ -54,7 +54,7 @@ export default function Resources() {
             <div className="bg-white p-6 rounded-lg shadow">
               <h3 className="text-lg font-semibold mb-2">Technician Efficiency Tool</h3>
               <p className="text-slate-600 mb-4">Calculate time and cost savings from streamlining technician documentation.</p>
-              <a href="#" className="text-primary font-medium hover:underline">Try Calculator</a>
+              <a href="/resources/calculators/technician-efficiency-tool" className="text-primary font-medium hover:underline">Try Calculator</a>
             </div>
           </div>
         </div>

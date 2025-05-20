@@ -6,280 +6,258 @@ export default function MobileCheckInBestPractices() {
   return (
     <InfoPageLayout
       title="Mobile Check-In Best Practices"
-      description="Optimize your technicians' mobile check-in process for maximum efficiency and data quality"
+      description="Learn how to optimize your technicians' mobile check-in process for maximum efficiency and data quality"
     >
       <div className="max-w-4xl mx-auto">
-        <div className="bg-blue-50 rounded-xl p-6 mb-8">
-          <div className="flex items-center mb-4">
-            <span className="text-3xl mr-4">📱</span>
-            <div>
-              <h2 className="text-xl font-bold text-primary">Mobile Check-In Best Practices</h2>
-              <p className="text-slate-600">Last updated: May 14, 2025</p>
-            </div>
-          </div>
-          <p className="text-slate-700">
-            This comprehensive guide will help you optimize your technicians' mobile check-in process,
-            ensuring maximum efficiency in the field while capturing high-quality data that can be
-            leveraged for marketing, customer service, and business growth.
-          </p>
-        </div>
-
-        <div className="prose prose-slate max-w-none mb-12">
-          <h2>Why Mobile Check-Ins Matter</h2>
-          <p>
-            The mobile check-in process is more than just documenting a service call. When done correctly,
-            it becomes a powerful tool that:
-          </p>
-          <ul>
-            <li>Creates valuable content for your website</li>
-            <li>Improves your local SEO rankings</li>
-            <li>Provides transparency to customers</li>
-            <li>Creates opportunities for review collection</li>
-            <li>Builds a searchable knowledge base of service history</li>
-          </ul>
-
-          <h2>Setting Up Technicians for Success</h2>
-          <p>
-            Before implementing mobile check-ins with your team, ensure you've properly prepared:
-          </p>
-          <ol>
-            <li>
-              <strong>Proper Training</strong> - Schedule a dedicated training session to demonstrate the
-              mobile check-in process and explain its importance to your business.
-            </li>
-            <li>
-              <strong>Clear Expectations</strong> - Establish guidelines for when check-ins should be completed
-              (immediately after service, not at day's end) and what information should be included.
-            </li>
-            <li>
-              <strong>Test Devices</strong> - Ensure all technicians have compatible mobile devices with
-              reliable data connections or the ability to work offline.
-            </li>
-            <li>
-              <strong>Create Accountability</strong> - Implement a system to monitor check-in completion rates
-              and quality.
-            </li>
-          </ol>
-
-          <h2>Best Practices for Quality Check-Ins</h2>
-          
-          <h3>1. Capture High-Quality Photos</h3>
-          <p>
-            Photos are one of the most valuable assets from the check-in process:
-          </p>
-          <ul>
-            <li>Take "before and after" photos when appropriate</li>
-            <li>Ensure good lighting and clear focus</li>
-            <li>Capture multiple angles of the work performed</li>
-            <li>Include context in the image (show the surrounding area)</li>
-            <li>Avoid including customer personal items or information</li>
-          </ul>
-
-          <h3>2. Write Detailed but Concise Notes</h3>
-          <p>
-            The notes section is what will be transformed into valuable content:
-          </p>
-          <ul>
-            <li>Use industry terminology appropriately</li>
-            <li>Explain what was done and why in clear language</li>
-            <li>Mention specific parts replaced or services performed</li>
-            <li>Note any customer education provided during the visit</li>
-            <li>Include preventative recommendations made</li>
-          </ul>
-
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6">
-            <p className="text-sm text-yellow-800">
-              <strong>Pro Tip:</strong> Create a simple check-in template for technicians to follow, ensuring
-              consistent information capture across all service calls.
+        <div className="bg-white rounded-lg shadow-md p-8 mb-8">
+          <div className="prose max-w-none">
+            <h2>Introduction</h2>
+            <p>
+              Mobile check-ins are the foundation of the Rank It Pro platform. When your technicians document their work 
+              properly in the field, you gain valuable marketing content, opportunities for customer reviews, and a 
+              comprehensive record of completed work. This guide will help you implement best practices to maximize the 
+              value of your technicians' check-ins.
             </p>
-          </div>
 
-          <h3>3. Accurate Location Tracking</h3>
-          <p>
-            Location data enhances the value of check-ins for local SEO:
-          </p>
-          <ul>
-            <li>Ensure location services are enabled on technician devices</li>
-            <li>Verify the address is correct before submitting</li>
-            <li>Include neighborhood or area names when possible</li>
-            <li>Note any landmark information that might be helpful</li>
-          </ul>
+            <h2>Setting Up for Success</h2>
+            
+            <h3>1. Device Preparation</h3>
+            <ul>
+              <li><strong>Choose the right devices:</strong> Modern smartphones with good quality cameras provide the best experience. For teams with assigned company phones, ensure they meet minimum requirements.</li>
+              <li><strong>Storage capacity:</strong> Check that technicians have sufficient storage space on their devices. Each check-in with photos can use 20-50MB.</li>
+              <li><strong>Battery life:</strong> Encourage technicians to keep battery packs or vehicle chargers available, especially for all-day field work.</li>
+              <li><strong>App permissions:</strong> Ensure the Rank It Pro app has permissions for location services, camera, storage, and notifications.</li>
+            </ul>
+            
+            <h3>2. Technician Training</h3>
+            <p>
+              Invest time in proper training to ensure all technicians understand the process and its importance:
+            </p>
+            <ul>
+              <li><strong>Initial training session:</strong> Schedule a dedicated 30-60 minute session to introduce the app and demonstrate a complete check-in.</li>
+              <li><strong>Practice check-ins:</strong> Have technicians complete 2-3 practice check-ins during training.</li>
+              <li><strong>Shadowing:</strong> For the first week, have managers or experienced users available to answer questions.</li>
+              <li><strong>Refresher training:</strong> Schedule quarterly refreshers to address common issues and share best practices.</li>
+            </ul>
+            
+            <h3>3. Create Clear Guidelines</h3>
+            <p>
+              Document your expectations for check-ins and share them with your team:
+            </p>
+            <ul>
+              <li><strong>Check-in policy:</strong> Create a written policy that outlines when check-ins are required (all jobs, jobs over a certain value, etc.).</li>
+              <li><strong>Photo standards:</strong> Define clear standards for photo quality, quantity, and content.</li>
+              <li><strong>Privacy guidelines:</strong> Establish rules for customer privacy, including identifiable information in photos and notes.</li>
+            </ul>
 
-          <h3>4. Select Appropriate Categories</h3>
-          <p>
-            Proper categorization makes content more findable and useful:
-          </p>
-          <ul>
-            <li>Choose the most specific job type category available</li>
-            <li>Use consistent terminology across technicians</li>
-            <li>Add appropriate tags to improve searchability</li>
-          </ul>
+            <div className="bg-blue-50 p-6 rounded-lg my-6 border border-blue-100">
+              <h3 className="text-blue-800 mt-0">Pro Tip: Connectivity Issues</h3>
+              <p className="text-blue-700 mb-0">
+                Rank It Pro's mobile app works offline. Technicians can complete check-ins even in areas with poor connectivity, 
+                and the data will sync automatically when a connection is restored. Remind technicians to occasionally open the app 
+                when they're back in service areas to ensure all check-ins are uploaded.
+              </p>
+            </div>
 
-          <h2>Optimizing Your Workflow</h2>
+            <h2>Taking Great Photos</h2>
+            <p>
+              Photos are the most valuable part of each check-in. They provide visual proof of work completed and form 
+              the basis for compelling marketing content.
+            </p>
+            
+            <h3>1. Before and After Photos</h3>
+            <p>
+              The most compelling check-ins include both before and after photos of the work:
+            </p>
+            <ul>
+              <li><strong>Same angle:</strong> Try to take before and after photos from the same position and angle.</li>
+              <li><strong>Show the problem:</strong> Before photos should clearly show the issue being addressed.</li>
+              <li><strong>Show the solution:</strong> After photos should demonstrate the completed work and improvement made.</li>
+              <li><strong>Multiple angles:</strong> For complex jobs, capture several angles to fully document the work.</li>
+            </ul>
+            
+            <h3>2. Lighting and Clarity</h3>
+            <ul>
+              <li><strong>Use good lighting:</strong> Turn on additional lighting in dark areas when possible.</li>
+              <li><strong>Flash usage:</strong> Use flash in dark areas, but be aware it can create glare on metal surfaces.</li>
+              <li><strong>Focus:</strong> Take a moment to ensure the photo is in focus before capturing.</li>
+              <li><strong>Stabilization:</strong> Hold the phone with both hands to reduce blur, especially in low light.</li>
+            </ul>
+            
+            <h3>3. Composition Best Practices</h3>
+            <ul>
+              <li><strong>Clean work area:</strong> Take a moment to remove debris, tools, or personal items from the frame.</li>
+              <li><strong>Context:</strong> Include enough of the surrounding area to provide context for the work.</li>
+              <li><strong>Distance and detail:</strong> Include both wide shots (showing context) and close-ups (showing detailed work).</li>
+              <li><strong>Horizontal orientation:</strong> When possible, take photos in landscape (horizontal) mode.</li>
+            </ul>
 
-          <h3>Timing is Everything</h3>
-          <p>
-            When technicians complete check-ins has a significant impact on their effectiveness:
-          </p>
-          <ul>
-            <li><strong>Best Practice:</strong> Complete the check-in immediately after service completion, while still at the customer's location</li>
-            <li><strong>Good Alternative:</strong> Complete check-ins between service calls</li>
-            <li><strong>Avoid:</strong> Batching all check-ins at the end of the day</li>
-          </ul>
+            <h2>Writing Effective Check-In Notes</h2>
+            <p>
+              While photos are crucial, detailed notes provide important context and technical information that 
+              enhances both the service record and the marketing value.
+            </p>
+            
+            <h3>1. Be Specific and Detailed</h3>
+            <ul>
+              <li><strong>Technical details:</strong> Include specific models, parts, or materials used.</li>
+              <li><strong>Problem description:</strong> Clearly explain what issue was addressed.</li>
+              <li><strong>Solution explanation:</strong> Describe the solution implemented.</li>
+              <li><strong>Avoid jargon:</strong> Use plain language that customers will understand.</li>
+            </ul>
+            
+            <h3>2. Include Action and Value</h3>
+            <ul>
+              <li><strong>Document actions:</strong> Note specific steps taken to fix the issue.</li>
+              <li><strong>Highlight value:</strong> Explain benefits of the work performed (increased efficiency, safety improvements, etc.).</li>
+              <li><strong>Mention preventative work:</strong> Note any additional issues identified or preventative measures taken.</li>
+            </ul>
+            
+            <h3>3. Sample Note Structure</h3>
+            <p>
+              An effective check-in note often includes:
+            </p>
+            <ol>
+              <li>Brief description of the problem or service request</li>
+              <li>Diagnosis or findings upon inspection</li>
+              <li>Solution implemented</li>
+              <li>Parts or materials used</li>
+              <li>Additional recommendations or observations</li>
+              <li>Value or benefit provided to the customer</li>
+            </ol>
 
-          <h3>Using Offline Mode Effectively</h3>
-          <p>
-            For areas with poor connectivity:
-          </p>
-          <ul>
-            <li>Train technicians to use the offline mode feature</li>
-            <li>Ensure they understand how synchronization works</li>
-            <li>Establish a daily synchronization routine</li>
-            <li>Consider providing mobile hotspots for technicians in rural areas</li>
-          </ul>
+            <div className="bg-green-50 p-6 rounded-lg my-6 border border-green-100">
+              <h3 className="text-green-800 mt-0">Example: Great Check-In Note</h3>
+              <div className="bg-white p-4 rounded border border-green-200">
+                <p className="my-1">
+                  <strong>Job Type:</strong> AC Repair
+                </p>
+                <p className="my-1">
+                  <strong>Notes:</strong> Responded to emergency call for AC not cooling. Diagnostic revealed a failed 
+                  capacitor causing compressor issues. Replaced 45/5 MFD dual run capacitor with OEM equivalent. Also 
+                  cleaned condenser coils which were 30% blocked with debris, reducing efficiency. System now cooling 
+                  properly, dropping from 85°F to 74°F within 30 minutes. Recommended quarterly filter changes and annual 
+                  maintenance to prevent future issues. Customer was relieved to have cooling restored during the heat wave 
+                  and appreciated the maintenance tips.
+                </p>
+              </div>
+            </div>
 
-          <h3>Review Request Integration</h3>
-          <p>
-            Maximize the impact of your check-ins by coordinating with review requests:
-          </p>
-          <ul>
-            <li>Set up automatic review requests to trigger after check-ins</li>
-            <li>Train technicians to mention to customers that they'll receive a review request</li>
-            <li>Use check-in data to personalize review requests</li>
-          </ul>
+            <h2>Efficient Daily Workflow</h2>
+            
+            <h3>1. Timing Your Check-Ins</h3>
+            <ul>
+              <li><strong>Complete on-site:</strong> Ideally, finish the check-in before leaving the job site while details are fresh.</li>
+              <li><strong>End of job:</strong> Make check-ins part of the job completion routine, along with paperwork and payment.</li>
+              <li><strong>Batch processing:</strong> If needed, technicians can take photos on-site and complete notes during downtime or at day's end.</li>
+            </ul>
+            
+            <h3>2. Streamlining the Process</h3>
+            <ul>
+              <li><strong>Templates:</strong> Create templates for common job types to speed up note writing.</li>
+              <li><strong>Voice-to-text:</strong> Use your device's dictation feature to quickly capture detailed notes.</li>
+              <li><strong>Photo-first approach:</strong> Take all photos first, then complete the notes section.</li>
+            </ul>
+            
+            <h3>3. Integration with Existing Workflow</h3>
+            <p>
+              The most successful implementations integrate Rank It Pro check-ins into existing processes:
+            </p>
+            <ul>
+              <li><strong>Combine with invoicing:</strong> Complete the check-in as part of the invoicing/payment process.</li>
+              <li><strong>Customer communication:</strong> Show customers photos as you take them, explaining the value of the work.</li>
+              <li><strong>CRM integration:</strong> If you use our CRM integrations, ensure technicians understand how check-ins relate to your core system.</li>
+            </ul>
 
-          <h2>Measuring Success</h2>
-          <p>
-            Track these key metrics to evaluate your mobile check-in implementation:
-          </p>
-          <ul>
-            <li><strong>Completion Rate:</strong> Percentage of service calls with completed check-ins</li>
-            <li><strong>Quality Score:</strong> Evaluation of photo quality, note completeness, and proper categorization</li>
-            <li><strong>Time to Completion:</strong> How quickly after service check-ins are submitted</li>
-            <li><strong>Content Generation Rate:</strong> Percentage of check-ins successfully converted to website content</li>
-            <li><strong>Customer Engagement:</strong> Views and interactions with published check-in content</li>
-          </ul>
+            <h2>Quality Control and Improvement</h2>
+            
+            <h3>1. Regular Review Process</h3>
+            <p>
+              Implement a process for reviewing check-in quality:
+            </p>
+            <ul>
+              <li><strong>Weekly reviews:</strong> Have managers review a sample of check-ins each week.</li>
+              <li><strong>Feedback sessions:</strong> Provide constructive feedback to technicians about their check-ins.</li>
+              <li><strong>Team sharing:</strong> Share examples of excellent check-ins with the whole team.</li>
+            </ul>
+            
+            <h3>2. Recognition and Incentives</h3>
+            <p>
+              Consider implementing incentives for high-quality check-ins:
+            </p>
+            <ul>
+              <li><strong>Recognition program:</strong> Acknowledge technicians who consistently submit great check-ins.</li>
+              <li><strong>Performance metrics:</strong> Include check-in quality in performance reviews.</li>
+              <li><strong>Content highlights:</strong> Share when a technician's check-in is featured in marketing or receives positive customer feedback.</li>
+            </ul>
+            
+            <h3>3. Continuous Improvement</h3>
+            <ul>
+              <li><strong>Monthly analysis:</strong> Review check-in metrics monthly to identify trends and areas for improvement.</li>
+              <li><strong>Solicit feedback:</strong> Ask technicians for suggestions to improve the process.</li>
+              <li><strong>Adapt guidelines:</strong> Update your company's check-in guidelines based on what you learn.</li>
+            </ul>
 
-          <h2>Common Challenges and Solutions</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
-              <h3 className="font-bold text-lg mb-2">Challenge: Technician Resistance</h3>
-              <p className="mb-2">Technicians may see check-ins as additional paperwork.</p>
-              <p className="font-bold text-sm">Solution:</p>
-              <ul className="list-disc pl-5 text-sm">
-                <li>Explain the business value and how it helps them</li>
-                <li>Simplify the process as much as possible</li>
-                <li>Provide incentives for consistent quality check-ins</li>
-                <li>Share success stories from check-in content</li>
+            <div className="bg-purple-50 p-6 rounded-lg my-6 border border-purple-100">
+              <h3 className="text-purple-800 mt-0">Measuring Success</h3>
+              <p className="text-purple-700 mb-2">
+                Key metrics to track for successful mobile check-in implementation:
+              </p>
+              <ul className="mb-0 text-purple-700">
+                <li><strong>Completion rate:</strong> Percentage of jobs with completed check-ins</li>
+                <li><strong>Photo quality:</strong> Average number of photos per check-in and photo quality score</li>
+                <li><strong>Note quality:</strong> Average word count and completeness of notes</li>
+                <li><strong>Content generation:</strong> Percentage of check-ins that generate usable marketing content</li>
+                <li><strong>Review rate:</strong> Percentage of check-ins that lead to completed customer reviews</li>
               </ul>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
-              <h3 className="font-bold text-lg mb-2">Challenge: Poor Quality Photos</h3>
-              <p className="mb-2">Blurry, poorly lit, or irrelevant images reduce content value.</p>
-              <p className="font-bold text-sm">Solution:</p>
-              <ul className="list-disc pl-5 text-sm">
-                <li>Provide basic photography training</li>
-                <li>Create a visual guide showing good vs. poor examples</li>
-                <li>Implement a quality review process</li>
-                <li>Consider providing small lighting tools</li>
-              </ul>
-            </div>
+            <h2>Common Challenges and Solutions</h2>
+            
+            <h3>1. Technician Resistance</h3>
+            <p>
+              Some technicians might initially resist adding what they perceive as extra documentation:
+            </p>
+            <ul>
+              <li><strong>Solution:</strong> Explain the value for both the company and technicians (more customers = more job security).</li>
+              <li><strong>Solution:</strong> Start with a pilot group of tech-savvy technicians who can become advocates.</li>
+              <li><strong>Solution:</strong> Show examples of marketing content generated from their check-ins.</li>
+            </ul>
+            
+            <h3>2. Inconsistent Quality</h3>
+            <p>
+              You might notice significant variation in check-in quality between technicians:
+            </p>
+            <ul>
+              <li><strong>Solution:</strong> Create clear, visual examples of what constitutes a good vs. poor check-in.</li>
+              <li><strong>Solution:</strong> Implement peer review where technicians can learn from each other.</li>
+              <li><strong>Solution:</strong> Provide additional training for technicians who consistently struggle.</li>
+            </ul>
+            
+            <h3>3. Time Constraints</h3>
+            <p>
+              On busy days, technicians might feel pressured to skip detailed check-ins:
+            </p>
+            <ul>
+              <li><strong>Solution:</strong> Build appropriate time for check-ins into job scheduling.</li>
+              <li><strong>Solution:</strong> Create simplified templates for very busy periods.</li>
+              <li><strong>Solution:</strong> Allow for "minimal" check-ins that can be enhanced later, rather than skipping entirely.</li>
+            </ul>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
-              <h3 className="font-bold text-lg mb-2">Challenge: Inconsistent Completion</h3>
-              <p className="mb-2">Some technicians regularly skip check-ins.</p>
-              <p className="font-bold text-sm">Solution:</p>
-              <ul className="list-disc pl-5 text-sm">
-                <li>Make check-ins part of the service process, not optional</li>
-                <li>Implement friendly competition with completion rate leaderboards</li>
-                <li>Include check-in performance in evaluations</li>
-                <li>Address connectivity issues that may be causing frustration</li>
-              </ul>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
-              <h3 className="font-bold text-lg mb-2">Challenge: Vague or Brief Notes</h3>
-              <p className="mb-2">One-line descriptions provide little content value.</p>
-              <p className="font-bold text-sm">Solution:</p>
-              <ul className="list-disc pl-5 text-sm">
-                <li>Provide templates with prompts for key information</li>
-                <li>Set a minimum character count for descriptions</li>
-                <li>Share examples of high-quality notes</li>
-                <li>Provide feedback on particularly good or poor examples</li>
-              </ul>
-            </div>
-          </div>
-
-          <h2>Advanced Strategies</h2>
-
-          <h3>Gamification</h3>
-          <p>
-            Increase engagement by adding competitive elements:
-          </p>
-          <ul>
-            <li>Create leaderboards for check-in completion and quality</li>
-            <li>Provide recognition for "Check-in of the Week"</li>
-            <li>Offer small incentives for consistent high performance</li>
-          </ul>
-
-          <h3>Customer Involvement</h3>
-          <p>
-            Leverage the customer's presence during check-ins:
-          </p>
-          <ul>
-            <li>Show customers their check-in before submission</li>
-            <li>Encourage customers to provide a quote about the service</li>
-            <li>Explain how the published check-in will help other customers with similar issues</li>
-          </ul>
-
-          <h3>Integration with Training</h3>
-          <p>
-            Use check-in data to improve your team:
-          </p>
-          <ul>
-            <li>Review exceptional check-ins during team meetings</li>
-            <li>Identify common issues or solutions from aggregated check-in data</li>
-            <li>Develop training materials based on real-world service examples</li>
-          </ul>
-        </div>
-
-        <div className="bg-slate-100 rounded-xl p-8 mb-12 text-center">
-          <h2 className="text-2xl font-bold mb-4">Ready to Implement These Practices?</h2>
-          <p className="mb-6">Download our complete Mobile Check-In Implementation Kit</p>
-          <a
-            href="#"
-            className="inline-block px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-colors"
-          >
-            Download Implementation Kit
-          </a>
-        </div>
-
-        <div className="border-t border-slate-200 pt-8">
-          <h3 className="font-bold text-lg mb-4">Related Resources</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Link href="/resources/content-creation-templates">
-              <a className="block p-4 bg-white rounded-lg shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-                <span className="text-2xl mb-2 inline-block">📝</span>
-                <h4 className="font-semibold mb-1">Content Creation Templates</h4>
-                <p className="text-sm text-slate-600">Pre-made templates for effective blog posts</p>
-              </a>
-            </Link>
-            <Link href="/resources/maximizing-review-collection">
-              <a className="block p-4 bg-white rounded-lg shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-                <span className="text-2xl mb-2 inline-block">⭐</span>
-                <h4 className="font-semibold mb-1">Maximizing Review Collection</h4>
-                <p className="text-sm text-slate-600">Strategies for getting more reviews</p>
-              </a>
-            </Link>
-            <Link href="/resources/seo-impact-analysis">
-              <a className="block p-4 bg-white rounded-lg shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-                <span className="text-2xl mb-2 inline-block">📊</span>
-                <h4 className="font-semibold mb-1">SEO Impact Analysis</h4>
-                <p className="text-sm text-slate-600">How check-ins improve search rankings</p>
-              </a>
-            </Link>
+            <h2>Conclusion</h2>
+            <p>
+              Implementing these best practices will help your team create high-quality check-ins that provide maximum 
+              value for both service documentation and marketing content generation. Remember that consistency is key—it's 
+              better to have regular, good-quality check-ins than occasional perfect ones.
+            </p>
+            <p>
+              For additional support with your mobile check-in process:
+            </p>
+            <ul>
+              <li>Contact your account manager for personalized advice</li>
+              <li>Schedule a team training session with our implementation specialists</li>
+              <li>Visit our <Link href="/help-center">Help Center</Link> for troubleshooting and technical support</li>
+            </ul>
           </div>
         </div>
       </div>
