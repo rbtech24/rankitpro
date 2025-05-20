@@ -1,6 +1,6 @@
 import React from 'react';
 import { InfoPageLayout } from '../components/layouts/InfoPageLayout';
-import { Link } from 'wouter';
+import { Link } from "wouter";
 
 export default function Resources() {
   return (
@@ -79,7 +79,7 @@ export default function Resources() {
                   <h3 className="font-semibold text-sm mb-1">{download.title}</h3>
                   <p className="text-slate-500 text-xs mb-2">{download.format} • {download.size}</p>
                   {download.link ? (
-                    <Link href={download.link} className="text-primary text-sm hover:underline">View Document</Link>
+                    <a href={download.link} className="text-primary text-sm hover:underline">View Document</a>
                   ) : (
                     <a href="#" className="text-primary text-sm hover:underline">Download</a>
                   )}
