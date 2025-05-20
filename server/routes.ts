@@ -26,6 +26,7 @@ import generateContentRoutes from "./routes/generate-content";
 import mobileRoutes from "./routes/mobile";
 import mobileCheckInsRoutes from "./routes/mobile/check-ins";
 import mobileNotificationsRoutes from "./routes/mobile/notifications";
+import crmIntegrationRoutes from "./routes/crm-integration";
 import emailService from "./services/email-service";
 import { fromZodError } from "zod-validation-error";
 import { WebSocketServer, WebSocket } from 'ws';
@@ -811,6 +812,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/ai-providers", aiProvidersRoutes);
   app.use("/api/generate-content", generateContentRoutes);
   app.use("/api/mobile/v1", mobileRoutes);
+  app.use("/api/crm", crmIntegrationRoutes);
   
   // Create HTTP server
   const httpServer = createServer(app);

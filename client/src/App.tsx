@@ -24,6 +24,7 @@ import TechnicianMobile from "@/pages/technician-mobile";
 import ReviewRequest from "@/pages/review-request";
 import Review from "@/pages/review";
 import ReviewsDashboard from "@/pages/reviews-dashboard";
+import CRMIntegrations from "@/pages/crm-integrations";
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
 // Informational Pages
