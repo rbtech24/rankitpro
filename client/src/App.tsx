@@ -133,6 +133,66 @@ function Router() {
         </div>
       </Route>
       
+      <Route path="/resources/seo-impact-analysis">
+        <div className="p-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+            <h1 className="text-2xl font-bold mb-6">SEO Impact Analysis</h1>
+            <p className="mb-4">Learn how Rank It Pro's check-in system can significantly boost your search rankings and online visibility.</p>
+            <div className="mt-8">
+              <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
+            </div>
+          </div>
+        </div>
+      </Route>
+      
+      <Route path="/resources/maximizing-review-collection">
+        <div className="p-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+            <h1 className="text-2xl font-bold mb-6">Maximizing Review Collection</h1>
+            <p className="mb-4">Learn proven strategies to increase your review quantity, quality, and impact on potential customers.</p>
+            <div className="mt-8">
+              <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
+            </div>
+          </div>
+        </div>
+      </Route>
+      
+      <Route path="/resources/content-creation-templates">
+        <div className="p-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+            <h1 className="text-2xl font-bold mb-6">Content Creation Templates</h1>
+            <p className="mb-4">Access ready-to-use templates for creating compelling content from your technicians' check-ins.</p>
+            <div className="mt-8">
+              <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
+            </div>
+          </div>
+        </div>
+      </Route>
+      
+      <Route path="/resources/wordpress-integration-guide">
+        <div className="p-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+            <h1 className="text-2xl font-bold mb-6">WordPress Integration Guide</h1>
+            <p className="mb-4">Learn how to seamlessly integrate Rank It Pro with your WordPress website for maximum SEO impact.</p>
+            <div className="mt-8">
+              <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
+            </div>
+          </div>
+        </div>
+      </Route>
+      
+      <Route path="/resources/client-communication-scripts">
+        <div className="p-8">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+            <h1 className="text-2xl font-bold mb-6">Client Communication Scripts</h1>
+            <p className="mb-4">Use these proven scripts to effectively communicate with clients about check-ins, reviews, and more.</p>
+            <div className="mt-8">
+              <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
+            </div>
+          </div>
+        </div>
+      </Route>
+      
       <Route path="/resources/calculators/roi-calculator">
         <div className="p-8">
           <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
