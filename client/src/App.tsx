@@ -211,7 +211,176 @@ function Router() {
         <div className="p-8">
           <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
             <h1 className="text-2xl font-bold mb-6">SEO Value Estimator</h1>
-            <p className="mb-4">This calculator is coming soon</p>
+            <p className="mb-6">Calculate the estimated value of improved local SEO from technician check-ins and the content they generate.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Current SEO Statistics</h2>
+                <ul className="space-y-3">
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Monthly Website Visitors:</span>
+                    <span className="font-medium">1,250</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Organic Conversion Rate:</span>
+                    <span className="font-medium">2.4%</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Average Customer Value:</span>
+                    <span className="font-medium">$350</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Current Google Ranking:</span>
+                    <span className="font-medium">#7-12 (avg.)</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Local Service Pages:</span>
+                    <span className="font-medium">14</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Content Generation</h2>
+                <ul className="space-y-3">
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Technicians:</span>
+                    <span className="font-medium">5</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Check-ins per Month:</span>
+                    <span className="font-medium">330</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Job Types Covered:</span>
+                    <span className="font-medium">12</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Service Areas:</span>
+                    <span className="font-medium">8</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Expected Ranking Improvement:</span>
+                    <span className="font-medium">3-5 positions</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="p-6 bg-white border rounded-lg shadow-sm mb-8">
+              <h2 className="text-xl font-semibold mb-4">Projected SEO Benefits</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-center">
+                  <p className="text-sm text-blue-700 mb-1">Estimated Visitor Increase</p>
+                  <p className="text-3xl font-bold text-blue-800">+45%</p>
+                  <p className="text-xs text-blue-600 mt-1">From 1,250 to 1,812 monthly visitors</p>
+                </div>
+                
+                <div className="bg-green-50 p-4 rounded-lg border border-green-100 text-center">
+                  <p className="text-sm text-green-700 mb-1">Conversion Improvement</p>
+                  <p className="text-3xl font-bold text-green-800">+0.8%</p>
+                  <p className="text-xs text-green-600 mt-1">From 2.4% to 3.2% conversion rate</p>
+                </div>
+                
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-100 text-center">
+                  <p className="text-sm text-purple-700 mb-1">Additional Monthly Revenue</p>
+                  <p className="text-3xl font-bold text-purple-800">$8,050</p>
+                  <p className="text-xs text-purple-600 mt-1">From increased visitors and conversions</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-lg">Local SEO Impact Breakdown</h3>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center">
+                      <div className="w-32 text-sm">Keyword Rankings</div>
+                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: '72%' }}></div>
+                      </div>
+                      <div className="w-16 text-right text-sm font-medium">+72%</div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-32 text-sm">Local Map Pack</div>
+                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: '65%' }}></div>
+                      </div>
+                      <div className="w-16 text-right text-sm font-medium">+65%</div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-32 text-sm">Local Content</div>
+                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: '85%' }}></div>
+                      </div>
+                      <div className="w-16 text-right text-sm font-medium">+85%</div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-32 text-sm">Local Citations</div>
+                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: '40%' }}></div>
+                      </div>
+                      <div className="w-16 text-right text-sm font-medium">+40%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Long-term Value (12 months)</h2>
+                <ul className="space-y-2">
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Additional Website Visitors:</span>
+                    <span className="font-medium">6,750+</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Additional Conversions:</span>
+                    <span className="font-medium">216+</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Additional Annual Revenue:</span>
+                    <span className="font-medium">$96,600+</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Equivalent PPC Ad Spend:</span>
+                    <span className="font-medium">$33,750</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Content Value</h2>
+                <ul className="space-y-2">
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Local Service Pages Created:</span>
+                    <span className="font-medium">96</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Cost Per Page (outsourced):</span>
+                    <span className="font-medium">$120-180</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Content Creation Savings:</span>
+                    <span className="font-medium">$11,520+</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Customer Retention Value:</span>
+                    <span className="font-medium">$24,500+</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6">
+              <p className="text-blue-800 text-sm">
+                <strong>Note:</strong> This calculator provides estimated values based on industry averages and your business metrics. 
+                Actual results may vary based on your market, competition, and implementation quality. For a custom analysis, 
+                please schedule a consultation with our SEO specialists.
+              </p>
+            </div>
+            
             <div className="mt-8">
               <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
             </div>
