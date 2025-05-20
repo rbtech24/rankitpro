@@ -77,7 +77,11 @@ export default function Resources() {
                 <div>
                   <h3 className="font-semibold text-sm mb-1">{download.title}</h3>
                   <p className="text-slate-500 text-xs mb-2">{download.format} • {download.size}</p>
-                  <a href="#" className="text-primary text-sm hover:underline">Download</a>
+                  {download.link ? (
+                    <a href={download.link} className="text-primary text-sm hover:underline">View Document</a>
+                  ) : (
+                    <a href="#" className="text-primary text-sm hover:underline">Download</a>
+                  )}
                 </div>
               </div>
             ))}
@@ -144,17 +148,20 @@ const downloads = [
   {
     title: "Complete Guide to Local SEO for Service Businesses",
     format: "PDF",
-    size: "1.2 MB"
+    size: "1.2 MB",
+    link: "/downloads/local-seo-guide"
   },
   {
     title: "Rank It Pro Implementation Checklist",
     format: "PDF",
-    size: "842 KB"
+    size: "842 KB",
+    link: "/downloads/implementation-checklist"
   },
   {
     title: "Technician Training Slides",
     format: "PowerPoint",
-    size: "3.5 MB"
+    size: "3.5 MB",
+    link: "/downloads/technician-training-slides"
   },
   {
     title: "Review Request Email Templates",

@@ -25,6 +25,9 @@ import ReviewRequest from "@/pages/review-request";
 import Review from "@/pages/review";
 import ReviewsDashboard from "@/pages/reviews-dashboard";
 import CRMIntegrations from "@/pages/crm-integrations";
+import LocalSeoGuide from "@/pages/downloads/local-seo-guide";
+import ImplementationChecklist from "@/pages/downloads/implementation-checklist";
+import TechnicianTrainingSlides from "@/pages/downloads/technician-training-slides";
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
 // Informational Pages
@@ -110,6 +113,11 @@ function Router() {
         <PrivateRoute component={WordPressCustomFields} path="/wordpress-custom-fields" role="company_admin" />
       </Route>
       <Route path="/review/:token"><Review /></Route>
+      
+      {/* Downloadable Resources */}
+      <Route path="/downloads/local-seo-guide"><LocalSeoGuide /></Route>
+      <Route path="/downloads/implementation-checklist"><ImplementationChecklist /></Route>
+      <Route path="/downloads/technician-training-slides"><TechnicianTrainingSlides /></Route>
       
       {/* Dashboard Pages */}
       <Route path="/dashboard">
