@@ -167,7 +167,7 @@ const downloads = [
     size: "950 KB"
   },
   {
-    title: "CheckIn Pro Mobile App User Guide",
+    title: "Rank It Pro Mobile App User Guide",
     format: "PDF",
     size: "2.3 MB"
   }
