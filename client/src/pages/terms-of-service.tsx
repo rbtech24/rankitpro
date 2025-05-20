@@ -15,13 +15,13 @@ export default function TermsOfService() {
             <section className="mb-8">
               <h2 className="text-xl font-bold mb-4">1. Introduction</h2>
               <p>
-                Welcome to CheckIn Pro. These Terms of Service ("Terms") govern your access to and use of the CheckIn Pro platform, 
+                Welcome to Rank It Pro. These Terms of Service ("Terms") govern your access to and use of the Rank It Pro platform, 
                 including our website, mobile applications, and related services (collectively, the "Service"). By using our Service, 
                 you agree to be bound by these Terms. If you do not agree to these Terms, please do not use our Service.
               </p>
               <p>
-                CheckIn Pro is a platform that helps home service businesses manage technician check-ins, generate content, 
-                and request reviews. Our Service is provided by CheckIn Pro, Inc. ("we," "us," or "our"), a Delaware corporation.
+                Rank It Pro is a platform that helps home service businesses manage technician check-ins, generate content, 
+                and request reviews. Our Service is provided by Rank It Pro, Inc. ("we," "us," or "our"), a Delaware corporation.
               </p>
             </section>
 
@@ -42,7 +42,7 @@ export default function TermsOfService() {
             <section className="mb-8">
               <h2 className="text-xl font-bold mb-4">3. Subscription and Payment</h2>
               <p>
-                CheckIn Pro offers various subscription plans with different features and pricing. By subscribing to our Service, 
+                Rank It Pro offers various subscription plans with different features and pricing. By subscribing to our Service, 
                 you agree to pay the applicable subscription fees as described on our pricing page or as otherwise communicated to you.
               </p>
               <p>
@@ -109,9 +109,9 @@ export default function TermsOfService() {
             <section className="mb-8">
               <h2 className="text-xl font-bold mb-4">6. Intellectual Property</h2>
               <p>
-                The Service and its original content, features, and functionality are owned by CheckIn Pro and are protected by 
-                copyright, trademark, and other intellectual property laws. The CheckIn Pro name and logo are trademarks of 
-                CheckIn Pro, Inc.
+                The Service and its original content, features, and functionality are owned by Rank It Pro and are protected by 
+                copyright, trademark, and other intellectual property laws. The Rank It Pro name and logo are trademarks of 
+                Rank It Pro, Inc.
               </p>
               <p>
                 Except as expressly provided in these Terms, nothing in these Terms shall be deemed to grant, by implication, 
@@ -167,7 +167,7 @@ export default function TermsOfService() {
             <section className="mb-8">
               <h2 className="text-xl font-bold mb-4">10. Indemnification</h2>
               <p>
-                You agree to indemnify, defend, and hold harmless CheckIn Pro, its affiliates, officers, directors, employees, 
+                You agree to indemnify, defend, and hold harmless Rank It Pro, its affiliates, officers, directors, employees, 
                 agents, and licensors from and against all claims, liabilities, damages, judgments, awards, losses, costs, expenses, 
                 or fees (including reasonable attorneys' fees) arising out of or relating to your violation of these Terms or your 
                 use of the Service.
@@ -227,7 +227,7 @@ export default function TermsOfService() {
                 If you have any questions about these Terms, please contact us at:
               </p>
               <div className="mt-4">
-                <p><strong>Email:</strong> legal@checkinpro.com</p>
+                <p><strong>Email:</strong> legal@rankitpro.com</p>
                 <p><strong>Address:</strong> 1234 Tech Way, Suite 500, San Francisco, CA 94105</p>
                 <p><strong>Phone:</strong> (555) 123-4567</p>
               </div>
