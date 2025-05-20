@@ -141,6 +141,23 @@ export default function Sidebar({ className }: SidebarProps) {
                 Integrations
               </a>
             </Link>
+            <Link href="/crm-integrations">
+              <a className={cn(
+                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1",
+                isActive("/crm-integrations") && "bg-blue-50 border-l-3 border-blue-600"
+              )}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                  <path d="M17 3a2.85 2.85 0 1 1 0 5.7"/>
+                  <path d="M10 13a2.85 2.85 0 1 1 0 5.7"/>
+                  <path d="M7 3a2.85 2.85 0 1 0 0 5.7"/>
+                  <path d="M14 13a2.85 2.85 0 1 0 0 5.7"/>
+                  <path d="M14.5 5.5a6 6 0 0 1-9.2 1"/>
+                  <path d="M16.5 13.5a6 6 0 0 1-1.8 3.8"/>
+                  <path d="M8.8 17a6 6 0 0 1-1.2-10"/>
+                </svg>
+                CRM Integrations
+              </a>
+            </Link>
           </div>
         )}
         

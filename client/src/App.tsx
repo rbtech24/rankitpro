@@ -150,6 +150,9 @@ function Router() {
       <Route path="/ai-settings">
         <PrivateRoute component={AISettings} path="/ai-settings" role="company_admin" />
       </Route>
+      <Route path="/crm-integrations">
+        <PrivateRoute component={CRMIntegrations} path="/crm-integrations" role="company_admin" />
+      </Route>
       
       {/* Technician Apps */}
       <Route path="/tech-app">
