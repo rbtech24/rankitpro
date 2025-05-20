@@ -7,7 +7,7 @@ export default function Documentation() {
   return (
     <InfoPageLayout 
       title="Documentation" 
-      description="Comprehensive guides to help you get the most out of CheckIn Pro"
+      description="Comprehensive guides to help you get the most out of Rank It Pro"
     >
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row gap-8">
@@ -59,8 +59,8 @@ const docSections = [
     title: 'Getting Started',
     content: (
       <>
-        <h2>Welcome to CheckIn Pro</h2>
-        <p>This guide will help you get started with CheckIn Pro, the all-in-one platform for home service businesses to transform field operations into powerful marketing content.</p>
+        <h2>Welcome to Rank It Pro</h2>
+        <p>This guide will help you get started with Rank It Pro, the all-in-one platform for home service businesses to transform field operations into powerful marketing content.</p>
         
         <h3>1. Setting Up Your Account</h3>
         <p>After signing up, you'll need to complete a few steps to set up your account:</p>
@@ -81,7 +81,7 @@ const docSections = [
         </ol>
         
         <h3>3. Mobile App Setup</h3>
-        <p>Technicians will need to download the CheckIn Pro mobile app to complete check-ins from the field:</p>
+        <p>Technicians will need to download the Rank It Pro mobile app to complete check-ins from the field:</p>
         <ul>
           <li>Available on iOS and Android</li>
           <li>Requires location permissions for GPS tracking</li>

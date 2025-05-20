@@ -471,7 +471,7 @@ const Home = () => {
           <div className="container mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Transform Your Field Service Marketing?</h2>
             <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto opacity-90">
-              Join hundreds of home service businesses using CheckIn Pro to turn everyday service calls into powerful marketing content.
+              Join hundreds of home service businesses using Rank It Pro to turn everyday service calls into powerful marketing content.
             </p>
             <Link to="/register">
               <Button variant="secondary" size="lg" className="font-semibold">

@@ -5,7 +5,7 @@ export default function Testimonials() {
   return (
     <InfoPageLayout 
       title="Testimonials" 
-      description="Read what our customers are saying about CheckIn Pro"
+      description="Read what our customers are saying about Rank It Pro"
     >
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
@@ -35,7 +35,7 @@ export default function Testimonials() {
         <div className="bg-gradient-to-r from-primary/5 to-primary/10 p-8 rounded-xl mb-16">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold mb-4">Customer Satisfaction Stats</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">Our customers see real results when using CheckIn Pro for their home service business</p>
+            <p className="text-slate-600 max-w-2xl mx-auto">Our customers see real results when using Rank It Pro for their home service business</p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
@@ -76,14 +76,14 @@ const testimonials = [
     role: "Owner",
     company: "Peterson Plumbing",
     rating: 5,
-    text: "CheckIn Pro has completely transformed how we document service calls. Our technicians love the simple mobile interface, and the automatic content generation has boosted our website traffic by over 200% in just 3 months!"
+    text: "Rank It Pro has completely transformed how we document service calls. Our technicians love the simple mobile interface, and the automatic content generation has boosted our website traffic by over 200% in just 3 months!"
   },
   {
     name: "Sarah Johnson",
     role: "Operations Manager",
     company: "Johnson Electrical",
     rating: 5,
-    text: "The review automation feature has increased our Google reviews by 4x! Our customers appreciate the transparency, and we've seen a significant uptick in referral business since implementing CheckIn Pro."
+    text: "The review automation feature has increased our Google reviews by 4x! Our customers appreciate the transparency, and we've seen a significant uptick in referral business since implementing Rank It Pro."
   },
   {
     name: "David Wilson",

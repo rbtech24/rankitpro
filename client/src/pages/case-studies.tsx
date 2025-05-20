@@ -5,7 +5,7 @@ export default function CaseStudies() {
   return (
     <InfoPageLayout 
       title="Case Studies" 
-      description="See how service businesses boost visibility and customer trust with CheckIn Pro"
+      description="See how service businesses boost visibility and customer trust with Rank It Pro"
     >
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
@@ -91,7 +91,7 @@ const caseStudies = [
     icon: "🔧",
     industry: "Plumbing",
     title: "West Coast Plumbing Increases Online Visibility by 200%",
-    description: "A mid-sized plumbing company using CheckIn Pro to document jobs and transform field work into blog content and review requests.",
+    description: "A mid-sized plumbing company using Rank It Pro to document jobs and transform field work into blog content and review requests.",
     results: {
       checkIns: 40,
       seo: 200,
