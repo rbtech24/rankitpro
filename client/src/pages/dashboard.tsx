@@ -14,6 +14,17 @@ import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocation } from "wouter";
+import { 
+  Users,
+  Building2,
+  CreditCard,
+  CheckCircle2,
+  AlertTriangle,
+  Clipboard,
+  Box,
+  ChevronRight
+} from "lucide-react";
 
 export default function Dashboard() {
   const [visitModalOpen, setVisitModalOpen] = useState(false);
@@ -90,12 +101,12 @@ export default function Dashboard() {
                           Manage and monitor Housecall Pro integration across all companies
                         </CardDescription>
                       </div>
-                      <Button 
-                        variant="outline" 
+                      <button 
+                        className="px-4 py-2 border rounded-md hover:bg-gray-100"
                         onClick={() => setLocation("/crm-integrations")}
                       >
                         Manage All Integrations
-                      </Button>
+                      </button>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-6">

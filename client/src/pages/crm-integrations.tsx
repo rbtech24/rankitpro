@@ -510,8 +510,9 @@ const SyncSettings = ({
 // Main CRM Integrations Page
 export default function CRMIntegrationsPage() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<string>("overview");
-  const [selectedCRM, setSelectedCRM] = useState<string | null>(null);
+  // Default to "housecall" tab for direct Housecall Pro access
+  const [activeTab, setActiveTab] = useState<string>("housecall");
+  const [selectedCRM, setSelectedCRM] = useState<string | null>("housecall");
   const [configureDialogOpen, setConfigureDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [testStatus, setTestStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
