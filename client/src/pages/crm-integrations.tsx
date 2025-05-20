@@ -520,9 +520,21 @@ export default function CRMIntegrationsPage() {
   const { data: availableCRMsResponse, isLoading: isLoadingAvailableCRMs, error: availableCRMsError } = useQuery({
     queryKey: ['/api/crm/available'],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/crm/available');
-      return response.json();
+      try {
+        const response = await apiRequest('GET', '/api/crm/available');
+        return response.json();
+      } catch (error) {
+        console.error("Error fetching available CRMs:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load available CRM integrations",
+          variant: "destructive",
+        });
+        throw error;
+      }
     },
+    retry: 1,
+    staleTime: 60000, // 1 minute
   });
   
   // Extract the array from the response
