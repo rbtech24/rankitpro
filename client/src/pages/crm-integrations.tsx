@@ -1056,6 +1056,11 @@ export default function CRMIntegrationsPage() {
                   <div className="flex justify-center items-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                   </div>
+                ) : syncHistoryError ? (
+                  <div className="text-center py-8">
+                    <p className="text-red-500">Error loading synchronization history</p>
+                    <p className="text-sm text-gray-500 mt-2">Please try again or contact support</p>
+                  </div>
                 ) : syncHistory && syncHistory.length > 0 ? (
                   <div className="space-y-4">
                     <div className="rounded-md border">
