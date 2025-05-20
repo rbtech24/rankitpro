@@ -548,9 +548,21 @@ export default function CRMIntegrationsPage() {
   } = useQuery({
     queryKey: ['/api/crm/configured'],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/crm/configured');
-      return response.json();
+      try {
+        const response = await apiRequest('GET', '/api/crm/configured');
+        return response.json();
+      } catch (error) {
+        console.error("Error fetching configured CRMs:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load your configured CRM integrations",
+          variant: "destructive",
+        });
+        throw error;
+      }
     },
+    retry: 1,
+    staleTime: 30000, // 30 seconds
   });
   
   // Extract and process the configured CRMs
@@ -564,9 +576,21 @@ export default function CRMIntegrationsPage() {
   } = useQuery({
     queryKey: ['/api/crm/sync-history'],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/crm/sync-history');
-      return response.json();
+      try {
+        const response = await apiRequest('GET', '/api/crm/sync-history');
+        return response.json();
+      } catch (error) {
+        console.error("Error fetching sync history:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load CRM synchronization history",
+          variant: "destructive",
+        });
+        throw error;
+      }
     },
+    retry: 1,
+    staleTime: 30000, // 30 seconds
   });
   
   // Extract and process the sync history
