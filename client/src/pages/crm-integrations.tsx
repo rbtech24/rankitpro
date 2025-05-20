@@ -510,9 +510,8 @@ const SyncSettings = ({
 // Main CRM Integrations Page
 export default function CRMIntegrationsPage() {
   const { toast } = useToast();
-  // Default to "housecall" tab for direct Housecall Pro access
   const [activeTab, setActiveTab] = useState<string>("housecall");
-  const [selectedCRM, setSelectedCRM] = useState<string | null>("housecall");
+  const [selectedCRM, setSelectedCRM] = useState<string>("housecall");
   const [configureDialogOpen, setConfigureDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [testStatus, setTestStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -530,12 +529,15 @@ export default function CRMIntegrationsPage() {
   
   // Fetch configured CRMs
   const { 
-    data: configuredCRMs,
+    data: configuredCRMsResponse,
     isLoading: isLoadingCRMs,
   } = useQuery({
     queryKey: ['/api/crm/configured'],
     queryFn: () => apiRequest('GET', '/api/crm/configured'),
   });
+  
+  // Extract and process the configured CRMs
+  const configuredCRMs = Array.isArray(configuredCRMsResponse) ? configuredCRMsResponse : [];
   
   // Fetch CRM sync history
   const { 
@@ -661,8 +663,10 @@ export default function CRMIntegrationsPage() {
   
   // Get existing configuration for a CRM
   const getExistingConfig = (crmType: string) => {
-    const config = configuredCRMs?.find(crm => crm.id === crmType);
-    return config;
+    if (!Array.isArray(configuredCRMs)) {
+      return null;
+    }
+    return configuredCRMs.find((crm: any) => crm.id === crmType) || null;
   };
   
   // Reset test status when changing CRMs
@@ -879,9 +883,9 @@ export default function CRMIntegrationsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {availableCRMs?.map((crm) => {
-                      const isConfigured = configuredCRMs?.some(
-                        configured => configured.id === crm.id
+                    {Array.isArray(availableCRMs) && availableCRMs.map((crm) => {
+                      const isConfigured = Array.isArray(configuredCRMs) && configuredCRMs.some(
+                        (configured: any) => configured.id === crm.id
                       );
                       
                       return (
