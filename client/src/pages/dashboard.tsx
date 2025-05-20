@@ -12,6 +12,7 @@ import BillingManagement from "@/components/dashboard/billing-management";
 import VisitModal from "@/components/modals/visit-modal";
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocation } from "wouter";
@@ -26,8 +27,169 @@ import {
   AlertTriangle,
   Clipboard,
   Box,
-  ChevronRight
+  ChevronRight,
+  Loader2,
+  RefreshCw
 } from "lucide-react";
+import { formatDistanceToNow } from 'date-fns';
+
+// Component to display companies with Housecall Pro integration
+const HousecallProCompaniesTable = () => {
+  const [location, setLocation] = useLocation();
+  
+  // Fetch all companies
+  const { data: companies, isLoading: isLoadingCompanies } = useQuery({
+    queryKey: ['/api/companies'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/companies');
+      return response.json();
+    }
+  });
+
+  // Get companies with Housecall Pro integration
+  const companiesWithHousecallPro = React.useMemo(() => {
+    if (!companies) return [];
+    
+    return companies.filter(company => {
+      if (!company.crmIntegrations) return false;
+      
+      try {
+        const crmIntegrations = JSON.parse(company.crmIntegrations);
+        return crmIntegrations && crmIntegrations.housecallpro;
+      } catch (error) {
+        return false;
+      }
+    }).map(company => {
+      const crmIntegrations = JSON.parse(company.crmIntegrations || '{}');
+      const hcpIntegration = crmIntegrations.housecallpro || {};
+      
+      return {
+        id: company.id,
+        name: company.name,
+        status: hcpIntegration.status || 'inactive',
+        lastSynced: hcpIntegration.lastSyncedAt ? new Date(hcpIntegration.lastSyncedAt) : null,
+        syncStatus: hcpIntegration.lastSyncStatus || 'unknown'
+      };
+    });
+  }, [companies]);
+  
+  // Function to get sync history for a company (will be called when configuring individual company)
+  const getSyncHistory = async (companyId) => {
+    try {
+      const response = await apiRequest('GET', `/api/admin/companies/${companyId}/crm-sync-history`);
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching sync history:', error);
+      return [];
+    }
+  };
+  
+  // Function to trigger a manual sync
+  const triggerSync = async (companyId) => {
+    try {
+      await apiRequest('POST', `/api/admin/companies/${companyId}/trigger-sync`, { crmType: 'housecallpro' });
+      // Refresh the companies data
+      queryClient.invalidateQueries({ queryKey: ['/api/companies'] });
+    } catch (error) {
+      console.error('Error triggering sync:', error);
+    }
+  };
+  
+  if (isLoadingCompanies) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+  
+  if (companiesWithHousecallPro.length === 0) {
+    return (
+      <div className="text-center p-8 border rounded-md bg-gray-50">
+        <p className="text-gray-500 mb-4">No companies are currently using Housecall Pro integration.</p>
+        <Button onClick={() => setLocation("/crm-integrations")}>
+          Set Up Integration
+        </Button>
+      </div>
+    );
+  }
+  
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Company Name</TableHead>
+          <TableHead>Integration Status</TableHead>
+          <TableHead>Last Sync</TableHead>
+          <TableHead>Sync Status</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {companiesWithHousecallPro.map(company => (
+          <TableRow key={company.id}>
+            <TableCell className="font-medium">{company.name}</TableCell>
+            <TableCell>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                company.status === 'active' 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-gray-100 text-gray-800'
+              }`}>
+                {company.status === 'active' ? 'Active' : 'Inactive'}
+              </span>
+            </TableCell>
+            <TableCell>
+              {company.lastSynced 
+                ? formatDistanceToNow(company.lastSynced, { addSuffix: true }) 
+                : 'Never'}
+            </TableCell>
+            <TableCell>
+              {company.syncStatus === 'success' && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                  <CheckCircle2 className="h-3 w-3 mr-1" /> Success
+                </span>
+              )}
+              {company.syncStatus === 'partial' && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                  <AlertTriangle className="h-3 w-3 mr-1" /> Partial
+                </span>
+              )}
+              {company.syncStatus === 'failed' && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200">
+                  <AlertTriangle className="h-3 w-3 mr-1" /> Failed
+                </span>
+              )}
+              {company.syncStatus === 'unknown' && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
+                  Unknown
+                </span>
+              )}
+            </TableCell>
+            <TableCell className="text-right">
+              <div className="flex justify-end space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  title="Refresh Integration" 
+                  onClick={() => triggerSync(company.id)}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setLocation(`/crm-integrations?company=${company.id}`)}
+                >
+                  Configure
+                </Button>
+              </div>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+};
 
 export default function Dashboard() {
   const [visitModalOpen, setVisitModalOpen] = useState(false);

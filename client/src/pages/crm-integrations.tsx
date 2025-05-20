@@ -517,39 +517,48 @@ export default function CRMIntegrationsPage() {
   const [testStatus, setTestStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   
   // Fetch available CRMs
-  const { data: availableCRMsResponse } = useQuery({
+  const { data: availableCRMsResponse, isLoading: isLoadingAvailableCRMs, error: availableCRMsError } = useQuery({
     queryKey: ['/api/crm/available'],
-    queryFn: () => apiRequest('GET', '/api/crm/available'),
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/crm/available');
+      return response.json();
+    },
   });
   
   // Extract the array from the response
-  const availableCRMs = Array.isArray(availableCRMsResponse) 
-    ? availableCRMsResponse 
-    : [];
+  const availableCRMs = availableCRMsResponse || [];
   
   // Fetch configured CRMs
   const { 
     data: configuredCRMsResponse,
     isLoading: isLoadingCRMs,
+    error: configuredCRMsError
   } = useQuery({
     queryKey: ['/api/crm/configured'],
-    queryFn: () => apiRequest('GET', '/api/crm/configured'),
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/crm/configured');
+      return response.json();
+    },
   });
   
   // Extract and process the configured CRMs
-  const configuredCRMs = Array.isArray(configuredCRMsResponse) ? configuredCRMsResponse : [];
+  const configuredCRMs = configuredCRMsResponse || [];
   
   // Fetch CRM sync history
   const { 
     data: syncHistoryResponse,
     isLoading: isLoadingHistory,
+    error: syncHistoryError
   } = useQuery({
     queryKey: ['/api/crm/sync-history'],
-    queryFn: () => apiRequest('GET', '/api/crm/sync-history'),
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/crm/sync-history');
+      return response.json();
+    },
   });
   
   // Extract and process the sync history
-  const syncHistory = Array.isArray(syncHistoryResponse) ? syncHistoryResponse : [];
+  const syncHistory = syncHistoryResponse || [];
   
   // Save CRM configuration mutation
   const saveCRMMutation = useMutation({
