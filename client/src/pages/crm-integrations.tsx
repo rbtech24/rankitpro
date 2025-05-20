@@ -823,6 +823,11 @@ export default function CRMIntegrationsPage() {
                     <div className="flex justify-center items-center py-8">
                       <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                     </div>
+                  ) : configuredCRMsError ? (
+                    <div className="text-center py-8">
+                      <p className="text-red-500">Error loading CRM configurations</p>
+                      <p className="text-sm text-gray-500 mt-2">Please try again or contact support</p>
+                    </div>
                   ) : configuredCRMs && configuredCRMs.length > 0 ? (
                     <div className="space-y-4">
                       {configuredCRMs.map((crm: any) => (
@@ -928,33 +933,44 @@ export default function CRMIntegrationsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {Array.isArray(availableCRMs) && availableCRMs.map((crm: CRM) => {
-                      const isConfigured = Array.isArray(configuredCRMs) && configuredCRMs.some(
-                        (configured: any) => configured.id === crm.id
-                      );
-                      
-                      return (
-                        <div key={crm.id} className="p-4 border rounded-lg">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-medium">{crm.name}</h3>
-                              <p className="text-sm text-gray-500">{crm.description}</p>
+                  {isLoadingAvailableCRMs ? (
+                    <div className="flex justify-center items-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                    </div>
+                  ) : availableCRMsError ? (
+                    <div className="text-center py-8">
+                      <p className="text-red-500">Error loading available CRMs</p>
+                      <p className="text-sm text-gray-500 mt-2">Please try again or contact support</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {Array.isArray(availableCRMs) && availableCRMs.map((crm: CRM) => {
+                        const isConfigured = Array.isArray(configuredCRMs) && configuredCRMs.some(
+                          (configured: any) => configured.id === crm.id
+                        );
+                        
+                        return (
+                          <div key={crm.id} className="p-4 border rounded-lg">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="font-medium">{crm.name}</h3>
+                                <p className="text-sm text-gray-500">{crm.description}</p>
+                              </div>
+                              <Button
+                                onClick={() => {
+                                  setSelectedCRM(crm.id);
+                                  setConfigureDialogOpen(true);
+                                }}
+                                variant={isConfigured ? "outline" : "default"}
+                              >
+                                {isConfigured ? "Reconfigure" : "Connect"}
+                              </Button>
                             </div>
-                            <Button
-                              onClick={() => {
-                                setSelectedCRM(crm.id);
-                                setConfigureDialogOpen(true);
-                              }}
-                              variant={isConfigured ? "outline" : "default"}
-                            >
-                              {isConfigured ? "Reconfigure" : "Connect"}
-                            </Button>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
