@@ -16,7 +16,7 @@ export default function About() {
               <div>
                 <h3 className="text-xl font-semibold mb-4">From Field Problem to Complete Solution</h3>
                 <p className="text-slate-600 mb-4">
-                  CheckIn Pro began with a simple observation: home service technicians spend too much time on paperwork, 
+                  Rank It Pro began with a simple observation: home service technicians spend too much time on paperwork, 
                   while marketing teams struggle to create relevant content about the services their company provides.
                 </p>
                 <p className="text-slate-600 mb-4">
@@ -127,7 +127,7 @@ export default function About() {
         <section className="bg-slate-100 rounded-xl p-8 text-center mb-16">
           <h2 className="text-2xl font-bold mb-4">Get in Touch</h2>
           <p className="text-slate-600 mb-6 max-w-2xl mx-auto">
-            We'd love to hear from you! Whether you have questions about our platform or want to learn more about how CheckIn Pro can help your business, our team is here to assist you.
+            We'd love to hear from you! Whether you have questions about our platform or want to learn more about how Rank It Pro can help your business, our team is here to assist you.
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <a href="#" className="px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-primary/90 transition-colors">

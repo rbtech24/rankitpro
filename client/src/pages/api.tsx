@@ -324,7 +324,7 @@ const apiEndpoints = [
       { name: 'check_in_id', type: 'integer', required: true, description: 'ID of the check-in to use as the basis for the blog post' },
       { name: 'ai_provider', type: 'string', required: false, description: 'AI provider to use (openai, anthropic, xai). Default: openai' }
     ],
-    exampleRequest: `curl -X POST "https://api.checkinpro.com/v1/blog-posts/generate" \\
+    exampleRequest: `curl -X POST "https://api.rankitpro.com/v1/blog-posts/generate" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -340,13 +340,13 @@ const apiEndpoints = [
   "photos": [
     {
       "id": 456,
-      "url": "https://storage.checkinpro.com/photos/456.jpg",
-      "thumbnail_url": "https://storage.checkinpro.com/photos/456_thumb.jpg"
+      "url": "https://storage.rankitpro.com/photos/456.jpg",
+      "thumbnail_url": "https://storage.rankitpro.com/photos/456_thumb.jpg"
     },
     {
       "id": 457,
-      "url": "https://storage.checkinpro.com/photos/457.jpg",
-      "thumbnail_url": "https://storage.checkinpro.com/photos/457_thumb.jpg"
+      "url": "https://storage.rankitpro.com/photos/457.jpg",
+      "thumbnail_url": "https://storage.rankitpro.com/photos/457_thumb.jpg"
     }
   ]
 }`
@@ -364,7 +364,7 @@ const apiEndpoints = [
       { name: 'email', type: 'string', required: false, description: "Customer's email (required if method is 'email')" },
       { name: 'phone', type: 'string', required: false, description: "Customer's phone number (required if method is 'sms')" }
     ],
-    exampleRequest: `curl -X POST "https://api.checkinpro.com/v1/review-requests" \\
+    exampleRequest: `curl -X POST "https://api.rankitpro.com/v1/review-requests" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -381,7 +381,7 @@ const apiEndpoints = [
   "email": "jane.doe@example.com",
   "sent_at": "2025-05-14T16:30:12Z",
   "status": "sent",
-  "review_url": "https://review.checkinpro.com/c/abc123def456"
+  "review_url": "https://review.rankitpro.com/c/abc123def456"
 }`
   }
 ];

@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
             <section className="mb-8">
               <h2 className="text-xl font-bold mb-4">1. Introduction</h2>
               <p>
-                CheckIn Pro ("we," "our," or "us") respects your privacy and is committed to protecting your personal information. 
+                Rank It Pro ("we," "our," or "us") respects your privacy and is committed to protecting your personal information. 
                 This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform and services.
               </p>
               <p>
@@ -105,7 +105,7 @@ export default function PrivacyPolicy() {
                 <li><strong>Objection:</strong> You can object to our processing of your personal information.</li>
               </ul>
               <p className="mt-4">
-                To exercise these rights, please contact us at privacy@checkinpro.com. We will respond to your request within the timeframe required by applicable law.
+                To exercise these rights, please contact us at privacy@rankitpro.com. We will respond to your request within the timeframe required by applicable law.
               </p>
             </section>
 
@@ -143,7 +143,7 @@ export default function PrivacyPolicy() {
                 If you have any questions about this Privacy Policy, please contact us at:
               </p>
               <div className="mt-4">
-                <p><strong>Email:</strong> privacy@checkinpro.com</p>
+                <p><strong>Email:</strong> privacy@rankitpro.com</p>
                 <p><strong>Address:</strong> 1234 Tech Way, Suite 500, San Francisco, CA 94105</p>
                 <p><strong>Phone:</strong> (555) 123-4567</p>
               </div>
