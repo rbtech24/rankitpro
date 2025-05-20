@@ -90,27 +90,27 @@ const testimonials = [
     role: "Marketing Director",
     company: "Wilson HVAC",
     rating: 4,
-    text: "As the marketing director, I was skeptical about AI-generated content, but CheckIn Pro has exceeded expectations. The blog posts are high-quality, relevant, and have significantly improved our SEO rankings."
+    text: "As the marketing director, I was skeptical about AI-generated content, but Rank It Pro has exceeded expectations. The blog posts are high-quality, relevant, and have significantly improved our SEO rankings."
   },
   {
     name: "Jennifer Lee",
     role: "Admin Assistant",
     company: "Lee's Plumbing & Heating",
     rating: 5,
-    text: "I used to spend hours updating our website with new content and sending review requests. Now CheckIn Pro does it all automatically! This has freed up so much of my time to focus on other important tasks."
+    text: "I used to spend hours updating our website with new content and sending review requests. Now Rank It Pro does it all automatically! This has freed up so much of my time to focus on other important tasks."
   },
   {
     name: "Robert Taylor",
     role: "CEO",
     company: "Taylor Home Services",
     rating: 5,
-    text: "Since implementing CheckIn Pro, we've expanded into two new service areas due to increased online visibility. The ROI has been incredible - it basically pays for itself within the first month!"
+    text: "Since implementing Rank It Pro, we've expanded into two new service areas due to increased online visibility. The ROI has been incredible - it basically pays for itself within the first month!"
   },
   {
     name: "Amanda Garcia",
     role: "Service Manager",
     company: "Garcia Plumbing",
     rating: 4,
-    text: "Our technicians were initially resistant to adding another step to their process, but the CheckIn Pro mobile app is so intuitive that they quickly became advocates. Now they love showing customers their documented work!"
+    text: "Our technicians were initially resistant to adding another step to their process, but the Rank It Pro mobile app is so intuitive that they quickly became advocates. Now they love showing customers their documented work!"
   }
 ];

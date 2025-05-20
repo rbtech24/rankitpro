@@ -16,7 +16,7 @@ export default function HelpCenter() {
   return (
     <InfoPageLayout 
       title="Help Center" 
-      description="Find answers to your questions about using CheckIn Pro"
+      description="Find answers to your questions about using Rank It Pro"
     >
       <div className="max-w-5xl mx-auto">
         {/* Search */}
@@ -149,7 +149,7 @@ const helpArticles = [
   },
   {
     title: 'Setting up your company profile',
-    description: 'Configure your company information, branding, and service areas in your CheckIn Pro account.',
+    description: 'Configure your company information, branding, and service areas in your Rank It Pro account.',
     category: 'account'
   },
   {
@@ -159,12 +159,12 @@ const helpArticles = [
   },
   {
     title: 'Troubleshooting mobile app login issues',
-    description: 'Common solutions for login problems with the CheckIn Pro mobile application.',
+    description: 'Common solutions for login problems with the Rank It Pro mobile application.',
     category: 'mobile'
   },
   {
     title: 'Using the mobile app offline',
-    description: 'How to use the CheckIn Pro mobile app in areas with limited or no internet connectivity.',
+    description: 'How to use the Rank It Pro mobile app in areas with limited or no internet connectivity.',
     category: 'mobile'
   },
   {
@@ -174,11 +174,11 @@ const helpArticles = [
   },
   {
     title: 'Setting up WordPress integration',
-    description: 'Step-by-step guide to connecting CheckIn Pro with your WordPress website.',
+    description: 'Step-by-step guide to connecting Rank It Pro with your WordPress website.',
     category: 'integrations'
   },
   {
-    title: 'Using the CheckIn Pro API',
+    title: 'Using the Rank It Pro API',
     description: 'Technical documentation for developers looking to integrate CheckIn Pro with custom systems.',
     category: 'integrations'
   },
