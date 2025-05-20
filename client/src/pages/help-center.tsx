@@ -179,7 +179,7 @@ const helpArticles = [
   },
   {
     title: 'Using the Rank It Pro API',
-    description: 'Technical documentation for developers looking to integrate CheckIn Pro with custom systems.',
+    description: 'Technical documentation for developers looking to integrate Rank It Pro with custom systems.',
     category: 'integrations'
   },
   {

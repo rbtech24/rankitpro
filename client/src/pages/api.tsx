@@ -9,13 +9,13 @@ export default function API() {
   return (
     <InfoPageLayout 
       title="API Documentation" 
-      description="Integrate CheckIn Pro with your existing systems"
+      description="Integrate Rank It Pro with your existing systems"
     >
       <div className="max-w-6xl mx-auto">
         <div className="bg-white rounded-lg shadow-md p-6 mb-12">
           <h2 className="text-2xl font-bold mb-6">Getting Started</h2>
           <p className="mb-4">
-            The CheckIn Pro API allows you to integrate our platform with your existing systems. You can create check-ins, 
+            The Rank It Pro API allows you to integrate our platform with your existing systems. You can create check-ins, 
             manage technicians, generate content, and more through our RESTful API endpoints.
           </p>
           
@@ -34,7 +34,7 @@ export default function API() {
           <h3 className="text-lg font-semibold mt-6 mb-3">Base URL</h3>
           <div className="bg-slate-900 text-slate-50 p-4 rounded-md overflow-auto mb-6">
             <pre className="text-sm font-mono">
-              <code>https://api.checkinpro.com/v1</code>
+              <code>https://api.rankitpro.com/v1</code>
             </pre>
           </div>
           
@@ -166,7 +166,7 @@ const apiEndpoints = [
       { name: 'date_to', type: 'date', required: false, description: 'Filter by check-in date (format: YYYY-MM-DD)' },
       { name: 'job_type', type: 'string', required: false, description: 'Filter by job type' }
     ],
-    exampleRequest: `curl -X GET "https://api.checkinpro.com/v1/check-ins?page=1&limit=10" \\
+    exampleRequest: `curl -X GET "https://api.rankitpro.com/v1/check-ins?page=1&limit=10" \\
   -H "Authorization: Bearer YOUR_API_KEY"`,
     exampleResponse: `{
   "data": [
@@ -207,7 +207,7 @@ const apiEndpoints = [
       { name: 'location', type: 'string', required: false, description: 'Text description of the job location' },
       { name: 'photos', type: 'array', required: false, description: 'Array of base64-encoded images' }
     ],
-    exampleRequest: `curl -X POST "https://api.checkinpro.com/v1/check-ins" \\
+    exampleRequest: `curl -X POST "https://api.rankitpro.com/v1/check-ins" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -250,7 +250,7 @@ const apiEndpoints = [
     parameters: [
       { name: 'id', type: 'integer', required: true, description: 'The ID of the check-in to retrieve' }
     ],
-    exampleRequest: `curl -X GET "https://api.checkinpro.com/v1/check-ins/123" \\
+    exampleRequest: `curl -X GET "https://api.rankitpro.com/v1/check-ins/123" \\
   -H "Authorization: Bearer YOUR_API_KEY"`,
     exampleResponse: `{
   "id": 123,
@@ -264,14 +264,14 @@ const apiEndpoints = [
   "photos": [
     {
       "id": 456,
-      "url": "https://storage.checkinpro.com/photos/456.jpg",
-      "thumbnail_url": "https://storage.checkinpro.com/photos/456_thumb.jpg",
+      "url": "https://storage.rankitpro.com/photos/456.jpg",
+      "thumbnail_url": "https://storage.rankitpro.com/photos/456_thumb.jpg",
       "created_at": "2025-05-14T15:30:22Z"
     },
     {
       "id": 457,
-      "url": "https://storage.checkinpro.com/photos/457.jpg",
-      "thumbnail_url": "https://storage.checkinpro.com/photos/457_thumb.jpg",
+      "url": "https://storage.rankitpro.com/photos/457.jpg",
+      "thumbnail_url": "https://storage.rankitpro.com/photos/457_thumb.jpg",
       "created_at": "2025-05-14T15:31:05Z"
     }
   ],
@@ -292,7 +292,7 @@ const apiEndpoints = [
       { name: 'page', type: 'integer', required: false, description: 'Page number for pagination (default: 1)' },
       { name: 'limit', type: 'integer', required: false, description: 'Number of results per page (default: 20, max: 100)' }
     ],
-    exampleRequest: `curl -X GET "https://api.checkinpro.com/v1/technicians" \\
+    exampleRequest: `curl -X GET "https://api.rankitpro.com/v1/technicians" \\
   -H "Authorization: Bearer YOUR_API_KEY"`,
     exampleResponse: `{
   "data": [
