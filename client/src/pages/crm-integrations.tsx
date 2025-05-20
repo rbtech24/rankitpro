@@ -474,10 +474,15 @@ export default function CRMIntegrationsPage() {
   const [testStatus, setTestStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   
   // Fetch available CRMs
-  const { data: availableCRMs } = useQuery({
+  const { data: availableCRMsResponse } = useQuery({
     queryKey: ['/api/crm/available'],
     queryFn: () => apiRequest('GET', '/api/crm/available'),
   });
+  
+  // Extract the array from the response
+  const availableCRMs = Array.isArray(availableCRMsResponse) 
+    ? availableCRMsResponse 
+    : [];
   
   // Fetch configured CRMs
   const { 
