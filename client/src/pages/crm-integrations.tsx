@@ -233,12 +233,26 @@ const HousecallProSetup = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
+          <h4 className="text-sm font-medium text-blue-800 mb-2">How to get your Housecall Pro API Key</h4>
+          <ol className="text-sm text-blue-700 space-y-2 list-decimal list-inside">
+            <li>Log in to your Housecall Pro account</li>
+            <li>Navigate to Settings &gt; API & Integrations</li>
+            <li>Look for the API Access section</li>
+            <li>Generate a new API key or copy your existing key</li>
+            <li>Paste the API key in the field below</li>
+          </ol>
+          <p className="text-xs text-blue-600 mt-2">
+            Note: If you don't see API access in your settings, contact Housecall Pro support to enable API access for your account.
+          </p>
+        </div>
+        
         <FormField
           control={form.control}
           name="apiKey"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>API Key</FormLabel>
+              <FormLabel>Housecall Pro API Key</FormLabel>
               <FormControl>
                 <Input 
                   {...field} 
@@ -247,7 +261,7 @@ const HousecallProSetup = ({
                 />
               </FormControl>
               <FormDescription>
-                You can find your API key in your Housecall Pro account settings.
+                This API key will be stored securely and used to sync data between Rank It Pro and Housecall Pro.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -287,6 +301,16 @@ const HousecallProSetup = ({
 
           <Button type="submit">Save Configuration</Button>
         </div>
+        
+        <div className="mt-4 bg-gray-50 border border-gray-200 rounded-md p-4">
+          <h4 className="text-sm font-medium mb-2">What this integration will do:</h4>
+          <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+            <li>Sync check-ins from Rank It Pro as jobs in Housecall Pro</li>
+            <li>Create or update customer records based on check-in information</li>
+            <li>Attach photos from check-ins to jobs in Housecall Pro</li>
+            <li>Keep customer information in sync between both platforms</li>
+          </ul>
+        </div>
       </form>
     </Form>
   );
@@ -319,6 +343,15 @@ const SyncSettings = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-4">
+          <h4 className="text-sm font-medium text-green-800 mb-2">Data Synchronization Settings</h4>
+          <p className="text-sm text-green-700">
+            These settings control how data flows between Rank It Pro and your CRM system. 
+            The default settings are optimized for most businesses, but you can customize them 
+            to fit your specific workflow needs.
+          </p>
+        </div>
+      
         <FormField
           control={form.control}
           name="syncCustomers"
@@ -457,6 +490,16 @@ const SyncSettings = ({
             </FormItem>
           )}
         />
+
+        <div className="bg-gray-50 border border-gray-200 rounded-md p-4 mt-4 mb-4">
+          <h4 className="text-sm font-medium mb-2">How Sync Works:</h4>
+          <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+            <li>New check-ins are automatically synced to your CRM based on these settings</li>
+            <li>You can trigger a manual sync from the Configured CRMs tab</li>
+            <li>Sync history and status is tracked and displayed in the Sync History tab</li>
+            <li>If a sync fails, you'll see error details in the sync history</li>
+          </ul>
+        </div>
 
         <Button type="submit">Save Settings</Button>
       </form>
