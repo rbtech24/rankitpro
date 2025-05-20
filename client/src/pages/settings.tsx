@@ -381,7 +381,7 @@ export default function Settings() {
               <Card>
                 <CardHeader>
                   <CardTitle>Appearance Settings</CardTitle>
-                  <CardDescription>Customize how CheckIn Pro looks for you.</CardDescription>
+                  <CardDescription>Customize how Rank It Pro looks for you.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
