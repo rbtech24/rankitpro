@@ -25,6 +25,8 @@ export const companies = pgTable("companies", {
   wordpressConfig: text("wordpress_config"),
   javaScriptEmbedConfig: text("javascript_embed_config"),
   reviewSettings: text("review_settings"),
+  crmIntegrations: text("crm_integrations"), // Stores JSON string with CRM configurations
+  crmSyncHistory: text("crm_sync_history"), // Stores JSON string with CRM sync history
   createdAt: timestamp("created_at").defaultNow(),
 });
 
