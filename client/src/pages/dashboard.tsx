@@ -192,49 +192,8 @@ export default function Dashboard() {
                           <CardTitle>Companies Using Housecall Pro</CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Company Name</TableHead>
-                                <TableHead>Integration Status</TableHead>
-                                <TableHead>Last Sync</TableHead>
-                                <TableHead>Sync Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              <TableRow>
-                                <TableCell className="font-medium">Acme Plumbing</TableCell>
-                                <TableCell>
-                                  <Badge className="bg-green-100 text-green-800">Active</Badge>
-                                </TableCell>
-                                <TableCell>15 minutes ago</TableCell>
-                                <TableCell>
-                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                    <CheckCircle2 className="h-3 w-3 mr-1" /> Success
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <Button variant="ghost" size="sm">Configure</Button>
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell className="font-medium">Elite Contractors</TableCell>
-                                <TableCell>
-                                  <Badge className="bg-green-100 text-green-800">Active</Badge>
-                                </TableCell>
-                                <TableCell>30 minutes ago</TableCell>
-                                <TableCell>
-                                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                                    <AlertTriangle className="h-3 w-3 mr-1" /> Partial
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <Button variant="ghost" size="sm">Configure</Button>
-                                </TableCell>
-                              </TableRow>
-                            </TableBody>
-                          </Table>
+                          {/* Add data fetching for HCP companies */}
+                          <HousecallProCompaniesTable />
                         </CardContent>
                       </Card>
                     </div>
