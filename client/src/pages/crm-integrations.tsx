@@ -786,16 +786,15 @@ export default function CRMIntegrationsPage() {
                           <div>
                             <div className="flex items-center">
                               <h3 className="font-medium">{crm.name}</h3>
-                              <Badge 
-                                className="ml-2" 
-                                variant={
-                                  crm.status === "active" ? "success" : 
-                                  crm.status === "error" ? "destructive" : "outline"
+                              <span 
+                                className={
+                                  crm.status === "active" ? "ml-2 px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 inline-block" : 
+                                  crm.status === "error" ? "ml-2 px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 inline-block" : "ml-2 px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800 inline-block"
                                 }
                               >
                                 {crm.status === "active" ? "Active" : 
                                  crm.status === "error" ? "Error" : "Inactive"}
-                              </Badge>
+                              </span>
                             </div>
                             <p className="text-sm text-gray-500">
                               {crm.lastSyncedAt 
@@ -999,7 +998,7 @@ export default function CRMIntegrationsPage() {
                                 >
                                   {history.status === "success" ? "Success" : 
                                    history.status === "failed" ? "Failed" : "Partial Success"}
-                                </Badge>
+                                </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {history.itemsProcessed}
