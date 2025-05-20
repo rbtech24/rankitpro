@@ -541,12 +541,15 @@ export default function CRMIntegrationsPage() {
   
   // Fetch CRM sync history
   const { 
-    data: syncHistory,
+    data: syncHistoryResponse,
     isLoading: isLoadingHistory,
   } = useQuery({
     queryKey: ['/api/crm/sync-history'],
     queryFn: () => apiRequest('GET', '/api/crm/sync-history'),
   });
+  
+  // Extract and process the sync history
+  const syncHistory = Array.isArray(syncHistoryResponse) ? syncHistoryResponse : [];
   
   // Save CRM configuration mutation
   const saveCRMMutation = useMutation({
@@ -982,16 +985,16 @@ export default function CRMIntegrationsPage() {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {syncHistory.map((history) => (
-                            <tr key={history.id}>
+                          {syncHistory.map((history: any) => (
+                            <tr key={history.id || `sync-${history.timestamp}`}>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 {history.crmName}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <Badge 
-                                  variant={
-                                    history.status === "success" ? "success" : 
-                                    history.status === "failed" ? "destructive" : "outline"
+                                <span 
+                                  className={
+                                    history.status === "success" ? "px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 inline-block" : 
+                                    history.status === "failed" ? "px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 inline-block" : "px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800 inline-block"
                                   }
                                 >
                                   {history.status === "success" ? "Success" : 
