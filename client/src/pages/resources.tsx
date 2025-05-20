@@ -37,7 +37,7 @@ export default function Resources() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white p-6 rounded-lg shadow">
               <h3 className="text-lg font-semibold mb-2">ROI Calculator</h3>
-              <p className="text-slate-600 mb-4">Calculate the return on investment from implementing CheckIn Pro in your business.</p>
+              <p className="text-slate-600 mb-4">Calculate the return on investment from implementing Rank It Pro in your business.</p>
               <a href="#" className="text-primary font-medium hover:underline">Try Calculator</a>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
@@ -118,7 +118,7 @@ const resources = [
     icon: "⭐",
     category: "Tutorial",
     title: "Maximizing Review Collection",
-    description: "Step-by-step guide to implementing an effective review collection strategy with CheckIn Pro."
+    description: "Step-by-step guide to implementing an effective review collection strategy with Rank It Pro."
   },
   {
     icon: "📝",
@@ -130,7 +130,7 @@ const resources = [
     icon: "🔄",
     category: "Integration",
     title: "WordPress Integration Guide",
-    description: "How to seamlessly connect CheckIn Pro with your WordPress website."
+    description: "How to seamlessly connect Rank It Pro with your WordPress website."
   },
   {
     icon: "📞",
@@ -147,7 +147,7 @@ const downloads = [
     size: "1.2 MB"
   },
   {
-    title: "CheckIn Pro Implementation Checklist",
+    title: "Rank It Pro Implementation Checklist",
     format: "PDF",
     size: "842 KB"
   },
