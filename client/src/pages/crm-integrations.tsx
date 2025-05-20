@@ -562,8 +562,14 @@ export default function CRMIntegrationsPage() {
   
   // Save CRM configuration mutation
   const saveCRMMutation = useMutation({
-    mutationFn: (data: { crmType: string, credentials: any, syncSettings?: any }) => 
-      apiRequest('POST', '/api/crm/configure', data),
+    mutationFn: async (data: { crmType: string, credentials: any, syncSettings?: any }) => {
+      const response = await apiRequest('POST', '/api/crm/configure', data);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to save CRM configuration');
+      }
+      return response.json();
+    },
     onSuccess: () => {
       toast({ 
         title: "CRM configuration saved", 
@@ -572,10 +578,10 @@ export default function CRMIntegrationsPage() {
       setConfigureDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ['/api/crm/configured'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error saving CRM configuration",
-        description: "There was an error saving your CRM configuration. Please try again.",
+        description: error.message || "There was an error saving your CRM configuration. Please try again.",
         variant: "destructive",
       });
     }
@@ -583,8 +589,14 @@ export default function CRMIntegrationsPage() {
   
   // Test CRM connection mutation
   const testCRMMutation = useMutation({
-    mutationFn: (data: { crmType: string, credentials: any }) => 
-      apiRequest('POST', '/api/crm/test-connection', data),
+    mutationFn: async (data: { crmType: string, credentials: any }) => {
+      const response = await apiRequest('POST', '/api/crm/test-connection', data);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Connection test failed');
+      }
+      return response.json();
+    },
     onSuccess: () => {
       setTestStatus("success");
       toast({ 
@@ -592,11 +604,11 @@ export default function CRMIntegrationsPage() {
         description: "Successfully connected to your CRM."
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       setTestStatus("error");
       toast({
         title: "Connection test failed",
-        description: "Could not connect to your CRM. Please check your credentials.",
+        description: error.message || "Could not connect to your CRM. Please check your credentials.",
         variant: "destructive",
       });
     }
@@ -604,8 +616,14 @@ export default function CRMIntegrationsPage() {
   
   // Delete CRM configuration mutation
   const deleteCRMMutation = useMutation({
-    mutationFn: (crmType: string) => 
-      apiRequest('DELETE', `/api/crm/${crmType}`),
+    mutationFn: async (crmType: string) => {
+      const response = await apiRequest('DELETE', `/api/crm/${crmType}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to remove CRM integration');
+      }
+      return response.json();
+    },
     onSuccess: () => {
       toast({ 
         title: "CRM integration removed", 
@@ -614,10 +632,10 @@ export default function CRMIntegrationsPage() {
       setDeleteDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ['/api/crm/configured'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error removing CRM integration",
-        description: "There was an error removing your CRM integration. Please try again.",
+        description: error.message || "There was an error removing your CRM integration. Please try again.",
         variant: "destructive",
       });
     }
@@ -625,19 +643,26 @@ export default function CRMIntegrationsPage() {
   
   // Trigger manual sync mutation
   const triggerSyncMutation = useMutation({
-    mutationFn: (crmType: string) => 
-      apiRequest('POST', `/api/crm/${crmType}/sync`),
+    mutationFn: async (crmType: string) => {
+      const response = await apiRequest('POST', `/api/crm/${crmType}/sync`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to trigger sync');
+      }
+      return response.json();
+    },
     onSuccess: () => {
       toast({ 
         title: "Sync triggered", 
         description: "The sync process has been started. Check the history tab for results."
       });
       queryClient.invalidateQueries({ queryKey: ['/api/crm/sync-history'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/crm/configured'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error triggering sync",
-        description: "There was an error starting the sync process. Please try again.",
+        description: error.message || "There was an error starting the sync process. Please try again.",
         variant: "destructive",
       });
     }
@@ -668,9 +693,19 @@ export default function CRMIntegrationsPage() {
     triggerSyncMutation.mutate(crmType);
   };
   
+  // Define CRM type for type safety
+  interface CRM {
+    id: string;
+    name: string;
+    description: string;
+    logoUrl?: string;
+    status?: 'configured' | 'not_configured';
+    lastSyncAt?: string | null;
+  }
+  
   // Find CRM details
-  const getCRMDetails = (crmId: string) => {
-    return availableCRMs?.find(crm => crm.id === crmId);
+  const getCRMDetails = (crmId: string): CRM | undefined => {
+    return (availableCRMs as CRM[])?.find(crm => crm.id === crmId);
   };
   
   // Get existing configuration for a CRM
