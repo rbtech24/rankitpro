@@ -392,7 +392,267 @@ function Router() {
         <div className="p-8">
           <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
             <h1 className="text-2xl font-bold mb-6">Review Impact Calculator</h1>
-            <p className="mb-4">This calculator is coming soon</p>
+            <p className="mb-6">Discover how increasing the quantity and quality of your online reviews can directly impact your business growth.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Current Review Status</h2>
+                <ul className="space-y-3">
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Total Review Count:</span>
+                    <span className="font-medium">42</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Average Star Rating:</span>
+                    <span className="font-medium">4.2</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Monthly New Reviews:</span>
+                    <span className="font-medium">3</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Response Rate:</span>
+                    <span className="font-medium">65%</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Google Business Profile Views:</span>
+                    <span className="font-medium">650/month</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">With Rank It Pro</h2>
+                <ul className="space-y-3">
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Total Review Count (after 6 months):</span>
+                    <span className="font-medium">112</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Average Star Rating:</span>
+                    <span className="font-medium">4.7</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Monthly New Reviews:</span>
+                    <span className="font-medium">12</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Response Rate:</span>
+                    <span className="font-medium">100%</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Google Business Profile Views:</span>
+                    <span className="font-medium">1,105/month</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="p-6 bg-white border rounded-lg shadow-sm mb-8">
+              <h2 className="text-xl font-semibold mb-4">Impact on Customer Decisions</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-center">
+                  <p className="text-sm text-blue-700 mb-1">Click-Through Rate Increase</p>
+                  <p className="text-3xl font-bold text-blue-800">+32%</p>
+                  <p className="text-xs text-blue-600 mt-1">More customers clicking on your listing</p>
+                </div>
+                
+                <div className="bg-green-50 p-4 rounded-lg border border-green-100 text-center">
+                  <p className="text-sm text-green-700 mb-1">Lead Conversion Rate</p>
+                  <p className="text-3xl font-bold text-green-800">+15%</p>
+                  <p className="text-xs text-green-600 mt-1">Higher conversion from inquiry to customer</p>
+                </div>
+                
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-100 text-center">
+                  <p className="text-sm text-purple-700 mb-1">Price Sensitivity Reduction</p>
+                  <p className="text-3xl font-bold text-purple-800">-21%</p>
+                  <p className="text-xs text-purple-600 mt-1">Customers less focused on price alone</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-lg">Consumer Trust Factors</h3>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center">
+                      <div className="w-40 text-sm">Perceived Quality</div>
+                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: '75%' }}></div>
+                      </div>
+                      <div className="w-16 text-right text-sm font-medium">+75%</div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-40 text-sm">Trust in Expertise</div>
+                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: '83%' }}></div>
+                      </div>
+                      <div className="w-16 text-right text-sm font-medium">+83%</div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-40 text-sm">Willingness to Refer</div>
+                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: '64%' }}></div>
+                      </div>
+                      <div className="w-16 text-right text-sm font-medium">+64%</div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-40 text-sm">Local Reputation</div>
+                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: '70%' }}></div>
+                      </div>
+                      <div className="w-16 text-right text-sm font-medium">+70%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-4">Star Rating Comparison</h2>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-medium mb-2">Current Rating: 4.2 Stars</h3>
+                  <div className="flex items-center mb-2">
+                    <div className="flex text-yellow-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-600 ml-2">(42 reviews)</span>
+                  </div>
+                  <div className="bg-red-50 p-3 rounded border border-red-100">
+                    <p className="text-sm text-red-700">Only 47% of consumers would consider a business with less than 4.5 stars</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium mb-2">Projected Rating: 4.7 Stars</h3>
+                  <div className="flex items-center mb-2">
+                    <div className="flex text-yellow-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-600 ml-2">(112 reviews)</span>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded border border-green-100">
+                    <p className="text-sm text-green-700">92% of consumers would consider a business with 4.7+ stars</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Financial Impact (6 months)</h2>
+                <ul className="space-y-2">
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Additional Website Visits:</span>
+                    <span className="font-medium">2,730</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Additional Leads:</span>
+                    <span className="font-medium">128</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>New Customers:</span>
+                    <span className="font-medium">38</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Increased Revenue:</span>
+                    <span className="font-medium">$13,300</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Cost Per New Customer:</span>
+                    <span className="font-medium">$20.53</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Implementation Strategy</h2>
+                <ul className="space-y-4">
+                  <li className="flex items-start">
+                    <div className="bg-primary rounded-full p-1 text-white mr-3 mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium">Automated review requests</p>
+                      <p className="text-sm text-gray-600">Request reviews after every check-in</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-primary rounded-full p-1 text-white mr-3 mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium">Response templates</p>
+                      <p className="text-sm text-gray-600">Quickly respond to all reviews</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-primary rounded-full p-1 text-white mr-3 mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium">Reputation monitoring</p>
+                      <p className="text-sm text-gray-600">Track reviews across all platforms</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-primary rounded-full p-1 text-white mr-3 mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium">Review widgets</p>
+                      <p className="text-sm text-gray-600">Display reviews on your website</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6">
+              <p className="text-blue-800 text-sm">
+                <strong>Note:</strong> This calculator provides estimated values based on industry averages for home service businesses. 
+                Actual results may vary based on your market, competition, service quality, and implementation. For a custom analysis, 
+                please schedule a consultation with our review management specialists.
+              </p>
+            </div>
+            
             <div className="mt-8">
               <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
             </div>
@@ -404,7 +664,208 @@ function Router() {
         <div className="p-8">
           <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
             <h1 className="text-2xl font-bold mb-6">Technician Efficiency Tool</h1>
-            <p className="mb-4">This calculator is coming soon</p>
+            <p className="mb-6">Calculate the time and cost savings your business can achieve by streamlining technician documentation with Rank It Pro.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Current Documentation Process</h2>
+                <ul className="space-y-3">
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Number of Technicians:</span>
+                    <span className="font-medium">8</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Jobs Per Technician Per Day:</span>
+                    <span className="font-medium">5</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Work Days Per Month:</span>
+                    <span className="font-medium">22</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Current Documentation Time:</span>
+                    <span className="font-medium">12 min/job</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Average Technician Pay Rate:</span>
+                    <span className="font-medium">$32/hour</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">With Rank It Pro</h2>
+                <ul className="space-y-3">
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Estimated Documentation Time:</span>
+                    <span className="font-medium">4 min/job</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Time Savings:</span>
+                    <span className="font-medium">8 min/job</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Additional Jobs Possible:</span>
+                    <span className="font-medium">+1.2 jobs/day/tech</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Photo Documentation Quality:</span>
+                    <span className="font-medium">+85%</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Documentation Completeness:</span>
+                    <span className="font-medium">+72%</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="p-6 bg-white border rounded-lg shadow-sm mb-8">
+              <h2 className="text-xl font-semibold mb-4">Monthly Savings Breakdown</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-center">
+                  <p className="text-sm text-blue-700 mb-1">Time Saved</p>
+                  <p className="text-3xl font-bold text-blue-800">146.6 hours</p>
+                  <p className="text-xs text-blue-600 mt-1">Monthly technician time savings</p>
+                </div>
+                
+                <div className="bg-green-50 p-4 rounded-lg border border-green-100 text-center">
+                  <p className="text-sm text-green-700 mb-1">Labor Cost Savings</p>
+                  <p className="text-3xl font-bold text-green-800">$4,693</p>
+                  <p className="text-xs text-green-600 mt-1">Monthly savings in technician wages</p>
+                </div>
+                
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-100 text-center">
+                  <p className="text-sm text-purple-700 mb-1">Additional Job Capacity</p>
+                  <p className="text-3xl font-bold text-purple-800">211 jobs</p>
+                  <p className="text-xs text-purple-600 mt-1">Additional monthly job capacity</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-lg">Operational Improvements</h3>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center">
+                      <div className="w-40 text-sm">Technician Productivity</div>
+                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: '67%' }}></div>
+                      </div>
+                      <div className="w-16 text-right text-sm font-medium">+67%</div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-40 text-sm">Data Accuracy</div>
+                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: '84%' }}></div>
+                      </div>
+                      <div className="w-16 text-right text-sm font-medium">+84%</div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-40 text-sm">Customer Communication</div>
+                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: '75%' }}></div>
+                      </div>
+                      <div className="w-16 text-right text-sm font-medium">+75%</div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-40 text-sm">Job Turnaround Time</div>
+                      <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: '52%' }}></div>
+                      </div>
+                      <div className="w-16 text-right text-sm font-medium">+52%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Annual Impact Analysis</h2>
+                <ul className="space-y-2">
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Annual Hours Saved:</span>
+                    <span className="font-medium">1,760</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Annual Labor Cost Savings:</span>
+                    <span className="font-medium">$56,320</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Reduced Overtime Hours:</span>
+                    <span className="font-medium">432</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Additional Annual Revenue Potential:</span>
+                    <span className="font-medium">$527,500</span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b">
+                    <span>Return on Investment:</span>
+                    <span className="font-medium">1,856%</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-slate-50 p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4">Indirect Benefits</h2>
+                <ul className="space-y-4">
+                  <li className="flex items-start">
+                    <div className="bg-primary rounded-full p-1 text-white mr-3 mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium">Reduced Technician Stress</p>
+                      <p className="text-sm text-gray-600">Less time spent on paperwork</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-primary rounded-full p-1 text-white mr-3 mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium">Improved Data Management</p>
+                      <p className="text-sm text-gray-600">Centralized record-keeping</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-primary rounded-full p-1 text-white mr-3 mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium">Enhanced Customer Satisfaction</p>
+                      <p className="text-sm text-gray-600">More detailed job documentation</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-primary rounded-full p-1 text-white mr-3 mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium">Marketing Content Generation</p>
+                      <p className="text-sm text-gray-600">Automatic content from each job</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6">
+              <p className="text-blue-800 text-sm">
+                <strong>Note:</strong> This calculator uses industry averages for home service businesses to estimate potential savings and improvements. 
+                Actual results depend on your specific operations, technician processes, and implementation. For a personalized analysis, 
+                please schedule a consultation with our efficiency specialists.
+              </p>
+            </div>
+            
             <div className="mt-8">
               <a href="/resources" className="text-primary hover:underline">Back to Resources</a>
             </div>
