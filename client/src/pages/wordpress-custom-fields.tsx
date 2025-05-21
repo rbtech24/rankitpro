@@ -60,11 +60,9 @@ import {
   Globe,
   Settings2,
   Layers,
-  Rocket,
   FileCode,
   CheckCircle,
   AlertCircle,
-  LucideIcon,
   Braces,
   X
 } from 'lucide-react';
