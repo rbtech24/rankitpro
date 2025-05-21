@@ -193,10 +193,161 @@ const templateVariables = [
   { key: "{{reviewLink}}", description: "Link to leave a review" }
 ];
 
+// Email template preview component
+const EmailTemplatePreview = ({ subject, message, company, technician, customer }) => {
+  return (
+    <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
+      <div className="border-b pb-2 mb-2">
+        <div className="flex items-center justify-between mb-2">
+          {company.logoUrl ? (
+            <img src={company.logoUrl} alt={company.name} className="h-8" />
+          ) : (
+            <div className="font-bold text-xl text-primary">{company.name}</div>
+          )}
+          <Badge variant="outline" className="ml-2 bg-blue-50">
+            <Mail className="h-3 w-3 mr-1" /> Email Preview
+          </Badge>
+        </div>
+        <div><strong>From:</strong> {company.name} &lt;reviews@{company.domain || 'rankitpro.com'}&gt;</div>
+        <div><strong>To:</strong> {customer.name} &lt;{customer.email}&gt;</div>
+        <div><strong>Subject:</strong> {subject}</div>
+      </div>
+      <div className="prose prose-sm max-w-none mt-4">
+        <p>Hi {customer.name},</p>
+        <div className="my-2">
+          {message
+            .replace(/{{customerName}}/g, customer.name)
+            .replace(/{{technicianName}}/g, technician.name)
+            .replace(/{{companyName}}/g, company.name)
+            .replace(/{{serviceType}}/g, 'AC Repair')
+            .replace(/{{location}}/g, 'San Francisco')
+            .replace(/{{reviewLink}}/g, 'https://example.com/review')
+          }
+        </div>
+        
+        <div className="mt-4 pt-2 border-t text-sm text-gray-500">
+          <p>Best regards,<br/>
+          {technician.name}<br/>
+          {company.name}</p>
+          
+          {technician.photoUrl && (
+            <div className="mt-2 flex items-center">
+              <img src={technician.photoUrl} alt={technician.name} className="h-12 w-12 rounded-full mr-2" />
+              <div>
+                <div className="font-medium">{technician.name}</div>
+                <div className="text-xs">{technician.specialty || 'Technician'}</div>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="mt-4 pt-2 border-t text-xs text-gray-400">
+          <p>You received this email because you recently had service from {company.name}. If you'd prefer not to receive these emails, you can unsubscribe using the link below.</p>
+          <p><a href="#" className="text-primary underline">Unsubscribe</a></p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Performance metrics widget
+const PerformanceMetricsWidget = ({ stats = {} }) => {
+  // Default values if stats are not available yet
+  const metrics = {
+    totalRequests: stats.totalRequests || 0,
+    sentRequests: stats.sentRequests || 0,
+    completedRequests: stats.completedRequests || 0,
+    clickRate: stats.clickRate || 0,
+    conversionRate: stats.conversionRate || 0,
+    avgTimeToConversion: stats.avgTimeToConversion || 0,
+    byFollowUpStep: stats.byFollowUpStep || {
+      initial: 0,
+      firstFollowUp: 0,
+      secondFollowUp: 0,
+      finalFollowUp: 0
+    }
+  };
+  
+  // Calculate which step is most effective
+  const steps = [
+    { key: 'initial', label: 'Initial Request', value: metrics.byFollowUpStep.initial || 0 },
+    { key: 'firstFollowUp', label: 'First Follow-up', value: metrics.byFollowUpStep.firstFollowUp || 0 },
+    { key: 'secondFollowUp', label: 'Second Follow-up', value: metrics.byFollowUpStep.secondFollowUp || 0 },
+    { key: 'finalFollowUp', label: 'Final Follow-up', value: metrics.byFollowUpStep.finalFollowUp || 0 }
+  ];
+  
+  // Sort by value to find most effective
+  steps.sort((a, b) => b.value - a.value);
+  const mostEffectiveStep = steps[0];
+  
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg font-bold flex items-center">
+          <BarChart3 className="h-5 w-5 mr-2 text-primary" />
+          Review Performance Metrics
+        </CardTitle>
+        <CardDescription>Key performance indicators for your review collection</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+          <div className="bg-slate-50 p-3 rounded-lg">
+            <div className="text-sm text-gray-500">Conversion Rate</div>
+            <div className="text-2xl font-bold">{(metrics.conversionRate * 100).toFixed(1)}%</div>
+          </div>
+          <div className="bg-slate-50 p-3 rounded-lg">
+            <div className="text-sm text-gray-500">Open Rate</div>
+            <div className="text-2xl font-bold">{(metrics.clickRate * 100).toFixed(1)}%</div>
+          </div>
+          <div className="bg-slate-50 p-3 rounded-lg">
+            <div className="text-sm text-gray-500">Avg Response Time</div>
+            <div className="text-2xl font-bold">{metrics.avgTimeToConversion.toFixed(1)}h</div>
+          </div>
+        </div>
+        
+        <div className="mb-4">
+          <h4 className="text-sm font-medium mb-2">Follow-up Effectiveness</h4>
+          <div className="space-y-2">
+            {steps.map(step => (
+              <div key={step.key} className="flex items-center">
+                <div className="w-32 text-sm">{step.label}</div>
+                <div className="flex-1">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div 
+                      className={`h-2.5 rounded-full ${step.key === mostEffectiveStep.key ? 'bg-green-600' : 'bg-blue-500'}`} 
+                      style={{ 
+                        width: `${Math.max(5, (step.value / Math.max(1, metrics.completedRequests)) * 100)}%` 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <div className="w-8 text-right text-sm">{step.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {mostEffectiveStep.value > 0 && (
+          <div className="bg-green-50 p-3 rounded-lg border border-green-100 text-sm">
+            <div className="font-medium text-green-800 flex items-center mb-1">
+              <CheckCircle className="h-4 w-4 mr-1" /> Performance Insight
+            </div>
+            <p className="text-green-700">
+              Your most effective follow-up is the <strong>{mostEffectiveStep.label}</strong>, which has generated {mostEffectiveStep.value} reviews
+              ({metrics.completedRequests > 0 ? ((mostEffectiveStep.value / metrics.completedRequests) * 100).toFixed(0) : 0}% of all reviews).
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 const ReviewAutomation = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("general");
   const [templatePreview, setTemplatePreview] = useState(false);
+  const [previewType, setPreviewType] = useState("initial");
   const [isLoading, setIsLoading] = useState(false);
   const [activeCompanyId, setActiveCompanyId] = useState<number | null>(null);
   const [statsPeriod, setStatsPeriod] = useState<"7days" | "30days" | "90days">("30days");
