@@ -562,6 +562,189 @@ export class MemStorage implements IStorage {
       averageRating
     };
   }
+
+  // Review Request By Token methods
+  async getReviewRequestByToken(token: string): Promise<ReviewRequest | undefined> {
+    const requestId = this.reviewRequestTokens.get(token);
+    if (!requestId) {
+      return undefined;
+    }
+    return this.getReviewRequest(requestId);
+  }
+
+  // Review Automation methods
+  async getReviewRequestStatusesByCompany(companyId: number): Promise<ReviewRequestStatus[]> {
+    const statuses: ReviewRequestStatus[] = [];
+    
+    for (const status of this.reviewRequestStatuses.values()) {
+      const request = await this.getReviewRequest(status.reviewRequestId);
+      if (request && request.companyId === companyId) {
+        statuses.push(status);
+      }
+    }
+    
+    return statuses;
+  }
+
+  async getReviewRequestStatusByRequestId(requestId: number): Promise<ReviewRequestStatus | null> {
+    for (const status of this.reviewRequestStatuses.values()) {
+      if (status.reviewRequestId === requestId) {
+        return status;
+      }
+    }
+    return null;
+  }
+
+  async createReviewRequestStatus(status: InsertReviewRequestStatus): Promise<ReviewRequestStatus> {
+    const id = this.reviewRequestStatusId++;
+    const createdAt = new Date();
+    
+    const newStatus: ReviewRequestStatus = {
+      ...status,
+      id,
+      createdAt,
+    };
+    
+    this.reviewRequestStatuses.set(id, newStatus);
+    return newStatus;
+  }
+
+  async updateReviewRequestStatus(id: number, updates: Partial<ReviewRequestStatus>): Promise<ReviewRequestStatus> {
+    const status = this.reviewRequestStatuses.get(id);
+    
+    if (!status) {
+      throw new Error(`Review request status with ID ${id} not found`);
+    }
+    
+    const updatedStatus = {
+      ...status,
+      ...updates
+    };
+    
+    this.reviewRequestStatuses.set(id, updatedStatus);
+    return updatedStatus;
+  }
+
+  async getReviewFollowUpSettings(companyId: number): Promise<ReviewFollowUpSettings | null> {
+    for (const settings of this.reviewFollowUpSettings.values()) {
+      if (settings.companyId === companyId) {
+        return settings;
+      }
+    }
+    return null;
+  }
+
+  async createReviewFollowUpSettings(settings: InsertReviewFollowUpSettings): Promise<ReviewFollowUpSettings> {
+    const id = this.reviewFollowUpSettingsId++;
+    const createdAt = new Date();
+    
+    const newSettings: ReviewFollowUpSettings = {
+      ...settings,
+      id,
+      createdAt,
+      updatedAt: createdAt
+    };
+    
+    this.reviewFollowUpSettings.set(id, newSettings);
+    return newSettings;
+  }
+
+  async updateReviewFollowUpSettings(id: number, updates: Partial<ReviewFollowUpSettings>): Promise<ReviewFollowUpSettings> {
+    const settings = this.reviewFollowUpSettings.get(id);
+    
+    if (!settings) {
+      throw new Error(`Review follow-up settings with ID ${id} not found`);
+    }
+    
+    const updatedSettings = {
+      ...settings,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.reviewFollowUpSettings.set(id, updatedSettings);
+    return updatedSettings;
+  }
+
+  async getReviewAutomationStats(companyId: number): Promise<{
+    totalRequests: number;
+    sentRequests: number;
+    completedRequests: number;
+    clickRate: number;
+    conversionRate: number;
+    avgTimeToConversion: number;
+    byFollowUpStep: {
+      initial: number;
+      firstFollowUp: number;
+      secondFollowUp: number;
+      finalFollowUp: number;
+    };
+  }> {
+    const requests = await this.getReviewRequestsByCompany(companyId);
+    const statuses = await this.getReviewRequestStatusesByCompany(companyId);
+    const responses = await this.getReviewResponsesByCompany(companyId);
+    
+    // Calculate how many requests have been sent
+    const sentRequests = requests.filter(req => req.sentAt !== null).length;
+    
+    // Calculate completed requests (have a response)
+    const completedRequestIds = responses.map(resp => resp.reviewRequestId);
+    const completedRequests = completedRequestIds.length;
+    
+    // Calculate click rate (opened / sent)
+    const clickedStatuses = statuses.filter(status => status.linkClicked);
+    const clickRate = sentRequests > 0 ? clickedStatuses.length / sentRequests : 0;
+    
+    // Calculate conversion rate (completed / sent)
+    const conversionRate = sentRequests > 0 ? completedRequests / sentRequests : 0;
+    
+    // Calculate average time to conversion
+    let totalConversionTime = 0;
+    let conversionCount = 0;
+    
+    for (const response of responses) {
+      const request = requests.find(req => req.id === response.reviewRequestId);
+      if (request && request.sentAt && response.respondedAt) {
+        const conversionTime = response.respondedAt.getTime() - request.sentAt.getTime();
+        totalConversionTime += conversionTime;
+        conversionCount++;
+      }
+    }
+    
+    const avgTimeToConversion = conversionCount > 0 ? totalConversionTime / conversionCount / (1000 * 60 * 60) : 0; // In hours
+    
+    // Calculate conversions by follow-up step
+    const byFollowUpStep = {
+      initial: 0,
+      firstFollowUp: 0,
+      secondFollowUp: 0,
+      finalFollowUp: 0
+    };
+    
+    for (const status of statuses) {
+      if (completedRequestIds.includes(status.reviewRequestId)) {
+        if (status.firstFollowUpSent && !status.secondFollowUpSent) {
+          byFollowUpStep.firstFollowUp++;
+        } else if (status.secondFollowUpSent && !status.finalFollowUpSent) {
+          byFollowUpStep.secondFollowUp++;
+        } else if (status.finalFollowUpSent) {
+          byFollowUpStep.finalFollowUp++;
+        } else {
+          byFollowUpStep.initial++;
+        }
+      }
+    }
+    
+    return {
+      totalRequests: requests.length,
+      sentRequests,
+      completedRequests,
+      clickRate,
+      conversionRate,
+      avgTimeToConversion,
+      byFollowUpStep
+    };
+  }
 }
 
 export const storage = new MemStorage();
