@@ -12,14 +12,35 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getCurrentUser } from '@/lib/auth';
 import { User, LogOut, Settings, HelpCircle } from 'lucide-react';
-import { NotificationCenter } from '@/components/notifications/NotificationSystem';
+import { useState, useEffect } from 'react';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 interface HeaderProps {
   showNotifications?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({ showNotifications = false }) => {
-  const { user, logout } = useAuth();
+  const [user, setUser] = useState<any>(null);
+  
+  useEffect(() => {
+    // Fetch the current user
+    getCurrentUser().then(
+      (userData) => {
+        setUser(userData);
+      },
+      () => {
+        setUser(null);
+      }
+    );
+  }, []);
+  
+  // Basic logout function
+  const logout = () => {
+    // Clear local user data
+    localStorage.removeItem('token');
+    // Redirect to login page
+    window.location.href = '/login';
+  };
   
   return (
     <header className="w-full h-16 border-b bg-white flex items-center justify-between px-6 sticky top-0 z-50">
@@ -30,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({ showNotifications = false }) => {
       </div>
       
       <div className="flex items-center space-x-4">
-        {showNotifications && <NotificationCenter />}
+        {showNotifications && <NotificationBell count={5} />}
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
