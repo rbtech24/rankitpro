@@ -6,7 +6,7 @@ import { log } from '../vite';
  * Manages periodic jobs such as review follow-up processing.
  */
 class SchedulerService {
-  private reviewProcessorInterval: NodeJS.Timer | null = null;
+  private reviewProcessorInterval: NodeJS.Timeout | null = null;
   
   /**
    * Initialize the scheduler and set up recurring jobs

@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Tabs,
   TabsContent,
@@ -217,7 +218,7 @@ const ReviewAutomation = () => {
     isLoading: isLoadingSettings,
     refetch: refetchSettings
   } = useQuery({
-    queryKey: ['/api/automation/review-settings', activeCompanyId],
+    queryKey: ['/api/review-automation-settings', activeCompanyId],
     enabled: !!activeCompanyId,
     queryFn: async () => {
       if (!activeCompanyId) return null;
@@ -231,7 +232,7 @@ const ReviewAutomation = () => {
     data: stats,
     isLoading: isLoadingStats 
   } = useQuery({
-    queryKey: ['/api/automation/review-stats', activeCompanyId, statsPeriod],
+    queryKey: ['/api/review-automation-stats', activeCompanyId, statsPeriod],
     enabled: !!activeCompanyId,
     queryFn: async () => {
       if (!activeCompanyId) return null;
