@@ -132,6 +132,7 @@ export class MemStorage implements IStorage {
   private reviewFollowUpSettings: Map<number, ReviewFollowUpSettings>;
   private reviewRequestStatuses: Map<number, ReviewRequestStatus>;
   private reviewRequestTokens: Map<string, number>; // Map token to requestId
+  private wordpressCustomFields: Map<number, WordpressCustomFields>;
   
   private userId: number;
   private companyId: number;
@@ -142,6 +143,8 @@ export class MemStorage implements IStorage {
   private reviewResponseId: number;
   private reviewFollowUpSettingsId: number;
   private reviewRequestStatusId: number;
+  
+  private wordpressCustomFieldsId: number;
   
   constructor() {
     this.users = new Map();
@@ -154,6 +157,7 @@ export class MemStorage implements IStorage {
     this.reviewFollowUpSettings = new Map();
     this.reviewRequestStatuses = new Map();
     this.reviewRequestTokens = new Map();
+    this.wordpressCustomFields = new Map();
     
     this.userId = 1;
     this.companyId = 1;
@@ -164,6 +168,7 @@ export class MemStorage implements IStorage {
     this.reviewResponseId = 1;
     this.reviewFollowUpSettingsId = 1;
     this.reviewRequestStatusId = 1;
+    this.wordpressCustomFieldsId = 1;
     
     // Add a default super admin
     this.createUser({
@@ -684,6 +689,142 @@ export class MemStorage implements IStorage {
     return updatedSettings;
   }
 
+  // WordPress Custom Fields operations
+  async getWordpressCustomFields(id: number): Promise<WordpressCustomFields | undefined> {
+    return this.wordpressCustomFields.get(id);
+  }
+  
+  async getWordpressCustomFieldsByCompany(companyId: number): Promise<WordpressCustomFields | undefined> {
+    return Array.from(this.wordpressCustomFields.values()).find(
+      (wpcf) => wpcf.companyId === companyId
+    );
+  }
+  
+  async createWordpressCustomFields(wpCustomFields: InsertWordpressCustomFields): Promise<WordpressCustomFields> {
+    const id = this.wordpressCustomFieldsId++;
+    const createdAt = new Date();
+    const updatedAt = new Date();
+    
+    const newWpCustomFields: WordpressCustomFields = {
+      ...wpCustomFields,
+      id,
+      createdAt,
+      updatedAt,
+      lastSync: null
+    };
+    
+    this.wordpressCustomFields.set(id, newWpCustomFields);
+    return newWpCustomFields;
+  }
+  
+  async updateWordpressCustomFields(id: number, updates: Partial<WordpressCustomFields>): Promise<WordpressCustomFields | undefined> {
+    const wpCustomFields = this.wordpressCustomFields.get(id);
+    if (!wpCustomFields) {
+      return undefined;
+    }
+    
+    const updatedWpCustomFields = {
+      ...wpCustomFields,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.wordpressCustomFields.set(id, updatedWpCustomFields);
+    return updatedWpCustomFields;
+  }
+  
+  async testWordpressConnection(companyId: number): Promise<{
+    isConnected: boolean;
+    version?: string;
+    message?: string;
+  }> {
+    // In a real implementation, this would make an actual connection test
+    // For now, simulate a successful connection
+    const wpCustomFields = await this.getWordpressCustomFieldsByCompany(companyId);
+    
+    if (!wpCustomFields) {
+      return {
+        isConnected: false,
+        message: "WordPress integration not configured for this company"
+      };
+    }
+    
+    // Simulate a connection test based on values
+    if (wpCustomFields.siteUrl.includes('example.com')) {
+      return {
+        isConnected: false,
+        message: "Could not connect to WordPress site. Please verify URL and credentials."
+      };
+    }
+    
+    // Simulate a successful connection
+    return {
+      isConnected: true,
+      version: "6.4.2",
+      message: "Successfully connected to WordPress site"
+    };
+  }
+  
+  async syncWordpressCheckIns(companyId: number, checkInIds?: number[]): Promise<{
+    success: boolean;
+    synced: number;
+    failed: number;
+    message?: string;
+  }> {
+    // In a real implementation, this would sync check-ins to WordPress
+    const wpCustomFields = await this.getWordpressCustomFieldsByCompany(companyId);
+    
+    if (!wpCustomFields) {
+      return {
+        success: false,
+        synced: 0,
+        failed: 0,
+        message: "WordPress integration not configured for this company"
+      };
+    }
+    
+    // Get check-ins to sync
+    let checkInsToSync: CheckIn[] = [];
+    
+    if (checkInIds && checkInIds.length > 0) {
+      // Sync specific check-ins
+      checkInsToSync = checkInIds
+        .map(id => this.checkIns.get(id))
+        .filter((checkIn): checkIn is CheckIn => !!checkIn && checkIn.companyId === companyId);
+    } else {
+      // Sync all check-ins for the company
+      checkInsToSync = Array.from(this.checkIns.values())
+        .filter(checkIn => checkIn.companyId === companyId)
+        .slice(0, 10); // Limit to 10 for simulation purposes
+    }
+    
+    if (checkInsToSync.length === 0) {
+      return {
+        success: true,
+        synced: 0,
+        failed: 0,
+        message: "No check-ins to sync"
+      };
+    }
+    
+    // Simulate sync with some random success/failure
+    const synced = Math.floor(checkInsToSync.length * 0.8); // 80% success rate for simulation
+    const failed = checkInsToSync.length - synced;
+    
+    // Update last sync time
+    await this.updateWordpressCustomFields(wpCustomFields.id, {
+      lastSync: new Date(),
+      lastSyncStatus: `Synced ${synced} check-ins, ${failed} failed`
+    });
+    
+    return {
+      success: true,
+      synced,
+      failed,
+      message: `Successfully synced ${synced} check-ins to WordPress. ${failed} failed.`
+    };
+  }
+  
   async getReviewAutomationStats(companyId: number): Promise<{
     totalRequests: number;
     sentRequests: number;
