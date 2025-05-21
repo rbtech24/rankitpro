@@ -31,6 +31,7 @@ import TechnicianTrainingSlides from "@/pages/downloads/technician-training-slid
 import BillingManagement from "@/pages/billing-management";
 import CompaniesManagement from "@/pages/companies-management";
 import SystemSettings from "@/pages/system-settings";
+import SystemOverview from "@/pages/system-overview";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
@@ -975,6 +976,9 @@ function Router() {
       </Route>
       <Route path="/system-settings">
         <PrivateRoute component={SystemSettings} path="/system-settings" role="super_admin" />
+      </Route>
+      <Route path="/system-overview">
+        <PrivateRoute component={SystemOverview} path="/system-overview" role="super_admin" />
       </Route>
       <Route path="/integrations">
         <PrivateRoute component={Integrations} path="/integrations" role="company_admin" />
