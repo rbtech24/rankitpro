@@ -1992,18 +1992,81 @@ const ReviewAutomation = () => {
                 <CardTitle>Review Request Timeline</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col space-y-3">
-                  {schedule.map((step, index) => (
-                    <div key={index} className="flex items-center">
-                      <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center text-primary text-sm font-medium">
-                        {index + 1}
+                <div className="relative">
+                  {/* Vertical timeline line */}
+                  <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                  
+                  <div className="space-y-6">
+                    {schedule.map((step, index) => (
+                      <div key={index} className="flex items-start relative pl-9">
+                        {/* Timeline dot */}
+                        <div className="absolute left-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white z-10">
+                          {index + 1}
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="flex-1 bg-gray-50 rounded-lg p-4 border border-gray-100">
+                          <div className="font-medium flex items-center justify-between">
+                            {step.name}
+                            <Badge variant="outline" className="ml-2">
+                              Day {step.days}
+                            </Badge>
+                          </div>
+                          
+                          <div className="text-sm text-gray-500 mt-2">
+                            {index === 0 && "Initial request sent after service completion"}
+                            {index === 1 && "First follow-up if no response received"}
+                            {index === 2 && "Second follow-up with more urgent messaging"}
+                            {index === 3 && "Final attempt to collect a review"}
+                          </div>
+                          
+                          {/* Email subject preview */}
+                          <div className="mt-3 pt-3 border-t text-xs text-gray-600">
+                            {index === 0 && <><span className="font-medium">Subject:</span> {form.watch("initialSubject")}</>}
+                            {index === 1 && <><span className="font-medium">Subject:</span> {form.watch("firstFollowUpSubject")}</>}
+                            {index === 2 && <><span className="font-medium">Subject:</span> {form.watch("secondFollowUpSubject")}</>}
+                            {index === 3 && <><span className="font-medium">Subject:</span> {form.watch("finalFollowUpSubject")}</>}
+                          </div>
+                          
+                          {/* Step effectiveness if stats available */}
+                          {stats && stats.byFollowUpStep && (
+                            <div className="mt-2 pt-2 border-t flex items-center justify-between text-xs">
+                              <span className="text-gray-500">Effectiveness:</span>
+                              <span className="font-medium">
+                                {(() => {
+                                  const stepKey = index === 0 ? 'initial' : 
+                                    index === 1 ? 'firstFollowUp' : 
+                                    index === 2 ? 'secondFollowUp' : 'finalFollowUp';
+                                  
+                                  const stepValue = stats.byFollowUpStep[stepKey] || 0;
+                                  const totalSent = stats.sentRequests || 1;
+                                  const percentage = (stepValue / totalSent) * 100;
+                                  
+                                  const highestValue = Math.max(
+                                    stats.byFollowUpStep.initial || 0,
+                                    stats.byFollowUpStep.firstFollowUp || 0,
+                                    stats.byFollowUpStep.secondFollowUp || 0,
+                                    stats.byFollowUpStep.finalFollowUp || 0
+                                  );
+                                  
+                                  const isMostEffective = stepValue === highestValue && stepValue > 0;
+                                  
+                                  return (
+                                    <span className={isMostEffective ? "text-green-600 font-bold" : ""}>
+                                      {stepValue > 0 ? 
+                                        `${stepValue} reviews (${percentage.toFixed(1)}%)` : 
+                                        "No data yet"}
+                                      {isMostEffective && " ★"}
+                                    </span>
+                                  );
+                                })()}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="ml-3">
-                        <div className="text-sm font-medium">{step.name}</div>
-                        <div className="text-xs text-gray-500">Day {step.days}</div>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
