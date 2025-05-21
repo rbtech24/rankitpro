@@ -176,18 +176,131 @@ export default function WordPressCustomFields() {
   
   const { toast } = useToast();
   
+  // Fetch existing WordPress custom fields configuration
+  const { data: wpCustomFields, isLoading: isLoadingWpCustomFields } = useQuery({
+    queryKey: ['/api/wordpress/custom-fields'],
+    enabled: true,
+  });
+
+  // Mutation for saving WordPress connection
+  const saveConnectionMutation = useMutation({
+    mutationFn: (data: z.infer<typeof wordpressConnectionSchema>) => 
+      apiRequest('POST', '/api/wordpress/custom-fields/connection', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/wordpress/custom-fields'] });
+      toast({
+        title: "WordPress Connection Saved",
+        description: "Your WordPress connection settings have been saved successfully.",
+      });
+      // Test the connection automatically after saving
+      testConnection();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error Saving Connection",
+        description: "There was an error saving your WordPress connection settings.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Mutation for saving field mappings
+  const saveFieldMappingMutation = useMutation({
+    mutationFn: (data: z.infer<typeof fieldMappingSchema>) => 
+      apiRequest('POST', '/api/wordpress/custom-fields/mapping', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/wordpress/custom-fields'] });
+      toast({
+        title: "Field Mappings Saved",
+        description: "Your WordPress field mappings have been saved successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error Saving Field Mappings",
+        description: "There was an error saving your WordPress field mappings.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Mutation for testing connection
+  const testConnectionMutation = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/wordpress/custom-fields/test-connection'),
+    onSuccess: async (data) => {
+      const response = await data.json();
+      setConnStatus({
+        status: response.isConnected ? "connected" : "error",
+        version: response.version,
+        apiStatus: response.isConnected ? "active" : "inactive",
+        message: response.message
+      });
+      
+      toast({
+        title: response.isConnected ? "Connection Successful" : "Connection Failed",
+        description: response.message,
+        variant: response.isConnected ? "default" : "destructive",
+      });
+    },
+    onError: (error) => {
+      setConnStatus({
+        status: "error",
+        message: "Failed to connect to WordPress site"
+      });
+      
+      toast({
+        title: "Connection Failed",
+        description: "Failed to connect to the WordPress site. Please check your credentials.",
+        variant: "destructive",
+      });
+    }
+  });
+  
   // WordPress connection form
   const connectionForm = useForm<z.infer<typeof wordpressConnectionSchema>>({
     resolver: zodResolver(wordpressConnectionSchema),
     defaultValues: {
-      siteUrl: "https://example.com",
-      apiKey: "wp_api_key_123456789",
-      secretKey: "wp_secret_key_1234567890abcdef",
-      useRestApi: true,
-      autoPublish: false,
-      postStatus: "draft",
+      siteUrl: wpCustomFields?.siteUrl || "https://example.com",
+      apiKey: wpCustomFields?.apiKey || "",
+      secretKey: wpCustomFields?.secretKey || "",
+      useRestApi: wpCustomFields?.useRestApi ?? true,
+      autoPublish: wpCustomFields?.autoPublish ?? false,
+      postStatus: wpCustomFields?.postStatus || "draft",
     }
   });
+  
+  // Update form values when data is loaded
+  React.useEffect(() => {
+    if (wpCustomFields) {
+      connectionForm.reset({
+        siteUrl: wpCustomFields.siteUrl,
+        apiKey: wpCustomFields.apiKey,
+        secretKey: wpCustomFields.secretKey,
+        useRestApi: wpCustomFields.useRestApi,
+        autoPublish: wpCustomFields.autoPublish,
+        postStatus: wpCustomFields.postStatus,
+      });
+      
+      fieldMappingForm.reset({
+        titlePrefix: wpCustomFields.titlePrefix || "[Check-in] ",
+        contentFieldMapping: wpCustomFields.contentTemplate || "notes",
+        includePhotos: wpCustomFields.includePhotos,
+        includeLocation: wpCustomFields.includeLocation,
+        customFields: wpCustomFields.customFieldMappings || defaultFieldMappings,
+        metaPrefix: wpCustomFields.metaPrefix || "rankitpro_",
+        advancedMapping: wpCustomFields.advancedMapping || "// Add custom JavaScript mapping function here\nfunction mapFields(checkIn) {\n  return {\n    // your custom mapping logic\n  };\n}",
+      });
+      
+      if (wpCustomFields.isConnected) {
+        setConnStatus({
+          status: "connected",
+          version: wpCustomFields.lastSyncStatus || "Unknown",
+          apiStatus: "active",
+          message: "Connected to WordPress site"
+        });
+      }
+    }
+  }, [wpCustomFields]);
   
   // Field mapping form
   const fieldMappingForm = useForm<z.infer<typeof fieldMappingSchema>>({
@@ -206,34 +319,8 @@ export default function WordPressCustomFields() {
   // Handle testing WordPress connection
   const testConnection = async () => {
     setTestingConnection(true);
-    
     try {
-      // For now, just simulate the API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simulate a successful connection
-      setConnStatus({
-        status: "connected",
-        version: "6.4.2",
-        apiStatus: "active",
-        message: "Successfully connected to WordPress site"
-      });
-      
-      toast({
-        title: "Connection Successful",
-        description: "Successfully connected to the WordPress site.",
-      });
-    } catch (error) {
-      setConnStatus({
-        status: "error",
-        message: "Failed to connect to WordPress site"
-      });
-      
-      toast({
-        title: "Connection Failed",
-        description: "Failed to connect to the WordPress site. Please check your credentials.",
-        variant: "destructive",
-      });
+      await testConnectionMutation.mutateAsync();
     } finally {
       setTestingConnection(false);
     }
@@ -241,46 +328,14 @@ export default function WordPressCustomFields() {
   
   // Submit handler for WordPress connection form
   const onSubmitConnection = async (data: z.infer<typeof wordpressConnectionSchema>) => {
-    try {
-      // Simulate API call to save WordPress connection
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "WordPress Connection Saved",
-        description: "Your WordPress connection settings have been saved successfully.",
-      });
-      
-      // Test the connection automatically after saving
-      testConnection();
-    } catch (error) {
-      toast({
-        title: "Error Saving Connection",
-        description: "There was an error saving your WordPress connection settings.",
-        variant: "destructive",
-      });
-    }
+    await saveConnectionMutation.mutateAsync(data);
   };
   
   // Submit handler for field mapping form
   const onSubmitFieldMapping = async (data: z.infer<typeof fieldMappingSchema>) => {
-    try {
-      // Simulate API call to save field mappings
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Update local state
-      setFieldMappings(data.customFields);
-      
-      toast({
-        title: "Field Mappings Saved",
-        description: "Your WordPress field mappings have been saved successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error Saving Field Mappings",
-        description: "There was an error saving your WordPress field mappings.",
-        variant: "destructive",
-      });
-    }
+    // Update local state and save to API
+    setFieldMappings(data.customFields);
+    await saveFieldMappingMutation.mutateAsync(data);
   };
   
   // Add a new custom field mapping
@@ -299,6 +354,35 @@ export default function WordPressCustomFields() {
       "customFields",
       currentFields.filter((_, i) => i !== index)
     );
+  };
+  
+  // Sync check-ins to WordPress
+  const syncMutation = useMutation({
+    mutationFn: (data: { checkInIds?: number[] }) => 
+      apiRequest('POST', '/api/wordpress/custom-fields/sync', data),
+    onSuccess: async (data) => {
+      const response = await data.json();
+      
+      toast({
+        title: "Sync Completed",
+        description: response.message || `Synced ${response.synced} check-ins. ${response.failed} failed.`,
+      });
+      
+      // Refresh custom fields data to update last sync info
+      queryClient.invalidateQueries({ queryKey: ['/api/wordpress/custom-fields'] });
+    },
+    onError: () => {
+      toast({
+        title: "Sync Failed",
+        description: "Failed to sync check-ins to WordPress. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Handle sync button click
+  const handleSync = async () => {
+    await syncMutation.mutateAsync({});
   };
   
   // Generate WordPress shortcode

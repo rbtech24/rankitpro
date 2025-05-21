@@ -4,6 +4,7 @@ import { storage } from '../storage';
 import { isAuthenticated, isCompanyAdmin } from '../middleware/auth';
 import { WordPressService, WordPressCredentials } from '../services/wordpress-service';
 import crypto from 'crypto';
+import { insertWordpressCustomFieldsSchema } from '@shared/schema';
 
 const router = Router();
 
@@ -397,6 +398,223 @@ router.get('/public/check-ins', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching public check-ins:', error);
     return res.status(500).json({ error: 'Error fetching check-ins' });
+  }
+});
+
+// Custom Fields API Endpoints
+
+// Get WordPress custom fields configuration
+router.get('/custom-fields', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+  const companyId = req.user?.companyId;
+  
+  if (!companyId) {
+    return res.status(400).json({ error: 'No company associated with this account' });
+  }
+  
+  try {
+    const customFields = await storage.getWordpressCustomFieldsByCompany(companyId);
+    
+    if (!customFields) {
+      return res.json(null);
+    }
+    
+    return res.json(customFields);
+  } catch (error) {
+    console.error('Error fetching WordPress custom fields:', error);
+    return res.status(500).json({ error: 'Error fetching WordPress custom fields' });
+  }
+});
+
+// Save WordPress connection settings
+router.post('/custom-fields/connection', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+  const companyId = req.user?.companyId;
+  
+  if (!companyId) {
+    return res.status(400).json({ error: 'No company associated with this account' });
+  }
+  
+  try {
+    // Validate the request body
+    const connectionSchema = z.object({
+      siteUrl: z.string().url(),
+      apiKey: z.string().min(10),
+      secretKey: z.string().min(20),
+      useRestApi: z.boolean().default(true),
+      autoPublish: z.boolean().default(false),
+      postStatus: z.enum(["publish", "draft", "pending"]).default("draft"),
+      category: z.string().optional(),
+      author: z.string().optional(),
+    });
+    
+    const validationResult = connectionSchema.safeParse(req.body);
+    
+    if (!validationResult.success) {
+      return res.status(400).json({ error: 'Invalid WordPress connection settings', details: validationResult.error });
+    }
+    
+    const data = validationResult.data;
+    
+    // Check if settings already exist
+    const existingSettings = await storage.getWordpressCustomFieldsByCompany(companyId);
+    
+    if (existingSettings) {
+      // Update existing settings
+      await storage.updateWordpressCustomFields(existingSettings.id, {
+        siteUrl: data.siteUrl,
+        apiKey: data.apiKey,
+        secretKey: data.secretKey,
+        useRestApi: data.useRestApi,
+        autoPublish: data.autoPublish,
+        postStatus: data.postStatus,
+        defaultCategory: data.category || null,
+        defaultAuthor: data.author || null,
+      });
+    } else {
+      // Create new settings with default values for remaining fields
+      await storage.createWordpressCustomFields({
+        companyId,
+        siteUrl: data.siteUrl,
+        apiKey: data.apiKey,
+        secretKey: data.secretKey,
+        useRestApi: data.useRestApi,
+        autoPublish: data.autoPublish,
+        postStatus: data.postStatus,
+        postType: "post",
+        defaultCategory: data.category || null,
+        defaultAuthor: data.author || null,
+        titlePrefix: "[Check-in] ",
+        titleTemplate: null,
+        contentTemplate: null,
+        includePhotos: true,
+        includeLocation: true,
+        includeMap: false,
+        includeSchema: false,
+        customFieldMappings: JSON.stringify([
+          { wpField: "post_title", checkInField: "job_type", isActive: true },
+          { wpField: "post_content", checkInField: "notes", isActive: true },
+          { wpField: "rp_technician", checkInField: "technician_name", isActive: true },
+          { wpField: "rp_location", checkInField: "location", isActive: true },
+          { wpField: "rp_completion_date", checkInField: "completion_date", isActive: true },
+        ]),
+        taxonomyMappings: JSON.stringify({}),
+        advancedMapping: null,
+        metaPrefix: "rankitpro_",
+        isConnected: false
+      });
+    }
+    
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('Error saving WordPress connection settings:', error);
+    return res.status(500).json({ error: 'Error saving WordPress connection settings' });
+  }
+});
+
+// Save field mappings
+router.post('/custom-fields/mapping', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+  const companyId = req.user?.companyId;
+  
+  if (!companyId) {
+    return res.status(400).json({ error: 'No company associated with this account' });
+  }
+  
+  try {
+    // Validate the request body
+    const fieldMappingSchema = z.object({
+      titlePrefix: z.string().optional(),
+      contentFieldMapping: z.string().min(1),
+      includePhotos: z.boolean().default(true),
+      includeLocation: z.boolean().default(true),
+      customFields: z.array(
+        z.object({
+          wpField: z.string().min(1),
+          checkInField: z.string().min(1),
+          isActive: z.boolean().default(true),
+        })
+      ).default([]),
+      metaPrefix: z.string().default("rankitpro_"),
+      advancedMapping: z.string().optional(),
+    });
+    
+    const validationResult = fieldMappingSchema.safeParse(req.body);
+    
+    if (!validationResult.success) {
+      return res.status(400).json({ error: 'Invalid WordPress field mappings', details: validationResult.error });
+    }
+    
+    const data = validationResult.data;
+    
+    // Check if settings already exist
+    const existingSettings = await storage.getWordpressCustomFieldsByCompany(companyId);
+    
+    if (!existingSettings) {
+      return res.status(404).json({ error: 'WordPress custom fields configuration not found' });
+    }
+    
+    // Update existing settings
+    await storage.updateWordpressCustomFields(existingSettings.id, {
+      titlePrefix: data.titlePrefix || null,
+      contentTemplate: data.contentFieldMapping,
+      includePhotos: data.includePhotos,
+      includeLocation: data.includeLocation,
+      customFieldMappings: JSON.stringify(data.customFields),
+      metaPrefix: data.metaPrefix,
+      advancedMapping: data.advancedMapping || null,
+    });
+    
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('Error saving WordPress field mappings:', error);
+    return res.status(500).json({ error: 'Error saving WordPress field mappings' });
+  }
+});
+
+// Test WordPress connection
+router.post('/custom-fields/test-connection', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+  const companyId = req.user?.companyId;
+  
+  if (!companyId) {
+    return res.status(400).json({ error: 'No company associated with this account' });
+  }
+  
+  try {
+    const result = await storage.testWordpressConnection(companyId);
+    
+    if (result.isConnected) {
+      // Update connection status in the database
+      const customFields = await storage.getWordpressCustomFieldsByCompany(companyId);
+      
+      if (customFields) {
+        await storage.updateWordpressCustomFields(customFields.id, {
+          isConnected: true,
+        });
+      }
+    }
+    
+    return res.json(result);
+  } catch (error) {
+    console.error('Error testing WordPress connection:', error);
+    return res.status(500).json({ error: 'Error testing WordPress connection' });
+  }
+});
+
+// Sync check-ins to WordPress
+router.post('/custom-fields/sync', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+  const companyId = req.user?.companyId;
+  
+  if (!companyId) {
+    return res.status(400).json({ error: 'No company associated with this account' });
+  }
+  
+  try {
+    const { checkInIds } = req.body;
+    
+    const result = await storage.syncWordpressCheckIns(companyId, checkInIds);
+    
+    return res.json(result);
+  } catch (error) {
+    console.error('Error syncing check-ins to WordPress:', error);
+    return res.status(500).json({ error: 'Error syncing check-ins to WordPress' });
   }
 });
 
