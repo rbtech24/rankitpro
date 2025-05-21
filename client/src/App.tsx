@@ -29,6 +29,7 @@ import LocalSeoGuide from "@/pages/downloads/local-seo-guide";
 import ImplementationChecklist from "@/pages/downloads/implementation-checklist";
 import TechnicianTrainingSlides from "@/pages/downloads/technician-training-slides";
 import BillingManagement from "@/pages/billing-management";
+import CompaniesManagement from "@/pages/companies-management";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
@@ -967,6 +968,9 @@ function Router() {
       </Route>
       <Route path="/billing-management">
         <PrivateRoute component={BillingManagement} path="/billing-management" role="super_admin" />
+      </Route>
+      <Route path="/companies-management">
+        <PrivateRoute component={CompaniesManagement} path="/companies-management" role="super_admin" />
       </Route>
       <Route path="/integrations">
         <PrivateRoute component={Integrations} path="/integrations" role="company_admin" />
