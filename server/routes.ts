@@ -799,30 +799,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Register integration routes (WordPress, JavaScript embed, AI providers)
+  // Register all route modules
   app.use("/api/integrations", integrationsRoutes);
   app.use("/api/check-ins", checkInRoutes);
   app.use("/api/reviews", reviewRoutes);
   app.use("/api/blogs", blogRoutes);
   app.use("/api/demo", demoRoutes);
   app.use("/api/review-requests", reviewRequestRoutes);
-  app.use("/api/review-response", reviewResponseRoutes);
-  app.use("/api/wordpress", wordpressRoutes);
-  app.use("/api/wordpress-custom-fields", wordpressCustomFieldsRoutes);
-  app.use("/api/billing", billingRoutes);
-  app.use("/api/users", userRoutes);
-  app.use("/api/ai-providers", aiProvidersRoutes);
-  app.use("/api/generate-content", generateContentRoutes);
-  app.use("/api/mobile/v1", mobileRoutes);
-  app.use("/api/crm", crmIntegrationRoutes);
-  
-  // Create HTTP server
-  // Register all our route modules
-  app.use("/api/integrations", integrationsRoutes);
-  app.use("/api/check-ins", checkInRoutes);
-  app.use("/api/reviews", reviewRoutes);
-  app.use("/api/blogs", blogRoutes);
-  app.use("/api/review-request", reviewRequestRoutes);
   app.use("/api/review-response", reviewResponseRoutes);
   app.use("/api/review-automation", reviewAutomationRoutes);
   app.use("/api/wordpress", wordpressRoutes);
@@ -832,9 +815,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/users", userRoutes);
   app.use("/api/ai-providers", aiProvidersRoutes);
   app.use("/api/generate-content", generateContentRoutes);
+  app.use("/api/mobile/v1", mobileRoutes);
   app.use("/api/mobile", mobileRoutes);
   app.use("/api/mobile/check-ins", mobileCheckInsRoutes);
   app.use("/api/mobile/notifications", mobileNotificationsRoutes);
+  app.use("/api/crm", crmIntegrationRoutes);
   app.use("/api/crm-integration", crmIntegrationRoutes);
   
   // Initialize the scheduler service to process review follow-ups
