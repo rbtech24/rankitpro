@@ -20,6 +20,16 @@ class ReviewAutomationService {
   }
   
   /**
+   * Helper function to strip HTML tags for plain text emails
+   */
+  stripHtml(html: string): string {
+    return html.replace(/<[^>]*>?/gm, '')
+               .replace(/&nbsp;/g, ' ')
+               .replace(/\s+/g, ' ')
+               .trim();
+  }
+
+  /**
    * Process pending review requests that need to be sent or followed up on
    */
   async processScheduledReviewRequests(): Promise<void> {
@@ -236,7 +246,7 @@ class ReviewAutomationService {
       
       targetPositiveExperiencesOnly: false,
       targetServiceTypes: [],
-      targetMinimumInvoiceAmount: 0,
+      targetMinimumInvoiceAmount: "0", // Using string to match schema
       
       enableSmartTiming: false,
       smartTimingPreferences: {
@@ -300,14 +310,17 @@ class ReviewAutomationService {
         );
         
         // Send the email
+        // Get company settings that might contain logo information
+        const companySettings = company.reviewSettings ? 
+          JSON.parse(company.reviewSettings) : {};
+        
+        // Safely send email without attachments, as our email service doesn't support them directly
         await emailService.sendEmail({
           to: requestStatus.customerEmail,
           from: `reviews@rankitpro.com`,
           subject,
           html: message,
-          // Add company logo if enabled
-          attachments: settings.includeCompanyLogo && company.logoUrl ? 
-            [{ filename: 'logo.png', path: company.logoUrl }] : []
+          text: this.stripHtml(message) // Plain text fallback
         });
         
         sendSuccess = true;
@@ -746,13 +759,22 @@ class ReviewAutomationService {
       const { smartTimingPreferences } = settings;
       
       // Check preferred days
-      if (smartTimingPreferences.preferWeekdays && 
-          !smartTimingPreferences.preferredDays.includes(dayOfWeek)) {
+      const preferences = smartTimingPreferences as { 
+        preferWeekdays?: boolean; 
+        preferredDays?: number[];
+        avoidLateNight?: boolean;
+        avoidHolidays?: boolean;
+        optimizeByOpenRates?: boolean;
+      };
+      
+      if (preferences.preferWeekdays && 
+          preferences.preferredDays && 
+          !preferences.preferredDays.includes(dayOfWeek)) {
         return false;
       }
       
       // Check if it's late night and we want to avoid that
-      if (smartTimingPreferences.avoidLateNight && 
+      if (preferences.avoidLateNight && 
           (hour < 7 || hour > 21)) {
         return false;
       }
