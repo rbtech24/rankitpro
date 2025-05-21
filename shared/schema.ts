@@ -146,6 +146,114 @@ export type InsertReviewRequest = z.infer<typeof insertReviewRequestSchema>;
 export type ReviewResponse = typeof reviewResponses.$inferSelect;
 export type InsertReviewResponse = z.infer<typeof insertReviewResponseSchema>;
 
+// Review Automation Schemas
+export const reviewFollowUpSettings = pgTable("review_follow_up_settings", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").references(() => companies.id, { onDelete: "cascade" }).notNull(),
+
+  // Initial request settings
+  initialDelay: integer("initial_delay").default(2).notNull(), // Days after service completion
+  initialMessage: text("initial_message").notNull(),
+  initialSubject: text("initial_subject").notNull(),
+  
+  // First follow-up settings
+  enableFirstFollowUp: boolean("enable_first_follow_up").default(true).notNull(),
+  firstFollowUpDelay: integer("first_follow_up_delay").default(3).notNull(),
+  firstFollowUpMessage: text("first_follow_up_message").notNull(),
+  firstFollowUpSubject: text("first_follow_up_subject").notNull(),
+  
+  // Second follow-up settings
+  enableSecondFollowUp: boolean("enable_second_follow_up").default(true).notNull(),
+  secondFollowUpDelay: integer("second_follow_up_delay").default(5).notNull(),
+  secondFollowUpMessage: text("second_follow_up_message").notNull(),
+  secondFollowUpSubject: text("second_follow_up_subject").notNull(),
+  
+  // Final follow-up settings
+  enableFinalFollowUp: boolean("enable_final_follow_up").default(false).notNull(),
+  finalFollowUpDelay: integer("final_follow_up_delay").default(7).notNull(),
+  finalFollowUpMessage: text("final_follow_up_message"),
+  finalFollowUpSubject: text("final_follow_up_subject"),
+  
+  // Channels and time settings
+  enableEmailRequests: boolean("enable_email_requests").default(true).notNull(),
+  enableSmsRequests: boolean("enable_sms_requests").default(false).notNull(),
+  preferredSendTime: text("preferred_send_time").default("10:00").notNull(),
+  sendWeekends: boolean("send_weekends").default(false).notNull(),
+  
+  // Additional options
+  includeServiceDetails: boolean("include_service_details").default(true).notNull(),
+  includeTechnicianPhoto: boolean("include_technician_photo").default(true).notNull(),
+  includeCompanyLogo: boolean("include_company_logo").default(true).notNull(),
+  enableIncentives: boolean("enable_incentives").default(false).notNull(),
+  incentiveDetails: text("incentive_details"),
+  
+  // Targeting and optimization
+  targetPositiveExperiencesOnly: boolean("target_positive_experiences_only").default(false).notNull(),
+  targetServiceTypes: text("target_service_types").array(),
+  targetMinimumInvoiceAmount: numeric("target_minimum_invoice_amount").default("0").notNull(),
+  
+  // Smart timing options
+  enableSmartTiming: boolean("enable_smart_timing").default(false).notNull(),
+  smartTimingPreferences: jsonb("smart_timing_preferences").notNull(),
+  
+  // Status
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+export const reviewRequestStatuses = pgTable("review_request_statuses", {
+  id: serial("id").primaryKey(),
+  reviewRequestId: integer("review_request_id").references(() => reviewRequests.id, { onDelete: "cascade" }).notNull(),
+  checkInId: integer("check_in_id").references(() => checkIns.id, { onDelete: "set null" }),
+  customerId: text("customer_id").notNull(),
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone"),
+  
+  // Request tracking
+  initialRequestSent: boolean("initial_request_sent").default(false).notNull(),
+  initialRequestSentAt: timestamp("initial_request_sent_at"),
+  firstFollowUpSent: boolean("first_follow_up_sent").default(false).notNull(),
+  firstFollowUpSentAt: timestamp("first_follow_up_sent_at"),
+  secondFollowUpSent: boolean("second_follow_up_sent").default(false).notNull(),
+  secondFollowUpSentAt: timestamp("second_follow_up_sent_at"),
+  finalFollowUpSent: boolean("final_follow_up_sent").default(false).notNull(),
+  finalFollowUpSentAt: timestamp("final_follow_up_sent_at"),
+  
+  // Response tracking
+  linkClicked: boolean("link_clicked").default(false).notNull(),
+  linkClickedAt: timestamp("link_clicked_at"),
+  reviewSubmitted: boolean("review_submitted").default(false).notNull(),
+  reviewSubmittedAt: timestamp("review_submitted_at"),
+  
+  // Status
+  status: text("status", { enum: ['pending', 'in_progress', 'completed', 'unsubscribed'] }).default('pending').notNull(),
+  unsubscribedAt: timestamp("unsubscribed_at"),
+  completedAt: timestamp("completed_at"),
+  technicianId: integer("technician_id").references(() => technicians.id, { onDelete: "set null" }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+// Insert schemas for the new tables
+export const insertReviewFollowUpSettingsSchema = createInsertSchema(reviewFollowUpSettings).omit({ 
+  id: true, 
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertReviewRequestStatusSchema = createInsertSchema(reviewRequestStatuses).omit({ 
+  id: true, 
+  createdAt: true
+});
+
+// Types for the new tables
+export type ReviewFollowUpSettings = typeof reviewFollowUpSettings.$inferSelect;
+export type InsertReviewFollowUpSettings = z.infer<typeof insertReviewFollowUpSettingsSchema>;
+
+export type ReviewRequestStatus = typeof reviewRequestStatuses.$inferSelect;
+export type InsertReviewRequestStatus = z.infer<typeof insertReviewRequestStatusSchema>;
+
 // Extended types that include related data
 export type CheckInWithTechnician = CheckIn & {
   technician: Technician;

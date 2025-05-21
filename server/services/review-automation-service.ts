@@ -1,0 +1,806 @@
+import { storage } from "../storage";
+import emailService from "./email-service";
+import { 
+  ReviewFollowUpSettings, 
+  ReviewRequestStatus,
+  InsertReviewRequestStatus,
+  InsertReviewRequest
+} from "@shared/schema";
+import { defaultEmailTemplates, defaultSubjectTemplates, defaultSmsTemplates, timingOptimizationFactors } from "@shared/models/review-automation";
+import twilio from 'twilio';
+import { v4 as uuidv4 } from 'uuid';
+
+class ReviewAutomationService {
+  private twilioClient: twilio.Twilio | null = null;
+  
+  constructor() {
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      this.twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    }
+  }
+  
+  /**
+   * Process pending review requests that need to be sent or followed up on
+   */
+  async processScheduledReviewRequests(): Promise<void> {
+    try {
+      // Get all active companies
+      const companies = await storage.getAllCompanies();
+      
+      for (const company of companies) {
+        // Skip companies without review automation settings
+        const settings = await this.getCompanySettings(company.id);
+        if (!settings || !settings.isActive) continue;
+        
+        await this.processPendingRequestsForCompany(company.id, settings);
+      }
+    } catch (error) {
+      console.error("Error processing scheduled review requests:", error);
+    }
+  }
+  
+  /**
+   * Process pending requests for a specific company
+   */
+  async processPendingRequestsForCompany(companyId: number, settings: ReviewFollowUpSettings): Promise<void> {
+    try {
+      // Get all pending/in progress review requests for this company
+      const requestStatuses = await storage.getReviewRequestStatusesByCompany(companyId);
+      const now = new Date();
+      
+      for (const requestStatus of requestStatuses) {
+        // Skip completed or unsubscribed requests
+        if (requestStatus.status === 'completed' || requestStatus.status === 'unsubscribed') {
+          continue;
+        }
+        
+        // Check if this is an initial request that needs to be sent
+        if (!requestStatus.initialRequestSent) {
+          await this.sendInitialRequest(requestStatus, settings);
+          continue;
+        }
+        
+        // Check for first follow-up
+        if (settings.enableFirstFollowUp && 
+            !requestStatus.firstFollowUpSent && 
+            requestStatus.initialRequestSentAt) {
+          
+          const daysSinceInitial = this.getDaysBetween(requestStatus.initialRequestSentAt, now);
+          
+          if (daysSinceInitial >= settings.firstFollowUpDelay) {
+            await this.sendFirstFollowUp(requestStatus, settings);
+            continue;
+          }
+        }
+        
+        // Check for second follow-up
+        if (settings.enableSecondFollowUp && 
+            !requestStatus.secondFollowUpSent && 
+            requestStatus.firstFollowUpSentAt) {
+          
+          const daysSinceFirstFollowUp = this.getDaysBetween(requestStatus.firstFollowUpSentAt, now);
+          
+          if (daysSinceFirstFollowUp >= settings.secondFollowUpDelay) {
+            await this.sendSecondFollowUp(requestStatus, settings);
+            continue;
+          }
+        }
+        
+        // Check for final follow-up
+        if (settings.enableFinalFollowUp && 
+            !requestStatus.finalFollowUpSent && 
+            requestStatus.secondFollowUpSentAt) {
+          
+          const daysSinceSecondFollowUp = this.getDaysBetween(requestStatus.secondFollowUpSentAt, now);
+          
+          if (daysSinceSecondFollowUp >= settings.finalFollowUpDelay) {
+            await this.sendFinalFollowUp(requestStatus, settings);
+            continue;
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Error processing requests for company ${companyId}:`, error);
+    }
+  }
+  
+  /**
+   * Create and queue a new review request from a check-in
+   */
+  async createReviewRequestFromCheckIn(
+    checkInId: number, 
+    technicianId: number,
+    companyId: number
+  ): Promise<ReviewRequestStatus | null> {
+    try {
+      // Get the check-in
+      const checkIn = await storage.getCheckIn(checkInId);
+      if (!checkIn) {
+        throw new Error(`Check-in ${checkInId} not found`);
+      }
+      
+      // Get company settings
+      const settings = await this.getCompanySettings(companyId);
+      if (!settings || !settings.isActive) {
+        console.log(`Review automation not active for company ${companyId}`);
+        return null;
+      }
+      
+      // Check if customer information is available
+      if (!checkIn.customerName || (!checkIn.customerEmail && !checkIn.customerPhone)) {
+        console.log(`Cannot create review request: missing customer information for check-in ${checkInId}`);
+        return null;
+      }
+      
+      // Check service type targeting (if configured)
+      if (settings.targetServiceTypes.length > 0 && 
+          !settings.targetServiceTypes.includes(checkIn.jobType)) {
+        console.log(`Check-in ${checkInId} job type ${checkIn.jobType} not in targeted service types`);
+        return null;
+      }
+      
+      // Create a review request record
+      const reviewRequestData: InsertReviewRequest = {
+        customerName: checkIn.customerName,
+        email: checkIn.customerEmail || null,
+        phone: checkIn.customerPhone || null,
+        method: checkIn.customerEmail ? "email" : "sms",
+        jobType: checkIn.jobType,
+        customMessage: null,
+        token: uuidv4(),
+        status: "pending",
+        technicianId,
+        companyId
+      };
+      
+      const reviewRequest = await storage.createReviewRequest(reviewRequestData);
+      
+      // Create a request status record to track the follow-ups
+      const statusData: InsertReviewRequestStatus = {
+        reviewRequestId: reviewRequest.id,
+        checkInId,
+        customerId: `customer_${Date.now()}`, // Generate a unique customer ID
+        customerName: checkIn.customerName,
+        customerEmail: checkIn.customerEmail || '', // Required field
+        customerPhone: checkIn.customerPhone || undefined,
+        technicianId,
+        status: 'pending'
+      };
+      
+      const requestStatus = await storage.createReviewRequestStatus(statusData);
+      
+      // Schedule for sending after the initial delay
+      console.log(`Created review request ${reviewRequest.id} with status tracking ${requestStatus.id}`);
+      
+      return requestStatus;
+    } catch (error) {
+      console.error("Error creating review request from check-in:", error);
+      return null;
+    }
+  }
+  
+  /**
+   * Get review follow-up settings for a company
+   */
+  async getCompanySettings(companyId: number): Promise<ReviewFollowUpSettings | null> {
+    try {
+      let settings = await storage.getReviewFollowUpSettings(companyId);
+      
+      if (!settings) {
+        // Create default settings for this company
+        const defaultSettings = this.createDefaultSettings(companyId);
+        settings = await storage.createReviewFollowUpSettings(defaultSettings);
+      }
+      
+      return settings;
+    } catch (error) {
+      console.error(`Error getting review settings for company ${companyId}:`, error);
+      return null;
+    }
+  }
+  
+  /**
+   * Create default review follow-up settings for a new company
+   */
+  createDefaultSettings(companyId: number) {
+    return {
+      companyId,
+      initialDelay: 2, // 2 days after service
+      initialMessage: defaultEmailTemplates.initialMessageTemplate,
+      initialSubject: defaultSubjectTemplates.initialSubject,
+      
+      enableFirstFollowUp: true,
+      firstFollowUpDelay: 3, // 3 days after initial request
+      firstFollowUpMessage: defaultEmailTemplates.firstFollowUpMessageTemplate,
+      firstFollowUpSubject: defaultSubjectTemplates.firstFollowUpSubject,
+      
+      enableSecondFollowUp: true,
+      secondFollowUpDelay: 5, // 5 days after first follow-up
+      secondFollowUpMessage: defaultEmailTemplates.secondFollowUpMessageTemplate,
+      secondFollowUpSubject: defaultSubjectTemplates.secondFollowUpSubject,
+      
+      enableFinalFollowUp: false,
+      finalFollowUpDelay: 7, // 7 days after second follow-up
+      finalFollowUpMessage: defaultEmailTemplates.finalFollowUpMessageTemplate,
+      finalFollowUpSubject: defaultSubjectTemplates.finalFollowUpSubject,
+      
+      enableEmailRequests: true,
+      enableSmsRequests: false,
+      preferredSendTime: "10:00",
+      sendWeekends: false,
+      
+      includeServiceDetails: true,
+      includeTechnicianPhoto: true,
+      includeCompanyLogo: true,
+      enableIncentives: false,
+      
+      targetPositiveExperiencesOnly: false,
+      targetServiceTypes: [],
+      targetMinimumInvoiceAmount: 0,
+      
+      enableSmartTiming: false,
+      smartTimingPreferences: {
+        preferWeekdays: true,
+        preferredDays: [1, 2, 3, 4, 5], // Monday to Friday
+        avoidHolidays: true,
+        avoidLateNight: true,
+        optimizeByOpenRates: true
+      },
+      
+      isActive: true
+    };
+  }
+  
+  /**
+   * Send the initial review request
+   */
+  private async sendInitialRequest(requestStatus: ReviewRequestStatus, settings: ReviewFollowUpSettings): Promise<boolean> {
+    try {
+      // Get necessary data for the request
+      const [company, technician, reviewRequest, checkIn] = await Promise.all([
+        storage.getCompany(settings.companyId),
+        storage.getTechnician(requestStatus.technicianId),
+        storage.getReviewRequest(requestStatus.reviewRequestId),
+        requestStatus.checkInId ? storage.getCheckIn(requestStatus.checkInId) : Promise.resolve(null)
+      ]);
+      
+      if (!company || !technician || !reviewRequest) {
+        throw new Error(`Missing data for request ${requestStatus.id}`);
+      }
+      
+      // Check if we should send now (smart timing)
+      if (!this.shouldSendBasedOnTiming(settings)) {
+        console.log(`Not sending request ${requestStatus.id} due to timing preferences`);
+        return false;
+      }
+      
+      // Generate review link with token
+      const reviewLink = `https://rankitpro.com/review/${reviewRequest.token}`;
+      
+      // Send the request via email and/or SMS
+      let sendSuccess = false;
+      
+      // Send via email if enabled and we have an email
+      if (settings.enableEmailRequests && requestStatus.customerEmail) {
+        const message = this.formatMessageTemplate(
+          settings.initialMessage,
+          {
+            customerName: requestStatus.customerName,
+            companyName: company.name,
+            technicianName: technician.name,
+            serviceType: checkIn?.jobType || 'service',
+            location: checkIn?.city || 'your area',
+            reviewLink
+          }
+        );
+        
+        const subject = this.formatMessageTemplate(
+          settings.initialSubject,
+          { companyName: company.name }
+        );
+        
+        // Send the email
+        await emailService.sendEmail({
+          to: requestStatus.customerEmail,
+          from: `reviews@rankitpro.com`,
+          subject,
+          html: message,
+          // Add company logo if enabled
+          attachments: settings.includeCompanyLogo && company.logoUrl ? 
+            [{ filename: 'logo.png', path: company.logoUrl }] : []
+        });
+        
+        sendSuccess = true;
+      }
+      
+      // Send via SMS if enabled and we have a phone number
+      if (settings.enableSmsRequests && requestStatus.customerPhone && this.twilioClient) {
+        const smsText = this.formatMessageTemplate(
+          defaultSmsTemplates.initialSmsTemplate,
+          {
+            companyName: company.name,
+            serviceType: checkIn?.jobType || 'service',
+            reviewLink
+          }
+        );
+        
+        // Send the SMS
+        await this.twilioClient.messages.create({
+          body: smsText,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: requestStatus.customerPhone
+        });
+        
+        sendSuccess = true;
+      }
+      
+      if (sendSuccess) {
+        // Update request status
+        await storage.updateReviewRequestStatus(requestStatus.id, {
+          initialRequestSent: true,
+          initialRequestSentAt: new Date(),
+          status: 'in_progress'
+        });
+        
+        // Update review request
+        await storage.updateReviewRequest(reviewRequest.id, {
+          status: 'sent'
+        });
+        
+        console.log(`Sent initial review request ${requestStatus.id} to ${requestStatus.customerName}`);
+        return true;
+      } else {
+        console.log(`No delivery method available for request ${requestStatus.id}`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`Error sending initial request ${requestStatus.id}:`, error);
+      return false;
+    }
+  }
+  
+  /**
+   * Send the first follow-up reminder
+   */
+  private async sendFirstFollowUp(requestStatus: ReviewRequestStatus, settings: ReviewFollowUpSettings): Promise<boolean> {
+    try {
+      if (!settings.enableFirstFollowUp) {
+        return false;
+      }
+      
+      const [company, technician, reviewRequest, checkIn] = await Promise.all([
+        storage.getCompany(settings.companyId),
+        storage.getTechnician(requestStatus.technicianId),
+        storage.getReviewRequest(requestStatus.reviewRequestId),
+        requestStatus.checkInId ? storage.getCheckIn(requestStatus.checkInId) : Promise.resolve(null)
+      ]);
+      
+      if (!company || !technician || !reviewRequest) {
+        throw new Error(`Missing data for request ${requestStatus.id}`);
+      }
+      
+      // Check if we should send now (smart timing)
+      if (!this.shouldSendBasedOnTiming(settings)) {
+        return false;
+      }
+      
+      const reviewLink = `https://rankitpro.com/review/${reviewRequest.token}`;
+      let sendSuccess = false;
+      
+      // Send via email
+      if (settings.enableEmailRequests && requestStatus.customerEmail) {
+        const message = this.formatMessageTemplate(
+          settings.firstFollowUpMessage,
+          {
+            customerName: requestStatus.customerName,
+            companyName: company.name,
+            technicianName: technician.name,
+            reviewLink
+          }
+        );
+        
+        const subject = this.formatMessageTemplate(
+          settings.firstFollowUpSubject,
+          { companyName: company.name }
+        );
+        
+        await emailService.sendEmail({
+          to: requestStatus.customerEmail,
+          from: `reviews@rankitpro.com`,
+          subject,
+          html: message
+        });
+        
+        sendSuccess = true;
+      }
+      
+      // Send via SMS
+      if (settings.enableSmsRequests && requestStatus.customerPhone && this.twilioClient) {
+        const smsText = this.formatMessageTemplate(
+          defaultSmsTemplates.firstFollowUpSmsTemplate,
+          {
+            companyName: company.name,
+            reviewLink
+          }
+        );
+        
+        await this.twilioClient.messages.create({
+          body: smsText,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: requestStatus.customerPhone
+        });
+        
+        sendSuccess = true;
+      }
+      
+      if (sendSuccess) {
+        // Update request status
+        await storage.updateReviewRequestStatus(requestStatus.id, {
+          firstFollowUpSent: true,
+          firstFollowUpSentAt: new Date()
+        });
+        
+        console.log(`Sent first follow-up for request ${requestStatus.id} to ${requestStatus.customerName}`);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error(`Error sending first follow-up for request ${requestStatus.id}:`, error);
+      return false;
+    }
+  }
+  
+  /**
+   * Send the second follow-up reminder
+   */
+  private async sendSecondFollowUp(requestStatus: ReviewRequestStatus, settings: ReviewFollowUpSettings): Promise<boolean> {
+    try {
+      if (!settings.enableSecondFollowUp) {
+        return false;
+      }
+      
+      const [company, technician, reviewRequest, checkIn] = await Promise.all([
+        storage.getCompany(settings.companyId),
+        storage.getTechnician(requestStatus.technicianId),
+        storage.getReviewRequest(requestStatus.reviewRequestId),
+        requestStatus.checkInId ? storage.getCheckIn(requestStatus.checkInId) : Promise.resolve(null)
+      ]);
+      
+      if (!company || !technician || !reviewRequest) {
+        throw new Error(`Missing data for request ${requestStatus.id}`);
+      }
+      
+      // Check if we should send now (smart timing)
+      if (!this.shouldSendBasedOnTiming(settings)) {
+        return false;
+      }
+      
+      const reviewLink = `https://rankitpro.com/review/${reviewRequest.token}`;
+      let sendSuccess = false;
+      
+      // Send via email
+      if (settings.enableEmailRequests && requestStatus.customerEmail) {
+        const message = this.formatMessageTemplate(
+          settings.secondFollowUpMessage,
+          {
+            customerName: requestStatus.customerName,
+            companyName: company.name,
+            technicianName: technician.name,
+            serviceType: checkIn?.jobType || 'service',
+            location: checkIn?.city || 'your area',
+            reviewLink
+          }
+        );
+        
+        const subject = this.formatMessageTemplate(
+          settings.secondFollowUpSubject,
+          { companyName: company.name }
+        );
+        
+        await emailService.sendEmail({
+          to: requestStatus.customerEmail,
+          from: `reviews@rankitpro.com`,
+          subject,
+          html: message
+        });
+        
+        sendSuccess = true;
+      }
+      
+      // Send via SMS
+      if (settings.enableSmsRequests && requestStatus.customerPhone && this.twilioClient) {
+        const smsText = this.formatMessageTemplate(
+          defaultSmsTemplates.secondFollowUpSmsTemplate,
+          {
+            companyName: company.name,
+            reviewLink
+          }
+        );
+        
+        await this.twilioClient.messages.create({
+          body: smsText,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: requestStatus.customerPhone
+        });
+        
+        sendSuccess = true;
+      }
+      
+      if (sendSuccess) {
+        // Update request status
+        await storage.updateReviewRequestStatus(requestStatus.id, {
+          secondFollowUpSent: true,
+          secondFollowUpSentAt: new Date()
+        });
+        
+        console.log(`Sent second follow-up for request ${requestStatus.id} to ${requestStatus.customerName}`);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error(`Error sending second follow-up for request ${requestStatus.id}:`, error);
+      return false;
+    }
+  }
+  
+  /**
+   * Send the final follow-up reminder
+   */
+  private async sendFinalFollowUp(requestStatus: ReviewRequestStatus, settings: ReviewFollowUpSettings): Promise<boolean> {
+    try {
+      if (!settings.enableFinalFollowUp || !settings.finalFollowUpMessage || !settings.finalFollowUpSubject) {
+        return false;
+      }
+      
+      const [company, technician, reviewRequest] = await Promise.all([
+        storage.getCompany(settings.companyId),
+        storage.getTechnician(requestStatus.technicianId),
+        storage.getReviewRequest(requestStatus.reviewRequestId)
+      ]);
+      
+      if (!company || !technician || !reviewRequest) {
+        throw new Error(`Missing data for request ${requestStatus.id}`);
+      }
+      
+      // Check if we should send now (smart timing)
+      if (!this.shouldSendBasedOnTiming(settings)) {
+        return false;
+      }
+      
+      const reviewLink = `https://rankitpro.com/review/${reviewRequest.token}`;
+      let sendSuccess = false;
+      
+      // Send via email
+      if (settings.enableEmailRequests && requestStatus.customerEmail) {
+        const message = this.formatMessageTemplate(
+          settings.finalFollowUpMessage,
+          {
+            customerName: requestStatus.customerName,
+            companyName: company.name,
+            technicianName: technician.name,
+            reviewLink
+          }
+        );
+        
+        const subject = this.formatMessageTemplate(
+          settings.finalFollowUpSubject,
+          { companyName: company.name }
+        );
+        
+        await emailService.sendEmail({
+          to: requestStatus.customerEmail,
+          from: `reviews@rankitpro.com`,
+          subject,
+          html: message
+        });
+        
+        sendSuccess = true;
+      }
+      
+      // Send via SMS
+      if (settings.enableSmsRequests && requestStatus.customerPhone && this.twilioClient) {
+        const smsText = this.formatMessageTemplate(
+          defaultSmsTemplates.finalFollowUpSmsTemplate,
+          {
+            companyName: company.name,
+            reviewLink
+          }
+        );
+        
+        await this.twilioClient.messages.create({
+          body: smsText,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: requestStatus.customerPhone
+        });
+        
+        sendSuccess = true;
+      }
+      
+      if (sendSuccess) {
+        // Update request status
+        await storage.updateReviewRequestStatus(requestStatus.id, {
+          finalFollowUpSent: true,
+          finalFollowUpSentAt: new Date()
+        });
+        
+        console.log(`Sent final follow-up for request ${requestStatus.id} to ${requestStatus.customerName}`);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error(`Error sending final follow-up for request ${requestStatus.id}:`, error);
+      return false;
+    }
+  }
+  
+  /**
+   * Record when a review request link is clicked
+   */
+  async recordLinkClick(token: string): Promise<boolean> {
+    try {
+      // Find the review request by token
+      const reviewRequest = await storage.getReviewRequestByToken(token);
+      if (!reviewRequest) {
+        return false;
+      }
+      
+      // Find the request status
+      const requestStatus = await storage.getReviewRequestStatusByRequestId(reviewRequest.id);
+      if (!requestStatus) {
+        return false;
+      }
+      
+      // Update request status
+      await storage.updateReviewRequestStatus(requestStatus.id, {
+        linkClicked: true,
+        linkClickedAt: new Date()
+      });
+      
+      return true;
+    } catch (error) {
+      console.error(`Error recording link click for token ${token}:`, error);
+      return false;
+    }
+  }
+  
+  /**
+   * Record when a review is submitted
+   */
+  async recordReviewSubmission(token: string): Promise<boolean> {
+    try {
+      // Find the review request by token
+      const reviewRequest = await storage.getReviewRequestByToken(token);
+      if (!reviewRequest) {
+        return false;
+      }
+      
+      // Find the request status
+      const requestStatus = await storage.getReviewRequestStatusByRequestId(reviewRequest.id);
+      if (!requestStatus) {
+        return false;
+      }
+      
+      // Update request status
+      await storage.updateReviewRequestStatus(requestStatus.id, {
+        reviewSubmitted: true,
+        reviewSubmittedAt: new Date(),
+        status: 'completed',
+        completedAt: new Date()
+      });
+      
+      return true;
+    } catch (error) {
+      console.error(`Error recording review submission for token ${token}:`, error);
+      return false;
+    }
+  }
+  
+  /**
+   * Record when a customer unsubscribes from review requests
+   */
+  async recordUnsubscribe(token: string): Promise<boolean> {
+    try {
+      // Find the review request by token
+      const reviewRequest = await storage.getReviewRequestByToken(token);
+      if (!reviewRequest) {
+        return false;
+      }
+      
+      // Find the request status
+      const requestStatus = await storage.getReviewRequestStatusByRequestId(reviewRequest.id);
+      if (!requestStatus) {
+        return false;
+      }
+      
+      // Update request status
+      await storage.updateReviewRequestStatus(requestStatus.id, {
+        status: 'unsubscribed',
+        unsubscribedAt: new Date()
+      });
+      
+      return true;
+    } catch (error) {
+      console.error(`Error recording unsubscribe for token ${token}:`, error);
+      return false;
+    }
+  }
+  
+  /**
+   * Determine if we should send a message based on timing preferences
+   */
+  private shouldSendBasedOnTiming(settings: ReviewFollowUpSettings): boolean {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+    const hour = now.getHours();
+    
+    // Check if we should avoid weekends
+    if (!settings.sendWeekends && (dayOfWeek === 0 || dayOfWeek === 6)) {
+      return false;
+    }
+    
+    // Check if we're using smart timing
+    if (settings.enableSmartTiming) {
+      const { smartTimingPreferences } = settings;
+      
+      // Check preferred days
+      if (smartTimingPreferences.preferWeekdays && 
+          !smartTimingPreferences.preferredDays.includes(dayOfWeek)) {
+        return false;
+      }
+      
+      // Check if it's late night and we want to avoid that
+      if (smartTimingPreferences.avoidLateNight && 
+          (hour < 7 || hour > 21)) {
+        return false;
+      }
+      
+      // Additional smart timing checks could be implemented here
+      // For example, holiday detection
+    } else {
+      // Simple time check based on preferred send time
+      const [preferredHour, preferredMinute] = settings.preferredSendTime.split(':').map(Number);
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      
+      // Only send within a 2-hour window of the preferred time
+      if (Math.abs(currentHour - preferredHour) > 2) {
+        return false;
+      }
+      
+      // If it's exactly the preferred hour, check minutes
+      if (currentHour === preferredHour && currentMinute < preferredMinute) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  /**
+   * Format a message template with provided variables
+   */
+  private formatMessageTemplate(template: string, variables: Record<string, string>): string {
+    let formatted = template;
+    
+    // Replace each variable placeholder with its value
+    for (const [key, value] of Object.entries(variables)) {
+      formatted = formatted.replace(new RegExp(`{{${key}}}`, 'g'), value);
+    }
+    
+    return formatted;
+  }
+  
+  /**
+   * Calculate number of days between two dates
+   */
+  private getDaysBetween(date1: Date, date2: Date): number {
+    const diffTime = Math.abs(date2.getTime() - date1.getTime());
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  }
+}
+
+const reviewAutomationService = new ReviewAutomationService();
+export default reviewAutomationService;
