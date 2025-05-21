@@ -28,6 +28,7 @@ import CRMIntegrations from "@/pages/crm-integrations";
 import LocalSeoGuide from "@/pages/downloads/local-seo-guide";
 import ImplementationChecklist from "@/pages/downloads/implementation-checklist";
 import TechnicianTrainingSlides from "@/pages/downloads/technician-training-slides";
+import BillingManagement from "@/pages/billing-management";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
