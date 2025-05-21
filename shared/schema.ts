@@ -254,6 +254,59 @@ export type InsertReviewFollowUpSettings = z.infer<typeof insertReviewFollowUpSe
 export type ReviewRequestStatus = typeof reviewRequestStatuses.$inferSelect;
 export type InsertReviewRequestStatus = z.infer<typeof insertReviewRequestStatusSchema>;
 
+// WordPress custom fields integration
+export const wordpressCustomFields = pgTable("wordpress_custom_fields", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").references(() => companies.id, { onDelete: "cascade" }).notNull(),
+  
+  // Connection settings
+  siteUrl: text("site_url").notNull(),
+  apiKey: text("api_key").notNull(),
+  secretKey: text("secret_key").notNull(),
+  useRestApi: boolean("use_rest_api").default(true).notNull(),
+  
+  // Publishing settings
+  postType: text("post_type").default("post").notNull(),
+  defaultCategory: text("default_category"),
+  defaultAuthor: text("default_author"),
+  postStatus: text("post_status", { enum: ["publish", "draft", "pending"] }).default("draft").notNull(),
+  autoPublish: boolean("auto_publish").default(false).notNull(),
+  
+  // Field mapping
+  titlePrefix: text("title_prefix"),
+  titleTemplate: text("title_template"),
+  contentTemplate: text("content_template"),
+  
+  // Field options
+  includePhotos: boolean("include_photos").default(true).notNull(),
+  includeLocation: boolean("include_location").default(true).notNull(),
+  includeMap: boolean("include_map").default(false).notNull(),
+  includeSchema: boolean("include_schema").default(false).notNull(),
+  
+  // Advanced settings
+  customFieldMappings: jsonb("custom_field_mappings").notNull(),
+  taxonomyMappings: jsonb("taxonomy_mappings").notNull(),
+  advancedMapping: text("advanced_mapping"),
+  metaPrefix: text("meta_prefix").default("rankitpro_").notNull(),
+  
+  // Status
+  isConnected: boolean("is_connected").default(false).notNull(),
+  lastSync: timestamp("last_sync"),
+  lastSyncStatus: text("last_sync_status"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+export const insertWordpressCustomFieldsSchema = createInsertSchema(wordpressCustomFields).omit({ 
+  id: true, 
+  createdAt: true,
+  updatedAt: true,
+  lastSync: true
+});
+
+export type WordpressCustomFields = typeof wordpressCustomFields.$inferSelect;
+export type InsertWordpressCustomFields = z.infer<typeof insertWordpressCustomFieldsSchema>;
+
 // Extended types that include related data
 export type CheckInWithTechnician = CheckIn & {
   technician: Technician;

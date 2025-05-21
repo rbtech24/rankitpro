@@ -2,7 +2,8 @@ import {
   User, InsertUser, Company, InsertCompany, Technician, InsertTechnician, 
   CheckIn, InsertCheckIn, BlogPost, InsertBlogPost, ReviewRequest, InsertReviewRequest,
   ReviewResponse, InsertReviewResponse, CheckInWithTechnician, TechnicianWithStats,
-  ReviewFollowUpSettings, InsertReviewFollowUpSettings, ReviewRequestStatus, InsertReviewRequestStatus
+  ReviewFollowUpSettings, InsertReviewFollowUpSettings, ReviewRequestStatus, InsertReviewRequestStatus,
+  WordpressCustomFields, InsertWordpressCustomFields
 } from "@shared/schema";
 
 export interface IStorage {
@@ -66,6 +67,23 @@ export interface IStorage {
     averageRating: number;
     totalResponses: number;
     ratingDistribution: { [key: number]: number };
+  }>;
+  
+  // WordPress Custom Fields operations
+  getWordpressCustomFields(id: number): Promise<WordpressCustomFields | undefined>;
+  getWordpressCustomFieldsByCompany(companyId: number): Promise<WordpressCustomFields | undefined>;
+  createWordpressCustomFields(wpCustomFields: InsertWordpressCustomFields): Promise<WordpressCustomFields>;
+  updateWordpressCustomFields(id: number, updates: Partial<WordpressCustomFields>): Promise<WordpressCustomFields | undefined>;
+  testWordpressConnection(companyId: number): Promise<{
+    isConnected: boolean;
+    version?: string;
+    message?: string;
+  }>;
+  syncWordpressCheckIns(companyId: number, checkInIds?: number[]): Promise<{
+    success: boolean;
+    synced: number;
+    failed: number;
+    message?: string;
   }>;
   
   // Review Automation operations
