@@ -133,6 +133,9 @@ export class MemStorage implements IStorage {
     this.blogPosts = new Map();
     this.reviewRequests = new Map();
     this.reviewResponses = new Map();
+    this.reviewFollowUpSettings = new Map();
+    this.reviewRequestStatuses = new Map();
+    this.reviewRequestTokens = new Map();
     
     this.userId = 1;
     this.companyId = 1;
@@ -141,6 +144,8 @@ export class MemStorage implements IStorage {
     this.blogPostId = 1;
     this.reviewRequestId = 1;
     this.reviewResponseId = 1;
+    this.reviewFollowUpSettingsId = 1;
+    this.reviewRequestStatusId = 1;
     
     // Add a default super admin
     this.createUser({

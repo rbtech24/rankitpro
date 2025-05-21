@@ -16,6 +16,7 @@ import blogRoutes from "./routes/blog";
 import demoRoutes from "./routes/demo";
 import reviewRequestRoutes from "./routes/review-request";
 import reviewResponseRoutes from "./routes/review-response";
+import reviewAutomationRoutes from "./routes/review-automation";
 import wordpressRoutes from "./routes/wordpress-integration";
 import wordpressCustomFieldsRoutes from "./routes/wordpress-custom-fields";
 import jsWidgetRoutes from "./routes/js-widget";
@@ -28,6 +29,7 @@ import mobileCheckInsRoutes from "./routes/mobile/check-ins";
 import mobileNotificationsRoutes from "./routes/mobile/notifications";
 import crmIntegrationRoutes from "./routes/crm-integration";
 import emailService from "./services/email-service";
+import schedulerService from "./services/scheduler";
 import { fromZodError } from "zod-validation-error";
 import { WebSocketServer, WebSocket } from 'ws';
 
