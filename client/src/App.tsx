@@ -965,6 +965,9 @@ function Router() {
       <Route path="/users">
         <PrivateRoute component={Users} path="/users" role="company_admin" />
       </Route>
+      <Route path="/billing-management">
+        <PrivateRoute component={BillingManagement} path="/billing-management" role="super_admin" />
+      </Route>
       <Route path="/integrations">
         <PrivateRoute component={Integrations} path="/integrations" role="company_admin" />
       </Route>
