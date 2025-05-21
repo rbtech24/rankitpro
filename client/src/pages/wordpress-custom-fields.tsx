@@ -981,6 +981,10 @@ $rankitpro_integration = new RankItProIntegration();`;
               <Settings2 className="mr-2 h-4 w-4" />
               Field Mapping
             </TabsTrigger>
+            <TabsTrigger value="sync" className="flex items-center">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Sync
+            </TabsTrigger>
             <TabsTrigger value="shortcodes" className="flex items-center">
               <Braces className="mr-2 h-4 w-4" />
               Shortcodes
@@ -1635,6 +1639,164 @@ $rankitpro_integration = new RankItProIntegration();`;
           </TabsContent>
           
           {/* Installation Tab */}
+          <TabsContent value="sync" className="space-y-6">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sync Check-ins to WordPress</CardTitle>
+                  <CardDescription>
+                    Manually sync your check-ins to WordPress using your current field mappings.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex flex-col gap-2">
+                      <Label>Sync Status</Label>
+                      <div className="flex items-center gap-2 text-sm">
+                        <div className="flex items-center gap-1">
+                          {wpCustomFields?.lastSync ? (
+                            <>
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              <span>Last sync: {new Date(wpCustomFields.lastSync).toLocaleString()}</span>
+                            </>
+                          ) : (
+                            <>
+                              <AlertCircle className="h-4 w-4 text-yellow-500" />
+                              <span>No sync performed yet</span>
+                            </>
+                          )}
+                        </div>
+                        {wpCustomFields?.lastSyncStatus && (
+                          <>
+                            <div className="h-4 w-px bg-gray-300" />
+                            <div className="flex items-center gap-1">
+                              <span>{wpCustomFields.lastSyncStatus}</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Sync Options</Label>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="sync-all" defaultChecked />
+                          <label
+                            htmlFor="sync-all"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            Sync all check-ins
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="sync-new" />
+                          <label
+                            htmlFor="sync-new"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            Only sync new check-ins
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="sync-selected" />
+                          <label
+                            htmlFor="sync-selected"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            Sync selected check-ins only
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button variant="outline">Cancel</Button>
+                  <Button 
+                    onClick={handleSync} 
+                    disabled={syncMutation.isPending || !wpCustomFields?.isConnected}
+                  >
+                    {syncMutation.isPending ? (
+                      <div className="flex items-center">
+                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                        Syncing...
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Sync to WordPress
+                      </div>
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Automated Syncing</CardTitle>
+                  <CardDescription>
+                    Configure automatic syncing settings for your WordPress site.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Switch 
+                        id="auto-sync" 
+                        checked={wpCustomFields?.autoPublish || false}
+                        disabled={!wpCustomFields?.isConnected}
+                      />
+                      <Label htmlFor="auto-sync">Enable automatic syncing</Label>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Sync Frequency</Label>
+                      <Select defaultValue="daily" disabled={!wpCustomFields?.isConnected || !wpCustomFields?.autoPublish}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="immediate">Immediately after check-in</SelectItem>
+                          <SelectItem value="hourly">Hourly</SelectItem>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Post Status for New Check-ins</Label>
+                      <Select 
+                        value={wpCustomFields?.postStatus || "draft"}
+                        disabled={!wpCustomFields?.isConnected}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select post status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="publish">Published</SelectItem>
+                          <SelectItem value="pending">Pending Review</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => testConnection()}
+                    disabled={!wpCustomFields?.isConnected || testingConnection}
+                  >
+                    {testingConnection ? 'Saving...' : 'Save Sync Settings'}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </TabsContent>
+          
           <TabsContent value="installation">
             <Card>
               <CardHeader>
