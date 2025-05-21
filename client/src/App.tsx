@@ -940,6 +940,10 @@ function Router() {
       <Route path="/check-ins">
         <PrivateRoute component={CheckIns} path="/check-ins" />
       </Route>
+      {/* Redirect /visits to /check-ins since they're the same functionality */}
+      <Route path="/visits">
+        <Redirect to="/check-ins" />
+      </Route>
       <Route path="/blog-posts">
         <PrivateRoute component={BlogPosts} path="/blog-posts" />
       </Route>
