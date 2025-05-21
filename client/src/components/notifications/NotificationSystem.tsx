@@ -51,16 +51,16 @@ export interface Notification {
 }
 
 // Context for notifications
-interface NotificationContextType {
+type NotificationContextType = {
   notifications: Notification[];
   unreadCount: number;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
   clearNotification: (id: string) => void;
   addNotification: (notification: Omit<Notification, 'id' | 'isRead' | 'timestamp'>) => void;
-}
+};
 
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+const NotificationContext = createContext<NotificationContextType | null>(null);
 
 // Mock notification data
 const initialNotifications: Notification[] = [
@@ -195,7 +195,7 @@ const initialNotifications: Notification[] = [
   }
 ];
 
-export const NotificationProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
   
   const unreadCount = notifications.filter(notification => !notification.isRead).length;
@@ -233,7 +233,7 @@ export const NotificationProvider: React.FC<{children: React.ReactNode}> = ({ ch
     setNotifications([newNotification, ...notifications]);
   };
   
-  // You could fetch notifications from the API here
+  // In a real implementation, we would fetch notifications from the API here
   // useEffect(() => {
   //   const fetchNotifications = async () => {
   //     try {
@@ -268,7 +268,7 @@ export const NotificationProvider: React.FC<{children: React.ReactNode}> = ({ ch
 
 export const useNotifications = () => {
   const context = useContext(NotificationContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useNotifications must be used within a NotificationProvider');
   }
   return context;
@@ -294,8 +294,8 @@ const getNotificationIcon = (type: NotificationType) => {
   }
 };
 
-// Default export as the actual notification bell component
-const NotificationCenter: React.FC = () => {
+// The actual notification bell component
+export const NotificationCenter = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotification } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   
@@ -313,13 +313,13 @@ const NotificationCenter: React.FC = () => {
       case 'company_activity':
         if (notification.data?.companyId) {
           // Example: navigate to company details
-          // In a real app, you would use useNavigate or similar for navigation
           console.log(`Navigate to company ${notification.data.companyId}`);
         }
         break;
       case 'billing_issue':
         // Navigate to billing management
         console.log('Navigate to billing management');
+        window.location.href = '/billing-management';
         break;
       case 'system_alert':
         // Navigate to system status page
@@ -337,7 +337,7 @@ const NotificationCenter: React.FC = () => {
           variant="ghost" 
           size="icon" 
           className="relative"
-          onClick={() => setIsOpen(true)}
+          onClick={() => setIsOpen(!isOpen)}
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
@@ -403,7 +403,7 @@ const NotificationCenter: React.FC = () => {
               <NotificationList 
                 notifications={notifications.filter(n => 
                   n.type === 'system_alert' || n.type === 'usage_alert' || n.type === 'billing_issue'
-                )}
+                )} 
                 onNotificationClick={handleNotificationClick}
                 onClearNotification={clearNotification}
               />
@@ -427,11 +427,7 @@ interface NotificationListProps {
   onClearNotification: (id: string) => void;
 }
 
-const NotificationList: React.FC<NotificationListProps> = ({ 
-  notifications, 
-  onNotificationClick, 
-  onClearNotification 
-}) => {
+const NotificationList = ({ notifications, onNotificationClick, onClearNotification }: NotificationListProps) => {
   if (notifications.length === 0) {
     return (
       <div className="py-16 flex flex-col items-center text-center">
@@ -489,6 +485,3 @@ const NotificationList: React.FC<NotificationListProps> = ({
     </ScrollArea>
   );
 };
-
-// Export as default
-export default NotificationCenter;
