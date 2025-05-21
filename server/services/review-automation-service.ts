@@ -133,7 +133,7 @@ class ReviewAutomationService {
       }
       
       // Check service type targeting (if configured)
-      if (settings.targetServiceTypes.length > 0 && 
+      if (settings.targetServiceTypes && settings.targetServiceTypes.length > 0 && 
           !settings.targetServiceTypes.includes(checkIn.jobType)) {
         console.log(`Check-in ${checkInId} job type ${checkIn.jobType} not in targeted service types`);
         return null;
