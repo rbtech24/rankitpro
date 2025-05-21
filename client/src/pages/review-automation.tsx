@@ -1061,12 +1061,25 @@ const ReviewAutomation = () => {
                                         </DialogDescription>
                                       </DialogHeader>
                                       <div className="bg-white border rounded-md p-6 my-4">
-                                        <div className="mb-2 text-gray-700 text-sm">
-                                          <strong>Subject:</strong> {formatTemplate(form.watch("initialSubject"))}
-                                        </div>
-                                        <div className="whitespace-pre-line text-gray-800">
-                                          {formatTemplate(form.watch("initialMessage"))}
-                                        </div>
+                                        <EmailTemplatePreview
+                                          subject={form.watch("initialSubject")}
+                                          message={form.watch("initialMessage")}
+                                          company={{
+                                            name: user?.companyName || "Your Company",
+                                            domain: "rankitpro.com",
+                                            logoUrl: form.watch("includeCompanyLogo") ? "https://via.placeholder.com/200x50?text=Company+Logo" : null
+                                          }}
+                                          technician={{
+                                            name: "Michael Johnson",
+                                            specialty: "HVAC Technician",
+                                            photoUrl: form.watch("includeTechnicianPhoto") ? 
+                                              "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHByb2Zlc3Npb25hbCUyMG1hbnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=120&q=80" : null
+                                          }}
+                                          customer={{
+                                            name: "Sarah Anderson",
+                                            email: "sarah.anderson@example.com"
+                                          }}
+                                        />
                                       </div>
                                     </DialogContent>
                                   </Dialog>
@@ -1704,6 +1717,23 @@ const ReviewAutomation = () => {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
+                        <div className="mb-4 flex items-center justify-between">
+                          <h3 className="text-lg font-medium">Performance Period</h3>
+                          <Select 
+                            value={statsPeriod} 
+                            onValueChange={setStatsPeriod as any}
+                          >
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue placeholder="Select period" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="7days">Last 7 Days</SelectItem>
+                              <SelectItem value="30days">Last 30 Days</SelectItem>
+                              <SelectItem value="90days">Last 90 Days</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
                         {isLoadingStats ? (
                           <div className="flex justify-center items-center min-h-[400px]">
                             <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full"></div>
@@ -1715,6 +1745,37 @@ const ReviewAutomation = () => {
                           </div>
                         ) : (
                           <div className="space-y-6">
+                            {/* Performance Metrics Dashboard */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                              <div className="bg-white p-4 rounded-lg border shadow-sm">
+                                <div className="text-sm font-medium text-gray-500">Sent Requests</div>
+                                <div className="mt-1 flex items-baseline justify-between">
+                                  <div className="text-2xl font-semibold">{stats.sentRequests}</div>
+                                  <div className="text-xs text-gray-500">Total</div>
+                                </div>
+                              </div>
+                              <div className="bg-white p-4 rounded-lg border shadow-sm">
+                                <div className="text-sm font-medium text-gray-500">Click Rate</div>
+                                <div className="mt-1 flex items-baseline justify-between">
+                                  <div className="text-2xl font-semibold">{Math.round(stats.clickRate * 100)}%</div>
+                                  <div className="text-xs text-gray-500">{Math.round(stats.clickRate * stats.sentRequests)} clicks</div>
+                                </div>
+                              </div>
+                              <div className="bg-white p-4 rounded-lg border shadow-sm">
+                                <div className="text-sm font-medium text-gray-500">Conversion Rate</div>
+                                <div className="mt-1 flex items-baseline justify-between">
+                                  <div className="text-2xl font-semibold">{Math.round(stats.conversionRate * 100)}%</div>
+                                  <div className="text-xs text-gray-500">{stats.completedRequests} reviews</div>
+                                </div>
+                              </div>
+                              <div className="bg-white p-4 rounded-lg border shadow-sm">
+                                <div className="text-sm font-medium text-gray-500">Avg Response Time</div>
+                                <div className="mt-1 flex items-baseline justify-between">
+                                  <div className="text-2xl font-semibold">{stats.avgTimeToConversion.toFixed(1)}</div>
+                                  <div className="text-xs text-gray-500">hours</div>
+                                </div>
+                              </div>
+                            </div>
                             <div className="flex space-x-2 mb-4">
                               <Button 
                                 variant={statsPeriod === "7days" ? "default" : "outline"} 
