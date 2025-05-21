@@ -1,7 +1,8 @@
 import { 
   User, InsertUser, Company, InsertCompany, Technician, InsertTechnician, 
   CheckIn, InsertCheckIn, BlogPost, InsertBlogPost, ReviewRequest, InsertReviewRequest,
-  ReviewResponse, InsertReviewResponse, CheckInWithTechnician, TechnicianWithStats
+  ReviewResponse, InsertReviewResponse, CheckInWithTechnician, TechnicianWithStats,
+  ReviewFollowUpSettings, InsertReviewFollowUpSettings, ReviewRequestStatus, InsertReviewRequestStatus
 } from "@shared/schema";
 
 export interface IStorage {
@@ -50,6 +51,7 @@ export interface IStorage {
   // Review request operations
   getReviewRequest(id: number): Promise<ReviewRequest | undefined>;
   getReviewRequestsByCompany(companyId: number): Promise<ReviewRequest[]>;
+  getReviewRequestByToken(token: string): Promise<ReviewRequest | undefined>;
   createReviewRequest(reviewRequest: InsertReviewRequest): Promise<ReviewRequest>;
   updateReviewRequest(id: number, updates: Partial<ReviewRequest>): Promise<ReviewRequest | undefined>;
   
@@ -64,6 +66,30 @@ export interface IStorage {
     averageRating: number;
     totalResponses: number;
     ratingDistribution: { [key: number]: number };
+  }>;
+  
+  // Review Automation operations
+  getReviewFollowUpSettings(companyId: number): Promise<ReviewFollowUpSettings | null>;
+  createReviewFollowUpSettings(settings: InsertReviewFollowUpSettings): Promise<ReviewFollowUpSettings>;
+  updateReviewFollowUpSettings(id: number, updates: Partial<ReviewFollowUpSettings>): Promise<ReviewFollowUpSettings>;
+  
+  getReviewRequestStatusesByCompany(companyId: number): Promise<ReviewRequestStatus[]>;
+  getReviewRequestStatusByRequestId(requestId: number): Promise<ReviewRequestStatus | null>;
+  createReviewRequestStatus(status: InsertReviewRequestStatus): Promise<ReviewRequestStatus>;
+  updateReviewRequestStatus(id: number, updates: Partial<ReviewRequestStatus>): Promise<ReviewRequestStatus>;
+  getReviewAutomationStats(companyId: number): Promise<{
+    totalRequests: number;
+    sentRequests: number;
+    completedRequests: number;
+    clickRate: number;
+    conversionRate: number;
+    avgTimeToConversion: number;
+    byFollowUpStep: {
+      initial: number;
+      firstFollowUp: number;
+      secondFollowUp: number;
+      finalFollowUp: number;
+    };
   }>;
   
   // Stats operations
@@ -85,6 +111,9 @@ export class MemStorage implements IStorage {
   private blogPosts: Map<number, BlogPost>;
   private reviewRequests: Map<number, ReviewRequest>;
   private reviewResponses: Map<number, ReviewResponse>;
+  private reviewFollowUpSettings: Map<number, ReviewFollowUpSettings>;
+  private reviewRequestStatuses: Map<number, ReviewRequestStatus>;
+  private reviewRequestTokens: Map<string, number>; // Map token to requestId
   
   private userId: number;
   private companyId: number;
@@ -93,6 +122,8 @@ export class MemStorage implements IStorage {
   private blogPostId: number;
   private reviewRequestId: number;
   private reviewResponseId: number;
+  private reviewFollowUpSettingsId: number;
+  private reviewRequestStatusId: number;
   
   constructor() {
     this.users = new Map();
