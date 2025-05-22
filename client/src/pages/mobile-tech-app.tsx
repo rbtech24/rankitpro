@@ -120,13 +120,27 @@ export default function MobileTechApp() {
 
       {/* Main Content */}
       <main className="container p-4 mx-auto max-w-md">
-        {isWizardOpen ? (
+        {wizardStage === 'photos' ? (
           <PhotoUploadWizard
             onPhotosSelected={handlePhotosSelected}
-            onCancel={() => setIsWizardOpen(false)}
+            onCancel={() => setWizardStage('none')}
+          />
+        ) : wizardStage === 'details' ? (
+          <JobFormWizard
+            jobTypes={jobTypes}
+            photos={selectedPhotos}
+            onBack={() => setWizardStage('photos')}
+            onComplete={handleFormComplete}
           />
         ) : (
           <>
+            {/* Success Message */}
+            {successMessage && (
+              <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded relative">
+                <span className="block sm:inline">{successMessage}</span>
+              </div>
+            )}
+            
             {/* Quick Actions */}
             <section className="mb-6">
               <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
@@ -134,7 +148,7 @@ export default function MobileTechApp() {
                 <Button 
                   size="lg" 
                   className="h-16 font-semibold text-lg"
-                  onClick={() => setIsWizardOpen(true)}
+                  onClick={() => setWizardStage('photos')}
                 >
                   <svg className="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
@@ -247,7 +261,7 @@ export default function MobileTechApp() {
           <span className="text-xs mt-1">Home</span>
         </button>
         
-        <button className="flex flex-col items-center text-gray-500" onClick={() => setIsWizardOpen(true)}>
+        <button className="flex flex-col items-center text-gray-500" onClick={() => setWizardStage('photos')}>
           <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
             <circle cx="12" cy="13" r="3"/>
