@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 import {
@@ -27,19 +27,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { apiRequest } from "@/lib/queryClient";
 
-const JOB_TYPES = [
-  "Plumbing Repair",
-  "Water Heater Installation",
-  "Drain Cleaning",
-  "Sewer Line Repair",
-  "AC Maintenance",
-  "HVAC Repair",
-  "Electrical Repair",
-  "Remodeling",
-  "Flooring Installation",
-  "Roof Repair",
-  "General Maintenance"
-];
+// Job types will now be fetched from the server
+// as they're controlled by company admin
 
 // Form schema
 const formSchema = z.object({
@@ -50,6 +39,9 @@ const formSchema = z.object({
   longitude: z.number().optional(),
   createBlogPost: z.boolean().default(false),
   sendReviewRequest: z.boolean().default(false),
+  beforePhotos: z.any().optional(),
+  duringPhotos: z.any().optional(),
+  afterPhotos: z.any().optional(),
 });
 
 type CheckinFormValues = z.infer<typeof formSchema>;
@@ -60,9 +52,141 @@ interface VisitFormProps {
 
 export default function VisitForm({ onSuccess }: VisitFormProps) {
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [beforePhotos, setBeforePhotos] = useState<File[]>([]);
+  const [duringPhotos, setDuringPhotos] = useState<File[]>([]);
+  const [afterPhotos, setAfterPhotos] = useState<File[]>([]);
+  const [beforePhotoPreviewUrls, setBeforePhotoPreviewUrls] = useState<string[]>([]);
+  const [duringPhotoPreviewUrls, setDuringPhotoPreviewUrls] = useState<string[]>([]);
+  const [afterPhotoPreviewUrls, setAfterPhotoPreviewUrls] = useState<string[]>([]);
+  const beforeFileInputRef = useRef<HTMLInputElement>(null);
+  const duringFileInputRef = useRef<HTMLInputElement>(null);
+  const afterFileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
+  // Fetch job types configured by company admin
+  const { data: jobTypes = [], isLoading: isLoadingJobTypes } = useQuery({
+    queryKey: ['/api/job-types'],
+    queryFn: async () => {
+      try {
+        const res = await apiRequest('GET', '/api/job-types');
+        if (!res.ok) {
+          // If API isn't implemented yet, return default job types
+          return [
+            "Plumbing Repair",
+            "Water Heater Installation",
+            "Drain Cleaning",
+            "Sewer Line Repair",
+            "AC Maintenance",
+            "HVAC Repair",
+            "Electrical Repair",
+            "Remodeling",
+            "Flooring Installation",
+            "Roof Repair",
+            "General Maintenance"
+          ];
+        }
+        return await res.json();
+      } catch (error) {
+        console.error("Error fetching job types:", error);
+        // Return default job types as fallback
+        return [
+          "Plumbing Repair",
+          "Water Heater Installation",
+          "Drain Cleaning",
+          "Sewer Line Repair",
+          "AC Maintenance",
+          "HVAC Repair",
+          "Electrical Repair",
+          "Remodeling",
+          "Flooring Installation",
+          "Roof Repair",
+          "General Maintenance"
+        ];
+      }
+    }
+  });
+  
+  // Handle photo uploads
+  const handlePhotoChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    photoType: 'before' | 'during' | 'after'
+  ) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const newFiles = Array.from(e.target.files);
+    const newPreviewUrls: string[] = [];
+    
+    // Generate preview URLs for display
+    newFiles.forEach(file => {
+      const url = URL.createObjectURL(file);
+      newPreviewUrls.push(url);
+    });
+    
+    // Update state based on photo type
+    if (photoType === 'before') {
+      setBeforePhotos(prev => [...prev, ...newFiles]);
+      setBeforePhotoPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    } else if (photoType === 'during') {
+      setDuringPhotos(prev => [...prev, ...newFiles]);
+      setDuringPhotoPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    } else {
+      setAfterPhotos(prev => [...prev, ...newFiles]);
+      setAfterPhotoPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    }
+  };
+  
+  // Remove a photo
+  const removePhoto = (
+    index: number,
+    photoType: 'before' | 'during' | 'after'
+  ) => {
+    if (photoType === 'before') {
+      const newPhotos = [...beforePhotos];
+      const newUrls = [...beforePhotoPreviewUrls];
+      
+      // Clean up object URL to prevent memory leaks
+      URL.revokeObjectURL(newUrls[index]);
+      
+      newPhotos.splice(index, 1);
+      newUrls.splice(index, 1);
+      
+      setBeforePhotos(newPhotos);
+      setBeforePhotoPreviewUrls(newUrls);
+    } else if (photoType === 'during') {
+      const newPhotos = [...duringPhotos];
+      const newUrls = [...duringPhotoPreviewUrls];
+      
+      URL.revokeObjectURL(newUrls[index]);
+      
+      newPhotos.splice(index, 1);
+      newUrls.splice(index, 1);
+      
+      setDuringPhotos(newPhotos);
+      setDuringPhotoPreviewUrls(newUrls);
+    } else {
+      const newPhotos = [...afterPhotos];
+      const newUrls = [...afterPhotoPreviewUrls];
+      
+      URL.revokeObjectURL(newUrls[index]);
+      
+      newPhotos.splice(index, 1);
+      newUrls.splice(index, 1);
+      
+      setAfterPhotos(newPhotos);
+      setAfterPhotoPreviewUrls(newUrls);
+    }
+  };
+  
+  // Clean up object URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      beforePhotoPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+      duringPhotoPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+      afterPhotoPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [beforePhotoPreviewUrls, duringPhotoPreviewUrls, afterPhotoPreviewUrls]);
+
   // Form definition
   const form = useForm<CheckinFormValues>({
     resolver: zodResolver(formSchema),
@@ -78,7 +202,37 @@ export default function VisitForm({ onSuccess }: VisitFormProps) {
   // Create checkin mutation
   const createCheckinMutation = useMutation({
     mutationFn: async (values: CheckinFormValues) => {
-      const res = await apiRequest("POST", "/api/visits", values);
+      // Create FormData to handle file uploads
+      const formData = new FormData();
+      
+      // Add text fields to FormData
+      formData.append('jobType', values.jobType);
+      formData.append('notes', values.notes);
+      if (values.location) formData.append('location', values.location);
+      if (values.latitude) formData.append('latitude', values.latitude.toString());
+      if (values.longitude) formData.append('longitude', values.longitude.toString());
+      formData.append('createBlogPost', values.createBlogPost ? 'true' : 'false');
+      formData.append('sendReviewRequest', values.sendReviewRequest ? 'true' : 'false');
+      
+      // Add photo files to FormData
+      beforePhotos.forEach((photo, i) => {
+        formData.append(`beforePhotos`, photo);
+      });
+      
+      duringPhotos.forEach((photo, i) => {
+        formData.append(`duringPhotos`, photo);
+      });
+      
+      afterPhotos.forEach((photo, i) => {
+        formData.append(`afterPhotos`, photo);
+      });
+      
+      // Make API request with FormData
+      const res = await fetch('/api/visits', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include' // Include cookies for authentication
+      });
       
       if (!res.ok) {
         const errorText = await res.text();
@@ -164,14 +318,15 @@ export default function VisitForm({ onSuccess }: VisitFormProps) {
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
+                disabled={isLoadingJobTypes}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select job type" />
+                    <SelectValue placeholder={isLoadingJobTypes ? "Loading job types..." : "Select job type"} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {JOB_TYPES.map((jobType) => (
+                  {jobTypes.map((jobType) => (
                     <SelectItem key={jobType} value={jobType}>{jobType}</SelectItem>
                   ))}
                 </SelectContent>
@@ -239,6 +394,153 @@ export default function VisitForm({ onSuccess }: VisitFormProps) {
             </FormItem>
           )}
         />
+        
+        {/* Before Photos */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <FormLabel>Before Photos</FormLabel>
+            <input 
+              type="file" 
+              accept="image/*" 
+              multiple 
+              className="hidden"
+              ref={beforeFileInputRef}
+              onChange={(e) => handlePhotoChange(e, 'before')}
+            />
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={() => beforeFileInputRef.current?.click()}
+            >
+              Add Photos
+            </Button>
+          </div>
+          
+          {beforePhotoPreviewUrls.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              {beforePhotoPreviewUrls.map((url, index) => (
+                <div key={index} className="relative rounded overflow-hidden h-24 bg-gray-100">
+                  <img 
+                    src={url} 
+                    alt={`Before photo ${index + 1}`} 
+                    className="w-full h-full object-cover"
+                  />
+                  <Button 
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-1 right-1 h-5 w-5 rounded-full"
+                    onClick={() => removePhoto(index, 'before')}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 6 6 18"></path>
+                      <path d="m6 6 12 12"></path>
+                    </svg>
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
+        {/* During Photos */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <FormLabel>During Service Photos</FormLabel>
+            <input 
+              type="file" 
+              accept="image/*" 
+              multiple 
+              className="hidden"
+              ref={duringFileInputRef}
+              onChange={(e) => handlePhotoChange(e, 'during')}
+            />
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={() => duringFileInputRef.current?.click()}
+            >
+              Add Photos
+            </Button>
+          </div>
+          
+          {duringPhotoPreviewUrls.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              {duringPhotoPreviewUrls.map((url, index) => (
+                <div key={index} className="relative rounded overflow-hidden h-24 bg-gray-100">
+                  <img 
+                    src={url} 
+                    alt={`During photo ${index + 1}`} 
+                    className="w-full h-full object-cover"
+                  />
+                  <Button 
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-1 right-1 h-5 w-5 rounded-full"
+                    onClick={() => removePhoto(index, 'during')}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 6 6 18"></path>
+                      <path d="m6 6 12 12"></path>
+                    </svg>
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
+        {/* After Photos */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <FormLabel>After Service Photos</FormLabel>
+            <input 
+              type="file" 
+              accept="image/*" 
+              multiple 
+              className="hidden"
+              ref={afterFileInputRef}
+              onChange={(e) => handlePhotoChange(e, 'after')}
+            />
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={() => afterFileInputRef.current?.click()}
+            >
+              Add Photos
+            </Button>
+          </div>
+          
+          {afterPhotoPreviewUrls.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              {afterPhotoPreviewUrls.map((url, index) => (
+                <div key={index} className="relative rounded overflow-hidden h-24 bg-gray-100">
+                  <img 
+                    src={url} 
+                    alt={`After photo ${index + 1}`} 
+                    className="w-full h-full object-cover"
+                  />
+                  <Button 
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-1 right-1 h-5 w-5 rounded-full"
+                    onClick={() => removePhoto(index, 'after')}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 6 6 18"></path>
+                      <path d="m6 6 12 12"></path>
+                    </svg>
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         
         <div className="space-y-2">
           <FormField
