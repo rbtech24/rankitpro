@@ -17,12 +17,16 @@ import TechDashboard from "@/components/technician/tech-dashboard";
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocation } from "wouter";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Users,
   Building2,
@@ -33,9 +37,25 @@ import {
   Box,
   ChevronRight,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  ArrowUpRight,
+  ListChecks,
+  Star,
+  User,
+  Calendar,
+  BarChart3,
+  Bell,
+  Settings,
+  TrendingUp,
+  HelpCircle,
+  Globe,
+  MessageSquare,
+  Newspaper,
+  FileText,
+  Wrench,
+  ExternalLink
 } from "lucide-react";
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 
 // Component to display companies with Housecall Pro integration
 const HousecallProCompaniesTable = () => {
