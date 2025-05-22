@@ -37,7 +37,7 @@ const formSchema = z.object({
   location: z.string().optional(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
-  createBlogPost: z.boolean().default(false),
+  publicationType: z.enum(["check_in", "blog_post", "both", "none"]).default("check_in"),
   sendReviewRequest: z.boolean().default(false),
   beforePhotos: z.any().optional(),
   duringPhotos: z.any().optional(),
@@ -194,7 +194,7 @@ export default function VisitForm({ onSuccess }: VisitFormProps) {
       jobType: "",
       notes: "",
       location: "",
-      createBlogPost: false,
+      publicationType: "check_in",
       sendReviewRequest: false,
     },
   });
@@ -211,7 +211,7 @@ export default function VisitForm({ onSuccess }: VisitFormProps) {
       if (values.location) formData.append('location', values.location);
       if (values.latitude) formData.append('latitude', values.latitude.toString());
       if (values.longitude) formData.append('longitude', values.longitude.toString());
-      formData.append('createBlogPost', values.createBlogPost ? 'true' : 'false');
+      formData.append('publicationType', values.publicationType);
       formData.append('sendReviewRequest', values.sendReviewRequest ? 'true' : 'false');
       
       // Add photo files to FormData
@@ -542,27 +542,99 @@ export default function VisitForm({ onSuccess }: VisitFormProps) {
           )}
         </div>
         
-        <div className="space-y-2">
-          <FormField
-            control={form.control}
-            name="createBlogPost"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Create Blog Post</FormLabel>
-                  <FormDescription>
-                    Automatically generate a blog post from this check-in
-                  </FormDescription>
-                </div>
-              </FormItem>
-            )}
-          />
+        <div className="space-y-4">
+          <FormItem className="space-y-3">
+            <FormLabel>Publication Options</FormLabel>
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="publicationType"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <input
+                        type="radio"
+                        checked={field.value === "check_in"}
+                        onChange={() => field.onChange("check_in")}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Service Check-in Only</FormLabel>
+                      <FormDescription>
+                        Create a service check-in (like Nearby Now)
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="publicationType"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <input
+                        type="radio"
+                        checked={field.value === "blog_post"}
+                        onChange={() => field.onChange("blog_post")}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Blog Post Only</FormLabel>
+                      <FormDescription>
+                        Create a blog post from this service visit
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="publicationType"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <input
+                        type="radio"
+                        checked={field.value === "both"}
+                        onChange={() => field.onChange("both")}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Both Options</FormLabel>
+                      <FormDescription>
+                        Create both a service check-in and a blog post
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="publicationType"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <input
+                        type="radio"
+                        checked={field.value === "none"}
+                        onChange={() => field.onChange("none")}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Internal Record Only</FormLabel>
+                      <FormDescription>
+                        Do not publish this service visit
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
+          </FormItem>
           
           <FormField
             control={form.control}
@@ -597,7 +669,7 @@ export default function VisitForm({ onSuccess }: VisitFormProps) {
                 <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 Submitting...
               </>
-            ) : "Submit Check-in"}
+            ) : "Submit Visit"}
           </Button>
         </div>
       </form>
