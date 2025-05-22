@@ -200,9 +200,12 @@ export default function Dashboard() {
   });
   
   const userRole = auth?.user?.role;
-  const isAdmin = userRole === "super_admin" || userRole === "company_admin";
-  const isTechnician = userRole === "technician";
   const isSuperAdmin = userRole === "super_admin";
+  const isCompanyAdmin = userRole === "company_admin";
+  const isTechnician = userRole === "technician";
+  
+  // More specific role flags to prevent confusion
+  const isAdmin = isSuperAdmin || isCompanyAdmin;
   
   return (
     <DashboardLayout>
@@ -381,30 +384,48 @@ export default function Dashboard() {
               </div>
             </TabsContent>
           </Tabs>
-        ) : (
-          // Regular Admin or Technician Dashboard
+        ) : isCompanyAdmin ? (
+          // Company Admin Dashboard
           <>
-            {/* Stats are shown to all users */}
+            {/* Stats are shown to admins */}
             <StatsOverview />
             
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 mb-6">
-              {/* Recent visits shown to all users */}
+              {/* Recent visits shown to admins */}
               <RecentVisits />
               
               <div className="lg:col-span-2 space-y-6">
-                {/* Quick actions shown to all users, but with different options */}
+                {/* Quick actions for admins with different options */}
                 <QuickActions onOpenVisitModal={() => setVisitModalOpen(true)} />
                 
-                {/* AI Writer only shown to admins */}
-                {isAdmin && <AIWriter />}
+                {/* AI Writer for admins */}
+                <AIWriter />
               </div>
             </div>
             
-            {/* Only show technician performance to admins */}
-            {isAdmin && <TechnicianPerformance />}
+            {/* Admin-specific components */}
+            <TechnicianPerformance />
+            <WebsiteIntegration />
+          </>
+        ) : (
+          // Technician Dashboard
+          <>
+            {/* Stats shown to technicians (with limited data) */}
+            <StatsOverview />
             
-            {/* Only show website integration to admins */}
-            {isAdmin && <WebsiteIntegration />}
+            <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 mb-6">
+              {/* Recent visits shown to technicians (likely their own visits only) */}
+              <RecentVisits />
+              
+              <div className="lg:col-span-2 space-y-6">
+                {/* Quick actions for technicians (only actions they can perform) */}
+                <QuickActions onOpenVisitModal={() => setVisitModalOpen(true)} />
+                
+                {/* Technicians don't see AI Writer */}
+              </div>
+            </div>
+            
+            {/* No admin components for technicians */}
           </>
         )}
       </div>
