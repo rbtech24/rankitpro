@@ -49,6 +49,7 @@ import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import WordPressIntegration from "@/pages/wordpress-integration";
 import WordPressCustomFields from "@/pages/wordpress-custom-fields";
+import EmergencyLogin from "@/pages/emergency-login";
 
 // Authenticated route that redirects to login if not authenticated
 function PrivateRoute({ component: Component, role, ...rest }: { component: React.ComponentType<any>, role?: string, path: string }) {
@@ -102,6 +103,7 @@ function Router() {
       </Route>
       
       {/* Informational Pages */}
+      <Route path="/emergency-login"><EmergencyLogin /></Route>
       <Route path="/about"><About /></Route>
       <Route path="/case-studies"><CaseStudies /></Route>
       <Route path="/testimonials"><Testimonials /></Route>
