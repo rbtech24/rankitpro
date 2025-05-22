@@ -145,7 +145,7 @@ export default function Login() {
                 <div>
                   <p className="font-semibold">Technician:</p>
                   <p>Email: tech@testcompany.com</p>
-                  <p>Password: tech123</p>
+                  <p>Password: tech1234</p>
                 </div>
               </div>
             </div>
