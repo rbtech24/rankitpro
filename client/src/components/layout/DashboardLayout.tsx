@@ -1,5 +1,6 @@
 import React, { ReactNode, useState } from 'react';
 import { Link, useLocation } from 'wouter';
+import { Logo } from '@/components/ui/logo';
 import { 
   Home, 
   ClipboardList, 
@@ -64,7 +65,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex flex-col flex-grow pt-5 bg-white border-r border-gray-200">
           <div className="px-4 pb-4 border-b border-gray-200">
             <div className="flex items-center">
-              <img src="/assets/rank it pro logo.png" alt="RANK IT PRO" className="h-12" />
+              <Logo size="md" />
             </div>
           </div>
           
