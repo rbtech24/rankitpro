@@ -4,6 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import emailService from "./services/email-service";
+import { createTestAccounts } from "./scripts/create-test-accounts";
 
 const app = express();
 app.use(express.json());
@@ -71,6 +72,9 @@ async function createSuperAdminIfNotExists() {
 (async () => {
   // Create default super admin user if needed
   await createSuperAdminIfNotExists();
+  
+  // Create test accounts (company admin, technician)
+  await createTestAccounts();
   
   // Initialize email service
   if (process.env.SENDGRID_API_KEY) {
