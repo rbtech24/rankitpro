@@ -119,7 +119,7 @@ export default function Login() {
               </form>
             </Form>
           </CardContent>
-          <CardFooter className="flex justify-center">
+          <CardFooter className="flex flex-col gap-4">
             <p className="text-sm text-gray-600">
               Don't have an account?{" "}
               <Link href="/register">
@@ -128,6 +128,27 @@ export default function Login() {
                 </span>
               </Link>
             </p>
+            
+            <div className="w-full border-t pt-4">
+              <p className="text-sm font-medium text-center mb-2">Test Accounts</p>
+              <div className="text-xs text-gray-600 space-y-2 bg-gray-50 p-3 rounded-md">
+                <div>
+                  <p className="font-semibold">Super Admin:</p>
+                  <p>Email: superadmin@example.com</p>
+                  <p>Password: admin123</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Company Admin:</p>
+                  <p>Email: admin@testcompany.com</p>
+                  <p>Password: company123</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Technician:</p>
+                  <p>Email: tech@testcompany.com</p>
+                  <p>Password: tech123</p>
+                </div>
+              </div>
+            </div>
           </CardFooter>
         </Card>
       </div>
