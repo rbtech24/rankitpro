@@ -10,6 +10,7 @@ import AdminBusinessManagement from "@/components/dashboard/admin-business-manag
 import CompaniesManagement from "@/components/dashboard/companies-management";
 import BillingManagement from "@/components/dashboard/billing-management";
 import VisitModal from "@/components/modals/visit-modal";
+import MobileVisitModal from "@/components/technician/mobile-visit-modal";
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
