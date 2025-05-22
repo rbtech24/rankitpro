@@ -329,35 +329,99 @@ export default function JobFormWizard({
             />
             
             <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="publicationType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Publication Options</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select publication type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="check_in">Service Check-in Only (like Nearby Now)</SelectItem>
-                        <SelectItem value="blog_post">Blog Post Only</SelectItem>
-                        <SelectItem value="both">Both Service Check-in and Blog Post</SelectItem>
-                        <SelectItem value="none">No Publication (Internal Record Only)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Choose how you want this service visit to be published
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <FormItem className="space-y-3">
+                <FormLabel>Publication Options</FormLabel>
+                <div className="space-y-2">
+                  <FormField
+                    control={form.control}
+                    name="publicationType"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <input
+                            type="radio"
+                            checked={field.value === "check_in"}
+                            onChange={() => field.onChange("check_in")}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Service Check-in Only</FormLabel>
+                          <FormDescription>
+                            Create a service check-in (like Nearby Now)
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="publicationType"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <input
+                            type="radio"
+                            checked={field.value === "blog_post"}
+                            onChange={() => field.onChange("blog_post")}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Blog Post Only</FormLabel>
+                          <FormDescription>
+                            Create a blog post from this service visit
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="publicationType"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <input
+                            type="radio"
+                            checked={field.value === "both"}
+                            onChange={() => field.onChange("both")}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Both Options</FormLabel>
+                          <FormDescription>
+                            Create both a service check-in and a blog post
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="publicationType"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <input
+                            type="radio"
+                            checked={field.value === "none"}
+                            onChange={() => field.onChange("none")}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Internal Record Only</FormLabel>
+                          <FormDescription>
+                            Do not publish this service visit
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormMessage />
+              </FormItem>
               
               <FormField
                 control={form.control}
