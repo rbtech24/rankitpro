@@ -113,7 +113,7 @@ export default function MobileTechApp() {
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             <img 
-              src="/rank it pro logo.png" 
+              src="/assets/rank it pro logo.png" 
               alt="Rank It Pro" 
               className="h-10 mr-2" 
             />
