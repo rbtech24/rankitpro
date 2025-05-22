@@ -59,25 +59,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Sidebar from '@/components/layout/sidebar';
-import { useMediaQuery } from '@/hooks/use-media-query';
 
-// Fix for sidebar import error
-if (typeof Sidebar !== 'function') {
-  // @ts-ignore - fallback if import fails
-  const SidebarComponent = () => (
-    <aside className="w-64 bg-white border-r h-screen p-4">
-      <nav className="mt-6">
-        <ul className="space-y-2">
-          <li><a href="/dashboard" className="block p-2 rounded hover:bg-gray-100">Dashboard</a></li>
-          <li><a href="/billing-management" className="block p-2 rounded bg-primary text-white">Billing Management</a></li>
-          <li><a href="/companies" className="block p-2 rounded hover:bg-gray-100">Companies</a></li>
-        </ul>
-      </nav>
-    </aside>
-  );
-  // Use conditional rendering instead of reassignment
-  // This approach is more React-friendly and works better in production builds
-}
+// Define a fallback sidebar component for mobile or when the main sidebar isn't available
+const FallbackSidebar = () => (
+  <aside className="w-64 bg-white border-r h-screen p-4">
+    <nav className="mt-6">
+      <ul className="space-y-2">
+        <li><a href="/dashboard" className="block p-2 rounded hover:bg-gray-100">Dashboard</a></li>
+        <li><a href="/billing-management" className="block p-2 rounded bg-primary text-white">Billing Management</a></li>
+        <li><a href="/companies" className="block p-2 rounded hover:bg-gray-100">Companies</a></li>
+      </ul>
+    </nav>
+  </aside>
+);
 
 // Plan creation schema
 const planSchema = z.object({
@@ -382,7 +376,7 @@ export default function BillingManagement() {
   
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar />
+      {typeof Sidebar === 'function' ? <Sidebar /> : <FallbackSidebar />}
       
       <div className="flex-1 overflow-auto p-6">
         <h1 className="text-2xl font-bold mb-6">Billing & Subscription Management</h1>
