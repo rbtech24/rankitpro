@@ -22,6 +22,7 @@ import TechApp from "@/pages/tech-app";
 import AISettings from "@/pages/ai-settings";
 import Home from "@/pages/home";
 import TechnicianMobile from "@/pages/technician-mobile";
+import MobileTechApp from "@/pages/mobile-tech-app";
 import ReviewRequest from "@/pages/review-request";
 import Review from "@/pages/review";
 import ReviewsDashboard from "@/pages/reviews-dashboard";
@@ -121,6 +122,11 @@ function Router() {
         <PrivateRoute component={WordPressCustomFields} path="/wordpress-custom-fields" role="company_admin" />
       </Route>
       <Route path="/review/:token"><Review /></Route>
+      
+      {/* Mobile Tech App - Progressive Web App */}
+      <Route path="/mobile">
+        <PrivateRoute component={MobileTechApp} path="/mobile" role="technician" />
+      </Route>
       
       {/* Downloadable Resources */}
       <Route path="/downloads/local-seo-guide"><LocalSeoGuide /></Route>
