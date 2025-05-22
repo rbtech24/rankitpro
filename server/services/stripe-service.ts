@@ -45,6 +45,13 @@ const PLAN_LIMITS = {
 
 export class StripeService {
   /**
+   * Check if Stripe is available for use
+   */
+  isStripeAvailable(): boolean {
+    return stripe !== null;
+  }
+
+  /**
    * Get or create a subscription for a user
    */
   async getOrCreateSubscription(userId: number, plan: string): Promise<{
@@ -52,6 +59,11 @@ export class StripeService {
     subscriptionId?: string;
     alreadySubscribed?: boolean;
   }> {
+    // Return early if Stripe is not available
+    if (!this.isStripeAvailable()) {
+      return { alreadySubscribed: false };
+    }
+    
     try {
       const user = await storage.getUser(userId);
       if (!user) {
@@ -144,13 +156,18 @@ export class StripeService {
    * Cancel a user's subscription
    */
   async cancelSubscription(userId: number): Promise<{ success: boolean; cancelDate: string }> {
+    // Return early if Stripe is not available
+    if (!this.isStripeAvailable()) {
+      return { success: false, cancelDate: new Date().toISOString() };
+    }
+    
     const user = await storage.getUser(userId);
     if (!user || !user.stripeSubscriptionId) {
       throw new Error("No active subscription found");
     }
     
     try {
-      const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+      const subscription = await stripe!.subscriptions.update(user.stripeSubscriptionId, {
         cancel_at_period_end: true
       });
       
@@ -171,6 +188,23 @@ export class StripeService {
    * Get a user's subscription data
    */
   async getSubscriptionData(userId: number) {
+    // Return default data if Stripe is not available
+    if (!this.isStripeAvailable()) {
+      return {
+        status: "inactive",
+        plan: "starter",
+        currentPeriodEnd: null,
+        cancelAtPeriodEnd: false,
+        paymentMethods: [],
+        invoices: [],
+        usage: {
+          checkins: { used: 0, limit: PLAN_LIMITS.starter.checkins },
+          blogPosts: { used: 0, limit: PLAN_LIMITS.starter.blogPosts },
+          technicians: { used: 0, limit: PLAN_LIMITS.starter.technicians }
+        }
+      };
+    }
+    
     const user = await storage.getUser(userId);
     if (!user) {
       throw new Error("User not found");
@@ -184,20 +218,25 @@ export class StripeService {
         currentPeriodEnd: null,
         cancelAtPeriodEnd: false,
         paymentMethods: [],
-        invoices: []
+        invoices: [],
+        usage: {
+          checkins: { used: 0, limit: PLAN_LIMITS.starter.checkins },
+          blogPosts: { used: 0, limit: PLAN_LIMITS.starter.blogPosts },
+          technicians: { used: 0, limit: PLAN_LIMITS.starter.technicians }
+        }
       };
     }
     
     try {
       // Get subscription details
-      const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+      const subscription = await stripe!.subscriptions.retrieve(user.stripeSubscriptionId);
       
       // Get the company for usage data
       const company = user.companyId ? await storage.getCompany(user.companyId) : null;
       
       // Get payment methods
       const paymentMethods = user.stripeCustomerId 
-        ? await stripe.paymentMethods.list({
+        ? await stripe!.paymentMethods.list({
             customer: user.stripeCustomerId,
             type: 'card'
           })
@@ -205,7 +244,7 @@ export class StripeService {
       
       // Get invoices
       const invoices = user.stripeCustomerId 
-        ? await stripe.invoices.list({
+        ? await stripe!.invoices.list({
             customer: user.stripeCustomerId,
             limit: 5
           })
@@ -282,8 +321,13 @@ export class StripeService {
    * Create a payment intent for a one-time payment
    */
   async createPaymentIntent(amount: number, currency: string = 'usd', customerId?: string): Promise<string> {
+    // Return empty string if Stripe is not available
+    if (!this.isStripeAvailable()) {
+      return '';
+    }
+    
     try {
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntent = await stripe!.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency,
         ...(customerId && { customer: customerId }),
@@ -300,13 +344,18 @@ export class StripeService {
    * Update a company's plan based on a user's subscription
    */
   async updateCompanyPlan(userId: number): Promise<void> {
+    // Return early if Stripe is not available
+    if (!this.isStripeAvailable()) {
+      return;
+    }
+    
     const user = await storage.getUser(userId);
     if (!user || !user.companyId || !user.stripeSubscriptionId) {
       return;
     }
     
     try {
-      const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+      const subscription = await stripe!.subscriptions.retrieve(user.stripeSubscriptionId);
       const planId = subscription.items.data[0].price.id;
       
       let plan = "starter";
