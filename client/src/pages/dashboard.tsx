@@ -11,6 +11,7 @@ import CompaniesManagement from "@/components/dashboard/companies-management";
 import BillingManagement from "@/components/dashboard/billing-management";
 import VisitModal from "@/components/modals/visit-modal";
 import MobileVisitModal from "@/components/technician/mobile-visit-modal";
+
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -195,6 +196,7 @@ const HousecallProCompaniesTable = () => {
 export default function Dashboard() {
   const [visitModalOpen, setVisitModalOpen] = useState(false);
   const [blogPostModalOpen, setBlogPostModalOpen] = useState(false);
+  const [, setLocation] = useLocation();
   
   const { data: auth } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
@@ -410,8 +412,8 @@ export default function Dashboard() {
             <WebsiteIntegration />
           </>
         ) : (
-          <div className="technician-mobile-dashboard">
-            {/* Field Technician Mobile Dashboard */}
+          <>
+            {/* Mobile-optimized Technician Dashboard */}
             {/* Header - Mobile Friendly */}
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-blue-600 mb-2">Field Technician</h2>
