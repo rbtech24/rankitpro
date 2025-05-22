@@ -109,11 +109,17 @@ export default function MobileTechApp() {
   return (
     <div className="w-full min-h-screen bg-gray-50">
       {/* App Header */}
-      <header className="bg-primary text-white p-4 sticky top-0 z-10 shadow-md">
+      <header className="bg-white p-4 sticky top-0 z-10 shadow-md">
         <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold">Rank It Pro</h1>
+          <div className="flex items-center">
+            <img 
+              src="/rank it pro logo.png" 
+              alt="Rank It Pro" 
+              className="h-10 mr-2" 
+            />
+          </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm">Field Technician</span>
+            <span className="text-sm font-medium text-gray-700">Field Technician</span>
           </div>
         </div>
       </header>
