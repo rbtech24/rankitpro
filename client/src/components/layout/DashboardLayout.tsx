@@ -66,7 +66,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex flex-col flex-grow pt-5 bg-white border-r border-gray-200">
           <div className="px-4 pb-4 border-b border-gray-200">
             <div className="flex items-center">
-              <img src="/rank it pro logo.png" alt="RANK IT PRO" className="h-12" />
+              <img src="/assets/rank it pro logo.png" alt="RANK IT PRO" className="h-12" />
             </div>
           </div>
           
@@ -114,7 +114,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           
           <div className="flex-1 flex justify-between px-4">
             <div className="flex-1 flex items-center">
-              <img src="/rank it pro logo.png" alt="RANK IT PRO" className="h-10" />
+              <img src="/assets/rank it pro logo.png" alt="RANK IT PRO" className="h-10" />
             </div>
             <div className="flex items-center">
               <NotificationBell />
@@ -129,7 +129,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             
             <div className="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-white">
               <div className="flex items-center justify-between px-4 pb-4 border-b border-gray-200">
-                <img src="/rank it pro logo.png" alt="RANK IT PRO" className="h-10" />
+                <img src="/assets/rank it pro logo.png" alt="RANK IT PRO" className="h-10" />
                 <button
                   type="button"
                   className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
