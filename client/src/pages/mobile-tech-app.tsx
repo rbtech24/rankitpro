@@ -4,11 +4,13 @@ import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PhotoUploadWizard from "@/components/technician/photo-upload-wizard";
+import JobFormWizard from "@/components/technician/job-form-wizard";
 
 export default function MobileTechApp() {
   // We'll get user info from the server
   const [userInfo, setUserInfo] = useState<any>(null);
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  // Wizard state management
+  const [wizardStage, setWizardStage] = useState<'none' | 'photos' | 'details'>('none');
   const [selectedPhotos, setSelectedPhotos] = useState<{
     before: File[];
     during: File[];
@@ -18,6 +20,7 @@ export default function MobileTechApp() {
     during: [],
     after: []
   });
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Fetch job types for the visit form
   const { data: jobTypes = [], isLoading: isLoadingJobTypes } = useQuery({
@@ -79,13 +82,28 @@ export default function MobileTechApp() {
     after: File[];
   }) => {
     setSelectedPhotos(photos);
-    setIsWizardOpen(false);
-    
-    // Here you would continue to the visit form with the selected photos
-    // This is where you'd link to the next step in your wizard flow
+    // Move to the job details form
+    setWizardStage('details');
     console.log("Photos selected:", photos);
+  };
+  
+  // Handle form completion
+  const handleFormComplete = () => {
+    // Reset the wizard state
+    setWizardStage('none');
+    setSelectedPhotos({
+      before: [],
+      during: [],
+      after: []
+    });
     
-    // TODO: Navigate to the visit form with photos pre-loaded
+    // Show success message
+    setSuccessMessage("Service visit successfully recorded!");
+    
+    // Hide success message after 3 seconds
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 3000);
   };
 
   return (
@@ -95,7 +113,7 @@ export default function MobileTechApp() {
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold">Rank It Pro</h1>
           <div className="flex items-center gap-2">
-            <span className="text-sm">{user?.username}</span>
+            <span className="text-sm">Field Technician</span>
           </div>
         </div>
       </header>
