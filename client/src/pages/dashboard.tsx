@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import StatsOverview from "@/components/dashboard/stats-overview";
 import RecentVisits from "@/components/dashboard/recent-visits";
+
 import QuickActions from "@/components/dashboard/quick-actions";
 import AIWriter from "@/components/dashboard/ai-writer";
 import TechnicianPerformance from "@/components/dashboard/technician-performance";
@@ -419,7 +420,7 @@ export default function Dashboard() {
           <>
             {/* Company Admin Dashboard */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <PerformanceOverview />
+              <StatsOverview />
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -427,7 +428,7 @@ export default function Dashboard() {
                 <RecentVisits />
               </div>
               <div className="md:col-span-1">
-                <QuickActions />
+                <QuickActions onOpenVisitModal={() => setVisitModalOpen(true)} />
               </div>
             </div>
             
