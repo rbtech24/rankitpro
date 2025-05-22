@@ -18,6 +18,7 @@ import {
   LogOut
 } from 'lucide-react';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import TechnicianSidebar from './technician-sidebar';
 import { Button } from '@/components/ui/button';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
