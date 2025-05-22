@@ -58,7 +58,8 @@ import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import Sidebar from '@/components/layout/sidebar';
+import SidebarComponent from '@/components/layout/sidebar';
+// We'll use a different name for the import to avoid reassignment issues
 
 // Define a fallback sidebar component for mobile or when the main sidebar isn't available
 const FallbackSidebar = () => (
@@ -376,7 +377,7 @@ export default function BillingManagement() {
   
   return (
     <div className="flex h-screen bg-gray-50">
-      {typeof Sidebar === 'function' ? <Sidebar /> : <FallbackSidebar />}
+      <SidebarComponent />
       
       <div className="flex-1 overflow-auto p-6">
         <h1 className="text-2xl font-bold mb-6">Billing & Subscription Management</h1>
