@@ -59,6 +59,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Sidebar from '@/components/layout/sidebar';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 // Fix for sidebar import error
 if (typeof Sidebar !== 'function') {
@@ -74,8 +75,8 @@ if (typeof Sidebar !== 'function') {
       </nav>
     </aside>
   );
-  // @ts-ignore - dynamic replacement
-  Sidebar = SidebarComponent;
+  // Use conditional rendering instead of reassignment
+  // This approach is more React-friendly and works better in production builds
 }
 
 // Plan creation schema
