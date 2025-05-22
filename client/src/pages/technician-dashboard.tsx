@@ -63,17 +63,7 @@ export default function TechnicianDashboardPage() {
       <div className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-white border-r border-gray-200">
         {/* Logo */}
         <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
-          <div className="flex items-center">
-            <div className="h-10 w-10 bg-blue-500 rounded-md flex items-center justify-center mr-2">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-                <circle cx="12" cy="10" r="3"/>
-                <path d="m5 15 5-5"/>
-                <path d="M19 8h.01"/>
-              </svg>
-            </div>
-            <span className="font-bold text-lg text-gray-800">Rank It Pro</span>
-          </div>
+          <img src="/rank it pro logo.png" alt="RANK IT PRO" className="h-10" />
         </div>
         
         {/* Navigation */}
