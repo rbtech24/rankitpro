@@ -408,25 +408,102 @@ export default function Dashboard() {
             <WebsiteIntegration />
           </>
         ) : (
-          // Technician Dashboard
-          <>
-            {/* Stats shown to technicians (with limited data) */}
-            <StatsOverview />
+          // Completely redesigned Technician Dashboard optimized for field use
+          <div className="technician-dashboard">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">My Dashboard</h2>
+              <p className="text-sm text-gray-500">
+                Log your service visits and track your activity
+              </p>
+            </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 mb-6">
-              {/* Recent visits shown to technicians (likely their own visits only) */}
-              <RecentVisits />
-              
-              <div className="lg:col-span-2 space-y-6">
-                {/* Quick actions for technicians (only actions they can perform) */}
-                <QuickActions onOpenVisitModal={() => setVisitModalOpen(true)} />
-                
-                {/* Technicians don't see AI Writer */}
+            {/* Large Create Visit Button for easy mobile access */}
+            <div className="mb-6">
+              <button 
+                onClick={() => setVisitModalOpen(true)}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                Create New Visit
+              </button>
+            </div>
+            
+            {/* Simple Stats */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="text-sm text-gray-500 mb-1">Today's Visits</div>
+                <div className="text-2xl font-bold text-gray-800">0</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="text-sm text-gray-500 mb-1">This Week</div>
+                <div className="text-2xl font-bold text-gray-800">0</div>
               </div>
             </div>
             
-            {/* No admin components for technicians */}
-          </>
+            {/* Recent Visits with Mobile-Optimized Display */}
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-800">Recent Visits</h3>
+                <a href="/visits" className="text-blue-600 text-sm font-medium">
+                  View All
+                </a>
+              </div>
+              
+              <div className="space-y-4">
+                {/* Show recent visits or empty state */}
+                <div className="bg-white rounded-lg shadow overflow-hidden">
+                  <div className="p-6 text-center">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
+                        <path d="M9 11l3 3L22 4" />
+                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                      </svg>
+                    </div>
+                    <h4 className="text-gray-800 font-medium mb-2">No visits logged yet</h4>
+                    <p className="text-gray-500 text-sm mb-4">
+                      Create your first visit to start building your service history
+                    </p>
+                    <button 
+                      onClick={() => setVisitModalOpen(true)}
+                      className="text-blue-600 font-medium text-sm"
+                    >
+                      Log Your First Visit
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Quick Tips Section - Mobile Friendly */}
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+              <h3 className="font-medium text-blue-800 mb-2">Tips for Great Check-ins</h3>
+              <ul className="text-sm text-blue-800 space-y-2">
+                <li className="flex items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500 mr-2 mt-0.5">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                  Take clear photos of completed work
+                </li>
+                <li className="flex items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500 mr-2 mt-0.5">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                  Include specific details in your notes
+                </li>
+                <li className="flex items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500 mr-2 mt-0.5">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                  Double-check your location services are enabled
+                </li>
+              </ul>
+            </div>
+          </div>
         )}
       </div>
       
