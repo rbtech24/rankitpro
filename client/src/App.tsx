@@ -8,7 +8,7 @@ import { NotificationProvider } from "@/context/NotificationContext";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
-import Dashboard from "@/pages/dashboard";
+import Dashboard from "@/pages/new-dashboard";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
