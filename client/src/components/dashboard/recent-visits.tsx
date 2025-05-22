@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { format, formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import VisitCard from "@/components/visit/visit-card";
+import { AuthState, getCurrentUser } from "@/lib/auth";
 
 interface Technician {
   id: number;
@@ -28,11 +29,25 @@ interface Visit {
 
 export default function RecentVisits() {
   const { toast } = useToast();
+  const { data: auth } = useQuery<AuthState>({
+    queryKey: ["/api/auth/me"],
+    queryFn: getCurrentUser
+  });
+  
+  const userRole = auth?.user?.role;
+  const isSuperAdmin = userRole === "super_admin";
+  const isCompanyAdmin = userRole === "company_admin";
+  const isTechnician = userRole === "technician";
+  
+  // For technicians, we might want to show only their own visits
+  const endpoint = isTechnician 
+    ? "/api/visits?limit=5&technicianId=" + auth?.user?.id
+    : "/api/visits?limit=5";
   
   const { data: visits, isLoading } = useQuery<Visit[]>({
-    queryKey: ["/api/visits", { limit: 5 }],
+    queryKey: ["/api/visits", { limit: 5, technicianId: isTechnician ? auth?.user?.id : undefined }],
     queryFn: async () => {
-      const res = await apiRequest("GET", "/api/visits?limit=5");
+      const res = await apiRequest("GET", endpoint);
       return res.json();
     }
   });
@@ -89,8 +104,17 @@ export default function RecentVisits() {
     <Card className="bg-white shadow-card col-span-4">
       <CardHeader className="px-6 py-5 border-b border-gray-200">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-medium text-gray-900">Recent Visits</CardTitle>
-          <Button variant="link" size="sm" className="text-primary-600">View all</Button>
+          <CardTitle className="text-lg font-medium text-gray-900">
+            {isTechnician ? "My Recent Visits" : "Recent Visits"}
+          </CardTitle>
+          <Button 
+            variant="link" 
+            size="sm" 
+            className="text-primary-600"
+            onClick={() => window.location.href = "/visits"}
+          >
+            View all
+          </Button>
         </div>
       </CardHeader>
       
@@ -126,14 +150,23 @@ export default function RecentVisits() {
             <VisitCard
               key={visit.id}
               visit={visit}
-              onCreatePost={() => handleCreatePost(visit.id)}
-              onRequestReview={() => handleRequestReview(visit.id, visit.technician.id)}
+              onCreatePost={!isSuperAdmin ? () => handleCreatePost(visit.id) : undefined}
+              onRequestReview={isCompanyAdmin ? () => handleRequestReview(visit.id, visit.technician.id) : undefined}
             />
           ))
         ) : (
           <div className="p-6 text-center">
-            <p className="text-gray-500">No visits found. Create your first visit to get started.</p>
-            <Button className="mt-4">Create Visit</Button>
+            <p className="text-gray-500">
+              {isTechnician 
+                ? "You haven't logged any visits yet. Create your first visit to get started." 
+                : "No visits found. Create your first visit to get started."}
+            </p>
+            <Button 
+              className="mt-4"
+              onClick={() => window.location.href = "/visits?action=new"}
+            >
+              Create Visit
+            </Button>
           </div>
         )}
       </div>
