@@ -7,10 +7,15 @@ if (!process.env.STRIPE_SECRET_KEY) {
   console.warn("Warning: STRIPE_SECRET_KEY environment variable is not set. Stripe functionality will be limited.");
 }
 
-// Initialize Stripe client with type assertion to handle TypeScript API version issues
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2023-10-16" as any,
-});
+// Initialize Stripe client conditionally based on API key availability
+let stripe: Stripe | null = null;
+
+// Only initialize Stripe if the API key is available
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2023-10-16" as any,
+  });
+}
 
 // Define price IDs for different subscription plans
 const PRICE_IDS = {
