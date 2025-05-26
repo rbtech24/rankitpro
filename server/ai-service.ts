@@ -16,11 +16,15 @@ export interface BlogPostResult {
 
 export type AIProviderType = "openai" | "anthropic" | "xai";
 
-// OpenAI implementation
+// Centralized AI API initialization - controlled by super admin only
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-dummy-key-for-development" });
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 
 async function generateSummaryWithOpenAI(params: ContentGenerationParams): Promise<string> {
+  if (!openai) {
+    throw new Error("OpenAI API key not configured by administrator");
+  }
+
   const { jobType, notes, location, technicianName } = params;
   
   const prompt = `
@@ -45,11 +49,15 @@ async function generateSummaryWithOpenAI(params: ContentGenerationParams): Promi
     return response.choices[0].message.content || "Error generating content";
   } catch (error) {
     console.error("Error generating summary with OpenAI:", error);
-    return "Unable to generate summary at this time.";
+    throw new Error("AI service temporarily unavailable");
   }
 }
 
 async function generateBlogPostWithOpenAI(params: ContentGenerationParams): Promise<BlogPostResult> {
+  if (!openai) {
+    throw new Error("OpenAI API key not configured by administrator");
+  }
+
   const { jobType, notes, location, technicianName } = params;
   
   const prompt = `
@@ -63,8 +71,6 @@ async function generateBlogPostWithOpenAI(params: ContentGenerationParams): Prom
     Create a detailed, SEO-friendly blog post that describes the job. Use professional language suitable for a home service business website. Include technical details, benefits to the customer, and any relevant maintenance tips.
     
     Format the post with a catchy title, an introduction, several informative paragraphs with subheadings, and a conclusion.
-    
-    Include schema markup for the content in JSON-LD format at the end.
     
     Respond with JSON in this format:
     {
@@ -81,7 +87,7 @@ async function generateBlogPostWithOpenAI(params: ContentGenerationParams): Prom
       max_tokens: 1000,
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    const result = JSON.parse(response.choices[0].message.content || "{}");
     
     return {
       title: result.title || `${jobType} Service Completed`,
@@ -89,10 +95,7 @@ async function generateBlogPostWithOpenAI(params: ContentGenerationParams): Prom
     };
   } catch (error) {
     console.error("Error generating blog post with OpenAI:", error);
-    return {
-      title: `${jobType} Service`,
-      content: "Unable to generate blog post content at this time."
-    };
+    throw new Error("AI service temporarily unavailable");
   }
 }
 
