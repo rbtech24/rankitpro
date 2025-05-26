@@ -25,12 +25,12 @@ const PLAN_AI_LIMITS = {
     dailyLimit: 5 // 5 requests per day
   },
   pro: {
-    monthlyCostLimit: 50.00, // $50 per month
+    monthlyCostLimit: 25.00, // $25 per month
     requestsLimit: 500, // 500 AI requests per month
     dailyLimit: 20 // 20 requests per day
   },
   agency: {
-    monthlyCostLimit: 150.00, // $150 per month
+    monthlyCostLimit: 75.00, // $75 per month
     requestsLimit: 1500, // 1500 AI requests per month
     dailyLimit: 60 // 60 requests per day
   }
