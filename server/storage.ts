@@ -3,7 +3,8 @@ import {
   CheckIn, InsertCheckIn, BlogPost, InsertBlogPost, ReviewRequest, InsertReviewRequest,
   ReviewResponse, InsertReviewResponse, CheckInWithTechnician, TechnicianWithStats,
   ReviewFollowUpSettings, InsertReviewFollowUpSettings, ReviewRequestStatus, InsertReviewRequestStatus,
-  WordpressCustomFields, InsertWordpressCustomFields
+  WordpressCustomFields, InsertWordpressCustomFields, AiUsageTracking, InsertAiUsageTracking,
+  MonthlyAiUsage, InsertMonthlyAiUsage
 } from "@shared/schema";
 
 export interface IStorage {
@@ -119,6 +120,17 @@ export interface IStorage {
     reviewResponses: number;
     averageRating: number;
   }>;
+  
+  // AI Usage Tracking operations
+  createAiUsageTracking(usage: InsertAiUsageTracking): Promise<AiUsageTracking>;
+  getMonthlyAiUsage(companyId: number, year: number, month: number): Promise<MonthlyAiUsage | null>;
+  getDailyAiUsage(companyId: number, date: Date): Promise<number>;
+  updateMonthlyAiUsage(companyId: number, year: number, month: number, updates: {
+    totalRequests: number;
+    totalTokens: number;
+    totalCost: number;
+    [key: string]: number;
+  }): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -133,6 +145,8 @@ export class MemStorage implements IStorage {
   private reviewRequestStatuses: Map<number, ReviewRequestStatus>;
   private reviewRequestTokens: Map<string, number>; // Map token to requestId
   private wordpressCustomFields: Map<number, WordpressCustomFields>;
+  private aiUsageTracking: Map<number, AiUsageTracking>;
+  private monthlyAiUsage: Map<string, MonthlyAiUsage>;
   
   private userId: number;
   private companyId: number;

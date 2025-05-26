@@ -247,6 +247,58 @@ export const insertReviewRequestStatusSchema = createInsertSchema(reviewRequestS
   createdAt: true
 });
 
+// AI Usage Tracking table
+export const aiUsageTracking = pgTable("ai_usage_tracking", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  provider: text("provider", { enum: ["openai", "anthropic", "xai"] }).notNull(),
+  operation: text("operation", { enum: ["summary", "blog_post"] }).notNull(),
+  tokensUsed: integer("tokens_used").notNull(),
+  estimatedCost: numeric("estimated_cost", { precision: 10, scale: 6 }).notNull(), // Store in dollars
+  requestData: jsonb("request_data"), // Store request details for analysis
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  userId: integer("user_id").references(() => users.id),
+  checkInId: integer("check_in_id").references(() => checkIns.id)
+});
+
+// Monthly AI Usage Summary table
+export const monthlyAiUsage = pgTable("monthly_ai_usage", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  year: integer("year").notNull(),
+  month: integer("month").notNull(),
+  totalRequests: integer("total_requests").notNull().default(0),
+  totalTokens: integer("total_tokens").notNull().default(0),
+  totalCost: numeric("total_cost", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  openaiRequests: integer("openai_requests").notNull().default(0),
+  openaiCost: numeric("openai_cost", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  anthropicRequests: integer("anthropic_requests").notNull().default(0),
+  anthropicCost: numeric("anthropic_cost", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  xaiRequests: integer("xai_requests").notNull().default(0),
+  xaiCost: numeric("xai_cost", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Insert schemas for AI usage tracking
+export const insertAiUsageTrackingSchema = createInsertSchema(aiUsageTracking).omit({ 
+  id: true, 
+  createdAt: true
+});
+
+export const insertMonthlyAiUsageSchema = createInsertSchema(monthlyAiUsage).omit({ 
+  id: true, 
+  createdAt: true,
+  updatedAt: true
+});
+
+// Types for AI usage tracking
+export type AiUsageTracking = typeof aiUsageTracking.$inferSelect;
+export type InsertAiUsageTracking = z.infer<typeof insertAiUsageTrackingSchema>;
+
+export type MonthlyAiUsage = typeof monthlyAiUsage.$inferSelect;
+export type InsertMonthlyAiUsage = z.infer<typeof insertMonthlyAiUsageSchema>;
+
 // Types for the new tables
 export type ReviewFollowUpSettings = typeof reviewFollowUpSettings.$inferSelect;
 export type InsertReviewFollowUpSettings = z.infer<typeof insertReviewFollowUpSettingsSchema>;
