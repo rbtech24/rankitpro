@@ -106,7 +106,7 @@ const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({
 
 async function generateSummaryWithClaude(params: ContentGenerationParams): Promise<string> {
   if (!anthropic) {
-    return "Claude API key not configured. Unable to generate summary.";
+    throw new Error("Claude API key not configured by administrator");
   }
   
   const { jobType, notes, location, technicianName } = params;
@@ -134,7 +134,7 @@ async function generateSummaryWithClaude(params: ContentGenerationParams): Promi
     return message.content[0].text || "Error generating content with Claude";
   } catch (error) {
     console.error("Error generating summary with Claude:", error);
-    return "Unable to generate summary with Claude at this time.";
+    throw new Error("AI service temporarily unavailable");
   }
 }
 
