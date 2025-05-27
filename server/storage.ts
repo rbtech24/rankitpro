@@ -160,6 +160,8 @@ export class MemStorage implements IStorage {
   private wordpressCustomFields: Map<number, WordpressCustomFields>;
   private aiUsageTracking: Map<number, AiUsageTracking>;
   private monthlyAiUsage: Map<string, MonthlyAiUsage>;
+  private apiCredentials: Map<number, APICredentials>;
+  private apiCredentialsByApiKey: Map<string, APICredentials>;
   
   private userId: number;
   private companyId: number;
@@ -172,6 +174,7 @@ export class MemStorage implements IStorage {
   private reviewRequestStatusId: number;
   
   private wordpressCustomFieldsId: number;
+  private apiCredentialsId: number;
   
   constructor() {
     this.users = new Map();
@@ -188,6 +191,8 @@ export class MemStorage implements IStorage {
     this.wordpressCustomFields = new Map();
     this.aiUsageTracking = new Map();
     this.monthlyAiUsage = new Map();
+    this.apiCredentials = new Map();
+    this.apiCredentialsByApiKey = new Map();
     
     this.userId = 1;
     this.companyId = 1;
@@ -199,6 +204,7 @@ export class MemStorage implements IStorage {
     this.reviewFollowUpSettingsId = 1;
     this.reviewRequestStatusId = 1;
     this.wordpressCustomFieldsId = 1;
+    this.apiCredentialsId = 1;
     
     // Add a default super admin
     this.createUser({
@@ -1043,6 +1049,58 @@ export class MemStorage implements IStorage {
       if (tokenData.userId === userId) {
         this.passwordResetTokens.delete(token);
       }
+    }
+  }
+
+  // API Credentials methods
+  async createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials> {
+    const id = this.apiCredentialsId++;
+    const newCredentials: APICredentials = {
+      id,
+      ...credentials,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    this.apiCredentials.set(id, newCredentials);
+    this.apiCredentialsByApiKey.set(credentials.apiKeyHash, newCredentials);
+    
+    return newCredentials;
+  }
+
+  async getAPICredentialsByCompany(companyId: number): Promise<APICredentials[]> {
+    return Array.from(this.apiCredentials.values())
+      .filter(cred => cred.companyId === companyId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async getAPICredentialsByApiKey(apiKeyHash: string): Promise<APICredentials | null> {
+    return this.apiCredentialsByApiKey.get(apiKeyHash) || null;
+  }
+
+  async updateAPICredentialLastUsed(credentialId: number): Promise<void> {
+    const credential = this.apiCredentials.get(credentialId);
+    if (credential) {
+      credential.lastUsedAt = new Date();
+      credential.updatedAt = new Date();
+    }
+  }
+
+  async deactivateAPICredentials(credentialId: number, companyId: number): Promise<boolean> {
+    const credential = this.apiCredentials.get(credentialId);
+    if (credential && credential.companyId === companyId) {
+      credential.isActive = false;
+      credential.updatedAt = new Date();
+      return true;
+    }
+    return false;
+  }
+
+  async updateAPICredentialSecret(credentialId: number, companyId: number, secretKeyHash: string): Promise<void> {
+    const credential = this.apiCredentials.get(credentialId);
+    if (credential && credential.companyId === companyId) {
+      credential.secretKeyHash = secretKeyHash;
+      credential.updatedAt = new Date();
     }
   }
 }
