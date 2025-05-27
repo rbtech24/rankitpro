@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/form";
 
 export default function Settings() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
   
   const { data: auth, isLoading } = useQuery<AuthState>({
@@ -462,7 +461,6 @@ export default function Settings() {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
     </DashboardLayout>
   );
 }
