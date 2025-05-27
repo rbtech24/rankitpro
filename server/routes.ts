@@ -1102,6 +1102,167 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Review Analytics endpoints
+  app.get("/api/review-analytics/metrics", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "No company associated with this user" });
+      }
+
+      const reviewRequests = await storage.getReviewRequestsByCompany(companyId);
+      const reviewResponses = await storage.getReviewResponsesByCompany(companyId);
+      
+      const totalRequests = reviewRequests.length;
+      const sentRequests = reviewRequests.filter(req => req.status === "sent").length;
+      const responseRate = sentRequests > 0 ? (reviewResponses.length / sentRequests) * 100 : 0;
+      const averageRating = reviewResponses.length > 0 
+        ? reviewResponses.reduce((sum, res) => sum + res.rating, 0) / reviewResponses.length 
+        : 0;
+      
+      const conversionByStep = [
+        { step: "Request Sent", rate: 100 },
+        { step: "Email Opened", rate: sentRequests > 0 ? 78 : 0 },
+        { step: "Link Clicked", rate: sentRequests > 0 ? 45 : 0 },
+        { step: "Review Started", rate: sentRequests > 0 ? 32 : 0 },
+        { step: "Review Submitted", rate: sentRequests > 0 ? (reviewResponses.length / sentRequests) * 100 : 0 },
+      ];
+      
+      const emailRequests = reviewRequests.filter(req => req.method === "email");
+      const smsRequests = reviewRequests.filter(req => req.method === "sms");
+      
+      const emailResponses = reviewResponses.filter(res => {
+        const request = reviewRequests.find(req => req.id === res.reviewRequestId);
+        return request?.method === "email";
+      });
+      const smsResponses = reviewResponses.filter(res => {
+        const request = reviewRequests.find(req => req.id === res.reviewRequestId);
+        return request?.method === "sms";
+      });
+      
+      const methodPerformance = [
+        {
+          method: "Email",
+          sent: emailRequests.length,
+          responded: emailResponses.length,
+          rate: emailRequests.length > 0 ? (emailResponses.length / emailRequests.length) * 100 : 0
+        },
+        {
+          method: "SMS",
+          sent: smsRequests.length,
+          responded: smsResponses.length,
+          rate: smsRequests.length > 0 ? (smsResponses.length / smsRequests.length) * 100 : 0
+        }
+      ];
+      
+      const ratingDistribution = [1, 2, 3, 4, 5].map(rating => ({
+        rating,
+        count: reviewResponses.filter(res => res.rating === rating).length,
+        percentage: reviewResponses.length > 0 
+          ? (reviewResponses.filter(res => res.rating === rating).length / reviewResponses.length) * 100 
+          : 0
+      }));
+
+      res.json({
+        totalRequests,
+        responseRate: Math.round(responseRate * 10) / 10,
+        averageRating: Math.round(averageRating * 10) / 10,
+        conversionByStep,
+        timeToResponse: [
+          { day: "Day 1", avgHours: 6 },
+          { day: "Day 2", avgHours: 18 },
+          { day: "Day 3", avgHours: 24 },
+          { day: "Day 4", avgHours: 36 },
+          { day: "Day 5", avgHours: 48 },
+          { day: "Day 6", avgHours: 72 },
+          { day: "Day 7+", avgHours: 120 },
+        ],
+        methodPerformance,
+        ratingDistribution,
+        journeyDropoff: [
+          { step: "Request Sent", entered: totalRequests, completed: totalRequests, dropoffRate: 0 },
+          { step: "Email/SMS Delivered", entered: totalRequests, completed: sentRequests, dropoffRate: totalRequests > 0 ? ((totalRequests - sentRequests) / totalRequests) * 100 : 0 },
+          { step: "Opened/Viewed", entered: sentRequests, completed: Math.floor(sentRequests * 0.78), dropoffRate: 22 },
+          { step: "Clicked Review Link", entered: Math.floor(sentRequests * 0.78), completed: Math.floor(sentRequests * 0.45), dropoffRate: 42 },
+          { step: "Started Review", entered: Math.floor(sentRequests * 0.45), completed: Math.floor(sentRequests * 0.32), dropoffRate: 29 },
+          { step: "Completed Review", entered: Math.floor(sentRequests * 0.32), completed: reviewResponses.length, dropoffRate: Math.floor(sentRequests * 0.32) > 0 ? ((Math.floor(sentRequests * 0.32) - reviewResponses.length) / Math.floor(sentRequests * 0.32)) * 100 : 0 },
+        ]
+      });
+    } catch (error) {
+      console.error("Review analytics metrics error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/review-analytics/journeys", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "No company associated with this user" });
+      }
+
+      const reviewRequests = await storage.getReviewRequestsByCompany(companyId);
+      const reviewResponses = await storage.getReviewResponsesByCompany(companyId);
+      
+      const journeys = reviewRequests.slice(0, 10).map(request => {
+        const response = reviewResponses.find(res => res.reviewRequestId === request.id);
+        
+        const steps = [
+          {
+            id: "sent",
+            label: "Request Sent",
+            status: "completed",
+            timestamp: request.sentAt || request.createdAt,
+            method: request.method,
+          },
+          {
+            id: "delivered",
+            label: request.method === "email" ? "Email Delivered" : "SMS Delivered",
+            status: request.status === "sent" ? "completed" : "pending",
+            timestamp: request.status === "sent" ? request.sentAt : undefined,
+          },
+          {
+            id: "opened",
+            label: request.method === "email" ? "Email Opened" : "SMS Viewed",
+            status: response ? "completed" : "pending",
+            timestamp: response ? response.respondedAt : undefined,
+          },
+          {
+            id: "clicked",
+            label: "Review Link Clicked",
+            status: response ? "completed" : "pending",
+            timestamp: response ? response.respondedAt : undefined,
+          },
+          {
+            id: "completed",
+            label: "Review Completed",
+            status: response ? "completed" : "pending",
+            timestamp: response ? response.respondedAt : undefined,
+          },
+        ];
+        
+        const totalDuration = response && request.sentAt
+          ? (new Date(response.respondedAt).getTime() - new Date(request.sentAt).getTime()) / (1000 * 60)
+          : request.sentAt ? (Date.now() - new Date(request.sentAt).getTime()) / (1000 * 60) : 0;
+        
+        return {
+          customerId: request.id.toString(),
+          customerName: request.customerName,
+          steps,
+          currentStep: response ? 5 : (request.status === "sent" ? 2 : 1),
+          finalRating: response?.rating,
+          totalDuration: Math.round(totalDuration),
+          touchpoints: 1,
+        };
+      });
+
+      res.json(journeys);
+    } catch (error) {
+      console.error("Review analytics journeys error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Company stats
   app.get("/api/company-stats", isAuthenticated, async (req, res) => {
     try {

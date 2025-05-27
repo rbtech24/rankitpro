@@ -13,6 +13,7 @@ import TechnicianDashboard from "@/pages/technician-dashboard";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
+import ReviewAnalytics from "@/pages/review-analytics";
 import Technicians from "@/pages/technicians";
 import Users from "@/pages/users";
 import Integrations from "@/pages/integrations";
