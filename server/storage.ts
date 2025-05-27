@@ -1000,6 +1000,43 @@ export class MemStorage implements IStorage {
 
   private aiUsageTrackingId: number = 1;
   private monthlyAiUsageId: number = 1;
+
+  // Password reset methods
+  async updateUserPassword(userId: number, hashedPassword: string): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.password = hashedPassword;
+      this.users.set(userId, user);
+    }
+  }
+
+  async setPasswordResetToken(userId: number, token: string, expiry: Date): Promise<void> {
+    this.passwordResetTokens.set(token, { userId, expiry });
+  }
+
+  async verifyPasswordResetToken(token: string): Promise<number | null> {
+    const tokenData = this.passwordResetTokens.get(token);
+    if (!tokenData) {
+      return null;
+    }
+
+    // Check if token has expired
+    if (new Date() > tokenData.expiry) {
+      this.passwordResetTokens.delete(token);
+      return null;
+    }
+
+    return tokenData.userId;
+  }
+
+  async clearPasswordResetToken(userId: number): Promise<void> {
+    // Find and remove all tokens for this user
+    for (const [token, tokenData] of this.passwordResetTokens.entries()) {
+      if (tokenData.userId === userId) {
+        this.passwordResetTokens.delete(token);
+      }
+    }
+  }
 }
 
 export const storage = new MemStorage();

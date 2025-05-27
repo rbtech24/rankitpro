@@ -53,6 +53,8 @@ import TermsOfService from "@/pages/terms-of-service";
 import WordPressIntegration from "@/pages/wordpress-integration";
 import WordPressCustomFields from "@/pages/wordpress-custom-fields";
 import EmergencyLogin from "@/pages/emergency-login";
+import ForgotPassword from "@/pages/forgot-password";
+import ResetPassword from "@/pages/reset-password";
 
 // Authenticated route that redirects to login if not authenticated
 function PrivateRoute({ component: Component, role, ...rest }: { component: React.ComponentType<any>, role?: string, path: string }) {
@@ -97,6 +99,12 @@ function Router() {
     <Switch>
       <Route path="/login">
         {auth?.user ? <Redirect to="/dashboard" /> : <Login />}
+      </Route>
+      <Route path="/forgot-password">
+        <ForgotPassword />
+      </Route>
+      <Route path="/reset-password">
+        <ResetPassword />
       </Route>
       <Route path="/register">
         {auth?.user ? <Redirect to="/dashboard" /> : <Register />}
