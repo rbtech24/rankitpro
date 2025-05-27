@@ -317,13 +317,13 @@ export default function Billing() {
                         <div className="bg-white rounded-lg border p-4">
                           <div className="text-sm text-gray-500 mb-1">Blog Posts</div>
                           <div className="flex items-end justify-between">
-                            <div className="text-xl font-semibold">{subscriptionData.usage.blogposts.used}</div>
-                            <div className="text-sm text-gray-500">/ {subscriptionData.usage.blogposts.limit}</div>
+                            <div className="text-xl font-semibold">{subscriptionData.usage?.blogposts?.used || 0}</div>
+                            <div className="text-sm text-gray-500">/ {subscriptionData.usage?.blogposts?.limit || 0}</div>
                           </div>
                           <div className="mt-2 h-2 bg-gray-100 rounded-full overflow-hidden">
                             <div 
-                              className={`h-full ${subscriptionData.usage.blogposts.used / subscriptionData.usage.blogposts.limit > 0.9 ? 'bg-red-500' : 'bg-primary'}`} 
-                              style={{ width: `${Math.min(100, (subscriptionData.usage.blogposts.used / subscriptionData.usage.blogposts.limit) * 100)}%` }}>
+                              className={`h-full ${(subscriptionData.usage?.blogposts?.used || 0) / (subscriptionData.usage?.blogposts?.limit || 1) > 0.9 ? 'bg-red-500' : 'bg-primary'}`} 
+                              style={{ width: `${Math.min(100, ((subscriptionData.usage?.blogposts?.used || 0) / (subscriptionData.usage?.blogposts?.limit || 1)) * 100)}%` }}>
                             </div>
                           </div>
                         </div>
