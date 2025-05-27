@@ -172,6 +172,8 @@ export class MemStorage implements IStorage {
     this.reviewRequestStatuses = new Map();
     this.reviewRequestTokens = new Map();
     this.wordpressCustomFields = new Map();
+    this.aiUsageTracking = new Map();
+    this.monthlyAiUsage = new Map();
     
     this.userId = 1;
     this.companyId = 1;
