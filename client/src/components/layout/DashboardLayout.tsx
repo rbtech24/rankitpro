@@ -56,7 +56,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { label: 'Integrations', path: '/integrations', icon: <LinkIcon className="h-5 w-5" /> },
     { label: 'Settings', path: '/settings', icon: <Settings className="h-5 w-5" /> },
     { label: 'Billing', path: '/billing', icon: <CreditCard className="h-5 w-5" /> },
-    { label: 'AI Settings', path: '/ai-settings', icon: <BrainCircuit className="h-5 w-5" /> },
   ];
 
   return (
