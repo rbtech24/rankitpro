@@ -34,6 +34,7 @@ import BillingManagement from "@/pages/billing-management";
 import CompaniesManagement from "@/pages/companies-management";
 import SystemSettings from "@/pages/system-settings";
 import SystemOverview from "@/pages/system-overview";
+import SetupGuide from "@/pages/setup-guide";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
