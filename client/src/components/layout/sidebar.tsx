@@ -242,6 +242,19 @@ export default function Sidebar({ className }: SidebarProps) {
                     Website Integration
                   </a>
                 </Link>
+                <Link href="/wordpress-plugin">
+                  <a className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1",
+                    isActive("/wordpress-plugin") && "bg-blue-50 border-l-3 border-blue-600"
+                  )}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                      <path d="M12 17h.01"/>
+                    </svg>
+                    WordPress Plugin
+                  </a>
+                </Link>
                 <Link href="/crm-integrations">
                   <a className={cn(
                     "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1",
