@@ -24,6 +24,13 @@ export default function Sidebar({ className }: SidebarProps) {
 
   return (
     <aside className={cn("bg-white w-64 min-h-screen border-r border-gray-200 flex flex-col", className)}>
+      {/* Logo Section */}
+      <div className="px-4 py-6 border-b border-gray-200">
+        <div className="flex items-center">
+          <img src="/rank it pro logo.png" alt="RANK IT PRO" className="h-12" />
+        </div>
+      </div>
+      
       <div className="flex-1 overflow-y-auto">
         <nav className="px-4 py-6 space-y-2">
           {/* Main Section */}
