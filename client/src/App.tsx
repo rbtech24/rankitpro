@@ -13,7 +13,7 @@ import TechnicianDashboard from "@/pages/technician-dashboard";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
-import ReviewAnalytics from "@/pages/review-analytics";
+import ReviewAnalytics from "@/pages/review-analytics-clean";
 import Technicians from "@/pages/technicians";
 import InstallationGuide from "@/pages/installation-guide";
 import ApiDocumentation from "@/pages/api-documentation";
