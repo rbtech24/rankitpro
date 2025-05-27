@@ -1015,6 +1015,9 @@ function Router() {
       <Route path="/wordpress-custom-fields">
         <PrivateRoute component={WordPressCustomFields} path="/wordpress-custom-fields" role="company_admin" />
       </Route>
+      <Route path="/wordpress-plugin">
+        <PrivateRoute component={WordPressPlugin} path="/wordpress-plugin" role="company_admin" />
+      </Route>
       <Route path="/settings">
         <PrivateRoute component={Settings} path="/settings" />
       </Route>
