@@ -141,10 +141,40 @@ export default function TechApp() {
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoPreviewUrls, setPhotoPreviewUrls] = useState<string[]>([]);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+
+  // Initialize offline support
+  useEffect(() => {
+    initOfflineSupport();
+    
+    const handleOnline = () => {
+      setIsOffline(false);
+      toast({
+        title: "Back Online! 🌐",
+        description: "Connection restored. Syncing offline data...",
+      });
+    };
+    
+    const handleOffline = () => {
+      setIsOffline(true);
+      toast({
+        title: "Offline Mode 📱", 
+        description: "You can still submit visits - they'll sync when back online!",
+      });
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [toast]);
   
   const { data: auth, isLoading: authLoading } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
@@ -171,9 +201,21 @@ export default function TechApp() {
     },
   });
   
-  // Create checkin mutation
+  // Create checkin mutation with offline support
   const createCheckinMutation = useMutation({
     mutationFn: async (data: FormData) => {
+      // If offline, save to IndexedDB
+      if (isOffline) {
+        const formDataObj = Object.fromEntries(data.entries());
+        const saved = await saveOfflineVisit(formDataObj);
+        if (saved) {
+          return { offline: true, message: "Saved offline" };
+        } else {
+          throw new Error("Failed to save offline");
+        }
+      }
+      
+      // Online submission
       const res = await fetch("/api/check-ins", {
         method: "POST",
         body: data,
@@ -187,14 +229,20 @@ export default function TechApp() {
       
       return res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/check-ins"] });
-      
-      toast({
-        title: "Check-in Submitted",
-        description: "Your check-in was successfully recorded.",
-        variant: "default",
-      });
+    onSuccess: (result) => {
+      if (result?.offline) {
+        toast({
+          title: "Saved Offline! 📱",
+          description: "Your check-in is saved and will sync when you're back online.",
+        });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["/api/check-ins"] });
+        toast({
+          title: "Check-in Submitted ✅",
+          description: "Your check-in was successfully recorded.",
+          variant: "default",
+        });
+      }
       
       form.reset();
       setPhotos([]);
@@ -394,6 +442,17 @@ export default function TechApp() {
             <TabsContent value="new" className="mt-0">
               <Card>
                 <CardHeader>
+                  {isOffline && (
+                    <div className="mb-4 p-3 bg-orange-100 border border-orange-200 rounded-lg">
+                      <div className="flex items-center justify-center gap-2 text-orange-800">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                        <span className="text-sm font-medium">Working Offline</span>
+                      </div>
+                      <p className="text-xs text-orange-600 mt-1 text-center">
+                        Your check-ins will sync when you're back online
+                      </p>
+                    </div>
+                  )}
                   <CardTitle>New Check-in</CardTitle>
                   <CardDescription>Record details about your current job.</CardDescription>
                 </CardHeader>
