@@ -79,8 +79,8 @@ export default function Sidebar({ className }: SidebarProps) {
                 </a>
               </Link>
               <Link href="/visits">
-                <a className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1",
+                <div className={cn(
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer",
                   isActive("/visits") && "bg-blue-50 border-l-3 border-blue-600"
                 )}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
@@ -88,11 +88,11 @@ export default function Sidebar({ className }: SidebarProps) {
                     <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>
                   </svg>
                   My Visits
-                </a>
+                </div>
               </Link>
               <Link href="/tech-app">
-                <a className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1",
+                <div className={cn(
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer",
                   isActive("/tech-app") && "bg-blue-50 border-l-3 border-blue-600"
                 )}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
