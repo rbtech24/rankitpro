@@ -431,7 +431,7 @@ export default function ReviewRequests() {
                     className="font-mono text-sm"
                   />
                   <p className="text-xs text-slate-500">
-                    Available placeholders: {{customer_name}}, {{technician_name}}, {{job_type}}, {{review_link}}
+                    Available placeholders: {`{{customer_name}}, {{technician_name}}, {{job_type}}, {{review_link}}`}
                   </p>
                 </div>
                 
