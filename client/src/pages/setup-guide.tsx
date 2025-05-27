@@ -60,7 +60,7 @@ export default function SetupGuide() {
             Overview
           </TabsTrigger>
           <TabsTrigger value="wordpress" className="flex items-center gap-2">
-            <Wordpress className="w-4 h-4" />
+            <Monitor className="w-4 h-4" />
             WordPress
           </TabsTrigger>
           <TabsTrigger value="website" className="flex items-center gap-2">
