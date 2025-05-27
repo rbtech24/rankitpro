@@ -165,24 +165,12 @@ router.get('/plugin', isAuthenticated, isCompanyAdmin, async (req: Request, res:
     const apiEndpoint = process.env.API_ENDPOINT || `https://${req.headers.host}`;
     const pluginCode = WordPressService.generatePluginCode(apiKey, apiEndpoint);
     
-    // Create a zip file with the plugin and documentation
-    const archiver = require('archiver');
-    const archive = archiver('zip', { zlib: { level: 9 } });
-    
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', 'attachment; filename=rank-it-pro-plugin.zip');
-    
-    archive.pipe(res);
-    
-    // Add the plugin file
-    archive.append(pluginCode, { name: 'rank-it-pro-plugin.php' });
-    
-    // Add installation instructions
+    // Create installation instructions to include with the plugin
     const readmeContent = `# Rank It Pro WordPress Plugin
 
 ## Installation Instructions
 
-1. Download the plugin zip file
+1. Save the rank-it-pro-plugin.php file to your computer
 2. Log into your WordPress admin panel
 3. Go to Plugins > Add New > Upload Plugin
 4. Choose the rank-it-pro-plugin.php file and click Install Now
@@ -200,8 +188,7 @@ router.get('/plugin', isAuthenticated, isCompanyAdmin, async (req: Request, res:
 
 ## Support
 
-For support and documentation, visit: https://rankitpro.com/support
-API Documentation: https://rankitpro.com/api-docs
+For support and documentation, visit your dashboard's documentation section.
 
 ## Features
 
@@ -223,10 +210,24 @@ If you experience issues:
 Version: 1.0.0
 Author: Rank It Pro
 `;
+
+    // Create a complete plugin file with embedded instructions
+    const completePlugin = `<?php
+/*
+Plugin Name: Rank It Pro Integration
+Description: ${readmeContent.replace(/\n/g, '\n * ')}
+Version: 1.0.0
+Author: Rank It Pro
+*/
+
+${pluginCode}
+?>`;
+
+    // Set the response headers for downloading the plugin
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', 'attachment; filename=rank-it-pro-plugin.php');
     
-    archive.append(readmeContent, { name: 'README.md' });
-    
-    return archive.finalize();
+    return res.send(completePlugin);
   } catch (error) {
     console.error('Error generating WordPress plugin:', error);
     return res.status(500).json({ error: 'Error generating WordPress plugin' });
