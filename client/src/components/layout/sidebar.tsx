@@ -242,6 +242,19 @@ export default function Sidebar({ className }: SidebarProps) {
                     Website Integration
                   </a>
                 </Link>
+                <Link href="/api-credentials">
+                  <a className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1",
+                    isActive("/api-credentials") && "bg-blue-50 border-l-3 border-blue-600"
+                  )}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                      <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
+                      <path d="M12 18h.01"/>
+                      <path d="M12 6v6"/>
+                    </svg>
+                    API Credentials
+                  </a>
+                </Link>
                 <Link href="/wordpress-plugin">
                   <a className={cn(
                     "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1",

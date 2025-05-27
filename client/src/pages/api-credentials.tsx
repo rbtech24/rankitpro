@@ -116,8 +116,10 @@ export default function APICredentials() {
 
   // Regenerate secret mutation
   const regenerateMutation = useMutation({
-    mutationFn: (id: number) => 
-      apiRequest("POST", `/api/api-credentials/${id}/regenerate-secret`),
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("POST", `/api/api-credentials/${id}/regenerate-secret`);
+      return response.json();
+    },
     onSuccess: (data) => {
       setNewCredentials({ apiKey: "", secretKey: data.secretKey });
       queryClient.invalidateQueries({ queryKey: ["/api/api-credentials"] });
