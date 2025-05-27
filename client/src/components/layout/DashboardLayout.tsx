@@ -22,7 +22,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
       
       {/* Mobile header */}
-      <div className="md:pl-64 flex flex-col flex-1">
+      <div className="flex flex-col flex-1">
         <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white border-b border-gray-200 md:hidden">
           <button
             type="button"

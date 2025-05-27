@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Sidebar from "@/components/layout/sidebar";
-import TopNav from "@/components/layout/top-nav";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,17 +130,14 @@ export default function Settings() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar className={`fixed inset-0 z-40 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:translate-x-0 md:relative`} />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <TopNav onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+          <p className="text-sm text-gray-500">Manage your account and application preferences.</p>
+        </div>
         
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-            <p className="text-sm text-gray-500">Manage your account and application preferences.</p>
-          </div>
+
           
           <Tabs defaultValue="profile" className="space-y-6">
             <TabsList className="mb-2">
@@ -465,8 +461,8 @@ export default function Settings() {
               </Card>
             </TabsContent>
           </Tabs>
-        </main>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
