@@ -5,6 +5,61 @@ import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { AuthState, getCurrentUser, logout } from "@/lib/auth";
 
+// Offline capabilities
+const initOfflineSupport = () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('SW registered: ', registration);
+      })
+      .catch(registrationError => {
+        console.log('SW registration failed: ', registrationError);
+      });
+  }
+
+  // Request background sync permission
+  if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+    navigator.serviceWorker.ready.then(registration => {
+      return registration.sync.register('background-sync-visits');
+    });
+  }
+};
+
+const saveOfflineVisit = async (visitData: any) => {
+  if (!('indexedDB' in window)) return false;
+  
+  try {
+    const db = await openOfflineDB();
+    const tx = db.transaction(['offline-visits'], 'readwrite');
+    const store = tx.objectStore('offline-visits');
+    await store.add({
+      data: visitData,
+      timestamp: Date.now(),
+      synced: false
+    });
+    return true;
+  } catch (error) {
+    console.error('Failed to save offline visit:', error);
+    return false;
+  }
+};
+
+const openOfflineDB = () => {
+  return new Promise<IDBDatabase>((resolve, reject) => {
+    const request = indexedDB.open('rank-it-pro-offline', 1);
+    
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    
+    request.onupgradeneeded = event => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains('offline-visits')) {
+        db.createObjectStore('offline-visits', { keyPath: 'id', autoIncrement: true });
+      }
+    };
+  });
+};
+
 import {
   Card,
   CardContent,

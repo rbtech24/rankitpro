@@ -1,0 +1,33 @@
+{
+  "name": "Rank It Pro Mobile",
+  "short_name": "RankItPro",
+  "description": "Mobile app for technicians to manage visits and check-ins",
+  "start_url": "/tech-app",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0088d2",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/rank it pro logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/rank it pro logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": [
+    {
+      "src": "/rank it pro logo.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}

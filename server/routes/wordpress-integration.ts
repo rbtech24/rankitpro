@@ -165,11 +165,68 @@ router.get('/plugin', isAuthenticated, isCompanyAdmin, async (req: Request, res:
     const apiEndpoint = process.env.API_ENDPOINT || `https://${req.headers.host}`;
     const pluginCode = WordPressService.generatePluginCode(apiKey, apiEndpoint);
     
-    // Set the response headers for downloading the plugin
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader('Content-Disposition', 'attachment; filename=check-in-integration.php');
+    // Create a zip file with the plugin and documentation
+    const archiver = require('archiver');
+    const archive = archiver('zip', { zlib: { level: 9 } });
     
-    return res.send(pluginCode);
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename=rank-it-pro-plugin.zip');
+    
+    archive.pipe(res);
+    
+    // Add the plugin file
+    archive.append(pluginCode, { name: 'rank-it-pro-plugin.php' });
+    
+    // Add installation instructions
+    const readmeContent = `# Rank It Pro WordPress Plugin
+
+## Installation Instructions
+
+1. Download the plugin zip file
+2. Log into your WordPress admin panel
+3. Go to Plugins > Add New > Upload Plugin
+4. Choose the rank-it-pro-plugin.php file and click Install Now
+5. Activate the plugin
+6. Go to Settings > Rank It Pro Integration
+7. Enter your API credentials from your Rank It Pro dashboard
+8. Configure your sync settings and save
+
+## Configuration
+
+- **API Key**: ${apiKey}
+- **Webhook URL**: ${apiEndpoint}/api/wordpress/webhook
+- **Auto Sync**: Enable to automatically publish check-ins
+- **Photo Upload**: Enable to include technician photos
+
+## Support
+
+For support and documentation, visit: https://rankitpro.com/support
+API Documentation: https://rankitpro.com/api-docs
+
+## Features
+
+- Automatic check-in publishing
+- SEO-optimized post creation
+- Schema.org markup for local SEO
+- Photo integration
+- Custom post types for service visits
+- Webhook support for real-time updates
+
+## Troubleshooting
+
+If you experience issues:
+1. Check that your API key is correct
+2. Ensure your WordPress site can make outbound HTTPS requests
+3. Verify the webhook URL is accessible
+4. Check plugin logs in WordPress admin
+
+Version: 1.0.0
+Author: Rank It Pro
+`;
+    
+    archive.append(readmeContent, { name: 'README.md' });
+    
+    return archive.finalize();
   } catch (error) {
     console.error('Error generating WordPress plugin:', error);
     return res.status(500).json({ error: 'Error generating WordPress plugin' });
