@@ -982,6 +982,9 @@ function Router() {
       <Route path="/reviews">
         <PrivateRoute component={Reviews} path="/reviews" />
       </Route>
+      <Route path="/review-analytics">
+        <PrivateRoute component={ReviewAnalytics} path="/review-analytics" role="company_admin" />
+      </Route>
       <Route path="/review-requests">
         <PrivateRoute component={ReviewRequest} path="/review-requests" role="company_admin" />
       </Route>
