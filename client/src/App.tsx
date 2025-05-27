@@ -35,6 +35,7 @@ import CompaniesManagement from "@/pages/companies-management";
 import SystemSettings from "@/pages/system-settings";
 import SystemOverview from "@/pages/system-overview";
 import SetupGuide from "@/pages/setup-guide";
+import AdminUserManagement from "@/pages/admin-user-management";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
@@ -997,6 +998,9 @@ function Router() {
       </Route>
       <Route path="/companies-management">
         <PrivateRoute component={CompaniesManagement} path="/companies-management" role="super_admin" />
+      </Route>
+      <Route path="/admin-user-management">
+        <PrivateRoute component={AdminUserManagement} path="/admin-user-management" role="super_admin" />
       </Route>
       <Route path="/system-settings">
         <PrivateRoute component={SystemSettings} path="/system-settings" role="super_admin" />

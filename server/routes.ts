@@ -557,6 +557,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Admin password management routes
+  app.post("/api/admin/change-user-password", isSuperAdmin, async (req, res) => {
+    try {
+      const { userId, newPassword } = req.body;
+      
+      if (!userId || !newPassword) {
+        return res.status(400).json({ message: "User ID and new password are required" });
+      }
+      
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+      
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update user password
+      await storage.updateUserPassword(userId, hashedPassword);
+      
+      res.json({ message: "Password changed successfully" });
+    } catch (error) {
+      console.error("Admin change password error:", error);
+      res.status(500).json({ message: "Server error while changing password" });
+    }
+  });
+  
+  app.get("/api/admin/users", isSuperAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      
+      // Remove passwords from response
+      const usersWithoutPasswords = users.map(user => {
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      });
+      
+      res.json(usersWithoutPasswords);
+    } catch (error) {
+      console.error("Get all users error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
   // Company routes
   app.get("/api/companies", isSuperAdmin, async (req, res) => {
     try {
