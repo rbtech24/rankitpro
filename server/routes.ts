@@ -5,7 +5,8 @@ import session from "express-session";
 import MemoryStore from "memorystore";
 import bcrypt from "bcrypt";
 import { generateSummary, generateBlogPost } from "./ai-service";
-import { insertUserSchema, insertCompanySchema, insertTechnicianSchema, insertCheckInSchema, insertBlogPostSchema, insertReviewRequestSchema } from "@shared/schema";
+import { insertUserSchema, insertCompanySchema, insertTechnicianSchema, insertCheckInSchema, insertBlogPostSchema, insertReviewRequestSchema, insertAPICredentialsSchema } from "@shared/schema";
+import { apiCredentialService } from "./services/api-credentials";
 import { isAuthenticated, isCompanyAdmin, isSuperAdmin, belongsToCompany } from "./middleware/auth";
 import multer from "multer";
 import { z } from "zod";
@@ -1150,6 +1151,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/mobile/notifications", mobileNotificationsRoutes);
   app.use("/api/crm", crmIntegrationRoutes);
   app.use("/api/crm-integration", crmIntegrationRoutes);
+  
+  // API Credentials routes
+  app.post("/api/api-credentials", isAuthenticated, isCompanyAdmin, async (req, res) => {
+    try {
+      const companyId = req.user.companyId!;
+      const createRequest = z.object({
+        name: z.string().min(1, "Name is required"),
+        permissions: z.array(z.string()).min(1, "At least one permission is required"),
+        expiresAt: z.string().optional().transform(val => val ? new Date(val) : undefined)
+      }).parse(req.body);
+
+      const credentials = await apiCredentialService.createCredentials(companyId, createRequest);
+      res.json(credentials);
+    } catch (error) {
+      console.error("Create API credentials error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Validation error", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/api-credentials", isAuthenticated, isCompanyAdmin, async (req, res) => {
+    try {
+      const companyId = req.user.companyId!;
+      const credentials = await apiCredentialService.getCompanyCredentials(companyId);
+      res.json(credentials);
+    } catch (error) {
+      console.error("Get API credentials error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.post("/api/api-credentials/:id/deactivate", isAuthenticated, isCompanyAdmin, async (req, res) => {
+    try {
+      const credentialId = parseInt(req.params.id);
+      const companyId = req.user.companyId!;
+      
+      const success = await apiCredentialService.deactivateCredentials(credentialId, companyId);
+      if (!success) {
+        return res.status(404).json({ message: "Credentials not found" });
+      }
+      
+      res.json({ message: "Credentials deactivated successfully" });
+    } catch (error) {
+      console.error("Deactivate API credentials error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.post("/api/api-credentials/:id/regenerate-secret", isAuthenticated, isCompanyAdmin, async (req, res) => {
+    try {
+      const credentialId = parseInt(req.params.id);
+      const companyId = req.user.companyId!;
+      
+      const newSecret = await apiCredentialService.regenerateSecret(credentialId, companyId);
+      res.json({ secretKey: newSecret });
+    } catch (error) {
+      console.error("Regenerate secret error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/api-credentials/permissions", isAuthenticated, isCompanyAdmin, async (req, res) => {
+    try {
+      const permissions = apiCredentialService.getAvailablePermissions();
+      res.json(permissions);
+    } catch (error) {
+      console.error("Get permissions error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
   
   // Initialize the scheduler service to process review follow-ups
   schedulerService.initialize();
