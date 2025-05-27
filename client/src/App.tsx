@@ -15,6 +15,7 @@ import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
 import ReviewAnalytics from "@/pages/review-analytics-clean";
 import AnalyticsDashboard from "@/pages/analytics-dashboard-simple";
+import Notifications from "@/pages/notifications";
 import Technicians from "@/pages/technicians";
 import InstallationGuide from "@/pages/installation-guide";
 import ApiDocumentation from "@/pages/api-documentation";
@@ -996,6 +997,9 @@ function Router() {
       </Route>
       <Route path="/analytics-dashboard">
         <PrivateRoute component={AnalyticsDashboard} path="/analytics-dashboard" role="company_admin" />
+      </Route>
+      <Route path="/notifications">
+        <PrivateRoute component={Notifications} path="/notifications" />
       </Route>
       <Route path="/review-requests">
         <PrivateRoute component={ReviewRequest} path="/review-requests" role="company_admin" />
