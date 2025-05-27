@@ -133,7 +133,7 @@ export default function SetupGuide() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Wordpress className="w-5 h-5" />
+                <Globe2 className="w-5 h-5" />
                 WordPress Integration
               </CardTitle>
               <CardDescription>
