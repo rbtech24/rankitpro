@@ -209,6 +209,22 @@ export default function Sidebar({ className }: SidebarProps) {
                   Reviews
                 </a>
               </Link>
+              {isCompanyAdmin && (
+                <Link href="/review-analytics">
+                  <a className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1",
+                    isActive("/review-analytics") && "bg-blue-50 border-l-3 border-blue-600"
+                  )}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                      <path d="M3 3v18h18"/>
+                      <path d="M18 17V9"/>
+                      <path d="M13 17V5"/>
+                      <path d="M8 17v-3"/>
+                    </svg>
+                    Review Analytics
+                  </a>
+                </Link>
+              )}
             </div>
             
             {/* Company Admin Management Section */}
