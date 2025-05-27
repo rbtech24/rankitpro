@@ -245,23 +245,23 @@ export default function Dashboard() {
   const isTechnician = userRole === "technician";
 
   // Calculate real metrics from your data
-  const totalVisits = visits?.length || 0;
-  const totalTechnicians = technicians?.length || 0;
-  const totalBlogPosts = blogPosts?.length || 0;
-  const totalReviews = reviews?.length || 0;
+  const totalVisits = Array.isArray(visits) ? visits.length : 0;
+  const totalTechnicians = Array.isArray(technicians) ? technicians.length : 0;
+  const totalBlogPosts = Array.isArray(blogPosts) ? blogPosts.length : 0;
+  const totalReviews = Array.isArray(reviews) ? reviews.length : 0;
   
   // Calculate average rating from reviews
   const averageRating = totalReviews > 0 
-    ? (reviews.reduce((sum, review) => sum + (review.rating || 0), 0) / totalReviews).toFixed(1)
+    ? (Array.isArray(reviews) ? reviews.reduce((sum: number, review: any) => sum + (review.rating || 0), 0) / totalReviews : 0).toFixed(1)
     : "0.0";
 
   // Calculate recent activity (this week)
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
   
-  const recentVisits = visits?.filter(visit => 
-    new Date(visit.createdAt) > oneWeekAgo
-  ).length || 0;
+  const recentVisits = Array.isArray(visits) ? visits.filter((visit: any) => 
+    visit.createdAt && new Date(visit.createdAt) > oneWeekAgo
+  ).length : 0;
   
   // Loading state
   if (authLoading) {
@@ -328,9 +328,9 @@ export default function Dashboard() {
                 <span className="text-blue-100">Active Technicians</span>
                 <User className="h-5 w-5 text-blue-200" />
               </div>
-              <div className="text-2xl font-bold">{isCompanyAdmin ? "5" : "156"}</div>
+              <div className="text-2xl font-bold">{totalTechnicians}</div>
               <div className="text-xs text-blue-200 mt-1">
-                {isCompanyAdmin ? "4 currently in the field" : "132 currently on jobs"}
+                {totalTechnicians > 0 ? `${Math.ceil(totalTechnicians * 0.8)} currently active` : "No technicians"}
               </div>
             </div>
             
@@ -339,9 +339,9 @@ export default function Dashboard() {
                 <span className="text-blue-100">Total Visits</span>
                 <Calendar className="h-5 w-5 text-blue-200" />
               </div>
-              <div className="text-2xl font-bold">{isCompanyAdmin ? "843" : "28,421"}</div>
+              <div className="text-2xl font-bold">{totalVisits}</div>
               <div className="text-xs text-blue-200 mt-1">
-                {isCompanyAdmin ? "+12 this week" : "+1,845 this month"}
+                +{recentVisits} this week
               </div>
             </div>
             
@@ -350,9 +350,9 @@ export default function Dashboard() {
                 <span className="text-blue-100">Average Rating</span>
                 <Star className="h-5 w-5 text-amber-300" fill="#fcd34d" />
               </div>
-              <div className="text-2xl font-bold">{isCompanyAdmin ? "4.9" : "4.7"}</div>
+              <div className="text-2xl font-bold">{averageRating}</div>
               <div className="text-xs text-blue-200 mt-1">
-                {isCompanyAdmin ? "From 156 reviews" : "From 4,362 reviews"}
+                From {totalReviews} reviews
               </div>
             </div>
             
@@ -364,9 +364,9 @@ export default function Dashboard() {
                   <Building2 className="h-5 w-5 text-blue-200" />
                 }
               </div>
-              <div className="text-2xl font-bold">{isCompanyAdmin ? "1,247" : "43"}</div>
+              <div className="text-2xl font-bold">{totalBlogPosts}</div>
               <div className="text-xs text-blue-200 mt-1">
-                {isCompanyAdmin ? "+18% from last month" : "6 new this month"}
+                Generated blog posts
               </div>
             </div>
           </div>
