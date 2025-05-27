@@ -48,24 +48,18 @@ const CompaniesManagement = () => {
   // Fetch companies data
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ['/api/companies'],
-    queryFn: () => apiRequest('GET', '/api/companies'),
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/companies');
+      return response.json();
+    },
   });
   
-  // Mock data for presentation
-  const mockCompanies = [
-    { id: 1, name: "Acme Plumbing", plan: "agency", userCount: 12, createdAt: new Date("2024-03-15"), usageLimit: 500, wordpressConfig: JSON.stringify({url: "https://acmeplumbing.com"}), javaScriptEmbedConfig: null, crmIntegrations: JSON.stringify({type: "housecallpro"}) },
-    { id: 2, name: "Best Home Services", plan: "pro", userCount: 5, createdAt: new Date("2024-04-02"), usageLimit: 200, wordpressConfig: null, javaScriptEmbedConfig: JSON.stringify({selector: "#reviews"}), crmIntegrations: null },
-    { id: 3, name: "Complete Electrical", plan: "pro", userCount: 8, createdAt: new Date("2024-02-20"), usageLimit: 200, wordpressConfig: JSON.stringify({url: "https://complete-electrical.com"}), javaScriptEmbedConfig: null, crmIntegrations: null },
-    { id: 4, name: "Delta HVAC", plan: "starter", userCount: 3, createdAt: new Date("2024-05-01"), usageLimit: 100, wordpressConfig: null, javaScriptEmbedConfig: null, crmIntegrations: null },
-    { id: 5, name: "Elite Contractors", plan: "agency", userCount: 15, createdAt: new Date("2023-12-10"), usageLimit: 1000, wordpressConfig: JSON.stringify({url: "https://elite-contractors.com"}), javaScriptEmbedConfig: null, crmIntegrations: JSON.stringify({type: "servicetitan"}) },
-  ];
-  
-  // Filter companies based on search term
+  // Filter companies based on search term and use real data
   const filteredCompanies = searchTerm 
-    ? mockCompanies.filter(company => 
+    ? companies.filter((company: any) => 
         company.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
-    : mockCompanies;
+    : companies;
     
   // Get company by ID
   const getCompanyById = (id: number) => {
