@@ -36,6 +36,7 @@ import SystemSettings from "@/pages/system-settings";
 import SystemOverview from "@/pages/system-overview";
 import SetupGuide from "@/pages/setup-guide";
 import AdminUserManagement from "@/pages/admin-user-management";
+import WordPressPlugin from "@/pages/wordpress-plugin";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
