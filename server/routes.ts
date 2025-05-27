@@ -296,6 +296,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error during login" });
     }
   });
+
+  // Password reset request
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      // Find user
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Don't reveal if email exists or not for security
+        return res.json({ message: "If this email exists, a password reset link has been sent" });
+      }
+      
+      // Generate reset token
+      const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const resetExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      
+      // Store reset token (in a real app, store this in database)
+      await storage.setPasswordResetToken(user.id, resetToken, resetExpiry);
+      
+      // Send email with reset link
+      const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
+      
+      try {
+        await emailService.sendPasswordResetEmail(email, user.username, resetUrl);
+      } catch (emailError) {
+        console.error("Failed to send password reset email:", emailError);
+        // Still return success to not reveal email existence
+      }
+      
+      res.json({ message: "If this email exists, a password reset link has been sent" });
+    } catch (error) {
+      console.error("Password reset request error:", error);
+      res.status(500).json({ message: "Server error during password reset request" });
+    }
+  });
+
+  // Password reset
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      
+      if (!token || !password) {
+        return res.status(400).json({ message: "Token and password are required" });
+      }
+      
+      if (password.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+      
+      // Verify reset token
+      const userId = await storage.verifyPasswordResetToken(token);
+      if (!userId) {
+        return res.status(400).json({ message: "Invalid or expired reset token" });
+      }
+      
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      // Update user password
+      await storage.updateUserPassword(userId, hashedPassword);
+      
+      // Clear reset token
+      await storage.clearPasswordResetToken(userId);
+      
+      res.json({ message: "Password reset successful" });
+    } catch (error) {
+      console.error("Password reset error:", error);
+      res.status(500).json({ message: "Server error during password reset" });
+    }
+  });
   
   // Emergency login endpoint for troubleshooting
   app.post("/api/emergency-login", async (req, res) => {

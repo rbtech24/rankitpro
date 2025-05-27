@@ -18,6 +18,10 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   updateUserStripeInfo(userId: number, stripeInfo: { customerId: string, subscriptionId: string }): Promise<User | undefined>;
+  updateUserPassword(userId: number, hashedPassword: string): Promise<void>;
+  setPasswordResetToken(userId: number, token: string, expiry: Date): Promise<void>;
+  verifyPasswordResetToken(token: string): Promise<number | null>;
+  clearPasswordResetToken(userId: number): Promise<void>;
   
   // Company operations
   getCompany(id: number): Promise<Company | undefined>;
@@ -144,6 +148,7 @@ export class MemStorage implements IStorage {
   private reviewFollowUpSettings: Map<number, ReviewFollowUpSettings>;
   private reviewRequestStatuses: Map<number, ReviewRequestStatus>;
   private reviewRequestTokens: Map<string, number>; // Map token to requestId
+  private passwordResetTokens: Map<string, { userId: number; expiry: Date }>; // Map token to user and expiry
   private wordpressCustomFields: Map<number, WordpressCustomFields>;
   private aiUsageTracking: Map<number, AiUsageTracking>;
   private monthlyAiUsage: Map<string, MonthlyAiUsage>;
@@ -171,6 +176,7 @@ export class MemStorage implements IStorage {
     this.reviewFollowUpSettings = new Map();
     this.reviewRequestStatuses = new Map();
     this.reviewRequestTokens = new Map();
+    this.passwordResetTokens = new Map();
     this.wordpressCustomFields = new Map();
     this.aiUsageTracking = new Map();
     this.monthlyAiUsage = new Map();
