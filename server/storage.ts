@@ -920,6 +920,80 @@ export class MemStorage implements IStorage {
       byFollowUpStep
     };
   }
+
+  // AI Usage Tracking methods
+  async createAiUsageTracking(usage: InsertAiUsageTracking): Promise<AiUsageTracking> {
+    const id = this.aiUsageTrackingId++;
+    const createdAt = new Date();
+    const newUsage: AiUsageTracking = { ...usage, id, createdAt };
+    this.aiUsageTracking.set(id, newUsage);
+    
+    // Update monthly usage
+    const year = createdAt.getFullYear();
+    const month = createdAt.getMonth() + 1;
+    await this.updateMonthlyAiUsage(usage.companyId, year, month, {
+      totalRequests: 1,
+      totalTokens: usage.tokensUsed,
+      totalCost: usage.estimatedCost
+    });
+    
+    return newUsage;
+  }
+
+  async getMonthlyAiUsage(companyId: number, year: number, month: number): Promise<MonthlyAiUsage | null> {
+    const key = `${companyId}-${year}-${month}`;
+    return this.monthlyAiUsage.get(key) || null;
+  }
+
+  async getDailyAiUsage(companyId: number, date: Date): Promise<number> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return Array.from(this.aiUsageTracking.values())
+      .filter(usage => 
+        usage.companyId === companyId &&
+        usage.createdAt >= startOfDay &&
+        usage.createdAt <= endOfDay
+      ).length;
+  }
+
+  async updateMonthlyAiUsage(companyId: number, year: number, month: number, updates: {
+    totalRequests: number;
+    totalTokens: number;
+    totalCost: number;
+    [key: string]: number;
+  }): Promise<void> {
+    const key = `${companyId}-${year}-${month}`;
+    const existing = this.monthlyAiUsage.get(key);
+    
+    if (existing) {
+      this.monthlyAiUsage.set(key, {
+        ...existing,
+        totalRequests: existing.totalRequests + updates.totalRequests,
+        totalTokens: existing.totalTokens + updates.totalTokens,
+        totalCost: existing.totalCost + updates.totalCost,
+        updatedAt: new Date()
+      });
+    } else {
+      const newUsage: MonthlyAiUsage = {
+        id: this.monthlyAiUsageId++,
+        companyId,
+        year,
+        month,
+        totalRequests: updates.totalRequests,
+        totalTokens: updates.totalTokens,
+        totalCost: updates.totalCost,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      this.monthlyAiUsage.set(key, newUsage);
+    }
+  }
+
+  private aiUsageTrackingId: number = 1;
+  private monthlyAiUsageId: number = 1;
 }
 
 export const storage = new MemStorage();
