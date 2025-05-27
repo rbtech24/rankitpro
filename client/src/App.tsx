@@ -974,6 +974,9 @@ function Router() {
       <Route path="/setup">
         <PrivateRoute component={SetupGuide} path="/setup" role="company_admin" />
       </Route>
+      <Route path="/setup-guide">
+        <PrivateRoute component={SetupGuide} path="/setup-guide" role="company_admin" />
+      </Route>
       <Route path="/check-ins">
         <PrivateRoute component={CheckIns} path="/check-ins" />
       </Route>
