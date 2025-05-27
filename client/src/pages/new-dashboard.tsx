@@ -217,11 +217,51 @@ export default function Dashboard() {
     queryKey: ["/api/auth/me"],
     queryFn: getCurrentUser
   });
+
+  // Fetch real data for dashboard metrics
+  const { data: visits = [] } = useQuery({
+    queryKey: ["/api/visits"],
+    enabled: !!auth?.user
+  });
+
+  const { data: technicians = [] } = useQuery({
+    queryKey: ["/api/technicians"],
+    enabled: !!auth?.user
+  });
+
+  const { data: blogPosts = [] } = useQuery({
+    queryKey: ["/api/blog-posts"],
+    enabled: !!auth?.user
+  });
+
+  const { data: reviews = [] } = useQuery({
+    queryKey: ["/api/review-responses"],
+    enabled: !!auth?.user
+  });
   
   const userRole = auth?.user?.role;
   const isSuperAdmin = userRole === "super_admin";
   const isCompanyAdmin = userRole === "company_admin";
   const isTechnician = userRole === "technician";
+
+  // Calculate real metrics from your data
+  const totalVisits = visits?.length || 0;
+  const totalTechnicians = technicians?.length || 0;
+  const totalBlogPosts = blogPosts?.length || 0;
+  const totalReviews = reviews?.length || 0;
+  
+  // Calculate average rating from reviews
+  const averageRating = totalReviews > 0 
+    ? (reviews.reduce((sum, review) => sum + (review.rating || 0), 0) / totalReviews).toFixed(1)
+    : "0.0";
+
+  // Calculate recent activity (this week)
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  
+  const recentVisits = visits?.filter(visit => 
+    new Date(visit.createdAt) > oneWeekAgo
+  ).length || 0;
   
   // Loading state
   if (authLoading) {
@@ -263,11 +303,18 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="hidden md:flex items-center space-x-3">
-              <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
+              <Button 
+                variant="outline" 
+                className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+                onClick={() => window.open('/help-center', '_blank')}
+              >
                 <HelpCircle className="h-4 w-4 mr-2" />
                 Help
               </Button>
-              <Button className="bg-white text-blue-700 hover:bg-blue-50">
+              <Button 
+                className="bg-white text-blue-700 hover:bg-blue-50"
+                onClick={() => setLocation('/settings')}
+              >
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>
