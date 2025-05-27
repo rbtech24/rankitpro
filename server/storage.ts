@@ -4,7 +4,7 @@ import {
   ReviewResponse, InsertReviewResponse, CheckInWithTechnician, TechnicianWithStats,
   ReviewFollowUpSettings, InsertReviewFollowUpSettings, ReviewRequestStatus, InsertReviewRequestStatus,
   WordpressCustomFields, InsertWordpressCustomFields, AiUsageTracking, InsertAiUsageTracking,
-  MonthlyAiUsage, InsertMonthlyAiUsage
+  MonthlyAiUsage, InsertMonthlyAiUsage, APICredentials, InsertAPICredentials
 } from "@shared/schema";
 
 export interface IStorage {
@@ -135,6 +135,14 @@ export interface IStorage {
     totalCost: number;
     [key: string]: number;
   }): Promise<void>;
+
+  // API Credentials operations
+  createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials>;
+  getAPICredentialsByCompany(companyId: number): Promise<APICredentials[]>;
+  getAPICredentialsByApiKey(apiKeyHash: string): Promise<APICredentials | null>;
+  updateAPICredentialLastUsed(credentialId: number): Promise<void>;
+  deactivateAPICredentials(credentialId: number, companyId: number): Promise<boolean>;
+  updateAPICredentialSecret(credentialId: number, companyId: number, secretKeyHash: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {

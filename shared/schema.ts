@@ -247,6 +247,27 @@ export const insertReviewRequestStatusSchema = createInsertSchema(reviewRequestS
   createdAt: true
 });
 
+// API Credentials table
+export const apiCredentials = pgTable("api_credentials", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").references(() => companies.id, { onDelete: "cascade" }).notNull(),
+  name: text("name").notNull(),
+  apiKeyHash: text("api_key_hash").notNull().unique(),
+  secretKeyHash: text("secret_key_hash").notNull(),
+  permissions: text("permissions").notNull(), // JSON array of permission strings
+  isActive: boolean("is_active").default(true).notNull(),
+  expiresAt: timestamp("expires_at"),
+  lastUsedAt: timestamp("last_used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+export const insertAPICredentialsSchema = createInsertSchema(apiCredentials).omit({ 
+  id: true, 
+  createdAt: true,
+  updatedAt: true
+});
+
 // AI Usage Tracking table
 export const aiUsageTracking = pgTable("ai_usage_tracking", {
   id: serial("id").primaryKey(),
@@ -369,3 +390,6 @@ export type TechnicianWithStats = Technician & {
   reviewsCount: number;
   rating: number;
 };
+
+export type APICredentials = typeof apiCredentials.$inferSelect;
+export type InsertAPICredentials = z.infer<typeof insertAPICredentialsSchema>;
