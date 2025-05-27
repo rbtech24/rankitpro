@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Sidebar from "@/components/layout/sidebar";
+import Sidebar from "@/components/layout/sidebar-clean";
 import TopNav from "@/components/layout/top-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

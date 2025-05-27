@@ -40,6 +40,7 @@ import CompaniesManagement from "@/pages/companies-management";
 import SystemSettings from "@/pages/system-settings";
 import SystemOverview from "@/pages/system-overview";
 import SetupGuide from "@/pages/setup-guide";
+import AIContentGenerator from "@/pages/ai-content-generator";
 import AdminUserManagement from "@/pages/admin-user-management";
 import WordPressPlugin from "@/pages/wordpress-plugin";
 import APICredentials from "@/pages/api-credentials";
@@ -1029,6 +1030,7 @@ function Router() {
       </Route>
       <Route path="/api-credentials">
         <PrivateRoute component={APICredentials} path="/api-credentials" role="company_admin" />
+        <PrivateRoute component={AIContentGenerator} path="/ai-content-generator" role="company_admin" />
       </Route>
       <Route path="/settings">
         <PrivateRoute component={Settings} path="/settings" />

@@ -7,6 +7,16 @@ export interface ContentGenerationParams {
   notes: string;
   location?: string;
   technicianName: string;
+  // Enhanced customization options
+  tone?: 'professional' | 'friendly' | 'technical' | 'casual';
+  length?: 'short' | 'medium' | 'long';
+  includeKeywords?: string[];
+  targetAudience?: 'homeowners' | 'business_owners' | 'property_managers' | 'general';
+  contentType?: 'blog_post' | 'social_media' | 'email' | 'website_content';
+  seoFocus?: boolean;
+  includeCallToAction?: boolean;
+  brandVoice?: string;
+  specialInstructions?: string;
 }
 
 export interface BlogPostResult {
@@ -25,25 +35,69 @@ async function generateSummaryWithOpenAI(params: ContentGenerationParams): Promi
     throw new Error("OpenAI API key not configured by administrator");
   }
 
-  const { jobType, notes, location, technicianName } = params;
+  const { 
+    jobType, 
+    notes, 
+    location, 
+    technicianName,
+    tone = 'professional',
+    length = 'medium',
+    includeKeywords = [],
+    targetAudience = 'homeowners',
+    seoFocus = true,
+    includeCallToAction = false,
+    brandVoice,
+    specialInstructions
+  } = params;
   
-  const prompt = `
-    Generate a professional summary for a home service job:
+  const lengthGuide = {
+    short: '1 paragraph, maximum 100 words',
+    medium: '2-3 paragraphs, 150-250 words', 
+    long: '4-5 paragraphs, 300-500 words'
+  };
+
+  const toneGuide = {
+    professional: 'formal, business-appropriate language',
+    friendly: 'warm, conversational, and approachable',
+    technical: 'detailed technical explanations with industry terminology',
+    casual: 'relaxed, everyday language that feels personal'
+  };
+
+  const audienceGuide = {
+    homeowners: 'residential property owners concerned with maintenance and value',
+    business_owners: 'commercial property managers focused on efficiency and cost',
+    property_managers: 'professionals managing multiple properties and tenant satisfaction',
+    general: 'broad audience including all property types'
+  };
+
+  let prompt = `
+    Generate a ${tone} summary for a home service job targeting ${targetAudience}:
     
     Job Type: ${jobType}
     Technician: ${technicianName}
     Location: ${location || 'Not specified'}
-    Notes: ${notes}
+    Work Details: ${notes}
     
-    Create a concise, SEO-friendly summary that describes the job. Use professional language suitable for a home service business website. Include technical details when relevant. 
-    Maximum length: 2 paragraphs.
+    Writing Requirements:
+    - Tone: ${toneGuide[tone]}
+    - Length: ${lengthGuide[length]}
+    - Target Audience: ${audienceGuide[targetAudience]}
+    ${seoFocus ? '- Include SEO-friendly keywords and phrases naturally' : ''}
+    ${includeKeywords.length > 0 ? `- Incorporate these keywords naturally: ${includeKeywords.join(', ')}` : ''}
+    ${includeCallToAction ? '- End with a compelling call-to-action' : ''}
+    ${brandVoice ? `- Brand Voice: ${brandVoice}` : ''}
+    ${specialInstructions ? `- Special Instructions: ${specialInstructions}` : ''}
+    
+    Create engaging content that showcases expertise and builds trust with potential customers.
   `;
 
   try {
+    const maxTokens = length === 'short' ? 150 : length === 'medium' ? 300 : 600;
+    
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 300,
+      max_tokens: maxTokens,
     });
 
     return response.choices[0].message.content || "Error generating content";
