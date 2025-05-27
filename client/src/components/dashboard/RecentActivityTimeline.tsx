@@ -6,7 +6,7 @@ import { Bell, Calendar, Star, Newspaper, RefreshCw, Loader2 } from "lucide-reac
 import { useQuery } from "@tanstack/react-query";
 
 interface Activity {
-  id: number;
+  id: string | number;
   type: 'visit_added' | 'review' | 'blog_post' | 'integration' | string;
   content: string;
   author: {
@@ -45,7 +45,7 @@ const RecentActivityTimeline = () => {
     const allActivities: Activity[] = [];
 
     // Add recent visits
-    if (visits) {
+    if (visits && Array.isArray(visits)) {
       visits.slice(0, 3).forEach((visit: any) => {
         const technician = technicians?.find((t: any) => t.id === visit.technicianId);
         allActivities.push({
@@ -62,7 +62,7 @@ const RecentActivityTimeline = () => {
     }
 
     // Add recent blog posts
-    if (blogPosts) {
+    if (blogPosts && Array.isArray(blogPosts)) {
       blogPosts.slice(0, 2).forEach((post: any) => {
         allActivities.push({
           id: `blog-${post.id}`,
@@ -75,7 +75,7 @@ const RecentActivityTimeline = () => {
     }
 
     // Add recent reviews
-    if (reviews) {
+    if (reviews && Array.isArray(reviews)) {
       reviews.slice(0, 3).forEach((review: any) => {
         const stars = '★'.repeat(review.rating);
         allActivities.push({
