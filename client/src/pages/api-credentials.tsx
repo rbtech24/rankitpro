@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Sidebar } from "@/components/layout/sidebar";
+import Sidebar from "@/components/layout/sidebar";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -71,8 +71,10 @@ export default function APICredentials() {
 
   // Create credentials mutation
   const createMutation = useMutation({
-    mutationFn: (data: CreateCredentialForm) => 
-      apiRequest("POST", "/api/api-credentials", data),
+    mutationFn: async (data: CreateCredentialForm) => {
+      const response = await apiRequest("POST", "/api/api-credentials", data);
+      return response.json();
+    },
     onSuccess: (data) => {
       setNewCredentials(data);
       setIsCreateDialogOpen(false);

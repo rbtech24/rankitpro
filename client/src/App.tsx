@@ -37,6 +37,7 @@ import SystemOverview from "@/pages/system-overview";
 import SetupGuide from "@/pages/setup-guide";
 import AdminUserManagement from "@/pages/admin-user-management";
 import WordPressPlugin from "@/pages/wordpress-plugin";
+import APICredentials from "@/pages/api-credentials";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
@@ -1017,6 +1018,9 @@ function Router() {
       </Route>
       <Route path="/wordpress-plugin">
         <PrivateRoute component={WordPressPlugin} path="/wordpress-plugin" role="company_admin" />
+      </Route>
+      <Route path="/api-credentials">
+        <PrivateRoute component={APICredentials} path="/api-credentials" role="company_admin" />
       </Route>
       <Route path="/settings">
         <PrivateRoute component={Settings} path="/settings" />
