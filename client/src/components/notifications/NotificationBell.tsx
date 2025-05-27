@@ -12,35 +12,33 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import { useNotifications } from '@/context/NotificationContext';
+import { Link } from 'wouter';
 
 interface NotificationBellProps {
   count?: number;
 }
 
-const NotificationBell: React.FC<NotificationBellProps> = ({ count = 5 }) => {
+const NotificationBell: React.FC<NotificationBellProps> = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { notifications, unreadCount, markAsRead } = useNotifications();
   
-  // Sample notifications
-  const notifications = [
-    {
-      id: 1,
-      title: "New Company Sign-up",
-      message: "Top HVAC Solutions has signed up for the Professional plan",
-      time: "15 minutes ago"
-    },
-    {
-      id: 2,
-      title: "Payment Failed",
-      message: "City Roofing Experts had a failed payment attempt",
-      time: "2 hours ago"
-    },
-    {
-      id: 3,
-      title: "API Rate Limit Warning",
-      message: "API rate limit for OpenAI is at 80% of daily quota",
-      time: "50 minutes ago"
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
+    return `${Math.floor(diffInMinutes / 1440)} days ago`;
+  };
+  
+  const handleNotificationClick = (notification: any) => {
+    if (!notification.read) {
+      markAsRead(notification.id);
     }
-  ];
+  };
   
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -52,7 +50,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ count = 5 }) => {
           onClick={() => setIsOpen(!isOpen)}
         >
           <Bell className="h-5 w-5" />
-          {count > 0 && (
+          {unreadCount > 0 && (
             <Badge 
               className="absolute -top-1 -right-1 px-1.5 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500"
               variant="secondary"
