@@ -12,7 +12,7 @@ import Dashboard from "@/pages/new-dashboard";
 import TechnicianDashboard from "@/pages/tech-dashboard";
 import TechDashboardComplete from "@/pages/tech-dashboard-complete";
 import TechnicianFinal from "@/pages/technician-final";
-import TechnicianDashboardFinal from "@/pages/technician-dashboard-final";
+import MobileFieldTech from "@/pages/mobile-field-tech";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
@@ -976,14 +976,14 @@ function Router() {
         </div>
       </Route>
       
-      {/* Clean Field Tech Dashboard - No Conflicts */}
+      {/* Mobile Field Tech App */}
       <Route path="/field-tech">
-        <TechnicianDashboardFinal />
+        <MobileFieldTech />
       </Route>
       
-      {/* Dashboard Pages - NEW FIELD TECH DASHBOARD */}
+      {/* Dashboard Pages - MOBILE FIELD TECH */}
       <Route path="/dashboard">
-        <TechnicianDashboardFinal />
+        <MobileFieldTech />
       </Route>
       <Route path="/admin-dashboard">
         <PrivateRoute component={Dashboard} path="/admin-dashboard" />
