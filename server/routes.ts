@@ -129,114 +129,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
   
-  // PRIORITY: Job Types Management API - Must be before other routes to avoid conflicts
-  const companyJobTypes = new Map<number, Array<{id: number, name: string, isActive: boolean}>>();
-
-  app.get('/api/job-types', isAuthenticated, async (req: Request, res: Response) => {
-    try {
-      const companyId = req.user?.companyId;
-      if (!companyId) {
-        return res.status(400).json({ error: 'Company ID required' });
-      }
-      
-      const jobTypes = companyJobTypes.get(companyId) || [];
-      res.json(jobTypes);
-    } catch (error) {
-      console.error('Error fetching job types:', error);
-      res.status(500).json({ error: 'Failed to fetch job types' });
-    }
-  });
-
-  // TEST ENDPOINT - Completely unique name to avoid any conflicts
-  app.post('/api/test-job-creation-unique', isAuthenticated, async (req: Request, res: Response) => {
-    console.log('=== TEST ENDPOINT HIT ===');
-    console.log('Request body:', req.body);
-    res.json({ success: true, message: 'Test endpoint working' });
-  });
-
-  app.post('/api/job-types', isAuthenticated, async (req: Request, res: Response) => {
-    console.log('=== POST /api/job-types HIT ===');
-    try {
-      const { name } = req.body;
-      const companyId = req.user?.companyId;
-      
-      console.log('Body:', req.body);
-      console.log('User company ID:', companyId);
-      
-      if (!companyId) {
-        return res.status(400).json({ error: 'Company ID required' });
-      }
-
-      if (!name || !name.trim()) {
-        return res.status(400).json({ error: 'Job type name is required' });
-      }
-
-      const existingJobTypes = companyJobTypes.get(companyId) || [];
-      const newId = Math.max(0, ...existingJobTypes.map(jt => jt.id)) + 1;
-      const newJobType = {
-        id: newId,
-        name: name.trim(),
-        isActive: true
-      };
-
-      const updatedJobTypes = [...existingJobTypes, newJobType];
-      companyJobTypes.set(companyId, updatedJobTypes);
-
-      console.log('Successfully created job type:', newJobType);
-      res.json(newJobType);
-    } catch (error) {
-      console.error('Error creating job type:', error);
-      res.status(500).json({ error: 'Failed to create job type' });
-    }
-  });
-
-  app.patch('/api/job-types/:id', isAuthenticated, async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const { name } = req.body;
-      const companyId = req.user?.companyId;
-      
-      if (!companyId) {
-        return res.status(400).json({ error: 'Company ID required' });
-      }
-
-      const existingJobTypes = companyJobTypes.get(companyId) || [];
-      const jobTypeIndex = existingJobTypes.findIndex(jt => jt.id === parseInt(id));
-      
-      if (jobTypeIndex === -1) {
-        return res.status(404).json({ error: 'Job type not found' });
-      }
-
-      existingJobTypes[jobTypeIndex].name = name;
-      companyJobTypes.set(companyId, existingJobTypes);
-
-      res.json(existingJobTypes[jobTypeIndex]);
-    } catch (error) {
-      console.error('Error updating job type:', error);
-      res.status(500).json({ error: 'Failed to update job type' });
-    }
-  });
-
-  app.delete('/api/job-types/:id', isAuthenticated, async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const companyId = req.user?.companyId;
-      
-      if (!companyId) {
-        return res.status(400).json({ error: 'Company ID required' });
-      }
-
-      const existingJobTypes = companyJobTypes.get(companyId) || [];
-      const filteredJobTypes = existingJobTypes.filter(jt => jt.id !== parseInt(id));
-      
-      companyJobTypes.set(companyId, filteredJobTypes);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting job type:', error);
-      res.status(500).json({ error: 'Failed to delete job type' });
-    }
-  });
-  
   // Add an emergency login route for debugging purposes
   app.post("/api/emergency-login", async (req, res) => {
     try {
@@ -1395,6 +1287,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get company stats error:", error);
       res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  // Job Types Management API - Placed after all middleware setup is complete
+  const companyJobTypes = new Map<number, Array<{id: number, name: string, isActive: boolean}>>();
+
+  app.get('/api/job-types', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        return res.status(400).json({ error: 'Company ID required' });
+      }
+      
+      const jobTypes = companyJobTypes.get(companyId) || [];
+      res.json(jobTypes);
+    } catch (error) {
+      console.error('Error fetching job types:', error);
+      res.status(500).json({ error: 'Failed to fetch job types' });
+    }
+  });
+
+  app.post('/api/test-job-creation-unique', isAuthenticated, async (req: Request, res: Response) => {
+    console.log('=== TEST ENDPOINT HIT ===');
+    console.log('Request body:', req.body);
+    console.log('User:', req.user);
+    res.json({ success: true, message: 'Test endpoint working' });
+  });
+
+  app.post('/api/job-types', isAuthenticated, async (req: Request, res: Response) => {
+    console.log('=== POST /api/job-types HIT ===');
+    try {
+      const { name } = req.body;
+      const companyId = req.user?.companyId;
+      
+      console.log('Body:', req.body);
+      console.log('User company ID:', companyId);
+      
+      if (!companyId) {
+        return res.status(400).json({ error: 'Company ID required' });
+      }
+
+      if (!name || !name.trim()) {
+        return res.status(400).json({ error: 'Job type name is required' });
+      }
+
+      const existingJobTypes = companyJobTypes.get(companyId) || [];
+      const newId = Math.max(0, ...existingJobTypes.map(jt => jt.id)) + 1;
+      const newJobType = {
+        id: newId,
+        name: name.trim(),
+        isActive: true
+      };
+
+      const updatedJobTypes = [...existingJobTypes, newJobType];
+      companyJobTypes.set(companyId, updatedJobTypes);
+
+      console.log('Successfully created job type:', newJobType);
+      res.json(newJobType);
+    } catch (error) {
+      console.error('Error creating job type:', error);
+      res.status(500).json({ error: 'Failed to create job type' });
+    }
+  });
+
+  app.patch('/api/job-types/:id', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { name } = req.body;
+      const companyId = req.user?.companyId;
+      
+      if (!companyId) {
+        return res.status(400).json({ error: 'Company ID required' });
+      }
+
+      const existingJobTypes = companyJobTypes.get(companyId) || [];
+      const jobTypeIndex = existingJobTypes.findIndex(jt => jt.id === parseInt(id));
+      
+      if (jobTypeIndex === -1) {
+        return res.status(404).json({ error: 'Job type not found' });
+      }
+
+      existingJobTypes[jobTypeIndex].name = name;
+      companyJobTypes.set(companyId, existingJobTypes);
+
+      res.json(existingJobTypes[jobTypeIndex]);
+    } catch (error) {
+      console.error('Error updating job type:', error);
+      res.status(500).json({ error: 'Failed to update job type' });
+    }
+  });
+
+  app.delete('/api/job-types/:id', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const companyId = req.user?.companyId;
+      
+      if (!companyId) {
+        return res.status(400).json({ error: 'Company ID required' });
+      }
+
+      const existingJobTypes = companyJobTypes.get(companyId) || [];
+      const filteredJobTypes = existingJobTypes.filter(jt => jt.id !== parseInt(id));
+      
+      companyJobTypes.set(companyId, filteredJobTypes);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting job type:', error);
+      res.status(500).json({ error: 'Failed to delete job type' });
     }
   });
   
