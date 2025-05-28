@@ -455,32 +455,29 @@ export default function CompaniesManagement() {
     status: Math.random() > 0.1 ? "active" : "inactive"
   })) : [];
   
-  // Mock check-ins for selected company
-  const mockCheckIns = selectedCompany ? Array.from({ length: 10 }).map((_, index) => ({
-    id: index + 1,
-    jobType: ["Repair", "Installation", "Maintenance", "Inspection", "Emergency"][Math.floor(Math.random() * 5)],
-    technicianName: `Technician ${Math.floor(Math.random() * selectedCompany.currentTechnicians) + 1}`,
-    location: `${["123 Main St", "456 Oak Ave", "789 Pine Rd", "321 Elm Blvd", "654 Maple Ln"][Math.floor(Math.random() * 5)]}, ${selectedCompany.city}, ${selectedCompany.state}`,
-    dateCompleted: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toISOString(),
-    photosCount: Math.floor(Math.random() * 6) + 1,
-    noteLength: Math.floor(Math.random() * 300) + 50,
-    hasBlogPost: Math.random() > 0.3,
-    hasReviewRequest: Math.random() > 0.2,
-    reviewStatus: Math.random() > 0.5 ? (Math.random() > 0.7 ? "completed" : "pending") : "none"
-  })) : [];
-  
-  // Mock reviews for selected company
-  const mockReviews = selectedCompany ? Array.from({ length: 10 }).map((_, index) => ({
-    id: index + 1,
-    customerName: `Customer ${index + 1}`,
-    rating: Math.floor(Math.random() * 2) + 4, // 4 or 5 stars
-    reviewText: "Great service! The technician was professional, on time, and fixed our issue quickly. Would definitely recommend!",
-    technicianName: `Technician ${Math.floor(Math.random() * selectedCompany.currentTechnicians) + 1}`,
-    jobType: ["Repair", "Installation", "Maintenance", "Inspection", "Emergency"][Math.floor(Math.random() * 5)],
-    reviewDate: new Date(Date.now() - Math.floor(Math.random() * 90 * 24 * 60 * 60 * 1000)).toISOString(),
-    platform: ["Google", "Facebook", "Yelp", "Website"][Math.floor(Math.random() * 4)],
-    responseStatus: Math.random() > 0.2 ? "responded" : "pending"
-  })) : [];
+  // Real check-ins data for selected company
+  const { data: companyCheckIns = [] } = useQuery({
+    queryKey: ['/api/companies', selectedCompany?.id, 'check-ins'],
+    queryFn: async () => {
+      if (!selectedCompany?.id) return [];
+      const res = await fetch(`/api/companies/${selectedCompany.id}/check-ins`, { credentials: 'include' });
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!selectedCompany?.id
+  });
+
+  // Real reviews data for selected company
+  const { data: companyReviews = [] } = useQuery({
+    queryKey: ['/api/companies', selectedCompany?.id, 'reviews'],
+    queryFn: async () => {
+      if (!selectedCompany?.id) return [];
+      const res = await fetch(`/api/companies/${selectedCompany.id}/reviews`, { credentials: 'include' });
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!selectedCompany?.id
+  });
   
   return (
     <div className="flex h-screen bg-gray-50">
@@ -1660,7 +1657,7 @@ export default function CompaniesManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockCheckIns.map(checkIn => (
+                {companyCheckIns.map(checkIn => (
                   <TableRow key={checkIn.id}>
                     <TableCell>{checkIn.jobType}</TableCell>
                     <TableCell>{checkIn.technicianName}</TableCell>
