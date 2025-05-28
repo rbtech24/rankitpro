@@ -18,11 +18,10 @@ interface TechNavigationProps {
 export default function TechNavigation({ className, onLogout }: TechNavigationProps) {
   const [location] = useLocation();
   
-  // Tech-only navigation items
+  // Tech-only navigation items - DISABLED to prevent conflicts with new dashboard
   const navigation = [
     { label: 'Dashboard', path: '/dashboard', icon: <Home className="h-5 w-5" /> },
-    { label: 'My Visits', path: '/visits', icon: <ClipboardList className="h-5 w-5" /> },
-    { label: 'Mobile App', path: '/tech-app', icon: <MessageSquare className="h-5 w-5" /> },
+    // Visits and reviews now handled internally in dashboard
   ];
 
   return (
