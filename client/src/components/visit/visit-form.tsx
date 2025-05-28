@@ -98,6 +98,18 @@ const formSchema = z.object({
   longitude: z.number().optional(),
   contentType: z.enum(["none", "service_post", "full_blog"]).default("none"),
   sendReviewRequest: z.boolean().default(false),
+  customerName: z.string().optional(),
+  customerEmail: z.string().email().optional().or(z.literal("")),
+  customerPhone: z.string().optional(),
+}).refine((data) => {
+  if (data.sendReviewRequest) {
+    return data.customerName && data.customerName.trim() !== "" && 
+           (data.customerEmail || data.customerPhone);
+  }
+  return true;
+}, {
+  message: "Customer name and either email or phone required for review requests",
+  path: ["sendReviewRequest"]
 });
 
 type VisitFormValues = z.infer<typeof formSchema>;
@@ -168,6 +180,9 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
       location: "",
       contentType: "none" as const,
       sendReviewRequest: false,
+      customerName: "",
+      customerEmail: "",
+      customerPhone: "",
     },
   });
   
@@ -330,15 +345,30 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
       });
     }
     
-    // If send review request is checked, we would handle that here
-    // This would typically open a modal to collect customer information
-    if (values.sendReviewRequest) {
-      // For this implementation, we'll just show a toast
-      toast({
-        title: "Review Request",
-        description: "The review request feature will be implemented in the next phase.",
-        variant: "default",
-      });
+    // Handle review request if customer information is provided
+    if (values.sendReviewRequest && values.customerName) {
+      try {
+        await apiRequest("POST", "/api/review-requests", {
+          customerName: values.customerName,
+          customerEmail: values.customerEmail || null,
+          customerPhone: values.customerPhone || null,
+          visitId: result.id,
+          jobType: values.jobType,
+          technicianId: parseInt(values.technicianId),
+        });
+        
+        toast({
+          title: "Review Request Scheduled",
+          description: `Review request will be sent to ${values.customerName} via ${values.customerEmail ? 'email' : 'SMS'}.`,
+        });
+      } catch (error) {
+        console.error("Failed to create review request:", error);
+        toast({
+          title: "Review Request Failed",
+          description: "The visit was created but the review request could not be scheduled.",
+          variant: "destructive",
+        });
+      }
     }
   };
   
@@ -567,6 +597,72 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
                   </FormItem>
                 )}
               />
+
+              {/* Customer Information - only show when review request is checked */}
+              {form.watch("sendReviewRequest") && (
+                <div className="space-y-4 border-t pt-4">
+                  <h3 className="text-sm font-medium text-gray-700">Customer Information</h3>
+                  
+                  <FormField
+                    control={form.control}
+                    name="customerName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Name *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="John Smith"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="customerEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="email"
+                              placeholder="john@example.com"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="customerPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="tel"
+                              placeholder="(555) 123-4567"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <p className="text-xs text-gray-500">
+                    * Either email or phone number is required for review requests
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
