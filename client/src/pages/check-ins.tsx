@@ -50,10 +50,19 @@ export default function CheckIns() {
   
   const handleCreatePost = async (checkInId: number) => {
     try {
-      // Generate blog post content
+      // Get the visit data first
+      const visit = checkIns.find(c => c.id === checkInId);
+      if (!visit) {
+        throw new Error("Visit not found");
+      }
+
+      // Generate blog post content using the visit data
       const contentRes = await apiRequest("POST", "/api/generate-content", {
-        checkInId,
-        contentType: "blog"
+        jobType: visit.jobType,
+        notes: visit.notes || "",
+        location: visit.location || "",
+        technicianName: visit.technician.name,
+        contentType: "blog_post"
       });
       const contentData = await contentRes.json();
       
@@ -66,9 +75,12 @@ export default function CheckIns() {
       
       toast({
         title: "Blog Post Created",
-        description: "The blog post was created successfully.",
+        description: "The blog post was created successfully and is ready for publishing.",
         variant: "default",
       });
+      
+      // Refresh the data
+      refetch();
     } catch (error) {
       toast({
         title: "Error",
@@ -78,12 +90,32 @@ export default function CheckIns() {
     }
   };
 
-  const handleRequestReview = (checkInId: number, technicianId: number) => {
-    toast({
-      title: "Review Request",
-      description: "The review request modal would open here.",
-      variant: "default",
-    });
+  const handleRequestReview = async (checkInId: number, technicianId: number) => {
+    try {
+      await apiRequest("POST", "/api/review-requests", {
+        checkInId,
+        technicianId,
+        method: "email",
+        customerEmail: "customer@example.com", // In real app, this would come from the visit data
+        customerName: "Customer",
+        message: "We'd love to hear about your experience with our service!"
+      });
+      
+      toast({
+        title: "Review Request Sent",
+        description: "Customer review request has been sent successfully.",
+        variant: "default",
+      });
+      
+      // Refresh the data
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send review request. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -91,8 +123,8 @@ export default function CheckIns() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Check-ins</h1>
-            <p className="text-sm text-gray-500">View and manage all check-ins from your technicians.</p>
+            <h1 className="text-2xl font-bold text-gray-900">Visits</h1>
+            <p className="text-sm text-gray-500">View and manage all visits from your technicians.</p>
           </div>
           
           <div className="flex gap-2 w-full sm:w-auto">
@@ -103,7 +135,7 @@ export default function CheckIns() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <Button onClick={() => setCheckInModalOpen(true)}>
-              New Check-in
+              Add New Visit
             </Button>
           </div>
         </div>
@@ -138,7 +170,7 @@ export default function CheckIns() {
                     : "No check-ins found. Create your first check-in to get started."}
                 </p>
                 <Button className="mt-4" onClick={() => setCheckInModalOpen(true)}>
-                  Create Check-in
+                  Create Visit
                 </Button>
               </div>
             )}
