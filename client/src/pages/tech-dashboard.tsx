@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import MobileVisitModal from '@/components/technician/mobile-visit-modal';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import logoPath from '@assets/rank it pro logo.png';
 import { 
   MapPin, 
   Camera, 
@@ -16,7 +17,8 @@ import {
   Home,
   ClipboardList,
   Smartphone,
-  LogOut
+  LogOut,
+  Star
 } from 'lucide-react';
 
 export default function TechDashboardPage() {
@@ -65,6 +67,7 @@ export default function TechDashboardPage() {
   const navigation = [
     { label: 'Dashboard', path: '/dashboard', icon: Home },
     { label: 'My Visits', path: '/visits', icon: ClipboardList },
+    { label: 'My Reviews', path: '/tech-reviews', icon: CheckCircle },
     { label: 'Mobile App', path: '/tech-app', icon: Smartphone },
   ];
 
@@ -77,13 +80,7 @@ export default function TechDashboardPage() {
         {/* Logo */}
         <div className="flex items-center px-6 py-4 border-b">
           <div className="flex items-center">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">RP</span>
-            </div>
-            <div className="ml-3">
-              <div className="text-lg font-semibold text-gray-900">RANK</div>
-              <div className="text-lg font-semibold text-green-600">IT PRO</div>
-            </div>
+            <img src={logoPath} alt="Rank It Pro" className="h-10 w-auto" />
           </div>
         </div>
         
@@ -127,12 +124,7 @@ export default function TechDashboardPage() {
         <div className="sticky top-0 z-10 flex-shrink-0 bg-white shadow-sm md:hidden">
           <div className="flex items-center justify-between h-16 px-4">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">RP</span>
-              </div>
-              <div className="ml-3">
-                <div className="text-lg font-semibold text-gray-900">RANK IT PRO</div>
-              </div>
+              <img src={logoPath} alt="Rank It Pro" className="h-8 w-auto" />
             </div>
             <div className="flex items-center space-x-2">
               <NotificationBell />
@@ -154,12 +146,7 @@ export default function TechDashboardPage() {
             <div className="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-white">
               <div className="flex items-center justify-between px-4">
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">RP</span>
-                  </div>
-                  <div className="ml-3">
-                    <div className="text-lg font-semibold text-gray-900">RANK IT PRO</div>
-                  </div>
+                  <img src={logoPath} alt="Rank It Pro" className="h-8 w-auto" />
                 </div>
                 <Button
                   variant="ghost"
