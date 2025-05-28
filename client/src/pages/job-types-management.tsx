@@ -78,11 +78,17 @@ export default function JobTypesManagement() {
 
   const updateJobTypeMutation = useMutation({
     mutationFn: async ({ id, name }: { id: number; name: string }) => {
-      const res = await apiRequest("PATCH", `/api/job-types/${id}`, { name });
-      return res.json();
+      const updatedJobTypes = jobTypes.map(jt => 
+        jt.id === id ? { ...jt, name: name.trim() } : jt
+      );
+      localStorage.setItem('company-job-types', JSON.stringify(updatedJobTypes));
+      return updatedJobTypes.find(jt => jt.id === id);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/job-types"] });
+    onSuccess: (_, variables) => {
+      const updatedJobTypes = jobTypes.map(jt => 
+        jt.id === variables.id ? { ...jt, name: variables.name.trim() } : jt
+      );
+      setJobTypes(updatedJobTypes);
       setEditingId(null);
       setEditingName("");
       toast({
@@ -101,11 +107,12 @@ export default function JobTypesManagement() {
 
   const deleteJobTypeMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await apiRequest("DELETE", `/api/job-types/${id}`);
-      return res.json();
+      const updatedJobTypes = jobTypes.filter(jt => jt.id !== id);
+      localStorage.setItem('company-job-types', JSON.stringify(updatedJobTypes));
+      return { success: true };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/job-types"] });
+    onSuccess: (_, deletedId) => {
+      setJobTypes(prev => prev.filter(jt => jt.id !== deletedId));
       toast({
         title: "Job Type Deleted",
         description: "Job type has been deleted successfully.",
