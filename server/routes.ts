@@ -1194,6 +1194,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Tasks API endpoint for dashboard
+  app.get("/api/tasks/upcoming", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user.companyId;
+      
+      if (!companyId && req.user.role !== "super_admin") {
+        return res.status(400).json({ message: "No company associated with this user" });
+      }
+
+      // Generate real tasks based on actual data
+      const tasks = [];
+      
+      // Check for recent check-ins that may need blog posts
+      const recentCheckIns = await storage.getCheckInsByCompany(companyId, 5);
+      const unbloggedCheckIns = recentCheckIns.filter(checkIn => !checkIn.isBlog);
+      
+      if (unbloggedCheckIns.length > 0) {
+        tasks.push({
+          id: 1,
+          title: `Review and approve ${unbloggedCheckIns.length} pending blog posts`,
+          dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24), // Tomorrow
+          priority: 'high',
+          completed: false
+        });
+      }
+
+      // Check for pending review requests
+      const reviewRequests = await storage.getReviewRequestsByCompany(companyId);
+      const pendingRequests = reviewRequests.filter(req => req.status === 'pending');
+      
+      if (pendingRequests.length > 0) {
+        tasks.push({
+          id: 2,
+          title: `Follow up on ${pendingRequests.length} pending review requests`,
+          dueDate: new Date(Date.now() + 1000 * 60 * 60 * 48), // 2 days
+          priority: 'medium',
+          completed: false
+        });
+      }
+
+      res.json(tasks);
+    } catch (error) {
+      console.error("Get upcoming tasks error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Review Analytics endpoints
   app.get("/api/review-analytics/metrics", isAuthenticated, async (req, res) => {
     try {
