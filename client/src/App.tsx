@@ -11,6 +11,7 @@ import Register from "@/pages/register";
 import Dashboard from "@/pages/new-dashboard";
 import TechnicianDashboard from "@/pages/tech-dashboard";
 import TechDashboardComplete from "@/pages/tech-dashboard-complete";
+import TechnicianFinal from "@/pages/technician-final";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
@@ -974,9 +975,9 @@ function Router() {
         </div>
       </Route>
       
-      {/* Dashboard Pages */}
+      {/* Dashboard Pages - FORCED TECH DASHBOARD ONLY */}
       <Route path="/dashboard">
-        <PrivateRoute component={TechDashboardComplete} path="/dashboard" role="technician" />
+        <TechnicianFinal />
       </Route>
       <Route path="/admin-dashboard">
         <PrivateRoute component={Dashboard} path="/admin-dashboard" />
