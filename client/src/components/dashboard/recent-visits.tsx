@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -7,6 +7,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import VisitCard from "@/components/visit/visit-card";
 import { AuthState, getCurrentUser } from "@/lib/auth";
+import ReviewRequestModal from "@/components/modals/review-request-modal";
 
 interface Technician {
   id: number;
@@ -82,22 +83,12 @@ export default function RecentVisits() {
     }
   };
   
-  const handleRequestReview = async (visitId: number, technicianId: number) => {
-    try {
-      // This would open a modal to collect customer information
-      // For now, we'll just show a success toast
-      toast({
-        title: "Review Request",
-        description: "The review request modal would open here.",
-        variant: "default",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to open review request form.",
-        variant: "destructive",
-      });
-    }
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedVisit, setSelectedVisit] = useState<{ visitId: number; technicianId: number } | null>(null);
+
+  const handleRequestReview = (visitId: number, technicianId: number) => {
+    setSelectedVisit({ visitId, technicianId });
+    setReviewModalOpen(true);
   };
   
   return (
@@ -170,6 +161,16 @@ export default function RecentVisits() {
           </div>
         )}
       </div>
+
+      <ReviewRequestModal
+        isOpen={reviewModalOpen}
+        onClose={() => {
+          setReviewModalOpen(false);
+          setSelectedVisit(null);
+        }}
+        visitId={selectedVisit?.visitId}
+        technicianId={selectedVisit?.technicianId}
+      />
     </Card>
   );
 }
