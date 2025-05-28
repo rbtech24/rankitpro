@@ -77,14 +77,28 @@ export function TechnicianSidebar({
   ];
 
   const handleItemClick = (itemId: string, event?: React.MouseEvent) => {
-    // Prevent event bubbling that might trigger other handlers
+    // Completely prevent any route navigation
     if (event) {
       event.preventDefault();
       event.stopPropagation();
+      event.stopImmediatePropagation();
     }
     
-    console.log('Sidebar navigation clicked:', itemId); // Debug log
+    // Force stay on current route
+    const currentPath = window.location.pathname;
+    
+    console.log('Sidebar navigation clicked:', itemId);
+    console.log('Current path:', currentPath);
+    
+    // Call the view change handler
     onViewChange(itemId);
+    
+    // Ensure we stay on the current route
+    setTimeout(() => {
+      if (window.location.pathname !== currentPath) {
+        window.history.replaceState(null, '', currentPath);
+      }
+    }, 0);
     
     // Close mobile sidebar after selection
     if (window.innerWidth < 1024) {

@@ -37,8 +37,12 @@ export default function FieldTechDashboard() {
   const handleViewChange = (view: string) => {
     console.log('Dashboard: View change requested:', view);
     console.log('Dashboard: Current activeView:', activeView);
+    
+    // Force prevent any route navigation
+    window.history.pushState(null, '', window.location.pathname);
+    
     setActiveView(view);
-    console.log('Dashboard: New activeView should be:', view);
+    console.log('Dashboard: New activeView set to:', view);
   };
   const [supportModalOpen, setSupportModalOpen] = useState(false);
   const [supportForm, setSupportForm] = useState({
