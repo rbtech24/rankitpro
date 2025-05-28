@@ -43,6 +43,14 @@ export default function BlogPosts() {
       variant: "default",
     });
   };
+
+  const handleEditPost = (postId: number) => {
+    toast({
+      title: "Edit Blog Post",
+      description: `Opening editor for blog post #${postId}`,
+      variant: "default",
+    });
+  };
   
   return (
     <DashboardLayout>
@@ -116,7 +124,7 @@ export default function BlogPosts() {
                     <span className="text-xs text-gray-400">
                       {post.checkInId ? `From Check-in #${post.checkInId}` : 'Manual Post'}
                     </span>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handleEditPost(post.id)}>
                       Edit
                     </Button>
                   </div>
