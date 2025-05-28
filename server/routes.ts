@@ -1312,27 +1312,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('=== TEST ENDPOINT HIT ===');
     console.log('Request body:', req.body);
     console.log('User:', req.user);
-    res.json({ success: true, message: 'Test endpoint working' });
+    res.setHeader('Content-Type', 'application/json');
+    return res.json({ success: true, message: 'Test endpoint working' });
   });
 
-  app.post('/api/job-types', isAuthenticated, async (req: Request, res: Response) => {
-    console.log('=== POST /api/job-types HIT ===');
+  app.post('/api/job-types', async (req: Request, res: Response) => {
+    // Manual auth check to bypass middleware issues
+    if (!req.session?.userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
     try {
-      const { name } = req.body;
-      const companyId = req.user?.companyId;
-      
-      console.log('Body:', req.body);
-      console.log('User company ID:', companyId);
-      
-      if (!companyId) {
-        return res.status(400).json({ error: 'Company ID required' });
+      const user = await storage.getUser(req.session.userId);
+      if (!user || !user.companyId) {
+        return res.status(401).json({ error: 'User not found or no company' });
       }
-
-      if (!name || !name.trim()) {
+      
+      const { name } = req.body;
+      if (!name?.trim()) {
         return res.status(400).json({ error: 'Job type name is required' });
       }
 
-      const existingJobTypes = companyJobTypes.get(companyId) || [];
+      const existingJobTypes = companyJobTypes.get(user.companyId) || [];
       const newId = Math.max(0, ...existingJobTypes.map(jt => jt.id)) + 1;
       const newJobType = {
         id: newId,
@@ -1341,13 +1342,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const updatedJobTypes = [...existingJobTypes, newJobType];
-      companyJobTypes.set(companyId, updatedJobTypes);
+      companyJobTypes.set(user.companyId, updatedJobTypes);
 
-      console.log('Successfully created job type:', newJobType);
-      res.json(newJobType);
+      // Force JSON response
+      res.setHeader('Content-Type', 'application/json');
+      res.status(200);
+      return res.end(JSON.stringify(newJobType));
     } catch (error) {
-      console.error('Error creating job type:', error);
-      res.status(500).json({ error: 'Failed to create job type' });
+      res.setHeader('Content-Type', 'application/json');
+      res.status(500);
+      return res.end(JSON.stringify({ error: 'Failed to create job type' }));
     }
   });
 

@@ -33,7 +33,7 @@ export default function JobTypesManagement() {
 
   const createJobTypeMutation = useMutation({
     mutationFn: async (name: string) => {
-      const res = await apiRequest("POST", "/api/test-job-creation-unique", { name });
+      const res = await apiRequest("POST", "/api/job-types", { name });
       if (!res.ok) {
         throw new Error(`Failed to create job type: ${res.status}`);
       }
