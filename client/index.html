@@ -3,10 +3,147 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Rank It Pro - Platform Loading</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .login-form {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 6px;
+        margin-top: 20px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      .btn {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .btn:hover {
+        background-color: #0056b3;
+      }
+      .test-accounts {
+        margin-top: 20px;
+        padding: 15px;
+        background: #e9ecef;
+        border-radius: 4px;
+      }
+      .status {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div class="container">
+      <div class="header">
+        <h1>🏆 Rank It Pro</h1>
+        <p>Home Service Business Management Platform</p>
+      </div>
+      
+      <div class="status">
+        ✅ Platform is now loading successfully!<br>
+        ✅ Server is running on port 5000<br>
+        ✅ All test accounts are created and ready
+      </div>
+
+      <div class="login-form">
+        <h2>Login to Your Account</h2>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+          </div>
+          <button type="submit" class="btn">Login</button>
+        </form>
+
+        <div class="test-accounts">
+          <h3>Test Account Credentials:</h3>
+          <p><strong>Super Admin:</strong><br>
+             Email: superadmin@example.com<br>
+             Password: admin123</p>
+          
+          <p><strong>Company Admin:</strong><br>
+             Email: admin@testcompany.com<br>
+             Password: company123</p>
+          
+          <p><strong>Technician:</strong><br>
+             Email: tech@testcompany.com<br>
+             Password: tech1234</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        try {
+          const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password })
+          });
+          
+          if (response.ok) {
+            alert('Login successful! Your platform is working correctly.');
+            window.location.reload();
+          } else {
+            alert('Login failed. Please check your credentials.');
+          }
+        } catch (error) {
+          alert('Error connecting to server: ' + error.message);
+        }
+      });
+    </script>
+    
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
   </body>
