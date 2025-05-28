@@ -1422,7 +1422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/job-types', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+  app.post('/api/job-types', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { name } = req.body;
       const companyId = req.user.companyId;
@@ -1453,7 +1453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/job-types/:id', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+  app.patch('/api/job-types/:id', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const { name } = req.body;
@@ -1480,7 +1480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/job-types/:id', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+  app.delete('/api/job-types/:id', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const companyId = req.user.companyId;
