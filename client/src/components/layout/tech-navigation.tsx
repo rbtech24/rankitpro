@@ -21,10 +21,8 @@ export default function TechNavigation({ className, onLogout }: TechNavigationPr
   // Tech-only navigation items
   const navigation = [
     { label: 'Dashboard', path: '/dashboard', icon: <Home className="h-5 w-5" /> },
-    { label: 'Check-Ins', path: '/check-ins', icon: <ClipboardList className="h-5 w-5" /> },
-    { label: 'Blog Posts', path: '/blog-posts', icon: <FileText className="h-5 w-5" /> },
-    { label: 'Reviews', path: '/reviews', icon: <Star className="h-5 w-5" /> },
-    { label: 'Review Requests', path: '/review-requests', icon: <MessageSquare className="h-5 w-5" /> },
+    { label: 'My Visits', path: '/visits', icon: <ClipboardList className="h-5 w-5" /> },
+    { label: 'Mobile App', path: '/tech-app', icon: <MessageSquare className="h-5 w-5" /> },
   ];
 
   return (
