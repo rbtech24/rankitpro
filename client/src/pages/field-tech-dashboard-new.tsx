@@ -33,6 +33,13 @@ import { cn } from "@/lib/utils";
 export default function FieldTechDashboard() {
   const [activeView, setActiveView] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleViewChange = (view: string) => {
+    console.log('Dashboard: View change requested:', view);
+    console.log('Dashboard: Current activeView:', activeView);
+    setActiveView(view);
+    console.log('Dashboard: New activeView should be:', view);
+  };
   const [supportModalOpen, setSupportModalOpen] = useState(false);
   const [supportForm, setSupportForm] = useState({
     subject: '',
@@ -557,7 +564,7 @@ export default function FieldTechDashboard() {
       {/* Sidebar */}
       <TechnicianSidebar
         activeView={activeView}
-        onViewChange={setActiveView}
+        onViewChange={handleViewChange}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
         onLogout={handleLogout}

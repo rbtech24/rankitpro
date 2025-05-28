@@ -76,8 +76,16 @@ export function TechnicianSidebar({
     }
   ];
 
-  const handleItemClick = (itemId: string) => {
+  const handleItemClick = (itemId: string, event?: React.MouseEvent) => {
+    // Prevent event bubbling that might trigger other handlers
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
+    console.log('Sidebar navigation clicked:', itemId); // Debug log
     onViewChange(itemId);
+    
     // Close mobile sidebar after selection
     if (window.innerWidth < 1024) {
       onToggle();
@@ -116,7 +124,7 @@ export function TechnicianSidebar({
           return (
             <button
               key={item.id}
-              onClick={() => handleItemClick(item.id)}
+              onClick={(e) => handleItemClick(item.id, e)}
               className={cn(
                 "w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                 isActive
