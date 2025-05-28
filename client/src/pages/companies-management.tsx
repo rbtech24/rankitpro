@@ -350,7 +350,7 @@ export default function CompaniesManagement() {
         id: Math.max(...companies.map(c => c.id)) + 1,
         planName: mockPlans.find(p => p.id === data.planId)?.name || "",
         createdAt: new Date().toISOString(),
-        lastLogin: null,
+        lastLogin: "",
         currentTechnicians: 0,
         website: data.website || "",
         stats: {

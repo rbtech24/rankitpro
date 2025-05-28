@@ -63,7 +63,7 @@ const UpcomingTasks = () => {
       <CardContent>
         <ScrollArea className="h-[320px] pr-4">
           <div className="space-y-3">
-            {tasks.map((task) => (
+            {(tasks as Task[]).map((task: Task) => (
               <div 
                 key={task.id}
                 className="p-3 bg-white border rounded-lg hover:shadow-sm transition-shadow"
