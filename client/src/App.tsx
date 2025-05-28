@@ -13,6 +13,7 @@ import TechnicianDashboard from "@/pages/tech-dashboard";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
+import TechReviews from "@/pages/tech-reviews";
 import ReviewAnalytics from "@/pages/review-analytics-clean";
 import AnalyticsDashboard from "@/pages/analytics-dashboard-simple";
 import Notifications from "@/pages/notifications";
@@ -998,7 +999,7 @@ function Router() {
         <PrivateRoute component={Reviews} path="/reviews" />
       </Route>
       <Route path="/tech-reviews">
-        <PrivateRoute component={Reviews} path="/tech-reviews" role="technician" />
+        <PrivateRoute component={TechReviews} path="/tech-reviews" role="technician" />
       </Route>
       <Route path="/review-analytics">
         <PrivateRoute component={ReviewAnalytics} path="/review-analytics" role="company_admin" />
