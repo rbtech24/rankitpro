@@ -12,7 +12,7 @@ import Dashboard from "@/pages/new-dashboard";
 import TechnicianDashboard from "@/pages/tech-dashboard";
 import TechDashboardComplete from "@/pages/tech-dashboard-complete";
 import TechnicianFinal from "@/pages/technician-final";
-import FieldTechDashboard from "@/pages/field-tech-dashboard";
+import FieldTechDashboard from "@/pages/field-tech-dashboard-new";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
