@@ -33,7 +33,13 @@ export default function TechDashboardComplete() {
       });
   };
 
+  const handleSectionChange = (section: string) => {
+    console.log('Switching to section:', section); // Debug log
+    setActiveSection(section);
+  };
+
   const renderContent = () => {
+    console.log('Rendering content for section:', activeSection); // Debug log
     switch(activeSection) {
       case 'dashboard':
         return <DashboardContent />;
@@ -85,7 +91,7 @@ export default function TechDashboardComplete() {
         <nav className="flex-1 p-2">
           <div className="space-y-1">
             <button
-              onClick={() => setActiveSection('dashboard')}
+              onClick={() => handleSectionChange('dashboard')}
               className={cn(
                 "w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
                 activeSection === 'dashboard' 
@@ -98,7 +104,7 @@ export default function TechDashboardComplete() {
             </button>
             
             <button
-              onClick={() => setActiveSection('visits')}
+              onClick={() => handleSectionChange('visits')}
               className={cn(
                 "w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
                 activeSection === 'visits' 
@@ -111,7 +117,7 @@ export default function TechDashboardComplete() {
             </button>
             
             <button
-              onClick={() => setActiveSection('reviews')}
+              onClick={() => handleSectionChange('reviews')}
               className={cn(
                 "w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
                 activeSection === 'reviews' 
@@ -124,7 +130,7 @@ export default function TechDashboardComplete() {
             </button>
             
             <button
-              onClick={() => setActiveSection('mobile')}
+              onClick={() => handleSectionChange('mobile')}
               className={cn(
                 "w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
                 activeSection === 'mobile' 
@@ -141,7 +147,7 @@ export default function TechDashboardComplete() {
           <div className="mt-6 pt-6 border-t border-gray-200">
             <div className="space-y-1">
               <button
-                onClick={() => setActiveSection('profile')}
+                onClick={() => handleSectionChange('profile')}
                 className={cn(
                   "w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
                   activeSection === 'profile' 
