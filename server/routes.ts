@@ -453,13 +453,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Create technician record
           const newTechnician = await storage.createTechnician({
-            firstName: "Test",
-            lastName: "Technician",
+            name: "Test Technician",
             email: "tech@testcompany.com",
             phone: "555-555-5555",
-            companyId: testCompany.id,
-            profileImage: null,
-            isActive: true
+            companyId: testCompany.id
           });
           
           // Create user account for technician
@@ -468,8 +465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             username: "testtechnician",
             password: hashedPassword,
             role: "technician",
-            companyId: testCompany.id,
-            technicianId: newTechnician.id
+            companyId: testCompany.id
           });
           
           // Set session
@@ -603,12 +599,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Company routes
   app.get("/api/companies", isSuperAdmin, async (req, res) => {
     try {
-      // This would be implemented with a real database query
-      // For in-memory storage, we'll return a mock list
-      const companies = Array.from(
-        (storage as any).companies?.values() || []
-      );
-      
+      const companies = await storage.getAllCompanies();
       res.json(companies);
     } catch (error) {
       console.error("Get companies error:", error);
@@ -1133,7 +1124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const summary = await generateSummary({
           jobType: checkIn.jobType,
           notes: checkIn.notes || "",
-          location: checkIn.location,
+          location: checkIn.location || "",
           technicianName: technician.name
         });
         
@@ -1142,7 +1133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const blogContent = await generateBlogPost({
           jobType: checkIn.jobType,
           notes: checkIn.notes || "",
-          location: checkIn.location,
+          location: checkIn.location || "",
           technicianName: technician.name
         });
         

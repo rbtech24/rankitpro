@@ -1,4 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
@@ -7,8 +9,44 @@ import emailService from "./services/email-service";
 import { createTestAccounts } from "./scripts/create-test-accounts";
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
+// Security hardening - Helmet for security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+    },
+  },
+}));
+
+// Rate limiting for API endpoints
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Stricter rate limiting for authentication endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 login attempts per windowMs
+  message: "Too many login attempts, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiting
+app.use('/api/', apiLimiter);
+app.use('/api/auth/', authLimiter);
+
+app.use(express.json({ limit: '10mb' })); // Add size limit for security
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -40,15 +78,21 @@ app.use((req, res, next) => {
   next();
 });
 
-// Function to create a super admin user if one doesn't exist
+// Function to create a super admin user if one doesn't exist (development only)
 async function createSuperAdminIfNotExists() {
+  // Only create default accounts in development mode
+  if (process.env.NODE_ENV !== 'development') {
+    return;
+  }
+  
   try {
     // Check if a super admin already exists
     const existingUser = await storage.getUserByEmail("superadmin@example.com");
     
     if (!existingUser) {
-      // Create a super admin user
-      const hashedPassword = await bcrypt.hash("admin123", 10);
+      // Generate a secure random password for production
+      const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || "admin123";
+      const hashedPassword = await bcrypt.hash(defaultPassword, 12);
       
       await storage.createUser({
         username: "superadmin",
