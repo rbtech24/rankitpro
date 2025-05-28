@@ -82,7 +82,176 @@ const companySchema = z.object({
   featuresEnabled: z.array(z.string()),
 });
 
-// All data now fetched from real APIs - no more mock data
+// Mock data for companies
+const mockCompanies = [
+  {
+    id: 1,
+    name: "Top HVAC Solutions",
+    email: "admin@tophvac.com",
+    phoneNumber: "555-123-4567",
+    website: "https://www.tophvacsolutions.com",
+    address: "1234 Cooling Ave",
+    city: "Phoenix",
+    state: "AZ",
+    zipCode: "85001",
+    industry: "HVAC",
+    planId: "2",
+    planName: "Professional",
+    isActive: true,
+    createdAt: "2024-09-05T12:00:00Z",
+    lastLogin: "2025-05-15T09:23:45Z",
+    notes: "Large HVAC provider with multiple locations",
+    maxTechnicians: 15,
+    currentTechnicians: 11,
+    featuresEnabled: ["ai_content", "wordpress_integration", "crm_integration", "review_requests"],
+    stats: {
+      totalCheckIns: 432,
+      activeCheckInsLast30Days: 78,
+      totalTechnicians: 11,
+      totalBlogPosts: 127,
+      totalReviews: 89,
+      avgRating: 4.7
+    }
+  },
+  {
+    id: 2,
+    name: "Ace Plumbing Services",
+    email: "support@aceplumbing.com",
+    phoneNumber: "555-987-6543",
+    website: "https://www.aceplumbingservices.com",
+    address: "567 Pipe St",
+    city: "Chicago",
+    state: "IL",
+    zipCode: "60601",
+    industry: "Plumbing",
+    planId: "1",
+    planName: "Starter",
+    isActive: true,
+    createdAt: "2024-01-22T12:00:00Z",
+    lastLogin: "2025-05-14T14:12:37Z",
+    notes: "Family-owned plumbing business serving Chicago area",
+    maxTechnicians: 5,
+    currentTechnicians: 4,
+    featuresEnabled: ["ai_content", "review_requests"],
+    stats: {
+      totalCheckIns: 245,
+      activeCheckInsLast30Days: 42,
+      totalTechnicians: 4,
+      totalBlogPosts: 68,
+      totalReviews: 53,
+      avgRating: 4.9
+    }
+  },
+  {
+    id: 3,
+    name: "Metro Electrical Contractors",
+    email: "info@metroelectrical.com",
+    phoneNumber: "555-456-7890",
+    website: "https://www.metroelectrical.com",
+    address: "789 Circuit Blvd",
+    city: "Boston",
+    state: "MA",
+    zipCode: "02108",
+    industry: "Electrical",
+    planId: "3",
+    planName: "Enterprise",
+    isActive: true,
+    createdAt: "2025-05-10T12:00:00Z",
+    lastLogin: "2025-05-13T08:45:22Z",
+    notes: "Large electrical contractor with commercial and residential services",
+    maxTechnicians: 50,
+    currentTechnicians: 32,
+    featuresEnabled: ["ai_content", "wordpress_integration", "crm_integration", "review_requests", "custom_branding", "api_access"],
+    stats: {
+      totalCheckIns: 678,
+      activeCheckInsLast30Days: 134,
+      totalTechnicians: 32,
+      totalBlogPosts: 187,
+      totalReviews: 154,
+      avgRating: 4.5
+    }
+  },
+  {
+    id: 4,
+    name: "City Roofing Experts",
+    email: "contact@cityroofing.com",
+    phoneNumber: "555-234-5678",
+    website: "https://www.cityroofingexperts.com",
+    address: "456 Shingle Rd",
+    city: "Seattle",
+    state: "WA",
+    zipCode: "98101",
+    industry: "Roofing",
+    planId: "2",
+    planName: "Professional",
+    isActive: false,
+    createdAt: "2024-11-20T12:00:00Z",
+    lastLogin: "2025-03-10T11:32:17Z",
+    notes: "Account temporarily disabled due to payment issues",
+    maxTechnicians: 15,
+    currentTechnicians: 8,
+    featuresEnabled: ["ai_content", "wordpress_integration", "review_requests"],
+    stats: {
+      totalCheckIns: 321,
+      activeCheckInsLast30Days: 0,
+      totalTechnicians: 8,
+      totalBlogPosts: 94,
+      totalReviews: 72,
+      avgRating: 4.3
+    }
+  },
+  {
+    id: 5,
+    name: "Green Landscaping LLC",
+    email: "hello@greenlandscaping.com",
+    phoneNumber: "555-876-5432",
+    website: "https://www.greenlandscapingllc.com",
+    address: "123 Garden Way",
+    city: "Portland",
+    state: "OR",
+    zipCode: "97201",
+    industry: "Landscaping",
+    planId: "1",
+    planName: "Starter",
+    isActive: true,
+    createdAt: "2024-08-15T12:00:00Z",
+    lastLogin: "2025-05-15T10:15:53Z",
+    notes: "Seasonal business with high activity in spring/summer",
+    maxTechnicians: 5,
+    currentTechnicians: 3,
+    featuresEnabled: ["ai_content", "review_requests"],
+    stats: {
+      totalCheckIns: 187,
+      activeCheckInsLast30Days: 38,
+      totalTechnicians: 3,
+      totalBlogPosts: 54,
+      totalReviews: 47,
+      avgRating: 4.8
+    }
+  }
+];
+
+// Mock data for subscription plans
+const mockPlans = [
+  {
+    id: "1",
+    name: "Starter",
+    monthlyPrice: 99,
+    maxTechnicians: 5
+  },
+  {
+    id: "2",
+    name: "Professional",
+    monthlyPrice: 199,
+    maxTechnicians: 15
+  },
+  {
+    id: "3",
+    name: "Enterprise",
+    monthlyPrice: 499,
+    maxTechnicians: 999
+  }
+];
 
 // Available features
 const availableFeatures = [
@@ -116,17 +285,7 @@ const industries = [
 ];
 
 export default function CompaniesManagement() {
-  // Fetch real companies data from API
-  const { data: companies = [], isLoading: companiesLoading } = useQuery({
-    queryKey: ['/api/companies'],
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  // Fetch real subscription plans
-  const { data: subscriptionPlans = [] } = useQuery({
-    queryKey: ['/api/subscription-plans'],
-    staleTime: 10 * 60 * 1000, // 10 minutes
-  });
+  const [companies, setCompanies] = useState(mockCompanies);
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const [isAddingCompany, setIsAddingCompany] = useState(false);
   const [isViewingTechnicians, setIsViewingTechnicians] = useState(false);
@@ -188,12 +347,11 @@ export default function CompaniesManagement() {
       // Add new company
       const newCompany = {
         ...data,
-        id: Math.max(...(companies as any[]).map((c: any) => c.id)) + 1,
-        planName: subscriptionPlans.find((p: any) => p.id === data.planId)?.name || "",
+        id: Math.max(...companies.map(c => c.id)) + 1,
+        planName: mockPlans.find(p => p.id === data.planId)?.name || "",
         createdAt: new Date().toISOString(),
-        lastLogin: "",
+        lastLogin: null,
         currentTechnicians: 0,
-        website: data.website || "",
         stats: {
           totalCheckIns: 0,
           activeCheckInsLast30Days: 0,
@@ -203,8 +361,7 @@ export default function CompaniesManagement() {
           avgRating: 0
         }
       };
-      // Company creation will be handled by API mutation
-      queryClient.invalidateQueries({ queryKey: ['/api/companies'] });
+      setCompanies([...companies, newCompany]);
       toast({
         title: "Company Added",
         description: `${data.name} has been added successfully.`
@@ -216,13 +373,12 @@ export default function CompaniesManagement() {
           return { 
             ...company, 
             ...data,
-            planName: (subscriptionPlans as any[]).find((p: any) => p.id === data.planId)?.name || ""
+            planName: mockPlans.find(p => p.id === data.planId)?.name || ""
           };
         }
         return company;
       });
-      // Company updates will be handled by API mutation
-      queryClient.invalidateQueries({ queryKey: ['/api/companies'] });
+      setCompanies(updatedCompanies);
       toast({
         title: "Company Updated",
         description: `${data.name} has been updated successfully.`
@@ -609,7 +765,7 @@ export default function CompaniesManagement() {
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Enabled Features</h3>
                         <div className="flex flex-wrap gap-2 mt-1">
-                          {selectedCompany.featuresEnabled.map((featureId: string) => (
+                          {selectedCompany.featuresEnabled.map(featureId => (
                             <Badge key={featureId} variant="outline" className="bg-blue-50">
                               {availableFeatures.find(f => f.id === featureId)?.name}
                             </Badge>
@@ -1332,7 +1488,7 @@ export default function CompaniesManagement() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {viewCompanyStats.featuresEnabled.map((featureId: string) => {
+                        {viewCompanyStats.featuresEnabled.map(featureId => {
                           const feature = availableFeatures.find(f => f.id === featureId);
                           if (!feature) return null;
                           
@@ -1501,7 +1657,7 @@ export default function CompaniesManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {companyCheckIns.map((checkIn: any) => (
+                {companyCheckIns.map(checkIn => (
                   <TableRow key={checkIn.id}>
                     <TableCell>{checkIn.jobType}</TableCell>
                     <TableCell>{checkIn.technicianName}</TableCell>

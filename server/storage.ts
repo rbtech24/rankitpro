@@ -77,7 +77,6 @@ export interface IStorage {
   // WordPress Custom Fields operations
   getWordpressCustomFields(id: number): Promise<WordpressCustomFields | undefined>;
   getWordpressCustomFieldsByCompany(companyId: number): Promise<WordpressCustomFields | undefined>;
-  getWordPressIntegration(companyId: number): Promise<WordpressCustomFields | undefined>;
   createWordpressCustomFields(wpCustomFields: InsertWordpressCustomFields): Promise<WordpressCustomFields>;
   updateWordpressCustomFields(id: number, updates: Partial<WordpressCustomFields>): Promise<WordpressCustomFields | undefined>;
   testWordpressConnection(companyId: number): Promise<{
@@ -735,10 +734,6 @@ export class MemStorage implements IStorage {
     return Array.from(this.wordpressCustomFields.values()).find(
       (wpcf) => wpcf.companyId === companyId
     );
-  }
-
-  async getWordPressIntegration(companyId: number): Promise<WordpressCustomFields | undefined> {
-    return this.getWordpressCustomFieldsByCompany(companyId);
   }
   
   async createWordpressCustomFields(wpCustomFields: InsertWordpressCustomFields): Promise<WordpressCustomFields> {

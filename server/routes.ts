@@ -453,10 +453,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Create technician record
           const newTechnician = await storage.createTechnician({
-            name: "Test Technician",
+            firstName: "Test",
+            lastName: "Technician",
             email: "tech@testcompany.com",
             phone: "555-555-5555",
-            companyId: testCompany.id
+            companyId: testCompany.id,
+            profileImage: null,
+            isActive: true
           });
           
           // Create user account for technician
@@ -465,7 +468,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             username: "testtechnician",
             password: hashedPassword,
             role: "technician",
-            companyId: testCompany.id
+            companyId: testCompany.id,
+            technicianId: newTechnician.id
           });
           
           // Set session
@@ -599,7 +603,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Company routes
   app.get("/api/companies", isSuperAdmin, async (req, res) => {
     try {
-      const companies = await storage.getAllCompanies();
+      // This would be implemented with a real database query
+      // For in-memory storage, we'll return a mock list
+      const companies = Array.from(
+        (storage as any).companies?.values() || []
+      );
+      
       res.json(companies);
     } catch (error) {
       console.error("Get companies error:", error);
@@ -1124,7 +1133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const summary = await generateSummary({
           jobType: checkIn.jobType,
           notes: checkIn.notes || "",
-          location: checkIn.location || "",
+          location: checkIn.location,
           technicianName: technician.name
         });
         
@@ -1133,7 +1142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const blogContent = await generateBlogPost({
           jobType: checkIn.jobType,
           notes: checkIn.notes || "",
-          location: checkIn.location || "",
+          location: checkIn.location,
           technicianName: technician.name
         });
         
@@ -1194,141 +1203,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Tasks API endpoint for dashboard
-  app.get("/api/tasks/upcoming", isAuthenticated, async (req, res) => {
-    try {
-      const companyId = req.user.companyId;
-      
-      if (!companyId && req.user.role !== "super_admin") {
-        return res.status(400).json({ message: "No company associated with this user" });
-      }
-
-      // Generate real tasks based on actual data
-      const tasks = [];
-      
-      // Check for recent check-ins that may need blog posts
-      const recentCheckIns = await storage.getCheckInsByCompany(companyId, 5);
-      const unbloggedCheckIns = recentCheckIns.filter(checkIn => !checkIn.isBlog);
-      
-      if (unbloggedCheckIns.length > 0) {
-        tasks.push({
-          id: 1,
-          title: `Review and approve ${unbloggedCheckIns.length} pending blog posts`,
-          dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24), // Tomorrow
-          priority: 'high',
-          completed: false
-        });
-      }
-
-      // Check for pending review requests
-      const reviewRequests = await storage.getReviewRequestsByCompany(companyId);
-      const pendingRequests = reviewRequests.filter(req => req.status === 'pending');
-      
-      if (pendingRequests.length > 0) {
-        tasks.push({
-          id: 2,
-          title: `Follow up on ${pendingRequests.length} pending review requests`,
-          dueDate: new Date(Date.now() + 1000 * 60 * 60 * 48), // 2 days
-          priority: 'medium',
-          completed: false
-        });
-      }
-
-      res.json(tasks);
-    } catch (error) {
-      console.error("Get upcoming tasks error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
-
-  // Companies management API endpoints
-  app.get("/api/companies", isSuperAdmin, async (req, res) => {
-    try {
-      const companies = await storage.getAllCompanies();
-      
-      // Enrich companies with real statistics
-      const enrichedCompanies = await Promise.all(companies.map(async (company) => {
-        const checkIns = await storage.getCheckInsByCompany(company.id);
-        const technicians = await storage.getTechniciansByCompany(company.id);
-        const blogPosts = await storage.getBlogPostsByCompany(company.id);
-        const reviewRequests = await storage.getReviewRequestsByCompany(company.id);
-        
-        const now = new Date();
-        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        const activeCheckInsLast30Days = checkIns.filter(checkIn => 
-          new Date(checkIn.dateCompleted) >= thirtyDaysAgo
-        ).length;
-
-        const reviews = reviewRequests.filter(req => req.status === 'completed');
-        const avgRating = reviews.length > 0 
-          ? reviews.reduce((sum, review) => sum + (review.rating || 0), 0) / reviews.length 
-          : 0;
-
-        return {
-          ...company,
-          currentTechnicians: technicians.length,
-          stats: {
-            totalCheckIns: checkIns.length,
-            activeCheckInsLast30Days,
-            totalTechnicians: technicians.length,
-            totalBlogPosts: blogPosts.length,
-            totalReviews: reviews.length,
-            avgRating: Number(avgRating.toFixed(1))
-          }
-        };
-      }));
-
-      res.json(enrichedCompanies);
-    } catch (error) {
-      console.error("Get companies error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
-
-  // Subscription plans API endpoint
-  app.get("/api/subscription-plans", isAuthenticated, async (req, res) => {
-    try {
-      // Return real subscription plans from your system
-      const plans = [
-        {
-          id: "starter",
-          name: "Starter",
-          monthlyPrice: 99,
-          yearlyPrice: 990,
-          maxTechnicians: 5,
-          features: ["ai_content", "review_requests"],
-          stripePriceIdMonthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID,
-          stripePriceIdYearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID
-        },
-        {
-          id: "professional", 
-          name: "Professional",
-          monthlyPrice: 199,
-          yearlyPrice: 1990,
-          maxTechnicians: 15,
-          features: ["ai_content", "wordpress_integration", "crm_integration", "review_requests"],
-          stripePriceIdMonthly: process.env.STRIPE_PROFESSIONAL_MONTHLY_PRICE_ID,
-          stripePriceIdYearly: process.env.STRIPE_PROFESSIONAL_YEARLY_PRICE_ID
-        },
-        {
-          id: "enterprise",
-          name: "Enterprise", 
-          monthlyPrice: 499,
-          yearlyPrice: 4990,
-          maxTechnicians: 999,
-          features: ["ai_content", "wordpress_integration", "crm_integration", "review_requests", "custom_branding", "api_access"],
-          stripePriceIdMonthly: process.env.STRIPE_ENTERPRISE_MONTHLY_PRICE_ID,
-          stripePriceIdYearly: process.env.STRIPE_ENTERPRISE_YEARLY_PRICE_ID
-        }
-      ];
-      
-      res.json(plans);
-    } catch (error) {
-      console.error("Get subscription plans error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
-
   // Review Analytics endpoints
   app.get("/api/review-analytics/metrics", isAuthenticated, async (req, res) => {
     try {
@@ -1468,7 +1342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         ];
         
-        const totalDuration = response && response.respondedAt && request.sentAt
+        const totalDuration = response && request.sentAt
           ? (new Date(response.respondedAt).getTime() - new Date(request.sentAt).getTime()) / (1000 * 60)
           : request.sentAt ? (Date.now() - new Date(request.sentAt).getTime()) / (1000 * 60) : 0;
         

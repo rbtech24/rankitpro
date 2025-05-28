@@ -1,6 +1,5 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -15,29 +14,44 @@ interface Task {
 }
 
 const UpcomingTasks = () => {
-  // Fetch real tasks from API
-  const { data: tasks = [], isLoading } = useQuery({
-    queryKey: ['/api/tasks/upcoming'],
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center text-lg font-medium">
-            <ListChecks className="h-5 w-5 mr-2 text-indigo-600" />
-            Upcoming Tasks
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[320px] flex items-center justify-center">
-            <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Mock data - would be fetched from API in real implementation
+  const tasks: Task[] = [
+    { 
+      id: 1, 
+      title: 'Review monthly SEO performance', 
+      dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24), // Tomorrow
+      priority: 'high',
+      completed: false,
+    },
+    { 
+      id: 2, 
+      title: 'Send follow-up emails to recent customers', 
+      dueDate: new Date(Date.now() + 1000 * 60 * 60 * 48), // 2 days from now
+      priority: 'medium',
+      completed: false,
+    },
+    { 
+      id: 3, 
+      title: 'Approve technician schedules for next week', 
+      dueDate: new Date(Date.now() + 1000 * 60 * 60 * 72), // 3 days from now
+      priority: 'high',
+      completed: false,
+    },
+    { 
+      id: 4, 
+      title: 'Review and approve blog posts', 
+      dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 4), // 4 days from now
+      priority: 'medium',
+      completed: false,
+    },
+    { 
+      id: 5, 
+      title: 'Quarterly marketing planning meeting', 
+      dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 1 week from now
+      priority: 'high',
+      completed: false,
+    }
+  ];
   
   const getPriorityColor = (priority: string) => {
     switch(priority) {
@@ -63,7 +77,7 @@ const UpcomingTasks = () => {
       <CardContent>
         <ScrollArea className="h-[320px] pr-4">
           <div className="space-y-3">
-            {(tasks as Task[]).map((task: Task) => (
+            {tasks.map((task) => (
               <div 
                 key={task.id}
                 className="p-3 bg-white border rounded-lg hover:shadow-sm transition-shadow"
