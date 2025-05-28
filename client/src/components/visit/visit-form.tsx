@@ -96,7 +96,7 @@ const formSchema = z.object({
   location: z.string().optional(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
-  createBlogPost: z.boolean().default(false),
+  contentType: z.enum(["none", "service_post", "full_blog"]).default("none"),
   sendReviewRequest: z.boolean().default(false),
 });
 
@@ -166,7 +166,7 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
       jobType: "",
       notes: "",
       location: "",
-      createBlogPost: false,
+      contentType: "none" as const,
       sendReviewRequest: false,
     },
   });
@@ -309,7 +309,8 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
     if (values.location) formData.append("location", values.location);
     if (values.latitude !== undefined) formData.append("latitude", String(values.latitude));
     if (values.longitude !== undefined) formData.append("longitude", String(values.longitude));
-    formData.append("isBlog", String(values.createBlogPost));
+    formData.append("contentType", values.contentType);
+    formData.append("isBlog", String(values.contentType !== "none"));
     
     // Add photos
     photos.forEach(photo => {
@@ -318,6 +319,16 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
     
     // Submit the form
     createVisitMutation.mutate(formData);
+    
+    // Handle content generation based on selected type
+    if (values.contentType !== "none") {
+      const contentTypeLabel = values.contentType === "service_post" ? "Service visit post" : "Full blog article";
+      toast({
+        title: "Content Generation",
+        description: `${contentTypeLabel} will be generated from this visit.`,
+        variant: "default",
+      });
+    }
     
     // If send review request is checked, we would handle that here
     // This would typically open a modal to collect customer information
@@ -512,18 +523,29 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
               
               <FormField
                 control={form.control}
-                name="createBlogPost"
+                name="contentType"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-2">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Create blog post from this check-in</FormLabel>
-                    </div>
+                  <FormItem>
+                    <FormLabel>Content Generation</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose content type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">No content generation</SelectItem>
+                        <SelectItem value="service_post">Create service visit post</SelectItem>
+                        <SelectItem value="full_blog">Create full blog article</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Service posts are short summaries, while blog articles are comprehensive content pieces for SEO.
+                    </FormDescription>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
