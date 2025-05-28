@@ -1424,14 +1424,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/job-types', isAuthenticated, async (req: Request, res: Response) => {
     try {
+      console.log('POST /api/job-types - Body:', req.body);
+      console.log('User:', req.user);
+      
       const { name } = req.body;
-      const companyId = req.user.companyId;
+      const companyId = req.user?.companyId;
       
       if (!companyId) {
+        console.log('No company ID found');
         return res.status(400).json({ error: 'Company ID required' });
       }
 
       if (!name || !name.trim()) {
+        console.log('No name provided');
         return res.status(400).json({ error: 'Job type name is required' });
       }
 
@@ -1446,6 +1451,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedJobTypes = [...existingJobTypes, newJobType];
       companyJobTypes.set(companyId, updatedJobTypes);
 
+      console.log('Created job type:', newJobType);
+      res.setHeader('Content-Type', 'application/json');
       res.json(newJobType);
     } catch (error) {
       console.error('Error creating job type:', error);
