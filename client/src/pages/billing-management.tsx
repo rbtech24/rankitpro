@@ -89,143 +89,7 @@ const planSchema = z.object({
   stripePriceIdYearly: z.string().optional(),
 });
 
-// Mock data for subscription plans
-const mockPlans = [
-  {
-    id: 1,
-    name: "Starter",
-    description: "Perfect for small businesses with 1-5 technicians",
-    monthlyPrice: 50,
-    yearlyPrice: 500,
-    maxTechnicians: 5,
-    maxCheckinsPerMonth: 100,
-    features: [
-      "100 AI requests/month",
-      "5 daily AI limit",
-      "Check-in management",
-      "Basic reporting",
-      "Email support"
-    ],
-    isActive: true,
-    isFeatured: false,
-    stripePriceIdMonthly: "price_starter_monthly",
-    stripePriceIdYearly: "price_starter_yearly",
-    companiesCount: 18
-  },
-  {
-    id: 2,
-    name: "Professional",
-    description: "For growing businesses with up to 15 technicians",
-    monthlyPrice: 99,
-    yearlyPrice: 990,
-    maxTechnicians: 15,
-    maxCheckinsPerMonth: 500,
-    features: [
-      "500 AI requests/month",
-      "20 daily AI limit",
-      "Everything in Starter",
-      "WordPress integration",
-      "Advanced analytics",
-      "Priority support"
-    ],
-    isActive: true,
-    isFeatured: true,
-    stripePriceIdMonthly: "price_pro_monthly",
-    stripePriceIdYearly: "price_pro_yearly",
-    companiesCount: 32
-  },
-  {
-    id: 3,
-    name: "Agency",
-    description: "For large businesses with unlimited technicians",
-    monthlyPrice: 299,
-    yearlyPrice: 2990,
-    maxTechnicians: 999,
-    maxCheckinsPerMonth: 1500,
-    features: [
-      "1500 AI requests/month",
-      "60 daily AI limit",
-      "Everything in Professional",
-      "Unlimited technicians",
-      "White-label solution",
-      "Dedicated account manager"
-    ],
-    isActive: true,
-    isFeatured: false,
-    stripePriceIdMonthly: "price_enterprise_monthly",
-    stripePriceIdYearly: "price_enterprise_yearly",
-    companiesCount: 7
-  }
-];
-
-// Mock data for companies
-const mockCompanies = [
-  {
-    id: 1,
-    name: "Top HVAC Solutions",
-    planId: 2,
-    planName: "Professional",
-    subscriptionStatus: "active",
-    billingCycle: "monthly",
-    nextBillingDate: "2025-06-15",
-    amountDue: 199,
-    technicians: 11,
-    signupDate: "2024-09-05",
-    totalRevenue: 1592
-  },
-  {
-    id: 2,
-    name: "Ace Plumbing Services",
-    planId: 1,
-    planName: "Starter",
-    subscriptionStatus: "active",
-    billingCycle: "yearly",
-    nextBillingDate: "2026-01-22",
-    amountDue: 0,
-    technicians: 4,
-    signupDate: "2024-01-22",
-    totalRevenue: 990
-  },
-  {
-    id: 3,
-    name: "Metro Electrical Contractors",
-    planId: 3,
-    planName: "Enterprise",
-    subscriptionStatus: "trialing",
-    billingCycle: "monthly",
-    nextBillingDate: "2025-06-10",
-    amountDue: 0,
-    technicians: 32,
-    signupDate: "2025-05-10",
-    totalRevenue: 0
-  },
-  {
-    id: 4,
-    name: "City Roofing Experts",
-    planId: 2,
-    planName: "Professional",
-    subscriptionStatus: "past_due",
-    billingCycle: "monthly",
-    nextBillingDate: "2025-05-20",
-    amountDue: 199,
-    technicians: 8,
-    signupDate: "2024-11-20",
-    totalRevenue: 1194
-  },
-  {
-    id: 5,
-    name: "Green Landscaping LLC",
-    planId: 1,
-    planName: "Starter",
-    subscriptionStatus: "canceled",
-    billingCycle: "monthly",
-    nextBillingDate: null,
-    amountDue: 0,
-    technicians: 3,
-    signupDate: "2024-08-15",
-    totalRevenue: 495
-  }
-];
+// All billing data now fetched from real APIs - no more mock data
 
 // Subscription status badge color map
 const statusColorMap: Record<string, string> = {
@@ -238,8 +102,17 @@ const statusColorMap: Record<string, string> = {
 
 // Billing management component
 export default function BillingManagement() {
-  const [plans, setPlans] = useState(mockPlans);
-  const [companies, setCompanies] = useState(mockCompanies);
+  // Fetch real subscription plans from API
+  const { data: plans = [], isLoading: plansLoading } = useQuery({
+    queryKey: ['/api/subscription-plans'],
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  // Fetch real companies with billing data from API
+  const { data: companies = [], isLoading: companiesLoading } = useQuery({
+    queryKey: ['/api/companies'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
   const [editingPlan, setEditingPlan] = useState<any>(null);
   const [isAddingPlan, setIsAddingPlan] = useState(false);
   const [viewingCompany, setViewingCompany] = useState<any>(null);
