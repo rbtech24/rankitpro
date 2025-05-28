@@ -130,7 +130,7 @@ function Router() {
         <LogoutHandler />
       </Route>
       <Route path="/">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Home />}
+        {auth?.user ? <Redirect to="/tech-final" /> : <Home />}
       </Route>
       
       {/* Informational Pages */}
@@ -973,6 +973,11 @@ function Router() {
             </div>
           </div>
         </div>
+      </Route>
+      
+      {/* Clean Tech Dashboard - No Conflicts */}
+      <Route path="/tech-final">
+        <TechnicianFinal />
       </Route>
       
       {/* Dashboard Pages - FORCED TECH DASHBOARD ONLY */}
