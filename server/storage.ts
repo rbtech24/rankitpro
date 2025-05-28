@@ -736,6 +736,10 @@ export class MemStorage implements IStorage {
       (wpcf) => wpcf.companyId === companyId
     );
   }
+
+  async getWordPressIntegration(companyId: number): Promise<WordpressCustomFields | undefined> {
+    return this.getWordpressCustomFieldsByCompany(companyId);
+  }
   
   async createWordpressCustomFields(wpCustomFields: InsertWordpressCustomFields): Promise<WordpressCustomFields> {
     const id = this.wordpressCustomFieldsId++;
