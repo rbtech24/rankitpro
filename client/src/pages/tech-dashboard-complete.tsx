@@ -251,6 +251,80 @@ function DashboardContent() {
 
 // Visits Content Component
 function VisitsContent() {
+  const { data: visits = [], isLoading, error } = useQuery({
+    queryKey: ['/api/visits'],
+    queryFn: async () => {
+      const res = await fetch('/api/visits', { credentials: 'include' });
+      if (!res.ok) {
+        if (res.status === 401) {
+          throw new Error('Please log in to view your visits');
+        }
+        throw new Error('Failed to fetch visits');
+      }
+      return res.json();
+    }
+  });
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">My Visits</h1>
+          <p className="text-gray-600">Loading your visit history...</p>
+        </div>
+        <div className="animate-pulse space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-32 bg-gray-200 rounded"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">My Visits</h1>
+          <p className="text-gray-600">Track all your service visits and customer interactions.</p>
+        </div>
+        
+        <div className="mb-6">
+          <Button className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="mr-2 h-4 w-4" />
+            Log New Visit
+          </Button>
+        </div>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Visit History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <div className="text-red-600 mb-4">⚠️</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load visits</h3>
+              <p className="text-gray-500 mb-4">{error.message}</p>
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-6">
@@ -265,24 +339,149 @@ function VisitsContent() {
         </Button>
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Visit History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <MapPin className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No visits logged</h3>
-            <p className="text-gray-500">Start logging your service visits to build your history.</p>
-          </div>
-        </CardContent>
-      </Card>
+      {visits.length === 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Visit History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <MapPin className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No visits logged yet</h3>
+              <p className="text-gray-500 mb-4">Start logging your service visits to build your history.</p>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Log Your First Visit
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {visits.map((visit: any) => (
+            <Card key={visit.id}>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {visit.customerName || 'Customer Visit'}
+                      </h3>
+                      <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
+                        visit.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {visit.status || 'In Progress'}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-1 text-sm text-gray-600">
+                      <div className="flex items-center">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        {visit.location || 'No location specified'}
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-2" />
+                        {formatDate(visit.createdAt)}
+                      </div>
+                      {visit.jobType && (
+                        <div className="flex items-center">
+                          <span className="h-4 w-4 mr-2">🔧</span>
+                          {visit.jobType}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {visit.notes && (
+                      <p className="mt-3 text-gray-700">{visit.notes}</p>
+                    )}
+                  </div>
+                  
+                  {visit.photos && visit.photos.length > 0 && (
+                    <div className="ml-4">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Camera className="h-4 w-4 mr-1" />
+                        {visit.photos.length} photo{visit.photos.length !== 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 // Reviews Content Component
 function ReviewsContent() {
+  const { data: reviews = [], isLoading, error } = useQuery({
+    queryKey: ['/api/reviews'],
+    queryFn: async () => {
+      const res = await fetch('/api/reviews', { credentials: 'include' });
+      if (!res.ok) {
+        if (res.status === 401) {
+          throw new Error('Please log in to view your reviews');
+        }
+        throw new Error('Failed to fetch reviews');
+      }
+      return res.json();
+    }
+  });
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`h-4 w-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+      />
+    ));
+  };
+
+  if (isLoading) {
+    return (
+      <div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">My Reviews</h1>
+          <p className="text-gray-600">Loading your customer reviews...</p>
+        </div>
+        <div className="animate-pulse space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-32 bg-gray-200 rounded"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">My Reviews</h1>
+          <p className="text-gray-600">View customer feedback and ratings for your work.</p>
+        </div>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Customer Reviews</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <div className="text-red-600 mb-4">⚠️</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load reviews</h3>
+              <p className="text-gray-500 mb-4">{error.message}</p>
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-6">
@@ -290,18 +489,66 @@ function ReviewsContent() {
         <p className="text-gray-600">View customer feedback and ratings for your work.</p>
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Customer Reviews</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <Star className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No reviews yet</h3>
-            <p className="text-gray-500">Complete service visits to start receiving customer reviews.</p>
-          </div>
-        </CardContent>
-      </Card>
+      {reviews.length === 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Customer Reviews</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <Star className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No reviews yet</h3>
+              <p className="text-gray-500">Complete service visits to start receiving customer reviews.</p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {reviews.map((review: any) => (
+            <Card key={review.id}>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {review.customerName || 'Anonymous Customer'}
+                      </h3>
+                      <div className="ml-3 flex items-center">
+                        {renderStars(review.rating || 0)}
+                        <span className="ml-2 text-sm text-gray-600">
+                          {review.rating || 0}/5
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm text-gray-500 mb-3">
+                      {review.createdAt && new Date(review.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                      {review.jobType && ` • ${review.jobType}`}
+                    </div>
+                    
+                    {review.comment && (
+                      <p className="text-gray-700 leading-relaxed">
+                        "{review.comment}"
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                {review.response && (
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="text-sm font-medium text-blue-900 mb-1">Your Response:</h4>
+                    <p className="text-sm text-blue-800">{review.response}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
