@@ -147,6 +147,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // TEST ENDPOINT - Completely unique name to avoid any conflicts
+  app.post('/api/test-job-creation-unique', isAuthenticated, async (req: Request, res: Response) => {
+    console.log('=== TEST ENDPOINT HIT ===');
+    console.log('Request body:', req.body);
+    res.json({ success: true, message: 'Test endpoint working' });
+  });
+
   app.post('/api/job-types', isAuthenticated, async (req: Request, res: Response) => {
     console.log('=== POST /api/job-types HIT ===');
     try {
