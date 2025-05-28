@@ -28,13 +28,31 @@ export default function MobileFieldTech() {
   const [activeTab, setActiveTab] = useState('home');
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
-  const [visitForm, setVisitForm] = useState({
-    customerName: '',
-    address: '',
+  const [checkInForm, setCheckInForm] = useState({
+    technicianId: '',
     jobType: '',
     notes: '',
+    location: '',
+    latitude: undefined as number | undefined,
+    longitude: undefined as number | undefined,
+    createBlogPost: false,
+    sendReviewRequest: false,
     photos: [] as File[]
   });
+
+  const JOB_TYPES = [
+    "Plumbing Repair",
+    "Water Heater Installation", 
+    "Drain Cleaning",
+    "Sewer Line Repair",
+    "AC Maintenance",
+    "HVAC Repair",
+    "Electrical Repair",
+    "Remodeling",
+    "Flooring Installation",
+    "Roof Repair",
+    "General Maintenance"
+  ];
 
   const { data: auth } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
@@ -50,11 +68,26 @@ export default function MobileFieldTech() {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           });
+          setCheckInForm(prev => ({
+            ...prev,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          }));
         },
         (error) => console.log('Location error:', error)
       );
     }
   }, []);
+
+  // Auto-set technician ID when auth loads
+  useEffect(() => {
+    if (auth?.user?.id) {
+      setCheckInForm(prev => ({
+        ...prev,
+        technicianId: auth.user.id.toString()
+      }));
+    }
+  }, [auth?.user?.id]);
 
   const handleLogout = () => {
     fetch("/api/auth/logout", { method: "POST", credentials: "include" })
@@ -64,46 +97,63 @@ export default function MobileFieldTech() {
   const handlePhotoCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
-      setVisitForm(prev => ({
+      setCheckInForm(prev => ({
         ...prev,
         photos: [...prev.photos, ...Array.from(files)]
       }));
     }
   };
 
-  const submitVisit = async () => {
+  const submitCheckIn = async () => {
     try {
-      const visitData = {
-        ...visitForm,
-        technicianId: auth?.user?.id,
-        technicianName: auth?.user?.username,
-        companyId: auth?.company?.id,
-        location: currentLocation,
-        timestamp: new Date().toISOString(),
-        status: 'completed'
-      };
+      // Create FormData to match the company's check-in API
+      const formData = new FormData();
+      formData.append('technicianId', checkInForm.technicianId);
+      formData.append('jobType', checkInForm.jobType);
+      formData.append('notes', checkInForm.notes);
+      formData.append('location', checkInForm.location);
+      
+      if (checkInForm.latitude) {
+        formData.append('latitude', checkInForm.latitude.toString());
+      }
+      if (checkInForm.longitude) {
+        formData.append('longitude', checkInForm.longitude.toString());
+      }
+      
+      formData.append('createBlogPost', checkInForm.createBlogPost.toString());
+      formData.append('sendReviewRequest', checkInForm.sendReviewRequest.toString());
+      
+      // Add photos
+      checkInForm.photos.forEach((photo, index) => {
+        formData.append(`photos`, photo);
+      });
 
-      // In a real app, you'd upload photos to a cloud service first
-      const res = await fetch('/api/visits', {
+      const res = await fetch('/api/check-ins', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(visitData)
+        body: formData,
+        credentials: 'include'
       });
 
       if (res.ok) {
         setShowVisitModal(false);
-        setVisitForm({
-          customerName: '',
-          address: '',
+        setCheckInForm({
+          technicianId: auth?.user?.id?.toString() || '',
           jobType: '',
           notes: '',
+          location: '',
+          latitude: currentLocation?.lat,
+          longitude: currentLocation?.lng,
+          createBlogPost: false,
+          sendReviewRequest: false,
           photos: []
         });
-        alert('Visit logged successfully!');
+        alert('Check-in submitted successfully!');
+      } else {
+        const errorText = await res.text();
+        alert(`Failed to submit check-in: ${errorText}`);
       }
     } catch (error) {
-      alert('Error logging visit. Please try again.');
+      alert('Error submitting check-in. Please try again.');
     }
   };
 
@@ -445,13 +495,13 @@ export default function MobileFieldTech() {
         </div>
       </div>
 
-      {/* Visit Logging Modal */}
+      {/* Check-In Modal */}
       {showVisitModal && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end">
           <div className="bg-white rounded-t-xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Log New Visit</h3>
+                <h3 className="text-lg font-semibold">New Check-in</h3>
                 <Button variant="ghost" size="sm" onClick={() => setShowVisitModal(false)}>
                   ✕
                 </Button>
@@ -460,51 +510,37 @@ export default function MobileFieldTech() {
             
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Customer Name</label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                  value={visitForm.customerName}
-                  onChange={(e) => setVisitForm({...visitForm, customerName: e.target.value})}
-                  placeholder="Customer name"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Address</label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                  value={visitForm.address}
-                  onChange={(e) => setVisitForm({...visitForm, address: e.target.value})}
-                  placeholder="Service address"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Job Type</label>
+                <label className="block text-sm font-medium mb-1">Job Type *</label>
                 <select
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                  value={visitForm.jobType}
-                  onChange={(e) => setVisitForm({...visitForm, jobType: e.target.value})}
+                  value={checkInForm.jobType}
+                  onChange={(e) => setCheckInForm({...checkInForm, jobType: e.target.value})}
                 >
                   <option value="">Select job type</option>
-                  <option value="hvac_repair">HVAC Repair</option>
-                  <option value="hvac_install">HVAC Installation</option>
-                  <option value="hvac_maintenance">HVAC Maintenance</option>
-                  <option value="plumbing">Plumbing</option>
-                  <option value="electrical">Electrical</option>
-                  <option value="other">Other</option>
+                  {JOB_TYPES.map((type) => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
                 </select>
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-1">Notes</label>
+                <label className="block text-sm font-medium mb-1">Notes *</label>
                 <textarea
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm h-20 resize-none"
-                  value={visitForm.notes}
-                  onChange={(e) => setVisitForm({...visitForm, notes: e.target.value})}
-                  placeholder="Service notes and observations..."
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm h-24 resize-none"
+                  value={checkInForm.notes}
+                  onChange={(e) => setCheckInForm({...checkInForm, notes: e.target.value})}
+                  placeholder="Please add detailed notes about the work performed (minimum 5 characters)..."
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Location</label>
+                <input
+                  type="text"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                  value={checkInForm.location}
+                  onChange={(e) => setCheckInForm({...checkInForm, location: e.target.value})}
+                  placeholder="Service address or location details"
                 />
               </div>
               
@@ -528,11 +564,40 @@ export default function MobileFieldTech() {
                     <Camera className="w-4 h-4 mr-1" />
                     Take Photos
                   </Button>
-                  {visitForm.photos.length > 0 && (
+                  {checkInForm.photos.length > 0 && (
                     <span className="text-sm text-gray-600">
-                      {visitForm.photos.length} photo(s) selected
+                      {checkInForm.photos.length} photo(s) selected
                     </span>
                   )}
+                </div>
+              </div>
+
+              {/* Options matching company form */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="createBlogPost"
+                    checked={checkInForm.createBlogPost}
+                    onChange={(e) => setCheckInForm({...checkInForm, createBlogPost: e.target.checked})}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="createBlogPost" className="text-sm">
+                    Create blog post from this check-in
+                  </label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="sendReviewRequest"
+                    checked={checkInForm.sendReviewRequest}
+                    onChange={(e) => setCheckInForm({...checkInForm, sendReviewRequest: e.target.checked})}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="sendReviewRequest" className="text-sm">
+                    Send review request to customer
+                  </label>
                 </div>
               </div>
               
@@ -555,10 +620,10 @@ export default function MobileFieldTech() {
                 </Button>
                 <Button 
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
-                  onClick={submitVisit}
-                  disabled={!visitForm.customerName || !visitForm.address || !visitForm.jobType}
+                  onClick={submitCheckIn}
+                  disabled={!checkInForm.jobType || !checkInForm.notes || checkInForm.notes.length < 5}
                 >
-                  Log Visit
+                  Submit Check-in
                 </Button>
               </div>
             </div>
