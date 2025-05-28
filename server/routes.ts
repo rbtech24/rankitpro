@@ -1241,6 +1241,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Companies management API endpoints
+  app.get("/api/companies", isSuperAdmin, async (req, res) => {
+    try {
+      const companies = await storage.getAllCompanies();
+      
+      // Enrich companies with real statistics
+      const enrichedCompanies = await Promise.all(companies.map(async (company) => {
+        const checkIns = await storage.getCheckInsByCompany(company.id);
+        const technicians = await storage.getTechniciansByCompany(company.id);
+        const blogPosts = await storage.getBlogPostsByCompany(company.id);
+        const reviewRequests = await storage.getReviewRequestsByCompany(company.id);
+        
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const activeCheckInsLast30Days = checkIns.filter(checkIn => 
+          new Date(checkIn.dateCompleted) >= thirtyDaysAgo
+        ).length;
+
+        const reviews = reviewRequests.filter(req => req.status === 'completed');
+        const avgRating = reviews.length > 0 
+          ? reviews.reduce((sum, review) => sum + (review.rating || 0), 0) / reviews.length 
+          : 0;
+
+        return {
+          ...company,
+          currentTechnicians: technicians.length,
+          stats: {
+            totalCheckIns: checkIns.length,
+            activeCheckInsLast30Days,
+            totalTechnicians: technicians.length,
+            totalBlogPosts: blogPosts.length,
+            totalReviews: reviews.length,
+            avgRating: Number(avgRating.toFixed(1))
+          }
+        };
+      }));
+
+      res.json(enrichedCompanies);
+    } catch (error) {
+      console.error("Get companies error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Subscription plans API endpoint
+  app.get("/api/subscription-plans", isAuthenticated, async (req, res) => {
+    try {
+      // Return real subscription plans from your system
+      const plans = [
+        {
+          id: "starter",
+          name: "Starter",
+          monthlyPrice: 99,
+          yearlyPrice: 990,
+          maxTechnicians: 5,
+          features: ["ai_content", "review_requests"],
+          stripePriceIdMonthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID,
+          stripePriceIdYearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID
+        },
+        {
+          id: "professional", 
+          name: "Professional",
+          monthlyPrice: 199,
+          yearlyPrice: 1990,
+          maxTechnicians: 15,
+          features: ["ai_content", "wordpress_integration", "crm_integration", "review_requests"],
+          stripePriceIdMonthly: process.env.STRIPE_PROFESSIONAL_MONTHLY_PRICE_ID,
+          stripePriceIdYearly: process.env.STRIPE_PROFESSIONAL_YEARLY_PRICE_ID
+        },
+        {
+          id: "enterprise",
+          name: "Enterprise", 
+          monthlyPrice: 499,
+          yearlyPrice: 4990,
+          maxTechnicians: 999,
+          features: ["ai_content", "wordpress_integration", "crm_integration", "review_requests", "custom_branding", "api_access"],
+          stripePriceIdMonthly: process.env.STRIPE_ENTERPRISE_MONTHLY_PRICE_ID,
+          stripePriceIdYearly: process.env.STRIPE_ENTERPRISE_YEARLY_PRICE_ID
+        }
+      ];
+      
+      res.json(plans);
+    } catch (error) {
+      console.error("Get subscription plans error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Review Analytics endpoints
   app.get("/api/review-analytics/metrics", isAuthenticated, async (req, res) => {
     try {
