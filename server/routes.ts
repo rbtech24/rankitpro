@@ -860,6 +860,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Support Ticket routes
+  app.post("/api/support-tickets", isAuthenticated, async (req, res) => {
+    try {
+      const supportTicketSchema = z.object({
+        subject: z.string().min(1, "Subject is required"),
+        priority: z.enum(["low", "medium", "high", "urgent"]),
+        category: z.enum(["technical", "equipment", "app", "customer_service", "billing", "other"]),
+        description: z.string().min(1, "Description is required"),
+        location: z.string().optional(),
+        technicianId: z.number().optional(),
+        technicianName: z.string().optional(),
+        companyId: z.number().optional(),
+        status: z.string().default("open")
+      });
+
+      const data = supportTicketSchema.parse(req.body);
+      
+      // Create support ticket record (for now, we'll store it as a simple log)
+      const ticket = {
+        id: Date.now(), // Simple ID generation
+        ...data,
+        userId: req.user.id,
+        userEmail: req.user.email,
+        companyId: req.user.companyId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // Log the support ticket (in a real system, this would go to a database)
+      console.log("Support Ticket Created:", {
+        ticketId: ticket.id,
+        user: req.user.username,
+        company: req.user.companyId,
+        subject: data.subject,
+        priority: data.priority,
+        category: data.category,
+        description: data.description,
+        location: data.location
+      });
+
+      // In a production environment, you would:
+      // 1. Save to database
+      // 2. Send notification to support team
+      // 3. Create ticket in support system (Zendesk, Intercom, etc.)
+      
+      res.status(201).json({ 
+        message: "Support ticket created successfully",
+        ticketId: ticket.id,
+        status: "created"
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ message: validationError.message });
+      }
+      
+      console.error("Support ticket creation error:", error);
+      res.status(500).json({ message: "Failed to create support ticket" });
+    }
+  });
+  
   // Visit routes
   app.get("/api/visits", isAuthenticated, async (req, res) => {
     try {

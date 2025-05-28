@@ -14,7 +14,10 @@ import {
   Clock,
   Camera,
   Menu,
-  X
+  X,
+  HeadphonesIcon,
+  AlertCircle,
+  MessageSquare
 } from "lucide-react";
 import { getCurrentUser, AuthState } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -22,6 +25,14 @@ import { cn } from "@/lib/utils";
 export default function FieldTechDashboard() {
   const [activeView, setActiveView] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [supportModalOpen, setSupportModalOpen] = useState(false);
+  const [supportForm, setSupportForm] = useState({
+    subject: '',
+    priority: 'medium',
+    category: 'technical',
+    description: '',
+    location: ''
+  });
   
   const { data: auth } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
@@ -38,13 +49,91 @@ export default function FieldTechDashboard() {
     setSidebarOpen(false); // Close mobile sidebar
   };
 
-  // Fetch visits data
+  const handleSupportSubmit = async () => {
+    try {
+      const ticketData = {
+        ...supportForm,
+        technicianId: auth?.user?.id,
+        technicianName: auth?.user?.username,
+        companyId: auth?.company?.id,
+        status: 'open',
+        createdAt: new Date().toISOString()
+      };
+
+      const res = await fetch('/api/support-tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(ticketData)
+      });
+
+      if (res.ok) {
+        setSupportModalOpen(false);
+        setSupportForm({
+          subject: '',
+          priority: 'medium',
+          category: 'technical',
+          description: '',
+          location: ''
+        });
+        // Show success notification
+        alert('Support ticket created successfully! Our team will contact you soon.');
+      } else {
+        alert('Failed to create support ticket. Please try again.');
+      }
+    } catch (error) {
+      alert('Error creating support ticket. Please check your connection.');
+    }
+  };
+
+  const handleQuickSupport = (type: string) => {
+    const quickTickets = {
+      'equipment': {
+        subject: 'Equipment Issue',
+        category: 'technical',
+        priority: 'high',
+        description: 'I need assistance with equipment malfunction or technical issues.'
+      },
+      'app': {
+        subject: 'App Issue',
+        category: 'technical',
+        priority: 'medium',
+        description: 'I am experiencing problems with the mobile app or dashboard.'
+      },
+      'customer': {
+        subject: 'Customer Issue',
+        category: 'customer_service',
+        priority: 'medium',
+        description: 'I need help with a customer-related situation or complaint.'
+      }
+    };
+
+    const template = quickTickets[type as keyof typeof quickTickets];
+    if (template) {
+      setSupportForm({ ...supportForm, ...template });
+      setSupportModalOpen(true);
+    }
+  };
+
+  // Fetch visits data (try both endpoints for compatibility)
   const { data: visits = [], isLoading: visitsLoading } = useQuery({
-    queryKey: ['/api/visits'],
+    queryKey: ['/api/check-ins'],
     queryFn: async () => {
-      const res = await fetch('/api/visits', { credentials: 'include' });
-      if (!res.ok) return [];
-      return res.json();
+      try {
+        const res = await fetch('/api/check-ins', { credentials: 'include' });
+        if (res.ok) {
+          return await res.json();
+        }
+        // Fallback to visits endpoint
+        const visitsRes = await fetch('/api/visits', { credentials: 'include' });
+        if (visitsRes.ok) {
+          return await visitsRes.json();
+        }
+        return [];
+      } catch (error) {
+        console.log('API call failed, showing empty state');
+        return [];
+      }
     }
   });
 
@@ -52,9 +141,16 @@ export default function FieldTechDashboard() {
   const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
     queryKey: ['/api/reviews'],
     queryFn: async () => {
-      const res = await fetch('/api/reviews', { credentials: 'include' });
-      if (!res.ok) return [];
-      return res.json();
+      try {
+        const res = await fetch('/api/reviews', { credentials: 'include' });
+        if (res.ok) {
+          return await res.json();
+        }
+        return [];
+      } catch (error) {
+        console.log('Reviews API call failed, showing empty state');
+        return [];
+      }
     }
   });
 
@@ -229,7 +325,7 @@ export default function FieldTechDashboard() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Button size="lg" className="h-16 bg-blue-600 hover:bg-blue-700">
                     <Plus className="w-6 h-6 mr-3" />
                     Log New Visit
@@ -238,6 +334,49 @@ export default function FieldTechDashboard() {
                     <Camera className="w-6 h-6 mr-3" />
                     Quick Photo
                   </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="h-16 border-orange-200 hover:bg-orange-50"
+                    onClick={() => setSupportModalOpen(true)}
+                  >
+                    <HeadphonesIcon className="w-6 h-6 mr-3 text-orange-600" />
+                    Get Support
+                  </Button>
+                </div>
+                
+                {/* Quick Support Buttons */}
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-gray-700 mb-3">Quick Support:</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-xs"
+                      onClick={() => handleQuickSupport('equipment')}
+                    >
+                      <AlertCircle className="w-3 h-3 mr-1" />
+                      Equipment Issue
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-xs"
+                      onClick={() => handleQuickSupport('app')}
+                    >
+                      <Smartphone className="w-3 h-3 mr-1" />
+                      App Problem
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-xs"
+                      onClick={() => handleQuickSupport('customer')}
+                    >
+                      <MessageSquare className="w-3 h-3 mr-1" />
+                      Customer Help
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -555,6 +694,103 @@ export default function FieldTechDashboard() {
           {renderMainContent()}
         </main>
       </div>
+
+      {/* Support Ticket Modal */}
+      {supportModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSupportModalOpen(false)} />
+            <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Create Support Ticket</h3>
+                <button onClick={() => setSupportModalOpen(false)}>
+                  <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    value={supportForm.subject}
+                    onChange={(e) => setSupportForm({...supportForm, subject: e.target.value})}
+                    placeholder="Brief description of the issue"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                    <select
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      value={supportForm.priority}
+                      onChange={(e) => setSupportForm({...supportForm, priority: e.target.value})}
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      value={supportForm.category}
+                      onChange={(e) => setSupportForm({...supportForm, category: e.target.value})}
+                    >
+                      <option value="technical">Technical</option>
+                      <option value="equipment">Equipment</option>
+                      <option value="app">App Issue</option>
+                      <option value="customer_service">Customer Service</option>
+                      <option value="billing">Billing</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Current Location (Optional)</label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                    value={supportForm.location}
+                    onChange={(e) => setSupportForm({...supportForm, location: e.target.value})}
+                    placeholder="Where are you experiencing this issue?"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm h-24 resize-none"
+                    value={supportForm.description}
+                    onChange={(e) => setSupportForm({...supportForm, description: e.target.value})}
+                    placeholder="Please describe the issue in detail..."
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 mt-6">
+                <Button variant="outline" onClick={() => setSupportModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSupportSubmit}
+                  disabled={!supportForm.subject || !supportForm.description}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  <HeadphonesIcon className="w-4 h-4 mr-2" />
+                  Create Ticket
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
