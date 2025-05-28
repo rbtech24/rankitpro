@@ -46,6 +46,7 @@ import AIContentGenerator from "@/pages/ai-content-generator";
 import AdminUserManagement from "@/pages/admin-user-management";
 import WordPressPlugin from "@/pages/wordpress-plugin";
 import APICredentials from "@/pages/api-credentials";
+import JobTypesManagement from "@/pages/job-types-management";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
@@ -1011,6 +1012,9 @@ function Router() {
       {/* Admin Pages */}
       <Route path="/technicians">
         <PrivateRoute component={Technicians} path="/technicians" role="company_admin" />
+      </Route>
+      <Route path="/job-types-management">
+        <PrivateRoute component={JobTypesManagement} path="/job-types-management" role="company_admin" />
       </Route>
       <Route path="/users">
         <PrivateRoute component={Users} path="/users" role="company_admin" />
