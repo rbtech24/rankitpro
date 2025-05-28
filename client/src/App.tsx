@@ -10,6 +10,7 @@ import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Dashboard from "@/pages/new-dashboard";
 import TechnicianDashboard from "@/pages/tech-dashboard";
+import TechDashboardComplete from "@/pages/tech-dashboard-complete";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
@@ -976,7 +977,7 @@ function Router() {
       {/* Dashboard Pages */}
       <Route path="/dashboard">
         {auth?.user?.role === 'technician' 
-          ? <PrivateRoute component={TechDashboardPage} path="/dashboard" role="technician" />
+          ? <PrivateRoute component={TechDashboardComplete} path="/dashboard" role="technician" />
           : <PrivateRoute component={Dashboard} path="/dashboard" />
         }
       </Route>
