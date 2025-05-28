@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -13,13 +14,17 @@ import {
   Camera,
   MapPin
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { getCurrentUser, AuthState } from "@/lib/auth";
 
 export default function TechDashboardPage() {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showVisitModal, setShowVisitModal] = useState(false);
-  const { auth } = useAuth();
+  
+  const { data: auth } = useQuery<AuthState>({
+    queryKey: ["/api/auth/me"],
+    queryFn: getCurrentUser
+  });
 
   // Mock data for development
   const visits: any[] = [];
