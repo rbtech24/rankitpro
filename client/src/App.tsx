@@ -12,6 +12,7 @@ import Dashboard from "@/pages/new-dashboard";
 import TechnicianDashboard from "@/pages/tech-dashboard";
 import TechDashboardComplete from "@/pages/tech-dashboard-complete";
 import TechnicianFinal from "@/pages/technician-final";
+import FieldTechDashboard from "@/pages/field-tech-dashboard";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
@@ -130,7 +131,7 @@ function Router() {
         <LogoutHandler />
       </Route>
       <Route path="/">
-        {auth?.user ? <Redirect to="/tech-final" /> : <Home />}
+        {auth?.user ? <Redirect to="/field-tech" /> : <Home />}
       </Route>
       
       {/* Informational Pages */}
@@ -975,14 +976,14 @@ function Router() {
         </div>
       </Route>
       
-      {/* Clean Tech Dashboard - No Conflicts */}
-      <Route path="/tech-final">
-        <TechnicianFinal />
+      {/* Clean Field Tech Dashboard - No Conflicts */}
+      <Route path="/field-tech">
+        <FieldTechDashboard />
       </Route>
       
-      {/* Dashboard Pages - FORCED TECH DASHBOARD ONLY */}
+      {/* Dashboard Pages - NEW FIELD TECH DASHBOARD */}
       <Route path="/dashboard">
-        <TechnicianFinal />
+        <FieldTechDashboard />
       </Route>
       <Route path="/admin-dashboard">
         <PrivateRoute component={Dashboard} path="/admin-dashboard" />
