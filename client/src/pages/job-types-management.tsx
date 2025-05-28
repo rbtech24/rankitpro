@@ -34,6 +34,9 @@ export default function JobTypesManagement() {
   const createJobTypeMutation = useMutation({
     mutationFn: async (name: string) => {
       const res = await apiRequest("POST", "/api/job-types", { name });
+      if (!res.ok) {
+        throw new Error(`Failed to create job type: ${res.status}`);
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -44,10 +47,11 @@ export default function JobTypesManagement() {
         description: "New job type has been added successfully.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Job type creation error:", error);
       toast({
         title: "Error",
-        description: "Failed to add job type. Please try again.",
+        description: error.message || "Failed to add job type. Please try again.",
         variant: "destructive",
       });
     }
