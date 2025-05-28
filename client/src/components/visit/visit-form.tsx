@@ -81,19 +81,12 @@ interface Technician {
   name: string;
 }
 
-const JOB_TYPES = [
-  "Plumbing Repair",
-  "Water Heater Installation",
-  "Drain Cleaning",
-  "Sewer Line Repair",
-  "AC Maintenance",
-  "HVAC Repair",
-  "Electrical Repair",
-  "Remodeling",
-  "Flooring Installation",
-  "Roof Repair",
-  "General Maintenance"
-];
+// Job types interface
+interface JobType {
+  id: number;
+  name: string;
+  isActive: boolean;
+}
 
 // Form schema
 const formSchema = z.object({
@@ -124,6 +117,26 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
       return res.json();
     }
   });
+
+  // Get job types from localStorage (matching job types management approach)
+  const getStoredJobTypes = (): JobType[] => {
+    try {
+      const stored = localStorage.getItem('company-job-types');
+      return stored ? JSON.parse(stored) : [
+        { id: 1, name: "Plumbing Repair", isActive: true },
+        { id: 2, name: "HVAC Maintenance", isActive: true },
+        { id: 3, name: "Electrical Work", isActive: true }
+      ];
+    } catch {
+      return [
+        { id: 1, name: "Plumbing Repair", isActive: true },
+        { id: 2, name: "HVAC Maintenance", isActive: true },
+        { id: 3, name: "Electrical Work", isActive: true }
+      ];
+    }
+  };
+
+  const [jobTypes] = useState<JobType[]>(getStoredJobTypes);
   
   // Form definition
   const form = useForm<VisitFormValues>({
@@ -355,8 +368,8 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {JOB_TYPES.map((jobType) => (
-                          <SelectItem key={jobType} value={jobType}>{jobType}</SelectItem>
+                        {jobTypes.filter(jt => jt.isActive).map((jobType) => (
+                          <SelectItem key={jobType.id} value={jobType.name}>{jobType.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
