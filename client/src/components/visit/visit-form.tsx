@@ -90,7 +90,7 @@ interface JobType {
 
 // Form schema
 const formSchema = z.object({
-  technicianId: z.string().min(1, "Please select a technician"),
+  technicianId: z.string().optional(),
   jobType: z.string().min(1, "Please select a job type"),
   notes: z.string().min(5, "Please add detailed notes about the work performed"),
   location: z.string().optional(),
@@ -354,7 +354,13 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
     
     // Create FormData for file uploads
     const formData = new FormData();
-    formData.append("technicianId", values.technicianId);
+    // Handle technician ID - use selected technician for admins, current user for technicians
+    if (values.technicianId) {
+      formData.append("technicianId", values.technicianId);
+    } else if (auth?.user?.role === "technician") {
+      // For technicians submitting their own visits, use their user ID
+      formData.append("technicianId", auth.user.id.toString());
+    }
     formData.append("jobType", values.jobType);
     formData.append("notes", values.notes);
     
@@ -389,40 +395,43 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
         <Card>
           <CardContent className="pt-6">
             <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="technicianId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Technician</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      disabled={techniciansLoading}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a technician" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {techniciansLoading ? (
-                          <SelectItem value="loading" disabled>Loading technicians...</SelectItem>
-                        ) : technicians && technicians.length > 0 ? (
-                          technicians.map((tech) => (
-                            <SelectItem key={tech.id} value={tech.id.toString()}>
-                              {tech.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="none" disabled>No technicians found</SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Only show technician selection for company admins */}
+              {auth?.user?.role === "company_admin" && (
+                <FormField
+                  control={form.control}
+                  name="technicianId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Technician</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={techniciansLoading}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a technician" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {techniciansLoading ? (
+                            <SelectItem value="loading" disabled>Loading technicians...</SelectItem>
+                          ) : technicians && technicians.length > 0 ? (
+                            technicians.map((tech) => (
+                              <SelectItem key={tech.id} value={tech.id.toString()}>
+                                {tech.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="none" disabled>No technicians found</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               
               <FormField
                 control={form.control}
