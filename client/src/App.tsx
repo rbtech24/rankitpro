@@ -1004,8 +1004,8 @@ function Router() {
       <Route path="/blog-posts">
         <PrivateRoute component={BlogPosts} path="/blog-posts" />
       </Route>
-      <Route path="/reviews">
-        <PrivateRoute component={Reviews} path="/reviews" />
+      <Route path="/admin-reviews">
+        <PrivateRoute component={Reviews} path="/admin-reviews" />
       </Route>
 
       <Route path="/review-analytics">
