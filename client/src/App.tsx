@@ -1032,9 +1032,10 @@ function Router() {
       <Route path="/admin-user-management">
         <PrivateRoute component={AdminUserManagement} path="/admin-user-management" role="super_admin" />
       </Route>
-      <Route path="/system-settings">
+      {/* Temporarily disabled while fixing hooks issue */}
+      {/* <Route path="/system-settings">
         <PrivateRoute component={SystemSettings} path="/system-settings" role="super_admin" />
-      </Route>
+      </Route> */}
       <Route path="/system-overview">
         <PrivateRoute component={SystemOverview} path="/system-overview" role="super_admin" />
       </Route>
@@ -1087,24 +1088,6 @@ function Router() {
 }
 
 function App() {
-  const [initialized, setInitialized] = useState(false);
-  
-  useEffect(() => {
-    // Prefetch current user
-    queryClient.prefetchQuery({
-      queryKey: ["/api/auth/me"],
-      queryFn: getCurrentUser
-    }).then(() => setInitialized(true));
-  }, []);
-  
-  if (!initialized) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
-      </div>
-    );
-  }
-  
   return (
     <QueryClientProvider client={queryClient}>
       <NotificationProvider>

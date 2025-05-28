@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import {
@@ -136,43 +136,35 @@ const mockEmailSettings = {
   sendBillingNotifications: true,
 };
 
-const mockAISettings = {
-  defaultProvider: "openai" as const,
-  openaiModel: "gpt-4o",
-  anthropicModel: "claude-3-7-sonnet-20250219",
-  xaiModel: "grok-2-1212",
-  maxTokensPerRequest: 2000,
-  temperatureSummary: 0.3,
-  temperatureBlog: 0.7,
-  customInstructionsSummary: "Create a concise summary of the home service check-in that highlights the key problems, solutions, and outcomes in a professional tone.",
-  customInstructionsBlog: "Create an engaging blog post for a home service business that explains the service in a way that demonstrates expertise and builds trust with potential customers.",
-  enableAIImageGeneration: true,
-};
+// Fetch real AI settings from database
+const { data: aiSettings, isLoading: aiLoading } = useQuery({
+  queryKey: ['/api/system/ai-settings'],
+  queryFn: async () => {
+    const res = await fetch('/api/system/ai-settings', { credentials: 'include' });
+    if (!res.ok) throw new Error('Failed to fetch AI settings');
+    return res.json();
+  }
+});
 
-const mockSystemSettings = {
-  maxUploadSizeMB: 10,
-  allowedFileTypes: ["jpg", "jpeg", "png", "heic", "pdf"],
-  maxImagesPerCheckIn: 6,
-  maxCheckInsPerDay: 50,
-  sessionTimeoutMinutes: 60,
-  maintenanceMode: false,
-  maintenanceMessage: "Rank It Pro is currently undergoing scheduled maintenance. We'll be back shortly.",
-  debugMode: false,
-  enableRateLimiting: true,
-  maxRequestsPerMinute: 100,
-};
+// Fetch real system settings from database
+const { data: systemSettings, isLoading: systemLoading } = useQuery({
+  queryKey: ['/api/system/settings'],
+  queryFn: async () => {
+    const res = await fetch('/api/system/settings', { credentials: 'include' });
+    if (!res.ok) throw new Error('Failed to fetch system settings');
+    return res.json();
+  }
+});
 
-const mockIntegrationSettings = {
-  defaultWordPressFieldPrefix: "rp_",
-  defaultEmbedTitle: "Recent Service Visits",
-  defaultEmbedSubtitle: "See what our technicians have been working on",
-  enableCustomBranding: true,
-  disableRankItProBranding: false,
-  enableCustomCSS: true,
-  customCSS: ".rank-it-pro-embed { border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }",
-  defaultLanguage: "en-US",
-  enableMultiLanguage: false,
-};
+// Fetch real integration settings from database
+const { data: integrationSettings, isLoading: integrationLoading } = useQuery({
+  queryKey: ['/api/system/integration-settings'],
+  queryFn: async () => {
+    const res = await fetch('/api/system/integration-settings', { credentials: 'include' });
+    if (!res.ok) throw new Error('Failed to fetch integration settings');
+    return res.json();
+  }
+});
 
 // Available AI models
 const aiModels = {
@@ -211,6 +203,19 @@ export default function SystemSettings() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
+  // Fetch system settings data
+  const { data: aiSettings } = useQuery({
+    queryKey: ["/api/system/ai-settings"],
+  });
+  
+  const { data: systemSettings } = useQuery({
+    queryKey: ["/api/system/settings"],
+  });
+  
+  const { data: integrationSettings } = useQuery({
+    queryKey: ["/api/system/integration-settings"],
+  });
+  
   // Email settings form
   const emailForm = useForm<z.infer<typeof emailSettingsSchema>>({
     resolver: zodResolver(emailSettingsSchema),
@@ -220,19 +225,47 @@ export default function SystemSettings() {
   // AI settings form
   const aiForm = useForm<z.infer<typeof aiSettingsSchema>>({
     resolver: zodResolver(aiSettingsSchema),
-    defaultValues: mockAISettings
+    defaultValues: aiSettings || {
+      defaultProvider: "openai",
+      openaiModel: "gpt-4o",
+      anthropicModel: "claude-3-7-sonnet-20250219",
+      xaiModel: "grok-2-1212",
+      maxTokensPerRequest: 2000,
+      temperatureSummary: 0.3,
+      temperatureBlog: 0.7,
+      enableAIImageGeneration: true
+    }
   });
   
   // System settings form
   const systemForm = useForm<z.infer<typeof systemSettingsSchema>>({
     resolver: zodResolver(systemSettingsSchema),
-    defaultValues: mockSystemSettings
+    defaultValues: systemSettings || {
+      maxUploadSizeMB: 10,
+      allowedFileTypes: ["jpg", "jpeg", "png", "heic", "pdf"],
+      maxImagesPerCheckIn: 6,
+      maxCheckInsPerDay: 50,
+      sessionTimeoutMinutes: 60,
+      maintenanceMode: false,
+      debugMode: false,
+      enableRateLimiting: true,
+      maxRequestsPerMinute: 100
+    }
   });
   
   // Integration settings form
   const integrationForm = useForm<z.infer<typeof integrationSettingsSchema>>({
     resolver: zodResolver(integrationSettingsSchema),
-    defaultValues: mockIntegrationSettings
+    defaultValues: integrationSettings || {
+      defaultWordPressFieldPrefix: "rp_",
+      defaultEmbedTitle: "Recent Service Visits",
+      defaultEmbedSubtitle: "See what our technicians have been working on",
+      enableCustomBranding: true,
+      disableRankItProBranding: false,
+      enableCustomCSS: true,
+      defaultLanguage: "en-US",
+      enableMultiLanguage: false
+    }
   });
   
   // Submit handlers

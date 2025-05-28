@@ -637,6 +637,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
+
+  // Company check-ins endpoint
+  app.get("/api/companies/:id/check-ins", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      
+      // Check permissions
+      if (req.user.role !== "super_admin" && req.user.companyId !== companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const checkIns = await storage.getCheckInsByCompany(companyId);
+      res.json(checkIns);
+    } catch (error) {
+      console.error("Get company check-ins error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Company reviews endpoint
+  app.get("/api/companies/:id/reviews", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      
+      // Check permissions
+      if (req.user.role !== "super_admin" && req.user.companyId !== companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const reviews = await storage.getReviewResponsesByCompany(companyId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Get company reviews error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // System settings endpoints
+  app.get("/api/system/ai-settings", isSuperAdmin, async (req, res) => {
+    try {
+      // Return default AI settings that can be configured via database later
+      const aiSettings = {
+        defaultProvider: "openai",
+        openaiModel: "gpt-4o",
+        anthropicModel: "claude-3-7-sonnet-20250219",
+        xaiModel: "grok-2-1212",
+        maxTokensPerRequest: 2000,
+        temperatureSummary: 0.3,
+        temperatureBlog: 0.7,
+        customInstructionsSummary: "Create a concise summary of the home service check-in that highlights the key problems, solutions, and outcomes in a professional tone.",
+        customInstructionsBlog: "Create an engaging blog post for a home service business that explains the service in a way that demonstrates expertise and builds trust with potential customers.",
+        enableAIImageGeneration: true,
+      };
+      res.json(aiSettings);
+    } catch (error) {
+      console.error("Get AI settings error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/system/settings", isSuperAdmin, async (req, res) => {
+    try {
+      // Return default system settings that can be configured via database later
+      const systemSettings = {
+        maxUploadSizeMB: 10,
+        allowedFileTypes: ["jpg", "jpeg", "png", "heic", "pdf"],
+        maxImagesPerCheckIn: 6,
+        maxCheckInsPerDay: 50,
+        sessionTimeoutMinutes: 60,
+        maintenanceMode: false,
+        maintenanceMessage: "Rank It Pro is currently undergoing scheduled maintenance. We'll be back shortly.",
+        debugMode: false,
+        enableRateLimiting: true,
+        maxRequestsPerMinute: 100,
+      };
+      res.json(systemSettings);
+    } catch (error) {
+      console.error("Get system settings error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/system/integration-settings", isSuperAdmin, async (req, res) => {
+    try {
+      // Return default integration settings that can be configured via database later
+      const integrationSettings = {
+        defaultWordPressFieldPrefix: "rp_",
+        defaultEmbedTitle: "Recent Service Visits",
+        defaultEmbedSubtitle: "See what our technicians have been working on",
+        enableCustomBranding: true,
+        disableRankItProBranding: false,
+        enableCustomCSS: true,
+        customCSS: ".rank-it-pro-embed { border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }",
+        defaultLanguage: "en-US",
+        enableMultiLanguage: false,
+      };
+      res.json(integrationSettings);
+    } catch (error) {
+      console.error("Get integration settings error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
   
   // Technician routes
   app.get("/api/technicians", isCompanyAdmin, async (req, res) => {
