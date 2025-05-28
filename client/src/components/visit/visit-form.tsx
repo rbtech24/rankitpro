@@ -6,6 +6,54 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+// Reverse geocoding function to convert coordinates to address
+async function reverseGeocode(latitude: number, longitude: number): Promise<string> {
+  try {
+    // Using OpenStreetMap Nominatim API (free, no API key required)
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+    );
+    
+    if (!response.ok) {
+      throw new Error('Geocoding service unavailable');
+    }
+    
+    const data = await response.json();
+    
+    if (data && data.address) {
+      const address = data.address;
+      
+      // Build a formatted address string
+      const parts = [];
+      
+      if (address.house_number && address.road) {
+        parts.push(`${address.house_number} ${address.road}`);
+      } else if (address.road) {
+        parts.push(address.road);
+      }
+      
+      if (address.city || address.town || address.village) {
+        parts.push(address.city || address.town || address.village);
+      }
+      
+      if (address.state) {
+        parts.push(address.state);
+      }
+      
+      if (address.postcode) {
+        parts.push(address.postcode);
+      }
+      
+      return parts.join(', ') || data.display_name;
+    }
+    
+    throw new Error('No address found');
+  } catch (error) {
+    console.error('Reverse geocoding error:', error);
+    throw error;
+  }
+}
+
 import {
   Form,
   FormControl,
@@ -152,10 +200,16 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
         form.setValue("latitude", latitude);
         form.setValue("longitude", longitude);
         
-        // Try to get human-readable address using reverse geocoding
-        // In a real app, you'd use a geocoding service like Google Maps API
-        // For now, we'll just set coordinates as the location string
-        form.setValue("location", `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° W`);
+        // Convert coordinates to readable address using reverse geocoding
+        reverseGeocode(latitude, longitude)
+          .then(address => {
+            form.setValue("location", address);
+          })
+          .catch(error => {
+            console.error("Reverse geocoding failed:", error);
+            // Fallback to showing city based on coordinates
+            form.setValue("location", `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° W`);
+          });
         setIsGettingLocation(false);
       },
       (error) => {
