@@ -6,7 +6,7 @@ import {
   DialogTitle,
   DialogDescription
 } from "@/components/ui/dialog";
-import VisitForm from "./visit-form";
+import VisitForm from "@/components/visit/visit-form";
 
 interface MobileVisitModalProps {
   open: boolean;

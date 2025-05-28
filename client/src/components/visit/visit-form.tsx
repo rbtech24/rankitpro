@@ -121,13 +121,23 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Get technicians
+  // Get current user info to determine if they need technician selection
+  const { data: auth } = useQuery({
+    queryKey: ["/api/auth/me"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/auth/me");
+      return res.json();
+    }
+  });
+
+  // Only fetch technicians for company admins, not for technicians themselves
   const { data: technicians, isLoading: techniciansLoading } = useQuery<Technician[]>({
     queryKey: ["/api/technicians"],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/technicians");
       return res.json();
-    }
+    },
+    enabled: auth?.user?.role === "company_admin" // Only run for company admins
   });
 
   // Get job types from localStorage with reactive updates
