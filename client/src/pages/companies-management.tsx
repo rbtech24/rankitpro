@@ -188,8 +188,8 @@ export default function CompaniesManagement() {
       // Add new company
       const newCompany = {
         ...data,
-        id: Math.max(...companies.map(c => c.id)) + 1,
-        planName: mockPlans.find(p => p.id === data.planId)?.name || "",
+        id: Math.max(...(companies as any[]).map((c: any) => c.id)) + 1,
+        planName: subscriptionPlans.find((p: any) => p.id === data.planId)?.name || "",
         createdAt: new Date().toISOString(),
         lastLogin: "",
         currentTechnicians: 0,
@@ -203,7 +203,8 @@ export default function CompaniesManagement() {
           avgRating: 0
         }
       };
-      setCompanies([...companies, newCompany]);
+      // Company creation will be handled by API mutation
+      queryClient.invalidateQueries({ queryKey: ['/api/companies'] });
       toast({
         title: "Company Added",
         description: `${data.name} has been added successfully.`
@@ -215,12 +216,13 @@ export default function CompaniesManagement() {
           return { 
             ...company, 
             ...data,
-            planName: mockPlans.find(p => p.id === data.planId)?.name || ""
+            planName: (subscriptionPlans as any[]).find((p: any) => p.id === data.planId)?.name || ""
           };
         }
         return company;
       });
-      setCompanies(updatedCompanies);
+      // Company updates will be handled by API mutation
+      queryClient.invalidateQueries({ queryKey: ['/api/companies'] });
       toast({
         title: "Company Updated",
         description: `${data.name} has been updated successfully.`
