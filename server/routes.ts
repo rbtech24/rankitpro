@@ -1387,6 +1387,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
+
+  // Simple in-memory job types storage for immediate functionality
+  const companyJobTypes = new Map<number, Array<{id: number, name: string, isActive: boolean}>>();
+
+  // Job Types Management API endpoints
+  app.post('/api/job-types', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      console.log('POST /api/job-types - Body:', req.body);
+      console.log('User:', req.user);
+      
+      const { name } = req.body;
+      const companyId = req.user?.companyId;
+      
+      if (!companyId) {
+        console.log('No company ID found');
+        return res.status(400).json({ error: 'Company ID required' });
+      }
+
+      if (!name || !name.trim()) {
+        console.log('No name provided');
+        return res.status(400).json({ error: 'Job type name is required' });
+      }
+
+      const existingJobTypes = companyJobTypes.get(companyId) || [];
+      const newId = Math.max(0, ...existingJobTypes.map(jt => jt.id)) + 1;
+      const newJobType = {
+        id: newId,
+        name: name.trim(),
+        isActive: true
+      };
+
+      const updatedJobTypes = [...existingJobTypes, newJobType];
+      companyJobTypes.set(companyId, updatedJobTypes);
+
+      console.log('Created job type:', newJobType);
+      res.setHeader('Content-Type', 'application/json');
+      res.json(newJobType);
+    } catch (error) {
+      console.error('Error creating job type:', error);
+      res.status(500).json({ error: 'Failed to create job type' });
+    }
+  });
+
+  app.patch('/api/job-types/:id', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { name } = req.body;
+      const companyId = req.user.companyId;
+      
+      if (!companyId) {
+        return res.status(400).json({ error: 'Company ID required' });
+      }
+
+      const existingJobTypes = companyJobTypes.get(companyId) || [];
+      const jobTypeIndex = existingJobTypes.findIndex(jt => jt.id === parseInt(id));
+      
+      if (jobTypeIndex === -1) {
+        return res.status(404).json({ error: 'Job type not found' });
+      }
+
+      existingJobTypes[jobTypeIndex].name = name;
+      companyJobTypes.set(companyId, existingJobTypes);
+
+      res.json(existingJobTypes[jobTypeIndex]);
+    } catch (error) {
+      console.error('Error updating job type:', error);
+      res.status(500).json({ error: 'Failed to update job type' });
+    }
+  });
+
+  app.delete('/api/job-types/:id', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const companyId = req.user.companyId;
+      
+      if (!companyId) {
+        return res.status(400).json({ error: 'Company ID required' });
+      }
+
+      const existingJobTypes = companyJobTypes.get(companyId) || [];
+      const filteredJobTypes = existingJobTypes.filter(jt => jt.id !== parseInt(id));
+      
+      companyJobTypes.set(companyId, filteredJobTypes);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting job type:', error);
+      res.status(500).json({ error: 'Failed to delete job type' });
+    }
+  });
   
 
 
