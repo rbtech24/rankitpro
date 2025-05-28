@@ -4,6 +4,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import BlogEditModal from "@/components/modals/blog-edit-modal";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -19,6 +20,8 @@ interface BlogPost {
 
 export default function BlogPosts() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const { toast } = useToast();
   
   const { data: blogPosts, isLoading } = useQuery<BlogPost[]>({
@@ -45,11 +48,11 @@ export default function BlogPosts() {
   };
 
   const handleEditPost = (postId: number) => {
-    toast({
-      title: "Edit Blog Post",
-      description: `Opening editor for blog post #${postId}`,
-      variant: "default",
-    });
+    const post = filteredBlogPosts?.find(p => p.id === postId);
+    if (post) {
+      setSelectedPost(post);
+      setEditModalOpen(true);
+    }
   };
   
   return (
@@ -150,6 +153,15 @@ export default function BlogPosts() {
           </Card>
         )}
       </div>
+
+      <BlogEditModal
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedPost(null);
+        }}
+        blogPost={selectedPost}
+      />
     </DashboardLayout>
   );
 }
