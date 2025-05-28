@@ -38,7 +38,7 @@ import LocalSeoGuide from "@/pages/downloads/local-seo-guide";
 import ImplementationChecklist from "@/pages/downloads/implementation-checklist";
 import TechnicianTrainingSlides from "@/pages/downloads/technician-training-slides";
 import BillingManagement from "@/pages/billing-management";
-import CompaniesManagement from "@/pages/companies-management";
+import CompaniesManagement from "@/pages/companies-management-simple";
 import SystemSettings from "@/pages/system-settings";
 import SystemOverview from "@/pages/system-overview";
 import SetupGuide from "@/pages/setup-guide";
