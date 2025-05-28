@@ -12,7 +12,7 @@ import Dashboard from "@/pages/new-dashboard";
 import TechnicianDashboard from "@/pages/tech-dashboard";
 import TechDashboardComplete from "@/pages/tech-dashboard-complete";
 import TechnicianFinal from "@/pages/technician-final";
-import FieldTechDashboard from "@/pages/field-tech-dashboard-new";
+import TechnicianDashboardFinal from "@/pages/technician-dashboard-final";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
@@ -978,12 +978,12 @@ function Router() {
       
       {/* Clean Field Tech Dashboard - No Conflicts */}
       <Route path="/field-tech">
-        <FieldTechDashboard />
+        <TechnicianDashboardFinal />
       </Route>
       
       {/* Dashboard Pages - NEW FIELD TECH DASHBOARD */}
       <Route path="/dashboard">
-        <FieldTechDashboard />
+        <TechnicianDashboardFinal />
       </Route>
       <Route path="/admin-dashboard">
         <PrivateRoute component={Dashboard} path="/admin-dashboard" />
