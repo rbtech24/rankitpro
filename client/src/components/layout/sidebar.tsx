@@ -227,8 +227,8 @@ export default function Sidebar({ className }: SidebarProps) {
               )}
             </div>
             
-            {/* Company Admin Management Section */}
-            {isCompanyAdmin && (
+            {/* Company Admin Management Section - Only for company admins */}
+            {!isTechnician && isCompanyAdmin && (
               <div className="mb-4">
                 <div className="px-3 mb-2 text-xs text-gray-500 uppercase font-semibold">Management</div>
                 <Link href="/technicians">
