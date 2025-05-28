@@ -25,6 +25,7 @@ export default function TechDashboardPage() {
   const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showVisitModal, setShowVisitModal] = useState(false);
+  const [activeSection, setActiveSection] = useState('dashboard');
   
   const { data: auth, isLoading } = useQuery<AuthState>({
     queryKey: ['/api/auth/me'],
@@ -65,13 +66,13 @@ export default function TechDashboardPage() {
 
   // Navigation items for technicians
   const navigation = [
-    { label: 'Dashboard', path: '/dashboard', icon: Home },
-    { label: 'My Visits', path: '/tech-visits', icon: ClipboardList },
-    { label: 'My Reviews', path: '/tech-reviews', icon: CheckCircle },
-    { label: 'Mobile App', path: '/tech-app', icon: Smartphone },
+    { label: 'Dashboard', section: 'dashboard', icon: Home },
+    { label: 'My Visits', section: 'visits', icon: ClipboardList },
+    { label: 'My Reviews', section: 'reviews', icon: CheckCircle },
+    { label: 'Mobile App', section: 'mobile', icon: Smartphone },
   ];
 
-  const isActive = (path: string) => location === path;
+  const isActive = (section: string) => activeSection === section;
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -91,16 +92,18 @@ export default function TechDashboardPage() {
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
-                <Link href={item.path} key={item.path}>
-                  <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md mb-1 cursor-pointer ${
-                    isActive(item.path) 
+                <button
+                  key={item.section}
+                  onClick={() => setActiveSection(item.section)}
+                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md mb-1 cursor-pointer ${
+                    isActive(item.section) 
                       ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' 
                       : 'text-gray-600 hover:bg-gray-100'
-                  }`}>
-                    <Icon className="mr-3 h-5 w-5" />
-                    {item.label}
-                  </div>
-                </Link>
+                  }`}
+                >
+                  <Icon className="mr-3 h-5 w-5" />
+                  {item.label}
+                </button>
               );
             })}
           </div>
@@ -161,15 +164,17 @@ export default function TechDashboardPage() {
                   {navigation.map((item) => {
                     const Icon = item.icon;
                     return (
-                      <Link href={item.path} key={item.path}>
-                        <div 
-                          className="flex items-center px-3 py-2 text-base font-medium rounded-md text-gray-700 hover:bg-gray-100 mb-1 cursor-pointer"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <Icon className="mr-3 h-5 w-5" />
-                          {item.label}
-                        </div>
-                      </Link>
+                      <button
+                        key={item.section}
+                        onClick={() => {
+                          setActiveSection(item.section);
+                          setMobileMenuOpen(false);
+                        }}
+                        className="w-full flex items-center px-3 py-2 text-base font-medium rounded-md text-gray-700 hover:bg-gray-100 mb-1 cursor-pointer"
+                      >
+                        <Icon className="mr-3 h-5 w-5" />
+                        {item.label}
+                      </button>
                     );
                   })}
                   <div className="pt-4 mt-4 border-t border-gray-200">
