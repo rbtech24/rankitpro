@@ -42,13 +42,15 @@ router.get("/wordpress", isAuthenticated, isCompanyAdmin, async (req: Request, r
       return res.status(404).json({ message: "Company not found" });
     }
 
-    // In a real implementation, we would retrieve this from the database
-    // For now, we'll use a placeholder
-    const wordpressIntegration: WordPressIntegration = {
-      siteUrl: "https://example.com",
-      apiKey: "wp_" + Math.random().toString(36).substring(2, 15),
-      autoPublish: true
-    };
+    // Get WordPress integration settings from the database
+    const wordpressIntegration = await storage.getWordPressIntegration(user.companyId);
+    if (!wordpressIntegration) {
+      return res.json({
+        siteUrl: "",
+        apiKey: "",
+        autoPublish: false
+      });
+    }
 
     return res.json(wordpressIntegration);
   } catch (error) {
