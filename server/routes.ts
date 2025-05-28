@@ -1391,7 +1391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Register all route modules
+  // Register all route modules (MOBILE ROUTES MOVED TO END TO AVOID CONFLICTS)
   app.use("/api/integrations", integrationsRoutes);
   app.use("/api/check-ins", checkInRoutes);
   app.use("/api/reviews", reviewRoutes);
@@ -1407,12 +1407,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/users", userRoutes);
   app.use("/api/ai-providers", aiProvidersRoutes);
   app.use("/api/generate-content", generateContentRoutes);
+  app.use("/api/crm", crmIntegrationRoutes);
+  app.use("/api/crm-integration", crmIntegrationRoutes);
+  
+  // MOBILE ROUTES LAST TO PREVENT INTERFERENCE WITH OTHER APIs
   app.use("/api/mobile/v1", mobileRoutes);
   app.use("/api/mobile", mobileRoutes);
   app.use("/api/mobile/check-ins", mobileCheckInsRoutes);
   app.use("/api/mobile/notifications", mobileNotificationsRoutes);
-  app.use("/api/crm", crmIntegrationRoutes);
-  app.use("/api/crm-integration", crmIntegrationRoutes);
   
   // API Credentials routes
   app.post("/api/api-credentials", isAuthenticated, isCompanyAdmin, async (req, res) => {
