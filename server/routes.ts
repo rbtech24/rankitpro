@@ -1333,7 +1333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         ];
         
-        const totalDuration = response && request.sentAt
+        const totalDuration = response && response.respondedAt && request.sentAt
           ? (new Date(response.respondedAt).getTime() - new Date(request.sentAt).getTime()) / (1000 * 60)
           : request.sentAt ? (Date.now() - new Date(request.sentAt).getTime()) / (1000 * 60) : 0;
         

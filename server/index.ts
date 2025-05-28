@@ -8,6 +8,13 @@ import bcrypt from "bcrypt";
 import emailService from "./services/email-service";
 import { createTestAccounts } from "./scripts/create-test-accounts";
 
+// Extend session interface for TypeScript
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+  }
+}
+
 const app = express();
 
 // Security hardening - Helmet for security headers
