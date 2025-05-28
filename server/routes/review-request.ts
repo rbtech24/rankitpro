@@ -385,6 +385,7 @@ router.get('/stats', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
     oneWeekAgo.setDate(today.getDate() - 7);
     
     const sentThisWeek = reviewRequests.filter(req => {
+      if (!req.sentAt) return false;
       const sentDate = new Date(req.sentAt);
       return sentDate >= oneWeekAgo && sentDate <= today;
     }).length;

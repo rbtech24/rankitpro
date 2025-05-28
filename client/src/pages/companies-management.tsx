@@ -352,6 +352,7 @@ export default function CompaniesManagement() {
         createdAt: new Date().toISOString(),
         lastLogin: null,
         currentTechnicians: 0,
+        website: data.website || "",
         stats: {
           totalCheckIns: 0,
           activeCheckInsLast30Days: 0,
@@ -765,7 +766,7 @@ export default function CompaniesManagement() {
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Enabled Features</h3>
                         <div className="flex flex-wrap gap-2 mt-1">
-                          {selectedCompany.featuresEnabled.map(featureId => (
+                          {selectedCompany.featuresEnabled.map((featureId: string) => (
                             <Badge key={featureId} variant="outline" className="bg-blue-50">
                               {availableFeatures.find(f => f.id === featureId)?.name}
                             </Badge>
@@ -1488,7 +1489,7 @@ export default function CompaniesManagement() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {viewCompanyStats.featuresEnabled.map(featureId => {
+                        {viewCompanyStats.featuresEnabled.map((featureId: string) => {
                           const feature = availableFeatures.find(f => f.id === featureId);
                           if (!feature) return null;
                           
@@ -1657,7 +1658,7 @@ export default function CompaniesManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {companyCheckIns.map(checkIn => (
+                {companyCheckIns.map((checkIn: any) => (
                   <TableRow key={checkIn.id}>
                     <TableCell>{checkIn.jobType}</TableCell>
                     <TableCell>{checkIn.technicianName}</TableCell>
