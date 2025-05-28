@@ -285,7 +285,17 @@ const industries = [
 ];
 
 export default function CompaniesManagement() {
-  const [companies, setCompanies] = useState(mockCompanies);
+  // Fetch real companies data from API
+  const { data: companies = [], isLoading: companiesLoading } = useQuery({
+    queryKey: ['/api/companies'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Fetch real subscription plans
+  const { data: subscriptionPlans = [] } = useQuery({
+    queryKey: ['/api/subscription-plans'],
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const [isAddingCompany, setIsAddingCompany] = useState(false);
   const [isViewingTechnicians, setIsViewingTechnicians] = useState(false);
