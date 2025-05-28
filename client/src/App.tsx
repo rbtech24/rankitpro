@@ -976,7 +976,7 @@ function Router() {
       {/* Dashboard Pages */}
       <Route path="/dashboard">
         {auth?.user?.role === 'technician' 
-          ? <PrivateRoute component={TechnicianDashboard} path="/dashboard" role="technician" />
+          ? <PrivateRoute component={TechDashboardPage} path="/dashboard" role="technician" />
           : <PrivateRoute component={Dashboard} path="/dashboard" />
         }
       </Route>
