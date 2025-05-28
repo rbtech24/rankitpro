@@ -1308,6 +1308,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Alternative POST endpoint for job types management
+  app.post('/api/company/job-types/create', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { name } = req.body;
+      const companyId = req.user?.companyId;
+      
+      if (!companyId) {
+        return res.status(400).json({ error: 'Company ID required' });
+      }
+
+      if (!name?.trim()) {
+        return res.status(400).json({ error: 'Job type name is required' });
+      }
+
+      const existingJobTypes = companyJobTypes.get(companyId) || [];
+      const newId = Math.max(0, ...existingJobTypes.map(jt => jt.id)) + 1;
+      const newJobType = {
+        id: newId,
+        name: name.trim(),
+        isActive: true
+      };
+
+      const updatedJobTypes = [...existingJobTypes, newJobType];
+      companyJobTypes.set(companyId, updatedJobTypes);
+
+      res.json(newJobType);
+    } catch (error) {
+      console.error('Error creating job type:', error);
+      res.status(500).json({ error: 'Failed to create job type' });
+    }
+  });
+
   app.post('/api/test-job-creation-unique', isAuthenticated, async (req: Request, res: Response) => {
     console.log('=== TEST ENDPOINT HIT ===');
     console.log('Request body:', req.body);
