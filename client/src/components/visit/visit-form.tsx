@@ -202,9 +202,36 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
       
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: async (result) => {
       queryClient.invalidateQueries({ queryKey: ["/api/visits"] });
       queryClient.invalidateQueries({ queryKey: ["/api/company-stats"] });
+      
+      // Handle review request if customer information is provided
+      const formValues = form.getValues();
+      if (formValues.sendReviewRequest && formValues.customerName && result?.id) {
+        try {
+          await apiRequest("POST", "/api/review-requests", {
+            customerName: formValues.customerName,
+            customerEmail: formValues.customerEmail || null,
+            customerPhone: formValues.customerPhone || null,
+            visitId: result.id,
+            jobType: formValues.jobType,
+            technicianId: parseInt(formValues.technicianId),
+          });
+          
+          toast({
+            title: "Review Request Scheduled",
+            description: `Review request will be sent to ${formValues.customerName} via ${formValues.customerEmail ? 'email' : 'SMS'}.`,
+          });
+        } catch (error) {
+          console.error("Failed to create review request:", error);
+          toast({
+            title: "Review Request Failed",
+            description: "The visit was created but the review request could not be scheduled.",
+            variant: "destructive",
+          });
+        }
+      }
       
       toast({
         title: "Visit Submitted",
@@ -343,32 +370,6 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
         description: `${contentTypeLabel} will be generated from this visit.`,
         variant: "default",
       });
-    }
-    
-    // Handle review request if customer information is provided
-    if (values.sendReviewRequest && values.customerName) {
-      try {
-        await apiRequest("POST", "/api/review-requests", {
-          customerName: values.customerName,
-          customerEmail: values.customerEmail || null,
-          customerPhone: values.customerPhone || null,
-          visitId: result.id,
-          jobType: values.jobType,
-          technicianId: parseInt(values.technicianId),
-        });
-        
-        toast({
-          title: "Review Request Scheduled",
-          description: `Review request will be sent to ${values.customerName} via ${values.customerEmail ? 'email' : 'SMS'}.`,
-        });
-      } catch (error) {
-        console.error("Failed to create review request:", error);
-        toast({
-          title: "Review Request Failed",
-          description: "The visit was created but the review request could not be scheduled.",
-          variant: "destructive",
-        });
-      }
     }
   };
   
