@@ -66,7 +66,7 @@ export default function TechDashboardPage() {
   // Navigation items for technicians
   const navigation = [
     { label: 'Dashboard', path: '/dashboard', icon: Home },
-    { label: 'My Visits', path: '/visits', icon: ClipboardList },
+    { label: 'My Visits', path: '/tech-visits', icon: ClipboardList },
     { label: 'My Reviews', path: '/tech-reviews', icon: CheckCircle },
     { label: 'Mobile App', path: '/tech-app', icon: Smartphone },
   ];

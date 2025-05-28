@@ -14,6 +14,7 @@ import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
 import TechReviews from "@/pages/tech-reviews";
+import TechVisits from "@/pages/tech-visits";
 import ReviewAnalytics from "@/pages/review-analytics-clean";
 import AnalyticsDashboard from "@/pages/analytics-dashboard-simple";
 import Notifications from "@/pages/notifications";
@@ -1000,6 +1001,9 @@ function Router() {
       </Route>
       <Route path="/tech-reviews">
         <PrivateRoute component={TechReviews} path="/tech-reviews" role="technician" />
+      </Route>
+      <Route path="/tech-visits">
+        <PrivateRoute component={TechVisits} path="/tech-visits" role="technician" />
       </Route>
       <Route path="/review-analytics">
         <PrivateRoute component={ReviewAnalytics} path="/review-analytics" role="company_admin" />
