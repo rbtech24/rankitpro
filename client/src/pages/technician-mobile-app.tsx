@@ -17,6 +17,7 @@ import {
   History
 } from "lucide-react";
 import { getCurrentUser, AuthState } from "@/lib/auth";
+import { apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 
 export default function TechnicianMobileApp() {
@@ -42,14 +43,32 @@ export default function TechnicianMobileApp() {
     queryFn: getCurrentUser
   });
 
-  const { data: jobTypes = [] } = useQuery({
+  // Fetch job types with proper error handling
+  const { data: jobTypes = [], isLoading: jobTypesLoading, error: jobTypesError } = useQuery({
     queryKey: ["/api/job-types"],
-    enabled: !!auth?.user
+    enabled: !!auth?.user,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/job-types");
+      if (!response.ok) {
+        // If no job types configured yet, return empty array so form still works
+        console.log("No job types configured yet - company admin needs to add job types");
+        return [];
+      }
+      return response.json();
+    }
   });
 
-  const { data: checkIns = [] } = useQuery({
+  // Fetch check-ins with proper error handling
+  const { data: checkIns = [], isLoading: checkInsLoading } = useQuery({
     queryKey: ["/api/check-ins"],
-    enabled: !!auth?.user
+    enabled: !!auth?.user,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/check-ins");
+      if (!response.ok) {
+        throw new Error("Failed to fetch check-ins");
+      }
+      return response.json();
+    }
   });
 
   // Get current location
@@ -119,16 +138,11 @@ export default function TechnicianMobileApp() {
         formData.append(`photos`, photo);
       });
 
-      const res = await fetch('/api/check-ins', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include'
-      });
-
-      if (!res.ok) {
-        throw new Error(await res.text());
+      const response = await apiRequest('POST', '/api/check-ins', formData);
+      if (!response.ok) {
+        throw new Error(`Failed to submit check-in: ${response.statusText}`);
       }
-      return res.json();
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/check-ins"] });
@@ -416,10 +430,19 @@ export default function TechnicianMobileApp() {
                   onChange={(e) => setCheckInForm({...checkInForm, jobType: e.target.value})}
                 >
                   <option value="">Select job type</option>
-                  {jobTypes.map((jobType: any) => (
-                    <option key={jobType.id} value={jobType.name}>{jobType.name}</option>
-                  ))}
+                  {jobTypes.length > 0 ? (
+                    jobTypes.map((jobType: any) => (
+                      <option key={jobType.id} value={jobType.name}>{jobType.name}</option>
+                    ))
+                  ) : (
+                    <option value="" disabled>No job types configured - contact your admin</option>
+                  )}
                 </select>
+                {jobTypes.length === 0 && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    📋 Your company admin needs to add job types in the admin dashboard first
+                  </p>
+                )}
               </div>
               
               <div>
