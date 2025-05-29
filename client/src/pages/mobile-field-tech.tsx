@@ -41,16 +41,21 @@ export default function MobileFieldTech() {
     photos: [] as File[]
   });
 
-  // Get job types from company admin settings
-  const { data: jobTypes = [] } = useQuery({
-    queryKey: ["/api/job-types"],
-    enabled: !!auth?.user
-  });
-
   const { data: auth } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
     queryFn: getCurrentUser
   });
+
+  // Get job types from company admin settings
+  const { data: jobTypes = [], isLoading: jobTypesLoading, error: jobTypesError } = useQuery({
+    queryKey: ["/api/job-types"],
+    enabled: !!auth?.user
+  });
+
+  // Debug logging
+  console.log('Job Types Data:', jobTypes);
+  console.log('Job Types Loading:', jobTypesLoading);
+  console.log('Job Types Error:', jobTypesError);
 
   // Get check-ins for the technician
   const { data: checkIns = [] } = useQuery({
