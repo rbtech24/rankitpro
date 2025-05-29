@@ -487,85 +487,45 @@ export default function TechnicianMobileApp() {
               </div>
             </div>
             
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-6">
+              {/* Location Field */}
               <div>
-                <label className="block text-sm font-medium mb-1">Job Type *</label>
-                <select
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
-                  value={checkInForm.jobType}
-                  onChange={(e) => setCheckInForm({...checkInForm, jobType: e.target.value})}
-                >
-                  <option value="">Select job type</option>
-                  {jobTypes.length > 0 ? (
-                    jobTypes.map((jobType: any) => (
-                      <option key={jobType.id} value={jobType.name}>{jobType.name}</option>
-                    ))
-                  ) : (
-                    <option value="" disabled>No job types configured - contact your admin</option>
-                  )}
-                </select>
-                {jobTypes.length === 0 && (
-                  <p className="text-xs text-amber-600 mt-1">
-                    📋 Your company admin needs to add job types in the admin dashboard first
-                  </p>
-                )}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Notes *</label>
-                <textarea
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm h-24 resize-none"
-                  value={checkInForm.notes}
-                  onChange={(e) => setCheckInForm({...checkInForm, notes: e.target.value})}
-                  placeholder="Please add detailed notes about the work performed (minimum 5 characters)..."
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Location</label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                  value={checkInForm.location}
-                  onChange={(e) => setCheckInForm({...checkInForm, location: e.target.value})}
-                  placeholder="Service address or location details"
-                />
-              </div>
-
-              <div className="border-t pt-4">
-                <h4 className="text-sm font-medium mb-3">Additional Options</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      id="createBlogPost"
-                      checked={checkInForm.createBlogPost}
-                      onChange={(e) => setCheckInForm({...checkInForm, createBlogPost: e.target.checked})}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="createBlogPost" className="text-sm font-medium text-gray-700">
-                      Create blog post from this check-in
-                    </label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      id="sendReviewRequest"
-                      checked={checkInForm.sendReviewRequest}
-                      onChange={(e) => setCheckInForm({...checkInForm, sendReviewRequest: e.target.checked})}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="sendReviewRequest" className="text-sm font-medium text-gray-700">
-                      Send review request to customer
-                    </label>
-                  </div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 pr-10 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={checkInForm.location}
+                    onChange={(e) => setCheckInForm({...checkInForm, location: e.target.value})}
+                    placeholder="123 Main St, Anytown, IL"
+                  />
+                  <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 </div>
               </div>
 
+              {/* Notes Field */}
               <div>
-                <label className="block text-sm font-medium mb-1">Photos</label>
-                <div className="flex items-center space-x-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                <textarea
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  rows={4}
+                  value={checkInForm.notes}
+                  onChange={(e) => setCheckInForm({...checkInForm, notes: e.target.value})}
+                  placeholder="Describe the work performed..."
+                />
+              </div>
+
+              {/* Photos Section */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Photos</label>
+                <div 
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => document.getElementById('photo-input')?.click()}
+                >
+                  <Camera className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-sm font-medium text-gray-600 mb-1">Upload photos or drag and drop</p>
+                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                  
                   <input
                     type="file"
                     accept="image/*"
@@ -575,18 +535,60 @@ export default function TechnicianMobileApp() {
                     className="hidden"
                     id="photo-input"
                   />
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => document.getElementById('photo-input')?.click()}
+                </div>
+                {checkInForm.photos.length > 0 && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    {checkInForm.photos.length} photo(s) selected
+                  </p>
+                )}
+              </div>
+
+              {/* Content Generation */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Content Generation</label>
+                <div className="relative">
+                  <select
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                    value={checkInForm.createBlogPost ? 'blog' : checkInForm.sendReviewRequest ? 'review' : 'none'}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setCheckInForm(prev => ({
+                        ...prev,
+                        createBlogPost: value === 'blog',
+                        sendReviewRequest: value === 'review'
+                      }));
+                    }}
                   >
-                    <Camera className="w-4 h-4 mr-1" />
-                    Take Photos
-                  </Button>
-                  {checkInForm.photos.length > 0 && (
-                    <span className="text-sm text-gray-600">
-                      {checkInForm.photos.length} photo(s) selected
-                    </span>
+                    <option value="none">No content generation</option>
+                    <option value="blog">Create full blog article</option>
+                    <option value="review">Create service visit post</option>
+                  </select>
+                  <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                
+                {/* Selection Indicator */}
+                <div className="mt-3 space-y-2">
+                  <div className={`flex items-center px-3 py-2 rounded-lg text-sm ${
+                    !checkInForm.createBlogPost && !checkInForm.sendReviewRequest 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    No content generation
+                  </div>
+                  {checkInForm.createBlogPost && (
+                    <div className="flex items-center px-3 py-2 rounded-lg text-sm bg-blue-100 text-blue-800">
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Create full blog article
+                    </div>
+                  )}
+                  {checkInForm.sendReviewRequest && (
+                    <div className="flex items-center px-3 py-2 rounded-lg text-sm bg-purple-100 text-purple-800">
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Create service visit post
+                    </div>
                   )}
                 </div>
               </div>
@@ -600,20 +602,13 @@ export default function TechnicianMobileApp() {
                 </div>
               )}
               
-              <div className="flex space-x-3 pt-4">
+              <div className="pt-6">
                 <Button 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => setShowCheckInModal(false)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 text-base font-medium rounded-lg"
                   onClick={() => submitCheckInMutation.mutate()}
-                  disabled={!checkInForm.jobType || !checkInForm.notes || checkInForm.notes.length < 5 || submitCheckInMutation.isPending}
+                  disabled={!checkInForm.notes || checkInForm.notes.length < 5 || submitCheckInMutation.isPending}
                 >
-                  {submitCheckInMutation.isPending ? 'Submitting...' : 'Submit Check-in'}
+                  {submitCheckInMutation.isPending ? 'Submitting...' : 'Submit Visit'}
                 </Button>
               </div>
             </div>
