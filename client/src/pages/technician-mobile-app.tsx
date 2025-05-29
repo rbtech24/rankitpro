@@ -71,22 +71,88 @@ export default function TechnicianMobileApp() {
     }
   });
 
-  // Get current location
+  // Get current location and reverse geocode to get address
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          
+          setCurrentLocation({ lat, lng });
           setCheckInForm(prev => ({
             ...prev,
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
+            latitude: lat,
+            longitude: lng
           }));
+
+          // Set location with coordinates initially
+          setCheckInForm(prev => ({
+            ...prev,
+            location: `Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`
+          }));
+
+          // Try to get a more readable location if Google Maps is available
+          try {
+            const google = (window as any).google;
+            if (google && google.maps && google.maps.Geocoder) {
+              const geocoder = new google.maps.Geocoder();
+              geocoder.geocode(
+                { location: { lat, lng } },
+                (results: any[], status: string) => {
+                  if (status === 'OK' && results[0]) {
+                    const addressComponents = results[0].address_components;
+                    let streetName = '';
+                    let city = '';
+                    let state = '';
+                    let zip = '';
+                    
+                    addressComponents.forEach((component: any) => {
+                      const types = component.types;
+                      if (types.includes('route')) {
+                        streetName = component.long_name;
+                      } else if (types.includes('locality')) {
+                        city = component.long_name;
+                      } else if (types.includes('administrative_area_level_1')) {
+                        state = component.short_name;
+                      } else if (types.includes('postal_code')) {
+                        zip = component.long_name;
+                      }
+                    });
+                    
+                    // Format: Street Name, City, State Zip (no house numbers)
+                    const formattedLocation = [streetName, city, state, zip].filter(Boolean).join(', ');
+                    if (formattedLocation) {
+                      setCheckInForm(prev => ({
+                        ...prev,
+                        location: formattedLocation
+                      }));
+                    }
+                  }
+                }
+              );
+            }
+          } catch (error) {
+            console.log('Geocoding not available, using coordinates');
+          }
         },
-        (error) => console.log('Location error:', error)
+        (error) => {
+          console.log('Location error:', error);
+          // Try to get location using IP geolocation as fallback
+          fetch('https://ipapi.co/json/')
+            .then(response => response.json())
+            .then(data => {
+              if (data.city && data.region) {
+                setCheckInForm(prev => ({
+                  ...prev,
+                  location: `${data.city}, ${data.region}`
+                }));
+              }
+            })
+            .catch(() => {
+              console.log('IP geolocation also failed');
+            });
+        }
       );
     }
   }, []);

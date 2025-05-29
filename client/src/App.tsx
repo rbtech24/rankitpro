@@ -56,6 +56,34 @@ import LogoutHandler from "@/components/LogoutHandler";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
+// Dashboard router component that directs users based on their role
+function DashboardRouter() {
+  const { data: auth, isLoading } = useQuery<AuthState>({
+    queryKey: ["/api/auth/me"],
+    queryFn: getCurrentUser
+  });
+
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!auth?.user) {
+    return <Redirect to="/login" />;
+  }
+
+  // Technicians get the clean mobile app only
+  if (auth.user.role === 'technician') {
+    return <TechnicianMobileApp />;
+  }
+
+  // Company admins and super admins get the regular dashboard
+  return <Dashboard />;
+}
+
 // Informational Pages
 import About from "@/pages/about";
 import CaseStudies from "@/pages/case-studies";
@@ -986,9 +1014,9 @@ function Router() {
         <TechnicianMobileApp />
       </Route>
       
-      {/* Dashboard Pages - MOBILE FIELD TECH */}
+      {/* Dashboard Pages - Technicians get mobile app, others get desktop */}
       <Route path="/dashboard">
-        <TechnicianMobileApp />
+        <DashboardRouter />
       </Route>
       <Route path="/admin-dashboard">
         <PrivateRoute component={Dashboard} path="/admin-dashboard" />
