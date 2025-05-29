@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#0088d2"/>
+  
+  <!-- Main icon - simplified checkmark with location pin -->
+  <g transform="translate(256, 256)">
+    <!-- Location pin background -->
+    <path d="M-40 -80 C-40 -100, -20 -120, 0 -120 C20 -120, 40 -100, 40 -80 C40 -60, 0 0, 0 0 C0 0, -40 -60, -40 -80 Z" fill="white"/>
+    
+    <!-- Checkmark inside pin -->
+    <path d="M-15 -85 L-5 -75 L15 -95" stroke="#0088d2" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    
+    <!-- Text "R" for Rank It Pro -->
+    <text x="0" y="60" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="white" text-anchor="middle">R</text>
+  </g>
+</svg>
