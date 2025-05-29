@@ -39,9 +39,16 @@ export default function FieldTechDashboard() {
     queryFn: getCurrentUser
   });
 
-  const handleLogout = () => {
-    fetch("/api/auth/logout", { method: "POST", credentials: "include" })
-      .then(() => window.location.href = "/login");
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+      // Force a full page refresh to clear all state and redirect to home
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if logout fails, redirect to home
+      window.location.href = "/";
+    }
   };
 
   const handleNavClick = (view: string) => {

@@ -342,8 +342,13 @@ export default function TechApp() {
   
   // Handle logout
   const handleLogout = async () => {
-    await logout();
-    setLocation("/login");
+    try {
+      await logout();
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout error:", error);
+      window.location.href = "/";
+    }
   };
   
   // Form submission
