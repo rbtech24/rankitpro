@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export default function LogoutHandler() {
@@ -13,6 +13,9 @@ export default function LogoutHandler() {
         // Call the logout API
         await apiRequest("POST", "/api/auth/logout");
         
+        // Clear React Query cache to remove auth state
+        queryClient.clear();
+        
         // Clear any local storage
         localStorage.removeItem("auth");
         
@@ -22,18 +25,26 @@ export default function LogoutHandler() {
           description: "You have been successfully logged out.",
         });
         
-        // Redirect to home page
-        setLocation("/");
+        // Use setTimeout to ensure cache is cleared before redirect
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 100);
+        
       } catch (error) {
         console.error("Logout error:", error);
         
-        // Even if logout API fails, still redirect to clear the session
+        // Even if logout API fails, still clear cache and redirect
+        queryClient.clear();
+        localStorage.removeItem("auth");
+        
         toast({
           title: "Logged Out",
           description: "You have been logged out.",
         });
         
-        setLocation("/");
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 100);
       }
     };
 

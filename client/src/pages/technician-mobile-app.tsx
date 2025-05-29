@@ -167,9 +167,19 @@ export default function TechnicianMobileApp() {
     }
   }, [auth?.user?.id]);
 
-  const handleLogout = () => {
-    fetch("/api/auth/logout", { method: "POST", credentials: "include" })
-      .then(() => window.location.href = "/login");
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+      // Clear the React Query cache
+      queryClient.clear();
+      // Force a hard refresh to clear all state
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if logout fails, clear cache and redirect
+      queryClient.clear();
+      window.location.href = "/";
+    }
   };
 
   const handlePhotoCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
