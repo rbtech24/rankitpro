@@ -603,11 +603,11 @@ export default function TechnicianMobileApp() {
                 </div>
               </div>
               
-              {currentLocation && (
+              {currentLocation && checkInForm.location && (
                 <div className="p-3 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-center text-sm text-green-800">
                     <Navigation className="w-4 h-4 mr-2" />
-                    Location captured: {currentLocation.lat.toFixed(4)}, {currentLocation.lng.toFixed(4)}
+                    Location captured: {checkInForm.location}
                   </div>
                 </div>
               )}
