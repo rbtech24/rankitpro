@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +58,12 @@ export default function MobileFieldTech() {
   const { data: auth } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
     queryFn: getCurrentUser
+  });
+
+  // Get check-ins for the technician
+  const { data: checkIns = [] } = useQuery({
+    queryKey: ["/api/check-ins"],
+    enabled: !!auth?.user
   });
 
   // Get current location
@@ -214,6 +221,61 @@ export default function MobileFieldTech() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        );
+
+      case 'history':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Check-in History</h2>
+              <Button 
+                size="sm"
+                onClick={() => setShowVisitModal(true)}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                New Check-in
+              </Button>
+            </div>
+            
+            {checkIns.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-8">
+                  <p className="text-gray-500 mb-4">No check-ins found.</p>
+                  <Button 
+                    onClick={() => setShowVisitModal(true)}
+                    variant="outline"
+                  >
+                    Create Your First Check-in
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {checkIns.map((checkIn: any, index: number) => (
+                  <Card key={index}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium text-sm">{checkIn.jobType}</h3>
+                        <Badge variant="secondary" className="text-xs">
+                          {new Date(checkIn.createdAt).toLocaleDateString()}
+                        </Badge>
+                      </div>
+                      {checkIn.location && (
+                        <p className="text-xs text-gray-600 mb-2">📍 {checkIn.location}</p>
+                      )}
+                      {checkIn.notes && (
+                        <p className="text-sm text-gray-700 line-clamp-2">{checkIn.notes}</p>
+                      )}
+                      {checkIn.photos && checkIn.photos.length > 0 && (
+                        <p className="text-xs text-blue-600 mt-2">📷 {checkIn.photos.length} photo(s)</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         );
 
@@ -467,7 +529,7 @@ export default function MobileFieldTech() {
           {[
             { id: 'home', label: 'Home', icon: Home },
             { id: 'visits', label: 'Visits', icon: MapPin },
-            { id: 'reviews', label: 'Reviews', icon: Star },
+            { id: 'history', label: 'History', icon: Clock },
             { id: 'profile', label: 'Profile', icon: User }
           ].map(tab => {
             const Icon = tab.icon;
