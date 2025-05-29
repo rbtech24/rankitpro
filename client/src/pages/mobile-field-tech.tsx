@@ -41,19 +41,11 @@ export default function MobileFieldTech() {
     photos: [] as File[]
   });
 
-  const JOB_TYPES = [
-    "Plumbing Repair",
-    "Water Heater Installation", 
-    "Drain Cleaning",
-    "Sewer Line Repair",
-    "AC Maintenance",
-    "HVAC Repair",
-    "Electrical Repair",
-    "Remodeling",
-    "Flooring Installation",
-    "Roof Repair",
-    "General Maintenance"
-  ];
+  // Get job types from company admin settings
+  const { data: jobTypes = [] } = useQuery({
+    queryKey: ["/api/job-types"],
+    enabled: !!auth?.user
+  });
 
   const { data: auth } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
@@ -574,13 +566,13 @@ export default function MobileFieldTech() {
               <div>
                 <label className="block text-sm font-medium mb-1">Job Type *</label>
                 <select
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 4 5\"><path fill=\"%23666\" d=\"M2 0L0 2h4zm0 5L0 3h4z\"/></svg>')] bg-no-repeat bg-right bg-[length:12px_12px] pr-8"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
                   value={checkInForm.jobType}
                   onChange={(e) => setCheckInForm({...checkInForm, jobType: e.target.value})}
                 >
                   <option value="">Select job type</option>
-                  {JOB_TYPES.map((type) => (
-                    <option key={type} value={type}>{type}</option>
+                  {jobTypes.map((jobType: any) => (
+                    <option key={jobType.id} value={jobType.name}>{jobType.name}</option>
                   ))}
                 </select>
               </div>
