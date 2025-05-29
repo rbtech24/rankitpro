@@ -512,7 +512,7 @@ export default function MobileFieldTech() {
               <div>
                 <label className="block text-sm font-medium mb-1">Job Type *</label>
                 <select
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 4 5\"><path fill=\"%23666\" d=\"M2 0L0 2h4zm0 5L0 3h4z\"/></svg>')] bg-no-repeat bg-right bg-[length:12px_12px] pr-8"
                   value={checkInForm.jobType}
                   onChange={(e) => setCheckInForm({...checkInForm, jobType: e.target.value})}
                 >
