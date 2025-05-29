@@ -544,6 +544,38 @@ export default function MobileFieldTech() {
                 />
               </div>
               
+              {/* Options matching company form */}
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-medium mb-3">Additional Options</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="createBlogPost"
+                      checked={checkInForm.createBlogPost}
+                      onChange={(e) => setCheckInForm({...checkInForm, createBlogPost: e.target.checked})}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="createBlogPost" className="text-sm font-medium text-gray-700">
+                      Create blog post from this check-in
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="sendReviewRequest"
+                      checked={checkInForm.sendReviewRequest}
+                      onChange={(e) => setCheckInForm({...checkInForm, sendReviewRequest: e.target.checked})}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="sendReviewRequest" className="text-sm font-medium text-gray-700">
+                      Send review request to customer
+                    </label>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">Photos</label>
                 <div className="flex items-center space-x-2">
@@ -569,35 +601,6 @@ export default function MobileFieldTech() {
                       {checkInForm.photos.length} photo(s) selected
                     </span>
                   )}
-                </div>
-              </div>
-
-              {/* Options matching company form */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="createBlogPost"
-                    checked={checkInForm.createBlogPost}
-                    onChange={(e) => setCheckInForm({...checkInForm, createBlogPost: e.target.checked})}
-                    className="w-4 h-4"
-                  />
-                  <label htmlFor="createBlogPost" className="text-sm">
-                    Create blog post from this check-in
-                  </label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="sendReviewRequest"
-                    checked={checkInForm.sendReviewRequest}
-                    onChange={(e) => setCheckInForm({...checkInForm, sendReviewRequest: e.target.checked})}
-                    className="w-4 h-4"
-                  />
-                  <label htmlFor="sendReviewRequest" className="text-sm">
-                    Send review request to customer
-                  </label>
                 </div>
               </div>
               
