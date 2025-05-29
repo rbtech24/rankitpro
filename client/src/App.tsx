@@ -12,7 +12,7 @@ import Dashboard from "@/pages/new-dashboard";
 import TechnicianDashboard from "@/pages/tech-dashboard";
 import TechDashboardComplete from "@/pages/tech-dashboard-complete";
 import TechnicianFinal from "@/pages/technician-final";
-import MobileFieldTech from "@/pages/mobile-field-tech";
+import TechnicianMobileApp from "@/pages/technician-mobile-app";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
@@ -92,6 +92,11 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
   if (!auth?.user) {
     setTimeout(() => setLocation("/login"), 100);
     return null;
+  }
+
+  // Redirect technicians to mobile app
+  if (auth.user.role === 'technician' && rest.path !== '/dashboard') {
+    return <Redirect to="/dashboard" />;
   }
   
   if (role && auth.user.role !== role && auth.user.role !== "super_admin") {
@@ -978,12 +983,12 @@ function Router() {
       
       {/* Mobile Field Tech App */}
       <Route path="/field-tech">
-        <MobileFieldTech />
+        <TechnicianMobileApp />
       </Route>
       
       {/* Dashboard Pages - MOBILE FIELD TECH */}
       <Route path="/dashboard">
-        <MobileFieldTech />
+        <TechnicianMobileApp />
       </Route>
       <Route path="/admin-dashboard">
         <PrivateRoute component={Dashboard} path="/admin-dashboard" />
