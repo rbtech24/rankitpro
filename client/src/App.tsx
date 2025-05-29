@@ -5,6 +5,7 @@ import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NotificationProvider } from "@/context/NotificationContext";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
@@ -1127,6 +1128,7 @@ function App() {
           <Toaster />
           <Router />
         </TooltipProvider>
+        <PWAInstallPrompt />
       </NotificationProvider>
     </QueryClientProvider>
   );
