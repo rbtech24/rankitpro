@@ -87,53 +87,40 @@ export default function TechnicianMobileApp() {
           }));
 
           // Set location with coordinates initially
-          setCheckInForm(prev => ({
-            ...prev,
-            location: `Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`
-          }));
-
-          // Try to get a more readable location if Google Maps is available
+          // Use OpenStreetMap's free reverse geocoding service
           try {
-            const google = (window as any).google;
-            if (google && google.maps && google.maps.Geocoder) {
-              const geocoder = new google.maps.Geocoder();
-              geocoder.geocode(
-                { location: { lat, lng } },
-                (results: any[], status: string) => {
-                  if (status === 'OK' && results[0]) {
-                    const addressComponents = results[0].address_components;
-                    let streetName = '';
-                    let city = '';
-                    let state = '';
-                    let zip = '';
-                    
-                    addressComponents.forEach((component: any) => {
-                      const types = component.types;
-                      if (types.includes('route')) {
-                        streetName = component.long_name;
-                      } else if (types.includes('locality')) {
-                        city = component.long_name;
-                      } else if (types.includes('administrative_area_level_1')) {
-                        state = component.short_name;
-                      } else if (types.includes('postal_code')) {
-                        zip = component.long_name;
-                      }
-                    });
-                    
-                    // Format: Street Name, City, State Zip (no house numbers)
-                    const formattedLocation = [streetName, city, state, zip].filter(Boolean).join(', ');
-                    if (formattedLocation) {
-                      setCheckInForm(prev => ({
-                        ...prev,
-                        location: formattedLocation
-                      }));
-                    }
-                  }
-                }
-              );
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`
+            );
+            const data = await response.json();
+            
+            if (data && data.address) {
+              const addr = data.address;
+              const streetName = addr.road || addr.street || '';
+              const city = addr.city || addr.town || addr.village || '';
+              const state = addr.state || '';
+              const zip = addr.postcode || '';
+              
+              // Format: Street Name, City, State Zip (no house numbers for privacy)
+              const formattedLocation = [streetName, city, state, zip].filter(Boolean).join(', ');
+              
+              setCheckInForm(prev => ({
+                ...prev,
+                location: formattedLocation || `${lat.toFixed(4)}, ${lng.toFixed(4)}`
+              }));
+            } else {
+              // Fallback to coordinates if geocoding fails
+              setCheckInForm(prev => ({
+                ...prev,
+                location: `${lat.toFixed(4)}, ${lng.toFixed(4)}`
+              }));
             }
           } catch (error) {
-            console.log('Geocoding not available, using coordinates');
+            console.log('Reverse geocoding failed, using coordinates');
+            setCheckInForm(prev => ({
+              ...prev,
+              location: `${lat.toFixed(4)}, ${lng.toFixed(4)}`
+            }));
           }
         },
         (error) => {
