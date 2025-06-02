@@ -126,7 +126,12 @@ function Router() {
         <LogoutHandler />
       </Route>
       <Route path="/">
-        <Home />
+        <div className="min-h-screen flex items-center justify-center bg-white">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-black mb-4">HOME PAGE WORKS</h1>
+            <p className="text-xl text-gray-600">Authentication disabled, tech blocked</p>
+          </div>
+        </div>
       </Route>
       
       {/* Admin Login */}
