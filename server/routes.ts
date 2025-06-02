@@ -119,21 +119,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
-  // Setup session middleware
+  // Setup session middleware with simplified configuration
   app.use(
     session({
-      store: new SessionStore({
-        checkPeriod: 86400000, // Prune expired entries every 24h
-      }),
       secret: process.env.SESSION_SECRET || "checkin-pro-secret-key-for-development",
-      resave: false, // Don't save session if unmodified
-      saveUninitialized: false, // Don't create session until something stored
-      rolling: true, // Reset expiration on activity
+      resave: true, // Force session save even if not modified
+      saveUninitialized: true, // Create session immediately
       cookie: {
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
         httpOnly: true,
         secure: false, // Set to false for development
-        sameSite: 'lax' // Allow same-site requests
       },
     })
   );
