@@ -306,11 +306,23 @@ export default function TechnicianMobileApp() {
                 variant="outline" 
                 className="w-full justify-start text-red-600 hover:text-red-700"
                 onClick={() => {
-                  // Nuclear option - go directly to login page
+                  console.log('LOGOUT: Starting logout process');
                   localStorage.clear();
                   sessionStorage.clear();
-                  fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-                  window.location.href = "/login";
+                  
+                  fetch("/api/auth/logout", { method: "POST", credentials: "include" })
+                    .then(() => {
+                      console.log('LOGOUT: API call successful, redirecting');
+                      setTimeout(() => {
+                        window.location.replace('/');
+                      }, 100);
+                    })
+                    .catch(() => {
+                      console.log('LOGOUT: API call failed, redirecting anyway');
+                      setTimeout(() => {
+                        window.location.replace('/');
+                      }, 100);
+                    });
                 }}
               >
                 <LogOut className="w-4 h-4 mr-2" />
