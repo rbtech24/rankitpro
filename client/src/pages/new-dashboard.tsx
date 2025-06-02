@@ -218,12 +218,16 @@ export default function Dashboard() {
     queryFn: getCurrentUser
   });
 
-  // TECH FUNCTIONALITY DISABLED - Block technician access
-  React.useEffect(() => {
-    if (auth?.user?.role === 'technician') {
-      setLocation('/login');
-    }
-  }, [auth?.user?.role, setLocation]);
+  // TECH FUNCTIONALITY COMPLETELY DISABLED - Block ALL technician access immediately
+  if (auth?.user?.role === 'technician') {
+    window.location.href = '/login';
+    return <div className="h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h1>
+        <p className="text-gray-600">Tech functionality is currently disabled.</p>
+      </div>
+    </div>;
+  }
 
   // Fetch real data for dashboard metrics
   const { data: visits = [] } = useQuery({

@@ -10,35 +10,20 @@ import NotificationBell from '@/components/notifications/NotificationBell';
 
 export default function TechDashboardPage() {
   const [location, setLocation] = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showVisitModal, setShowVisitModal] = useState(false);
   
-  const { data: auth, isLoading } = useQuery<AuthState>({
-    queryKey: ['/api/auth/me'],
-    queryFn: getCurrentUser
-  });
-  
-  const handleLogout = async () => {
-    await logout();
-    setLocation('/login');
-  };
-  
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-  
-  if (!auth?.user || auth.user.role !== 'technician') {
-    return (
-      <div className="flex items-center justify-center h-screen flex-col gap-4">
-        <p className="text-lg">You need to be logged in as a technician to view this page.</p>
-        <Button onClick={() => setLocation('/login')}>Go to Login</Button>
-      </div>
-    );
-  }
+  // TECH DASHBOARD COMPLETELY DISABLED
+  return (
+    <div className="flex items-center justify-center h-screen flex-col gap-4">
+      <h1 className="text-2xl font-bold text-red-600">Tech Dashboard Disabled</h1>
+      <p className="text-lg text-gray-600">This functionality is currently unavailable.</p>
+      <button 
+        onClick={() => window.location.href = '/login'}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
+        Return to Login
+      </button>
+    </div>
+  );
   
   return (
     <div className="flex h-screen bg-gray-50">
