@@ -159,13 +159,18 @@ export default function TechnicianMobileApp() {
       await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
       // Clear the React Query cache
       queryClient.clear();
-      // Force a hard refresh to clear all state
-      window.location.href = "/login";
+      // Clear any local storage
+      localStorage.clear();
+      sessionStorage.clear();
+      // Force a complete page reload to clear all cached state
+      window.location.replace("/login");
     } catch (error) {
       console.error("Logout error:", error);
       // Even if logout fails, clear cache and redirect
       queryClient.clear();
-      window.location.href = "/login";
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.replace("/login");
     }
   };
 
