@@ -133,7 +133,7 @@ function Router() {
         <LogoutHandler />
       </Route>
       <Route path="/">
-        <SimpleTest />
+        <Home />
       </Route>
       
       {/* Admin Login */}
