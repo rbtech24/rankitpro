@@ -311,8 +311,24 @@ export default function TechnicianMobileApp() {
                 variant="outline" 
                 className="w-full justify-start text-red-600 hover:text-red-700"
                 onClick={() => {
-                  console.log('Button clicked directly');
-                  handleLogout();
+                  console.log('Direct logout - clearing everything and redirecting');
+                  
+                  // Clear all data immediately
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  
+                  // Call logout API
+                  fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+                  
+                  // Force redirect with a delay to ensure API call
+                  setTimeout(() => {
+                    window.open("/", "_self");
+                  }, 100);
+                  
+                  // Backup redirect
+                  setTimeout(() => {
+                    window.location.href = "/";
+                  }, 200);
                 }}
               >
                 <LogOut className="w-4 h-4 mr-2" />
