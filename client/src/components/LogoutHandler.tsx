@@ -17,7 +17,8 @@ export default function LogoutHandler() {
         queryClient.clear();
         
         // Clear any local storage
-        localStorage.removeItem("auth");
+        localStorage.clear();
+        sessionStorage.clear();
         
         // Show success message
         toast({
@@ -25,9 +26,9 @@ export default function LogoutHandler() {
           description: "You have been successfully logged out.",
         });
         
-        // Use setTimeout to ensure cache is cleared before redirect
+        // Force a complete page reload to clear all state
         setTimeout(() => {
-          window.location.href = "/";
+          window.location.replace("/");
         }, 100);
         
       } catch (error) {
@@ -35,7 +36,8 @@ export default function LogoutHandler() {
         
         // Even if logout API fails, still clear cache and redirect
         queryClient.clear();
-        localStorage.removeItem("auth");
+        localStorage.clear();
+        sessionStorage.clear();
         
         toast({
           title: "Logged Out",
@@ -43,7 +45,7 @@ export default function LogoutHandler() {
         });
         
         setTimeout(() => {
-          window.location.href = "/";
+          window.location.replace("/");
         }, 100);
       }
     };

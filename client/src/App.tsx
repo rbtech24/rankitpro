@@ -93,9 +93,12 @@ import ResetPassword from "@/pages/reset-password";
 
 // Authenticated route that redirects to login if not authenticated
 function PrivateRoute({ component: Component, role, ...rest }: { component: React.ComponentType<any>, role?: string, path: string }) {
-  const { data: auth, isLoading } = useQuery<AuthState>({
+  const { data: auth, isLoading, error } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
-    queryFn: getCurrentUser
+    queryFn: getCurrentUser,
+    retry: 1,
+    staleTime: 0,
+    gcTime: 0
   });
   
   const [, setLocation] = useLocation();
@@ -106,16 +109,13 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
     </div>;
   }
   
-  if (!auth?.user) {
-    setTimeout(() => setLocation("/login"), 100);
+  // If auth failed or no user, redirect to login
+  if (error || !auth?.user) {
+    setLocation("/login");
     return null;
   }
 
-  // Redirect technicians to mobile app
-  if (auth.user.role === 'technician' && rest.path !== '/dashboard') {
-    return <Redirect to="/dashboard" />;
-  }
-  
+  // Role-based access control
   if (role && auth.user.role !== role && auth.user.role !== "super_admin") {
     return <Redirect to="/dashboard" />;
   }
@@ -124,9 +124,12 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
 }
 
 function Router() {
-  const { data: auth, isLoading } = useQuery<AuthState>({
+  const { data: auth, isLoading, error } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
-    queryFn: getCurrentUser
+    queryFn: getCurrentUser,
+    retry: 1,
+    staleTime: 0,
+    gcTime: 0
   });
   
   if (isLoading) {
@@ -138,7 +141,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Login />}
+        {auth?.user && !error ? <Redirect to="/dashboard" /> : <Login />}
       </Route>
       <Route path="/forgot-password">
         <ForgotPassword />
@@ -147,13 +150,13 @@ function Router() {
         <ResetPassword />
       </Route>
       <Route path="/register">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Register />}
+        {auth?.user && !error ? <Redirect to="/dashboard" /> : <Register />}
       </Route>
       <Route path="/logout">
         <LogoutHandler />
       </Route>
       <Route path="/">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Home />}
+        {auth?.user && !error ? <Redirect to="/dashboard" /> : <Home />}
       </Route>
       
       {/* Informational Pages */}
