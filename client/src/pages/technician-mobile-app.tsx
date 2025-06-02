@@ -155,28 +155,25 @@ export default function TechnicianMobileApp() {
   }, [auth?.user?.id]);
 
   const handleLogout = () => {
-    // Step 1: Clear all storage immediately
+    // Prevent multiple calls by checking if already logging out
+    if ((window as any).isLoggingOut) return;
+    (window as any).isLoggingOut = true;
+    
+    // Immediately clear all data
     localStorage.clear();
     sessionStorage.clear();
-    
-    // Step 2: Clear React Query cache
     queryClient.clear();
     
-    // Step 3: Clear cookies
+    // Clear cookies
     document.cookie.split(";").forEach(function(c) { 
       document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
     
-    // Step 4: Tell service worker to clear caches
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({ type: 'LOGOUT' });
-    }
-    
-    // Step 5: Call logout API in background (don't wait for it)
-    fetch("/api/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
-    
-    // Step 6: Force immediate hard navigation
-    window.location.href = "/login";
+    // Call logout API once
+    fetch("/api/auth/logout", { method: "POST", credentials: "include" }).finally(() => {
+      // Force complete browser reset
+      window.location.replace("/");
+    });
   };
 
   const handlePhotoCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
