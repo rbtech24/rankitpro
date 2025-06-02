@@ -55,29 +55,20 @@ export async function register(credentials: RegisterCredentials): Promise<AuthSt
   return { user, company: null };
 }
 
+// Simple logout function - just redirects to force a clean slate
 export function logout(): void {
-  console.log('LOGOUT: Nuclear option - forcing immediate redirect');
+  console.log('LOGOUT: Simple redirect approach');
   
-  // Clear everything immediately
+  // Clear data immediately
   localStorage.clear();
   sessionStorage.clear();
-  queryClient.clear();
   
-  // Call logout API in background
-  fetch("/api/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
-  
-  // Force immediate redirect with cache busting
-  const url = `/?logout=${Date.now()}&clear=true`;
-  console.log('LOGOUT: Redirecting to:', url);
-  
-  // Try multiple redirect methods
-  window.location.replace(url);
-  window.location.href = url;
-  
-  // Final fallback - just go to base URL
-  setTimeout(() => {
-    window.location.replace('/');
-  }, 100);
+  // Make one API call and redirect
+  fetch("/api/auth/logout", { method: "POST", credentials: "include" })
+    .finally(() => {
+      // Force navigation to home page
+      window.location.href = "/";
+    });
 }
 
 export async function getCurrentUser(): Promise<AuthState> {

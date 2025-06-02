@@ -16,7 +16,7 @@ import {
   Navigation,
   History
 } from "lucide-react";
-import { getCurrentUser, AuthState, logout } from "@/lib/auth";
+import { getCurrentUser, AuthState } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 
@@ -153,11 +153,6 @@ export default function TechnicianMobileApp() {
       }));
     }
   }, [auth?.user?.id]);
-
-  const handleLogout = () => {
-    console.log('Logout button clicked - redirecting to logout handler');
-    logout();
-  };
 
   const handlePhotoCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -311,24 +306,13 @@ export default function TechnicianMobileApp() {
                 variant="outline" 
                 className="w-full justify-start text-red-600 hover:text-red-700"
                 onClick={() => {
-                  console.log('Direct logout - clearing everything and redirecting');
-                  
-                  // Clear all data immediately
+                  // Use a simple direct approach
                   localStorage.clear();
                   sessionStorage.clear();
-                  
-                  // Call logout API
-                  fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-                  
-                  // Force redirect with a delay to ensure API call
-                  setTimeout(() => {
-                    window.open("/", "_self");
-                  }, 100);
-                  
-                  // Backup redirect
-                  setTimeout(() => {
-                    window.location.href = "/";
-                  }, 200);
+                  fetch("/api/auth/logout", { method: "POST", credentials: "include" })
+                    .finally(() => {
+                      window.location.href = "/";
+                    });
                 }}
               >
                 <LogOut className="w-4 h-4 mr-2" />

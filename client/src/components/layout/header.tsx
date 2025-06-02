@@ -34,7 +34,6 @@ const Header: React.FC<HeaderProps> = ({ showNotifications = false }) => {
     );
   }, []);
   
-  // Use centralized logout function
   const handleLogout = () => {
     logout();
   };
