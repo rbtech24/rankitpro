@@ -148,10 +148,10 @@ function Router() {
       </Route>
       <Route path="/review/:token"><Review /></Route>
       
-      {/* Mobile Tech App - Progressive Web App */}
-      <Route path="/mobile">
+      {/* Mobile Tech App - Progressive Web App - TEMPORARILY DISABLED */}
+      {/* <Route path="/mobile">
         <PrivateRoute component={MobileTechApp} path="/mobile" role="technician" />
-      </Route>
+      </Route> */}
       
       {/* Downloadable Resources */}
       <Route path="/downloads/local-seo-guide"><LocalSeoGuide /></Route>
@@ -975,9 +975,10 @@ function Router() {
       <Route path="/dashboard">
         <PrivateRoute component={Dashboard} path="/dashboard" />
       </Route>
-      <Route path="/tech-dashboard">
+      {/* TEMPORARILY DISABLED */}
+      {/* <Route path="/tech-dashboard">
         <PrivateRoute component={TechnicianDashboard} path="/tech-dashboard" role="technician" />
-      </Route>
+      </Route> */}
       <Route path="/setup">
         <PrivateRoute component={SetupGuide} path="/setup" role="company_admin" />
       </Route>
