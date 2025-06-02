@@ -154,36 +154,29 @@ export default function TechnicianMobileApp() {
     }
   }, [auth?.user?.id]);
 
-  const handleLogout = async () => {
-    // Immediately disable all interactions
-    const logoutButton = document.querySelector('[data-logout-button]') as HTMLButtonElement;
-    if (logoutButton) logoutButton.disabled = true;
-    
-    try {
-      // Call logout API first
-      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-    } catch (error) {
-      console.error("Logout API error:", error);
-    }
-    
-    // Aggressively clear everything
-    queryClient.invalidateQueries();
-    queryClient.removeQueries();
-    queryClient.clear();
-    
+  const handleLogout = () => {
+    // Step 1: Clear all storage immediately
     localStorage.clear();
     sessionStorage.clear();
     
-    // Clear cookies
+    // Step 2: Clear React Query cache
+    queryClient.clear();
+    
+    // Step 3: Clear cookies
     document.cookie.split(";").forEach(function(c) { 
       document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
     
-    // Force reload to completely reset application state
+    // Step 4: Tell service worker to clear caches
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'LOGOUT' });
+    }
+    
+    // Step 5: Call logout API in background (don't wait for it)
+    fetch("/api/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
+    
+    // Step 6: Force immediate hard navigation
     window.location.href = "/login";
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
   };
 
   const handlePhotoCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
