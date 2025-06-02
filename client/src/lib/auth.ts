@@ -55,19 +55,24 @@ export async function register(credentials: RegisterCredentials): Promise<AuthSt
   return { user, company: null };
 }
 
-// Simple logout function - just redirects to force a clean slate
+// Simple logout function - clears cache and redirects
 export function logout(): void {
-  console.log('LOGOUT: Simple redirect approach');
+  console.log('LOGOUT: Clearing cache and redirecting');
   
-  // Clear data immediately
+  // Clear all data immediately
   localStorage.clear();
   sessionStorage.clear();
   
-  // Make one API call and redirect
+  // Clear React Query cache completely
+  queryClient.clear();
+  queryClient.invalidateQueries();
+  queryClient.removeQueries();
+  
+  // Make API call and redirect
   fetch("/api/auth/logout", { method: "POST", credentials: "include" })
     .finally(() => {
-      // Force navigation to home page
-      window.location.href = "/";
+      // Force a complete page reload to reset everything
+      window.location.reload();
     });
 }
 

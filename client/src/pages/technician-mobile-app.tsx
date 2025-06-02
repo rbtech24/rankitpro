@@ -306,12 +306,13 @@ export default function TechnicianMobileApp() {
                 variant="outline" 
                 className="w-full justify-start text-red-600 hover:text-red-700"
                 onClick={() => {
-                  // Use a simple direct approach
+                  // Clear everything and force reload
                   localStorage.clear();
                   sessionStorage.clear();
+                  queryClient.clear();
                   fetch("/api/auth/logout", { method: "POST", credentials: "include" })
                     .finally(() => {
-                      window.location.href = "/";
+                      window.location.reload();
                     });
                 }}
               >
