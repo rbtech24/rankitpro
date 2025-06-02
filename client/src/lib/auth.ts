@@ -56,8 +56,33 @@ export async function register(credentials: RegisterCredentials): Promise<AuthSt
 }
 
 export function logout(): void {
-  // Immediately redirect to a logout handler page
-  window.location.href = '/logout';
+  console.log('Starting direct logout process');
+  
+  // Clear all application state immediately
+  queryClient.clear();
+  localStorage.clear();
+  sessionStorage.clear();
+  
+  // Clear cookies
+  document.cookie.split(";").forEach(function(c) { 
+    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+  });
+  
+  console.log('Cleared all client data');
+  
+  // Call logout API
+  fetch("/api/auth/logout", { 
+    method: "POST", 
+    credentials: "include" 
+  }).finally(() => {
+    console.log('Logout API completed, forcing navigation');
+    // Force navigation with complete page replacement
+    window.location.assign("/");
+    // Backup: reload if assign doesn't work
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  });
 }
 
 export async function getCurrentUser(): Promise<AuthState> {
