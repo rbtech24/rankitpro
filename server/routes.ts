@@ -3,6 +3,13 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
 import MemoryStore from "memorystore";
+
+// Extend session data interface
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+  }
+}
 import bcrypt from "bcrypt";
 import { generateSummary, generateBlogPost } from "./ai-service";
 import { insertUserSchema, insertCompanySchema, insertTechnicianSchema, insertCheckInSchema, insertBlogPostSchema, insertReviewRequestSchema, insertAPICredentialsSchema } from "@shared/schema";
@@ -118,13 +125,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       store: new SessionStore({
         checkPeriod: 86400000, // Prune expired entries every 24h
       }),
-      secret: process.env.SESSION_SECRET || "checkin-pro-secret",
-      resave: true,
-      saveUninitialized: true,
+      secret: process.env.SESSION_SECRET || "checkin-pro-secret-key-for-development",
+      resave: false, // Don't save session if unmodified
+      saveUninitialized: false, // Don't create session until something stored
+      rolling: true, // Reset expiration on activity
       cookie: {
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
         httpOnly: true,
-        secure: false, // Set to false to ensure cookies work in development
+        secure: false, // Set to false for development
+        sameSite: 'lax' // Allow same-site requests
       },
     })
   );
@@ -283,9 +292,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
-      // Set session
+      // Set session and force save
       if (req.session) {
-        (req.session as any).userId = user.id;
+        req.session.userId = user.id;
+        await new Promise<void>((resolve, reject) => {
+          req.session.save((err) => {
+            if (err) {
+              console.error("Session save error:", err);
+              reject(err);
+            } else {
+              console.log(`Session saved for user ${user.id}`);
+              resolve();
+            }
+          });
+        });
       }
       
       // Remove password from response
