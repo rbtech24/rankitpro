@@ -48,6 +48,7 @@ import WordPressPlugin from "@/pages/wordpress-plugin";
 import APICredentials from "@/pages/api-credentials";
 import JobTypesManagement from "@/pages/job-types-management";
 import LogoutHandler from "@/components/LogoutHandler";
+import AdminLogin from "@/pages/admin-login";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
@@ -132,8 +133,11 @@ function Router() {
         <LogoutHandler />
       </Route>
       <Route path="/">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Home />}
+        <Redirect to="/admin-login" />
       </Route>
+      
+      {/* Admin Login */}
+      <Route path="/admin-login"><AdminLogin /></Route>
       
       {/* Informational Pages */}
       <Route path="/emergency-login"><EmergencyLogin /></Route>
