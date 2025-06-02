@@ -153,7 +153,7 @@ function Router() {
         <LogoutHandler />
       </Route>
       <Route path="/">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Home />}
+        {auth?.user ? <Redirect to="/dashboard" /> : <Redirect to="/login" />}
       </Route>
       
       {/* Informational Pages */}
