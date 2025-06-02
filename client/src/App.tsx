@@ -152,9 +152,7 @@ function Router() {
       <Route path="/logout">
         <LogoutHandler />
       </Route>
-      <Route path="/">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Home />}
-      </Route>
+      <Route path="/"><Home /></Route>
       
       {/* Informational Pages */}
       <Route path="/emergency-login"><EmergencyLogin /></Route>
