@@ -71,8 +71,11 @@ export async function logout(): Promise<void> {
     console.error("Logout API error:", error);
   }
 
-  // Clear all application state
+  // Clear all application state immediately
   queryClient.clear();
+  queryClient.removeQueries(); // Force remove all queries
+  queryClient.invalidateQueries(); // Invalidate any remaining
+  
   localStorage.clear();
   sessionStorage.clear();
   
@@ -81,9 +84,12 @@ export async function logout(): Promise<void> {
     document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
   });
 
-  // Reset logout state and redirect
+  // Reset logout state
   isLoggingOut = false;
-  window.location.replace("/");
+  
+  // Force a complete browser reload to fully clear all cached state
+  window.location.href = "/";
+  window.location.reload();
 }
 
 export async function getCurrentUser(): Promise<AuthState> {
