@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { AuthState, getCurrentUser } from "@/lib/auth";
+import { AuthState, getCurrentUser, logout } from "@/lib/auth";
 
 interface TechnicianSidebarProps {
   className?: string;
@@ -136,10 +136,7 @@ export default function TechnicianSidebar({ className, activeSection, onSectionC
           </button>
           <button 
             onClick={() => {
-              fetch("/api/auth/logout", { method: "POST", credentials: "include" })
-                .then(() => {
-                  window.location.href = "/login";
-                });
+              logout();
             }} 
             className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 w-full text-left">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
