@@ -302,20 +302,17 @@ export default function TechnicianMobileApp() {
             </Card>
 
             <div className="space-y-2">
-              <form action="/login" method="get">
-                <button 
-                  type="submit"
-                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-red-600 bg-white hover:bg-gray-50"
-                  onClick={() => {
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-                  }}
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </button>
-              </form>
+              <a 
+                href="/logout"
+                className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-red-600 bg-white hover:bg-gray-50"
+                onClick={() => {
+                  localStorage.clear();
+                  sessionStorage.clear();
+                }}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </a>
             </div>
           </div>
         );
