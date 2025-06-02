@@ -68,6 +68,7 @@ function RoleBasedDashboardRouter() {
 
   useEffect(() => {
     if (auth?.user) {
+      console.log('User role:', auth.user.role);
       switch (auth.user.role) {
         case 'super_admin':
           setLocation('/admin');
@@ -81,6 +82,9 @@ function RoleBasedDashboardRouter() {
         default:
           setLocation('/');
       }
+    } else {
+      console.log('No user found, redirecting to home');
+      setLocation('/');
     }
   }, [auth?.user, setLocation]);
 
