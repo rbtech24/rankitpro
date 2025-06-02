@@ -97,7 +97,7 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
   }
 
   if (role && auth.user.role !== role && auth.user.role !== "super_admin") {
-    return <Redirect to="/dashboard" />;
+    return <Redirect to="/admin-login" />;
   }
   
   return <Component {...rest} />;
@@ -118,7 +118,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Login />}
+        {auth?.user ? <Redirect to="/admin-login" /> : <Login />}
       </Route>
       <Route path="/forgot-password">
         <ForgotPassword />
@@ -127,7 +127,7 @@ function Router() {
         <ResetPassword />
       </Route>
       <Route path="/register">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Register />}
+        {auth?.user ? <Redirect to="/admin-login" /> : <Register />}
       </Route>
       <Route path="/logout">
         <LogoutHandler />
