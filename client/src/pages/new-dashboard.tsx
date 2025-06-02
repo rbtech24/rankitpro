@@ -209,25 +209,17 @@ const HousecallProCompaniesTable = () => {
 };
 
 export default function Dashboard() {
-  const [visitModalOpen, setVisitModalOpen] = useState(false);
-  const [blogPostModalOpen, setBlogPostModalOpen] = useState(false);
-  const [, setLocation] = useLocation();
-  
-  const { data: auth, isLoading: authLoading } = useQuery<AuthState>({
-    queryKey: ["/api/auth/me"],
-    queryFn: getCurrentUser
-  });
+  // TECH DASHBOARD COMPLETELY DISABLED - Force redirect to admin login
+  React.useEffect(() => {
+    window.location.href = '/admin-login';
+  }, []);
 
-  // TECH FUNCTIONALITY COMPLETELY DISABLED - Block ALL technician access immediately
-  if (auth?.user?.role === 'technician') {
-    window.location.href = '/login';
-    return <div className="h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h1>
-        <p className="text-gray-600">Tech functionality is currently disabled.</p>
-      </div>
-    </div>;
-  }
+  return <div className="h-screen flex items-center justify-center">
+    <div className="text-center">
+      <h1 className="text-2xl font-bold text-red-600 mb-4">Redirecting...</h1>
+      <p className="text-gray-600">Redirecting to admin login...</p>
+    </div>
+  </div>;
 
   // Fetch real data for dashboard metrics
   const { data: visits = [] } = useQuery({
