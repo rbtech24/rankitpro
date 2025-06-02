@@ -306,14 +306,11 @@ export default function TechnicianMobileApp() {
                 variant="outline" 
                 className="w-full justify-start text-red-600 hover:text-red-700"
                 onClick={() => {
-                  // Clear everything and force reload
+                  // Nuclear option - go directly to login page
                   localStorage.clear();
                   sessionStorage.clear();
-                  queryClient.clear();
-                  fetch("/api/auth/logout", { method: "POST", credentials: "include" })
-                    .finally(() => {
-                      window.location.reload();
-                    });
+                  fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+                  window.location.href = "/login";
                 }}
               >
                 <LogOut className="w-4 h-4 mr-2" />
