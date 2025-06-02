@@ -160,12 +160,12 @@ export default function TechnicianMobileApp() {
       // Clear the React Query cache
       queryClient.clear();
       // Force a hard refresh to clear all state
-      window.location.href = "/";
+      window.location.href = "/login";
     } catch (error) {
       console.error("Logout error:", error);
       // Even if logout fails, clear cache and redirect
       queryClient.clear();
-      window.location.href = "/";
+      window.location.href = "/login";
     }
   };
 
