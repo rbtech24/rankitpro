@@ -155,23 +155,35 @@ export default function TechnicianMobileApp() {
   }, [auth?.user?.id]);
 
   const handleLogout = async () => {
+    // Immediately disable all interactions
+    const logoutButton = document.querySelector('[data-logout-button]') as HTMLButtonElement;
+    if (logoutButton) logoutButton.disabled = true;
+    
     try {
+      // Call logout API first
       await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-      // Clear the React Query cache
-      queryClient.clear();
-      // Clear any local storage
-      localStorage.clear();
-      sessionStorage.clear();
-      // Force a complete page reload to clear all cached state
-      window.location.replace("/login");
     } catch (error) {
-      console.error("Logout error:", error);
-      // Even if logout fails, clear cache and redirect
-      queryClient.clear();
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.replace("/login");
+      console.error("Logout API error:", error);
     }
+    
+    // Aggressively clear everything
+    queryClient.invalidateQueries();
+    queryClient.removeQueries();
+    queryClient.clear();
+    
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Clear cookies
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    
+    // Force reload to completely reset application state
+    window.location.href = "/login";
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   const handlePhotoCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
