@@ -302,32 +302,20 @@ export default function TechnicianMobileApp() {
             </Card>
 
             <div className="space-y-2">
-              <Button 
-                variant="outline" 
-                className="w-full justify-start text-red-600 hover:text-red-700"
-                onClick={() => {
-                  console.log('LOGOUT: Starting logout process');
-                  localStorage.clear();
-                  sessionStorage.clear();
-                  
-                  fetch("/api/auth/logout", { method: "POST", credentials: "include" })
-                    .then(() => {
-                      console.log('LOGOUT: API call successful, redirecting');
-                      setTimeout(() => {
-                        window.location.replace('/');
-                      }, 100);
-                    })
-                    .catch(() => {
-                      console.log('LOGOUT: API call failed, redirecting anyway');
-                      setTimeout(() => {
-                        window.location.replace('/');
-                      }, 100);
-                    });
-                }}
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
+              <form action="/login" method="get">
+                <button 
+                  type="submit"
+                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-red-600 bg-white hover:bg-gray-50"
+                  onClick={() => {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+                  }}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </button>
+              </form>
             </div>
           </div>
         );
