@@ -57,20 +57,36 @@ import LogoutHandler from "@/components/LogoutHandler";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
-// Component that shows mobile app for technicians, dashboard for others
-function TechnicianDashboardRouter() {
+// Role-based dashboard router that redirects to appropriate route
+function RoleBasedDashboardRouter() {
   const { data: auth } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
     queryFn: getCurrentUser
   });
+  
+  const [, setLocation] = useLocation();
 
-  // Technicians get the clean mobile app only
-  if (auth?.user?.role === 'technician') {
-    return <TechnicianMobileApp />;
-  }
+  useEffect(() => {
+    if (auth?.user) {
+      switch (auth.user.role) {
+        case 'super_admin':
+          setLocation('/admin');
+          break;
+        case 'company_admin':
+          setLocation('/company');
+          break;
+        case 'technician':
+          setLocation('/tech');
+          break;
+        default:
+          setLocation('/');
+      }
+    }
+  }, [auth?.user, setLocation]);
 
-  // Everyone else gets the regular dashboard
-  return <Dashboard />;
+  return <div className="h-screen flex items-center justify-center">
+    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
+  </div>;
 }
 
 // Informational Pages
@@ -111,13 +127,19 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
     return null;
   }
 
-  // Redirect technicians to mobile app
-  if (auth.user.role === 'technician' && rest.path !== '/dashboard') {
-    return <Redirect to="/dashboard" />;
-  }
-  
+  // Role-based access control
   if (role && auth.user.role !== role && auth.user.role !== "super_admin") {
-    return <Redirect to="/dashboard" />;
+    // Redirect to appropriate dashboard based on user role
+    switch (auth.user.role) {
+      case 'super_admin':
+        return <Redirect to="/admin" />;
+      case 'company_admin':
+        return <Redirect to="/company" />;
+      case 'technician':
+        return <Redirect to="/tech" />;
+      default:
+        return <Redirect to="/" />;
+    }
   }
   
   return <Component {...rest} />;
@@ -138,7 +160,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Login />}
+        {auth?.user ? <RoleBasedDashboardRouter /> : <Login />}
       </Route>
       <Route path="/forgot-password">
         <ForgotPassword />
@@ -147,15 +169,13 @@ function Router() {
         <ResetPassword />
       </Route>
       <Route path="/register">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Register />}
+        {auth?.user ? <RoleBasedDashboardRouter /> : <Register />}
       </Route>
       <Route path="/logout">
         <LogoutHandler />
       </Route>
       <Route path="/"><Home /></Route>
       
-      {/* Informational Pages */}
-      <Route path="/emergency-login"><EmergencyLogin /></Route>
       <Route path="/about"><About /></Route>
       <Route path="/case-studies"><CaseStudies /></Route>
       <Route path="/testimonials"><Testimonials /></Route>
@@ -1001,9 +1021,20 @@ function Router() {
         <TechnicianMobileApp />
       </Route>
       
-      {/* Dashboard Pages - Technicians get mobile app, others get desktop */}
+      {/* Role-specific Dashboard Routes */}
+      <Route path="/admin">
+        <PrivateRoute component={Dashboard} path="/admin" role="super_admin" />
+      </Route>
+      <Route path="/company">
+        <PrivateRoute component={Dashboard} path="/company" role="company_admin" />
+      </Route>
+      <Route path="/tech">
+        <PrivateRoute component={TechnicianMobileApp} path="/tech" role="technician" />
+      </Route>
+      
+      {/* Legacy dashboard route - redirects based on role */}
       <Route path="/dashboard">
-        <PrivateRoute component={TechnicianDashboardRouter} path="/dashboard" />
+        <PrivateRoute component={RoleBasedDashboardRouter} path="/dashboard" />
       </Route>
       <Route path="/admin-dashboard">
         <PrivateRoute component={Dashboard} path="/admin-dashboard" />
