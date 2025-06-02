@@ -218,6 +218,13 @@ export default function Dashboard() {
     queryFn: getCurrentUser
   });
 
+  // Redirect technicians to their specific dashboard
+  React.useEffect(() => {
+    if (auth?.user?.role === 'technician') {
+      setLocation('/tech-dashboard');
+    }
+  }, [auth?.user?.role, setLocation]);
+
   // Fetch real data for dashboard metrics
   const { data: visits = [] } = useQuery({
     queryKey: ["/api/visits"],
