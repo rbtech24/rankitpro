@@ -63,15 +63,9 @@ export async function logout(): Promise<void> {
   if (isLoggingOut) return;
   isLoggingOut = true;
 
-  // Clear all data immediately before API call
-  localStorage.clear();
-  sessionStorage.clear();
+  // Set logout flag FIRST before clearing storage
+  sessionStorage.setItem('just_logged_out', 'true');
   
-  // Clear cookies
-  document.cookie.split(";").forEach(function(c) { 
-    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-  });
-
   // Clear React Query cache
   queryClient.clear();
   queryClient.removeQueries();
@@ -83,8 +77,13 @@ export async function logout(): Promise<void> {
     console.error("Logout API error:", error);
   }
 
-  // Set a flag in localStorage to indicate logout just happened
-  localStorage.setItem('just_logged_out', 'true');
+  // Clear all data after API call
+  localStorage.clear();
+  
+  // Clear cookies
+  document.cookie.split(";").forEach(function(c) { 
+    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+  });
   
   // Add cache busting parameter to ensure fresh page load
   const timestamp = Date.now();

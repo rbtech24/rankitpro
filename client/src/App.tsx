@@ -158,9 +158,9 @@ function Router() {
       <Route path="/">
         {(() => {
           // Check if user just logged out
-          const justLoggedOut = localStorage.getItem('just_logged_out');
+          const justLoggedOut = sessionStorage.getItem('just_logged_out');
           if (justLoggedOut) {
-            localStorage.removeItem('just_logged_out');
+            sessionStorage.removeItem('just_logged_out');
             return <Home />;
           }
           // Normal logic
