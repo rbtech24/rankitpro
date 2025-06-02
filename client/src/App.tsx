@@ -181,7 +181,7 @@ function Router() {
       <Route path="/logout">
         <LogoutHandler />
       </Route>
-      <Route path="/"><Home /></Route>
+      <Route path="/" component={Home} /></Route>
       
       <Route path="/about"><About /></Route>
       <Route path="/case-studies"><CaseStudies /></Route>
