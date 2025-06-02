@@ -149,10 +149,25 @@ export default function TechnicianMobileApp() {
     if (auth?.user?.id) {
       setCheckInForm(prev => ({
         ...prev,
-        technicianId: auth.user?.id?.toString() || ''
+        technicianId: auth.user.id.toString()
       }));
     }
   }, [auth?.user?.id]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+      // Clear the React Query cache
+      queryClient.clear();
+      // Force a hard refresh to clear all state
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if logout fails, clear cache and redirect
+      queryClient.clear();
+      window.location.href = "/";
+    }
+  };
 
   const handlePhotoCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -302,17 +317,14 @@ export default function TechnicianMobileApp() {
             </Card>
 
             <div className="space-y-2">
-              <a 
-                href="/logout"
-                className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-red-600 bg-white hover:bg-gray-50"
-                onClick={() => {
-                  localStorage.clear();
-                  sessionStorage.clear();
-                }}
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-red-600 hover:text-red-700"
+                onClick={handleLogout}
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
-              </a>
+              </Button>
             </div>
           </div>
         );

@@ -26,8 +26,16 @@ export default function TopNav({ onToggleSidebar }: TopNavProps) {
   
   const [, setLocation] = useLocation();
   
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Redirect to home page after successful logout
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if logout fails, clear cache and redirect
+      window.location.href = "/";
+    }
   };
   
   return (

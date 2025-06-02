@@ -1,7 +1,7 @@
 import React from 'react';
 
 export function Logo({ className = "h-10", size = "sm" }: { className?: string; size?: "sm" | "md" | "lg" }) {
-  const height = size === "sm" ? "h-6" : size === "md" ? "h-10" : "h-12";
+  const height = size === "sm" ? "h-8" : size === "md" ? "h-10" : "h-12";
   
   return (
     <div className="flex items-center">

@@ -536,19 +536,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Logged out successfully" });
     });
   });
-
-  // Server-side logout with redirect
-  app.get("/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error('Logout error:', err);
-      }
-      // Clear the session cookie
-      res.clearCookie('connect.sid');
-      // Redirect to home page
-      res.redirect('/');
-    });
-  });
   
   app.get("/api/auth/me", isAuthenticated, async (req, res) => {
     try {

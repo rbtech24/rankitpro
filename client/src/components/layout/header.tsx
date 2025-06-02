@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getCurrentUser, logout } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { User, LogOut, Settings, HelpCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import NotificationBell from '@/components/notifications/NotificationBell';
@@ -34,14 +34,18 @@ const Header: React.FC<HeaderProps> = ({ showNotifications = false }) => {
     );
   }, []);
   
-  const handleLogout = () => {
-    logout();
+  // Basic logout function
+  const logout = () => {
+    // Clear local user data
+    localStorage.removeItem('token');
+    // Redirect to login page
+    window.location.href = '/login';
   };
   
   return (
     <header className="w-full h-16 border-b bg-white flex items-center justify-between px-6 sticky top-0 z-50">
       <div className="flex items-center">
-        <Link href="/">
+        <Link href="/dashboard">
           <a className="text-xl font-bold text-primary">Rank It Pro</a>
         </Link>
       </div>
@@ -81,7 +85,7 @@ const Header: React.FC<HeaderProps> = ({ showNotifications = false }) => {
               <span>Help</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>
