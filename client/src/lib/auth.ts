@@ -55,11 +55,35 @@ export async function register(credentials: RegisterCredentials): Promise<AuthSt
   return { user, company: null };
 }
 
+// Global logout state to prevent multiple calls
+let isLoggingOut = false;
+
 export async function logout(): Promise<void> {
-  await apiRequest("POST", "/api/auth/logout");
-  
-  // Clear any user-related data from the cache
+  // Prevent multiple simultaneous logout calls
+  if (isLoggingOut) return;
+  isLoggingOut = true;
+
+  try {
+    // Call logout API
+    await apiRequest("POST", "/api/auth/logout");
+  } catch (error) {
+    // Continue even if API call fails
+    console.error("Logout API error:", error);
+  }
+
+  // Clear all application state
   queryClient.clear();
+  localStorage.clear();
+  sessionStorage.clear();
+  
+  // Clear cookies
+  document.cookie.split(";").forEach(function(c) { 
+    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+  });
+
+  // Reset logout state and redirect
+  isLoggingOut = false;
+  window.location.replace("/");
 }
 
 export async function getCurrentUser(): Promise<AuthState> {

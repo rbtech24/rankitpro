@@ -16,7 +16,7 @@ import {
   Navigation,
   History
 } from "lucide-react";
-import { getCurrentUser, AuthState } from "@/lib/auth";
+import { getCurrentUser, AuthState, logout } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 
@@ -149,31 +149,13 @@ export default function TechnicianMobileApp() {
     if (auth?.user?.id) {
       setCheckInForm(prev => ({
         ...prev,
-        technicianId: auth.user.id.toString()
+        technicianId: auth.user?.id?.toString() || ''
       }));
     }
   }, [auth?.user?.id]);
 
   const handleLogout = () => {
-    // Prevent multiple calls by checking if already logging out
-    if ((window as any).isLoggingOut) return;
-    (window as any).isLoggingOut = true;
-    
-    // Immediately clear all data
-    localStorage.clear();
-    sessionStorage.clear();
-    queryClient.clear();
-    
-    // Clear cookies
-    document.cookie.split(";").forEach(function(c) { 
-      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-    });
-    
-    // Call logout API once
-    fetch("/api/auth/logout", { method: "POST", credentials: "include" }).finally(() => {
-      // Force complete browser reset
-      window.location.replace("/");
-    });
+    logout();
   };
 
   const handlePhotoCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
