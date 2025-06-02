@@ -86,8 +86,9 @@ export async function logout(): Promise<void> {
   // Set a flag in localStorage to indicate logout just happened
   localStorage.setItem('just_logged_out', 'true');
   
-  // Force complete page replacement (no history entry)
-  window.location.replace("/");
+  // Add cache busting parameter to ensure fresh page load
+  const timestamp = Date.now();
+  window.location.replace(`/?t=${timestamp}`);
 }
 
 export async function getCurrentUser(): Promise<AuthState> {
