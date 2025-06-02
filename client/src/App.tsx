@@ -104,21 +104,14 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
 }
 
 function Router() {
-  const { data: auth, isLoading } = useQuery<AuthState>({
-    queryKey: ["/api/auth/me"],
-    queryFn: getCurrentUser
-  });
-  
-  if (isLoading) {
-    return <div className="h-screen flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
-    </div>;
-  }
+  // AUTH SYSTEM DISABLED - No authentication checks
+  const auth = null;
+  const isLoading = false;
   
   return (
     <Switch>
       <Route path="/login">
-        {auth?.user ? <Redirect to="/admin-login" /> : <Login />}
+        <Login />
       </Route>
       <Route path="/forgot-password">
         <ForgotPassword />
@@ -127,7 +120,7 @@ function Router() {
         <ResetPassword />
       </Route>
       <Route path="/register">
-        {auth?.user ? <Redirect to="/admin-login" /> : <Register />}
+        <Register />
       </Route>
       <Route path="/logout">
         <LogoutHandler />
