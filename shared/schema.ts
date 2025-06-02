@@ -20,25 +20,14 @@ export const users = pgTable("users", {
 export const companies = pgTable("companies", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  email: text("email"),
-  phoneNumber: text("phone_number"),
-  website: text("website"),
-  address: text("address"),
-  city: text("city"),
-  state: text("state"),
-  zipCode: text("zip_code"),
-  industry: text("industry"),
   plan: text("plan", { enum: ["starter", "pro", "agency"] }).notNull().default("starter"),
   usageLimit: integer("usage_limit").notNull().default(50),
-  isActive: boolean("is_active").notNull().default(true),
-  notes: text("notes"),
   wordpressConfig: text("wordpress_config"),
   javaScriptEmbedConfig: text("javascript_embed_config"),
   reviewSettings: text("review_settings"),
   crmIntegrations: text("crm_integrations"), // Stores JSON string with CRM configurations
   crmSyncHistory: text("crm_sync_history"), // Stores JSON string with CRM sync history
   createdAt: timestamp("created_at").defaultNow(),
-  lastLogin: timestamp("last_login"),
 });
 
 // Technicians table
@@ -108,10 +97,9 @@ export const reviewRequests = pgTable("review_requests", {
   customMessage: text("custom_message"),
   token: text("token"),
   status: text("status", { enum: ["pending", "sent", "failed"] }).notNull().default("pending"),
-  sentAt: timestamp("sent_at"),
+  sentAt: timestamp("sent_at").defaultNow(),
   technicianId: integer("technician_id").references(() => technicians.id).notNull(),
   companyId: integer("company_id").references(() => companies.id).notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Review responses table to track customer feedback

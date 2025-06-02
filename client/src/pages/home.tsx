@@ -9,8 +9,6 @@ import { Logo } from "@/components/ui/logo";
 const Home = () => {
   const isMobile = useIsMobile();
   
-  console.log('Home component rendered');
-  
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}

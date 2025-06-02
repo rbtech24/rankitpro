@@ -5,20 +5,14 @@ import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NotificationProvider } from "@/context/NotificationContext";
-import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Dashboard from "@/pages/new-dashboard";
-import TechnicianDashboard from "@/pages/tech-dashboard";
-import TechDashboardComplete from "@/pages/tech-dashboard-complete";
-import TechnicianFinal from "@/pages/technician-final";
-import TechnicianMobileApp from "@/pages/technician-mobile-app";
+import TechnicianDashboard from "@/pages/technician-dashboard";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
 import Reviews from "@/pages/reviews";
-import TechReviews from "@/pages/tech-reviews";
-import TechVisits from "@/pages/tech-visits";
 import ReviewAnalytics from "@/pages/review-analytics-clean";
 import AnalyticsDashboard from "@/pages/analytics-dashboard-simple";
 import Notifications from "@/pages/notifications";
@@ -57,46 +51,6 @@ import LogoutHandler from "@/components/LogoutHandler";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
-// Dashboard redirect handler - sends unauthenticated users to home
-function DashboardRedirectHandler() {
-  const { data: auth, isLoading } = useQuery<AuthState>({
-    queryKey: ["/api/auth/me"],
-    queryFn: getCurrentUser
-  });
-  
-  const [, setLocation] = useLocation();
-
-  useEffect(() => {
-    if (!isLoading) {
-      if (auth?.user) {
-        switch (auth.user.role) {
-          case 'super_admin':
-            setLocation('/admin');
-            break;
-          case 'company_admin':
-            setLocation('/company');
-            break;
-          case 'technician':
-            setLocation('/tech');
-            break;
-          default:
-            setLocation('/');
-        }
-      } else {
-        setLocation('/');
-      }
-    }
-  }, [auth?.user, isLoading, setLocation]);
-
-  if (isLoading) {
-    return <div className="h-screen flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
-    </div>;
-  }
-
-  return null;
-}
-
 // Informational Pages
 import About from "@/pages/about";
 import CaseStudies from "@/pages/case-studies";
@@ -134,20 +88,9 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
     setTimeout(() => setLocation("/login"), 100);
     return null;
   }
-
-  // Role-based access control
+  
   if (role && auth.user.role !== role && auth.user.role !== "super_admin") {
-    // Redirect to appropriate dashboard based on user role
-    switch (auth.user.role) {
-      case 'super_admin':
-        return <Redirect to="/admin" />;
-      case 'company_admin':
-        return <Redirect to="/company" />;
-      case 'technician':
-        return <Redirect to="/tech" />;
-      default:
-        return <Redirect to="/" />;
-    }
+    return <Redirect to="/dashboard" />;
   }
   
   return <Component {...rest} />;
@@ -159,9 +102,6 @@ function Router() {
     queryFn: getCurrentUser
   });
   
-  console.log('Router - Auth state:', auth);
-  console.log('Router - Is loading:', isLoading);
-  
   if (isLoading) {
     return <div className="h-screen flex items-center justify-center">
       <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
@@ -171,7 +111,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login">
-        {auth?.user ? <DashboardRedirectHandler /> : <Login />}
+        {auth?.user ? <Redirect to="/dashboard" /> : <Login />}
       </Route>
       <Route path="/forgot-password">
         <ForgotPassword />
@@ -180,13 +120,17 @@ function Router() {
         <ResetPassword />
       </Route>
       <Route path="/register">
-        {auth?.user ? <DashboardRedirectHandler /> : <Register />}
+        {auth?.user ? <Redirect to="/dashboard" /> : <Register />}
       </Route>
       <Route path="/logout">
         <LogoutHandler />
       </Route>
-      <Route path="/"><Home /></Route>
+      <Route path="/">
+        {auth?.user ? <Redirect to="/dashboard" /> : <Home />}
+      </Route>
       
+      {/* Informational Pages */}
+      <Route path="/emergency-login"><EmergencyLogin /></Route>
       <Route path="/about"><About /></Route>
       <Route path="/case-studies"><CaseStudies /></Route>
       <Route path="/testimonials"><Testimonials /></Route>
@@ -1027,28 +971,12 @@ function Router() {
         </div>
       </Route>
       
-      {/* Mobile Field Tech App */}
-      <Route path="/field-tech">
-        <TechnicianMobileApp />
-      </Route>
-      
-      {/* Role-specific Dashboard Routes */}
-      <Route path="/admin">
-        <PrivateRoute component={Dashboard} path="/admin" role="super_admin" />
-      </Route>
-      <Route path="/company">
-        <PrivateRoute component={Dashboard} path="/company" role="company_admin" />
-      </Route>
-      <Route path="/tech">
-        <PrivateRoute component={TechnicianMobileApp} path="/tech" role="technician" />
-      </Route>
-      
-      {/* Legacy dashboard route - redirects based on role */}
+      {/* Dashboard Pages */}
       <Route path="/dashboard">
-        <DashboardRedirectHandler />
-      </Route>
-      <Route path="/admin-dashboard">
-        <PrivateRoute component={Dashboard} path="/admin-dashboard" />
+        {auth?.user?.role === 'technician' 
+          ? <PrivateRoute component={TechnicianDashboard} path="/dashboard" role="technician" />
+          : <PrivateRoute component={Dashboard} path="/dashboard" />
+        }
       </Route>
       <Route path="/setup">
         <PrivateRoute component={SetupGuide} path="/setup" role="company_admin" />
@@ -1059,17 +987,16 @@ function Router() {
       <Route path="/check-ins">
         <PrivateRoute component={CheckIns} path="/check-ins" />
       </Route>
-      {/* DISABLED: /visits redirect conflicts with tech dashboard navigation */}
-      {/* <Route path="/visits">
+      {/* Redirect /visits to /check-ins since they're the same functionality */}
+      <Route path="/visits">
         <Redirect to="/check-ins" />
-      </Route> */}
+      </Route>
       <Route path="/blog-posts">
         <PrivateRoute component={BlogPosts} path="/blog-posts" />
       </Route>
-      <Route path="/admin-reviews">
-        <PrivateRoute component={Reviews} path="/admin-reviews" />
+      <Route path="/reviews">
+        <PrivateRoute component={Reviews} path="/reviews" />
       </Route>
-
       <Route path="/review-analytics">
         <PrivateRoute component={ReviewAnalytics} path="/review-analytics" role="company_admin" />
       </Route>
@@ -1105,10 +1032,9 @@ function Router() {
       <Route path="/admin-user-management">
         <PrivateRoute component={AdminUserManagement} path="/admin-user-management" role="super_admin" />
       </Route>
-      {/* Temporarily disabled while fixing hooks issue */}
-      {/* <Route path="/system-settings">
+      <Route path="/system-settings">
         <PrivateRoute component={SystemSettings} path="/system-settings" role="super_admin" />
-      </Route> */}
+      </Route>
       <Route path="/system-overview">
         <PrivateRoute component={SystemOverview} path="/system-overview" role="super_admin" />
       </Route>
@@ -1161,6 +1087,24 @@ function Router() {
 }
 
 function App() {
+  const [initialized, setInitialized] = useState(false);
+  
+  useEffect(() => {
+    // Prefetch current user
+    queryClient.prefetchQuery({
+      queryKey: ["/api/auth/me"],
+      queryFn: getCurrentUser
+    }).then(() => setInitialized(true));
+  }, []);
+  
+  if (!initialized) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
+      </div>
+    );
+  }
+  
   return (
     <QueryClientProvider client={queryClient}>
       <NotificationProvider>
@@ -1168,7 +1112,6 @@ function App() {
           <Toaster />
           <Router />
         </TooltipProvider>
-        <PWAInstallPrompt />
       </NotificationProvider>
     </QueryClientProvider>
   );

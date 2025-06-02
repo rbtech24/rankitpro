@@ -406,11 +406,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               address: "123 Test St",
               city: "Test City",
               state: "TS",
-              zipCode: "12345",
-              phoneNumber: "555-123-4567",
+              zip: "12345",
+              phone: "555-123-4567",
               email: "contact@testcompany.com",
               website: "https://testcompany.com",
               industry: "Home Services",
+              logo: null,
               plan: "pro",
               usageLimit: 100,
             });
@@ -636,108 +637,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
-
-  // Company check-ins endpoint
-  app.get("/api/companies/:id/check-ins", isAuthenticated, async (req, res) => {
-    try {
-      const companyId = parseInt(req.params.id);
-      
-      // Check permissions
-      if (req.user.role !== "super_admin" && req.user.companyId !== companyId) {
-        return res.status(403).json({ message: "Forbidden" });
-      }
-      
-      const checkIns = await storage.getCheckInsByCompany(companyId);
-      res.json(checkIns);
-    } catch (error) {
-      console.error("Get company check-ins error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
-
-  // Company reviews endpoint
-  app.get("/api/companies/:id/reviews", isAuthenticated, async (req, res) => {
-    try {
-      const companyId = parseInt(req.params.id);
-      
-      // Check permissions
-      if (req.user.role !== "super_admin" && req.user.companyId !== companyId) {
-        return res.status(403).json({ message: "Forbidden" });
-      }
-      
-      const reviews = await storage.getReviewResponsesByCompany(companyId);
-      res.json(reviews);
-    } catch (error) {
-      console.error("Get company reviews error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
-
-  // System settings endpoints
-  app.get("/api/system/ai-settings", isSuperAdmin, async (req, res) => {
-    try {
-      // Return default AI settings that can be configured via database later
-      const aiSettings = {
-        defaultProvider: "openai",
-        openaiModel: "gpt-4o",
-        anthropicModel: "claude-3-7-sonnet-20250219",
-        xaiModel: "grok-2-1212",
-        maxTokensPerRequest: 2000,
-        temperatureSummary: 0.3,
-        temperatureBlog: 0.7,
-        customInstructionsSummary: "Create a concise summary of the home service check-in that highlights the key problems, solutions, and outcomes in a professional tone.",
-        customInstructionsBlog: "Create an engaging blog post for a home service business that explains the service in a way that demonstrates expertise and builds trust with potential customers.",
-        enableAIImageGeneration: true,
-      };
-      res.json(aiSettings);
-    } catch (error) {
-      console.error("Get AI settings error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
-
-  app.get("/api/system/settings", isSuperAdmin, async (req, res) => {
-    try {
-      // Return default system settings that can be configured via database later
-      const systemSettings = {
-        maxUploadSizeMB: 10,
-        allowedFileTypes: ["jpg", "jpeg", "png", "heic", "pdf"],
-        maxImagesPerCheckIn: 6,
-        maxCheckInsPerDay: 50,
-        sessionTimeoutMinutes: 60,
-        maintenanceMode: false,
-        maintenanceMessage: "Rank It Pro is currently undergoing scheduled maintenance. We'll be back shortly.",
-        debugMode: false,
-        enableRateLimiting: true,
-        maxRequestsPerMinute: 100,
-      };
-      res.json(systemSettings);
-    } catch (error) {
-      console.error("Get system settings error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
-
-  app.get("/api/system/integration-settings", isSuperAdmin, async (req, res) => {
-    try {
-      // Return default integration settings that can be configured via database later
-      const integrationSettings = {
-        defaultWordPressFieldPrefix: "rp_",
-        defaultEmbedTitle: "Recent Service Visits",
-        defaultEmbedSubtitle: "See what our technicians have been working on",
-        enableCustomBranding: true,
-        disableRankItProBranding: false,
-        enableCustomCSS: true,
-        customCSS: ".rank-it-pro-embed { border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }",
-        defaultLanguage: "en-US",
-        enableMultiLanguage: false,
-      };
-      res.json(integrationSettings);
-    } catch (error) {
-      console.error("Get integration settings error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
   
   // Technician routes
   app.get("/api/technicians", isCompanyAdmin, async (req, res) => {
@@ -857,67 +756,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Delete technician error:", error);
       res.status(500).json({ message: "Server error" });
-    }
-  });
-  
-  // Support Ticket routes
-  app.post("/api/support-tickets", isAuthenticated, async (req, res) => {
-    try {
-      const supportTicketSchema = z.object({
-        subject: z.string().min(1, "Subject is required"),
-        priority: z.enum(["low", "medium", "high", "urgent"]),
-        category: z.enum(["technical", "equipment", "app", "customer_service", "billing", "other"]),
-        description: z.string().min(1, "Description is required"),
-        location: z.string().optional(),
-        technicianId: z.number().optional(),
-        technicianName: z.string().optional(),
-        companyId: z.number().optional(),
-        status: z.string().default("open")
-      });
-
-      const data = supportTicketSchema.parse(req.body);
-      
-      // Create support ticket record (for now, we'll store it as a simple log)
-      const ticket = {
-        id: Date.now(), // Simple ID generation
-        ...data,
-        userId: req.user.id,
-        userEmail: req.user.email,
-        companyId: req.user.companyId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      // Log the support ticket (in a real system, this would go to a database)
-      console.log("Support Ticket Created:", {
-        ticketId: ticket.id,
-        user: req.user.username,
-        company: req.user.companyId,
-        subject: data.subject,
-        priority: data.priority,
-        category: data.category,
-        description: data.description,
-        location: data.location
-      });
-
-      // In a production environment, you would:
-      // 1. Save to database
-      // 2. Send notification to support team
-      // 3. Create ticket in support system (Zendesk, Intercom, etc.)
-      
-      res.status(201).json({ 
-        message: "Support ticket created successfully",
-        ticketId: ticket.id,
-        status: "created"
-      });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const validationError = fromZodError(error);
-        return res.status(400).json({ message: validationError.message });
-      }
-      
-      console.error("Support ticket creation error:", error);
-      res.status(500).json({ message: "Failed to create support ticket" });
     }
   });
   

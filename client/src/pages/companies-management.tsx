@@ -82,8 +82,154 @@ const companySchema = z.object({
   featuresEnabled: z.array(z.string()),
 });
 
-// Companies are now fetched from real database via API
-const mockCompanies: any[] = [];
+// Mock data for companies
+const mockCompanies = [
+  {
+    id: 1,
+    name: "Top HVAC Solutions",
+    email: "admin@tophvac.com",
+    phoneNumber: "555-123-4567",
+    website: "https://www.tophvacsolutions.com",
+    address: "1234 Cooling Ave",
+    city: "Phoenix",
+    state: "AZ",
+    zipCode: "85001",
+    industry: "HVAC",
+    planId: "2",
+    planName: "Professional",
+    isActive: true,
+    createdAt: "2024-09-05T12:00:00Z",
+    lastLogin: "2025-05-15T09:23:45Z",
+    notes: "Large HVAC provider with multiple locations",
+    maxTechnicians: 15,
+    currentTechnicians: 11,
+    featuresEnabled: ["ai_content", "wordpress_integration", "crm_integration", "review_requests"],
+    stats: {
+      totalCheckIns: 432,
+      activeCheckInsLast30Days: 78,
+      totalTechnicians: 11,
+      totalBlogPosts: 127,
+      totalReviews: 89,
+      avgRating: 4.7
+    }
+  },
+  {
+    id: 2,
+    name: "Ace Plumbing Services",
+    email: "support@aceplumbing.com",
+    phoneNumber: "555-987-6543",
+    website: "https://www.aceplumbingservices.com",
+    address: "567 Pipe St",
+    city: "Chicago",
+    state: "IL",
+    zipCode: "60601",
+    industry: "Plumbing",
+    planId: "1",
+    planName: "Starter",
+    isActive: true,
+    createdAt: "2024-01-22T12:00:00Z",
+    lastLogin: "2025-05-14T14:12:37Z",
+    notes: "Family-owned plumbing business serving Chicago area",
+    maxTechnicians: 5,
+    currentTechnicians: 4,
+    featuresEnabled: ["ai_content", "review_requests"],
+    stats: {
+      totalCheckIns: 245,
+      activeCheckInsLast30Days: 42,
+      totalTechnicians: 4,
+      totalBlogPosts: 68,
+      totalReviews: 53,
+      avgRating: 4.9
+    }
+  },
+  {
+    id: 3,
+    name: "Metro Electrical Contractors",
+    email: "info@metroelectrical.com",
+    phoneNumber: "555-456-7890",
+    website: "https://www.metroelectrical.com",
+    address: "789 Circuit Blvd",
+    city: "Boston",
+    state: "MA",
+    zipCode: "02108",
+    industry: "Electrical",
+    planId: "3",
+    planName: "Enterprise",
+    isActive: true,
+    createdAt: "2025-05-10T12:00:00Z",
+    lastLogin: "2025-05-13T08:45:22Z",
+    notes: "Large electrical contractor with commercial and residential services",
+    maxTechnicians: 50,
+    currentTechnicians: 32,
+    featuresEnabled: ["ai_content", "wordpress_integration", "crm_integration", "review_requests", "custom_branding", "api_access"],
+    stats: {
+      totalCheckIns: 678,
+      activeCheckInsLast30Days: 134,
+      totalTechnicians: 32,
+      totalBlogPosts: 187,
+      totalReviews: 154,
+      avgRating: 4.5
+    }
+  },
+  {
+    id: 4,
+    name: "City Roofing Experts",
+    email: "contact@cityroofing.com",
+    phoneNumber: "555-234-5678",
+    website: "https://www.cityroofingexperts.com",
+    address: "456 Shingle Rd",
+    city: "Seattle",
+    state: "WA",
+    zipCode: "98101",
+    industry: "Roofing",
+    planId: "2",
+    planName: "Professional",
+    isActive: false,
+    createdAt: "2024-11-20T12:00:00Z",
+    lastLogin: "2025-03-10T11:32:17Z",
+    notes: "Account temporarily disabled due to payment issues",
+    maxTechnicians: 15,
+    currentTechnicians: 8,
+    featuresEnabled: ["ai_content", "wordpress_integration", "review_requests"],
+    stats: {
+      totalCheckIns: 321,
+      activeCheckInsLast30Days: 0,
+      totalTechnicians: 8,
+      totalBlogPosts: 94,
+      totalReviews: 72,
+      avgRating: 4.3
+    }
+  },
+  {
+    id: 5,
+    name: "Green Landscaping LLC",
+    email: "hello@greenlandscaping.com",
+    phoneNumber: "555-876-5432",
+    website: "https://www.greenlandscapingllc.com",
+    address: "123 Garden Way",
+    city: "Portland",
+    state: "OR",
+    zipCode: "97201",
+    industry: "Landscaping",
+    planId: "1",
+    planName: "Starter",
+    isActive: true,
+    createdAt: "2024-08-15T12:00:00Z",
+    lastLogin: "2025-05-15T10:15:53Z",
+    notes: "Seasonal business with high activity in spring/summer",
+    maxTechnicians: 5,
+    currentTechnicians: 3,
+    featuresEnabled: ["ai_content", "review_requests"],
+    stats: {
+      totalCheckIns: 187,
+      activeCheckInsLast30Days: 38,
+      totalTechnicians: 3,
+      totalBlogPosts: 54,
+      totalReviews: 47,
+      avgRating: 4.8
+    }
+  }
+];
 
 // Mock data for subscription plans
 const mockPlans = [
@@ -309,29 +455,32 @@ export default function CompaniesManagement() {
     status: Math.random() > 0.1 ? "active" : "inactive"
   })) : [];
   
-  // Real check-ins data for selected company
-  const { data: companyCheckIns = [] } = useQuery({
-    queryKey: ['/api/companies', selectedCompany?.id, 'check-ins'],
-    queryFn: async () => {
-      if (!selectedCompany?.id) return [];
-      const res = await fetch(`/api/companies/${selectedCompany.id}/check-ins`, { credentials: 'include' });
-      if (!res.ok) return [];
-      return res.json();
-    },
-    enabled: !!selectedCompany?.id
-  });
-
-  // Real reviews data for selected company
-  const { data: companyReviews = [] } = useQuery({
-    queryKey: ['/api/companies', selectedCompany?.id, 'reviews'],
-    queryFn: async () => {
-      if (!selectedCompany?.id) return [];
-      const res = await fetch(`/api/companies/${selectedCompany.id}/reviews`, { credentials: 'include' });
-      if (!res.ok) return [];
-      return res.json();
-    },
-    enabled: !!selectedCompany?.id
-  });
+  // Mock check-ins for selected company
+  const mockCheckIns = selectedCompany ? Array.from({ length: 10 }).map((_, index) => ({
+    id: index + 1,
+    jobType: ["Repair", "Installation", "Maintenance", "Inspection", "Emergency"][Math.floor(Math.random() * 5)],
+    technicianName: `Technician ${Math.floor(Math.random() * selectedCompany.currentTechnicians) + 1}`,
+    location: `${["123 Main St", "456 Oak Ave", "789 Pine Rd", "321 Elm Blvd", "654 Maple Ln"][Math.floor(Math.random() * 5)]}, ${selectedCompany.city}, ${selectedCompany.state}`,
+    dateCompleted: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toISOString(),
+    photosCount: Math.floor(Math.random() * 6) + 1,
+    noteLength: Math.floor(Math.random() * 300) + 50,
+    hasBlogPost: Math.random() > 0.3,
+    hasReviewRequest: Math.random() > 0.2,
+    reviewStatus: Math.random() > 0.5 ? (Math.random() > 0.7 ? "completed" : "pending") : "none"
+  })) : [];
+  
+  // Mock reviews for selected company
+  const mockReviews = selectedCompany ? Array.from({ length: 10 }).map((_, index) => ({
+    id: index + 1,
+    customerName: `Customer ${index + 1}`,
+    rating: Math.floor(Math.random() * 2) + 4, // 4 or 5 stars
+    reviewText: "Great service! The technician was professional, on time, and fixed our issue quickly. Would definitely recommend!",
+    technicianName: `Technician ${Math.floor(Math.random() * selectedCompany.currentTechnicians) + 1}`,
+    jobType: ["Repair", "Installation", "Maintenance", "Inspection", "Emergency"][Math.floor(Math.random() * 5)],
+    reviewDate: new Date(Date.now() - Math.floor(Math.random() * 90 * 24 * 60 * 60 * 1000)).toISOString(),
+    platform: ["Google", "Facebook", "Yelp", "Website"][Math.floor(Math.random() * 4)],
+    responseStatus: Math.random() > 0.2 ? "responded" : "pending"
+  })) : [];
   
   return (
     <div className="flex h-screen bg-gray-50">
@@ -1511,7 +1660,7 @@ export default function CompaniesManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {companyCheckIns.map(checkIn => (
+                {mockCheckIns.map(checkIn => (
                   <TableRow key={checkIn.id}>
                     <TableCell>{checkIn.jobType}</TableCell>
                     <TableCell>{checkIn.technicianName}</TableCell>

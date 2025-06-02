@@ -6,7 +6,7 @@ import {
   DialogTitle,
   DialogDescription
 } from "@/components/ui/dialog";
-import VisitForm from "@/components/visit/visit-form";
+import VisitForm from "./visit-form";
 
 interface MobileVisitModalProps {
   open: boolean;
@@ -20,15 +20,15 @@ export default function MobileVisitModal({ open, onClose }: MobileVisitModalProp
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-6">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-4">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold text-gray-900">Add New Service Visit</DialogTitle>
-          <DialogDescription className="text-gray-600 mt-2">
+          <DialogTitle className="text-xl text-center">Add New Service Visit</DialogTitle>
+          <DialogDescription className="text-center text-sm">
             Record details about your current service visit
           </DialogDescription>
         </DialogHeader>
         
-        <div className="mt-6">
+        <div className="mt-4">
           <VisitForm onSuccess={onClose} />
         </div>
       </DialogContent>
