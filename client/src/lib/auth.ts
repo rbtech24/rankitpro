@@ -56,33 +56,28 @@ export async function register(credentials: RegisterCredentials): Promise<AuthSt
 }
 
 export function logout(): void {
-  console.log('Starting direct logout process');
+  console.log('LOGOUT: Nuclear option - forcing immediate redirect');
   
-  // Clear all application state immediately
-  queryClient.clear();
+  // Clear everything immediately
   localStorage.clear();
   sessionStorage.clear();
+  queryClient.clear();
   
-  // Clear cookies
-  document.cookie.split(";").forEach(function(c) { 
-    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-  });
+  // Call logout API in background
+  fetch("/api/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
   
-  console.log('Cleared all client data');
+  // Force immediate redirect with cache busting
+  const url = `/?logout=${Date.now()}&clear=true`;
+  console.log('LOGOUT: Redirecting to:', url);
   
-  // Call logout API
-  fetch("/api/auth/logout", { 
-    method: "POST", 
-    credentials: "include" 
-  }).finally(() => {
-    console.log('Logout API completed, forcing navigation');
-    // Force navigation with complete page replacement
-    window.location.assign("/");
-    // Backup: reload if assign doesn't work
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-  });
+  // Try multiple redirect methods
+  window.location.replace(url);
+  window.location.href = url;
+  
+  // Final fallback - just go to base URL
+  setTimeout(() => {
+    window.location.replace('/');
+  }, 100);
 }
 
 export async function getCurrentUser(): Promise<AuthState> {
