@@ -55,53 +55,9 @@ export async function register(credentials: RegisterCredentials): Promise<AuthSt
   return { user, company: null };
 }
 
-// Global logout state to prevent multiple calls
-let isLoggingOut = false;
-
 export function logout(): void {
-  console.log('Logout function called');
-  
-  // Prevent multiple simultaneous logout calls
-  if (isLoggingOut) {
-    console.log('Already logging out, returning');
-    return;
-  }
-  isLoggingOut = true;
-
-  // Set logout flag FIRST before clearing storage
-  sessionStorage.setItem('just_logged_out', 'true');
-  console.log('Set logout flag in sessionStorage');
-  
-  // Clear React Query cache immediately
-  queryClient.clear();
-  queryClient.removeQueries();
-  console.log('Cleared React Query cache');
-  
-  // Clear all data
-  localStorage.clear();
-  console.log('Cleared localStorage');
-  
-  // Clear cookies
-  document.cookie.split(";").forEach(function(c) { 
-    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-  });
-  console.log('Cleared cookies');
-
-  // Call logout API without waiting for response
-  fetch("/api/auth/logout", { 
-    method: "POST", 
-    credentials: "include" 
-  }).catch(error => {
-    console.error("Logout API error:", error);
-  });
-  console.log('Called logout API');
-  
-  // Force immediate redirect
-  const timestamp = Date.now();
-  console.log('Attempting redirect to home page with timestamp:', timestamp);
-  
-  // Force redirect immediately
-  window.location.href = `/?t=${timestamp}`;
+  // Immediately redirect to a logout handler page
+  window.location.href = '/logout';
 }
 
 export async function getCurrentUser(): Promise<AuthState> {

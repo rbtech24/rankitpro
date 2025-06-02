@@ -1,57 +1,39 @@
 import { useEffect } from "react";
-import { useLocation } from "wouter";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 export default function LogoutHandler() {
-  const [, setLocation] = useLocation();
-  const { toast } = useToast();
-
   useEffect(() => {
-    const handleLogout = async () => {
-      try {
-        // Call the logout API
-        await apiRequest("POST", "/api/auth/logout");
-        
-        // Clear React Query cache to remove auth state
-        queryClient.clear();
-        
-        // Clear any local storage
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // Show success message
-        toast({
-          title: "Logged Out",
-          description: "You have been successfully logged out.",
-        });
-        
-        // Force a complete page reload to clear all state
-        setTimeout(() => {
-          window.location.replace("/");
-        }, 100);
-        
-      } catch (error) {
-        console.error("Logout error:", error);
-        
-        // Even if logout API fails, still clear cache and redirect
-        queryClient.clear();
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        toast({
-          title: "Logged Out",
-          description: "You have been logged out.",
-        });
-        
-        setTimeout(() => {
-          window.location.replace("/");
-        }, 100);
-      }
-    };
-
-    handleLogout();
-  }, [setLocation, toast]);
+    console.log('LogoutHandler: Starting logout process');
+    
+    // Clear all application state immediately
+    queryClient.clear();
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Clear cookies
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    
+    console.log('LogoutHandler: Cleared all client state');
+    
+    // Call logout API and redirect regardless of success/failure
+    fetch("/api/auth/logout", { 
+      method: "POST", 
+      credentials: "include" 
+    })
+    .then(() => {
+      console.log('LogoutHandler: Logout API successful');
+    })
+    .catch(error => {
+      console.log('LogoutHandler: Logout API failed, but continuing:', error);
+    })
+    .finally(() => {
+      console.log('LogoutHandler: Redirecting to home page');
+      // Force redirect to home page with cache busting
+      window.location.replace("/?logout=" + Date.now());
+    });
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

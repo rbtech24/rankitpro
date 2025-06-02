@@ -155,7 +155,7 @@ export default function TechnicianMobileApp() {
   }, [auth?.user?.id]);
 
   const handleLogout = () => {
-    console.log('handleLogout called in technician-mobile-app');
+    console.log('Logout button clicked - redirecting to logout handler');
     logout();
   };
 
