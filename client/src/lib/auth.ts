@@ -87,7 +87,22 @@ export async function logout(): Promise<void> {
   
   // Add cache busting parameter to ensure fresh page load
   const timestamp = Date.now();
-  window.location.replace(`/?t=${timestamp}`);
+  console.log('Attempting redirect to home page...');
+  
+  // Try multiple redirect methods
+  try {
+    window.location.replace(`/?t=${timestamp}`);
+  } catch (e) {
+    console.error('window.location.replace failed:', e);
+    window.location.href = `/?t=${timestamp}`;
+  }
+  
+  // Fallback: force reload after short delay
+  setTimeout(() => {
+    console.log('Fallback: forcing page reload');
+    window.location.href = '/';
+    window.location.reload();
+  }, 500);
 }
 
 export async function getCurrentUser(): Promise<AuthState> {
