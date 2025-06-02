@@ -310,7 +310,10 @@ export default function TechnicianMobileApp() {
               <Button 
                 variant="outline" 
                 className="w-full justify-start text-red-600 hover:text-red-700"
-                onClick={handleLogout}
+                onClick={() => {
+                  console.log('Button clicked directly');
+                  handleLogout();
+                }}
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
