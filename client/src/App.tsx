@@ -57,9 +57,9 @@ import LogoutHandler from "@/components/LogoutHandler";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
-// Role-based dashboard router that redirects to appropriate route
-function RoleBasedDashboardRouter() {
-  const { data: auth } = useQuery<AuthState>({
+// Dashboard redirect handler - sends unauthenticated users to home
+function DashboardRedirectHandler() {
+  const { data: auth, isLoading } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
     queryFn: getCurrentUser
   });
@@ -67,30 +67,34 @@ function RoleBasedDashboardRouter() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    if (auth?.user) {
-      console.log('User role:', auth.user.role);
-      switch (auth.user.role) {
-        case 'super_admin':
-          setLocation('/admin');
-          break;
-        case 'company_admin':
-          setLocation('/company');
-          break;
-        case 'technician':
-          setLocation('/tech');
-          break;
-        default:
-          setLocation('/');
+    if (!isLoading) {
+      if (auth?.user) {
+        switch (auth.user.role) {
+          case 'super_admin':
+            setLocation('/admin');
+            break;
+          case 'company_admin':
+            setLocation('/company');
+            break;
+          case 'technician':
+            setLocation('/tech');
+            break;
+          default:
+            setLocation('/');
+        }
+      } else {
+        setLocation('/');
       }
-    } else {
-      console.log('No user found, redirecting to home');
-      setLocation('/');
     }
-  }, [auth?.user, setLocation]);
+  }, [auth?.user, isLoading, setLocation]);
 
-  return <div className="h-screen flex items-center justify-center">
-    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
-  </div>;
+  if (isLoading) {
+    return <div className="h-screen flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
+    </div>;
+  }
+
+  return null;
 }
 
 // Informational Pages
@@ -167,7 +171,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login">
-        {auth?.user ? <RoleBasedDashboardRouter /> : <Login />}
+        {auth?.user ? <DashboardRedirectHandler /> : <Login />}
       </Route>
       <Route path="/forgot-password">
         <ForgotPassword />
@@ -176,7 +180,7 @@ function Router() {
         <ResetPassword />
       </Route>
       <Route path="/register">
-        {auth?.user ? <RoleBasedDashboardRouter /> : <Register />}
+        {auth?.user ? <DashboardRedirectHandler /> : <Register />}
       </Route>
       <Route path="/logout">
         <LogoutHandler />
@@ -1041,7 +1045,7 @@ function Router() {
       
       {/* Legacy dashboard route - redirects based on role */}
       <Route path="/dashboard">
-        <PrivateRoute component={RoleBasedDashboardRouter} path="/dashboard" />
+        <DashboardRedirectHandler />
       </Route>
       <Route path="/admin-dashboard">
         <PrivateRoute component={Dashboard} path="/admin-dashboard" />
