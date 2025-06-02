@@ -63,19 +63,7 @@ export async function logout(): Promise<void> {
   if (isLoggingOut) return;
   isLoggingOut = true;
 
-  try {
-    // Call logout API
-    await apiRequest("POST", "/api/auth/logout");
-  } catch (error) {
-    // Continue even if API call fails
-    console.error("Logout API error:", error);
-  }
-
-  // Clear all application state immediately
-  queryClient.clear();
-  queryClient.removeQueries(); // Force remove all queries
-  queryClient.invalidateQueries(); // Invalidate any remaining
-  
+  // Clear all data immediately before API call
   localStorage.clear();
   sessionStorage.clear();
   
@@ -84,12 +72,22 @@ export async function logout(): Promise<void> {
     document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
   });
 
-  // Reset logout state
-  isLoggingOut = false;
+  // Clear React Query cache
+  queryClient.clear();
+  queryClient.removeQueries();
   
-  // Force a complete browser reload to fully clear all cached state
-  window.location.href = "/";
-  window.location.reload();
+  try {
+    // Call logout API
+    await apiRequest("POST", "/api/auth/logout");
+  } catch (error) {
+    console.error("Logout API error:", error);
+  }
+
+  // Set a flag in localStorage to indicate logout just happened
+  localStorage.setItem('just_logged_out', 'true');
+  
+  // Force complete page replacement (no history entry)
+  window.location.replace("/");
 }
 
 export async function getCurrentUser(): Promise<AuthState> {

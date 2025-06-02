@@ -156,7 +156,16 @@ function Router() {
         <LogoutHandler />
       </Route>
       <Route path="/">
-        {auth?.user && !error ? <Redirect to="/dashboard" /> : <Home />}
+        {(() => {
+          // Check if user just logged out
+          const justLoggedOut = localStorage.getItem('just_logged_out');
+          if (justLoggedOut) {
+            localStorage.removeItem('just_logged_out');
+            return <Home />;
+          }
+          // Normal logic
+          return auth?.user && !error ? <Redirect to="/dashboard" /> : <Home />;
+        })()}
       </Route>
       
       {/* Informational Pages */}
