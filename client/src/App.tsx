@@ -89,6 +89,12 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
     return null;
   }
   
+  // TECH SITE DISABLED - Block all technician access
+  if (auth.user.role === "technician") {
+    setTimeout(() => setLocation("/login"), 100);
+    return null;
+  }
+
   if (role && auth.user.role !== role && auth.user.role !== "super_admin") {
     return <Redirect to="/dashboard" />;
   }

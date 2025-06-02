@@ -218,10 +218,10 @@ export default function Dashboard() {
     queryFn: getCurrentUser
   });
 
-  // Redirect technicians to their specific dashboard
+  // TECH FUNCTIONALITY DISABLED - Block technician access
   React.useEffect(() => {
     if (auth?.user?.role === 'technician') {
-      setLocation('/tech-dashboard');
+      setLocation('/login');
     }
   }, [auth?.user?.role, setLocation]);
 
