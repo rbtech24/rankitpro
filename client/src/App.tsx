@@ -126,10 +126,11 @@ function Router() {
         <LogoutHandler />
       </Route>
       <Route path="/">
-        <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="min-h-screen flex items-center justify-center bg-red-500">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-black mb-4">HOME PAGE WORKS</h1>
-            <p className="text-xl text-gray-600">Authentication disabled, tech blocked</p>
+            <h1 className="text-6xl font-bold text-white mb-4">CACHE BREAK - NEW VERSION</h1>
+            <p className="text-2xl text-white">Tech dashboard completely removed - {Date.now()}</p>
+            <p className="text-xl text-white mt-4">This is the new home page without auth system</p>
           </div>
         </div>
       </Route>
