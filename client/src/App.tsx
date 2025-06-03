@@ -123,7 +123,12 @@ function Router() {
         <Register />
       </Route>
       <Route path="/logout">
-        <LogoutHandler />
+        <div className="min-h-screen flex items-center justify-center bg-blue-500">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-white mb-4">Logout Disabled</h1>
+            <p className="text-xl text-white">Authentication system is completely disabled</p>
+          </div>
+        </div>
       </Route>
       <Route path="/">
         <div className="min-h-screen flex items-center justify-center bg-red-500">
@@ -980,9 +985,14 @@ function Router() {
         </div>
       </Route>
       
-      {/* Dashboard Pages */}
+      {/* Dashboard Pages - DISABLED */}
       <Route path="/dashboard">
-        <PrivateRoute component={Dashboard} path="/dashboard" />
+        <div className="min-h-screen flex items-center justify-center bg-purple-500">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-white mb-4">Dashboard Route Disabled</h1>
+            <p className="text-xl text-white">All dashboard functionality has been removed</p>
+          </div>
+        </div>
       </Route>
       {/* TEMPORARILY DISABLED */}
       {/* <Route path="/tech-dashboard">
