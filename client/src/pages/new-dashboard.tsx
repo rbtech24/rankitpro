@@ -209,17 +209,14 @@ const HousecallProCompaniesTable = () => {
 };
 
 export default function Dashboard() {
-  // TECH DASHBOARD COMPLETELY DISABLED - Force redirect to admin login
-  React.useEffect(() => {
-    window.location.href = '/admin-login';
-  }, []);
-
-  return <div className="h-screen flex items-center justify-center">
-    <div className="text-center">
-      <h1 className="text-2xl font-bold text-red-600 mb-4">Redirecting...</h1>
-      <p className="text-gray-600">Redirecting to admin login...</p>
-    </div>
-  </div>;
+  const [visitModalOpen, setVisitModalOpen] = useState(false);
+  const [blogPostModalOpen, setBlogPostModalOpen] = useState(false);
+  const [, setLocation] = useLocation();
+  
+  const { data: auth, isLoading: authLoading } = useQuery<AuthState>({
+    queryKey: ["/api/auth/me"],
+    queryFn: getCurrentUser
+  });
 
   // Fetch real data for dashboard metrics
   const { data: visits = [] } = useQuery({

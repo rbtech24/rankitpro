@@ -48,7 +48,6 @@ import WordPressPlugin from "@/pages/wordpress-plugin";
 import APICredentials from "@/pages/api-credentials";
 import JobTypesManagement from "@/pages/job-types-management";
 import LogoutHandler from "@/components/LogoutHandler";
-import AdminLogin from "@/pages/admin-login";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
@@ -90,28 +89,29 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
     return null;
   }
   
-  // TECH SITE DISABLED - Block all technician access
-  if (auth.user.role === "technician") {
-    setTimeout(() => setLocation("/login"), 100);
-    return null;
-  }
-
   if (role && auth.user.role !== role && auth.user.role !== "super_admin") {
-    return <Redirect to="/admin-login" />;
+    return <Redirect to="/dashboard" />;
   }
   
   return <Component {...rest} />;
 }
 
 function Router() {
-  // AUTH SYSTEM DISABLED - No authentication checks
-  const auth = null;
-  const isLoading = false;
+  const { data: auth, isLoading } = useQuery<AuthState>({
+    queryKey: ["/api/auth/me"],
+    queryFn: getCurrentUser
+  });
+  
+  if (isLoading) {
+    return <div className="h-screen flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
+    </div>;
+  }
   
   return (
     <Switch>
       <Route path="/login">
-        <Login />
+        {auth?.user ? <Redirect to="/dashboard" /> : <Login />}
       </Route>
       <Route path="/forgot-password">
         <ForgotPassword />
@@ -120,28 +120,14 @@ function Router() {
         <ResetPassword />
       </Route>
       <Route path="/register">
-        <Register />
+        {auth?.user ? <Redirect to="/dashboard" /> : <Register />}
       </Route>
       <Route path="/logout">
-        <div className="min-h-screen flex items-center justify-center bg-blue-500">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">Logout Disabled</h1>
-            <p className="text-xl text-white">Authentication system is completely disabled</p>
-          </div>
-        </div>
+        <LogoutHandler />
       </Route>
       <Route path="/">
-        <div className="min-h-screen flex items-center justify-center bg-red-500">
-          <div className="text-center">
-            <h1 className="text-6xl font-bold text-white mb-4">CACHE BREAK - NEW VERSION</h1>
-            <p className="text-2xl text-white">Tech dashboard completely removed - {Date.now()}</p>
-            <p className="text-xl text-white mt-4">This is the new home page without auth system</p>
-          </div>
-        </div>
+        {auth?.user ? <Redirect to="/dashboard" /> : <Home />}
       </Route>
-      
-      {/* Admin Login */}
-      <Route path="/admin-login"><AdminLogin /></Route>
       
       {/* Informational Pages */}
       <Route path="/emergency-login"><EmergencyLogin /></Route>
@@ -162,10 +148,10 @@ function Router() {
       </Route>
       <Route path="/review/:token"><Review /></Route>
       
-      {/* Mobile Tech App - Progressive Web App - TEMPORARILY DISABLED */}
-      {/* <Route path="/mobile">
+      {/* Mobile Tech App - Progressive Web App */}
+      <Route path="/mobile">
         <PrivateRoute component={MobileTechApp} path="/mobile" role="technician" />
-      </Route> */}
+      </Route>
       
       {/* Downloadable Resources */}
       <Route path="/downloads/local-seo-guide"><LocalSeoGuide /></Route>
@@ -985,19 +971,13 @@ function Router() {
         </div>
       </Route>
       
-      {/* Dashboard Pages - DISABLED */}
+      {/* Dashboard Pages */}
       <Route path="/dashboard">
-        <div className="min-h-screen flex items-center justify-center bg-purple-500">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">Dashboard Route Disabled</h1>
-            <p className="text-xl text-white">All dashboard functionality has been removed</p>
-          </div>
-        </div>
+        {auth?.user?.role === 'technician' 
+          ? <PrivateRoute component={TechnicianDashboard} path="/dashboard" role="technician" />
+          : <PrivateRoute component={Dashboard} path="/dashboard" />
+        }
       </Route>
-      {/* TEMPORARILY DISABLED */}
-      {/* <Route path="/tech-dashboard">
-        <PrivateRoute component={TechnicianDashboard} path="/tech-dashboard" role="technician" />
-      </Route> */}
       <Route path="/setup">
         <PrivateRoute component={SetupGuide} path="/setup" role="company_admin" />
       </Route>

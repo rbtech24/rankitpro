@@ -13,12 +13,7 @@ declare global {
 
 // Check if user is authenticated
 export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
-  console.log('Auth check - Session exists:', !!req.session);
-  console.log('Auth check - Session userId:', req.session?.userId);
-  console.log('Auth check - Session ID:', req.sessionID);
-  
   if (!req.session || !req.session.userId) {
-    console.log('Auth check failed - No session or userId');
     return res.status(401).json({ message: "Unauthorized" });
   }
   
