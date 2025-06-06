@@ -42,12 +42,17 @@ router.get("/wordpress", isAuthenticated, isCompanyAdmin, async (req: Request, r
       return res.status(404).json({ message: "Company not found" });
     }
 
-    // In a real implementation, we would retrieve this from the database
-    // For now, we'll use a placeholder
+    // Get WordPress integration settings from company data
+    const wordpressConfig = company.wordpressConfig ? JSON.parse(company.wordpressConfig) : null;
+    
+    if (!wordpressConfig) {
+      return res.json({ configured: false, message: "WordPress integration not configured" });
+    }
+    
     const wordpressIntegration: WordPressIntegration = {
-      siteUrl: "https://example.com",
-      apiKey: "wp_" + Math.random().toString(36).substring(2, 15),
-      autoPublish: true
+      siteUrl: wordpressConfig.siteUrl || "",
+      apiKey: wordpressConfig.apiKey || "",
+      autoPublish: wordpressConfig.autoPublish || false
     };
 
     return res.json(wordpressIntegration);
@@ -71,12 +76,29 @@ router.post("/wordpress", isAuthenticated, isCompanyAdmin, async (req: Request, 
       return res.status(400).json({ message: "Site URL is required" });
     }
 
-    // Generate a new API key if one is not provided
-    const apiKey = "wp_" + Math.random().toString(36).substring(2, 15);
+    // Import production utilities
+    const { generateSecureApiKey, validateAndSanitizeUrl } = await import("../utils/production-fixes");
+    
+    // Validate and sanitize the site URL
+    const validatedSiteUrl = validateAndSanitizeUrl(siteUrl);
+    
+    // Generate a secure API key
+    const apiKey = await generateSecureApiKey("wp");
 
-    // In a real implementation, we would save this to the database
+    // Save WordPress integration settings to company database
+    const wordpressConfig = {
+      siteUrl: validatedSiteUrl,
+      apiKey,
+      autoPublish: autoPublish ?? true,
+      configuredAt: new Date().toISOString()
+    };
+    
+    await storage.updateCompany(user.companyId, {
+      wordpressConfig: JSON.stringify(wordpressConfig)
+    });
+
     const wordpressIntegration: WordPressIntegration = {
-      siteUrl,
+      siteUrl: validatedSiteUrl,
       apiKey,
       autoPublish: autoPublish ?? true
     };
@@ -103,50 +125,76 @@ router.get("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res: 
       return res.status(404).json({ message: "Company not found" });
     }
 
-    // In a real implementation, we would retrieve this from the database
-    // For now, we'll generate a placeholder
+    // Get embed integration settings from company data
+    const embedConfig = company.javaScriptEmbedConfig ? JSON.parse(company.javaScriptEmbedConfig) : null;
+    
+    const defaultSettings = {
+      showTechPhotos: true,
+      showCheckInPhotos: true,
+      theme: "light",
+      style: "modern",
+      autoRefresh: true,
+      refreshInterval: 300
+    };
+
+    const settings = embedConfig?.settings || defaultSettings;
+    const { getBaseUrl } = await import("../utils/url-helper");
+    const baseUrl = getBaseUrl();
+    
     const scriptCode = `
 <div id="checkin-widget-${company.id}" class="checkin-widget"></div>
 <script>
   (function() {
     var script = document.createElement('script');
-    script.src = '${req.protocol}://${req.get('host')}/api/integration/embed/widget.js';
+    script.src = '${baseUrl}/api/integration/embed/widget.js';
     script.async = true;
     script.onload = function() {
       CheckInWidget.init({
         targetSelector: '#checkin-widget-${company.id}',
         companyId: ${company.id},
-        theme: 'light',
-        style: 'modern',
-        showTechPhotos: true,
-        showCheckInPhotos: true,
-        autoRefresh: true,
-        refreshInterval: 300
+        theme: '${settings.theme}',
+        style: '${settings.style}',
+        showTechPhotos: ${settings.showTechPhotos},
+        showCheckInPhotos: ${settings.showCheckInPhotos},
+        autoRefresh: ${settings.autoRefresh},
+        refreshInterval: ${settings.refreshInterval}
       });
     };
     document.head.appendChild(script);
   })();
 </script>`;
 
-    const styleCode = `
+    let styleCode = `
 .checkin-widget {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   max-width: 100%;
   margin: 0 auto;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }`;
 
+    if (settings.style === "modern") {
+      styleCode += `
+.checkin-widget {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}`;
+    } else if (settings.style === "classic") {
+      styleCode += `
+.checkin-widget {
+  border: 1px solid #ddd;
+}`;
+    }
+
+    if (settings.theme === "dark") {
+      styleCode += `
+.checkin-widget {
+  background-color: #222;
+  color: #fff;
+}`;
+    }
+
     const embedIntegration: EmbedIntegration = {
-      settings: {
-        showTechPhotos: true,
-        showCheckInPhotos: true,
-        theme: "light",
-        style: "modern",
-        autoRefresh: true,
-        refreshInterval: 300
-      },
+      settings,
       scriptCode,
       styleCode
     };
@@ -231,7 +279,16 @@ router.post("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res:
 }`;
     }
 
-    // In a real implementation, we would save this to the database
+    // Save embed integration settings to company database
+    const embedConfigData = {
+      settings,
+      lastUpdated: new Date().toISOString()
+    };
+    
+    await storage.updateCompany(user.companyId, {
+      javaScriptEmbedConfig: JSON.stringify(embedConfigData)
+    });
+
     const embedIntegration: EmbedIntegration = {
       settings,
       scriptCode,
@@ -334,7 +391,7 @@ const CheckInWidget = (function() {
     // Footer
     const footer = document.createElement('div');
     footer.className = 'checkin-footer';
-    footer.innerHTML = '<a href="https://rankitpro.com" target="_blank">Powered by Rank it Pro</a>';
+    footer.innerHTML = '<a href="#" target="_blank">Powered by Rank it Pro</a>';
     container.appendChild(footer);
     
     // Apply styles

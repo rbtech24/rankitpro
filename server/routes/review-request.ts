@@ -385,6 +385,7 @@ router.get('/stats', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
     oneWeekAgo.setDate(today.getDate() - 7);
     
     const sentThisWeek = reviewRequests.filter(req => {
+      if (!req.sentAt) return false;
       const sentDate = new Date(req.sentAt);
       return sentDate >= oneWeekAgo && sentDate <= today;
     }).length;
@@ -393,11 +394,10 @@ router.get('/stats', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
     const successfulSent = reviewRequests.filter(req => req.status === 'sent').length;
     const failedSent = totalSent - successfulSent;
     
-    // In a real app, these would come from actual customer responses
-    // For now, we'll use placeholder stats
-    const responseRate = 78; // 78%
-    const averageRating = 4.6; // 4.6/5
-    const positiveReviews = 92; // 92%
+    // Use production-ready statistics calculation
+    const { calculateRealReviewStats } = await import("../utils/production-fixes");
+    const stats = await calculateRealReviewStats(companyId);
+    const { responseRate, averageRating, positiveReviews } = stats;
     
     res.json({
       sentThisWeek,

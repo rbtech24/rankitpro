@@ -7,6 +7,8 @@ import {
   InsertReviewRequest
 } from "@shared/schema";
 import { defaultEmailTemplates, defaultSubjectTemplates, defaultSmsTemplates, timingOptimizationFactors } from "@shared/models/review-automation";
+import { generateReviewLink } from "../utils/url-helper";
+import { ensureValidToken } from "../utils/production-fixes";
 import twilio from 'twilio';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -285,7 +287,10 @@ class ReviewAutomationService {
       }
       
       // Generate review link with token
-      const reviewLink = `https://rankitpro.com/review/${reviewRequest.token}`;
+      if (!reviewRequest.token) {
+        throw new Error(`Review request ${reviewRequest.id} has no token`);
+      }
+      const reviewLink = generateReviewLink(ensureValidToken(reviewRequest.token, reviewRequest.id));
       
       // Send the request via email and/or SMS
       let sendSuccess = false;
@@ -397,7 +402,7 @@ class ReviewAutomationService {
         return false;
       }
       
-      const reviewLink = `https://rankitpro.com/review/${reviewRequest.token}`;
+      const reviewLink = generateReviewLink(ensureValidToken(reviewRequest.token, reviewRequest.id));
       let sendSuccess = false;
       
       // Send via email
@@ -489,7 +494,7 @@ class ReviewAutomationService {
         return false;
       }
       
-      const reviewLink = `https://rankitpro.com/review/${reviewRequest.token}`;
+      const reviewLink = generateReviewLink(ensureValidToken(reviewRequest.token, reviewRequest.id));
       let sendSuccess = false;
       
       // Send via email
@@ -582,7 +587,7 @@ class ReviewAutomationService {
         return false;
       }
       
-      const reviewLink = `https://rankitpro.com/review/${reviewRequest.token}`;
+      const reviewLink = generateReviewLink(ensureValidToken(reviewRequest.token, reviewRequest.id));
       let sendSuccess = false;
       
       // Send via email
