@@ -57,8 +57,10 @@ async function createSuperAdminIfNotExists() {
     const users = await storage.getAllUsers();
     console.log("Checking for existing super admin. Current user count:", users.length);
     const existingSuperAdmin = users.find(user => user.role === "super_admin");
+    console.log("Super admin exists:", !!existingSuperAdmin);
     
     if (!existingSuperAdmin) {
+      console.log("Creating new secure super admin account...");
       // Use environment variables if provided, otherwise generate secure credentials
       const adminPassword = process.env.SUPER_ADMIN_PASSWORD || generateSecurePassword();
       const adminEmail = process.env.SUPER_ADMIN_EMAIL || `admin-${Date.now()}@rankitpro.system`;
