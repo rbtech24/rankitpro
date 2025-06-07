@@ -40,20 +40,33 @@ app.use((req, res, next) => {
   next();
 });
 
+// Function to generate a secure random password
+function generateSecurePassword(): string {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*';
+  let password = '';
+  for (let i = 0; i < 16; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+}
+
 // Function to create a super admin user if one doesn't exist
 async function createSuperAdminIfNotExists() {
   try {
     // Check if any super admin exists
     const users = await storage.getAllUsers();
+    console.log("Checking for existing super admin. Current user count:", users.length);
     const existingSuperAdmin = users.find(user => user.role === "super_admin");
     
     if (!existingSuperAdmin) {
-      // Create the initial super admin user
-      const hashedPassword = await bcrypt.hash("admin123", 10);
+      // Use environment variables if provided, otherwise generate secure credentials
+      const adminPassword = process.env.SUPER_ADMIN_PASSWORD || generateSecurePassword();
+      const adminEmail = process.env.SUPER_ADMIN_EMAIL || `admin-${Date.now()}@rankitpro.system`;
+      const hashedPassword = await bcrypt.hash(adminPassword, 12);
       
       await storage.createUser({
-        username: "superadmin",
-        email: "superadmin@example.com",
+        username: "system_admin",
+        email: adminEmail,
         password: hashedPassword,
         role: "super_admin",
         companyId: null,
@@ -61,10 +74,15 @@ async function createSuperAdminIfNotExists() {
         stripeSubscriptionId: null
       });
       
-      log("Created initial super admin account");
-      log("Email: superadmin@example.com");
-      log("Password: admin123");
-      log("Please change this password after first login");
+      log("=====================================");
+      log("SYSTEM ADMIN ACCOUNT CREATED");
+      log("=====================================");
+      log(`Email: ${adminEmail}`);
+      log(`Password: ${adminPassword}`);
+      log("=====================================");
+      log("SAVE THESE CREDENTIALS IMMEDIATELY");
+      log("They will not be displayed again!");
+      log("=====================================");
     }
   } catch (error) {
     console.error("Error creating super admin user:", error);

@@ -92,9 +92,21 @@ railway deploy
 ### 4. Post-Deployment Setup
 
 1. **Database Setup**: Run database migrations if needed
-2. **Super Admin**: Login with `superadmin@example.com` / `admin123`
-3. **Change Default Password**: Update super admin password immediately
+2. **Super Admin**: Check server logs for auto-generated credentials on first startup
+3. **Save Admin Credentials**: The system generates unique, secure credentials displayed only once
 4. **Configure Integrations**: Set up WordPress/email services as needed
+
+#### Super Admin Security
+The system automatically creates a secure super admin account with:
+- Randomly generated 16-character password
+- Timestamped unique email address
+- Credentials displayed only during first server startup
+
+For production environments, you can optionally set:
+```env
+SUPER_ADMIN_EMAIL=your-secure-admin@yourdomain.com
+SUPER_ADMIN_PASSWORD=your-very-secure-password
+```
 
 ### 5. Production Checklist
 
