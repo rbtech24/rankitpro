@@ -471,10 +471,7 @@ export class WordPressService {
         `${this.apiBase}/posts`,
         postData,
         {
-          auth: {
-            username: this.credentials.username,
-            password: this.credentials.password
-          }
+          auth: this.authConfig
         }
       );
       
@@ -502,10 +499,7 @@ export class WordPressService {
             'Content-Type': mimeType,
             'Content-Disposition': `attachment; filename=${filename}`
           },
-          auth: {
-            username: this.credentials.username,
-            password: this.credentials.password
-          }
+          auth: this.authConfig
         }
       );
       
@@ -523,10 +517,7 @@ export class WordPressService {
     try {
       // Try to access WordPress templates API (if the WP REST API Template endpoint is available)
       const response = await axios.get(`${this.apiBase}/templates`, {
-        auth: {
-          username: this.credentials.username,
-          password: this.credentials.password
-        }
+        auth: this.authConfig
       });
       
       if (response.status === 200 && Array.isArray(response.data)) {
@@ -570,7 +561,7 @@ export class WordPressService {
         {
           auth: {
             username: credentials.username,
-            password: credentials.password
+            password: credentials.password || credentials.applicationPassword || ''
           }
         }
       );

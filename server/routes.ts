@@ -129,61 +129,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
   
-  // Add an emergency login route for debugging purposes
-  app.post("/api/emergency-login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      
-      console.log(`Emergency login attempt for: ${email}`);
-      
-      if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
+  // Emergency login route (disabled in production)
+  if (process.env.NODE_ENV === 'development') {
+    app.post("/api/emergency-login", async (req, res) => {
+      try {
+        const { email, password } = req.body;
+        
+        if (!email || !password) {
+          return res.status(400).json({ message: "Email and password are required" });
+        }
+        
+        // Find user by email
+        const user = await storage.getUserByEmail(email);
+        if (!user) {
+          return res.status(401).json({ message: "User not found" });
+        }
+        
+        console.log(`Found user: ${user.email}, role: ${user.role}`);
+        
+        // Verify password 
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        console.log(`Password verification result: ${isPasswordValid}`);
+        
+        if (!isPasswordValid) {
+          return res.status(401).json({ message: "Invalid password" });
+        }
+        
+        // Set session data
+        if (req.session) {
+          (req.session as any).userId = user.id;
+          console.log(`Session set for user ID: ${user.id}`);
+        }
+        
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = user;
+        
+        // Get company info if applicable
+        let company = undefined;
+        if (user.companyId && (user.role === "company_admin" || user.role === "technician")) {
+          company = await storage.getCompany(user.companyId);
+          console.log(`Company info retrieved: ${company?.name || "not found"}`);
+        }
+        
+        console.log("Emergency login successful");
+        res.json({ user: userWithoutPassword, company });
+      } catch (error) {
+        console.error("Emergency login error:", error);
+        res.status(500).json({ message: "Server error during login", error: String(error) });
       }
-      
-      // Retrieve all users for debugging
-      const allUsers = await storage.getAllUsers();
-      console.log(`Total users in system: ${allUsers.length}`);
-      
-      // Find user by email
-      const user = await storage.getUserByEmail(email);
-      if (!user) {
-        console.log(`User not found: ${email}`);
-        return res.status(401).json({ message: "User not found" });
-      }
-      
-      console.log(`Found user: ${user.email}, role: ${user.role}`);
-      
-      // Verify password 
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      console.log(`Password verification result: ${isPasswordValid}`);
-      
-      if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid password" });
-      }
-      
-      // Set session data
-      if (req.session) {
-        (req.session as any).userId = user.id;
-        console.log(`Session set for user ID: ${user.id}`);
-      }
-      
-      // Remove password from response
-      const { password: _, ...userWithoutPassword } = user;
-      
-      // Get company info if applicable
-      let company = undefined;
-      if (user.companyId && (user.role === "company_admin" || user.role === "technician")) {
-        company = await storage.getCompany(user.companyId);
-        console.log(`Company info retrieved: ${company?.name || "not found"}`);
-      }
-      
-      console.log("Emergency login successful");
-      res.json({ user: userWithoutPassword, company });
-    } catch (error) {
-      console.error("Emergency login error:", error);
-      res.status(500).json({ message: "Server error during login", error: String(error) });
-    }
-  });
+    });
+  }
   
   // Setup file upload middleware
   const upload = multer({
