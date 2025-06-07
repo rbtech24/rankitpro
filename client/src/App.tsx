@@ -30,6 +30,7 @@ import AISettings from "@/pages/ai-settings";
 import Home from "@/pages/home";
 import TechnicianMobile from "@/pages/technician-mobile";
 import MobileTechApp from "@/pages/mobile-tech-app";
+import Onboarding from "@/pages/onboarding";
 import ReviewRequest from "@/pages/review-request";
 import Review from "@/pages/review";
 import ReviewsDashboard from "@/pages/reviews-dashboard";
@@ -120,7 +121,10 @@ function Router() {
         <ResetPassword />
       </Route>
       <Route path="/register">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Register />}
+        {auth?.user ? <Redirect to="/dashboard" /> : <Onboarding />}
+      </Route>
+      <Route path="/onboarding">
+        {auth?.user ? <Redirect to="/dashboard" /> : <Onboarding />}
       </Route>
       <Route path="/logout">
         <LogoutHandler />
