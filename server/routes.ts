@@ -397,18 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (!testCompany) {
             testCompany = await storage.createCompany({
-              name: "Test Company",
-              address: "123 Test St",
-              city: "Test City",
-              state: "TS",
-              zip: "12345",
-              phone: "555-123-4567",
-              email: "contact@testcompany.com",
-              website: "https://testcompany.com",
-              industry: "Home Services",
-              logo: null,
-              plan: "pro",
-              usageLimit: 100,
+              name: "Test Company"
             });
             companyId = testCompany.id;
           } else {
@@ -449,13 +438,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Create technician record
           const newTechnician = await storage.createTechnician({
-            firstName: "Test",
-            lastName: "Technician",
+            name: "Test Technician",
             email: "tech@testcompany.com",
             phone: "555-555-5555",
-            companyId: testCompany.id,
-            profileImage: null,
-            isActive: true
+            companyId: testCompany.id
           });
           
           // Create user account for technician
@@ -464,8 +450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             username: "testtechnician",
             password: hashedPassword,
             role: "technician",
-            companyId: testCompany.id,
-            technicianId: newTechnician.id
+            companyId: testCompany.id
           });
           
           // Set session
@@ -1025,18 +1010,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (contentType === "summary") {
         const summary = await generateSummary({
-          jobType: checkIn.jobType,
+          jobType: checkIn.jobType || "",
           notes: checkIn.notes || "",
-          location: checkIn.location,
+          location: checkIn.location || "",
           technicianName: technician.name
         });
         
         res.json({ content: summary });
       } else if (contentType === "blog") {
         const blogContent = await generateBlogPost({
-          jobType: checkIn.jobType,
+          jobType: checkIn.jobType || "",
           notes: checkIn.notes || "",
-          location: checkIn.location,
+          location: checkIn.location || "",
           technicianName: technician.name
         });
         
