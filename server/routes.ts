@@ -1,6 +1,13 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+
+// Extend session interface to include userId
+declare module "express-session" {
+  interface SessionData {
+    userId?: number;
+  }
+}
 import session from "express-session";
 import MemoryStore from "memorystore";
 import bcrypt from "bcrypt";
@@ -1012,7 +1019,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const summary = await generateSummary({
           jobType: checkIn.jobType || "",
           notes: checkIn.notes || "",
-          location: checkIn.location || "",
+          location: checkIn.location ?? "",
           technicianName: technician.name
         });
         
@@ -1021,7 +1028,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const blogContent = await generateBlogPost({
           jobType: checkIn.jobType || "",
           notes: checkIn.notes || "",
-          location: checkIn.location || "",
+          location: checkIn.location ?? "",
           technicianName: technician.name
         });
         
@@ -1192,7 +1199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             id: "sent",
             label: "Request Sent",
             status: "completed",
-            timestamp: request.sentAt || request.createdAt,
+            timestamp: request.sentAt || new Date(),
             method: request.method,
           },
           {
@@ -1222,8 +1229,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ];
         
         const totalDuration = response && request.sentAt
-          ? (new Date(response.respondedAt).getTime() - new Date(request.sentAt).getTime()) / (1000 * 60)
-          : request.sentAt ? (Date.now() - new Date(request.sentAt).getTime()) / (1000 * 60) : 0;
+          ? (new Date(response.respondedAt || new Date()).getTime() - new Date(request.sentAt).getTime()) / (1000 * 60)
+          : request.sentAt ? (Date.now() - new Date(request.sentAt || new Date()).getTime()) / (1000 * 60) : 0;
         
         return {
           customerId: request.id.toString(),
@@ -1335,7 +1342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const user = await storage.getUser(req.session.userId);
+      const user = await storage.getUser(req.session.userId!);
       if (!user || !user.companyId) {
         return res.status(401).json({ error: 'User not found or no company' });
       }
