@@ -4,7 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import emailService from "./services/email-service";
-import { createTestAccounts } from "./scripts/create-test-accounts";
+
 
 const app = express();
 app.use(express.json());
@@ -43,11 +43,12 @@ app.use((req, res, next) => {
 // Function to create a super admin user if one doesn't exist
 async function createSuperAdminIfNotExists() {
   try {
-    // Check if a super admin already exists
-    const existingUser = await storage.getUserByEmail("superadmin@example.com");
+    // Check if any super admin exists
+    const users = await storage.getAllUsers();
+    const existingSuperAdmin = users.find(user => user.role === "super_admin");
     
-    if (!existingUser) {
-      // Create a super admin user
+    if (!existingSuperAdmin) {
+      // Create the initial super admin user
       const hashedPassword = await bcrypt.hash("admin123", 10);
       
       await storage.createUser({
@@ -60,9 +61,10 @@ async function createSuperAdminIfNotExists() {
         stripeSubscriptionId: null
       });
       
-      log("Created default super admin account");
-      log("Username: superadmin");
+      log("Created initial super admin account");
+      log("Email: superadmin@example.com");
       log("Password: admin123");
+      log("Please change this password after first login");
     }
   } catch (error) {
     console.error("Error creating super admin user:", error);
@@ -72,9 +74,6 @@ async function createSuperAdminIfNotExists() {
 (async () => {
   // Create default super admin user if needed
   await createSuperAdminIfNotExists();
-  
-  // Create test accounts (company admin, technician)
-  await createTestAccounts();
   
   // Initialize email service
   if (process.env.SENDGRID_API_KEY) {
