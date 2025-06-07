@@ -8,7 +8,7 @@ import { BlogPost, CheckIn } from '@shared/schema';
 export interface WordPressCredentials {
   siteUrl: string;
   username: string;
-  password?: string; // Application password
+  password: string; // Application password (required)
   applicationPassword?: string; // Alternative name for password (for compatibility)
   categories?: number[]; // WP category IDs to assign
   tags?: number[]; // WP tag IDs to assign
@@ -48,18 +48,21 @@ export class WordPressService {
   private companyId?: number;
   private authConfig: { username: string; password: string };
 
-  constructor(options: WordPressCredentials & { companyId?: number }) {
+  constructor(options: (WordPressCredentials | (Omit<WordPressCredentials, 'password'> & { applicationPassword: string })) & { companyId?: number }) {
+    const password = 'password' in options ? options.password : options.applicationPassword;
     this.credentials = {
       ...options,
+      password,
       // Handle password compatibility with applicationPassword field
-      password: options.password || options.applicationPassword || ''
+      siteUrl: options.siteUrl,
+      username: options.username
     };
     this.companyId = options.companyId;
     
     // Create authentication config for API requests
     this.authConfig = {
       username: options.username,
-      password: options.password || options.applicationPassword || ''
+      password
     };
     
     // Ensure the site URL ends with a slash
@@ -115,10 +118,7 @@ export class WordPressService {
   async getTags(): Promise<Array<{id: number, name: string, count: number}>> {
     try {
       const response = await axios.get(`${this.apiBase}/tags`, {
-        auth: {
-          username: this.credentials.username,
-          password: this.credentials.password
-        },
+        auth: this.authConfig,
         params: {
           per_page: 100
         }
@@ -142,19 +142,13 @@ export class WordPressService {
     try {
       // Try to access ACF REST API
       const response = await axios.get(`${this.credentials.siteUrl}/wp-json/acf/v3/posts`, {
-        auth: {
-          username: this.credentials.username,
-          password: this.credentials.password
-        }
+        auth: this.authConfig
       });
       
       if (response.status === 200) {
         // Get field groups
         const groupsResponse = await axios.get(`${this.credentials.siteUrl}/wp-json/acf/v3/field-groups`, {
-          auth: {
-            username: this.credentials.username,
-            password: this.credentials.password
-          }
+          auth: this.authConfig
         });
         
         const fields: Array<{key: string, name: string, type: string}> = [];
