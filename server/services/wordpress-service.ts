@@ -157,10 +157,7 @@ export class WordPressService {
         if (groupsResponse.data && Array.isArray(groupsResponse.data)) {
           for (const group of groupsResponse.data) {
             const fieldsResponse = await axios.get(`${this.credentials.siteUrl}/wp-json/acf/v3/field-groups/${group.id}/fields`, {
-              auth: {
-                username: this.credentials.username,
-                password: this.credentials.password
-              }
+              auth: this.authConfig
             });
             
             if (fieldsResponse.data && Array.isArray(fieldsResponse.data)) {
@@ -289,10 +286,7 @@ export class WordPressService {
                   `${this.apiBase}/media`,
                   formData,
                   {
-                    auth: {
-                      username: this.credentials.username,
-                      password: this.credentials.password
-                    },
+                    auth: this.authConfig,
                     headers: {
                       'Content-Type': 'multipart/form-data',
                     }
@@ -413,10 +407,7 @@ export class WordPressService {
         `${this.apiBase}/posts`,
         postData,
         {
-          auth: {
-            username: this.credentials.username,
-            password: this.credentials.password
-          }
+          auth: this.authConfig
         }
       );
       
