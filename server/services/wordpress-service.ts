@@ -281,7 +281,7 @@ export class WordPressService {
                 // Upload to WordPress
                 const formData = new FormData();
                 const fileName = `check-in-photo-${checkIn.id}-${Date.now()}.jpg`;
-                formData.append('file', new Blob([imageBuffer]), fileName);
+                formData.append('file', imageBuffer, fileName);
                 
                 const uploadResponse = await axios.post(
                   `${this.apiBase}/media`,
@@ -289,7 +289,7 @@ export class WordPressService {
                   {
                     auth: this.authConfig,
                     headers: {
-                      'Content-Type': 'multipart/form-data',
+                      ...formData.getHeaders(),
                     }
                   }
                 );

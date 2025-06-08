@@ -66,10 +66,11 @@ class EmailService {
         customMessage
       });
 
-      // Send email
+      // Send email with fallback sender
+      const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@rankitpro.com';
       const msg = {
         to,
-        from: `reviews@${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.checkin.app`,
+        from: fromEmail,
         subject,
         html,
       };
@@ -124,9 +125,10 @@ class EmailService {
 
       // Send email to all recipients
       for (const recipient of to) {
+        const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@rankitpro.com';
         const msg = {
           to: recipient,
-          from: `notifications@${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.checkin.app`,
+          from: fromEmail,
           subject,
           html,
         };
@@ -270,9 +272,10 @@ class EmailService {
 
       // Send email to all recipients
       for (const recipient of to) {
+        const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@rankitpro.com';
         const msg = {
           to: recipient,
-          from: `blog@${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.checkin.app`,
+          from: fromEmail,
           subject,
           html,
         };
