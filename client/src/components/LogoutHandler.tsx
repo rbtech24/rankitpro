@@ -10,15 +10,29 @@ export default function LogoutHandler() {
   useEffect(() => {
     const handleLogout = async () => {
       try {
-        // Call the logout API
+        // Call the logout API to destroy server session
         await apiRequest("POST", "/api/auth/logout");
         
         // Clear React Query cache completely
         queryClient.clear();
         
-        // Clear any local storage
-        localStorage.removeItem("auth");
+        // Clear all storage completely for mobile PWA compatibility
+        localStorage.clear();
         sessionStorage.clear();
+        
+        // Clear any cached data in IndexedDB if present
+        if ('indexedDB' in window) {
+          try {
+            const databases = await indexedDB.databases();
+            databases.forEach(db => {
+              if (db.name) {
+                indexedDB.deleteDatabase(db.name);
+              }
+            });
+          } catch (idbError) {
+            console.log("IndexedDB cleanup skipped:", idbError);
+          }
+        }
         
         // Show success message
         toast({
@@ -26,14 +40,18 @@ export default function LogoutHandler() {
           description: "You have been successfully logged out.",
         });
         
-        // Force a full page reload to clear all state
-        window.location.href = "/";
+        // For mobile PWA, use replace to ensure clean navigation
+        if ((window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches) {
+          window.location.replace("/");
+        } else {
+          window.location.href = "/";
+        }
       } catch (error) {
         console.error("Logout error:", error);
         
         // Even if logout API fails, still clear cache and redirect
         queryClient.clear();
-        localStorage.removeItem("auth");
+        localStorage.clear();
         sessionStorage.clear();
         
         toast({
@@ -41,8 +59,12 @@ export default function LogoutHandler() {
           description: "You have been logged out.",
         });
         
-        // Force a full page reload
-        window.location.href = "/";
+        // Force navigation for mobile compatibility
+        if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+          window.location.replace("/");
+        } else {
+          window.location.href = "/";
+        }
       }
     };
 

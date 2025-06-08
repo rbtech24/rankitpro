@@ -132,6 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
         httpOnly: true,
         secure: false, // Set to false to ensure cookies work in development
+        sameSite: 'lax', // Important for mobile PWA compatibility
       },
     })
   );
@@ -520,6 +521,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (err) {
         return res.status(500).json({ message: "Failed to logout" });
       }
+      
+      // Clear the session cookie explicitly for mobile compatibility
+      res.clearCookie('connect.sid', {
+        path: '/',
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax'
+      });
       
       res.json({ message: "Logged out successfully" });
     });
