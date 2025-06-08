@@ -4,7 +4,9 @@ import {
   ReviewResponse, InsertReviewResponse, CheckInWithTechnician, TechnicianWithStats,
   ReviewFollowUpSettings, InsertReviewFollowUpSettings, ReviewRequestStatus, InsertReviewRequestStatus,
   WordpressCustomFields, InsertWordpressCustomFields, AiUsageTracking, InsertAiUsageTracking,
-  MonthlyAiUsage, InsertMonthlyAiUsage, APICredentials, InsertAPICredentials
+  MonthlyAiUsage, InsertMonthlyAiUsage, APICredentials, InsertAPICredentials,
+  SalesPerson, InsertSalesPerson, SalesCommission, InsertSalesCommission,
+  CompanyAssignment, InsertCompanyAssignment
 } from "@shared/schema";
 
 export interface IStorage {

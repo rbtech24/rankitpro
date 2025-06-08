@@ -19,9 +19,9 @@ if (process.env.STRIPE_SECRET_KEY) {
 
 // Define price IDs for different subscription plans
 const PRICE_IDS = {
-  starter: "price_starter", // Replace these with actual Stripe price IDs
-  pro: "price_pro",
-  agency: "price_agency"
+  starter: process.env.STRIPE_STARTER_PRICE_ID || "price_starter",
+  pro: process.env.STRIPE_PRO_PRICE_ID || "price_pro", 
+  agency: process.env.STRIPE_AGENCY_PRICE_ID || "price_agency"
 };
 
 // Monthly usage limits for each plan
@@ -61,6 +61,12 @@ export class StripeService {
   }> {
     // Return early if Stripe is not available
     if (!this.isStripeAvailable()) {
+      console.warn("Stripe not available - simulating subscription update");
+      // Update plan in database without Stripe
+      const user = await storage.getUser(userId);
+      if (user && user.companyId) {
+        await storage.updateCompany(user.companyId, { plan: plan as any });
+      }
       return { alreadySubscribed: false };
     }
     
