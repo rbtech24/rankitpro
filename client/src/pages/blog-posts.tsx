@@ -40,11 +40,8 @@ export default function BlogPosts() {
   });
 
   const handleNewPost = () => {
-    toast({
-      title: "New Blog Post",
-      description: "The new blog post modal would open here.",
-      variant: "default",
-    });
+    setSelectedPost(null);
+    setEditModalOpen(true);
   };
 
   const handleEditPost = (postId: number) => {
