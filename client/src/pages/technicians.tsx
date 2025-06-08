@@ -34,8 +34,9 @@ type Technician = TechnicianWithStats;
 const techFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
-  phone: z.string().optional(),
+  phone: z.string().min(10, "Phone number is required"),
   specialty: z.string().optional(),
+  location: z.string().min(2, "Location is required"),
 });
 
 type TechFormValues = z.infer<typeof techFormSchema>;
@@ -56,6 +57,7 @@ export default function Technicians() {
       email: "",
       phone: "",
       specialty: "",
+      location: "",
     },
   });
   
@@ -68,6 +70,7 @@ export default function Technicians() {
           email: editTechnician.email,
           phone: editTechnician.phone || "",
           specialty: editTechnician.specialty || "",
+          location: editTechnician.location || "",
         });
       } else {
         form.reset({
@@ -75,6 +78,7 @@ export default function Technicians() {
           email: "",
           phone: "",
           specialty: "",
+          location: "",
         });
       }
     }
@@ -245,6 +249,7 @@ export default function Technicians() {
                   <thead>
                     <tr>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Technician</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Type</th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-ins</th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reviews</th>
@@ -295,6 +300,9 @@ export default function Technicians() {
                                 <div className="text-sm text-gray-500">{technician.email}</div>
                               </div>
                             </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{technician.location}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">{technician.specialty || "General"}</div>
