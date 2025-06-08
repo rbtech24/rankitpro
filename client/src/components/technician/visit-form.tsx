@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { detectLanguage, getTechnicianTranslations } from "@/lib/i18n";
 
 import {
   Form,
@@ -51,6 +52,8 @@ interface VisitFormProps {
 }
 
 export default function VisitForm({ onSuccess }: VisitFormProps) {
+  const [language] = useState(() => detectLanguage());
+  const t = getTechnicianTranslations(language);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [beforePhotos, setBeforePhotos] = useState<File[]>([]);
   const [duringPhotos, setDuringPhotos] = useState<File[]>([]);
@@ -245,7 +248,7 @@ export default function VisitForm({ onSuccess }: VisitFormProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/visits"] });
       
       toast({
-        title: "Visit Submitted",
+        title: t.checkInForm.success,
         description: "Your visit was successfully recorded.",
         variant: "default",
       });
@@ -258,7 +261,7 @@ export default function VisitForm({ onSuccess }: VisitFormProps) {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: t.checkInForm.error,
         description: `Failed to submit visit: ${error.message}`,
         variant: "destructive",
       });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,24 +7,28 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import VisitForm from "./visit-form";
+import { detectLanguage, getTechnicianTranslations } from "@/lib/i18n";
 
 interface MobileVisitModalProps {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export default function MobileVisitModal({ open, onClose }: MobileVisitModalProps) {
+export default function MobileVisitModal({ isOpen, onClose }: MobileVisitModalProps) {
+  const [language] = useState(() => detectLanguage());
+  const t = getTechnicianTranslations(language);
+
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-4">
         <DialogHeader>
-          <DialogTitle className="text-xl text-center">Add New Service Visit</DialogTitle>
+          <DialogTitle className="text-xl text-center">{t.checkInForm.title}</DialogTitle>
           <DialogDescription className="text-center text-sm">
-            Record details about your current service visit
+            {t.subtitle}
           </DialogDescription>
         </DialogHeader>
         
