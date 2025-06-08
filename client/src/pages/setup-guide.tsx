@@ -150,7 +150,7 @@ export default function SetupGuide() {
                       size="sm"
                       onClick={() => copyToClipboard(shortcode, 'wordpress-shortcode')}
                     >
-                      {copiedItems.has('wordpress-shortcode') ? (
+                      {copiedItems.includes('wordpress-shortcode') ? (
                         <Check className="w-4 h-4" />
                       ) : (
                         <Copy className="w-4 h-4" />
@@ -220,7 +220,7 @@ export default function SetupGuide() {
                       className="absolute top-2 right-2"
                       onClick={() => copyToClipboard(embedCode, 'embed-code')}
                     >
-                      {copiedItems.has('embed-code') ? (
+                      {copiedItems.includes('embed-code') ? (
                         <Check className="w-4 h-4" />
                       ) : (
                         <Copy className="w-4 h-4" />
@@ -377,7 +377,7 @@ export default function SetupGuide() {
                       size="sm"
                       onClick={() => copyToClipboard(`${window.location.origin}/mobile`, 'mobile-url')}
                     >
-                      {copiedItems.has('mobile-url') ? (
+                      {copiedItems.includes('mobile-url') ? (
                         <Check className="w-4 h-4" />
                       ) : (
                         <Copy className="w-4 h-4" />
