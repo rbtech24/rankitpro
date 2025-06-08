@@ -27,16 +27,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-interface Technician {
-  id: number;
-  name: string;
-  email: string;
-  phone?: string;
-  specialty?: string;
-  checkinsCount: number;
-  reviewsCount: number;
-  rating: number;
-}
+import { TechnicianWithStats } from "@shared/schema";
+
+type Technician = TechnicianWithStats;
 
 const techFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -87,13 +80,20 @@ export default function Technicians() {
     }
   }, [isAddModalOpen, editTechnician, form]);
   
-  const { data: technicians, isLoading } = useQuery<Technician[]>({
+  const { data: technicians, isLoading, error } = useQuery<Technician[]>({
     queryKey: ["/api/technicians"],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/technicians");
       return res.json();
     }
   });
+
+  // Log error for debugging if any
+  React.useEffect(() => {
+    if (error) {
+      console.error("Technicians query error:", error);
+    }
+  }, [error]);
   
   const createTechnicianMutation = useMutation({
     mutationFn: async (data: TechFormValues) => {
@@ -324,6 +324,27 @@ export default function Technicians() {
                           </td>
                         </tr>
                       ))
+                    ) : error ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-4 text-center">
+                          <p className="text-red-500 mb-2">
+                            Error loading technicians: {error.message}
+                          </p>
+                          <p className="text-gray-500 text-sm mb-4">
+                            This might be a permissions issue. Please check if you have company admin access.
+                          </p>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => window.location.reload()}
+                            className="mr-2"
+                          >
+                            Retry
+                          </Button>
+                          <Button onClick={openAddModal}>
+                            Add Technician
+                          </Button>
+                        </td>
+                      </tr>
                     ) : (
                       <tr>
                         <td colSpan={6} className="px-6 py-4 text-center">
