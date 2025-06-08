@@ -145,6 +145,34 @@ export interface IStorage {
   updateAPICredentialLastUsed(credentialId: number): Promise<void>;
   deactivateAPICredentials(credentialId: number, companyId: number): Promise<boolean>;
   updateAPICredentialSecret(credentialId: number, companyId: number, secretKeyHash: string): Promise<void>;
+  
+  // Sales Commission operations
+  getAllSalesPeople(): Promise<SalesPerson[]>;
+  getSalesPerson(id: number): Promise<SalesPerson | undefined>;
+  createSalesPerson(salesPerson: InsertSalesPerson): Promise<SalesPerson>;
+  updateSalesPerson(id: number, updates: Partial<SalesPerson>): Promise<SalesPerson | undefined>;
+  deleteSalesPerson(id: number): Promise<boolean>;
+  
+  assignCompanyToSalesPerson(salesPersonId: number, companyId: number): Promise<CompanyAssignment>;
+  getSalesPersonCompanies(salesPersonId: number): Promise<Company[]>;
+  getCompanySalesPerson(companyId: number): Promise<SalesPerson | null>;
+  
+  createSalesCommission(commission: InsertSalesCommission): Promise<SalesCommission>;
+  getSalesCommissions(salesPersonId?: number): Promise<SalesCommission[]>;
+  markCommissionPaid(commissionId: number): Promise<SalesCommission | undefined>;
+  calculateMonthlyCommissions(month: string): Promise<SalesCommission[]>;
+  getSalesCommissionDashboard(): Promise<{
+    totalCommissions: number;
+    paidCommissions: number;
+    unpaidCommissions: number;
+    totalAmount: number;
+    salesPeople: Array<{
+      id: number;
+      name: string;
+      totalCommissions: number;
+      unpaidAmount: number;
+    }>;
+  }>;
 }
 
 export class MemStorage implements IStorage {
@@ -164,6 +192,9 @@ export class MemStorage implements IStorage {
   private monthlyAiUsage: Map<string, MonthlyAiUsage>;
   private apiCredentials: Map<number, APICredentials>;
   private apiCredentialsByApiKey: Map<string, APICredentials>;
+  private salesPeople: Map<number, SalesPerson>;
+  private salesCommissions: Map<number, SalesCommission>;
+  private companyAssignments: Map<number, CompanyAssignment>;
   
   private userId: number;
   private companyId: number;
@@ -177,6 +208,9 @@ export class MemStorage implements IStorage {
   
   private wordpressCustomFieldsId: number;
   private apiCredentialsId: number;
+  private salesPersonId: number;
+  private salesCommissionId: number;
+  private companyAssignmentId: number;
   
   constructor() {
     this.users = new Map();
@@ -195,6 +229,9 @@ export class MemStorage implements IStorage {
     this.monthlyAiUsage = new Map();
     this.apiCredentials = new Map();
     this.apiCredentialsByApiKey = new Map();
+    this.salesPeople = new Map();
+    this.salesCommissions = new Map();
+    this.companyAssignments = new Map();
     
     this.userId = 1;
     this.companyId = 1;
@@ -207,6 +244,9 @@ export class MemStorage implements IStorage {
     this.reviewRequestStatusId = 1;
     this.wordpressCustomFieldsId = 1;
     this.apiCredentialsId = 1;
+    this.salesPersonId = 1;
+    this.salesCommissionId = 1;
+    this.companyAssignmentId = 1;
     
     // Add a default super admin
     this.createUser({
@@ -1104,6 +1144,211 @@ export class MemStorage implements IStorage {
       credential.secretKeyHash = secretKeyHash;
       credential.updatedAt = new Date();
     }
+  }
+
+  // Sales Commission operations
+  async getAllSalesPeople(): Promise<SalesPerson[]> {
+    return Array.from(this.salesPeople.values())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async getSalesPerson(id: number): Promise<SalesPerson | undefined> {
+    return this.salesPeople.get(id);
+  }
+
+  async createSalesPerson(salesPerson: InsertSalesPerson): Promise<SalesPerson> {
+    const id = this.salesPersonId++;
+    const newSalesPerson: SalesPerson = {
+      id,
+      ...salesPerson,
+      createdAt: new Date()
+    };
+    this.salesPeople.set(id, newSalesPerson);
+    return newSalesPerson;
+  }
+
+  async updateSalesPerson(id: number, updates: Partial<SalesPerson>): Promise<SalesPerson | undefined> {
+    const salesPerson = this.salesPeople.get(id);
+    if (salesPerson) {
+      Object.assign(salesPerson, updates);
+      return salesPerson;
+    }
+    return undefined;
+  }
+
+  async deleteSalesPerson(id: number): Promise<boolean> {
+    return this.salesPeople.delete(id);
+  }
+
+  async assignCompanyToSalesPerson(salesPersonId: number, companyId: number): Promise<CompanyAssignment> {
+    const id = this.companyAssignmentId++;
+    const assignment: CompanyAssignment = {
+      id,
+      salesPersonId,
+      companyId,
+      assignedAt: new Date()
+    };
+    this.companyAssignments.set(id, assignment);
+    return assignment;
+  }
+
+  async getSalesPersonCompanies(salesPersonId: number): Promise<Company[]> {
+    const assignments = Array.from(this.companyAssignments.values())
+      .filter(a => a.salesPersonId === salesPersonId);
+    
+    const companies: Company[] = [];
+    for (const assignment of assignments) {
+      const company = this.companies.get(assignment.companyId);
+      if (company) {
+        companies.push(company);
+      }
+    }
+    return companies;
+  }
+
+  async getCompanySalesPerson(companyId: number): Promise<SalesPerson | null> {
+    const assignment = Array.from(this.companyAssignments.values())
+      .find(a => a.companyId === companyId);
+    
+    if (assignment) {
+      return this.salesPeople.get(assignment.salesPersonId) || null;
+    }
+    return null;
+  }
+
+  async createSalesCommission(commission: InsertSalesCommission): Promise<SalesCommission> {
+    const id = this.salesCommissionId++;
+    const newCommission: SalesCommission = {
+      id,
+      ...commission,
+      createdAt: new Date()
+    };
+    this.salesCommissions.set(id, newCommission);
+    return newCommission;
+  }
+
+  async getSalesCommissions(salesPersonId?: number): Promise<SalesCommission[]> {
+    let commissions = Array.from(this.salesCommissions.values());
+    
+    if (salesPersonId) {
+      commissions = commissions.filter(c => c.salesPersonId === salesPersonId);
+    }
+    
+    return commissions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async markCommissionPaid(commissionId: number): Promise<SalesCommission | undefined> {
+    const commission = this.salesCommissions.get(commissionId);
+    if (commission) {
+      commission.isPaid = true;
+      commission.paidAt = new Date();
+      return commission;
+    }
+    return undefined;
+  }
+
+  async calculateMonthlyCommissions(month: string): Promise<SalesCommission[]> {
+    const newCommissions: SalesCommission[] = [];
+    
+    // Get all companies and their sales people
+    for (const company of this.companies.values()) {
+      const salesPerson = await this.getCompanySalesPerson(company.id);
+      
+      if (salesPerson && company.stripeSubscriptionId) {
+        // Calculate subscription amount based on plan
+        let subscriptionAmount = 0;
+        switch (company.plan) {
+          case 'starter':
+            subscriptionAmount = 49;
+            break;
+          case 'pro':
+            subscriptionAmount = 149;
+            break;
+          case 'agency':
+            subscriptionAmount = 299;
+            break;
+        }
+        
+        const commissionAmount = subscriptionAmount * (salesPerson.commissionRate / 100);
+        
+        // Check if commission already exists for this month
+        const existingCommission = Array.from(this.salesCommissions.values())
+          .find(c => c.salesPersonId === salesPerson.id && 
+                    c.companyId === company.id && 
+                    c.commissionMonth === month);
+        
+        if (!existingCommission) {
+          const commission = await this.createSalesCommission({
+            salesPersonId: salesPerson.id,
+            companyId: company.id,
+            subscriptionAmount: subscriptionAmount.toString(),
+            commissionAmount: commissionAmount.toString(),
+            commissionMonth: month,
+            isPaid: false
+          });
+          newCommissions.push(commission);
+        }
+      }
+    }
+    
+    return newCommissions;
+  }
+
+  async getSalesCommissionDashboard(): Promise<{
+    totalCommissions: number;
+    paidCommissions: number;
+    unpaidCommissions: number;
+    totalAmount: number;
+    salesPeople: Array<{
+      id: number;
+      name: string;
+      totalCommissions: number;
+      unpaidAmount: number;
+    }>;
+  }> {
+    const commissions = Array.from(this.salesCommissions.values());
+    const totalCommissions = commissions.length;
+    const paidCommissions = commissions.filter(c => c.isPaid).length;
+    const unpaidCommissions = totalCommissions - paidCommissions;
+    
+    const totalAmount = commissions.reduce((sum, c) => 
+      sum + parseFloat(c.commissionAmount), 0
+    );
+    
+    // Group by sales person
+    const salesPeopleMap = new Map<number, {
+      id: number;
+      name: string;
+      totalCommissions: number;
+      unpaidAmount: number;
+    }>();
+    
+    for (const commission of commissions) {
+      const salesPerson = this.salesPeople.get(commission.salesPersonId);
+      if (salesPerson) {
+        const existing = salesPeopleMap.get(salesPerson.id) || {
+          id: salesPerson.id,
+          name: salesPerson.name,
+          totalCommissions: 0,
+          unpaidAmount: 0
+        };
+        
+        existing.totalCommissions++;
+        if (!commission.isPaid) {
+          existing.unpaidAmount += parseFloat(commission.commissionAmount);
+        }
+        
+        salesPeopleMap.set(salesPerson.id, existing);
+      }
+    }
+    
+    return {
+      totalCommissions,
+      paidCommissions,
+      unpaidCommissions,
+      totalAmount,
+      salesPeople: Array.from(salesPeopleMap.values())
+    };
   }
 }
 
