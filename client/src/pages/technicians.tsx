@@ -274,6 +274,9 @@ export default function Technicians() {
                             <div className="h-4 bg-gray-200 rounded w-20"></div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 rounded w-16"></div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
                             <div className="h-4 bg-gray-200 rounded w-12"></div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -334,7 +337,7 @@ export default function Technicians() {
                       ))
                     ) : error ? (
                       <tr>
-                        <td colSpan={6} className="px-6 py-4 text-center">
+                        <td colSpan={7} className="px-6 py-4 text-center">
                           <p className="text-red-500 mb-2">
                             Error loading technicians: {error.message}
                           </p>
@@ -355,7 +358,7 @@ export default function Technicians() {
                       </tr>
                     ) : (
                       <tr>
-                        <td colSpan={6} className="px-6 py-4 text-center">
+                        <td colSpan={7} className="px-6 py-4 text-center">
                           <p className="text-gray-500">
                             {searchQuery 
                               ? "No technicians found matching your search." 
@@ -422,9 +425,23 @@ export default function Technicians() {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone (optional)</FormLabel>
+                    <FormLabel>Phone</FormLabel>
                     <FormControl>
                       <Input placeholder="(555) 123-4567" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Miami, FL or Downtown Office" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

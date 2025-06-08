@@ -449,6 +449,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             name: "Test Technician",
             email: "tech@testcompany.com",
             phone: "555-555-5555",
+            location: "Test Location",
             companyId: testCompany.id
           });
           
