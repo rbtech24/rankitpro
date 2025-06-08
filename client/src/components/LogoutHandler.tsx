@@ -3,6 +3,13 @@ import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+// Extend Navigator interface for PWA detection
+declare global {
+  interface Navigator {
+    standalone?: boolean;
+  }
+}
+
 export default function LogoutHandler() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -41,7 +48,7 @@ export default function LogoutHandler() {
         });
         
         // For mobile PWA, use replace to ensure clean navigation
-        if ((window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches) {
+        if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
           window.location.replace("/");
         } else {
           window.location.href = "/";
