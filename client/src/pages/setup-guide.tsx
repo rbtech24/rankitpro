@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function SetupGuide() {
   const { toast } = useToast();
-  const [copiedItems, setCopiedItems] = useState<Set<string>>(new Set());
+  const [copiedItems, setCopiedItems] = useState<string[]>([]);
   
   const { data: company } = useQuery<any>({
     queryKey: ["/api/companies/current"],
@@ -22,17 +23,13 @@ export default function SetupGuide() {
   const copyToClipboard = async (text: string, itemId: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedItems(prev => new Set([...prev, itemId]));
+      setCopiedItems(prev => [...prev, itemId]);
       toast({
         title: "Copied!",
         description: "Code has been copied to your clipboard",
       });
       setTimeout(() => {
-        setCopiedItems(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(itemId);
-          return newSet;
-        });
+        setCopiedItems(prev => prev.filter(item => item !== itemId));
       }, 2000);
     } catch (err) {
       toast({
@@ -47,11 +44,12 @@ export default function SetupGuide() {
   const shortcode = company ? `[rankitpro_checkins company="${company.id}"]` : '';
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Platform Setup Guide</h1>
-        <p className="text-gray-600">Get your Rank It Pro platform integrated with your website and start generating automatic SEO content from technician visits.</p>
-      </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Platform Setup Guide</h1>
+          <p className="text-gray-600">Get your Rank It Pro platform integrated with your website and start generating automatic SEO content from technician visits.</p>
+        </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-6">
@@ -501,6 +499,7 @@ export default function SetupGuide() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
