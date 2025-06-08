@@ -39,8 +39,34 @@ export default function BlogEditModal({ isOpen, onClose, blogPost }: BlogEditMod
     if (blogPost) {
       setTitle(blogPost.title);
       setContent(blogPost.content);
+    } else {
+      setTitle("");
+      setContent("");
     }
   }, [blogPost]);
+
+  const createBlogMutation = useMutation({
+    mutationFn: async (data: { title: string; content: string }) => {
+      const res = await apiRequest("POST", "/api/blog-posts", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/blog-posts"] });
+      toast({
+        title: "Blog Post Created",
+        description: "Your blog post has been successfully created.",
+        variant: "default",
+      });
+      onClose();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to create blog post: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  });
 
   const updateBlogMutation = useMutation({
     mutationFn: async (data: { title: string; content: string }) => {
@@ -78,7 +104,11 @@ export default function BlogEditModal({ isOpen, onClose, blogPost }: BlogEditMod
       return;
     }
 
-    updateBlogMutation.mutate({ title, content });
+    if (blogPost) {
+      updateBlogMutation.mutate({ title, content });
+    } else {
+      createBlogMutation.mutate({ title, content });
+    }
   };
 
   const handleClose = () => {
@@ -91,7 +121,7 @@ export default function BlogEditModal({ isOpen, onClose, blogPost }: BlogEditMod
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Blog Post</DialogTitle>
+          <DialogTitle>{blogPost ? 'Edit Blog Post' : 'Create New Blog Post'}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -142,9 +172,12 @@ export default function BlogEditModal({ isOpen, onClose, blogPost }: BlogEditMod
             </Button>
             <Button 
               type="submit" 
-              disabled={updateBlogMutation.isPending}
+              disabled={updateBlogMutation.isPending || createBlogMutation.isPending}
             >
-              {updateBlogMutation.isPending ? "Updating..." : "Update Blog Post"}
+              {blogPost 
+                ? (updateBlogMutation.isPending ? "Updating..." : "Update Blog Post")
+                : (createBlogMutation.isPending ? "Creating..." : "Create Blog Post")
+              }
             </Button>
           </DialogFooter>
         </form>

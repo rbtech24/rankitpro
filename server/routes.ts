@@ -950,7 +950,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/blog-posts", isCompanyAdmin, upload.array("photos", 5), async (req, res) => {
+  app.post("/api/blog-posts", isAuthenticated, upload.array("photos", 5), async (req, res) => {
     try {
       const companyId = req.user.companyId;
       
@@ -987,6 +987,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.error("Create blog post error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.patch("/api/blog-posts/:id", isAuthenticated, async (req, res) => {
+    try {
+      const blogPostId = parseInt(req.params.id);
+      const { title, content } = req.body;
+      
+      if (!title || !content) {
+        return res.status(400).json({ message: "Title and content are required" });
+      }
+      
+      // Get the blog post to check permissions
+      const existingPost = await storage.getBlogPost(blogPostId);
+      if (!existingPost) {
+        return res.status(404).json({ message: "Blog post not found" });
+      }
+      
+      // Check if user belongs to the same company as the blog post
+      if (req.user.role !== "super_admin" && req.user.companyId !== existingPost.companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const updatedPost = await storage.updateBlogPost(blogPostId, { title, content });
+      res.json(updatedPost);
+    } catch (error) {
+      console.error("Update blog post error:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
