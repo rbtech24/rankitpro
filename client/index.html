@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
+    <!-- PWA Manifest - dynamically loaded based on language -->
+    <link rel="manifest" href="/manifest.json" id="manifest-link" />
     
     <!-- Theme color -->
     <meta name="theme-color" content="#0088d2" />
@@ -44,6 +44,19 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Dynamic Manifest Loading based on Language -->
+    <script>
+      // Detect user language and load appropriate manifest
+      const userLang = navigator.language || navigator.languages?.[0] || 'en';
+      const isSpanish = userLang.startsWith('es');
+      
+      if (isSpanish) {
+        document.getElementById('manifest-link').href = '/manifest-es.json';
+        document.documentElement.lang = 'es';
+        document.querySelector('meta[name="apple-mobile-web-app-title"]').content = 'Rank It Pro';
+      }
+    </script>
     
     <!-- Service Worker Registration -->
     <script>

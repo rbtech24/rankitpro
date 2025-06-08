@@ -329,7 +329,7 @@ export default function VisitForm({ onSuccess }: VisitFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {jobTypes.map((jobType) => (
+                  {jobTypes.map((jobType: string) => (
                     <SelectItem key={jobType} value={jobType}>{jobType}</SelectItem>
                   ))}
                 </SelectContent>
