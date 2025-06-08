@@ -1,4 +1,5 @@
 import axios from 'axios';
+import FormData from 'form-data';
 import { BlogPost, CheckIn } from '@shared/schema';
 
 /**
