@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X, Download, Share, Plus } from 'lucide-react';
+import { detectLanguage, getPWATranslations } from '@/lib/i18n';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -12,6 +13,8 @@ export const PWAInstallPrompt: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showIOSPrompt, setShowIOSPrompt] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [language] = useState(() => detectLanguage());
+  const t = getPWATranslations(language);
 
   useEffect(() => {
     // Check if app is already installed
@@ -66,7 +69,7 @@ export const PWAInstallPrompt: React.FC = () => {
     <Card className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm shadow-lg border-primary">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Install Rank It Pro</CardTitle>
+          <CardTitle className="text-lg">{t.title}</CardTitle>
           <Button
             variant="ghost"
             size="sm"
@@ -78,26 +81,26 @@ export const PWAInstallPrompt: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Install this app for the best mobile experience. Perfect for technicians in the field!
+          {t.iosDescription}
         </p>
         
         <div className="space-y-3">
           <div className="flex items-center space-x-3 text-sm">
             <Share className="h-4 w-4 text-primary" />
-            <span>Tap the share button in Safari</span>
+            <span>{t.iosSteps.share}</span>
           </div>
           <div className="flex items-center space-x-3 text-sm">
             <Plus className="h-4 w-4 text-primary" />
-            <span>Select "Add to Home Screen"</span>
+            <span>{t.iosSteps.addToHome}</span>
           </div>
           <div className="flex items-center space-x-3 text-sm">
             <Download className="h-4 w-4 text-primary" />
-            <span>Tap "Add" to install</span>
+            <span>{t.iosSteps.install}</span>
           </div>
         </div>
 
         <Button onClick={handleIOSInstallClick} className="w-full">
-          Got it!
+          {t.buttons.gotIt}
         </Button>
       </CardContent>
     </Card>
@@ -107,7 +110,7 @@ export const PWAInstallPrompt: React.FC = () => {
     <Card className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm shadow-lg border-primary">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Install Rank It Pro</CardTitle>
+          <CardTitle className="text-lg">{t.title}</CardTitle>
           <Button
             variant="ghost"
             size="sm"
@@ -119,20 +122,20 @@ export const PWAInstallPrompt: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Install this app for offline access and a native mobile experience.
+          {t.androidDescription}
         </p>
         
         <div className="flex space-x-2">
           <Button onClick={handleInstallClick} className="flex-1">
             <Download className="h-4 w-4 mr-2" />
-            Install App
+            {t.buttons.install}
           </Button>
           <Button 
             variant="outline" 
             onClick={() => setShowPrompt(false)}
             className="flex-1"
           >
-            Maybe Later
+            {t.buttons.maybeLater}
           </Button>
         </div>
       </CardContent>

@@ -1,19 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import RecentCheckIns from "@/components/dashboard/recent-visits";
+import { detectLanguage, getTechnicianTranslations } from "@/lib/i18n";
 
 interface TechDashboardProps {
   onNewVisit: () => void;
 }
 
 export default function TechDashboard({ onNewVisit }: TechDashboardProps) {
+  const [language] = useState(() => detectLanguage());
+  const t = getTechnicianTranslations(language);
+
   return (
     <div className="technician-dashboard">
       {/* Mobile-optimized Technician Dashboard */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-blue-600 mb-2">Field Technician</h2>
+        <h2 className="text-2xl font-bold text-blue-600 mb-2">{t.title}</h2>
         <p className="text-sm text-gray-600">
-          Log your service visits and track your work from the field
+          {t.subtitle}
         </p>
       </div>
       
@@ -28,15 +32,15 @@ export default function TechDashboard({ onNewVisit }: TechDashboardProps) {
             <polyline points="10 17 15 12 10 7" />
             <line x1="15" y1="12" x2="3" y2="12" />
           </svg>
-          Log New Visit
+          {t.quickActions.newCheckIn}
         </button>
       </div>
       
       {/* Recent Visits - Mobile Friendly Card List */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-3">Recent Visits</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-3">{t.recentActivity.title}</h3>
         <div className="space-y-3">
-          <RecentCheckIns showTechnicianView={true} limit={5} />
+          <RecentCheckIns />
         </div>
       </div>
       
