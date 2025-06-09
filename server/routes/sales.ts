@@ -10,7 +10,7 @@ const createSalesPersonSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
   phone: z.string().optional(),
-  commissionRate: z.number().min(0).max(100)
+  commissionRate: z.number().min(0).max(100).transform(val => val.toString())
 });
 
 const assignCompanySchema = z.object({

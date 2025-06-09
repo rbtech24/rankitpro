@@ -36,6 +36,7 @@ import mobileRoutes from "./routes/mobile";
 import mobileCheckInsRoutes from "./routes/mobile/check-ins";
 import mobileNotificationsRoutes from "./routes/mobile/notifications";
 import crmIntegrationRoutes from "./routes/crm-integration";
+import salesRoutes from "./routes/sales";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
 import { fromZodError } from "zod-validation-error";
@@ -1477,6 +1478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/generate-content", generateContentRoutes);
   app.use("/api/crm", crmIntegrationRoutes);
   app.use("/api/crm-integration", crmIntegrationRoutes);
+  app.use("/api/sales", salesRoutes);
   
   // MOBILE ROUTES LAST TO PREVENT INTERFERENCE WITH OTHER APIs
   app.use("/api/mobile/v1", mobileRoutes);
