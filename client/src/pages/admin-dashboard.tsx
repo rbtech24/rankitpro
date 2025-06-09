@@ -1,11 +1,8 @@
 import React from "react";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import CompaniesManagement from "@/components/dashboard/companies-management";
-import AdminBusinessManagement from "@/components/dashboard/admin-business-management";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { 
   Users,
   Building2,
@@ -37,9 +34,9 @@ export default function AdminDashboard() {
   const totalReviews = Array.isArray(reviews) ? reviews.length : 0;
 
   return (
-    <DashboardLayout>
+    <div className="min-h-screen bg-gray-50 p-6">
       {/* Super Admin Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-700 -mt-6 -mx-6 px-6 py-8 mb-8 text-white">
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-700 rounded-lg px-6 py-8 mb-8 text-white">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <div>
@@ -79,7 +76,7 @@ export default function AdminDashboard() {
               <Building2 className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Companies</p>
-                <p className="text-2xl font-bold">{Array.isArray(companies) ? companies.length : 0}</p>
+                <p className="text-2xl font-bold text-gray-900">{Array.isArray(companies) ? companies.length : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -91,7 +88,7 @@ export default function AdminDashboard() {
               <Users className="h-8 w-8 text-green-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold">{Array.isArray(allUsers) ? allUsers.length : 0}</p>
+                <p className="text-2xl font-bold text-gray-900">{Array.isArray(allUsers) ? allUsers.length : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -100,10 +97,10 @@ export default function AdminDashboard() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
-              <CheckCircle2 className="h-8 w-8 text-purple-600" />
+              <CheckCircle2 className="h-8 w-8 text-orange-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Platform Visits</p>
-                <p className="text-2xl font-bold">{totalVisits}</p>
+                <p className="text-2xl font-bold text-gray-900">{totalVisits}</p>
               </div>
             </div>
           </CardContent>
@@ -115,18 +112,63 @@ export default function AdminDashboard() {
               <Star className="h-8 w-8 text-yellow-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Platform Reviews</p>
-                <p className="text-2xl font-bold">{totalReviews}</p>
+                <p className="text-2xl font-bold text-gray-900">{totalReviews}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Management Sections */}
+      {/* Administrative Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <CompaniesManagement />
-        <AdminBusinessManagement />
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Platform Management</h3>
+            <div className="space-y-3">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setLocation('/companies-management')}
+              >
+                <Building2 className="h-4 w-4 mr-2" />
+                Manage Companies
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setLocation('/admin-user-management')}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Manage All Users
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4">System Overview</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Active Companies:</span>
+                <span className="font-medium">{Array.isArray(companies) ? companies.filter((c: any) => c.active).length : 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total Platform Users:</span>
+                <span className="font-medium">{Array.isArray(allUsers) ? allUsers.length : 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Platform Visits Today:</span>
+                <span className="font-medium">{totalVisits}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total Reviews:</span>
+                <span className="font-medium">{totalReviews}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }

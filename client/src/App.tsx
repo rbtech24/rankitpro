@@ -1022,7 +1022,7 @@ function Router() {
         <PrivateRoute component={Dashboard} path="/dashboard" />
       </Route>
       <Route path="/admin">
-        <PrivateRoute component={AdminDashboard} path="/admin" role="super_admin" />
+        <AdminDashboard />
       </Route>
       <Route path="/setup">
         <PrivateRoute component={SetupGuide} path="/setup" role="company_admin" />
