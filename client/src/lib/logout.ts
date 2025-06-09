@@ -1,88 +1,31 @@
-// Simple, reliable logout function that works in all environments
+// Bulletproof logout for all environments including Replit preview
 export function performImmediateLogout() {
-  console.log("Starting logout process...");
+  console.log("Starting bulletproof logout...");
   
-  // Step 1: Clear all browser storage immediately
+  // Clear all client data
   try {
     localStorage.clear();
     sessionStorage.clear();
-    console.log("Storage cleared");
-  } catch (e) {
-    console.log("Storage clear failed:", e);
-  }
-
-  // Step 2: Clear all cookies aggressively
-  try {
-    const cookies = document.cookie.split(";");
-    console.log("Found cookies:", cookies.length);
     
-    cookies.forEach(cookie => {
-      const eqPos = cookie.indexOf("=");
-      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-      
+    document.cookie.split(";").forEach(cookie => {
+      const name = cookie.split("=")[0].trim();
       if (name) {
-        // Multiple clearing strategies
         document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
-        
-        // Clear for parent domain
-        const hostname = window.location.hostname;
-        if (hostname.includes('.')) {
-          const parts = hostname.split('.');
-          if (parts.length > 1) {
-            const parentDomain = '.' + parts.slice(-2).join('.');
-            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${parentDomain};`;
-          }
-        }
       }
     });
-
-    // Force clear session cookies by name
-    const sessionCookies = ['connect.sid', 'session', 'JSESSIONID', 'PHPSESSID', 'auth', 'token'];
-    sessionCookies.forEach(cookieName => {
-      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
-      
-      const hostname = window.location.hostname;
-      if (hostname.includes('.')) {
-        const parts = hostname.split('.');
-        if (parts.length > 1) {
-          const parentDomain = '.' + parts.slice(-2).join('.');
-          document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${parentDomain};`;
-        }
-      }
-    });
-    console.log("Cookies cleared");
+    
+    console.log("Client data cleared");
   } catch (e) {
-    console.log("Cookie clear failed:", e);
+    console.log("Cleanup error:", e);
   }
 
-  // Step 3: Make server logout request (async, non-blocking)
+  // Server logout
   fetch("/api/auth/logout", {
     method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "no-cache"
-    }
-  }).then(() => {
-    console.log("Server logout successful");
-  }).catch(() => {
-    console.log("Server logout failed, but proceeding with client logout");
-  });
+    credentials: "include"
+  }).catch(() => {});
 
-  // Step 4: Force immediate navigation with multiple fallbacks
-  console.log("Redirecting to login...");
-  
-  // Try multiple navigation methods
-  try {
-    window.location.href = "/login";
-  } catch (e) {
-    try {
-      window.location.replace("/login");
-    } catch (e2) {
-      // Last resort - reload the page to clear state
-      window.location.reload();
-    }
-  }
+  // Force reload entire page to reset all state
+  console.log("Forcing page reload...");
+  window.location.reload(true);
 }
