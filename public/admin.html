@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Administrator Dashboard - RANK IT PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Admin Header -->
+        <div class="gradient-bg text-white p-8 mb-8">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-4xl font-bold mb-2">System Administrator Dashboard</h1>
+                        <p class="text-purple-100 text-lg">Platform-wide management and oversight</p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="window.location.href='/companies-management'" 
+                                class="bg-white/10 text-white border border-white/20 hover:bg-white/20 px-6 py-3 rounded-lg font-medium transition-colors">
+                            🏢 Manage Companies
+                        </button>
+                        <button onclick="window.location.href='/admin-user-management'" 
+                                class="bg-white text-purple-700 hover:bg-purple-50 px-6 py-3 rounded-lg font-medium transition-colors">
+                            👥 Manage Users
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-8">
+            <!-- Platform Statistics -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                            <span class="text-blue-600 text-xl">🏢</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium">Total Companies</p>
+                            <p class="text-2xl font-bold text-gray-900" id="totalCompanies">-</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                            <span class="text-green-600 text-xl">👥</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium">Total Users</p>
+                            <p class="text-2xl font-bold text-gray-900" id="totalUsers">-</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                            <span class="text-orange-600 text-xl">📍</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium">Platform Visits</p>
+                            <p class="text-2xl font-bold text-gray-900" id="totalVisits">-</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                            <span class="text-yellow-600 text-xl">⭐</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium">Platform Reviews</p>
+                            <p class="text-2xl font-bold text-gray-900" id="totalReviews">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Management Sections -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Platform Management -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold mb-6 text-gray-900">Platform Management</h3>
+                    <div class="space-y-4">
+                        <button onclick="window.location.href='/companies-management'" 
+                                class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center">
+                                <span class="text-xl mr-3">🏢</span>
+                                <span class="font-medium">Manage Companies</span>
+                            </div>
+                            <span class="text-gray-400">→</span>
+                        </button>
+                        <button onclick="window.location.href='/admin-user-management'" 
+                                class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center">
+                                <span class="text-xl mr-3">👥</span>
+                                <span class="font-medium">Manage All Users</span>
+                            </div>
+                            <span class="text-gray-400">→</span>
+                        </button>
+                        <button onclick="window.location.href='/system-settings'" 
+                                class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center">
+                                <span class="text-xl mr-3">⚙️</span>
+                                <span class="font-medium">System Settings</span>
+                            </div>
+                            <span class="text-gray-400">→</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- System Overview -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold mb-6 text-gray-900">System Overview</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-gray-600">Active Companies:</span>
+                            <span class="font-semibold" id="activeCompanies">-</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-gray-600">Total Platform Users:</span>
+                            <span class="font-semibold" id="totalPlatformUsers">-</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-gray-600">Platform Visits Today:</span>
+                            <span class="font-semibold" id="visitsToday">-</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-gray-600">Total Reviews:</span>
+                            <span class="font-semibold" id="platformReviews">-</span>
+                        </div>
+                        <div class="mt-6 p-4 bg-green-50 rounded-lg">
+                            <p class="text-green-800 font-medium">✅ System Status: Operational</p>
+                            <p class="text-green-600 text-sm">All services running normally</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-semibold mb-6 text-gray-900">Recent Platform Activity</h3>
+                <div class="space-y-4" id="recentActivity">
+                    <div class="flex items-center py-3 border-b border-gray-100">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-4"></div>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-900">New company registration</p>
+                            <p class="text-xs text-gray-500">2 minutes ago</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center py-3 border-b border-gray-100">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full mr-4"></div>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-900">System backup completed</p>
+                            <p class="text-xs text-gray-500">1 hour ago</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center py-3">
+                        <div class="w-2 h-2 bg-purple-500 rounded-full mr-4"></div>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-900">Platform maintenance scheduled</p>
+                            <p class="text-xs text-gray-500">3 hours ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load platform statistics
+        async function loadPlatformStats() {
+            try {
+                // Load companies
+                const companiesResponse = await fetch('/api/companies', {
+                    credentials: 'include'
+                });
+                if (companiesResponse.ok) {
+                    const companies = await companiesResponse.json();
+                    document.getElementById('totalCompanies').textContent = companies.length;
+                    document.getElementById('activeCompanies').textContent = companies.filter(c => c.active).length;
+                }
+
+                // Load users
+                const usersResponse = await fetch('/api/admin/users', {
+                    credentials: 'include'
+                });
+                if (usersResponse.ok) {
+                    const users = await usersResponse.json();
+                    document.getElementById('totalUsers').textContent = users.length;
+                    document.getElementById('totalPlatformUsers').textContent = users.length;
+                }
+
+                // Load visits
+                const visitsResponse = await fetch('/api/visits', {
+                    credentials: 'include'
+                });
+                if (visitsResponse.ok) {
+                    const visits = await visitsResponse.json();
+                    document.getElementById('totalVisits').textContent = visits.length;
+                    document.getElementById('visitsToday').textContent = visits.length;
+                }
+
+                // Load reviews
+                const reviewsResponse = await fetch('/api/review-responses', {
+                    credentials: 'include'
+                });
+                if (reviewsResponse.ok) {
+                    const reviews = await reviewsResponse.json();
+                    document.getElementById('totalReviews').textContent = reviews.length;
+                    document.getElementById('platformReviews').textContent = reviews.length;
+                }
+            } catch (error) {
+                console.error('Error loading platform statistics:', error);
+            }
+        }
+
+        // Load stats when page loads
+        document.addEventListener('DOMContentLoaded', loadPlatformStats);
+    </script>
+</body>
+</html>

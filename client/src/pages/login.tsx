@@ -41,8 +41,12 @@ export default function Login() {
   
   const loginMutation = useMutation({
     mutationFn: login,
-    onSuccess: () => {
-      setLocation("/dashboard");
+    onSuccess: (authState) => {
+      if (authState.user?.role === "super_admin") {
+        setLocation("/admin");
+      } else {
+        setLocation("/dashboard");
+      }
     },
     onError: (error: Error) => {
       toast({
