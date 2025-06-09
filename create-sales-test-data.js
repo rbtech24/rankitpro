@@ -33,6 +33,7 @@ async function createSalesTestData() {
 
     // Get existing companies to assign to sales people
     const companies = await storage.getAllCompanies();
+    console.log(`Found ${companies.length} companies:`, companies.map(c => c.name));
     
     if (companies.length >= 3) {
       // Assign companies to sales representatives
