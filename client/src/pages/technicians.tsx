@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import Sidebar from "@/components/layout/sidebar";
 import TopNav from "@/components/layout/top-nav";
 import { Button } from "@/components/ui/button";
@@ -170,6 +171,11 @@ export default function Technicians() {
     setEditTechnician(technician);
     setIsAddModalOpen(true);
   };
+
+  const handleViewTechnician = (technician: Technician) => {
+    // Show technician details in an alert for now
+    alert(`Technician Details:\n\nName: ${technician.name}\nEmail: ${technician.email}\nPhone: ${technician.phone}\nLocation: ${technician.location}\nSpecialty: ${technician.specialty || 'General'}\nCheck-ins: ${technician.checkinsCount}\nReviews: ${technician.reviewsCount}\nRating: ${technician.rating.toFixed(1)} stars`);
+  };
   
   const onSubmit = (values: TechFormValues) => {
     if (editTechnician) {
@@ -323,7 +329,14 @@ export default function Technicians() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <Button variant="link" size="sm" className="text-primary-600 hover:text-primary-900 mr-3">View</Button>
+                            <Button 
+                              variant="link" 
+                              size="sm" 
+                              className="text-primary-600 hover:text-primary-900 mr-3"
+                              onClick={() => handleViewTechnician(technician)}
+                            >
+                              View
+                            </Button>
                             <Button 
                               variant="link" 
                               size="sm" 
