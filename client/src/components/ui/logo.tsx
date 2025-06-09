@@ -12,11 +12,11 @@ export function Logo({ className, size = "sm", textVisible, linkDisabled }: Logo
   
   // Check if this is being used in footer context
   const isFooter = className?.includes('footer');
-  const finalHeight = isFooter ? "h-4" : height; // Half the size for footer (h-8 -> h-4)
+  const finalHeight = isFooter ? "h-6" : height; // Smaller size for footer
   
   return (
     <div className="flex items-center">
-      <img src="/rank it pro logo.png" alt="RANK IT PRO" className={className || finalHeight} />
+      <img src="/rank it pro logo.png" alt="RANK IT PRO" className={finalHeight} />
     </div>
   );
 }
