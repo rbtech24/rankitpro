@@ -10,6 +10,7 @@ declare module "express-session" {
 }
 import session from "express-session";
 import MemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
 import bcrypt from "bcrypt";
 import { generateSummary, generateBlogPost } from "./ai-service";
 import { insertUserSchema, insertCompanySchema, insertTechnicianSchema, insertCheckInSchema, insertBlogPostSchema, insertReviewRequestSchema, insertAPICredentialsSchema } from "@shared/schema";
@@ -121,12 +122,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
+  // Configure session store based on environment
+  let sessionStore;
+  if (process.env.DATABASE_URL) {
+    // Use PostgreSQL session store in production for persistence
+    const pgSession = connectPg(session);
+    sessionStore = new pgSession({
+      conString: process.env.DATABASE_URL,
+      createTableIfMissing: true,
+      ttl: 24 * 60 * 60, // 24 hours in seconds
+    });
+    console.log('[SESSION] Using PostgreSQL session store');
+  } else {
+    // Use memory store in development
+    sessionStore = new SessionStore({
+      checkPeriod: 86400000, // Prune expired entries every 24h
+    });
+    console.log('[SESSION] Using memory session store');
+  }
+  
   // Setup session middleware
   app.use(
     session({
-      store: new SessionStore({
-        checkPeriod: 86400000, // Prune expired entries every 24h
-      }),
+      store: sessionStore,
       secret: process.env.SESSION_SECRET || "checkin-pro-secret",
       resave: false,
       saveUninitialized: false,
@@ -134,8 +152,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
         httpOnly: true,
-        secure: false, // Set to false to ensure cookies work in development
-        sameSite: 'lax', // Important for mobile PWA compatibility
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       },
     })
   );
