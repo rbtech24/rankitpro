@@ -35,9 +35,11 @@ const Header: React.FC<HeaderProps> = ({ showNotifications = false }) => {
     );
   }, []);
   
-  // Proper logout function that uses the logout handler
+  // Immediate logout function
   const handleLogout = () => {
-    setLocation('/logout');
+    import('@/lib/logout').then(({ performImmediateLogout }) => {
+      performImmediateLogout();
+    });
   };
   
   return (
