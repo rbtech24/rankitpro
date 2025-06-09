@@ -90,9 +90,15 @@ export default function TestimonialsPage() {
 
   const handleSubmitTestimonial = async (formData: FormData) => {
     try {
-      await apiRequest('POST', '/api/testimonials', formData, {
-        'Content-Type': 'multipart/form-data'
+      const response = await fetch('/api/testimonials', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
       });
+      
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
       
       toast({ title: "Testimonial uploaded successfully" });
       setShowRecorder(false);

@@ -48,6 +48,7 @@ import SetupGuide from "@/pages/setup-guide";
 import AIContentGenerator from "@/pages/ai-content-generator";
 import AdminUserManagement from "@/pages/admin-user-management";
 import WordPressPlugin from "@/pages/wordpress-plugin";
+import TestimonialsPage from "@/pages/testimonials";
 import APICredentials from "@/pages/api-credentials";
 import JobTypesManagement from "@/pages/job-types-management";
 import LogoutHandler from "@/components/LogoutHandler";
@@ -1002,6 +1003,9 @@ function Router() {
       </Route>
       <Route path="/reviews">
         <PrivateRoute component={Reviews} path="/reviews" />
+      </Route>
+      <Route path="/testimonials-management">
+        <PrivateRoute component={TestimonialsPage} path="/testimonials-management" role="company_admin" />
       </Route>
       <Route path="/review-analytics">
         <PrivateRoute component={ReviewAnalytics} path="/review-analytics" role="company_admin" />
