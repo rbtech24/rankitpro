@@ -1467,6 +1467,30 @@ export class MemStorage implements IStorage {
       salesPeople: Array.from(salesPeopleMap.values())
     };
   }
+
+  async getCompanyStats(companyId: number): Promise<any> {
+    const company = this.getCompany(companyId);
+    if (!company) {
+      throw new Error("Company not found");
+    }
+    
+    const technicians = this.getTechniciansByCompany(companyId);
+    const visits = Array.from(this.checkIns.values()).filter(c => c.companyId === companyId);
+    const reviews = Array.from(this.reviewResponses.values()).filter(r => r.companyId === companyId);
+    
+    const avgRating = reviews.length > 0 
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+      : 0;
+    
+    return {
+      companyId,
+      totalTechnicians: technicians.length,
+      totalVisits: visits.length,
+      totalReviews: reviews.length,
+      avgRating: Math.round(avgRating * 10) / 10,
+      lastUpdated: new Date()
+    };
+  }
 }
 
 // Database implementation using Drizzle ORM
@@ -1604,6 +1628,11 @@ export class DatabaseStorage implements IStorage {
     return updatedTechnician;
   }
 
+  async deleteTechnician(id: number): Promise<boolean> {
+    const result = await db.delete(schema.technicians).where(eq(schema.technicians.id, id));
+    return result.rowCount > 0;
+  }
+
   async getTechniciansWithStats(companyId: number): Promise<TechnicianWithStats[]> {
     const technicians = await db.select().from(schema.technicians)
       .where(eq(schema.technicians.companyId, companyId));
@@ -1616,6 +1645,24 @@ export class DatabaseStorage implements IStorage {
       avgRating: 0,
       totalReviews: 0
     }));
+  }
+
+  async getCompanyStats(companyId: number): Promise<any> {
+    const company = await this.getCompany(companyId);
+    if (!company) {
+      throw new Error("Company not found");
+    }
+    
+    const technicians = await this.getTechniciansByCompany(companyId);
+    
+    return {
+      companyId,
+      totalTechnicians: technicians.length,
+      totalVisits: 0, // Will be implemented when check-ins are ready
+      totalReviews: 0, // Will be implemented when reviews are ready
+      avgRating: 0,
+      lastUpdated: new Date()
+    };
   }
   async getCheckIn(): Promise<any> { throw new Error("Not implemented"); }
   async getCheckInsByCompany(): Promise<any> { throw new Error("Not implemented"); }

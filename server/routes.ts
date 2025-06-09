@@ -1478,10 +1478,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const reviewResponses = await storage.getReviewResponsesByCompany(companyId);
       
       const totalRequests = reviewRequests.length;
-      const sentRequests = reviewRequests.filter(req => req.status === "sent").length;
+      const sentRequests = reviewRequests.filter((req: any) => req.status === "sent").length;
       const responseRate = sentRequests > 0 ? (reviewResponses.length / sentRequests) * 100 : 0;
       const averageRating = reviewResponses.length > 0 
-        ? reviewResponses.reduce((sum, res) => sum + res.rating, 0) / reviewResponses.length 
+        ? reviewResponses.reduce((sum: number, res: any) => sum + res.rating, 0) / reviewResponses.length 
         : 0;
       
       const conversionByStep = [
