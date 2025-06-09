@@ -225,6 +225,8 @@ export class MemStorage implements IStorage {
   private salesPersonId: number;
   private salesCommissionId: number;
   private companyAssignmentId: number;
+  private testimonialId: number;
+  private testimonialApprovalId: number;
   
   constructor() {
     this.users = new Map();
