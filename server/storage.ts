@@ -173,6 +173,18 @@ export interface IStorage {
       unpaidAmount: number;
     }>;
   }>;
+
+  // Testimonial operations
+  createTestimonial(data: InsertTestimonial): Promise<Testimonial>;
+  getTestimonialById(id: number): Promise<Testimonial | null>;
+  getTestimonialsByCompany(companyId: number, filters?: {
+    status?: string;
+    type?: 'audio' | 'video';
+    isPublic?: boolean;
+  }): Promise<Testimonial[]>;
+  updateTestimonialStatus(id: number, status: 'pending' | 'approved' | 'published' | 'rejected', approvedAt?: Date): Promise<Testimonial | null>;
+  createTestimonialApproval(data: InsertTestimonialApproval): Promise<TestimonialApproval>;
+  getTestimonialApprovalByToken(token: string): Promise<TestimonialApproval | null>;
 }
 
 export class MemStorage implements IStorage {
@@ -195,6 +207,8 @@ export class MemStorage implements IStorage {
   private salesPeople: Map<number, SalesPerson>;
   private salesCommissions: Map<number, SalesCommission>;
   private companyAssignments: Map<number, CompanyAssignment>;
+  private testimonials: Map<number, Testimonial>;
+  private testimonialApprovals: Map<number, TestimonialApproval>;
   
   private userId: number;
   private companyId: number;
@@ -1292,6 +1306,78 @@ export class MemStorage implements IStorage {
     }
     
     return newCommissions;
+  }
+
+  // Testimonial methods
+  async createTestimonial(data: InsertTestimonial): Promise<Testimonial> {
+    const id = this.testimonialIdCounter++;
+    const testimonial: Testimonial = {
+      id,
+      ...data,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.testimonials.set(id, testimonial);
+    return testimonial;
+  }
+
+  async getTestimonialById(id: number): Promise<Testimonial | null> {
+    return this.testimonials.get(id) || null;
+  }
+
+  async getTestimonialsByCompany(companyId: number, filters?: {
+    status?: string;
+    type?: 'audio' | 'video';
+    isPublic?: boolean;
+  }): Promise<Testimonial[]> {
+    const testimonials = Array.from(this.testimonials.values())
+      .filter(t => t.companyId === companyId);
+
+    if (filters) {
+      return testimonials.filter(t => {
+        if (filters.status && t.status !== filters.status) return false;
+        if (filters.type && t.type !== filters.type) return false;
+        if (filters.isPublic !== undefined && t.isPublic !== filters.isPublic) return false;
+        return true;
+      });
+    }
+
+    return testimonials.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async updateTestimonialStatus(id: number, status: 'pending' | 'approved' | 'published' | 'rejected', approvedAt?: Date): Promise<Testimonial | null> {
+    const testimonial = this.testimonials.get(id);
+    if (!testimonial) return null;
+
+    const updated: Testimonial = {
+      ...testimonial,
+      status,
+      approvedAt: approvedAt || testimonial.approvedAt,
+      updatedAt: new Date()
+    };
+
+    this.testimonials.set(id, updated);
+    return updated;
+  }
+
+  async createTestimonialApproval(data: InsertTestimonialApproval): Promise<TestimonialApproval> {
+    const id = this.testimonialApprovalIdCounter++;
+    const approval: TestimonialApproval = {
+      id,
+      ...data,
+      createdAt: new Date()
+    };
+    this.testimonialApprovals.set(id, approval);
+    return approval;
+  }
+
+  async getTestimonialApprovalByToken(token: string): Promise<TestimonialApproval | null> {
+    for (const approval of this.testimonialApprovals.values()) {
+      if (approval.approvalToken === token) {
+        return approval;
+      }
+    }
+    return null;
   }
 
   async getSalesCommissionDashboard(): Promise<{

@@ -445,3 +445,81 @@ export type SalesCommission = typeof salesCommissions.$inferSelect;
 export type InsertSalesCommission = z.infer<typeof insertSalesCommissionSchema>;
 export type CompanyAssignment = typeof companyAssignments.$inferSelect;
 export type InsertCompanyAssignment = z.infer<typeof insertCompanyAssignmentSchema>;
+
+// Audio/Video Testimonials
+export const testimonials = pgTable("testimonials", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  technicianId: integer("technician_id").references(() => technicians.id).notNull(),
+  checkInId: integer("check_in_id").references(() => checkIns.id),
+  
+  // Customer information
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email"),
+  customerPhone: text("customer_phone"),
+  
+  // Testimonial content
+  type: text("type", { enum: ["audio", "video"] }).notNull(),
+  title: text("title").notNull(),
+  content: text("content"), // Transcription for audio/video
+  duration: integer("duration"), // Duration in seconds
+  
+  // File information
+  originalFileName: text("original_file_name").notNull(),
+  fileSize: integer("file_size").notNull(), // Size in bytes
+  mimeType: text("mime_type").notNull(),
+  storageUrl: text("storage_url").notNull(),
+  thumbnailUrl: text("thumbnail_url"), // For video testimonials
+  
+  // Metadata
+  jobType: text("job_type"),
+  location: text("location"),
+  rating: integer("rating"), // 1-5 stars given by customer
+  
+  // Publishing status
+  status: text("status", { enum: ["pending", "approved", "published", "rejected"] }).default("pending").notNull(),
+  approvalToken: text("approval_token"), // For customer approval via email
+  approvedAt: timestamp("approved_at"),
+  publishedAt: timestamp("published_at"),
+  
+  // Display settings
+  isPublic: boolean("is_public").default(false).notNull(),
+  showOnWebsite: boolean("show_on_website").default(false).notNull(),
+  tags: text("tags").array(), // For categorization and filtering
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Testimonial approval tracking
+export const testimonialApprovals = pgTable("testimonial_approvals", {
+  id: serial("id").primaryKey(),
+  testimonialId: integer("testimonial_id").references(() => testimonials.id, { onDelete: "cascade" }).notNull(),
+  customerEmail: text("customer_email").notNull(),
+  approvalToken: text("approval_token").notNull().unique(),
+  status: text("status", { enum: ["pending", "approved", "rejected"] }).default("pending").notNull(),
+  approvedAt: timestamp("approved_at"),
+  rejectedAt: timestamp("rejected_at"),
+  rejectionReason: text("rejection_reason"),
+  emailSentAt: timestamp("email_sent_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(), // Token expiry
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+// Insert schemas for testimonials
+export const insertTestimonialSchema = createInsertSchema(testimonials).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
+
+export const insertTestimonialApprovalSchema = createInsertSchema(testimonialApprovals).omit({ 
+  id: true, 
+  createdAt: true 
+});
+
+// Types for testimonials
+export type Testimonial = typeof testimonials.$inferSelect;
+export type InsertTestimonial = z.infer<typeof insertTestimonialSchema>;
+export type TestimonialApproval = typeof testimonialApprovals.$inferSelect;
+export type InsertTestimonialApproval = z.infer<typeof insertTestimonialApprovalSchema>;
