@@ -1,53 +1,63 @@
 // Simple, reliable logout function that works in all environments
 export function performImmediateLogout() {
-  // Clear all storage immediately
+  console.log("Starting logout process...");
+  
+  // Step 1: Clear all browser storage immediately
   try {
     localStorage.clear();
     sessionStorage.clear();
+    console.log("Storage cleared");
   } catch (e) {
     console.log("Storage clear failed:", e);
   }
 
-  // Clear all cookies aggressively
-  const cookies = document.cookie.split(";");
-  cookies.forEach(cookie => {
-    const eqPos = cookie.indexOf("=");
-    const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+  // Step 2: Clear all cookies aggressively
+  try {
+    const cookies = document.cookie.split(";");
+    console.log("Found cookies:", cookies.length);
     
-    if (name) {
-      // Multiple clearing strategies
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+    cookies.forEach(cookie => {
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
       
-      // Clear for parent domain
+      if (name) {
+        // Multiple clearing strategies
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+        
+        // Clear for parent domain
+        const hostname = window.location.hostname;
+        if (hostname.includes('.')) {
+          const parts = hostname.split('.');
+          if (parts.length > 1) {
+            const parentDomain = '.' + parts.slice(-2).join('.');
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${parentDomain};`;
+          }
+        }
+      }
+    });
+
+    // Force clear session cookies by name
+    const sessionCookies = ['connect.sid', 'session', 'JSESSIONID', 'PHPSESSID', 'auth', 'token'];
+    sessionCookies.forEach(cookieName => {
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+      
       const hostname = window.location.hostname;
       if (hostname.includes('.')) {
         const parts = hostname.split('.');
         if (parts.length > 1) {
           const parentDomain = '.' + parts.slice(-2).join('.');
-          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${parentDomain};`;
+          document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${parentDomain};`;
         }
       }
-    }
-  });
+    });
+    console.log("Cookies cleared");
+  } catch (e) {
+    console.log("Cookie clear failed:", e);
+  }
 
-  // Force clear session cookies by name
-  const sessionCookies = ['connect.sid', 'session', 'JSESSIONID', 'PHPSESSID', 'auth', 'token'];
-  sessionCookies.forEach(cookieName => {
-    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
-    
-    const hostname = window.location.hostname;
-    if (hostname.includes('.')) {
-      const parts = hostname.split('.');
-      if (parts.length > 1) {
-        const parentDomain = '.' + parts.slice(-2).join('.');
-        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${parentDomain};`;
-      }
-    }
-  });
-
-  // Make server logout request (fire and forget)
+  // Step 3: Make server logout request (async, non-blocking)
   fetch("/api/auth/logout", {
     method: "POST",
     credentials: "include",
@@ -55,10 +65,24 @@ export function performImmediateLogout() {
       "Content-Type": "application/json",
       "Cache-Control": "no-cache"
     }
+  }).then(() => {
+    console.log("Server logout successful");
   }).catch(() => {
-    // Ignore server errors - client cleanup is sufficient
+    console.log("Server logout failed, but proceeding with client logout");
   });
 
-  // Immediate navigation
-  window.location.replace("/login");
+  // Step 4: Force immediate navigation with multiple fallbacks
+  console.log("Redirecting to login...");
+  
+  // Try multiple navigation methods
+  try {
+    window.location.href = "/login";
+  } catch (e) {
+    try {
+      window.location.replace("/login");
+    } catch (e2) {
+      // Last resort - reload the page to clear state
+      window.location.reload();
+    }
+  }
 }
