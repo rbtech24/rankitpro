@@ -56,10 +56,33 @@ export async function register(credentials: RegisterCredentials): Promise<AuthSt
 }
 
 export async function logout(): Promise<void> {
-  await apiRequest("POST", "/api/auth/logout");
+  try {
+    // Make logout request to server
+    await apiRequest("POST", "/api/auth/logout");
+  } catch (error) {
+    // Continue with client-side cleanup even if server request fails
+    console.log("Server logout request failed, continuing with client cleanup");
+  }
   
-  // Clear any user-related data from the cache
+  // Clear all cached data
   queryClient.clear();
+  
+  // Clear any stored authentication tokens or session data
+  if (typeof window !== 'undefined') {
+    // Clear localStorage
+    localStorage.clear();
+    
+    // Clear sessionStorage
+    sessionStorage.clear();
+    
+    // Clear any cookies by setting them to expire
+    document.cookie.split(";").forEach(cookie => {
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+    });
+  }
 }
 
 export async function getCurrentUser(): Promise<AuthState> {
