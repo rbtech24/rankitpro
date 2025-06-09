@@ -152,11 +152,13 @@ function Router() {
       <Route path="/register">
         {auth?.user ? <Redirect to="/dashboard" /> : <Onboarding />}
       </Route>
-      <Route path="/onboarding">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Onboarding />}
-      </Route>
+      {/* Logout route - must be before other routes */}
       <Route path="/logout">
         <LogoutHandler />
+      </Route>
+      
+      <Route path="/onboarding">
+        {auth?.user ? <Redirect to="/dashboard" /> : <Onboarding />}
       </Route>
       <Route path="/">
         {auth?.user ? <Redirect to="/dashboard" /> : <Home />}
