@@ -624,15 +624,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Company routes
   app.get("/api/companies", isSuperAdmin, async (req, res) => {
     try {
-      // This would be implemented with a real database query
-      // For in-memory storage, we'll return a mock list
-      const companies = Array.from(
-        (storage as any).companies?.values() || []
-      );
-      
+      const companies = await storage.getAllCompanies();
       res.json(companies);
     } catch (error) {
       console.error("Get companies error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.post("/api/companies", isSuperAdmin, async (req, res) => {
+    try {
+      const companyData = insertCompanySchema.parse(req.body);
+      const company = await storage.createCompany(companyData);
+      res.json(company);
+    } catch (error) {
+      console.error("Create company error:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
