@@ -75,12 +75,28 @@ import ResetPassword from "@/pages/reset-password";
 
 // Authenticated route that redirects to login if not authenticated
 function PrivateRoute({ component: Component, role, ...rest }: { component: React.ComponentType<any>, role?: string, path: string }) {
-  const { data: auth, isLoading } = useQuery<AuthState>({
+  const { data: auth, isLoading, error } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
-    queryFn: getCurrentUser
+    queryFn: getCurrentUser,
+    retry: false,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
   
   const [, setLocation] = useLocation();
+  
+  // Check for logout indicators in URL or storage
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const logoutParam = urlParams.get('logout') || urlParams.get('force');
+    
+    if (logoutParam) {
+      // Force immediate redirect to login if logout parameter present
+      setLocation("/login");
+      return;
+    }
+  }, [setLocation]);
   
   if (isLoading) {
     return <div className="h-screen flex items-center justify-center">
@@ -88,7 +104,8 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
     </div>;
   }
   
-  if (!auth?.user) {
+  // Handle authentication errors or missing user
+  if (error || !auth?.user) {
     setTimeout(() => setLocation("/login"), 100);
     return null;
   }
