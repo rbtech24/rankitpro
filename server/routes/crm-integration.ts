@@ -310,9 +310,12 @@ router.get('/sync-history', isAuthenticated, async (req, res) => {
     const syncHistory = company.crmSyncHistory ? JSON.parse(company.crmSyncHistory) : [];
     
     res.json(syncHistory);
-  } catch (error) {
-    log(`Error fetching CRM sync history: ${error.message}`);
-    res.status(500).json({ message: 'Error fetching CRM sync history' });
+  } catch (error: any) {
+    log(`Error fetching CRM sync history: ${error?.message || 'Unknown error'}`);
+    res.status(500).json({ 
+      message: 'Error fetching CRM sync history',
+      error: error?.message || 'Unknown error occurred'
+    });
   }
 });
 
