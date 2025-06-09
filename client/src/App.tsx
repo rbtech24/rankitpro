@@ -43,12 +43,12 @@ import BillingManagement from "@/pages/billing-management";
 import CompaniesManagement from "@/pages/companies-management";
 import SystemSettings from "@/pages/system-settings";
 import SystemOverview from "@/pages/system-overview";
+import SalesDashboard from "@/pages/sales-dashboard";
 import SetupGuide from "@/pages/setup-guide";
 import AIContentGenerator from "@/pages/ai-content-generator";
 import AdminUserManagement from "@/pages/admin-user-management";
 import WordPressPlugin from "@/pages/wordpress-plugin";
 import APICredentials from "@/pages/api-credentials";
-import SalesDashboard from "@/pages/sales-dashboard";
 import JobTypesManagement from "@/pages/job-types-management";
 import LogoutHandler from "@/components/LogoutHandler";
 

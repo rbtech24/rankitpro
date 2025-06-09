@@ -123,6 +123,9 @@ export class StripeService {
       // If the user doesn't have a stripe customer ID, create one
       let customerId = user.stripeCustomerId;
       if (!customerId) {
+        if (!stripe) {
+          throw new Error('Stripe service is not available. Please configure STRIPE_SECRET_KEY.');
+        }
         const customer = await stripe.customers.create({
           email: user.email,
           name: user.username,
