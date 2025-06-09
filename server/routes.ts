@@ -296,15 +296,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
-      // Set session
+      // Set session with explicit save
       if (req.session) {
         (req.session as any).userId = user.id;
+        console.log("LOGIN: Setting session userId:", user.id);
+        
+        req.session.save((err: any) => {
+          if (err) {
+            console.error("Session save error:", err);
+            return res.status(500).json({ message: "Session error" });
+          }
+          
+          console.log("LOGIN: Session saved successfully");
+          
+          // Remove password from response
+          const { password: _, ...userWithoutPassword } = user;
+          
+          res.json(userWithoutPassword);
+        });
+      } else {
+        console.log("LOGIN: No session object available");
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = user;
+        
+        res.json(userWithoutPassword);
       }
-      
-      // Remove password from response
-      const { password: _, ...userWithoutPassword } = user;
-      
-      res.json(userWithoutPassword);
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Server error during login" });
