@@ -56,32 +56,67 @@ export async function register(credentials: RegisterCredentials): Promise<AuthSt
 }
 
 export async function logout(): Promise<void> {
-  try {
-    // Make logout request to server
-    await apiRequest("POST", "/api/auth/logout");
-  } catch (error) {
-    // Continue with client-side cleanup even if server request fails
-    console.log("Server logout request failed, continuing with client cleanup");
-  }
-  
-  // Clear all cached data
-  queryClient.clear();
-  
-  // Clear any stored authentication tokens or session data
+  // Clear client-side data immediately
   if (typeof window !== 'undefined') {
-    // Clear localStorage
-    localStorage.clear();
+    // Clear all storage
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {
+      console.log("Storage clear failed:", e);
+    }
     
-    // Clear sessionStorage
-    sessionStorage.clear();
+    // Clear all cookies with multiple domain variations
+    const hostname = window.location.hostname;
+    const cookiesToClear = ['connect.sid', 'session', 'auth', 'token'];
     
-    // Clear any cookies by setting them to expire
     document.cookie.split(";").forEach(cookie => {
       const eqPos = cookie.indexOf("=");
       const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+      if (name) {
+        // Clear for current path and domain
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${hostname}`;
+        // Clear for parent domain
+        if (hostname.includes('.')) {
+          const parentDomain = hostname.substring(hostname.indexOf('.'));
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${parentDomain}`;
+        }
+      }
     });
+    
+    // Force clear known session cookies
+    cookiesToClear.forEach(cookieName => {
+      document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+      document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${hostname}`;
+      if (hostname.includes('.')) {
+        const parentDomain = hostname.substring(hostname.indexOf('.'));
+        document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${parentDomain}`;
+      }
+    });
+  }
+  
+  // Clear React Query cache
+  queryClient.clear();
+  
+  try {
+    // Attempt server logout with aggressive timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+  } catch (error) {
+    // Server logout failed, but client is already cleaned up
+    console.log("Server logout request failed, but client cleanup completed");
   }
 }
 
