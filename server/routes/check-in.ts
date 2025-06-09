@@ -357,4 +357,61 @@ router.post('/:id/summary', isAuthenticated, async (req: Request, res: Response)
   }
 });
 
+// Convert GPS coordinates to readable address
+router.post('/convert-coordinates', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const { latitude, longitude } = req.body;
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({ message: 'Latitude and longitude are required' });
+    }
+
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      return res.status(400).json({ message: 'Invalid coordinates format' });
+    }
+
+    const result = await reverseGeocode(lat, lng);
+    
+    res.json({
+      success: result.success,
+      formattedAddress: result.formattedAddress,
+      components: result.components,
+      error: result.error
+    });
+  } catch (error: any) {
+    console.error('Error converting coordinates:', error);
+    res.status(500).json({ 
+      message: 'Failed to convert coordinates',
+      error: error.message 
+    });
+  }
+});
+
+// Format location address (handles both coordinates and addresses)
+router.post('/format-location', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const { location } = req.body;
+
+    if (!location) {
+      return res.status(400).json({ message: 'Location is required' });
+    }
+
+    const formattedAddress = await formatLocationAddress(location);
+    
+    res.json({
+      originalLocation: location,
+      formattedAddress
+    });
+  } catch (error: any) {
+    console.error('Error formatting location:', error);
+    res.status(500).json({ 
+      message: 'Failed to format location',
+      error: error.message 
+    });
+  }
+});
+
 export default router;

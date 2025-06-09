@@ -192,8 +192,8 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
     }
 
     // Delete file from filesystem
-    if (testimonial.filePath && fs.existsSync(testimonial.filePath)) {
-      fs.unlinkSync(testimonial.filePath);
+    if (testimonial.storageUrl && fs.existsSync(testimonial.storageUrl)) {
+      fs.unlinkSync(testimonial.storageUrl);
     }
 
     await storage.deleteTestimonial(parseInt(id));
