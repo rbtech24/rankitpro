@@ -158,6 +158,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
   
+  // Get system admin credentials (development only)
+  if (process.env.NODE_ENV === 'development') {
+    app.get("/api/system-admin-credentials", async (req, res) => {
+      try {
+        const superAdmin = await storage.getUserByUsername("system_admin");
+        if (!superAdmin) {
+          return res.status(404).json({ message: "System admin not found" });
+        }
+        
+        // Generate new password and update it
+        const newPassword = Math.random().toString(36).slice(-12) + "Admin123!";
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+        
+        await storage.updateUser(superAdmin.id, { password: hashedPassword });
+        
+        res.json({
+          email: superAdmin.email,
+          username: superAdmin.username,
+          password: newPassword,
+          message: "System admin credentials reset successfully"
+        });
+      } catch (error) {
+        console.error("Error resetting system admin credentials:", error);
+        res.status(500).json({ message: "Server error" });
+      }
+    });
+  }
+
   // Emergency login route (disabled in production)
   if (process.env.NODE_ENV === 'development') {
     app.post("/api/emergency-login", async (req, res) => {
