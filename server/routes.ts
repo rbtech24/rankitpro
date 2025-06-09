@@ -1568,6 +1568,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // Temporary debug route to show system admin credentials
+  app.get("/api/debug/system-admin", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const systemAdmin = users.find(user => user.role === "super_admin");
+      
+      if (systemAdmin) {
+        res.json({
+          message: "System admin found",
+          email: systemAdmin.email,
+          username: systemAdmin.username,
+          note: "Use this email with password 'admin123' for login, or check server startup logs for generated password"
+        });
+      } else {
+        res.json({ message: "No system admin found" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get system admin info" });
+    }
+  });
+
   // Register testimonial routes
   registerTestimonialRoutes(app);
 
