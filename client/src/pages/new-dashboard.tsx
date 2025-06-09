@@ -238,6 +238,17 @@ export default function Dashboard() {
     queryKey: ["/api/review-responses"],
     enabled: !!auth?.user
   });
+
+  // Super admin queries for platform-wide data
+  const { data: companies = [] } = useQuery({
+    queryKey: ["/api/companies"],
+    enabled: !!auth?.user && auth?.user?.role === "super_admin"
+  });
+
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ["/api/admin/users"],
+    enabled: !!auth?.user && auth?.user?.role === "super_admin"
+  });
   
   const userRole = auth?.user?.role;
   const isSuperAdmin = userRole === "super_admin";
@@ -328,7 +339,7 @@ export default function Dashboard() {
                 <Building2 className="h-8 w-8 text-blue-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Companies</p>
-                  <p className="text-2xl font-bold">{companies?.length || 0}</p>
+                  <p className="text-2xl font-bold">{Array.isArray(companies) ? companies.length : 0}</p>
                 </div>
               </div>
             </CardContent>
@@ -340,7 +351,7 @@ export default function Dashboard() {
                 <Users className="h-8 w-8 text-green-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Users</p>
-                  <p className="text-2xl font-bold">{allUsers?.length || 0}</p>
+                  <p className="text-2xl font-bold">{Array.isArray(allUsers) ? allUsers.length : 0}</p>
                 </div>
               </div>
             </CardContent>
@@ -376,6 +387,15 @@ export default function Dashboard() {
           <CompaniesManagement />
           <AdminBusinessManagement />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Technician Dashboard - Simplified view focused on field work
+  if (isTechnician) {
+    return (
+      <DashboardLayout>
+        <TechDashboard onNewVisit={() => {}} />
       </DashboardLayout>
     );
   }
