@@ -1,31 +1,33 @@
-// Bulletproof logout for all environments including Replit preview
+import { queryClient } from "./queryClient";
+
+// Replit preview-optimized logout
 export function performImmediateLogout() {
-  console.log("Starting bulletproof logout...");
+  console.log("LOGOUT: Starting Replit-optimized logout");
   
   // Clear all client data
-  try {
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    document.cookie.split(";").forEach(cookie => {
-      const name = cookie.split("=")[0].trim();
-      if (name) {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      }
-    });
-    
-    console.log("Client data cleared");
-  } catch (e) {
-    console.log("Cleanup error:", e);
-  }
-
+  localStorage.clear();
+  sessionStorage.clear();
+  
+  // Clear cookies
+  document.cookie.split(";").forEach(cookie => {
+    const name = cookie.split("=")[0].trim();
+    if (name) {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    }
+  });
+  
+  // Clear React Query state
+  queryClient.clear();
+  queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
+  
   // Server logout
   fetch("/api/auth/logout", {
     method: "POST",
     credentials: "include"
   }).catch(() => {});
-
-  // Force reload entire page to reset all state
-  console.log("Forcing page reload...");
-  window.location.reload(true);
+  
+  console.log("LOGOUT: All data cleared, forcing reload");
+  
+  // Force immediate page reload - this bypasses all routing restrictions
+  window.location.reload();
 }
