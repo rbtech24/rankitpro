@@ -1349,6 +1349,28 @@ export class MemStorage implements IStorage {
     return testimonials.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
+  async getTestimonial(id: number): Promise<Testimonial | null> {
+    return this.testimonials.get(id) || null;
+  }
+
+  async updateTestimonial(id: number, updates: Partial<Testimonial>): Promise<Testimonial | null> {
+    const testimonial = this.testimonials.get(id);
+    if (!testimonial) return null;
+
+    const updated: Testimonial = {
+      ...testimonial,
+      ...updates,
+      updatedAt: new Date()
+    };
+
+    this.testimonials.set(id, updated);
+    return updated;
+  }
+
+  async deleteTestimonial(id: number): Promise<boolean> {
+    return this.testimonials.delete(id);
+  }
+
   async updateTestimonialStatus(id: number, status: 'pending' | 'approved' | 'published' | 'rejected', approvedAt?: Date): Promise<Testimonial | null> {
     const testimonial = this.testimonials.get(id);
     if (!testimonial) return null;

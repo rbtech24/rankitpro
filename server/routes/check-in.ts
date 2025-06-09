@@ -7,6 +7,7 @@ import { log } from '../vite';
 import { insertCheckInSchema } from '../../shared/schema';
 import { generateSummary, generateBlogPost } from '../ai/index';
 import type { AIProviderType } from '../ai/types';
+import { reverseGeocode, formatLocationAddress } from '../services/geocoding';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';

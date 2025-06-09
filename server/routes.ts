@@ -18,7 +18,7 @@ import { isAuthenticated, isCompanyAdmin, isSuperAdmin, belongsToCompany } from 
 import multer from "multer";
 import { z } from "zod";
 import integrationsRoutes from "./routes/integrations";
-import { registerTestimonialRoutes } from "./routes/testimonials";
+
 import checkInRoutes from "./routes/check-in";
 import reviewRoutes from "./routes/review";
 import blogRoutes from "./routes/blog";
@@ -1643,8 +1643,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Register testimonial routes
-  registerTestimonialRoutes(app);
+  // Register testimonials routes
+  const testimonialsRouter = (await import('./routes/testimonials')).default;
+  app.use('/api/testimonials', testimonialsRouter);
 
   // Initialize the scheduler service to process review follow-ups
   schedulerService.initialize();
