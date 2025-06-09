@@ -292,6 +292,103 @@ export default function Dashboard() {
     );
   }
   
+  // Super Admin Dashboard - Platform Management
+  if (isSuperAdmin) {
+    return (
+      <DashboardLayout>
+        {/* Super Admin Header */}
+        <div className="bg-gradient-to-r from-purple-600 to-indigo-700 -mt-6 -mx-6 px-6 py-8 mb-8 text-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h1 className="text-3xl font-bold">
+                  System Administrator Dashboard
+                </h1>
+                <p className="text-purple-100 mt-1">
+                  Platform-wide management and oversight
+                </p>
+              </div>
+              <div className="hidden md:flex items-center space-x-3">
+                <Button 
+                  variant="outline" 
+                  className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+                  onClick={() => setLocation('/companies-management')}
+                >
+                  <Building2 className="h-4 w-4 mr-2" />
+                  Manage Companies
+                </Button>
+                <Button 
+                  className="bg-white text-purple-700 hover:bg-purple-50"
+                  onClick={() => setLocation('/admin-user-management')}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Manage Users
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* System Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Building2 className="h-8 w-8 text-blue-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Companies</p>
+                  <p className="text-2xl font-bold">{companies?.length || 0}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Users className="h-8 w-8 text-green-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Users</p>
+                  <p className="text-2xl font-bold">{allUsers?.length || 0}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <CheckCircle2 className="h-8 w-8 text-purple-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Platform Visits</p>
+                  <p className="text-2xl font-bold">{totalVisits}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Star className="h-8 w-8 text-yellow-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Platform Reviews</p>
+                  <p className="text-2xl font-bold">{totalReviews}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Management Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <CompaniesManagement />
+          <AdminBusinessManagement />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       {/* Page Header with User Welcome */}
@@ -303,9 +400,7 @@ export default function Dashboard() {
                 Welcome back, {auth?.user?.username || "User"}!
               </h1>
               <p className="text-blue-100 mt-1">
-                {isSuperAdmin 
-                  ? "Here's your platform overview and management dashboard"
-                  : "Here's what's happening with your business today"}
+                Here's what's happening with your business today
               </p>
             </div>
             <div className="hidden md:flex items-center space-x-3">
