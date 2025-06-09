@@ -83,31 +83,99 @@ export function performImmediateLogout() {
     }
   }).catch(() => {});
   
-  // Step 6: Force navigation with cache busting
-  const timestamp = Date.now();
-  const clearCacheUrl = `/login?logout=${timestamp}&nocache=${Math.random()}`;
+  // Step 6: Preview-specific logout completion
+  console.log("LOGOUT: Completed - session destroyed, caches cleared");
   
-  // Visual feedback
-  document.body.innerHTML = `
-    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif; background: #f8fafc;">
-      <div style="text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <h2 style="color: #059669; margin-bottom: 1rem;">Logout Complete</h2>
-        <p style="color: #6b7280; margin-bottom: 1.5rem;">All caches cleared, session destroyed.</p>
-        <p style="color: #9ca3af; font-size: 0.875rem;">Redirecting...</p>
+  // Create persistent logout confirmation that works in preview
+  document.documentElement.innerHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Logged Out - Rank It Pro</title>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { 
+          margin: 0; 
+          font-family: system-ui, -apple-system, sans-serif; 
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+        }
+        .logout-container {
+          background: white;
+          padding: 3rem;
+          border-radius: 16px;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          text-align: center;
+          max-width: 400px;
+          width: 90%;
+        }
+        .success-icon {
+          font-size: 4rem;
+          color: #10b981;
+          margin-bottom: 1rem;
+        }
+        h1 {
+          color: #1f2937;
+          margin-bottom: 1rem;
+          font-size: 1.5rem;
+        }
+        p {
+          color: #6b7280;
+          margin-bottom: 2rem;
+          line-height: 1.6;
+        }
+        .login-btn {
+          background: #3b82f6;
+          color: white;
+          border: none;
+          padding: 12px 32px;
+          border-radius: 8px;
+          font-size: 1rem;
+          cursor: pointer;
+          text-decoration: none;
+          display: inline-block;
+          transition: background 0.2s;
+        }
+        .login-btn:hover {
+          background: #2563eb;
+        }
+        .status {
+          margin-top: 1.5rem;
+          padding: 1rem;
+          background: #f0fdf4;
+          border: 1px solid #bbf7d0;
+          border-radius: 8px;
+          color: #166534;
+          font-size: 0.875rem;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="logout-container">
+        <div class="success-icon">✓</div>
+        <h1>Successfully Logged Out</h1>
+        <p>Your session has been completely cleared and all caches have been reset. You are now logged out of Rank It Pro.</p>
+        <a href="/login" class="login-btn" onclick="window.location.reload(); return false;">Return to Login</a>
+        <div class="status">
+          ✓ Server session destroyed<br>
+          ✓ Local storage cleared<br>
+          ✓ All caches reset<br>
+          ✓ Cookies removed
+        </div>
       </div>
-    </div>
+      <script>
+        // Force any remaining React context to reset
+        if (window.location.pathname !== '/login') {
+          setTimeout(() => {
+            window.location.href = '/login?t=' + Date.now();
+          }, 3000);
+        }
+      </script>
+    </body>
+    </html>
   `;
-  
-  // Multiple navigation strategies with cache busting
-  setTimeout(() => {
-    window.location.href = clearCacheUrl;
-  }, 800);
-  
-  setTimeout(() => {
-    window.location.replace(clearCacheUrl);
-  }, 1200);
-  
-  setTimeout(() => {
-    window.location.reload();
-  }, 1600);
 }
