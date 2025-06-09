@@ -17,29 +17,56 @@ export default function LogoutHandler() {
   useEffect(() => {
     const handleLogout = async () => {
       try {
-        // Call the logout API to destroy server session
-        await apiRequest("POST", "/api/auth/logout");
-        
-        // Clear React Query cache completely
+        // First clear all client-side data immediately
         queryClient.clear();
-        
-        // Clear all storage completely for mobile PWA compatibility
         localStorage.clear();
         sessionStorage.clear();
         
-        // Clear any cached data in IndexedDB if present
+        // Clear any cached data in IndexedDB
         if ('indexedDB' in window) {
           try {
             const databases = await indexedDB.databases();
-            databases.forEach(db => {
+            await Promise.all(databases.map(db => {
               if (db.name) {
-                indexedDB.deleteDatabase(db.name);
+                return new Promise((resolve) => {
+                  const deleteReq = indexedDB.deleteDatabase(db.name);
+                  deleteReq.onsuccess = () => resolve(true);
+                  deleteReq.onerror = () => resolve(false);
+                  deleteReq.onblocked = () => resolve(false);
+                });
               }
-            });
+              return Promise.resolve();
+            }));
           } catch (idbError) {
-            console.log("IndexedDB cleanup skipped:", idbError);
+            console.log("IndexedDB cleanup completed with warnings");
           }
         }
+        
+        // Try to call the logout API to destroy server session
+        try {
+          await apiRequest("POST", "/api/auth/logout");
+          console.log("Server session destroyed successfully");
+        } catch (apiError) {
+          console.log("Server logout API call failed, proceeding with client cleanup");
+        }
+        
+        // Clear all possible cookie configurations
+        document.cookie.split(";").forEach(cookie => {
+          const eqPos = cookie.indexOf("=");
+          const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+          if (name) {
+            // Clear cookie for all possible paths and domains
+            const clearOptions = [
+              `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`,
+              `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname}`,
+              `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; secure`,
+              `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; secure; samesite=none`
+            ];
+            clearOptions.forEach(option => {
+              document.cookie = option;
+            });
+          }
+        });
         
         // Show success message
         toast({
@@ -47,31 +74,46 @@ export default function LogoutHandler() {
           description: "You have been successfully logged out.",
         });
         
-        // For mobile PWA, use replace to ensure clean navigation
-        if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
-          window.location.replace("/");
-        } else {
-          window.location.href = "/";
-        }
-      } catch (error) {
-        console.error("Logout error:", error);
+        // Force a complete page reload to ensure clean state
+        setTimeout(() => {
+          if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+            // PWA mode - use replace to prevent back navigation
+            window.location.replace("/");
+          } else {
+            // Regular browser - force reload
+            window.location.href = "/";
+          }
+        }, 500);
         
-        // Even if logout API fails, still clear cache and redirect
-        queryClient.clear();
-        localStorage.clear();
-        sessionStorage.clear();
+      } catch (error) {
+        console.error("Critical logout error:", error);
+        
+        // Emergency fallback - force complete cleanup and redirect
+        try {
+          queryClient.clear();
+          localStorage.clear();
+          sessionStorage.clear();
+          
+          // Emergency cookie clear
+          document.cookie.split(";").forEach(cookie => {
+            const name = cookie.split("=")[0].trim();
+            if (name) {
+              document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+            }
+          });
+        } catch (cleanupError) {
+          console.error("Emergency cleanup failed:", cleanupError);
+        }
         
         toast({
           title: "Logged Out",
           description: "You have been logged out.",
         });
         
-        // Force navigation for mobile compatibility
-        if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+        // Force navigation regardless of errors
+        setTimeout(() => {
           window.location.replace("/");
-        } else {
-          window.location.href = "/";
-        }
+        }, 100);
       }
     };
 

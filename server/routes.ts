@@ -520,19 +520,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/auth/logout", (req, res) => {
+    // Get session ID before destroying
+    const sessionId = req.sessionID;
+    
     req.session.destroy((err) => {
       if (err) {
+        console.error("Session destruction error:", err);
         return res.status(500).json({ message: "Failed to logout" });
       }
       
-      // Clear the session cookie explicitly for mobile compatibility
-      res.clearCookie('connect.sid', {
-        path: '/',
-        httpOnly: true,
-        secure: false,
-        sameSite: 'lax'
+      // Clear the session cookie with all possible configurations
+      const cookieOptions = [
+        { path: '/', httpOnly: true, secure: false, sameSite: 'lax' as const },
+        { path: '/', httpOnly: true, secure: true, sameSite: 'none' as const },
+        { path: '/', httpOnly: true, secure: false, sameSite: 'strict' as const },
+        { path: '/' }
+      ];
+      
+      cookieOptions.forEach(options => {
+        res.clearCookie('connect.sid', options);
       });
       
+      // Also clear any potential session cookies with different names
+      res.clearCookie('session');
+      res.clearCookie('sess');
+      res.clearCookie('sessionId');
+      
+      console.log(`Session ${sessionId} destroyed successfully`);
       res.json({ message: "Logged out successfully" });
     });
   });
