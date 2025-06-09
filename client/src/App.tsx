@@ -10,6 +10,7 @@ import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Dashboard from "@/pages/new-dashboard";
+import AdminDashboard from "@/pages/admin-dashboard";
 import TechnicianDashboard from "@/pages/technician-dashboard";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
@@ -1015,6 +1016,9 @@ function Router() {
       {/* Dashboard Pages */}
       <Route path="/dashboard">
         <PrivateRoute component={Dashboard} path="/dashboard" />
+      </Route>
+      <Route path="/admin">
+        <PrivateRoute component={AdminDashboard} path="/admin" role="super_admin" />
       </Route>
       <Route path="/setup">
         <PrivateRoute component={SetupGuide} path="/setup" role="company_admin" />
