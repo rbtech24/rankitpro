@@ -1596,10 +1596,27 @@ export class DatabaseStorage implements IStorage {
     return newTechnician;
   }
 
-  // Implement minimal required methods for immediate testing
-  // Additional methods would be implemented following the same Drizzle ORM pattern
-  async updateTechnician(): Promise<any> { throw new Error("Not implemented"); }
-  async getTechniciansWithStats(): Promise<any> { throw new Error("Not implemented"); }
+  async updateTechnician(id: number, updates: Partial<Technician>): Promise<Technician | undefined> {
+    const [updatedTechnician] = await db.update(schema.technicians)
+      .set(updates)
+      .where(eq(schema.technicians.id, id))
+      .returning();
+    return updatedTechnician;
+  }
+
+  async getTechniciansWithStats(companyId: number): Promise<TechnicianWithStats[]> {
+    const technicians = await db.select().from(schema.technicians)
+      .where(eq(schema.technicians.companyId, companyId));
+    
+    // For now, return technicians with zero stats since we haven't implemented check-ins yet
+    return technicians.map(tech => ({
+      ...tech,
+      totalCheckIns: 0,
+      thisMonthCheckIns: 0,
+      avgRating: 0,
+      totalReviews: 0
+    }));
+  }
   async getCheckIn(): Promise<any> { throw new Error("Not implemented"); }
   async getCheckInsByCompany(): Promise<any> { throw new Error("Not implemented"); }
   async getCheckInsByTechnician(): Promise<any> { throw new Error("Not implemented"); }
