@@ -36,13 +36,22 @@ export interface AuthState {
 }
 
 export async function login(credentials: LoginCredentials): Promise<AuthState> {
-  const response = await apiRequest("POST", "/api/auth/login", credentials);
-  const user = await response.json();
-  
-  // Invalidate any auth-related queries
-  queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-  
-  return { user, company: null };
+  try {
+    console.log("LOGIN: Starting login request for", credentials.email);
+    const response = await apiRequest("POST", "/api/auth/login", credentials);
+    const user = await response.json();
+    
+    console.log("LOGIN: Server response received", user);
+    
+    // Invalidate any auth-related queries
+    queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    
+    // Server returns user object directly, wrap it for consistency
+    return { user, company: null };
+  } catch (error) {
+    console.error("LOGIN: Error during login process", error);
+    throw error;
+  }
 }
 
 export async function register(credentials: RegisterCredentials): Promise<AuthState> {
