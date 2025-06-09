@@ -1113,14 +1113,6 @@ function Router() {
         <PrivateRoute component={TechnicianMobile} path="/tech-mobile" role="technician" />
       </Route>
       
-      {/* Mobile Web App */}
-      <Route path="/mobile">
-        <TechnicianMobile />
-      </Route>
-      <Route path="/mobile/:tab">
-        <TechnicianMobile />
-      </Route>
-      
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

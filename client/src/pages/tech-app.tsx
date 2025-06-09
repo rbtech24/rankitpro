@@ -341,9 +341,10 @@ export default function TechApp() {
   }, [photoPreviewUrls]);
   
   // Handle logout
-  const handleLogout = async () => {
-    await logout();
-    setLocation("/login");
+  const handleLogout = () => {
+    import('@/lib/logout').then(({ performImmediateLogout }) => {
+      performImmediateLogout();
+    });
   };
   
   // Form submission

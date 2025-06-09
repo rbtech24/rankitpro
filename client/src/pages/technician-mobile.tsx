@@ -252,37 +252,10 @@ export default function TechnicianMobile() {
   };
   
   // Handle logout
-  const handleLogout = async () => {
-    try {
-      const { accessToken } = getStoredTokens();
-      
-      if (accessToken && isOnline) {
-        await fetch('/api/mobile/v1/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // Clear tokens regardless of API response
-      clearTokens();
-      setAuthenticated(false);
-      setUser(null);
-      setTechnicianProfile(null);
-      setCheckIns([]);
-      setNotifications([]);
-      setSchedule([]);
-      setCustomers([]);
-      navigate('/technician-mobile');
-      
-      toast({
-        title: "Logged out",
-        description: "You have been logged out successfully"
-      });
-    }
+  const handleLogout = () => {
+    import('@/lib/logout').then(({ performImmediateLogout }) => {
+      performImmediateLogout();
+    });
   };
   
   // Fetch user profile
