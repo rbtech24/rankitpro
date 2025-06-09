@@ -33,19 +33,11 @@ const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
-  role: z.enum(["company_admin", "technician"]),
-  companyName: z.string().optional(),
+  role: z.enum(["company_admin"]),
+  companyName: z.string().min(3, "Company name must be at least 3 characters"),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
-}).refine(data => {
-  if (data.role === "company_admin" && (!data.companyName || data.companyName.length < 3)) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Company name is required for company admins",
-  path: ["companyName"],
 });
 
 type RegisterFormValues = z.infer<typeof formSchema>;
@@ -62,6 +54,7 @@ export default function Register() {
       password: "",
       confirmPassword: "",
       role: "company_admin",
+      companyName: "",
     },
   });
   
@@ -162,57 +155,20 @@ export default function Register() {
                 
                 <FormField
                   control={form.control}
-                  name="role"
+                  name="companyName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Account Type</FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          // Reset companyName if switching from company admin
-                          if (value !== "company_admin") {
-                            form.resetField("companyName");
-                          }
-                        }}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select your role" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="company_admin">Company Admin</SelectItem>
-                          <SelectItem value="technician">Technician</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Company Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Acme Plumbing, Inc." {...field} />
+                      </FormControl>
                       <FormDescription>
-                        Company admins can manage technicians and view all visits.
-                        Technicians can create visits.
+                        This will be the name of your company in the system.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
-                {form.watch("role") === "company_admin" && (
-                  <FormField
-                    control={form.control}
-                    name="companyName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Company Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Acme Plumbing, Inc." {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          This will be the name of your company in the system.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
                 
                 <Button 
                   type="submit" 
