@@ -920,6 +920,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
+
+  // Create user account for technician
+  app.post("/api/technicians/:id/create-account", isCompanyAdmin, async (req, res) => {
+    try {
+      const technicianId = parseInt(req.params.id);
+      const { username, password, confirmPassword } = req.body;
+      
+      // Validate input
+      if (!username || !password || !confirmPassword) {
+        return res.status(400).json({ message: "Username, password, and confirm password are required" });
+      }
+      
+      if (password !== confirmPassword) {
+        return res.status(400).json({ message: "Passwords do not match" });
+      }
+      
+      if (password.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters" });
+      }
+      
+      // Get technician
+      const technician = await storage.getTechnician(technicianId);
+      if (!technician) {
+        return res.status(404).json({ message: "Technician not found" });
+      }
+      
+      // Check permissions
+      if (req.user.role !== "super_admin" && req.user.companyId !== technician.companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      // Check if technician already has a user account
+      if (technician.userId) {
+        return res.status(400).json({ message: "Technician already has a user account" });
+      }
+      
+      // Check if username already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      // Create user account
+      const userData = {
+        email: technician.email,
+        username,
+        password: hashedPassword,
+        role: "technician" as const,
+        companyId: technician.companyId,
+        active: true
+      };
+      
+      const user = await storage.createUser(userData);
+      
+      // Update technician with user ID
+      await storage.updateTechnician(technicianId, { userId: user.id });
+      
+      res.json({ message: "User account created successfully", userId: user.id });
+    } catch (error) {
+      console.error("Create technician account error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
   
   // Visit routes
   app.get("/api/visits", isAuthenticated, async (req, res) => {
