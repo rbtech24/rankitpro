@@ -6,7 +6,8 @@ import {
   WordpressCustomFields, InsertWordpressCustomFields, AiUsageTracking, InsertAiUsageTracking,
   MonthlyAiUsage, InsertMonthlyAiUsage, APICredentials, InsertAPICredentials,
   SalesPerson, InsertSalesPerson, SalesCommission, InsertSalesCommission,
-  CompanyAssignment, InsertCompanyAssignment
+  CompanyAssignment, InsertCompanyAssignment, Testimonial, InsertTestimonial,
+  TestimonialApproval, InsertTestimonialApproval
 } from "@shared/schema";
 
 export interface IStorage {
@@ -248,6 +249,8 @@ export class MemStorage implements IStorage {
     this.salesPeople = new Map();
     this.salesCommissions = new Map();
     this.companyAssignments = new Map();
+    this.testimonials = new Map();
+    this.testimonialApprovals = new Map();
     
     this.userId = 1;
     this.companyId = 1;
@@ -263,6 +266,8 @@ export class MemStorage implements IStorage {
     this.salesPersonId = 1;
     this.salesCommissionId = 1;
     this.companyAssignmentId = 1;
+    this.testimonialId = 1;
+    this.testimonialApprovalId = 1;
     
     // Secure super admin will be created automatically by server/index.ts if none exists
   }
@@ -1306,10 +1311,13 @@ export class MemStorage implements IStorage {
 
   // Testimonial methods
   async createTestimonial(data: InsertTestimonial): Promise<Testimonial> {
-    const id = this.testimonialIdCounter++;
+    const id = this.testimonialId++;
     const testimonial: Testimonial = {
       id,
       ...data,
+      status: data.status || 'pending',
+      isPublic: data.isPublic || false,
+      showOnWebsite: data.showOnWebsite || false,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -1357,10 +1365,12 @@ export class MemStorage implements IStorage {
   }
 
   async createTestimonialApproval(data: InsertTestimonialApproval): Promise<TestimonialApproval> {
-    const id = this.testimonialApprovalIdCounter++;
+    const id = this.testimonialApprovalId++;
     const approval: TestimonialApproval = {
       id,
       ...data,
+      status: data.status || 'pending',
+      emailSentAt: data.emailSentAt || new Date(),
       createdAt: new Date()
     };
     this.testimonialApprovals.set(id, approval);

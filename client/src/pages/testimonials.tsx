@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { TestimonialRecorder } from '@/components/testimonial-recorder';
 import { apiRequest } from '@/lib/queryClient';
+import type { Testimonial } from '@shared/schema';
 import { 
   Video, 
   Mic, 
