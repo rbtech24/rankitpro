@@ -128,8 +128,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         checkPeriod: 86400000, // Prune expired entries every 24h
       }),
       secret: process.env.SESSION_SECRET || "checkin-pro-secret",
-      resave: true,
-      saveUninitialized: true,
+      resave: false,
+      saveUninitialized: false,
+      name: 'connect.sid',
       cookie: {
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
         httpOnly: true,

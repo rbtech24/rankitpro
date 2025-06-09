@@ -43,11 +43,14 @@ export async function login(credentials: LoginCredentials): Promise<AuthState> {
     
     console.log("LOGIN: Server response received", user);
     
-    // Invalidate any auth-related queries
+    // Immediately update the query cache with the user data
+    const authData = { user, company: null };
+    queryClient.setQueryData(["/api/auth/me"], authData);
+    
+    // Also invalidate to trigger a fresh fetch
     queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     
-    // Server returns user object directly, wrap it for consistency
-    return { user, company: null };
+    return authData;
   } catch (error) {
     console.error("LOGIN: Error during login process", error);
     throw error;
@@ -72,9 +75,13 @@ export async function logout(): Promise<void> {
 
 export async function getCurrentUser(): Promise<AuthState> {
   try {
+    console.log("AUTH: Fetching current user");
     const response = await apiRequest("GET", "/api/auth/me");
-    return await response.json();
+    const data = await response.json();
+    console.log("AUTH: Current user data received", data);
+    return data;
   } catch (error) {
+    console.log("AUTH: Error fetching current user", error);
     if ((error as Error).message.includes("401")) {
       return { user: null, company: null };
     }
