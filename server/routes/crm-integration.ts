@@ -15,9 +15,12 @@ router.get('/available', isAuthenticated, async (req, res) => {
   try {
     const availableCRMs = getSupportedCRMs();
     res.json(availableCRMs);
-  } catch (error) {
-    log(`Error fetching available CRMs: ${error.message}`);
-    res.status(500).json({ message: 'Error fetching available CRMs' });
+  } catch (error: any) {
+    log(`Error fetching available CRMs: ${error?.message || 'Unknown error'}`);
+    res.status(500).json({ 
+      message: 'Error fetching available CRMs',
+      error: error?.message || 'Unknown error occurred'
+    });
   }
 });
 
@@ -116,9 +119,12 @@ router.post('/configure', isAuthenticated, isCompanyAdmin, async (req, res) => {
     });
     
     res.json({ success: true });
-  } catch (error) {
-    log(`Error configuring CRM: ${error.message}`);
-    res.status(500).json({ message: 'Error configuring CRM integration' });
+  } catch (error: any) {
+    log(`Error configuring CRM: ${error?.message || 'Unknown error'}`);
+    res.status(500).json({ 
+      message: 'Error configuring CRM integration',
+      error: error?.message || 'Unknown error occurred'
+    });
   }
 });
 
@@ -138,9 +144,12 @@ router.post('/test-connection', isAuthenticated, isCompanyAdmin, async (req, res
     } else {
       res.status(400).json({ message: 'Connection test failed' });
     }
-  } catch (error) {
-    log(`Error testing CRM connection: ${error.message}`);
-    res.status(500).json({ message: 'Error testing CRM connection' });
+  } catch (error: any) {
+    log(`Error testing CRM connection: ${error?.message || 'Unknown error'}`);
+    res.status(500).json({ 
+      message: 'Error testing CRM connection',
+      error: error?.message || 'Unknown error occurred'
+    });
   }
 });
 
@@ -174,9 +183,12 @@ router.delete('/:crmType', isAuthenticated, isCompanyAdmin, async (req, res) => 
     }
     
     res.json({ success: true });
-  } catch (error) {
-    log(`Error deleting CRM integration: ${error.message}`);
-    res.status(500).json({ message: 'Error deleting CRM integration' });
+  } catch (error: any) {
+    log(`Error deleting CRM integration: ${error?.message || 'Unknown error'}`);
+    res.status(500).json({ 
+      message: 'Error deleting CRM integration',
+      error: error?.message || 'Unknown error occurred'
+    });
   }
 });
 
@@ -259,7 +271,7 @@ router.post('/:crmType/sync', isAuthenticated, isCompanyAdmin, async (req, res) 
         } else {
           syncHistoryEntry.errorCount++;
         }
-      } catch (error) {
+      } catch (error: any) {
         syncHistoryEntry.errorCount++;
       }
     }
@@ -270,9 +282,12 @@ router.post('/:crmType/sync', isAuthenticated, isCompanyAdmin, async (req, res) 
     */
     
     res.json({ success: true });
-  } catch (error) {
-    log(`Error syncing with CRM: ${error.message}`);
-    res.status(500).json({ message: 'Error syncing with CRM' });
+  } catch (error: any) {
+    log(`Error syncing with CRM: ${error?.message || 'Unknown error'}`);
+    res.status(500).json({ 
+      message: 'Error syncing with CRM',
+      error: error?.message || 'Unknown error occurred'
+    });
   }
 });
 
