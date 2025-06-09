@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +21,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ showNotifications = false }) => {
   const [user, setUser] = useState<any>(null);
+  const [, setLocation] = useLocation();
   
   useEffect(() => {
     // Fetch the current user
@@ -34,12 +35,9 @@ const Header: React.FC<HeaderProps> = ({ showNotifications = false }) => {
     );
   }, []);
   
-  // Basic logout function
-  const logout = () => {
-    // Clear local user data
-    localStorage.removeItem('token');
-    // Redirect to login page
-    window.location.href = '/login';
+  // Proper logout function that uses the logout handler
+  const handleLogout = () => {
+    setLocation('/logout');
   };
   
   return (
@@ -85,7 +83,7 @@ const Header: React.FC<HeaderProps> = ({ showNotifications = false }) => {
               <span>Help</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout}>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>
