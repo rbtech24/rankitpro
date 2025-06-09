@@ -14,6 +14,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import PaymentForm from "@/components/billing/payment-form";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
+import StripeConfigNotice from "@/components/billing/stripe-config-notice";
 
 // Initialize Stripe outside of the component
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
@@ -56,6 +57,7 @@ export default function Billing() {
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [renewalDate, setRenewalDate] = useState<Date | null>(null);
+  const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   
   // Query for subscription data
   const { data: subscriptionData, isLoading: isLoadingSubscription } = useQuery({
@@ -118,12 +120,25 @@ export default function Billing() {
         setSelectedPlan(null);
       }
     },
-    onError: (error) => {
+    onError: (error: any) => {
       setIsLoading(false);
       console.error('Error updating subscription:', error);
+      
+      // Extract error message from response
+      let errorMessage = "Failed to update your subscription. Please try again.";
+      if (error?.response?.json) {
+        error.response.json().then((data: any) => {
+          if (data.message) {
+            setSubscriptionError(data.message);
+          }
+        });
+      } else if (error?.message) {
+        setSubscriptionError(error.message);
+      }
+      
       toast({
-        title: "Error",
-        description: "Failed to update your subscription. Please try again.",
+        title: "Subscription Error",
+        description: errorMessage,
         variant: "destructive",
       });
       setSelectedPlan(null);
@@ -261,6 +276,11 @@ export default function Billing() {
           </div>
           
           <div className="space-y-6">
+            {/* Configuration Notice */}
+            {subscriptionError && (
+              <StripeConfigNotice error={subscriptionError} />
+            )}
+            
             {/* Current Plan Card */}
             <Card>
               <CardHeader>

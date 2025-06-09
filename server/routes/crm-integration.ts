@@ -38,20 +38,27 @@ router.get('/configured', isAuthenticated, async (req, res) => {
     
     // CRM configurations are stored in company.crmIntegrations field
     const crmIntegrations = company.crmIntegrations || '{}';
-    const parsedIntegrations = JSON.parse(crmIntegrations);
+    
+    let parsedIntegrations = {};
+    try {
+      parsedIntegrations = JSON.parse(crmIntegrations);
+    } catch (parseError) {
+      console.warn('Failed to parse CRM integrations JSON, using empty object:', parseError);
+      parsedIntegrations = {};
+    }
     
     // Format the response
     const configuredCRMs = Object.entries(parsedIntegrations).map(([id, config]: [string, any]) => ({
       id,
-      name: config.name,
+      name: config.name || id,
       status: config.status || 'inactive',
       lastSyncedAt: config.lastSyncedAt || null,
       syncSettings: config.syncSettings || null
     }));
     
     res.json(configuredCRMs);
-  } catch (error) {
-    log(`Error fetching configured CRMs: ${error.message}`);
+  } catch (error: any) {
+    console.error('Error fetching configured CRMs:', error);
     res.status(500).json({ message: 'Error fetching configured CRMs' });
   }
 });
