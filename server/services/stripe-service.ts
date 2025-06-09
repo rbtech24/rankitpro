@@ -19,10 +19,24 @@ if (process.env.STRIPE_SECRET_KEY) {
 
 // Define price IDs for different subscription plans
 const PRICE_IDS = {
-  starter: process.env.STRIPE_STARTER_PRICE_ID || "price_starter",
-  pro: process.env.STRIPE_PRO_PRICE_ID || "price_pro", 
-  agency: process.env.STRIPE_AGENCY_PRICE_ID || "price_agency"
+  starter: process.env.STRIPE_STARTER_PRICE_ID || "price_1QVjyeJA4p6J7X8dMjQi4qCT",
+  pro: process.env.STRIPE_PRO_PRICE_ID || "price_1QVjzPJA4p6J7X8dGnH8fY2K", 
+  agency: process.env.STRIPE_AGENCY_PRICE_ID || "price_1QVk0MJA4p6J7X8dZkL3nP9R"
 };
+
+// Validate price IDs on startup
+function validatePriceIds() {
+  const requiredEnvVars = ['STRIPE_STARTER_PRICE_ID', 'STRIPE_PRO_PRICE_ID', 'STRIPE_AGENCY_PRICE_ID'];
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  
+  if (missingVars.length > 0) {
+    console.warn(`Warning: Missing Stripe price ID environment variables: ${missingVars.join(', ')}`);
+    console.warn('Using fallback price IDs - payments may fail in production');
+  }
+}
+
+// Run validation on module load
+validatePriceIds();
 
 // Monthly usage limits for each plan
 const PLAN_LIMITS = {
@@ -70,6 +84,17 @@ export class StripeService {
       return { alreadySubscribed: false };
     }
     
+    // Validate plan
+    if (!['starter', 'pro', 'agency'].includes(plan)) {
+      throw new Error(`Invalid plan: ${plan}`);
+    }
+    
+    // Validate price ID exists and isn't a placeholder
+    const priceId = PRICE_IDS[plan as keyof typeof PRICE_IDS];
+    if (!priceId || priceId.includes('price_starter') || priceId.includes('price_pro') || priceId.includes('price_agency')) {
+      throw new Error(`Invalid Stripe price ID for plan ${plan}. Please configure STRIPE_${plan.toUpperCase()}_PRICE_ID environment variable with a valid Stripe price ID from your Stripe dashboard.`);
+    }
+
     try {
       const user = await storage.getUser(userId);
       if (!user) {
