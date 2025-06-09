@@ -78,6 +78,9 @@ export class StripeService {
 
       // If user already has a subscription, retrieve it
       if (user.stripeSubscriptionId) {
+        if (!stripe) {
+          throw new Error('Stripe service is not available. Please configure STRIPE_SECRET_KEY.');
+        }
         const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
         
         // If user is already subscribed to this plan, return early
@@ -89,6 +92,9 @@ export class StripeService {
         }
         
         // Otherwise, update the subscription with the new plan
+        if (!stripe) {
+          throw new Error('Stripe service is not available. Please configure STRIPE_SECRET_KEY.');
+        }
         const updatedSubscription = await stripe.subscriptions.update(subscription.id, {
           items: [{
             id: subscription.items.data[0].id,

@@ -1044,6 +1044,9 @@ function Router() {
       <Route path="/system-overview">
         <PrivateRoute component={SystemOverview} path="/system-overview" role="super_admin" />
       </Route>
+      <Route path="/sales-dashboard">
+        <PrivateRoute component={SalesDashboard} path="/sales-dashboard" role="super_admin" />
+      </Route>
       <Route path="/integrations">
         <PrivateRoute component={Integrations} path="/integrations" role="company_admin" />
       </Route>
