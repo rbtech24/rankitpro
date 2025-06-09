@@ -97,8 +97,17 @@ export default function Technicians() {
   React.useEffect(() => {
     if (error) {
       console.error("Technicians query error:", error);
+      
+      // Handle authentication errors for loading technicians
+      if (error.message.includes("401")) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in as a company admin to view technicians.",
+          variant: "destructive",
+        });
+      }
     }
-  }, [error]);
+  }, [error, toast]);
   
   const createTechnicianMutation = useMutation({
     mutationFn: async (data: TechFormValues) => {
@@ -118,6 +127,23 @@ export default function Technicians() {
       setIsAddModalOpen(false);
     },
     onError: (error: Error) => {
+      console.error("Create technician error:", error);
+      
+      // Handle authentication errors specifically
+      if (error.message.includes("401")) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in as a company admin to add technicians. Redirecting to login...",
+          variant: "destructive",
+        });
+        
+        // Redirect to login after a short delay
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+        return;
+      }
+      
       toast({
         title: "Error",
         description: `Failed to add technician: ${error.message}`,
