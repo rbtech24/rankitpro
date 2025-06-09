@@ -283,16 +283,7 @@ export default function Dashboard() {
     );
   }
   
-  // Technician Dashboard - Simplified view focused on field work
-  if (isTechnician && !isSuperAdmin) {
-    return (
-      <DashboardLayout>
-        <TechDashboard onNewVisit={() => {}} />
-      </DashboardLayout>
-    );
-  }
-  
-  // Super Admin Dashboard - Platform Management
+  // Super Admin Dashboard - Platform Management (Check first to override other roles)
   if (isSuperAdmin) {
     return (
       <DashboardLayout>
