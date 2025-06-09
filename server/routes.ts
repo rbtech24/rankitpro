@@ -527,6 +527,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/auth/logout", (req, res) => {
+    // Anti-cache headers to prevent logout response caching
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'Last-Modified': new Date().toUTCString(),
+      'ETag': '',
+      'Vary': '*'
+    });
+    
     // Get session ID before destroying
     const sessionId = req.sessionID;
     
