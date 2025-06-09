@@ -26,23 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
-interface Testimonial {
-  id: number;
-  title: string;
-  customerName: string;
-  customerEmail?: string;
-  type: 'audio' | 'video';
-  status: 'pending' | 'approved' | 'published' | 'rejected';
-  rating?: number;
-  location?: string;
-  jobType?: string;
-  duration?: number;
-  storageUrl: string;
-  isPublic: boolean;
-  showOnWebsite: boolean;
-  createdAt: string;
-  approvedAt?: string;
-}
+// Using imported Testimonial type from shared schema
 
 export default function TestimonialsPage() {
   const [activeTab, setActiveTab] = useState('list');
@@ -55,15 +39,18 @@ export default function TestimonialsPage() {
   const queryClient = useQueryClient();
 
   // Fetch testimonials
-  const { data: testimonials = [], isLoading } = useQuery({
+  const { data: testimonialsResponse = [], isLoading } = useQuery({
     queryKey: ['/api/testimonials', statusFilter, typeFilter],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (typeFilter !== 'all') params.append('type', typeFilter);
-      return apiRequest('GET', `/api/testimonials?${params}`);
+      const response = await apiRequest('GET', `/api/testimonials?${params}`);
+      return response.json();
     }
   });
+
+  const testimonials = Array.isArray(testimonialsResponse) ? testimonialsResponse : [];
 
   // Update testimonial status mutation
   const updateStatusMutation = useMutation({
@@ -83,11 +70,16 @@ export default function TestimonialsPage() {
   });
 
   // Generate shortcode query
-  const { data: shortcodeData } = useQuery({
+  const { data: shortcodeResponse } = useQuery({
     queryKey: ['/api/testimonials/shortcode'],
-    queryFn: () => apiRequest('GET', '/api/testimonials/shortcode'),
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/testimonials/shortcode');
+      return response.json();
+    },
     enabled: activeTab === 'embed'
   });
+
+  const shortcodeData = shortcodeResponse || {};
 
   const handleSubmitTestimonial = async (formData: FormData) => {
     try {
@@ -413,7 +405,7 @@ export default function TestimonialsPage() {
               <p className="text-gray-600">
                 Copy and paste this shortcode into any WordPress post or page to display your testimonials.
               </p>
-              {shortcodeData && (
+              {shortcodeData && shortcodeData.wordpress_shortcode && (
                 <div className="bg-gray-100 p-4 rounded-lg">
                   <code className="text-sm break-all">
                     {shortcodeData.wordpress_shortcode}
@@ -440,7 +432,7 @@ export default function TestimonialsPage() {
               <p className="text-gray-600">
                 For non-WordPress websites, use this JavaScript code to embed testimonials.
               </p>
-              {shortcodeData && (
+              {shortcodeData && shortcodeData.javascript_embed && (
                 <div className="bg-gray-100 p-4 rounded-lg">
                   <pre className="text-sm overflow-x-auto">
                     <code>{shortcodeData.javascript_embed}</code>
