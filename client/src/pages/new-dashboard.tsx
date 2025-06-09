@@ -243,6 +243,12 @@ export default function Dashboard() {
   const isSuperAdmin = userRole === "super_admin";
   const isCompanyAdmin = userRole === "company_admin";
   const isTechnician = userRole === "technician";
+  
+  // Debug logging
+  console.log("Dashboard - Auth state:", auth);
+  console.log("Dashboard - User role:", userRole);
+  console.log("Dashboard - isSuperAdmin:", isSuperAdmin);
+  console.log("Dashboard - isTechnician:", isTechnician);
 
   // Calculate real metrics from your data
   const totalVisits = Array.isArray(visits) ? visits.length : 0;
@@ -278,10 +284,10 @@ export default function Dashboard() {
   }
   
   // Technician Dashboard - Simplified view focused on field work
-  if (isTechnician) {
+  if (isTechnician && !isSuperAdmin) {
     return (
       <DashboardLayout>
-        <TechDashboard />
+        <TechDashboard onNewVisit={() => {}} />
       </DashboardLayout>
     );
   }
