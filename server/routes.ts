@@ -636,6 +636,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Logged out successfully" });
     });
   });
+
+  // Force logout endpoint - clears session without authentication check
+  app.get("/api/force-logout", (req, res) => {
+    // Anti-cache headers
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    
+    // Destroy session if it exists
+    if (req.session) {
+      req.session.destroy(() => {});
+    }
+    
+    // Clear all possible session cookies
+    const cookieOptions = [
+      { path: '/', httpOnly: true, secure: false, sameSite: 'lax' as const },
+      { path: '/', httpOnly: true, secure: true, sameSite: 'none' as const },
+      { path: '/', httpOnly: true, secure: false, sameSite: 'strict' as const },
+      { path: '/' }
+    ];
+    
+    cookieOptions.forEach(options => {
+      res.clearCookie('connect.sid', options);
+    });
+    
+    res.clearCookie('session');
+    res.clearCookie('sess');
+    res.clearCookie('sessionId');
+    
+    console.log("Force logout executed");
+    
+    // Redirect to login page
+    res.redirect('/login?force=1');
+  });
   
   app.get("/api/auth/me", isAuthenticated, async (req, res) => {
     try {
