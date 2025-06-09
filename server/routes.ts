@@ -299,7 +299,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Set session with explicit save
       if (req.session) {
         (req.session as any).userId = user.id;
-        console.log("LOGIN: Setting session userId:", user.id);
         
         req.session.save((err: any) => {
           if (err) {
@@ -307,15 +306,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return res.status(500).json({ message: "Session error" });
           }
           
-          console.log("LOGIN: Session saved successfully");
-          
           // Remove password from response
           const { password: _, ...userWithoutPassword } = user;
           
           res.json(userWithoutPassword);
         });
       } else {
-        console.log("LOGIN: No session object available");
         // Remove password from response
         const { password: _, ...userWithoutPassword } = user;
         

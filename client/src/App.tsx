@@ -127,10 +127,16 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
 }
 
 function Router() {
-  const { data: auth, isLoading } = useQuery<AuthState>({
+  const { data: auth, isLoading, error } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
-    queryFn: getCurrentUser
+    queryFn: getCurrentUser,
+    retry: false,
+    staleTime: 0 // Always revalidate auth state
   });
+  
+  // Handle logout parameter to force login page
+  const urlParams = new URLSearchParams(window.location.search);
+  const isLoggedOut = urlParams.has('logout') || urlParams.has('force');
   
   if (isLoading) {
     return <div className="h-screen flex items-center justify-center">
@@ -141,7 +147,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Login />}
+        {auth?.user && !isLoggedOut ? <Redirect to="/dashboard" /> : <Login />}
       </Route>
       <Route path="/forgot-password">
         <ForgotPassword />
