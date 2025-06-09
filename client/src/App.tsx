@@ -93,6 +93,15 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
     return null;
   }
   
+  // Role-based access control
+  if (auth.user.role === "technician") {
+    // Technicians can only access /mobile route
+    const currentPath = window.location.pathname;
+    if (!currentPath.startsWith("/mobile")) {
+      return <Redirect to="/mobile" />;
+    }
+  }
+  
   if (role && auth.user.role !== role && auth.user.role !== "super_admin") {
     return <Redirect to="/dashboard" />;
   }

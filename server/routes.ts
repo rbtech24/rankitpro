@@ -218,6 +218,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         path: ["confirmPassword"],
       }).parse(req.body);
       
+      // Only allow company_admin registration, not technician
+      if (data.role === "technician") {
+        return res.status(403).json({ 
+          message: "Technician accounts must be created by a company administrator" 
+        });
+      }
+      
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(data.email);
       if (existingUser) {
