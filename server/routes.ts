@@ -570,6 +570,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/auth/me", isAuthenticated, async (req, res) => {
     try {
+      // Anti-cache headers for authentication endpoint
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Last-Modified': new Date().toUTCString(),
+        'ETag': '',
+        'Vary': '*'
+      });
+      
       const user = req.user;
       
       // If user is company_admin or technician, get company info
