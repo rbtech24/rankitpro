@@ -148,7 +148,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/login">
-        {auth?.user && !isLoggedOut ? <Redirect to="/dashboard" /> : <Login />}
+        {auth?.user && !isLoggedOut ? 
+          (auth.user.role === "super_admin" ? <Redirect to="/admin" /> : <Redirect to="/dashboard" />) 
+          : <Login />}
       </Route>
       <Route path="/forgot-password">
         <ForgotPassword />
@@ -168,7 +170,9 @@ function Router() {
         {auth?.user ? <Redirect to="/dashboard" /> : <Onboarding />}
       </Route>
       <Route path="/">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Home />}
+        {auth?.user ? 
+          (auth.user.role === "super_admin" ? <Redirect to="/admin" /> : <Redirect to="/dashboard" />) 
+          : <Home />}
       </Route>
       
       {/* Informational Pages */}
