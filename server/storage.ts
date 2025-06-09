@@ -264,13 +264,7 @@ export class MemStorage implements IStorage {
     this.salesCommissionId = 1;
     this.companyAssignmentId = 1;
     
-    // Add a default super admin
-    this.createUser({
-      username: "admin",
-      email: "admin@checkinpro.com",
-      password: "$2b$10$WOcqvEQUqkgQozHp4OYV0eFNB3jA3S.NtT2tgN1b3JfNXBXs0VUZW", // "adminpassword" hashed
-      role: "super_admin"
-    });
+    // Secure super admin will be created automatically by server/index.ts if none exists
   }
   
   // User operations
