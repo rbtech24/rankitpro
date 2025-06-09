@@ -171,7 +171,7 @@ function Router() {
       </Route>
       <Route path="/">
         {auth?.user ? 
-          (auth.user.role === "super_admin" ? <Redirect to="/admin" /> : <Redirect to="/dashboard" />) 
+          (auth.user.role === "super_admin" ? <AdminDashboard /> : <Redirect to="/dashboard" />) 
           : <Home />}
       </Route>
       
