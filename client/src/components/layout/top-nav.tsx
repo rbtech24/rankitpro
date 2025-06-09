@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
-import { logout } from "@/lib/auth";
+
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,9 +27,10 @@ export default function TopNav({ onToggleSidebar, onMenuClick }: TopNavProps) {
   
   const [, setLocation] = useLocation();
   
-  const handleLogout = async () => {
-    await logout();
-    setLocation("/login");
+  const handleLogout = () => {
+    import('@/lib/logout').then(({ performImmediateLogout }) => {
+      performImmediateLogout();
+    });
   };
   
   return (

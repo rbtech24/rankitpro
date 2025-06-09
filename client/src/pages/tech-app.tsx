@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
-import { AuthState, getCurrentUser, logout } from "@/lib/auth";
+import { AuthState, getCurrentUser } from "@/lib/auth";
 
 // Offline capabilities
 const initOfflineSupport = () => {

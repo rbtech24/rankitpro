@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
-import { AuthState, getCurrentUser, logout } from '@/lib/auth';
+import { AuthState, getCurrentUser } from '@/lib/auth';
 import TechNavigation from '@/components/layout/tech-navigation';
 import TechDashboard from '@/components/technician/tech-dashboard';
 import MobileVisitModal from '@/components/technician/mobile-visit-modal';
@@ -18,9 +18,10 @@ export default function TechDashboardPage() {
     queryFn: getCurrentUser
   });
   
-  const handleLogout = async () => {
-    await logout();
-    setLocation('/login');
+  const handleLogout = () => {
+    import('@/lib/logout').then(({ performImmediateLogout }) => {
+      performImmediateLogout();
+    });
   };
   
   if (isLoading) {
@@ -170,7 +171,7 @@ export default function TechDashboardPage() {
       </div>
       
       {/* Mobile Visit Modal */}
-      <MobileVisitModal open={showVisitModal} onClose={() => setShowVisitModal(false)} />
+      <MobileVisitModal isOpen={showVisitModal} onClose={() => setShowVisitModal(false)} />
     </div>
   );
 }
