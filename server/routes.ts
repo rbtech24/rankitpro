@@ -259,10 +259,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Remove password from response
       const { password, ...userWithoutPassword } = user;
       
-      // Set session
-      if (req.session) {
-        (req.session as any).userId = user.id;
-      }
+      // Set session data and save synchronously
+      req.session.userId = user.id;
+      
+      // Use promisified session save for proper error handling
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) {
+            console.error("Registration session save error:", err);
+            reject(new Error("Session save failed"));
+          } else {
+            console.log(`Registration session saved successfully for user ${user.id}`);
+            resolve();
+          }
+        });
+      });
       
       res.status(201).json(userWithoutPassword);
     } catch (error) {
@@ -296,27 +307,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
-      // Set session with explicit save
-      if (req.session) {
-        (req.session as any).userId = user.id;
-        
+      // Set session data immediately and save synchronously
+      req.session.userId = user.id;
+      
+      // Use promisified session save for proper error handling
+      await new Promise<void>((resolve, reject) => {
         req.session.save((err: any) => {
           if (err) {
             console.error("Session save error:", err);
-            return res.status(500).json({ message: "Session error" });
+            reject(new Error("Session save failed"));
+          } else {
+            console.log(`Session saved successfully for user ${user.id}`);
+            resolve();
           }
-          
-          // Remove password from response
-          const { password: _, ...userWithoutPassword } = user;
-          
-          res.json(userWithoutPassword);
         });
-      } else {
-        // Remove password from response
-        const { password: _, ...userWithoutPassword } = user;
-        
-        res.json(userWithoutPassword);
-      }
+      });
+      
+      // Remove password from response
+      const { password: _, ...userWithoutPassword } = user;
+      
+      res.json(userWithoutPassword);
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Server error during login" });
