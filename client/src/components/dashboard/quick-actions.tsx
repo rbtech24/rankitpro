@@ -141,6 +141,21 @@ export default function QuickActions({
             </Button>
           )}
           
+          {/* Only company admins can manage testimonials */}
+          {isCompanyAdmin && (
+            <Button 
+              variant="outline" 
+              className="w-full flex items-center justify-center"
+              onClick={() => window.location.href = "/testimonials"}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-gray-500">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="10,8 16,12 10,16 10,8"/>
+              </svg>
+              Manage Testimonials
+            </Button>
+          )}
+          
           {/* Super admin specific actions */}
           {isSuperAdmin && (
             <Button 

@@ -176,6 +176,33 @@ export default function Technicians() {
     // Show technician details in an alert for now
     alert(`Technician Details:\n\nName: ${technician.name}\nEmail: ${technician.email}\nPhone: ${technician.phone}\nLocation: ${technician.location}\nSpecialty: ${technician.specialty || 'General'}\nCheck-ins: ${technician.checkinsCount}\nReviews: ${technician.reviewsCount}\nRating: ${technician.rating.toFixed(1)} stars`);
   };
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (technicianId: number) => {
+      const res = await apiRequest("POST", `/api/technicians/${technicianId}/reset-password`);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Password Reset",
+        description: `New password: ${data.newPassword}\n\nPlease save this password and share it securely with the technician.`,
+        variant: "default",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to reset password: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleResetPassword = (technician: Technician) => {
+    if (confirm(`Are you sure you want to reset the password for ${technician.name}? This will generate a new temporary password.`)) {
+      resetPasswordMutation.mutate(technician.id);
+    }
+  };
   
   const onSubmit = (values: TechFormValues) => {
     if (editTechnician) {
@@ -332,7 +359,7 @@ export default function Technicians() {
                             <Button 
                               variant="link" 
                               size="sm" 
-                              className="text-primary-600 hover:text-primary-900 mr-3"
+                              className="text-primary-600 hover:text-primary-900 mr-2"
                               onClick={() => handleViewTechnician(technician)}
                             >
                               View
@@ -340,10 +367,18 @@ export default function Technicians() {
                             <Button 
                               variant="link" 
                               size="sm" 
-                              className="text-primary-600 hover:text-primary-900"
+                              className="text-primary-600 hover:text-primary-900 mr-2"
                               onClick={() => openEditModal(technician)}
                             >
                               Edit
+                            </Button>
+                            <Button 
+                              variant="link" 
+                              size="sm" 
+                              className="text-orange-600 hover:text-orange-900"
+                              onClick={() => handleResetPassword(technician)}
+                            >
+                              Reset Password
                             </Button>
                           </td>
                         </tr>

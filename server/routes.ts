@@ -1501,6 +1501,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/mobile/check-ins", mobileCheckInsRoutes);
   app.use("/api/mobile/notifications", mobileNotificationsRoutes);
   
+  // Password reset for technicians
+  app.post("/api/technicians/:id/reset-password", isAuthenticated, isCompanyAdmin, async (req, res) => {
+    try {
+      const technicianId = parseInt(req.params.id);
+      const companyId = req.user.companyId!;
+      
+      // Get the technician to verify they belong to this company
+      const technician = await storage.getTechnician(technicianId);
+      if (!technician || technician.companyId !== companyId) {
+        return res.status(404).json({ message: "Technician not found" });
+      }
+
+      // Generate a new secure password
+      const newPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12).toUpperCase() + "!1";
+      
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update the user's password if they have a user account
+      if (technician.userId) {
+        await storage.updateUserPassword(technician.userId, hashedPassword);
+      }
+
+      res.json({ 
+        message: "Password reset successfully",
+        newPassword: newPassword
+      });
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
   // API Credentials routes
   app.post("/api/api-credentials", isAuthenticated, isCompanyAdmin, async (req, res) => {
     try {
