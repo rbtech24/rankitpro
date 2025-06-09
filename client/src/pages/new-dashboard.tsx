@@ -215,7 +215,9 @@ export default function Dashboard() {
   
   const { data: auth, isLoading: authLoading } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
-    queryFn: getCurrentUser
+    queryFn: getCurrentUser,
+    staleTime: 0,
+    cacheTime: 0
   });
 
   // Fetch real data for dashboard metrics
@@ -260,6 +262,13 @@ export default function Dashboard() {
   console.log("Dashboard - User role:", userRole);
   console.log("Dashboard - isSuperAdmin:", isSuperAdmin);
   console.log("Dashboard - isTechnician:", isTechnician);
+  console.log("Dashboard - Auth user:", auth?.user);
+  console.log("Dashboard - Auth user role:", auth?.user?.role);
+  
+  // Force super admin detection if needed
+  if (auth?.user?.role === "super_admin") {
+    console.log("FORCING SUPER ADMIN INTERFACE");
+  }
 
   // Calculate real metrics from your data
   const totalVisits = Array.isArray(visits) ? visits.length : 0;
@@ -295,7 +304,7 @@ export default function Dashboard() {
   }
   
   // Super Admin Dashboard - Platform Management (Check first to override other roles)
-  if (isSuperAdmin) {
+  if (isSuperAdmin || auth?.user?.role === "super_admin") {
     return (
       <DashboardLayout>
         {/* Super Admin Header */}
