@@ -43,14 +43,16 @@ export async function login(credentials: LoginCredentials): Promise<AuthState> {
     
     console.log("LOGIN: Server response received", user);
     
-    // Immediately update the query cache with the user data
-    const authData = { user, company: null };
-    queryClient.setQueryData(["/api/auth/me"], authData);
+    // Wait a moment for session cookie to be properly set
+    await new Promise(resolve => setTimeout(resolve, 250));
     
-    // Also invalidate to trigger a fresh fetch
-    queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    // Fetch complete auth state including company info
+    const authState = await getCurrentUser();
     
-    return authData;
+    // Update query cache with fresh auth data
+    queryClient.setQueryData(["/api/auth/me"], authState);
+    
+    return authState;
   } catch (error) {
     console.error("LOGIN: Error during login process", error);
     throw error;
@@ -76,13 +78,23 @@ export async function logout(): Promise<void> {
 export async function getCurrentUser(): Promise<AuthState> {
   try {
     console.log("AUTH: Fetching current user");
+    
+    // Add a small delay to ensure session cookies are properly set
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const response = await apiRequest("GET", "/api/auth/me");
     const data = await response.json();
     console.log("AUTH: Current user data received", data);
     return data;
   } catch (error) {
     console.log("AUTH: Error fetching current user", error);
+    
+    // Clear any stale auth data on 401 errors
     if ((error as Error).message.includes("401")) {
+      console.log("AUTH: Clearing stale authentication data");
+      queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
+      localStorage.removeItem('auth');
+      sessionStorage.removeItem('auth');
       return { user: null, company: null };
     }
     throw error;

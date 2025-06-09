@@ -13,27 +13,16 @@ declare global {
 
 // Check if user is authenticated
 export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
-  console.log("AUTH MIDDLEWARE: Checking authentication");
-  console.log("AUTH MIDDLEWARE: Session exists:", !!req.session);
-  console.log("AUTH MIDDLEWARE: Session userId:", req.session?.userId);
-  console.log("AUTH MIDDLEWARE: Session ID:", req.sessionID);
-  console.log("AUTH MIDDLEWARE: Request path:", req.path);
-  console.log("AUTH MIDDLEWARE: Request method:", req.method);
-  
   if (!req.session || !req.session.userId) {
-    console.log("AUTH MIDDLEWARE: No session or userId found");
     return res.status(401).json({ message: "Unauthorized" });
   }
   
   try {
-    console.log("AUTH MIDDLEWARE: Fetching user with ID:", req.session.userId);
     const user = await storage.getUser(req.session.userId);
     if (!user) {
-      console.log("AUTH MIDDLEWARE: User not found in storage");
       return res.status(401).json({ message: "User not found" });
     }
     
-    console.log("AUTH MIDDLEWARE: User authenticated successfully:", user.email);
     req.user = user;
     next();
   } catch (error) {
