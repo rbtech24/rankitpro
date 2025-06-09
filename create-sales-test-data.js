@@ -1,4 +1,4 @@
-import { storage } from './server/storage.js';
+import { storage } from './server/storage.ts';
 
 async function createSalesTestData() {
   console.log('Creating sales commission test data...');
@@ -147,14 +147,12 @@ async function createSalesTestData() {
   }
 }
 
-// Run if called directly
-if (require.main === module) {
-  createSalesTestData().then(() => {
-    process.exit(0);
-  }).catch(error => {
-    console.error('Failed to create test data:', error);
-    process.exit(1);
-  });
-}
+// Run the function directly
+createSalesTestData().then(() => {
+  process.exit(0);
+}).catch(error => {
+  console.error('Failed to create test data:', error);
+  process.exit(1);
+});
 
-module.exports = { createSalesTestData };
+export { createSalesTestData };
