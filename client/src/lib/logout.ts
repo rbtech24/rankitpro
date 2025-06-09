@@ -1,14 +1,12 @@
-import { queryClient } from "./queryClient";
-
-// Replit preview-optimized logout
+// Simple direct logout for preview environments
 export function performImmediateLogout() {
-  console.log("LOGOUT: Starting Replit-optimized logout");
+  console.log("LOGOUT: Direct logout and redirect");
   
-  // Clear all client data
+  // Clear all storage
   localStorage.clear();
   sessionStorage.clear();
   
-  // Clear cookies
+  // Clear all cookies
   document.cookie.split(";").forEach(cookie => {
     const name = cookie.split("=")[0].trim();
     if (name) {
@@ -16,18 +14,12 @@ export function performImmediateLogout() {
     }
   });
   
-  // Clear React Query state
-  queryClient.clear();
-  queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
-  
   // Server logout
   fetch("/api/auth/logout", {
     method: "POST",
     credentials: "include"
   }).catch(() => {});
   
-  console.log("LOGOUT: All data cleared, forcing reload");
-  
-  // Force immediate page reload - this bypasses all routing restrictions
-  window.location.reload();
+  // Direct navigation to login
+  window.location.href = "/login";
 }
