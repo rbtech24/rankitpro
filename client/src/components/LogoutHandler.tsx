@@ -23,8 +23,8 @@ export default function LogoutHandler() {
           variant: "default",
         });
       } finally {
-        // Always redirect to login
-        setLocation("/login");
+        // Force page reload to clear all state and redirect to login
+        window.location.href = "/login";
       }
     };
 
