@@ -1582,9 +1582,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const reviewRequestData = insertReviewRequestSchema.parse(req.body);
       
-      // Set company ID from user if not provided
+      // Ensure company ID is set - super admin can create for any company, others for their own
       if (!reviewRequestData.companyId) {
+        if (req.user.role === "super_admin") {
+          return res.status(400).json({ message: "Company ID is required for super admin requests" });
+        }
         reviewRequestData.companyId = req.user.companyId!;
+      }
+      
+      // Validate user has company association
+      if (!req.user.companyId && req.user.role !== "super_admin") {
+        return res.status(400).json({ message: "No company associated with this user" });
       }
       
       // Check permissions
