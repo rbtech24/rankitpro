@@ -7,6 +7,8 @@ import { Logo } from "@/components/ui/logo";
 
 interface SidebarProps {
   className?: string;
+  isOpen?: boolean;
+  onToggle?: (open: boolean) => void;
 }
 
 export default function Sidebar({ className }: SidebarProps) {

@@ -27,9 +27,9 @@ export default function LogoutHandler() {
           try {
             const databases = await indexedDB.databases();
             await Promise.all(databases.map(db => {
-              if (db.name) {
+              if (db.name && typeof db.name === 'string') {
                 return new Promise((resolve) => {
-                  const deleteReq = indexedDB.deleteDatabase(db.name!);
+                  const deleteReq = indexedDB.deleteDatabase(db.name as string);
                   deleteReq.onsuccess = () => resolve(true);
                   deleteReq.onerror = () => resolve(false);
                   deleteReq.onblocked = () => resolve(false);

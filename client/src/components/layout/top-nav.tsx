@@ -15,10 +15,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface TopNavProps {
-  onToggleSidebar: () => void;
+  onToggleSidebar?: () => void;
+  onMenuClick?: () => void;
 }
 
-export default function TopNav({ onToggleSidebar }: TopNavProps) {
+export default function TopNav({ onToggleSidebar, onMenuClick }: TopNavProps) {
   const { data: auth } = useQuery<AuthState>({ 
     queryKey: ["/api/auth/me"],
     queryFn: getCurrentUser

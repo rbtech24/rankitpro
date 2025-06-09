@@ -246,7 +246,7 @@ export function TestimonialRecorder({ technicianId, checkInId, onSubmit, onCance
               <video
                 ref={videoRef}
                 className="max-w-full max-h-64 rounded-lg"
-                controls={recordedBlob && !isRecording}
+                controls={!!(recordedBlob && !isRecording)}
                 muted={isRecording}
               />
             ) : (
