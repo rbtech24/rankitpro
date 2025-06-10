@@ -376,7 +376,8 @@ export class MemStorage implements IStorage {
       crmSyncHistory: company.crmSyncHistory || null,
       emailVerificationToken: company.emailVerificationToken || null,
       trialStartDate: company.trialStartDate || null,
-      isEmailVerified: company.isEmailVerified || false
+      isEmailVerified: company.isEmailVerified || false,
+      isTrialActive: company.isTrialActive || null
     };
     
     this.companies.set(id, newCompany);
@@ -509,16 +510,11 @@ export class MemStorage implements IStorage {
       materialsUsed: checkIn.materialsUsed || null,
       latitude: checkIn.latitude || null,
       longitude: checkIn.longitude || null,
-      timeSpent: checkIn.timeSpent || null,
-      invoiceNumber: checkIn.invoiceNumber || null,
-      cost: checkIn.cost || null,
-      tags: checkIn.tags || null,
-      completedAt: checkIn.completedAt || null,
-      signature: checkIn.signature || null,
-      rating: checkIn.rating || null,
-      feedback: checkIn.feedback || null,
-      gpsCoordinates: checkIn.gpsCoordinates || null,
-      isBlog: checkIn.isBlog || false
+      address: checkIn.address || null,
+      city: checkIn.city || null,
+      state: checkIn.state || null,
+      zipCode: checkIn.zipCode || null,
+      country: checkIn.country || null
     };
     
     this.checkIns.set(id, newCheckIn);
@@ -800,9 +796,29 @@ export class MemStorage implements IStorage {
     const createdAt = new Date();
     
     const newStatus: ReviewRequestStatus = {
-      ...status,
       id,
       createdAt,
+      status: status.status || "pending",
+      customerName: status.customerName,
+      customerEmail: status.customerEmail,
+      customerPhone: status.customerPhone || null,
+      technicianId: status.technicianId,
+      reviewRequestId: status.reviewRequestId,
+      customerId: status.customerId,
+      checkInId: status.checkInId || null,
+      initialRequestSent: status.initialRequestSent || false,
+      initialRequestSentAt: status.initialRequestSentAt || null,
+      firstFollowUpSent: status.firstFollowUpSent || false,
+      firstFollowUpSentAt: status.firstFollowUpSentAt || null,
+      secondFollowUpSent: status.secondFollowUpSent || false,
+      secondFollowUpSentAt: status.secondFollowUpSentAt || null,
+      thirdFollowUpSent: status.thirdFollowUpSent || false,
+      thirdFollowUpSentAt: status.thirdFollowUpSentAt || null,
+      unsubscribedAt: status.unsubscribedAt || null,
+      reviewSubmittedAt: status.reviewSubmittedAt || null,
+      totalEmailsSent: status.totalEmailsSent || 0,
+      lastEmailSentAt: status.lastEmailSentAt || null,
+      completedAt: status.completedAt || null
     };
     
     this.reviewRequestStatuses.set(id, newStatus);
