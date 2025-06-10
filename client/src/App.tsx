@@ -75,21 +75,7 @@ import EmergencyLogin from "@/pages/emergency-login";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 
-// Logout handler component that forces immediate logout and redirect
-function LogoutHandler() {
-  useEffect(() => {
-    performImmediateLogout();
-  }, []);
 
-  return (
-    <div className="h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-        <p>Logging out...</p>
-      </div>
-    </div>
-  );
-}
 
 // Authenticated route that redirects to login if not authenticated
 function PrivateRoute({ component: Component, role, ...rest }: { component: React.ComponentType<any>, role?: string, path: string }) {
