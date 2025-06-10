@@ -468,7 +468,7 @@ export class MemStorage implements IStorage {
   async getCheckInsByCompany(companyId: number, limit?: number): Promise<CheckInWithTechnician[]> {
     const companyCheckIns = Array.from(this.checkIns.values())
       .filter(checkIn => checkIn.companyId === companyId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      .sort((a, b) => (b.createdAt || new Date(0)).getTime() - (a.createdAt || new Date(0)).getTime());
     
     const result = await Promise.all(
       (limit ? companyCheckIns.slice(0, limit) : companyCheckIns).map(async checkIn => {
@@ -513,8 +513,8 @@ export class MemStorage implements IStorage {
       address: checkIn.address || null,
       city: checkIn.city || null,
       state: checkIn.state || null,
-      zipCode: checkIn.zipCode || null,
-      country: checkIn.country || null
+      zip: checkIn.zip || null,
+      addressVerified: checkIn.addressVerified || null
     };
     
     this.checkIns.set(id, newCheckIn);
@@ -812,12 +812,13 @@ export class MemStorage implements IStorage {
       firstFollowUpSentAt: status.firstFollowUpSentAt || null,
       secondFollowUpSent: status.secondFollowUpSent || false,
       secondFollowUpSentAt: status.secondFollowUpSentAt || null,
-      thirdFollowUpSent: status.thirdFollowUpSent || false,
-      thirdFollowUpSentAt: status.thirdFollowUpSentAt || null,
+      finalFollowUpSent: status.finalFollowUpSent || false,
+      finalFollowUpSentAt: status.finalFollowUpSentAt || null,
       unsubscribedAt: status.unsubscribedAt || null,
       reviewSubmittedAt: status.reviewSubmittedAt || null,
-      totalEmailsSent: status.totalEmailsSent || 0,
-      lastEmailSentAt: status.lastEmailSentAt || null,
+      linkClicked: status.linkClicked || false,
+      linkClickedAt: status.linkClickedAt || null,
+      reviewSubmitted: status.reviewSubmitted || false,
       completedAt: status.completedAt || null
     };
     
