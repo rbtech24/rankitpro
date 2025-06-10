@@ -368,14 +368,7 @@ export class MemStorage implements IStorage {
       wordpressConfig: company.wordpressConfig || null,
       javaScriptEmbedConfig: company.javaScriptEmbedConfig || null,
       reviewSettings: company.reviewSettings || null,
-      billingSettings: company.billingSettings || null,
-      aiProvider: company.aiProvider || 'openai',
-      customBranding: company.customBranding || null,
-      webhookSettings: company.webhookSettings || null,
-      smsSettings: company.smsSettings || null,
-      emailSettings: company.emailSettings || null,
-      active: company.active !== false,
-      trialEndsAt: company.trialEndsAt || null,
+      trialEndDate: company.trialEndDate || null,
       stripeCustomerId: company.stripeCustomerId || null,
       stripeSubscriptionId: company.stripeSubscriptionId || null
     };
@@ -435,7 +428,13 @@ export class MemStorage implements IStorage {
   async createTechnician(technician: InsertTechnician): Promise<Technician> {
     const id = this.technicianId++;
     const createdAt = new Date();
-    const newTechnician: Technician = { ...technician, id, createdAt };
+    const newTechnician: Technician = { 
+      ...technician, 
+      id, 
+      createdAt,
+      specialty: technician.specialty || null,
+      userId: technician.userId || null
+    };
     
     this.technicians.set(id, newTechnician);
     return newTechnician;
@@ -488,7 +487,19 @@ export class MemStorage implements IStorage {
   async createCheckIn(checkIn: InsertCheckIn): Promise<CheckIn> {
     const id = this.checkInId++;
     const createdAt = new Date();
-    const newCheckIn: CheckIn = { ...checkIn, id, createdAt };
+    const newCheckIn: CheckIn = { 
+      ...checkIn, 
+      id, 
+      createdAt,
+      location: checkIn.location || null,
+      notes: checkIn.notes || null,
+      customerName: checkIn.customerName || null,
+      customerEmail: checkIn.customerEmail || null,
+      customerPhone: checkIn.customerPhone || null,
+      photos: checkIn.photos || [],
+      beforePhotos: checkIn.beforePhotos || null,
+      afterPhotos: checkIn.afterPhotos || null
+    };
     
     this.checkIns.set(id, newCheckIn);
     return newCheckIn;
@@ -521,7 +532,13 @@ export class MemStorage implements IStorage {
   async createBlogPost(blogPost: InsertBlogPost): Promise<BlogPost> {
     const id = this.blogPostId++;
     const createdAt = new Date();
-    const newBlogPost: BlogPost = { ...blogPost, id, createdAt };
+    const newBlogPost: BlogPost = { 
+      ...blogPost, 
+      id, 
+      createdAt,
+      photos: blogPost.photos || null,
+      checkInId: blogPost.checkInId || null
+    };
     
     this.blogPosts.set(id, newBlogPost);
     return newBlogPost;
@@ -1665,14 +1682,201 @@ export class DatabaseStorage implements IStorage {
     const technicians = await db.select().from(schema.technicians)
       .where(eq(schema.technicians.companyId, companyId));
     
-    // For now, return technicians with zero stats since we haven't implemented check-ins yet
     return technicians.map(tech => ({
       ...tech,
-      totalCheckIns: 0,
-      thisMonthCheckIns: 0,
-      avgRating: 0,
-      totalReviews: 0
+      checkinsCount: 0,
+      reviewsCount: 0,
+      rating: 0
     }));
+  }
+
+  // Missing methods implementation
+  async deleteCheckIn(id: number): Promise<boolean> {
+    const result = await db.delete(schema.checkIns).where(eq(schema.checkIns.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async deleteBlogPost(id: number): Promise<boolean> {
+    const result = await db.delete(schema.blogPosts).where(eq(schema.blogPosts.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async getReviewRequestByToken(token: string): Promise<ReviewRequest | undefined> {
+    const [request] = await db.select().from(schema.reviewRequests)
+      .where(eq(schema.reviewRequests.token, token));
+    return request;
+  }
+
+  async getReviewResponsesByTechnician(technicianId: number): Promise<ReviewResponse[]> {
+    return await db.select().from(schema.reviewResponses)
+      .where(eq(schema.reviewResponses.technicianId, technicianId));
+  }
+
+  async getReviewResponsesByCompany(companyId: number): Promise<ReviewResponse[]> {
+    return await db.select().from(schema.reviewResponses)
+      .where(eq(schema.reviewResponses.companyId, companyId));
+  }
+
+  async createReviewFollowUpSettings(settings: any): Promise<any> {
+    const [result] = await db.insert(schema.reviewFollowUpSettings)
+      .values(settings)
+      .returning();
+    return result;
+  }
+
+  async updateReviewFollowUpSettings(companyId: number, updates: any): Promise<any> {
+    const [result] = await db.update(schema.reviewFollowUpSettings)
+      .set(updates)
+      .where(eq(schema.reviewFollowUpSettings.companyId, companyId))
+      .returning();
+    return result;
+  }
+
+  async createWordPressIntegration(integration: any): Promise<any> {
+    const [result] = await db.insert(schema.wordpressIntegrations)
+      .values(integration)
+      .returning();
+    return result;
+  }
+
+  async getWordPressIntegration(companyId: number): Promise<any> {
+    const [integration] = await db.select().from(schema.wordpressIntegrations)
+      .where(eq(schema.wordpressIntegrations.companyId, companyId));
+    return integration;
+  }
+
+  async updateWordPressIntegration(companyId: number, updates: any): Promise<any> {
+    const [result] = await db.update(schema.wordpressIntegrations)
+      .set(updates)
+      .where(eq(schema.wordpressIntegrations.companyId, companyId))
+      .returning();
+    return result;
+  }
+
+  async deleteWordPressIntegration(companyId: number): Promise<boolean> {
+    const result = await db.delete(schema.wordpressIntegrations)
+      .where(eq(schema.wordpressIntegrations.companyId, companyId));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async createAIUsageLog(log: any): Promise<any> {
+    const [result] = await db.insert(schema.aiUsageLogs)
+      .values(log)
+      .returning();
+    return result;
+  }
+
+  async getAIUsageByCompany(companyId: number): Promise<any[]> {
+    return await db.select().from(schema.aiUsageLogs)
+      .where(eq(schema.aiUsageLogs.companyId, companyId));
+  }
+
+  async createPasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<void> {
+    // Implementation would go here - storing in a password reset tokens table
+  }
+
+  async getPasswordResetToken(token: string): Promise<any> {
+    // Implementation would go here
+    return null;
+  }
+
+  async deletePasswordResetToken(token: string): Promise<boolean> {
+    // Implementation would go here
+    return false;
+  }
+
+  async createAPIKey(apiKey: any): Promise<any> {
+    const [result] = await db.insert(schema.apiKeys)
+      .values(apiKey)
+      .returning();
+    return result;
+  }
+
+  async getAPIKeyByHash(hash: string): Promise<any> {
+    const [apiKey] = await db.select().from(schema.apiKeys)
+      .where(eq(schema.apiKeys.apiKeyHash, hash));
+    return apiKey;
+  }
+
+  async getAPIKeysByCompany(companyId: number): Promise<any[]> {
+    return await db.select().from(schema.apiKeys)
+      .where(eq(schema.apiKeys.companyId, companyId));
+  }
+
+  async updateAPIKey(id: number, updates: any): Promise<any> {
+    const [result] = await db.update(schema.apiKeys)
+      .set(updates)
+      .where(eq(schema.apiKeys.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteAPIKey(id: number): Promise<boolean> {
+    const result = await db.delete(schema.apiKeys)
+      .where(eq(schema.apiKeys.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async createSalesPerson(person: any): Promise<any> {
+    const [result] = await db.insert(schema.salesPersons)
+      .values(person)
+      .returning();
+    return result;
+  }
+
+  async getSalesPersons(): Promise<any[]> {
+    return await db.select().from(schema.salesPersons);
+  }
+
+  async getSalesPerson(id: number): Promise<any> {
+    const [person] = await db.select().from(schema.salesPersons)
+      .where(eq(schema.salesPersons.id, id));
+    return person;
+  }
+
+  async updateSalesPerson(id: number, updates: any): Promise<any> {
+    const [result] = await db.update(schema.salesPersons)
+      .set(updates)
+      .where(eq(schema.salesPersons.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteSalesPerson(id: number): Promise<boolean> {
+    const result = await db.delete(schema.salesPersons)
+      .where(eq(schema.salesPersons.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async createCommission(commission: any): Promise<any> {
+    const [result] = await db.insert(schema.commissions)
+      .values(commission)
+      .returning();
+    return result;
+  }
+
+  async getCommissionsBySalesPerson(salesPersonId: number): Promise<any[]> {
+    return await db.select().from(schema.commissions)
+      .where(eq(schema.commissions.salesPersonId, salesPersonId));
+  }
+
+  async getCommissionsByMonth(month: string): Promise<any[]> {
+    return await db.select().from(schema.commissions)
+      .where(eq(schema.commissions.commissionMonth, month));
+  }
+
+  async updateCommission(id: number, updates: any): Promise<any> {
+    const [result] = await db.update(schema.commissions)
+      .set(updates)
+      .where(eq(schema.commissions.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteCommission(id: number): Promise<boolean> {
+    const result = await db.delete(schema.commissions)
+      .where(eq(schema.commissions.id, id));
+    return (result.rowCount || 0) > 0;
   }
 
   async getCompanyStats(companyId: number): Promise<any> {
