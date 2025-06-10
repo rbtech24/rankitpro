@@ -305,7 +305,16 @@ export class MemStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const id = this.userId++;
     const createdAt = new Date();
-    const newUser: User = { ...user, id, createdAt };
+    const newUser: User = { 
+      ...user, 
+      id, 
+      createdAt,
+      role: user.role || 'technician',
+      stripeCustomerId: user.stripeCustomerId || null,
+      stripeSubscriptionId: user.stripeSubscriptionId || null,
+      companyId: user.companyId || null,
+      active: user.active !== false
+    };
     
     this.users.set(id, newUser);
     return newUser;
@@ -350,7 +359,26 @@ export class MemStorage implements IStorage {
   async createCompany(company: InsertCompany): Promise<Company> {
     const id = this.companyId++;
     const createdAt = new Date();
-    const newCompany: Company = { ...company, id, createdAt };
+    const newCompany: Company = { 
+      ...company, 
+      id, 
+      createdAt,
+      plan: company.plan || 'starter',
+      usageLimit: company.usageLimit || 1000,
+      wordpressConfig: company.wordpressConfig || null,
+      javaScriptEmbedConfig: company.javaScriptEmbedConfig || null,
+      reviewSettings: company.reviewSettings || null,
+      billingSettings: company.billingSettings || null,
+      aiProvider: company.aiProvider || 'openai',
+      customBranding: company.customBranding || null,
+      webhookSettings: company.webhookSettings || null,
+      smsSettings: company.smsSettings || null,
+      emailSettings: company.emailSettings || null,
+      active: company.active !== false,
+      trialEndsAt: company.trialEndsAt || null,
+      stripeCustomerId: company.stripeCustomerId || null,
+      stripeSubscriptionId: company.stripeSubscriptionId || null
+    };
     
     this.companies.set(id, newCompany);
     return newCompany;
@@ -1474,7 +1502,7 @@ export class MemStorage implements IStorage {
       throw new Error("Company not found");
     }
     
-    const technicians = this.getTechniciansByCompany(companyId);
+    const technicians = await this.getTechniciansByCompany(companyId);
     const visits = Array.from(this.checkIns.values()).filter(c => c.companyId === companyId);
     const reviews = Array.from(this.reviewResponses.values()).filter(r => r.companyId === companyId);
     
@@ -1630,7 +1658,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTechnician(id: number): Promise<boolean> {
     const result = await db.delete(schema.technicians).where(eq(schema.technicians.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async getTechniciansWithStats(companyId: number): Promise<TechnicianWithStats[]> {
@@ -1684,7 +1712,19 @@ export class DatabaseStorage implements IStorage {
   async getReviewRequestStatuses(): Promise<any> { throw new Error("Not implemented"); }
   async createReviewRequestStatus(): Promise<any> { throw new Error("Not implemented"); }
   async updateReviewRequestStatus(): Promise<any> { throw new Error("Not implemented"); }
-  async getReviewFollowUpSettings(): Promise<any> { throw new Error("Not implemented"); }
+  async getReviewFollowUpSettings(companyId: number): Promise<any> {
+    // Return default settings to prevent scheduler crashes
+    return {
+      id: 1,
+      companyId,
+      enabled: false,
+      followUpIntervals: [24, 72, 168], // 1 day, 3 days, 1 week in hours
+      emailTemplate: "Default follow-up template",
+      maxFollowUps: 3,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
   async createReviewFollowUpSettings(): Promise<any> { throw new Error("Not implemented"); }
   async updateReviewFollowUpSettings(): Promise<any> { throw new Error("Not implemented"); }
   async getWordpressCustomFields(): Promise<any> { throw new Error("Not implemented"); }
