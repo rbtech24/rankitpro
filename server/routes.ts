@@ -122,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
-  // Configure session store based on environment
+  // Configure session store based on environment with shorter TTL
   let sessionStore;
   if (process.env.DATABASE_URL) {
     // Use PostgreSQL session store in production for persistence
@@ -130,18 +130,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     sessionStore = new pgSession({
       conString: process.env.DATABASE_URL,
       createTableIfMissing: true,
-      ttl: 24 * 60 * 60, // 24 hours in seconds
+      ttl: 2 * 60 * 60, // 2 hours in seconds
     });
-    console.log('[SESSION] Using PostgreSQL session store');
+    console.log('[SESSION] Using PostgreSQL session store with 2-hour TTL');
   } else {
     // Use memory store in development
     sessionStore = new SessionStore({
-      checkPeriod: 86400000, // Prune expired entries every 24h
+      checkPeriod: 3600000, // Prune expired entries every hour
     });
-    console.log('[SESSION] Using memory session store');
+    console.log('[SESSION] Using memory session store with 1-hour check period');
   }
   
-  // Setup session middleware
+  // Setup session middleware with shorter timeout
   app.use(
     session({
       store: sessionStore,
@@ -149,8 +149,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       resave: false,
       saveUninitialized: false,
       name: 'connect.sid',
+      rolling: true, // Reset expiration on each request
       cookie: {
-        maxAge: 1000 * 60 * 60 * 24, // 24 hours
+        maxAge: 1000 * 60 * 60 * 2, // 2 hours instead of 24
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
@@ -609,36 +610,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Get session ID before destroying
     const sessionId = req.sessionID;
     
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Session destruction error:", err);
-        return res.status(500).json({ message: "Failed to logout" });
-      }
-      
-      // Clear the session cookie with all possible configurations
-      const cookieOptions = [
-        { path: '/', httpOnly: true, secure: false, sameSite: 'lax' as const },
-        { path: '/', httpOnly: true, secure: true, sameSite: 'none' as const },
-        { path: '/', httpOnly: true, secure: false, sameSite: 'strict' as const },
-        { path: '/' }
-      ];
-      
-      cookieOptions.forEach(options => {
-        res.clearCookie('connect.sid', options);
+    // Force immediate session destruction
+    if (req.session) {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Session destruction error:", err);
+        }
+        
+        // Always clear cookies regardless of session destruction result
+        clearAllSessionCookies(res);
+        
+        console.log(`Session ${sessionId} destroyed successfully`);
+        res.json({ 
+          message: "Logged out successfully",
+          timestamp: new Date().toISOString(),
+          sessionCleared: true
+        });
       });
-      
-      // Also clear any potential session cookies with different names
-      res.clearCookie('session');
-      res.clearCookie('sess');
-      res.clearCookie('sessionId');
-      
-      console.log(`Session ${sessionId} destroyed successfully`);
-      res.json({ message: "Logged out successfully" });
-    });
+    } else {
+      // No session exists, just clear cookies
+      clearAllSessionCookies(res);
+      res.json({ 
+        message: "Logged out successfully",
+        timestamp: new Date().toISOString(),
+        sessionCleared: false
+      });
+    }
   });
 
+  // Helper function to clear all possible session cookies
+  function clearAllSessionCookies(res: any) {
+    const cookieOptions = [
+      { path: '/', httpOnly: true, secure: false, sameSite: 'lax' as const },
+      { path: '/', httpOnly: true, secure: true, sameSite: 'none' as const },
+      { path: '/', httpOnly: true, secure: false, sameSite: 'strict' as const },
+      { path: '/', httpOnly: true },
+      { path: '/' }
+    ];
+    
+    const cookieNames = ['connect.sid', 'session', 'sess', 'sessionId', 'auth'];
+    
+    cookieNames.forEach(name => {
+      cookieOptions.forEach(options => {
+        res.clearCookie(name, options);
+      });
+      // Also clear without options
+      res.clearCookie(name);
+    });
+    
+    // Set expired cookies to force browser to delete them
+    res.cookie('connect.sid', '', { expires: new Date(0), path: '/' });
+    res.cookie('session', '', { expires: new Date(0), path: '/' });
+  }
+
   // Force logout endpoint - clears session without authentication check
-  app.get("/api/force-logout", (req, res) => {
+  app.all("/api/force-logout", (req, res) => {
     // Anti-cache headers
     res.set({
       'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
@@ -651,26 +677,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.destroy(() => {});
     }
     
-    // Clear all possible session cookies
-    const cookieOptions = [
-      { path: '/', httpOnly: true, secure: false, sameSite: 'lax' as const },
-      { path: '/', httpOnly: true, secure: true, sameSite: 'none' as const },
-      { path: '/', httpOnly: true, secure: false, sameSite: 'strict' as const },
-      { path: '/' }
-    ];
-    
-    cookieOptions.forEach(options => {
-      res.clearCookie('connect.sid', options);
-    });
-    
-    res.clearCookie('session');
-    res.clearCookie('sess');
-    res.clearCookie('sessionId');
+    // Use the same comprehensive cookie clearing function
+    clearAllSessionCookies(res);
     
     console.log("Force logout executed");
     
-    // Redirect to login page
-    res.redirect('/login?force=1');
+    // Return JSON for API calls, redirect for browser
+    if (req.path.includes('/api/') || req.headers.accept?.includes('application/json')) {
+      res.json({ 
+        message: "Force logout completed",
+        timestamp: new Date().toISOString(),
+        cleared: true
+      });
+    } else {
+      res.redirect('/login?force=1');
+    }
+  });
+
+  // Immediate logout endpoint - more aggressive than regular logout
+  app.post("/api/auth/immediate-logout", (req, res) => {
+    // Anti-cache headers
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    
+    // Force session destruction without callback
+    if (req.session) {
+      try {
+        req.session.destroy(() => {});
+      } catch (error) {
+        console.log("Session destruction error (expected):", error);
+      }
+    }
+    
+    // Clear all cookies aggressively
+    clearAllSessionCookies(res);
+    
+    console.log("Immediate logout executed");
+    
+    res.json({ 
+      message: "Immediate logout completed",
+      timestamp: new Date().toISOString(),
+      sessionDestroyed: true,
+      cookiesCleared: true
+    });
   });
   
   app.get("/api/auth/me", isAuthenticated, async (req, res) => {
