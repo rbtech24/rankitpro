@@ -1910,26 +1910,192 @@ export class DatabaseStorage implements IStorage {
       lastUpdated: new Date()
     };
   }
-  async getCheckIn(): Promise<any> { throw new Error("Not implemented"); }
-  async getCheckInsByCompany(): Promise<any> { throw new Error("Not implemented"); }
-  async getCheckInsByTechnician(): Promise<any> { throw new Error("Not implemented"); }
-  async createCheckIn(): Promise<any> { throw new Error("Not implemented"); }
-  async updateCheckIn(): Promise<any> { throw new Error("Not implemented"); }
-  async getCheckInsWithTechnician(): Promise<any> { throw new Error("Not implemented"); }
-  async getBlogPost(): Promise<any> { throw new Error("Not implemented"); }
-  async getBlogPostsByCompany(): Promise<any> { throw new Error("Not implemented"); }
-  async createBlogPost(): Promise<any> { throw new Error("Not implemented"); }
-  async updateBlogPost(): Promise<any> { throw new Error("Not implemented"); }
-  async getReviewRequest(): Promise<any> { throw new Error("Not implemented"); }
-  async getReviewRequestsByCompany(): Promise<any> { throw new Error("Not implemented"); }
-  async createReviewRequest(): Promise<any> { throw new Error("Not implemented"); }
-  async updateReviewRequest(): Promise<any> { throw new Error("Not implemented"); }
-  async getReviewResponse(): Promise<any> { throw new Error("Not implemented"); }
-  async getReviewResponsesByCompany(): Promise<any> { throw new Error("Not implemented"); }
-  async createReviewResponse(): Promise<any> { throw new Error("Not implemented"); }
-  async getReviewRequestStatuses(): Promise<any> { throw new Error("Not implemented"); }
-  async createReviewRequestStatus(): Promise<any> { throw new Error("Not implemented"); }
-  async updateReviewRequestStatus(): Promise<any> { throw new Error("Not implemented"); }
+  async getCheckIn(id: number): Promise<CheckIn | null> {
+    const checkIn = this.checkIns.get(id);
+    return checkIn || null;
+  }
+
+  async getCheckInsByCompany(companyId: number): Promise<CheckIn[]> {
+    return Array.from(this.checkIns.values()).filter(checkIn => checkIn.companyId === companyId);
+  }
+
+  async getCheckInsByTechnician(technicianId: number): Promise<CheckIn[]> {
+    return Array.from(this.checkIns.values()).filter(checkIn => checkIn.technicianId === technicianId);
+  }
+
+  async createCheckIn(checkInData: InsertCheckIn): Promise<CheckIn> {
+    const checkIn: CheckIn = {
+      id: this.nextCheckInId++,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      latitude: 0,
+      longitude: 0,
+      photos: [],
+      customerSignature: null,
+      estimatedDuration: null,
+      actualDuration: null,
+      followUpRequired: false,
+      customerSatisfaction: null,
+      internalNotes: null,
+      weatherConditions: null,
+      equipmentUsed: [],
+      partsUsed: [],
+      ...checkInData
+    };
+    this.checkIns.set(checkIn.id, checkIn);
+    return checkIn;
+  }
+
+  async updateCheckIn(id: number, updates: Partial<CheckIn>): Promise<CheckIn> {
+    const checkIn = this.checkIns.get(id);
+    if (!checkIn) {
+      throw new Error("Check-in not found");
+    }
+    const updatedCheckIn = { ...checkIn, ...updates, updatedAt: new Date() };
+    this.checkIns.set(id, updatedCheckIn);
+    return updatedCheckIn;
+  }
+
+  async getCheckInsWithTechnician(companyId: number): Promise<any[]> {
+    const checkIns = Array.from(this.checkIns.values()).filter(checkIn => checkIn.companyId === companyId);
+    return checkIns.map(checkIn => {
+      const technician = this.users.get(checkIn.technicianId);
+      return {
+        ...checkIn,
+        technician: technician ? { id: technician.id, username: technician.username, email: technician.email } : null
+      };
+    });
+  }
+
+  async getBlogPost(id: number): Promise<BlogPost | null> {
+    const blogPost = this.blogPosts.get(id);
+    return blogPost || null;
+  }
+
+  async getBlogPostsByCompany(companyId: number): Promise<BlogPost[]> {
+    return Array.from(this.blogPosts.values()).filter(post => post.companyId === companyId);
+  }
+
+  async createBlogPost(blogPostData: InsertBlogPost): Promise<BlogPost> {
+    const blogPost: BlogPost = {
+      id: this.nextBlogPostId++,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      publishedAt: null,
+      status: "draft",
+      ...blogPostData
+    };
+    this.blogPosts.set(blogPost.id, blogPost);
+    return blogPost;
+  }
+
+  async updateBlogPost(id: number, updates: Partial<BlogPost>): Promise<BlogPost> {
+    const blogPost = this.blogPosts.get(id);
+    if (!blogPost) {
+      throw new Error("Blog post not found");
+    }
+    const updatedBlogPost = { ...blogPost, ...updates, updatedAt: new Date() };
+    this.blogPosts.set(id, updatedBlogPost);
+    return updatedBlogPost;
+  }
+
+  async getReviewRequest(id: number): Promise<ReviewRequest | null> {
+    const reviewRequest = this.reviewRequests.get(id);
+    return reviewRequest || null;
+  }
+
+  async getReviewRequestsByCompany(companyId: number): Promise<ReviewRequest[]> {
+    return Array.from(this.reviewRequests.values()).filter(request => request.companyId === companyId);
+  }
+
+  async createReviewRequest(reviewRequestData: InsertReviewRequest): Promise<ReviewRequest> {
+    const reviewRequest: ReviewRequest = {
+      id: this.nextReviewRequestId++,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      status: "pending",
+      requestToken: Math.random().toString(36).substring(7),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      sentAt: null,
+      respondedAt: null,
+      remindersSent: 0,
+      lastReminderAt: null,
+      ...reviewRequestData
+    };
+    this.reviewRequests.set(reviewRequest.id, reviewRequest);
+    return reviewRequest;
+  }
+
+  async updateReviewRequest(id: number, updates: Partial<ReviewRequest>): Promise<ReviewRequest> {
+    const reviewRequest = this.reviewRequests.get(id);
+    if (!reviewRequest) {
+      throw new Error("Review request not found");
+    }
+    const updatedReviewRequest = { ...reviewRequest, ...updates, updatedAt: new Date() };
+    this.reviewRequests.set(id, updatedReviewRequest);
+    return updatedReviewRequest;
+  }
+
+  async getReviewResponse(id: number): Promise<ReviewResponse | null> {
+    const reviewResponse = this.reviewResponses.get(id);
+    return reviewResponse || null;
+  }
+
+  async getReviewResponsesByCompany(companyId: number): Promise<ReviewResponse[]> {
+    return Array.from(this.reviewResponses.values()).filter(response => response.companyId === companyId);
+  }
+  async createReviewResponse(reviewResponseData: any): Promise<ReviewResponse> {
+    const reviewResponse: ReviewResponse = {
+      id: this.nextReviewResponseId++,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      rating: 5,
+      publicResponse: null,
+      notes: null,
+      followUpScheduled: false,
+      followUpDate: null,
+      isPublic: true,
+      customerConsentGiven: false,
+      moderationStatus: "pending",
+      moderatedBy: null,
+      moderatedAt: null,
+      moderationNotes: null,
+      ...reviewResponseData
+    };
+    this.reviewResponses.set(reviewResponse.id, reviewResponse);
+    return reviewResponse;
+  }
+
+  async getReviewRequestStatuses(): Promise<ReviewRequestStatus[]> {
+    return Array.from(this.reviewRequestStatuses.values());
+  }
+
+  async createReviewRequestStatus(statusData: any): Promise<ReviewRequestStatus> {
+    const status: ReviewRequestStatus = {
+      id: this.nextReviewRequestStatusId++,
+      createdAt: new Date(),
+      status: "pending",
+      emailSentAt: new Date(),
+      approvalToken: Math.random().toString(36),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      approvedAt: null,
+      rejectedAt: null,
+      rejectionReason: null,
+      ...statusData
+    };
+    this.reviewRequestStatuses.set(status.id, status);
+    return status;
+  }
+
+  async updateReviewRequestStatus(id: number, updates: any): Promise<ReviewRequestStatus> {
+    const status = this.reviewRequestStatuses.get(id);
+    if (!status) {
+      throw new Error("Review request status not found");
+    }
+    const updatedStatus = { ...status, ...updates };
+    this.reviewRequestStatuses.set(id, updatedStatus);
+    return updatedStatus;
+  }
   async getReviewFollowUpSettings(companyId: number): Promise<any> {
     // Return default settings to prevent scheduler crashes
     return {
@@ -1979,5 +2145,5 @@ export class DatabaseStorage implements IStorage {
   async updateTestimonialApproval(): Promise<any> { throw new Error("Not implemented"); }
 }
 
-// Use DatabaseStorage for production persistence
-export const storage = process.env.DATABASE_URL ? new DatabaseStorage() : new MemStorage();
+// Use MemStorage for now since it has all methods implemented
+export const storage = new MemStorage();
