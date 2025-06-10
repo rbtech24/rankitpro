@@ -9,7 +9,7 @@ import { register as registerUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Building2, Users, Wrench } from "lucide-react";
+import { CheckCircle, Building2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -19,45 +19,27 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 
 const formSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
-  role: z.enum(["company_admin", "technician"]),
-  companyName: z.string().optional(),
+  companyName: z.string().min(3, "Company name must be at least 3 characters"),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
-}).refine(data => {
-  if (data.role === "company_admin" && (!data.companyName || data.companyName.length < 3)) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Company name is required for company admins",
-  path: ["companyName"],
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 const steps = [
-  { id: 1, title: "Choose Account Type", description: "Select your role" },
-  { id: 2, title: "Account Details", description: "Enter your information" },
-  { id: 3, title: "Complete Setup", description: "Finish registration" }
+  { id: 1, title: "Account Details", description: "Enter your information" },
+  { id: 2, title: "Complete Setup", description: "Finish registration" }
 ];
 
 export default function Onboarding() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedRole, setSelectedRole] = useState<"company_admin" | "technician" | null>(null);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -68,7 +50,6 @@ export default function Onboarding() {
       email: "",
       password: "",
       confirmPassword: "",
-      role: "company_admin",
       companyName: "",
     },
   });
@@ -91,15 +72,13 @@ export default function Onboarding() {
     },
   });
 
-  const handleRoleSelection = (role: "company_admin" | "technician") => {
-    setSelectedRole(role);
-    form.setValue("role", role);
-    setCurrentStep(2);
-  };
-
   const onSubmit = (data: FormData) => {
-    setCurrentStep(3);
-    registerMutation.mutate(data);
+    setCurrentStep(2);
+    // Always register as company admin
+    registerMutation.mutate({
+      ...data,
+      role: "company_admin"
+    });
   };
 
   const progress = (currentStep / steps.length) * 100;
@@ -109,11 +88,16 @@ export default function Onboarding() {
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Building2 className="h-8 w-8 text-primary" />
+            </div>
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Welcome to Rank It Pro
           </h1>
           <p className="text-gray-600">
-            Let's get your account set up in just a few steps
+            Start your free trial and transform your home service business
           </p>
         </div>
 
@@ -130,94 +114,18 @@ export default function Onboarding() {
           <Progress value={progress} className="h-2" />
         </div>
 
-        {/* Step 1: Role Selection */}
+        {/* Step 1: Registration Form */}
         {currentStep === 1 && (
           <Card>
             <CardHeader>
-              <CardTitle>Choose Your Account Type</CardTitle>
+              <CardTitle>Create Your Business Account</CardTitle>
               <CardDescription>
-                Select the option that best describes your role
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div
-                onClick={() => handleRoleSelection("company_admin")}
-                className="border-2 border-gray-200 rounded-lg p-6 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
-              >
-                <div className="flex items-start space-x-4">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Building2 className="h-6 w-6 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-2">Business Owner / Manager</h3>
-                    <p className="text-gray-600 text-sm mb-3">
-                      I own or manage a home service business and want to oversee operations, manage technicians, and track performance.
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Dashboard Access</span>
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Team Management</span>
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Analytics</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                onClick={() => handleRoleSelection("technician")}
-                className="border-2 border-gray-200 rounded-lg p-6 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
-              >
-                <div className="flex items-start space-x-4">
-                  <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
-                    <Wrench className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-2">Field Technician</h3>
-                    <p className="text-gray-600 text-sm mb-3">
-                      I work in the field providing services to customers and need to log visits, upload photos, and manage my daily tasks.
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Mobile App</span>
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Visit Logging</span>
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">GPS Tracking</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Step 2: Account Details */}
-        {currentStep === 2 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Details</CardTitle>
-              <CardDescription>
-                {selectedRole === "company_admin" 
-                  ? "Create your business account and company profile"
-                  : "Create your technician account"
-                }
+                Enter your details to get started with your home service business management platform
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  {selectedRole === "company_admin" && (
-                    <FormField
-                      control={form.control}
-                      name="companyName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Company Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Your Company Name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -226,13 +134,13 @@ export default function Onboarding() {
                         <FormItem>
                           <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input placeholder="Choose a username" {...field} />
+                            <Input placeholder="Enter your username" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-
+                    
                     <FormField
                       control={form.control}
                       name="email"
@@ -240,13 +148,27 @@ export default function Onboarding() {
                         <FormItem>
                           <FormLabel>Email Address</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="your@email.com" {...field} />
+                            <Input type="email" placeholder="Enter your email" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
+
+                  <FormField
+                    control={form.control}
+                    name="companyName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your company name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
@@ -278,66 +200,87 @@ export default function Onboarding() {
                     />
                   </div>
 
-                  <div className="flex gap-4 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setCurrentStep(1)}
+                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <Link href="/login" className="flex-1">
+                      <Button type="button" variant="outline" className="w-full">
+                        Already have an account? Sign In
+                      </Button>
+                    </Link>
+                    <Button 
+                      type="submit" 
                       className="flex-1"
+                      disabled={registerMutation.isPending}
                     >
-                      Back
-                    </Button>
-                    <Button type="submit" className="flex-1" disabled={registerMutation.isPending}>
                       {registerMutation.isPending ? "Creating Account..." : "Create Account"}
                     </Button>
                   </div>
                 </form>
               </Form>
+
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="text-xs text-gray-500 text-center">
+                  By creating an account, you agree to our{" "}
+                  <Link href="/terms-of-service">
+                    <span className="text-primary hover:underline">Terms of Service</span>
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy-policy">
+                    <span className="text-primary hover:underline">Privacy Policy</span>
+                  </Link>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Step 3: Completion */}
-        {currentStep === 3 && (
+        {/* Step 2: Registration Complete */}
+        {currentStep === 2 && (
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="py-8">
               <div className="text-center">
-                {registerMutation.isPending ? (
-                  <div>
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                    <h3 className="text-xl font-semibold mb-2">Setting up your account...</h3>
-                    <p className="text-gray-600">This will just take a moment.</p>
-                  </div>
-                ) : registerMutation.isSuccess ? (
-                  <div>
-                    <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                      <CheckCircle className="h-6 w-6 text-green-600" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">Welcome aboard!</h3>
-                    <p className="text-gray-600">Your account has been created successfully.</p>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                <div className="flex justify-center mb-4">
+                  {registerMutation.isPending ? (
+                    <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
+                  ) : registerMutation.isSuccess ? (
+                    <CheckCircle className="h-12 w-12 text-green-600" />
+                  ) : (
+                    <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
                       <span className="text-red-600 text-xl">✕</span>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">Registration Failed</h3>
-                    <p className="text-gray-600 mb-4">There was an error creating your account.</p>
-                    <Button onClick={() => setCurrentStep(2)}>Try Again</Button>
+                  )}
+                </div>
+                
+                {registerMutation.isPending && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Creating Your Account</h3>
+                    <p className="text-gray-600">Please wait while we set up your business dashboard...</p>
+                  </div>
+                )}
+                
+                {registerMutation.isSuccess && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Welcome to Rank It Pro!</h3>
+                    <p className="text-gray-600 mb-4">
+                      Your account has been created successfully. You'll be redirected to your dashboard shortly.
+                    </p>
+                  </div>
+                )}
+                
+                {registerMutation.isError && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Registration Failed</h3>
+                    <p className="text-gray-600 mb-4">
+                      There was an error creating your account. Please try again.
+                    </p>
+                    <Button onClick={() => setCurrentStep(1)} variant="outline">
+                      Go Back
+                    </Button>
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
         )}
-
-        {/* Footer */}
-        <div className="text-center mt-8 text-sm text-gray-500">
-          Already have an account?{" "}
-          <Link to="/login" className="text-primary hover:underline">
-            Sign in here
-          </Link>
-        </div>
       </div>
     </div>
   );
