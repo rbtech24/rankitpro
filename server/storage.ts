@@ -370,7 +370,13 @@ export class MemStorage implements IStorage {
       reviewSettings: company.reviewSettings || null,
       trialEndDate: company.trialEndDate || null,
       stripeCustomerId: company.stripeCustomerId || null,
-      stripeSubscriptionId: company.stripeSubscriptionId || null
+      stripeSubscriptionId: company.stripeSubscriptionId || null,
+      crmIntegrations: company.crmIntegrations || null,
+      salesPersonId: company.salesPersonId || null,
+      crmSyncHistory: company.crmSyncHistory || null,
+      emailVerificationToken: company.emailVerificationToken || null,
+      trialStartDate: company.trialStartDate || null,
+      isEmailVerified: company.isEmailVerified || false
     };
     
     this.companies.set(id, newCompany);
@@ -498,7 +504,21 @@ export class MemStorage implements IStorage {
       customerPhone: checkIn.customerPhone || null,
       photos: checkIn.photos || [],
       beforePhotos: checkIn.beforePhotos || null,
-      afterPhotos: checkIn.afterPhotos || null
+      afterPhotos: checkIn.afterPhotos || null,
+      workPerformed: checkIn.workPerformed || null,
+      materialsUsed: checkIn.materialsUsed || null,
+      latitude: checkIn.latitude || null,
+      longitude: checkIn.longitude || null,
+      timeSpent: checkIn.timeSpent || null,
+      invoiceNumber: checkIn.invoiceNumber || null,
+      cost: checkIn.cost || null,
+      tags: checkIn.tags || null,
+      completedAt: checkIn.completedAt || null,
+      signature: checkIn.signature || null,
+      rating: checkIn.rating || null,
+      feedback: checkIn.feedback || null,
+      gpsCoordinates: checkIn.gpsCoordinates || null,
+      isBlog: checkIn.isBlog || false
     };
     
     this.checkIns.set(id, newCheckIn);
@@ -571,7 +591,17 @@ export class MemStorage implements IStorage {
   async createReviewRequest(reviewRequest: InsertReviewRequest): Promise<ReviewRequest> {
     const id = this.reviewRequestId++;
     const sentAt = new Date();
-    const newReviewRequest: ReviewRequest = { ...reviewRequest, id, sentAt };
+    const newReviewRequest: ReviewRequest = { 
+      ...reviewRequest, 
+      id, 
+      sentAt,
+      email: reviewRequest.email || null,
+      phone: reviewRequest.phone || null,
+      status: reviewRequest.status || 'pending',
+      jobType: reviewRequest.jobType || null,
+      customMessage: reviewRequest.customMessage || null,
+      token: reviewRequest.token || null
+    };
     
     this.reviewRequests.set(id, newReviewRequest);
     return newReviewRequest;
@@ -628,7 +658,13 @@ export class MemStorage implements IStorage {
     const id = this.reviewResponseId++;
     const respondedAt = new Date();
     
-    const newReviewResponse: ReviewResponse = { ...reviewResponse, id, respondedAt };
+    const newReviewResponse: ReviewResponse = { 
+      ...reviewResponse, 
+      id, 
+      respondedAt,
+      feedback: reviewResponse.feedback || null,
+      publicDisplay: reviewResponse.publicDisplay || null
+    };
     this.reviewResponses.set(id, newReviewResponse);
     
     return newReviewResponse;
