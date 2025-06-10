@@ -278,17 +278,41 @@ export const insertAPICredentialsSchema = createInsertSchema(apiCredentials).omi
 });
 
 // AI Usage Tracking table
-export const aiUsageTracking = pgTable("ai_usage_tracking", {
+export const aiUsageLogs = pgTable("ai_usage_logs", {
   id: serial("id").primaryKey(),
   companyId: integer("company_id").references(() => companies.id).notNull(),
   provider: text("provider", { enum: ["openai", "anthropic", "xai"] }).notNull(),
   operation: text("operation", { enum: ["summary", "blog_post"] }).notNull(),
   tokensUsed: integer("tokens_used").notNull(),
-  estimatedCost: numeric("estimated_cost", { precision: 10, scale: 6 }).notNull(), // Store in dollars
+  estimatedCost: text("estimated_cost").notNull(), // Store as string for precision
   requestData: jsonb("request_data"), // Store request details for analysis
   createdAt: timestamp("created_at").defaultNow().notNull(),
   userId: integer("user_id").references(() => users.id),
   checkInId: integer("check_in_id").references(() => checkIns.id)
+});
+
+// WordPress Integrations table  
+export const wordpressIntegrations = pgTable("wordpress_integrations", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  apiKey: text("api_key").notNull(),
+  secretKey: text("secret_key").notNull(),
+  siteUrl: text("site_url").notNull(),
+  useRestApi: boolean("use_rest_api").default(true).notNull(),
+  postType: text("post_type").default("post").notNull(),
+  defaultCategory: text("default_category"),
+  customFieldMappings: jsonb("custom_field_mappings").default({}).notNull(),
+  taxonomyMappings: jsonb("taxonomy_mappings").default({}).notNull(),
+  autoPublish: boolean("auto_publish").default(false).notNull(),
+  includePhotos: boolean("include_photos").default(true).notNull(),
+  photoSettings: jsonb("photo_settings").default({}).notNull(),
+  contentTemplate: text("content_template"),
+  lastSync: timestamp("last_sync"),
+  lastSyncStatus: text("last_sync_status"),
+  syncErrors: jsonb("sync_errors").default([]).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
 // Monthly AI Usage Summary table
@@ -311,7 +335,7 @@ export const monthlyAiUsage = pgTable("monthly_ai_usage", {
 });
 
 // Insert schemas for AI usage tracking
-export const insertAiUsageTrackingSchema = createInsertSchema(aiUsageTracking).omit({ 
+export const insertAiUsageLogsSchema = createInsertSchema(aiUsageLogs).omit({ 
   id: true, 
   createdAt: true
 });
@@ -323,8 +347,8 @@ export const insertMonthlyAiUsageSchema = createInsertSchema(monthlyAiUsage).omi
 });
 
 // Types for AI usage tracking
-export type AiUsageTracking = typeof aiUsageTracking.$inferSelect;
-export type InsertAiUsageTracking = z.infer<typeof insertAiUsageTrackingSchema>;
+export type AiUsageLogs = typeof aiUsageLogs.$inferSelect;
+export type InsertAiUsageLogs = z.infer<typeof insertAiUsageLogsSchema>;
 
 export type MonthlyAiUsage = typeof monthlyAiUsage.$inferSelect;
 export type InsertMonthlyAiUsage = z.infer<typeof insertMonthlyAiUsageSchema>;
