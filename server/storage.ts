@@ -518,7 +518,10 @@ export class MemStorage implements IStorage {
       locationSource: checkIn.locationSource || null,
       problemDescription: checkIn.problemDescription || null,
       solutionDescription: checkIn.solutionDescription || null,
-      customerFeedback: checkIn.customerFeedback || null
+      customerFeedback: checkIn.customerFeedback || null,
+      followUpRequired: checkIn.followUpRequired || null,
+      followUpNotes: checkIn.followUpNotes || null,
+      isBlog: checkIn.isBlog || null
     };
     
     this.checkIns.set(id, newCheckIn);
@@ -717,52 +720,6 @@ export class MemStorage implements IStorage {
     };
   }
 
-  async getCompanyStats(companyId: number): Promise<{
-    totalCheckins: number;
-    activeTechs: number;
-    blogPosts: number;
-    reviewRequests: number;
-    reviewResponses: number;
-    averageRating: number;
-  }> {
-    const totalCheckins = Array.from(this.checkIns.values()).filter(
-      checkIn => checkIn.companyId === companyId
-    ).length;
-    
-    const activeTechs = Array.from(this.technicians.values()).filter(
-      tech => tech.companyId === companyId
-    ).length;
-    
-    const blogPostsCount = Array.from(this.blogPosts.values()).filter(
-      post => post.companyId === companyId
-    ).length;
-    
-    const reviewRequestsCount = Array.from(this.reviewRequests.values()).filter(
-      request => request.companyId === companyId
-    ).length;
-    
-    // Get review responses data
-    const responses = Array.from(this.reviewResponses.values()).filter(
-      response => response.companyId === companyId
-    );
-    
-    const reviewResponsesCount = responses.length;
-    
-    // Calculate average rating
-    const averageRating = reviewResponsesCount > 0 
-      ? responses.reduce((sum, response) => sum + response.rating, 0) / reviewResponsesCount 
-      : 0;
-    
-    return {
-      totalCheckins,
-      activeTechs,
-      blogPosts: blogPostsCount,
-      reviewRequests: reviewRequestsCount,
-      reviewResponses: reviewResponsesCount,
-      averageRating
-    };
-  }
-
   // Review Request By Token methods
   async getReviewRequestByToken(token: string): Promise<ReviewRequest | undefined> {
     const requestId = this.reviewRequestTokens.get(token);
@@ -776,7 +733,7 @@ export class MemStorage implements IStorage {
   async getReviewRequestStatusesByCompany(companyId: number): Promise<ReviewRequestStatus[]> {
     const statuses: ReviewRequestStatus[] = [];
     
-    for (const status of this.reviewRequestStatuses.values()) {
+    for (const status of Array.from(this.reviewRequestStatuses.values())) {
       const request = await this.getReviewRequest(status.reviewRequestId);
       if (request && request.companyId === companyId) {
         statuses.push(status);
@@ -787,7 +744,7 @@ export class MemStorage implements IStorage {
   }
 
   async getReviewRequestStatusByRequestId(requestId: number): Promise<ReviewRequestStatus | null> {
-    for (const status of this.reviewRequestStatuses.values()) {
+    for (const status of Array.from(this.reviewRequestStatuses.values())) {
       if (status.reviewRequestId === requestId) {
         return status;
       }
@@ -847,7 +804,7 @@ export class MemStorage implements IStorage {
   }
 
   async getReviewFollowUpSettings(companyId: number): Promise<ReviewFollowUpSettings | null> {
-    for (const settings of this.reviewFollowUpSettings.values()) {
+    for (const settings of Array.from(this.reviewFollowUpSettings.values())) {
       if (settings.companyId === companyId) {
         return settings;
       }
