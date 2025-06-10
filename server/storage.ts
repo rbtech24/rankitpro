@@ -3,7 +3,7 @@ import {
   CheckIn, InsertCheckIn, BlogPost, InsertBlogPost, ReviewRequest, InsertReviewRequest,
   ReviewResponse, InsertReviewResponse, CheckInWithTechnician, TechnicianWithStats,
   ReviewFollowUpSettings, InsertReviewFollowUpSettings, ReviewRequestStatus, InsertReviewRequestStatus,
-  WordpressCustomFields, InsertWordpressCustomFields, AiUsageTracking, InsertAiUsageTracking,
+  WordpressCustomFields, InsertWordpressCustomFields, AiUsageLogs, InsertAiUsageLogs,
   MonthlyAiUsage, InsertMonthlyAiUsage, APICredentials, InsertAPICredentials,
   SalesPerson, InsertSalesPerson, SalesCommission, InsertSalesCommission,
   CompanyAssignment, InsertCompanyAssignment, Testimonial, InsertTestimonial,
@@ -132,7 +132,7 @@ export interface IStorage {
   }>;
   
   // AI Usage Tracking operations
-  createAiUsageTracking(usage: InsertAiUsageTracking): Promise<AiUsageTracking>;
+  createAiUsageLog(usage: InsertAiUsageLogs): Promise<AiUsageLogs>;
   getMonthlyAiUsage(companyId: number, year: number, month: number): Promise<MonthlyAiUsage | null>;
   getDailyAiUsage(companyId: number, date: Date): Promise<number>;
   updateMonthlyAiUsage(companyId: number, year: number, month: number, updates: {
@@ -204,7 +204,7 @@ export class MemStorage implements IStorage {
   private reviewRequestTokens: Map<string, number>; // Map token to requestId
   private passwordResetTokens: Map<string, { userId: number; expiry: Date }>; // Map token to user and expiry
   private wordpressCustomFields: Map<number, WordpressCustomFields>;
-  private aiUsageTracking: Map<number, AiUsageTracking>;
+  private aiUsageLogs: Map<number, AiUsageLogs>;
   private monthlyAiUsage: Map<string, MonthlyAiUsage>;
   private apiCredentials: Map<number, APICredentials>;
   private apiCredentialsByApiKey: Map<string, APICredentials>;
@@ -1061,11 +1061,11 @@ export class MemStorage implements IStorage {
   }
 
   // AI Usage Tracking methods
-  async createAiUsageTracking(usage: InsertAiUsageTracking): Promise<AiUsageTracking> {
-    const id = this.aiUsageTrackingId++;
+  async createAiUsageLog(usage: InsertAiUsageLogs): Promise<AiUsageLogs> {
+    const id = this.aiUsageLogsId++;
     const createdAt = new Date();
-    const newUsage: AiUsageTracking = { ...usage, id, createdAt };
-    this.aiUsageTracking.set(id, newUsage);
+    const newUsage: AiUsageLogs = { ...usage, id, createdAt };
+    this.aiUsageLogs.set(id, newUsage);
     
     // Update monthly usage
     const year = createdAt.getFullYear();
@@ -1073,7 +1073,7 @@ export class MemStorage implements IStorage {
     await this.updateMonthlyAiUsage(usage.companyId, year, month, {
       totalRequests: 1,
       totalTokens: usage.tokensUsed,
-      totalCost: usage.estimatedCost
+      totalCost: parseFloat(usage.estimatedCost)
     });
     
     return newUsage;
