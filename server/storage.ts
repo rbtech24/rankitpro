@@ -486,7 +486,7 @@ export class MemStorage implements IStorage {
   async getCheckInsByTechnician(technicianId: number, limit?: number): Promise<CheckIn[]> {
     const techCheckIns = Array.from(this.checkIns.values())
       .filter(checkIn => checkIn.technicianId === technicianId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      .sort((a, b) => (b.createdAt || new Date(0)).getTime() - (a.createdAt || new Date(0)).getTime());
     
     return limit ? techCheckIns.slice(0, limit) : techCheckIns;
   }
@@ -514,7 +514,11 @@ export class MemStorage implements IStorage {
       city: checkIn.city || null,
       state: checkIn.state || null,
       zip: checkIn.zip || null,
-      addressVerified: checkIn.addressVerified || null
+      addressVerified: checkIn.addressVerified || null,
+      locationSource: checkIn.locationSource || null,
+      problemDescription: checkIn.problemDescription || null,
+      solutionDescription: checkIn.solutionDescription || null,
+      customerFeedback: checkIn.customerFeedback || null
     };
     
     this.checkIns.set(id, newCheckIn);
@@ -542,7 +546,7 @@ export class MemStorage implements IStorage {
   async getBlogPostsByCompany(companyId: number): Promise<BlogPost[]> {
     return Array.from(this.blogPosts.values())
       .filter(post => post.companyId === companyId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      .sort((a, b) => (b.createdAt || new Date(0)).getTime() - (a.createdAt || new Date(0)).getTime());
   }
   
   async createBlogPost(blogPost: InsertBlogPost): Promise<BlogPost> {
@@ -581,7 +585,7 @@ export class MemStorage implements IStorage {
   async getReviewRequestsByCompany(companyId: number): Promise<ReviewRequest[]> {
     return Array.from(this.reviewRequests.values())
       .filter(request => request.companyId === companyId)
-      .sort((a, b) => b.sentAt.getTime() - a.sentAt.getTime());
+      .sort((a, b) => (b.sentAt || new Date(0)).getTime() - (a.sentAt || new Date(0)).getTime());
   }
   
   async createReviewRequest(reviewRequest: InsertReviewRequest): Promise<ReviewRequest> {
