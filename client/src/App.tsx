@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { NotificationProvider } from "@/context/NotificationContext";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import NotFound from "@/pages/not-found";
+import { performImmediateLogout } from "./lib/logout";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Dashboard from "@/pages/new-dashboard";
@@ -74,6 +75,22 @@ import EmergencyLogin from "@/pages/emergency-login";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 
+// Logout handler component that forces immediate logout and redirect
+function LogoutHandler() {
+  useEffect(() => {
+    performImmediateLogout();
+  }, []);
+
+  return (
+    <div className="h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+        <p>Logging out...</p>
+      </div>
+    </div>
+  );
+}
+
 // Authenticated route that redirects to login if not authenticated
 function PrivateRoute({ component: Component, role, ...rest }: { component: React.ComponentType<any>, role?: string, path: string }) {
   const { data: auth, isLoading, error } = useQuery<AuthState>({
@@ -128,21 +145,54 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
 }
 
 function Router() {
+  const [, setLocation] = useLocation();
   const { data: auth, isLoading, error } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
     queryFn: getCurrentUser,
     retry: false,
-    staleTime: 0 // Always revalidate auth state
+    staleTime: 0, // Always revalidate auth state
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
   
   // Handle logout parameter to force login page
   const urlParams = new URLSearchParams(window.location.search);
-  const isLoggedOut = urlParams.has('logout') || urlParams.has('force');
+  const isLoggedOut = urlParams.has('logout') || urlParams.has('force') || urlParams.has('cleared');
+  
+  // Force redirect to login if logout parameter is present
+  useEffect(() => {
+    if (isLoggedOut) {
+      queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
+      setLocation("/login");
+    }
+  }, [isLoggedOut, setLocation]);
+  
+  // Handle authentication errors
+  useEffect(() => {
+    if (error || (auth && !auth.user)) {
+      queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
+      setLocation("/login");
+    }
+  }, [error, auth, setLocation]);
   
   if (isLoading) {
     return <div className="h-screen flex items-center justify-center">
       <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
     </div>;
+  }
+  
+  // If logged out or no user, force login
+  if (isLoggedOut || !auth?.user) {
+    return (
+      <Switch>
+        <Route path="/login"><Login /></Route>
+        <Route path="/logout"><LogoutHandler /></Route>
+        <Route path="/forgot-password"><ForgotPassword /></Route>
+        <Route path="/reset-password"><ResetPassword /></Route>
+        <Route path="/register"><Onboarding /></Route>
+        <Route><Redirect to="/login" /></Route>
+      </Switch>
+    );
   }
   
   return (
