@@ -1,5 +1,7 @@
 import React from 'react';
 import { format } from 'date-fns';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -14,44 +16,23 @@ interface Task {
 }
 
 const UpcomingTasks = () => {
-  // Mock data - would be fetched from API in real implementation
-  const tasks: Task[] = [
-    { 
-      id: 1, 
-      title: 'Review monthly SEO performance', 
-      dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24), // Tomorrow
-      priority: 'high',
-      completed: false,
-    },
-    { 
-      id: 2, 
-      title: 'Send follow-up emails to recent customers', 
-      dueDate: new Date(Date.now() + 1000 * 60 * 60 * 48), // 2 days from now
-      priority: 'medium',
-      completed: false,
-    },
-    { 
-      id: 3, 
-      title: 'Approve technician schedules for next week', 
-      dueDate: new Date(Date.now() + 1000 * 60 * 60 * 72), // 3 days from now
-      priority: 'high',
-      completed: false,
-    },
-    { 
-      id: 4, 
-      title: 'Review and approve blog posts', 
-      dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 4), // 4 days from now
-      priority: 'medium',
-      completed: false,
-    },
-    { 
-      id: 5, 
-      title: 'Quarterly marketing planning meeting', 
-      dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 1 week from now
-      priority: 'high',
-      completed: false,
+  const { data: tasks = [], isLoading } = useQuery({
+    queryKey: ['/api/tasks/upcoming'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/tasks/upcoming');
+      return response.json();
     }
-  ];
+  });
+
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ taskId, completed }: { taskId: number, completed: boolean }) => {
+      const response = await apiRequest('PATCH', `/api/tasks/${taskId}`, { completed });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks/upcoming'] });
+    }
+  });
   
   const getPriorityColor = (priority: string) => {
     switch(priority) {
