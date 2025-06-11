@@ -141,12 +141,30 @@ async function createSuperAdminIfNotExists() {
     serveStatic(app);
   }
 
-  // Use Render's PORT environment variable in production, fallback to 3000 for development
-  const port = process.env.PORT || 3000;
+  // Use Render's PORT environment variable in production, fallback to 5000 for development
+  const port = process.env.PORT || 5000;
+  
+  // Add error handling for port conflicts
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use. Trying to find an available port...`);
+      // Try alternative ports
+      const alternativePort = parseInt(port.toString()) + 1;
+      server.listen({
+        port: alternativePort,
+        host: "0.0.0.0",
+      }, () => {
+        log(`serving on port ${alternativePort} (alternative port due to conflict)`);
+      });
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
+  
   server.listen({
     port,
     host: "0.0.0.0",
-    reusePort: process.env.NODE_ENV === "development",
   }, () => {
     log(`serving on port ${port}`);
   });
