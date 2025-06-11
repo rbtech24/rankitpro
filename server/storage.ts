@@ -844,6 +844,9 @@ export class MemStorage implements IStorage {
       incentiveDetails: settings.incentiveDetails ?? null,
       targetPositiveExperiencesOnly: settings.targetPositiveExperiencesOnly ?? false,
       targetServiceTypes: settings.targetServiceTypes ?? null,
+      targetMinimumInvoiceAmount: settings.targetMinimumInvoiceAmount ?? '0',
+      enableSmartTiming: settings.enableSmartTiming ?? false,
+      smartTimingPreferences: settings.smartTimingPreferences ?? {},
       createdAt,
       updatedAt: createdAt
     };
@@ -1295,6 +1298,8 @@ export class MemStorage implements IStorage {
     const newSalesPerson: SalesPerson = {
       id,
       ...salesPerson,
+      phone: salesPerson.phone ?? null,
+      isActive: salesPerson.isActive ?? null,
       createdAt: new Date()
     };
     this.salesPeople.set(id, newSalesPerson);
@@ -1355,6 +1360,8 @@ export class MemStorage implements IStorage {
     const newCommission: SalesCommission = {
       id,
       ...commission,
+      isPaid: commission.isPaid ?? null,
+      paidAt: commission.paidAt ?? null,
       createdAt: new Date()
     };
     this.salesCommissions.set(id, newCommission);
@@ -1437,6 +1444,7 @@ export class MemStorage implements IStorage {
       status: data.status || 'pending',
       isPublic: data.isPublic || false,
       showOnWebsite: data.showOnWebsite || false,
+      location: data.location ?? null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -1512,6 +1520,9 @@ export class MemStorage implements IStorage {
       ...data,
       status: data.status || 'pending',
       emailSentAt: data.emailSentAt || new Date(),
+      approvedAt: data.approvedAt ?? null,
+      rejectedAt: data.rejectedAt ?? null,
+      rejectionReason: data.rejectionReason ?? null,
       createdAt: new Date()
     };
     this.testimonialApprovals.set(id, approval);
