@@ -32,6 +32,7 @@ async function testAuthenticationSystem() {
     
     const testCredentials = [
       // Extract from latest console output
+      { email: 'admin-1749605052746@rankitpro.system', password: 'mZXM3$EHjw!R2gvS' },
       { email: 'admin-1749604920766@rankitpro.system', password: 'su!2$hXhJVW6Z69e' },
       // Common admin formats
       { email: 'admin@rankitpro.system', password: 'admin123' },
@@ -56,7 +57,7 @@ async function testAuthenticationSystem() {
       console.log(`   Status: ${loginResponse.status} - ${loginData.message || 'Unknown'}`);
       
       if (loginResponse.status === 200) {
-        successfulLogin = { creds, response: loginData };
+        successfulLogin = { creds, response: loginData, loginResponse };
         console.log('   ✅ LOGIN SUCCESSFUL!');
         break;
       }
@@ -88,8 +89,19 @@ async function testAuthenticationSystem() {
     // Step 5: Test authenticated endpoints
     console.log('\n5. Testing authenticated endpoints...');
     
-    const sessionCookie = successfulLogin.response.sessionId ? 
-      `connect.sid=${successfulLogin.response.sessionId}` : '';
+    // Extract session cookie from response headers
+    const setCookieHeader = successfulLogin.loginResponse.headers.get('set-cookie');
+    console.log('   Set-Cookie header:', setCookieHeader);
+    
+    let sessionCookie = '';
+    if (setCookieHeader) {
+      const cookieMatch = setCookieHeader.match(/connect\.sid=([^;]+)/);
+      if (cookieMatch) {
+        sessionCookie = `connect.sid=${cookieMatch[1]}`;
+      }
+    }
+    
+    console.log('   Using cookie:', sessionCookie || 'None found');
     
     const authHeaders = {
       'Content-Type': 'application/json',
