@@ -1445,6 +1445,7 @@ export class MemStorage implements IStorage {
       isPublic: data.isPublic || false,
       showOnWebsite: data.showOnWebsite || false,
       location: data.location ?? null,
+      jobType: data.jobType ?? null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
