@@ -836,6 +836,11 @@ export class MemStorage implements IStorage {
       enableEmailRequests: settings.enableEmailRequests ?? true,
       enableSmsRequests: settings.enableSmsRequests ?? false,
       preferredSendTime: settings.preferredSendTime ?? '10:00',
+      sendWeekends: settings.sendWeekends ?? false,
+      includeServiceDetails: settings.includeServiceDetails ?? true,
+      includeTechnicianPhoto: settings.includeTechnicianPhoto ?? false,
+      includeCompanyLogo: settings.includeCompanyLogo ?? false,
+      enableIncentives: settings.enableIncentives ?? false,
       createdAt,
       updatedAt: createdAt
     };
@@ -891,6 +896,10 @@ export class MemStorage implements IStorage {
       contentTemplate: wpCustomFields.contentTemplate ?? null,
       includePhotos: wpCustomFields.includePhotos ?? true,
       includeLocation: wpCustomFields.includeLocation ?? true,
+      includeMap: wpCustomFields.includeMap ?? false,
+      includeSchema: wpCustomFields.includeSchema ?? false,
+      advancedMapping: wpCustomFields.advancedMapping ?? null,
+      metaPrefix: wpCustomFields.metaPrefix ?? 'rankitpro_',
       createdAt,
       updatedAt,
       lastSync: null
