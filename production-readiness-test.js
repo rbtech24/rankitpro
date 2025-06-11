@@ -123,8 +123,8 @@ async function testAuthenticationSystem() {
     // Test super admin login with system-generated credentials
     console.log('Testing super admin authentication...');
     const superAdminLogin = await apiRequest('POST', '/api/auth/login', {
-      email: 'admin-1749605431053@rankitpro.system',
-      password: 'h#TWhn6JsVgiPyZ%'
+      email: 'admin-1749650060503@rankitpro.system',
+      password: 'mD#W&4$f8y*B#wwX'
     });
     
     if (superAdminLogin.ok) {
@@ -159,8 +159,8 @@ async function testCompanyManagement() {
   try {
     // Re-authenticate as super admin for company tests
     const login = await apiRequest('POST', '/api/auth/login', {
-      email: 'admin-1749605431053@rankitpro.system',
-      password: 'h#TWhn6JsVgiPyZ%'
+      email: 'admin-1749650060503@rankitpro.system',
+      password: 'mD#W&4$f8y*B#wwX'
     });
     superAdminCookies = login.cookies;
     
@@ -225,6 +225,7 @@ async function testUserManagement() {
   try {
     // Test technician creation
     const technicianData = {
+      username: 'test_technician',
       name: 'Test Technician',
       email: 'tech@testproduction.com',
       password: 'TechPass123!',
