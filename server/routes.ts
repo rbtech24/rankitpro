@@ -217,7 +217,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Database health check
   app.get("/api/health/database", async (req, res) => {
     try {
-      const { db } = await import('../server/db.js');
       const result = await db.execute('SELECT 1 as health');
       res.json({ 
         status: "ok", 
