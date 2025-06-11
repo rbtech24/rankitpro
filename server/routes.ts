@@ -691,6 +691,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
+
+  app.get("/api/companies/:id/users", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      
+      // Check permissions
+      if (req.user.role !== "super_admin" && req.user.companyId !== companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const users = await storage.getUsersByCompany(companyId);
+      
+      // Remove passwords from response
+      const usersWithoutPasswords = users.map(user => {
+        const { password: _, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      });
+      
+      res.json(usersWithoutPasswords);
+    } catch (error) {
+      console.error("Get company users error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
   
   // Technician routes
   app.get("/api/technicians", isCompanyAdmin, async (req, res) => {
