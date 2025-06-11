@@ -841,6 +841,9 @@ export class MemStorage implements IStorage {
       includeTechnicianPhoto: settings.includeTechnicianPhoto ?? false,
       includeCompanyLogo: settings.includeCompanyLogo ?? false,
       enableIncentives: settings.enableIncentives ?? false,
+      incentiveDetails: settings.incentiveDetails ?? null,
+      targetPositiveExperiencesOnly: settings.targetPositiveExperiencesOnly ?? false,
+      targetServiceTypes: settings.targetServiceTypes ?? null,
       createdAt,
       updatedAt: createdAt
     };
@@ -900,6 +903,8 @@ export class MemStorage implements IStorage {
       includeSchema: wpCustomFields.includeSchema ?? false,
       advancedMapping: wpCustomFields.advancedMapping ?? null,
       metaPrefix: wpCustomFields.metaPrefix ?? 'rankitpro_',
+      isConnected: wpCustomFields.isConnected ?? false,
+      lastSyncStatus: wpCustomFields.lastSyncStatus ?? null,
       createdAt,
       updatedAt,
       lastSync: null
@@ -1226,6 +1231,9 @@ export class MemStorage implements IStorage {
     const newCredentials: APICredentials = {
       id,
       ...credentials,
+      isActive: credentials.isActive ?? true,
+      expiresAt: credentials.expiresAt ?? null,
+      lastUsedAt: credentials.lastUsedAt ?? null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
