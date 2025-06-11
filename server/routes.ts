@@ -159,17 +159,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
   
-  // Get system admin credentials (development only)
+  // System admin credentials endpoint - STRICTLY development only
   if (process.env.NODE_ENV === 'development') {
     app.get("/api/system-admin-credentials", async (req, res) => {
+      // Additional security check
+      if (process.env.NODE_ENV !== 'development') {
+        return res.status(404).json({ message: "Not found" });
+      }
+      
       try {
         const superAdmin = await storage.getUserByUsername("system_admin");
         if (!superAdmin) {
           return res.status(404).json({ message: "System admin not found" });
         }
         
-        // Generate new password and update it
-        const newPassword = Math.random().toString(36).slice(-12) + "Admin123!";
+        // Generate cryptographically secure password
+        const crypto = require('crypto');
+        const newPassword = crypto.randomBytes(16).toString('hex') + "!A1";
         const hashedPassword = await bcrypt.hash(newPassword, 12);
         
         await storage.updateUser(superAdmin.id, { password: hashedPassword });
@@ -455,146 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Emergency login endpoint for troubleshooting
-  app.post("/api/emergency-login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      
-      if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
-      }
-      
-      console.log(`Emergency login attempt for: ${email}`);
-      
-      // Debug all users in the system
-      const allUsers = await storage.getAllUsers();
-      console.log(`Total users in system: ${allUsers.length}`);
-      
-      // Find user with more detailed logging
-      const user = await storage.getUserByEmail(email);
-      
-      if (!user) {
-        console.log(`User not found: ${email}`);
-        
-        // Auto-create test accounts if they don't exist
-        if (email === "admin@testcompany.com" && password === "company123") {
-          // Create test company if it doesn't exist
-          let testCompany = await storage.getCompanyByName("Test Company");
-          let companyId = 0;
-          
-          if (!testCompany) {
-            testCompany = await storage.createCompany({
-              name: "Test Company"
-            });
-            companyId = testCompany.id;
-          } else {
-            companyId = testCompany.id;
-          }
-          
-          // Create company admin
-          const hashedPassword = await bcrypt.hash("company123", 10);
-          const newUser = await storage.createUser({
-            email: "admin@testcompany.com",
-            username: "testadmin",
-            password: hashedPassword,
-            role: "company_admin",
-            companyId,
-          });
-          
-          // Set session
-          if (req.session) {
-            (req.session as any).userId = newUser.id;
-          }
-          
-          // Remove password from response
-          const { password: _, ...userWithoutPassword } = newUser;
-          
-          console.log(`Created new company admin account and logged in: ${email}`);
-          return res.json(userWithoutPassword);
-          
-        } else if (email === "tech@testcompany.com" && password === "tech1234") {
-          // Get the test company
-          const testCompany = await storage.getCompanyByName("Test Company");
-          
-          if (!testCompany) {
-            return res.status(400).json({ message: "Test Company doesn't exist yet. Please create admin account first." });
-          }
-          
-          // Create technician
-          const hashedPassword = await bcrypt.hash("tech1234", 10);
-          
-          // Create technician record
-          const newTechnician = await storage.createTechnician({
-            name: "Test Technician",
-            email: "tech@testcompany.com",
-            phone: "555-555-5555",
-            location: "Test Location",
-            companyId: testCompany.id
-          });
-          
-          // Create user account for technician
-          const newUser = await storage.createUser({
-            email: "tech@testcompany.com",
-            username: "testtechnician",
-            password: hashedPassword,
-            role: "technician",
-            companyId: testCompany.id
-          });
-          
-          // Set session
-          if (req.session) {
-            (req.session as any).userId = newUser.id;
-          }
-          
-          // Remove password from response
-          const { password: _, ...userWithoutPassword } = newUser;
-          
-          console.log(`Created new technician account and logged in: ${email}`);
-          return res.json(userWithoutPassword);
-        }
-        
-        return res.status(401).json({ message: "User not found" });
-      }
-      
-      // Special emergency login logic - handle both hashed and unhashed passwords
-      let isPasswordValid = false;
-      
-      // Direct comparison for emergency login
-      if (user.role === "company_admin" && password === "company123") {
-        isPasswordValid = true;
-      } else if (user.role === "technician" && password === "tech1234") {
-        isPasswordValid = true;
-      } else if (user.role === "super_admin" && password === "admin123") {
-        isPasswordValid = true;
-      } else {
-        // Try normal bcrypt comparison as fallback
-        isPasswordValid = await bcrypt.compare(password, user.password);
-      }
-      
-      if (!isPasswordValid) {
-        console.log(`Emergency login password validation failed for ${email}`);
-        return res.status(401).json({ message: "Invalid password" });
-      }
-      
-      console.log(`Emergency login successful for ${email} with role ${user.role}`);
-      
-      // Set session
-      if (req.session) {
-        (req.session as any).userId = user.id;
-      }
-      
-      // Remove password from response
-      const { password: _, ...userWithoutPassword } = user;
-      
-      res.json(userWithoutPassword);
-    } catch (error) {
-      console.error("Emergency login error:", error);
-      res.status(500).json({ 
-        message: "Server error during emergency login", 
-        details: error instanceof Error ? error.message : String(error)
-      });
-    }
-  });
+
 
   app.post("/api/auth/logout", (req, res) => {
     // Anti-cache headers to prevent logout response caching
