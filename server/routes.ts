@@ -233,6 +233,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Comprehensive health check for deployment diagnostics
+  app.get("/api/health/detailed", async (req, res) => {
+    const healthCheck = {
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      version: "1.0.0",
+      environment: process.env.NODE_ENV || "development",
+      features: {
+        database: false,
+        email: !!process.env.SENDGRID_API_KEY,
+        payments: !!(process.env.STRIPE_SECRET_KEY && 
+                    process.env.STRIPE_STARTER_PRICE_ID && 
+                    process.env.STRIPE_PRO_PRICE_ID && 
+                    process.env.STRIPE_AGENCY_PRICE_ID),
+        ai: !!(process.env.OPENAI_API_KEY || 
+               process.env.ANTHROPIC_API_KEY || 
+               process.env.XAI_API_KEY),
+        openai: !!process.env.OPENAI_API_KEY,
+        anthropic: !!process.env.ANTHROPIC_API_KEY,
+        xai: !!process.env.XAI_API_KEY
+      },
+      configuration: {
+        port: process.env.PORT || "5000",
+        hasSessionSecret: !!process.env.SESSION_SECRET,
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        superAdminConfigured: !!(process.env.SUPER_ADMIN_EMAIL && process.env.SUPER_ADMIN_PASSWORD)
+      },
+      warnings: [] as string[],
+      errors: [] as string[]
+    };
+
+    // Test database connection
+    try {
+      await db.execute('SELECT 1 as health');
+      healthCheck.features.database = true;
+    } catch (error) {
+      healthCheck.features.database = false;
+      healthCheck.errors.push(`Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      healthCheck.status = "degraded";
+    }
+
+    // Check for configuration issues
+    if (!process.env.SESSION_SECRET) {
+      healthCheck.warnings.push("SESSION_SECRET not configured - using fallback (not recommended for production)");
+    }
+
+    if (!healthCheck.features.email) {
+      healthCheck.warnings.push("Email notifications disabled - SENDGRID_API_KEY not configured");
+    }
+
+    if (!healthCheck.features.payments) {
+      healthCheck.warnings.push("Payment processing disabled - Stripe configuration incomplete");
+    }
+
+    if (!healthCheck.features.ai) {
+      healthCheck.warnings.push("AI content generation disabled - No AI provider API keys configured");
+    }
+
+    // Check for super admin account
+    try {
+      const users = await storage.getAllUsers();
+      const hasSuperAdmin = users.some(user => user.role === "super_admin");
+      if (!hasSuperAdmin) {
+        healthCheck.warnings.push("No super admin account found - one will be created on startup");
+      }
+    } catch (e) {
+      // Ignore this check if database is unavailable
+    }
+
+    // Set appropriate HTTP status
+    const statusCode = healthCheck.errors.length > 0 ? 500 : 200;
+    res.status(statusCode).json(healthCheck);
+  });
+
   // Add isAuthenticated method to req
   app.use((req: Request, _res: Response, next) => {
     // Extend the session type for TypeScript
