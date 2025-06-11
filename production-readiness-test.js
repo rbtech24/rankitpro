@@ -159,8 +159,8 @@ async function testCompanyManagement() {
   try {
     // Re-authenticate as super admin for company tests
     const login = await apiRequest('POST', '/api/auth/login', {
-      email: 'admin-1749650060503@rankitpro.system',
-      password: 'mD#W&4$f8y*B#wwX'
+      email: 'admin-1749650169086@rankitpro.system',
+      password: 'PfduFAem9aU&D6Pj'
     });
     superAdminCookies = login.cookies;
     
