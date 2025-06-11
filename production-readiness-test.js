@@ -123,8 +123,8 @@ async function testAuthenticationSystem() {
     // Test super admin login with system-generated credentials
     console.log('Testing super admin authentication...');
     const superAdminLogin = await apiRequest('POST', '/api/auth/login', {
-      email: 'admin-1749559678286@rankitpro.system',
-      password: 'amcpBsEB$TTY6MEZ'
+      email: 'admin-1749605157215@rankitpro.system',
+      password: 'E#k4ch6AyBD9J&vH'
     });
     
     if (superAdminLogin.ok) {
@@ -159,8 +159,8 @@ async function testCompanyManagement() {
   try {
     // Re-authenticate as super admin for company tests
     const login = await apiRequest('POST', '/api/auth/login', {
-      email: 'admin-1749559678286@rankitpro.system',
-      password: 'amcpBsEB$TTY6MEZ'
+      email: 'admin-1749605157215@rankitpro.system',
+      password: 'E#k4ch6AyBD9J&vH'
     });
     superAdminCookies = login.cookies;
     
@@ -174,10 +174,10 @@ async function testCompanyManagement() {
     };
     
     const createCompany = await apiRequest('POST', '/api/companies', companyData, superAdminCookies);
-    logTest('Company creation', createCompany.ok, `Company ID: ${createCompany.data?.company?.id}`, true);
+    logTest('Company creation', createCompany.ok, `Company ID: ${createCompany.data?.company?.id || createCompany.data?.id}`, true);
     
     if (createCompany.ok) {
-      testCompanyId = createCompany.data.company.id;
+      testCompanyId = createCompany.data.company?.id || createCompany.data?.id;
       
       // Test company retrieval
       const getCompany = await apiRequest('GET', `/api/companies/${testCompanyId}`, null, superAdminCookies);

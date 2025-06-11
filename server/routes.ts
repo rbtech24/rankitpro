@@ -571,7 +571,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const companyData = insertCompanySchema.parse(req.body);
       const company = await storage.createCompany(companyData);
-      res.json(company);
+      
+      // Create company admin user if admin details provided
+      if (req.body.adminEmail && req.body.adminPassword && req.body.adminName) {
+        const hashedPassword = await bcrypt.hash(req.body.adminPassword, 12);
+        const adminUser = await storage.createUser({
+          username: req.body.adminName.toLowerCase().replace(/\s+/g, '_'),
+          email: req.body.adminEmail,
+          password: hashedPassword,
+          role: 'company_admin',
+          companyId: company.id,
+        });
+        
+        res.status(201).json({ 
+          company,
+          admin: { ...adminUser, password: undefined }
+        });
+      } else {
+        res.status(201).json({ company });
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         const validationError = fromZodError(error);
