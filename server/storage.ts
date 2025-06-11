@@ -823,6 +823,9 @@ export class MemStorage implements IStorage {
     const newSettings: ReviewFollowUpSettings = {
       ...settings,
       id,
+      isActive: settings.isActive ?? true,
+      initialDelay: settings.initialDelay ?? 24,
+      enableFirstFollowUp: settings.enableFirstFollowUp ?? true,
       createdAt,
       updatedAt: createdAt
     };
@@ -867,6 +870,8 @@ export class MemStorage implements IStorage {
     const newWpCustomFields: WordpressCustomFields = {
       ...wpCustomFields,
       id,
+      useRestApi: wpCustomFields.useRestApi ?? true,
+      postType: wpCustomFields.postType ?? 'post',
       createdAt,
       updatedAt,
       lastSync: null
@@ -1068,7 +1073,14 @@ export class MemStorage implements IStorage {
   async createAiUsageLog(usage: InsertAiUsageLogs): Promise<AiUsageLogs> {
     const id = this.aiUsageLogsId++;
     const createdAt = new Date();
-    const newUsage: AiUsageLogs = { ...usage, id, createdAt };
+    const newUsage: AiUsageLogs = { 
+      ...usage, 
+      id, 
+      createdAt,
+      userId: usage.userId ?? null,
+      checkInId: usage.checkInId ?? null,
+      requestData: usage.requestData ?? null
+    };
     this.aiUsageLogs.set(id, newUsage);
     
     // Update monthly usage
@@ -1127,7 +1139,13 @@ export class MemStorage implements IStorage {
         month,
         totalRequests: updates.totalRequests,
         totalTokens: updates.totalTokens,
-        totalCost: updates.totalCost,
+        totalCost: updates.totalCost.toString(),
+        openaiRequests: 0,
+        openaiCost: "0.00",
+        anthropicRequests: 0,
+        anthropicCost: "0.00",
+        xaiRequests: 0,
+        xaiCost: "0.00",
         createdAt: new Date(),
         updatedAt: new Date()
       };
