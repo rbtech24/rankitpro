@@ -831,6 +831,11 @@ export class MemStorage implements IStorage {
       secondFollowUpDelay: settings.secondFollowUpDelay ?? 168,
       enableFinalFollowUp: settings.enableFinalFollowUp ?? false,
       finalFollowUpDelay: settings.finalFollowUpDelay ?? 336,
+      finalFollowUpMessage: settings.finalFollowUpMessage ?? null,
+      finalFollowUpSubject: settings.finalFollowUpSubject ?? null,
+      enableEmailRequests: settings.enableEmailRequests ?? true,
+      enableSmsRequests: settings.enableSmsRequests ?? false,
+      preferredSendTime: settings.preferredSendTime ?? '10:00',
       createdAt,
       updatedAt: createdAt
     };
@@ -882,7 +887,10 @@ export class MemStorage implements IStorage {
       postStatus: wpCustomFields.postStatus ?? 'draft',
       autoPublish: wpCustomFields.autoPublish ?? false,
       titlePrefix: wpCustomFields.titlePrefix ?? null,
-      titleSuffix: wpCustomFields.titleSuffix ?? null,
+      titleTemplate: wpCustomFields.titleTemplate ?? null,
+      contentTemplate: wpCustomFields.contentTemplate ?? null,
+      includePhotos: wpCustomFields.includePhotos ?? true,
+      includeLocation: wpCustomFields.includeLocation ?? true,
       createdAt,
       updatedAt,
       lastSync: null
