@@ -41,7 +41,6 @@ export default function NotificationBadge({ auth }: NotificationBadgeProps) {
     const ws = new WebSocket(wsUrl);
     
     ws.onopen = () => {
-      console.log('WebSocket connected');
       setIsConnected(true);
       
       // Send authentication message with user ID
@@ -79,18 +78,16 @@ export default function NotificationBadge({ auth }: NotificationBadgeProps) {
           }
         }
       } catch (error) {
-        console.error('Error processing WebSocket message:', error);
+        // Error processing WebSocket message, skip this message
       }
     };
     
     ws.onclose = () => {
-      console.log('WebSocket disconnected');
       setIsConnected(false);
       
       // Attempt to reconnect after 5 seconds
       setTimeout(() => {
         if (auth?.user) {
-          console.log('Attempting to reconnect WebSocket...');
           // The effect cleanup will run, and the effect will run again
           setSocket(null);
         }
@@ -98,7 +95,7 @@ export default function NotificationBadge({ auth }: NotificationBadgeProps) {
     };
     
     ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      // WebSocket error occurred
     };
     
     setSocket(ws);
@@ -139,7 +136,7 @@ export default function NotificationBadge({ auth }: NotificationBadgeProps) {
       try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-          console.log('Notification permission granted.');
+          // Notification permission granted
         }
       } catch (error) {
         console.error('Error requesting notification permission:', error);

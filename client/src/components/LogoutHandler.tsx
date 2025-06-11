@@ -23,7 +23,7 @@ export default function LogoutHandler() {
           });
         }
       } catch (e) {
-        console.log("Storage clear failed:", e);
+        // Storage clear failed, continue anyway
       }
 
       // Step 3: Nuclear cookie clearing
@@ -63,7 +63,7 @@ export default function LogoutHandler() {
           }
         });
       } catch (error) {
-        console.log("Server logout failed, proceeding anyway");
+        // Server logout failed, continue with client cleanup
       }
 
       // Step 6: Force navigation immediately
