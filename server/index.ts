@@ -4,6 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import emailService from "./services/email-service";
+import { validateEnvironment, getFeatureFlags } from "./env-validation";
 
 
 const app = express();
@@ -107,6 +108,18 @@ async function createSuperAdminIfNotExists() {
 }
 
 (async () => {
+  // Validate environment variables before starting
+  try {
+    const env = validateEnvironment();
+    const features = getFeatureFlags();
+    
+    console.log("🚀 Starting Rank It Pro SaaS Platform");
+    console.log(`📊 Features enabled: ${Object.entries(features).filter(([_, enabled]) => enabled).map(([name]) => name).join(', ') || 'none'}`);
+  } catch (error) {
+    console.error("❌ Environment validation failed:", error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+  
   // Create default super admin user if needed
   await createSuperAdminIfNotExists();
   
