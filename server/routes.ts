@@ -145,7 +145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(
     session({
       store: sessionStore,
-      secret: process.env.SESSION_SECRET || "checkin-pro-secret",
+      secret: process.env.SESSION_SECRET || require('crypto').randomBytes(32).toString('hex'),
       resave: false,
       saveUninitialized: false,
       name: 'connect.sid',
@@ -193,56 +193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }
 
-  // Emergency login route (disabled in production)
-  if (process.env.NODE_ENV === 'development') {
-    app.post("/api/emergency-login", async (req, res) => {
-      try {
-        const { email, password } = req.body;
-        
-        if (!email || !password) {
-          return res.status(400).json({ message: "Email and password are required" });
-        }
-        
-        // Find user by email
-        const user = await storage.getUserByEmail(email);
-        if (!user) {
-          return res.status(401).json({ message: "User not found" });
-        }
-        
-        console.log(`Found user: ${user.email}, role: ${user.role}`);
-        
-        // Verify password 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        console.log(`Password verification result: ${isPasswordValid}`);
-        
-        if (!isPasswordValid) {
-          return res.status(401).json({ message: "Invalid password" });
-        }
-        
-        // Set session data
-        if (req.session) {
-          (req.session as any).userId = user.id;
-          console.log(`Session set for user ID: ${user.id}`);
-        }
-        
-        // Remove password from response
-        const { password: _, ...userWithoutPassword } = user;
-        
-        // Get company info if applicable
-        let company = undefined;
-        if (user.companyId && (user.role === "company_admin" || user.role === "technician")) {
-          company = await storage.getCompany(user.companyId);
-          console.log(`Company info retrieved: ${company?.name || "not found"}`);
-        }
-        
-        console.log("Emergency login successful");
-        res.json({ user: userWithoutPassword, company });
-      } catch (error) {
-        console.error("Emergency login error:", error);
-        res.status(500).json({ message: "Server error during login", error: String(error) });
-      }
-    });
-  }
+
   
   // Setup file upload middleware
   const upload = multer({
@@ -530,67 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.cookie('session', '', { expires: new Date(0), path: '/' });
   }
 
-  // Force logout endpoint - clears session without authentication check
-  app.all("/api/force-logout", (req, res) => {
-    // Anti-cache headers
-    res.set({
-      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    });
-    
-    // Destroy session if it exists
-    if (req.session) {
-      req.session.destroy(() => {});
-    }
-    
-    // Use the same comprehensive cookie clearing function
-    clearAllSessionCookies(res);
-    
-    console.log("Force logout executed");
-    
-    // Return JSON for API calls, redirect for browser
-    if (req.path.includes('/api/') || req.headers.accept?.includes('application/json')) {
-      res.json({ 
-        message: "Force logout completed",
-        timestamp: new Date().toISOString(),
-        cleared: true
-      });
-    } else {
-      res.redirect('/login?force=1');
-    }
-  });
 
-  // Immediate logout endpoint - more aggressive than regular logout
-  app.post("/api/auth/immediate-logout", (req, res) => {
-    // Anti-cache headers
-    res.set({
-      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    });
-    
-    // Force session destruction without callback
-    if (req.session) {
-      try {
-        req.session.destroy(() => {});
-      } catch (error) {
-        console.log("Session destruction error (expected):", error);
-      }
-    }
-    
-    // Clear all cookies aggressively
-    clearAllSessionCookies(res);
-    
-    console.log("Immediate logout executed");
-    
-    res.json({ 
-      message: "Immediate logout completed",
-      timestamp: new Date().toISOString(),
-      sessionDestroyed: true,
-      cookiesCleared: true
-    });
-  });
   
   app.get("/api/auth/me", isAuthenticated, async (req, res) => {
     try {

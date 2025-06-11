@@ -225,6 +225,8 @@ export class MemStorage implements IStorage {
   private reviewRequestStatusId: number;
   
   private wordpressCustomFieldsId: number;
+  private aiUsageLogsId: number;
+  private monthlyAiUsageId: number;
   private apiCredentialsId: number;
   private salesPersonId: number;
   private salesCommissionId: number;
@@ -245,7 +247,7 @@ export class MemStorage implements IStorage {
     this.reviewRequestTokens = new Map();
     this.passwordResetTokens = new Map();
     this.wordpressCustomFields = new Map();
-    this.aiUsageTracking = new Map();
+    this.aiUsageLogs = new Map();
     this.monthlyAiUsage = new Map();
     this.apiCredentials = new Map();
     this.apiCredentialsByApiKey = new Map();
@@ -265,6 +267,8 @@ export class MemStorage implements IStorage {
     this.reviewFollowUpSettingsId = 1;
     this.reviewRequestStatusId = 1;
     this.wordpressCustomFieldsId = 1;
+    this.aiUsageLogsId = 1;
+    this.monthlyAiUsageId = 1;
     this.apiCredentialsId = 1;
     this.salesPersonId = 1;
     this.salesCommissionId = 1;
@@ -1090,7 +1094,7 @@ export class MemStorage implements IStorage {
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    return Array.from(this.aiUsageTracking.values())
+    return Array.from(this.aiUsageLogs.values())
       .filter(usage => 
         usage.companyId === companyId &&
         usage.createdAt >= startOfDay &&
@@ -1131,8 +1135,7 @@ export class MemStorage implements IStorage {
     }
   }
 
-  private aiUsageTrackingId: number = 1;
-  private monthlyAiUsageId: number = 1;
+
 
   // Password reset methods
   async updateUserPassword(userId: number, hashedPassword: string): Promise<void> {
