@@ -139,7 +139,7 @@ export default function NotificationBadge({ auth }: NotificationBadgeProps) {
           // Notification permission granted
         }
       } catch (error) {
-        console.error('Error requesting notification permission:', error);
+        // Error requesting notification permission
       }
     }
   };
