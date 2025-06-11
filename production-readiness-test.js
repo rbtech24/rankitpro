@@ -123,8 +123,8 @@ async function testAuthenticationSystem() {
     // Test super admin login with system-generated credentials
     console.log('Testing super admin authentication...');
     const superAdminLogin = await apiRequest('POST', '/api/auth/login', {
-      email: 'admin-1749650060503@rankitpro.system',
-      password: 'mD#W&4$f8y*B#wwX'
+      email: 'admin-1749650169086@rankitpro.system',
+      password: 'PfduFAem9aU&D6Pj'
     });
     
     if (superAdminLogin.ok) {
