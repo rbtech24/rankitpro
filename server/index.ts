@@ -141,8 +141,8 @@ async function createSuperAdminIfNotExists() {
     serveStatic(app);
   }
 
-  // Use Render's PORT environment variable in production, fallback to 5000 for development
-  const port = process.env.PORT || 5000;
+  // Use Render's PORT environment variable in production, fallback to 3000 for development
+  const port = process.env.PORT || 3000;
   server.listen({
     port,
     host: "0.0.0.0",
