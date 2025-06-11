@@ -37,11 +37,8 @@ export interface AuthState {
 
 export async function login(credentials: LoginCredentials): Promise<AuthState> {
   try {
-    console.log("LOGIN: Starting login request for", credentials.email);
     const response = await apiRequest("POST", "/api/auth/login", credentials);
     const user = await response.json();
-    
-    console.log("LOGIN: Server response received", user);
     
     // Wait a moment for session cookie to be properly set
     await new Promise(resolve => setTimeout(resolve, 250));
@@ -54,7 +51,6 @@ export async function login(credentials: LoginCredentials): Promise<AuthState> {
     
     return authState;
   } catch (error) {
-    console.error("LOGIN: Error during login process", error);
     throw error;
   }
 }
@@ -77,21 +73,15 @@ export async function logout(): Promise<void> {
 
 export async function getCurrentUser(): Promise<AuthState> {
   try {
-    console.log("AUTH: Fetching current user");
-    
     // Add a small delay to ensure session cookies are properly set
     await new Promise(resolve => setTimeout(resolve, 100));
     
     const response = await apiRequest("GET", "/api/auth/me");
     const data = await response.json();
-    console.log("AUTH: Current user data received", data);
     return data;
   } catch (error) {
-    console.log("AUTH: Error fetching current user", error);
-    
     // Clear any stale auth data on 401 errors
     if ((error as Error).message.includes("401")) {
-      console.log("AUTH: Clearing stale authentication data");
       queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
       localStorage.removeItem('auth');
       sessionStorage.removeItem('auth');

@@ -4,8 +4,6 @@ import { queryClient } from "@/lib/queryClient";
 export default function LogoutHandler() {
   useEffect(() => {
     const performCompleteLogout = async () => {
-      console.log("LOGOUT: Starting LogoutHandler sequence");
-      
       // Step 1: Immediately poison React Query cache
       queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
       queryClient.clear();

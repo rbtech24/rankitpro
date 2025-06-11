@@ -2,8 +2,6 @@ import { queryClient } from "./queryClient";
 
 // Enhanced logout function with aggressive session clearing
 export async function performImmediateLogout() {
-  console.log("LOGOUT: Starting enhanced logout sequence");
-  
   try {
     // Step 1: Clear React Query cache immediately
     queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
@@ -51,30 +49,26 @@ export async function performImmediateLogout() {
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache'
         }
-      }).catch(() => console.log("Regular logout failed"));
+      }).catch(() => {});
       
       // Finally try force logout
       await fetch("/api/force-logout", {
         method: "POST",
         credentials: "include"
-      }).catch(() => console.log("Force logout failed"));
+      }).catch(() => {});
       
-      console.log("LOGOUT: All server logout endpoints called");
     } catch (error) {
-      console.log("LOGOUT: Server logout failed, continuing with client cleanup");
+      // Continue with client cleanup regardless of server response
     }
     
     // Step 5: Additional cleanup - clear any cached authentication headers
     delete (window as any).authToken;
     delete (window as any).userSession;
     
-    console.log("LOGOUT: Complete, forcing page reload and redirect");
-    
     // Step 6: Force complete page reload to clear any lingering state
     window.location.replace("/login?cleared=1");
     
   } catch (error) {
-    console.error("LOGOUT: Error during logout", error);
     // Extreme fallback - force reload
     window.location.replace("/login?error=1");
   }
