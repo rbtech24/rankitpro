@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { db } from "./db";
 
 // Extend session interface to include userId
 declare module "express-session" {
@@ -203,6 +204,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
   });
   
+  // API Health Check - Must come before authentication middleware
+  app.get("/api/health", (req, res) => {
+    res.json({ 
+      status: "ok", 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      version: "1.0.0"
+    });
+  });
+
+  // Database health check
+  app.get("/api/health/database", async (req, res) => {
+    try {
+      const { db } = await import('../server/db.js');
+      const result = await db.execute('SELECT 1 as health');
+      res.json({ 
+        status: "ok", 
+        database: "connected",
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        status: "error", 
+        database: "disconnected",
+        error: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
   // Add isAuthenticated method to req
   app.use((req: Request, _res: Response, next) => {
     // Extend the session type for TypeScript
