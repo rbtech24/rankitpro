@@ -35,9 +35,7 @@ import billingRoutes from "./routes/billing";
 import userRoutes from "./routes/users";
 import aiProvidersRoutes from "./routes/ai-providers";
 import generateContentRoutes from "./routes/generate-content";
-import mobileRoutes from "./routes/mobile";
-import mobileCheckInsRoutes from "./routes/mobile/check-ins";
-import mobileNotificationsRoutes from "./routes/mobile/notifications";
+// Removed conflicting mobile routes
 import crmIntegrationRoutes from "./routes/crm-integration";
 import salesRoutes from "./routes/sales";
 import emailService from "./services/email-service";
@@ -2209,10 +2207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/sales", salesRoutes);
   
   // MOBILE ROUTES LAST TO PREVENT INTERFERENCE WITH OTHER APIs
-  app.use("/api/mobile/v1", mobileRoutes);
-  app.use("/api/mobile", mobileRoutes);
-  app.use("/api/mobile/check-ins", mobileCheckInsRoutes);
-  app.use("/api/mobile/notifications", mobileNotificationsRoutes);
+  // Removed conflicting mobile authentication routes
   
   // Password reset for technicians
   app.post("/api/technicians/:id/reset-password", isAuthenticated, isCompanyAdmin, async (req, res) => {
