@@ -53,6 +53,11 @@ const companyConnections = new Map<number, Set<WebSocket>>();
 const userConnections = new Map<number, WebSocket>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Force API routes to be handled before any static file serving
+  app.all('/api/*', (req, res, next) => {
+    res.header('Content-Type', 'application/json');
+    next();
+  });
   // Create HTTP server to be returned
   const server = createServer(app);
   
@@ -213,6 +218,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
   });
   
+  // Ensure API routes are processed before static file handling
+  app.use('/api', (req, res, next) => {
+    res.header('Content-Type', 'application/json');
+    next();
+  });
+
   // API Health Check - Must come before authentication middleware
   app.get("/api/health", (req, res) => {
     res.json({ 
@@ -651,17 +662,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Working admin authentication endpoint
-  app.post("/api/auth/login", (req, res) => {
+  app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
       
       console.log("LOGIN ATTEMPT:", email);
       
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password required" });
+      }
+      
       if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
         // Set session for compatibility
-        if (req.session) {
-          req.session.userId = 1;
-          console.log("SESSION SET: User ID 1");
+        try {
+          if (req.session) {
+            req.session.userId = 1;
+            console.log("SESSION SET: User ID 1");
+          }
+        } catch (sessionError) {
+          console.log("SESSION WARNING:", sessionError);
+          // Continue without session
         }
         
         const userResponse = {
@@ -684,7 +704,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("LOGIN ERROR:", error);
-      res.status(500).json({ message: "Login error" });
+      res.status(500).json({ message: "Server error during login" });
     }
   });
 
