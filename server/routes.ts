@@ -323,6 +323,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(statusCode).json(healthCheck);
   });
 
+  // Emergency database diagnostics
+  app.get("/api/emergency-db-test", async (req, res) => {
+    try {
+      // Test database connection
+      const allUsers = await storage.getAllUsers();
+      const superAdmins = allUsers.filter(user => user.role === "super_admin");
+      res.json({
+        status: "database_connected",
+        totalUsers: allUsers.length,
+        superAdminCount: superAdmins.length,
+        firstAdmin: superAdmins[0] ? {
+          email: superAdmins[0].email,
+          created: superAdmins[0].createdAt
+        } : null
+      });
+    } catch (error: any) {
+      console.error("Database test error:", error);
+      res.status(500).json({
+        status: "database_error",
+        error: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
+    }
+  });
+
   // Add isAuthenticated method to req
   app.use((req: Request, _res: Response, next) => {
     // Extend the session type for TypeScript
@@ -419,8 +444,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email and password are required" });
       }
       
-      // Find user
-      const user = await storage.getUserByEmail(email);
+      // Find user with enhanced error handling
+      let user;
+      try {
+        user = await storage.getUserByEmail(email);
+      } catch (dbError: any) {
+        console.error("Database error during user lookup:", dbError);
+        return res.status(500).json({ 
+          message: "Database connection error",
+          error: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+        });
+      }
+      
       if (!user) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
