@@ -348,6 +348,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Emergency admin password reset
+  app.post("/api/emergency-reset-admin", async (req, res) => {
+    try {
+      const { newPassword } = req.body;
+      
+      if (!newPassword || newPassword.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters" });
+      }
+      
+      // Find admin user
+      const allUsers = await storage.getAllUsers();
+      const adminUser = allUsers.find(user => user.role === "super_admin");
+      
+      if (!adminUser) {
+        return res.status(404).json({ message: "No admin user found" });
+      }
+      
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      
+      // Update admin password
+      await storage.updateUser(adminUser.id, { password: hashedPassword });
+      
+      res.json({ 
+        message: "Admin password reset successfully",
+        adminEmail: adminUser.email
+      });
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      res.status(500).json({
+        message: "Password reset failed",
+        error: error.message
+      });
+    }
+  });
+
   // Add isAuthenticated method to req
   app.use((req: Request, _res: Response, next) => {
     // Extend the session type for TypeScript
