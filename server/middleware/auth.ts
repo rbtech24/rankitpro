@@ -20,7 +20,7 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
   if (token) {
     try {
       const jwt = require('jsonwebtoken');
-      const decoded = jwt.verify(token, 'emergency-secret-key') as any;
+      const decoded = jwt.verify(token, 'production-auth-key') as any;
       userId = decoded.userId;
       console.log("AUTH DEBUG: JWT authentication successful for user:", userId);
     } catch (jwtError: any) {
