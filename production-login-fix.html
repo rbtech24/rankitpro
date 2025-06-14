@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Admin Login Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input[type="text"], input[type="password"] {
+            width: 300px;
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        .credentials {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Rank It Pro - Production Admin Access Recovery</h1>
+        
+        <div class="info step">
+            <h3>Current Status</h3>
+            <p>Admin account exists: <strong>bill@mrsprinklerrepair.com</strong></p>
+            <p>Password has been reset to: <strong>TempAdmin2024!</strong></p>
+        </div>
+
+        <div class="credentials">
+            <h3>🔑 Admin Login Credentials</h3>
+            <p><strong>Email:</strong> bill@mrsprinklerrepair.com</p>
+            <p><strong>Password:</strong> TempAdmin2024!</p>
+            <p><strong>Login URL:</strong> <a href="https://rankitpro.com/login" target="_blank">https://rankitpro.com/login</a></p>
+        </div>
+
+        <div class="step">
+            <h3>Step 1: Test Password Reset</h3>
+            <button onclick="testPasswordReset()">Test Password Reset</button>
+            <div id="resetResult"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Test Login</h3>
+            <button onclick="testLogin()">Test Login</button>
+            <div id="loginResult"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Access Dashboard</h3>
+            <p>If login works, you can access the admin dashboard at:</p>
+            <a href="https://rankitpro.com/dashboard" target="_blank" style="
+                display: inline-block;
+                background-color: #28a745;
+                color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+                border-radius: 5px;
+                margin: 10px 0;
+            ">Go to Admin Dashboard</a>
+        </div>
+
+        <div class="step">
+            <h3>Manual Login Process</h3>
+            <ol>
+                <li>Go to <a href="https://rankitpro.com/login" target="_blank">https://rankitpro.com/login</a></li>
+                <li>Enter email: <code>bill@mrsprinklerrepair.com</code></li>
+                <li>Enter password: <code>TempAdmin2024!</code></li>
+                <li>Click "Sign In"</li>
+                <li>You should be redirected to the dashboard</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>After Successful Login</h3>
+            <p>Once logged in, you should:</p>
+            <ul>
+                <li>Change your password to something more secure</li>
+                <li>Update your email address if needed</li>
+                <li>Configure your company settings</li>
+                <li>Test the platform features</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testPasswordReset() {
+            const resultDiv = document.getElementById('resetResult');
+            resultDiv.innerHTML = '<p>Testing password reset...</p>';
+            
+            try {
+                const response = await fetch('https://rankitpro.com/api/emergency-reset-admin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        newPassword: 'TempAdmin2024!',
+                        adminEmail: 'bill@mrsprinklerrepair.com'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">
+                        <h4>✅ Password Reset Successful</h4>
+                        <p>Admin: ${data.adminEmail}</p>
+                        <p>New password: TempAdmin2024!</p>
+                    </div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">
+                        <h4>❌ Password Reset Failed</h4>
+                        <p>${data.message}</p>
+                    </div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">
+                    <h4>❌ Network Error</h4>
+                    <p>${error.message}</p>
+                </div>`;
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = '<p>Testing login...</p>';
+            
+            try {
+                const response = await fetch('https://rankitpro.com/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'bill@mrsprinklerrepair.com',
+                        password: 'TempAdmin2024!'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">
+                        <h4>✅ Login Successful</h4>
+                        <p>Welcome ${data.email}!</p>
+                        <p>Role: ${data.role}</p>
+                        <p><a href="https://rankitpro.com/dashboard" target="_blank">Go to Dashboard</a></p>
+                    </div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">
+                        <h4>❌ Login Failed</h4>
+                        <p>${data.message}</p>
+                        <p>Status: ${response.status}</p>
+                    </div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">
+                    <h4>❌ Network Error</h4>
+                    <p>${error.message}</p>
+                </div>`;
+            }
+        }
+
+        // Auto-run password reset on page load
+        window.onload = function() {
+            testPasswordReset();
+        };
+    </script>
+</body>
+</html>

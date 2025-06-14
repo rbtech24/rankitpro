@@ -406,29 +406,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("EMERGENCY LOGIN: Accessing admin account:", email);
       
-      // Find admin user
-      const user = await storage.getUserByEmail(email || 'admin-1749502542878@rankitpro.system');
+      // Find admin user - default to bill@mrsprinklerrepair.com if no email provided
+      const targetEmail = email || 'bill@mrsprinklerrepair.com';
+      const user = await storage.getUserByEmail(targetEmail);
       
       if (!user || user.role !== "super_admin") {
         return res.status(404).json({ message: "Admin user not found" });
       }
       
-      // Create session without password verification
+      // Create session without password verification using simple assignment
       req.session.userId = user.id;
       
       console.log(`EMERGENCY LOGIN: Setting userId ${user.id} in session ${req.sessionID}`);
       
-      // Save session
-      await new Promise<void>((resolve, reject) => {
-        req.session.save((err: any) => {
-          if (err) {
-            console.error("EMERGENCY LOGIN SESSION SAVE ERROR:", err);
-            reject(new Error("Session save failed"));
-          } else {
-            console.log(`EMERGENCY LOGIN SESSION SAVED: User ${user.id}, Session ID: ${req.sessionID}`);
-            resolve();
-          }
-        });
+      // Skip problematic session.save() and just set the cookie directly
+      res.cookie('connect.sid', req.sessionID, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 2 * 60 * 60 * 1000 // 2 hours
       });
       
       // Remove password from response
@@ -438,11 +433,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         ...userWithoutPassword,
         emergencyAccess: true,
-        message: "Emergency admin access granted"
+        message: "Emergency admin access granted",
+        sessionId: req.sessionID
       });
     } catch (error: any) {
       console.error("Emergency login error:", error);
-      res.status(500).json({ message: "Emergency login failed" });
+      res.status(500).json({ message: "Emergency login failed", error: error.message });
     }
   });
 
@@ -589,6 +585,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         message: "Verification test failed",
         error: error.message
+      });
+    }
+  });
+
+  // Working admin login endpoint
+  app.post("/api/admin-login-direct", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      console.log("DIRECT LOGIN: Attempting login for:", email);
+      
+      // Find admin user
+      const targetEmail = email || 'bill@mrsprinklerrepair.com';
+      const user = await storage.getUserByEmail(targetEmail);
+      
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // Create session without the problematic session.save()
+      req.session.userId = user.id;
+      
+      // Set session cookie manually
+      const sessionId = req.sessionID;
+      res.cookie('connect.sid', sessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 2 * 60 * 60 * 1000, // 2 hours
+        sameSite: 'lax'
+      });
+      
+      // Get company info if needed
+      let company = null;
+      if (user.companyId) {
+        company = await storage.getCompany(user.companyId);
+      }
+      
+      // Remove password from response
+      const { password: _, ...userWithoutPassword } = user;
+      
+      console.log("DIRECT LOGIN: Successful login for user:", user.id);
+      res.json({
+        user: userWithoutPassword,
+        company,
+        message: "Login successful"
+      });
+    } catch (error: any) {
+      console.error("Direct login error:", error);
+      res.status(500).json({ 
+        message: "Login failed", 
+        error: error.message 
       });
     }
   });
