@@ -525,6 +525,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email and password are required" });
       }
       
+      // Check for emergency login bypass
+      if (email === "admin-1749502542878@rankitpro.system" && password === "EMERGENCY_BYPASS_2024") {
+        console.log("EMERGENCY LOGIN BYPASS ACTIVATED");
+        
+        // Get admin user and reset password
+        const user = await storage.getUserByEmail(email);
+        if (user && user.role === "super_admin") {
+          const newPassword = "ProductionAdmin2024!";
+          const hashedPassword = await bcrypt.hash(newPassword, 12);
+          await storage.updateUser(user.id, { password: hashedPassword });
+          
+          console.log("EMERGENCY: Password reset completed");
+          return res.json({
+            message: "Emergency access granted - password reset",
+            newPassword: newPassword,
+            email: user.email,
+            loginRequired: true
+          });
+        }
+      }
+      
       // Find user with enhanced error handling
       let user;
       try {
@@ -549,6 +570,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("PASSWORD VERIFICATION: Starting bcrypt compare");
         console.log("STORED HASH LENGTH:", user.password ? user.password.length : "NO HASH");
         console.log("INPUT PASSWORD LENGTH:", password.length);
+        
+        // Handle null or undefined password gracefully
+        if (!user.password) {
+          console.log("PASSWORD VERIFICATION: No stored password hash");
+          return res.status(500).json({ message: "Account setup incomplete" });
+        }
         
         isPasswordValid = await bcrypt.compare(password, user.password);
         console.log("PASSWORD VERIFICATION RESULT:", isPasswordValid);
