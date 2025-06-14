@@ -1081,7 +1081,7 @@ function Router() {
         <PrivateRoute component={Dashboard} path="/dashboard" />
       </Route>
       <Route path="/admin">
-        <AdminDashboard />
+        <PrivateRoute component={AdminDashboard} path="/admin" role="super_admin" />
       </Route>
       <Route path="/setup">
         <PrivateRoute component={SetupGuide} path="/setup" role="company_admin" />
