@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { InfoPageLayout } from "@/components/layouts/InfoPageLayout";
 
 const formSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -84,22 +85,9 @@ export default function Onboarding() {
   const progress = (currentStep / steps.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Building2 className="h-8 w-8 text-primary" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome to Rank It Pro
-          </h1>
-          <p className="text-gray-600">
-            Start your free trial and transform your home service business
-          </p>
-        </div>
+    <InfoPageLayout title="Register Your Business" description="Start your free trial and transform your home service business">
+      <div className="flex justify-center">
+        <div className="w-full max-w-2xl">
 
         {/* Progress Bar */}
         <div className="mb-8">
@@ -281,7 +269,8 @@ export default function Onboarding() {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
-    </div>
+    </InfoPageLayout>
   );
 }
