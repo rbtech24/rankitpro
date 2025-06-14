@@ -431,10 +431,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
-      // Set session data immediately and save synchronously
+      // Set session data and save explicitly
       req.session.userId = user.id;
       
-      // Use promisified session save for proper error handling
+      console.log(`LOGIN: Setting userId ${user.id} in session ${req.sessionID}`);
+      console.log("LOGIN: Session before save:", req.session);
+      
+      // Save session with error handling
       await new Promise<void>((resolve, reject) => {
         req.session.save((err: any) => {
           if (err) {
@@ -442,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             reject(new Error("Session save failed"));
           } else {
             console.log(`LOGIN SESSION SAVED: User ${user.id}, Session ID: ${req.sessionID}`);
-            console.log("LOGIN SESSION DATA:", { userId: req.session.userId, sessionID: req.sessionID });
+            console.log("LOGIN: Session after save:", req.session);
             resolve();
           }
         });
@@ -854,12 +857,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/technicians", isCompanyAdmin, async (req, res) => {
+  app.post("/api/technicians", isAuthenticated, async (req, res) => {
     try {
-      const companyId = req.user.companyId;
+      // Super admins can create technicians for any company (companyId in body)
+      // Company admins can only create for their own company
+      let companyId: number;
       
-      if (!companyId) {
-        return res.status(400).json({ message: "No company associated with this user" });
+      if (req.user.role === "super_admin") {
+        // Super admin can specify companyId in request body
+        companyId = req.body.companyId;
+        if (!companyId) {
+          return res.status(400).json({ message: "Company ID is required" });
+        }
+      } else {
+        // Company admin uses their associated company
+        companyId = req.user.companyId;
+        if (!companyId) {
+          return res.status(400).json({ message: "No company associated with this user" });
+        }
+        
+        // Ensure they're a company admin
+        if (req.user.role !== "company_admin") {
+          return res.status(403).json({ message: "Insufficient permissions" });
+        }
       }
       
       const data = insertTechnicianSchema.parse({
