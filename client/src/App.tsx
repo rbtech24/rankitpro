@@ -230,11 +230,7 @@ function Router() {
         {auth?.user ? <Redirect to="/dashboard" /> : <Onboarding />}
       </Route>
       <Route path="/">
-        {auth?.user ? 
-          (auth.user.role === "super_admin" ? <AdminDashboard /> : 
-           auth.user.role === "technician" ? <TechnicianDashboard /> :
-           <Redirect to="/dashboard" />) 
-          : <Home />}
+        <Home />
       </Route>
       
       {/* Informational Pages */}
