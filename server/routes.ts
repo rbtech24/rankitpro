@@ -161,6 +161,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
   
+  // Development session debugging endpoint
+  if (process.env.NODE_ENV === 'development') {
+    app.get("/api/debug/session", (req, res) => {
+      res.json({
+        sessionExists: !!req.session,
+        sessionId: req.sessionID,
+        userId: req.session?.userId,
+        cookieHeader: req.headers.cookie,
+        userAgent: req.headers['user-agent'],
+        sessionData: req.session,
+        isAuthenticated: req.isAuthenticated()
+      });
+    });
+  }
+
   // System admin credentials endpoint - STRICTLY development only
   if (process.env.NODE_ENV === 'development') {
     app.get("/api/system-admin-credentials", async (req, res) => {
@@ -423,10 +438,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await new Promise<void>((resolve, reject) => {
         req.session.save((err: any) => {
           if (err) {
-            console.error("Session save error:", err);
+            console.error("LOGIN SESSION SAVE ERROR:", err);
             reject(new Error("Session save failed"));
           } else {
-            console.log(`Session saved successfully for user ${user.id}`);
+            console.log(`LOGIN SESSION SAVED: User ${user.id}, Session ID: ${req.sessionID}`);
+            console.log("LOGIN SESSION DATA:", { userId: req.session.userId, sessionID: req.sessionID });
             resolve();
           }
         });
