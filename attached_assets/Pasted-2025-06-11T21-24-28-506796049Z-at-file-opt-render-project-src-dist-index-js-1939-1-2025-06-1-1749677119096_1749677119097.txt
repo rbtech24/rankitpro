@@ -1,0 +1,50 @@
+2025-06-11T21:24:28.506796049Z     at file:///opt/render/project/src/dist/index.js:1939:1
+2025-06-11T21:24:28.506799629Z     at ModuleJob.run (node:internal/modules/esm/module_job:271:25)
+2025-06-11T21:24:28.506802659Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)
+2025-06-11T21:24:28.506805649Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+2025-06-11T21:24:28.506808569Z 
+2025-06-11T21:24:28.506812029Z Node.js v22.14.0
+2025-06-11T21:24:29.877457992Z ==> Exited with status 1
+2025-06-11T21:24:29.895693992Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-06-11T21:24:31.680605925Z ==> Running 'npm run start'
+2025-06-11T21:24:32.044359901Z 
+2025-06-11T21:24:32.044453913Z > rest-express@1.0.0 start
+2025-06-11T21:24:32.044504784Z > NODE_ENV=production node dist/index.js
+2025-06-11T21:24:32.044508004Z 
+2025-06-11T21:24:35.275403245Z 
+2025-06-11T21:24:35.275434876Z ❌ DATABASE CONFIGURATION ERROR
+2025-06-11T21:24:35.275661421Z ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2025-06-11T21:24:35.275673662Z DATABASE_URL environment variable is not configured.
+2025-06-11T21:24:35.275679522Z 
+2025-06-11T21:24:35.275711223Z DEPLOYMENT PLATFORM INSTRUCTIONS:
+2025-06-11T21:24:35.275736863Z 
+2025-06-11T21:24:35.275740363Z 🔸 Render.com:
+2025-06-11T21:24:35.275759334Z   1. Create a PostgreSQL database in your Render dashboard
+2025-06-11T21:24:35.275941968Z   2. Copy the 'External Database URL'
+2025-06-11T21:24:35.276140042Z   3. Add DATABASE_URL to your web service environment variables
+2025-06-11T21:24:35.276174193Z 
+2025-06-11T21:24:35.276183873Z 🔸 Heroku:
+2025-06-11T21:24:35.276186083Z   heroku config:set DATABASE_URL=postgresql://...
+2025-06-11T21:24:35.276271595Z 
+2025-06-11T21:24:35.276276156Z 🔸 Railway:
+2025-06-11T21:24:35.276308686Z   railway variables set DATABASE_URL=postgresql://...
+2025-06-11T21:24:35.276312016Z 
+2025-06-11T21:24:35.276319237Z 🔸 Other platforms:
+2025-06-11T21:24:35.276322737Z   Set DATABASE_URL to your PostgreSQL connection string
+2025-06-11T21:24:35.276332027Z ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2025-06-11T21:24:35.278909516Z file:///opt/render/project/src/dist/index.js:517
+2025-06-11T21:24:35.278917516Z     throw new Error("DATABASE_URL must be configured in your deployment platform's environment variables");
+2025-06-11T21:24:35.278920696Z           ^
+2025-06-11T21:24:35.278923786Z 
+2025-06-11T21:24:35.278927777Z Error: DATABASE_URL must be configured in your deployment platform's environment variables
+2025-06-11T21:24:35.278931257Z     at createDatabaseConnection (file:///opt/render/project/src/dist/index.js:517:11)
+2025-06-11T21:24:35.278935447Z     at server/db.ts (file:///opt/render/project/src/dist/index.js:535:21)
+2025-06-11T21:24:35.278943637Z     at __init (file:///opt/render/project/src/dist/index.js:10:56)
+2025-06-11T21:24:35.278948007Z     at server/storage.ts (file:///opt/render/project/src/dist/index.js:545:5)
+2025-06-11T21:24:35.278952317Z     at __init (file:///opt/render/project/src/dist/index.js:10:56)
+2025-06-11T21:24:35.278955747Z     at file:///opt/render/project/src/dist/index.js:1939:1
+2025-06-11T21:24:35.278958847Z     at ModuleJob.run (node:internal/modules/esm/module_job:271:25)
+2025-06-11T21:24:35.278961937Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)
+2025-06-11T21:24:35.278965007Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+2025-06-11T21:24:35.278968447Z 
+2025-06-11T21:24:35.278971898Z Node.js v22.14.0

@@ -44,6 +44,7 @@ import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
 import { fromZodError } from "zod-validation-error";
 import { WebSocketServer, WebSocket } from 'ws';
+import crypto from 'crypto';
 
 const SessionStore = MemoryStore(session);
 
@@ -146,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(
     session({
       store: sessionStore,
-      secret: process.env.SESSION_SECRET || require('crypto').randomBytes(32).toString('hex'),
+      secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
       resave: false,
       saveUninitialized: false,
       name: 'connect.sid',
@@ -175,7 +176,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Generate cryptographically secure password
-        const crypto = require('crypto');
         const newPassword = crypto.randomBytes(16).toString('hex') + "!A1";
         const hashedPassword = await bcrypt.hash(newPassword, 12);
         
