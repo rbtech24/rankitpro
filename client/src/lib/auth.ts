@@ -59,28 +59,28 @@ export async function login(credentials: LoginCredentials): Promise<AuthState> {
       };
     }
     // Company Admin Login
-    else if (credentials.email === "company@test.com" && credentials.password === "test123") {
+    else if (credentials.email === "debugcompany@example.com" && credentials.password === "debug123") {
       user = {
-        id: 3,
-        username: "companyAdmin",
-        email: "company@test.com",
+        id: 10,
+        username: "debugcompany",
+        email: "debugcompany@example.com",
         role: "company_admin" as const,
-        companyId: 2
+        companyId: 9
       };
       
       company = {
-        id: 2,
-        name: "Test Company",
+        id: 9,
+        name: "Debug Company",
         plan: "pro",
         usageLimit: 10000
       };
     }
     // Technician Login
-    else if (credentials.email === "tech@test.com" && credentials.password === "tech123") {
+    else if (credentials.email === "debugtech@example.com" && credentials.password === "debug123") {
       user = {
         id: 11,
-        username: "techUser",
-        email: "tech@test.com",
+        username: "debugtech",
+        email: "debugtech@example.com",
         role: "technician" as const,
         companyId: 9
       };

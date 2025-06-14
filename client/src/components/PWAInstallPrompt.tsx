@@ -25,6 +25,19 @@ export const PWAInstallPrompt: React.FC = () => {
       return; // App is already installed
     }
 
+    // Only show PWA prompts on mobile devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTablet = /iPad|Android.*Tablet|Windows.*Touch/i.test(navigator.userAgent);
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    // Check screen size as additional mobile indicator
+    const isSmallScreen = window.innerWidth <= 768;
+    
+    // Only proceed if it's a mobile device or small touch screen
+    if (!isMobile && !isTablet && !(isTouchDevice && isSmallScreen)) {
+      return; // Don't show PWA prompts on desktop
+    }
+
     // Listen for beforeinstallprompt event (Android/Chrome)
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
