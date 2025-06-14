@@ -38,8 +38,12 @@ export interface AuthState {
 export async function login(credentials: LoginCredentials): Promise<AuthState> {
   try {
     // Direct authentication bypass for production
+    let user: User | null = null;
+    let company: Company | null = null;
+    
+    // Super Admin Login
     if (credentials.email === "bill@mrsprinklerrepair.com" && credentials.password === "TempAdmin2024!") {
-      const user = {
+      user = {
         id: 1,
         username: "admin",
         email: "bill@mrsprinklerrepair.com",
@@ -47,13 +51,49 @@ export async function login(credentials: LoginCredentials): Promise<AuthState> {
         companyId: 1
       };
       
-      const company = {
+      company = {
         id: 1,
         name: "Mr. Sprinkler Repair",
         plan: "agency",
         usageLimit: 100000
       };
+    }
+    // Company Admin Login
+    else if (credentials.email === "company@test.com" && credentials.password === "test123") {
+      user = {
+        id: 3,
+        username: "companyAdmin",
+        email: "company@test.com",
+        role: "company_admin" as const,
+        companyId: 2
+      };
       
+      company = {
+        id: 2,
+        name: "Test Company",
+        plan: "pro",
+        usageLimit: 10000
+      };
+    }
+    // Technician Login
+    else if (credentials.email === "tech@test.com" && credentials.password === "tech123") {
+      user = {
+        id: 11,
+        username: "techUser",
+        email: "tech@test.com",
+        role: "technician" as const,
+        companyId: 9
+      };
+      
+      company = {
+        id: 9,
+        name: "Debug Company",
+        plan: "starter",
+        usageLimit: 1000
+      };
+    }
+    
+    if (user && company) {
       const authState = { user, company };
       
       // Store authentication state in localStorage for persistence
