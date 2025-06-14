@@ -59,36 +59,36 @@ export async function login(credentials: LoginCredentials): Promise<AuthState> {
       };
     }
     // Company Admin Login
-    else if (credentials.email === "debugcompany@example.com" && credentials.password === "debug123") {
+    else if (credentials.email === "admin@testcompany.com" && credentials.password === "company123") {
       user = {
-        id: 10,
-        username: "debugcompany",
-        email: "debugcompany@example.com",
+        id: 3,
+        username: "companyadmin",
+        email: "admin@testcompany.com",
         role: "company_admin" as const,
-        companyId: 9
+        companyId: 2
       };
       
       company = {
-        id: 9,
-        name: "Debug Company",
+        id: 2,
+        name: "Test Company Ltd",
         plan: "pro",
-        usageLimit: 10000
+        usageLimit: 1000
       };
     }
     // Technician Login
-    else if (credentials.email === "debugtech@example.com" && credentials.password === "debug123") {
+    else if (credentials.email === "tech@testcompany.com" && credentials.password === "tech1234") {
       user = {
-        id: 11,
-        username: "debugtech",
-        email: "debugtech@example.com",
+        id: 4,
+        username: "techuser",
+        email: "tech@testcompany.com",
         role: "technician" as const,
-        companyId: 9
+        companyId: 2
       };
       
       company = {
-        id: 9,
-        name: "Debug Company",
-        plan: "starter",
+        id: 2,
+        name: "Test Company Ltd",
+        plan: "pro",
         usageLimit: 1000
       };
     }
