@@ -137,11 +137,6 @@ async function createSuperAdminIfNotExists() {
   
   const server = await registerRoutes(app);
 
-  // Add explicit 404 handler for API routes before static serving
-  app.use('/api/*', (req, res) => {
-    res.status(404).json({ message: `API endpoint not found: ${req.originalUrl}` });
-  });
-
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -158,6 +153,11 @@ async function createSuperAdminIfNotExists() {
   } else {
     serveStatic(app);
   }
+
+  // Add explicit 404 handler for API routes AFTER static serving
+  app.use('/api/*', (req, res) => {
+    res.status(404).json({ message: `API endpoint not found: ${req.originalUrl}` });
+  });
 
   // Use Render's PORT environment variable in production, fallback to 5000 for development
   const port = process.env.PORT || 5000;
