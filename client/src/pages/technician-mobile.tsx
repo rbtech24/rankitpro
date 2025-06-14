@@ -256,7 +256,7 @@ export default function TechnicianMobile() {
     } catch (error) {
       toast({
         title: "Login failed",
-        description: error.message,
+        description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive"
       });
     } finally {
@@ -346,7 +346,9 @@ export default function TechnicianMobile() {
       
       // Update stored access token
       const { refreshToken: storedRefreshToken } = getStoredTokens();
-      storeTokens(accessToken, storedRefreshToken);
+      if (storedRefreshToken) {
+        storeTokens(accessToken, storedRefreshToken);
+      }
       
       // Fetch profile with new token
       await fetchProfile();
@@ -1292,7 +1294,7 @@ export default function TechnicianMobile() {
                 
                 {checkIn.photos && checkIn.photos.length > 0 && (
                   <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
-                    {checkIn.photos.map((photo, index) => (
+                    {checkIn.photos.map((photo: { url: string }, index: number) => (
                       <img
                         key={index}
                         src={photo.url}
