@@ -351,34 +351,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Emergency admin password reset
   app.post("/api/emergency-reset-admin", async (req, res) => {
     try {
-      const { newPassword } = req.body;
+      const { newPassword, adminEmail } = req.body;
       
       if (!newPassword || newPassword.length < 8) {
         return res.status(400).json({ message: "Password must be at least 8 characters" });
       }
       
-      // Find admin user
-      const allUsers = await storage.getAllUsers();
-      const adminUser = allUsers.find(user => user.role === "super_admin");
+      // Find admin user by email or get super admin
+      let adminUser;
+      if (adminEmail) {
+        adminUser = await storage.getUserByEmail(adminEmail);
+      } else {
+        const allUsers = await storage.getAllUsers();
+        adminUser = allUsers.find(user => user.role === "super_admin");
+      }
       
       if (!adminUser) {
         return res.status(404).json({ message: "No admin user found" });
       }
       
+      console.log("EMERGENCY RESET: Updating password for user:", adminUser.id, adminUser.email);
+      
       // Hash new password
       const hashedPassword = await bcrypt.hash(newPassword, 12);
+      console.log("EMERGENCY RESET: New password hash generated, length:", hashedPassword.length);
       
       // Update admin password
       await storage.updateUser(adminUser.id, { password: hashedPassword });
+      console.log("EMERGENCY RESET: Password updated in database");
       
       res.json({ 
         message: "Admin password reset successfully",
-        adminEmail: adminUser.email
+        adminEmail: adminUser.email,
+        adminId: adminUser.id
       });
     } catch (error: any) {
       console.error("Password reset error:", error);
       res.status(500).json({
         message: "Password reset failed",
+        error: error.message
+      });
+    }
+  });
+
+  // Emergency password reset verification
+  app.post("/api/emergency-verify-reset", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      console.log("EMERGENCY VERIFY: Testing login for:", email);
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      console.log("EMERGENCY VERIFY: User found, testing password");
+      console.log("EMERGENCY VERIFY: Stored hash length:", user.password ? user.password.length : "NO HASH");
+      
+      const isValid = await bcrypt.compare(password, user.password);
+      console.log("EMERGENCY VERIFY: Password verification result:", isValid);
+      
+      res.json({
+        message: "Password verification test completed",
+        isValid,
+        userEmail: user.email,
+        hashLength: user.password ? user.password.length : 0
+      });
+    } catch (error: any) {
+      console.error("Password verification test error:", error);
+      res.status(500).json({
+        message: "Verification test failed",
         error: error.message
       });
     }
@@ -476,6 +519,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
+      console.log("LOGIN ATTEMPT:", { email, hasPassword: !!password });
+      
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
       }
@@ -484,6 +529,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let user;
       try {
         user = await storage.getUserByEmail(email);
+        console.log("USER LOOKUP RESULT:", user ? { id: user.id, email: user.email, role: user.role } : "User not found");
       } catch (dbError: any) {
         console.error("Database error during user lookup:", dbError);
         return res.status(500).json({ 
@@ -493,12 +539,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (!user) {
+        console.log("LOGIN FAILED: User not found");
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
-      // Verify password
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      // Verify password with enhanced error handling
+      let isPasswordValid = false;
+      try {
+        console.log("PASSWORD VERIFICATION: Starting bcrypt compare");
+        console.log("STORED HASH LENGTH:", user.password ? user.password.length : "NO HASH");
+        console.log("INPUT PASSWORD LENGTH:", password.length);
+        
+        isPasswordValid = await bcrypt.compare(password, user.password);
+        console.log("PASSWORD VERIFICATION RESULT:", isPasswordValid);
+      } catch (bcryptError: any) {
+        console.error("BCRYPT ERROR:", bcryptError);
+        return res.status(500).json({ 
+          message: "Password verification error",
+          error: process.env.NODE_ENV === 'development' ? bcryptError.message : undefined
+        });
+      }
+      
       if (!isPasswordValid) {
+        console.log("LOGIN FAILED: Invalid password");
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
@@ -525,6 +588,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Remove password from response
       const { password: _, ...userWithoutPassword } = user;
       
+      console.log("LOGIN SUCCESSFUL for user:", user.id);
       res.json(userWithoutPassword);
     } catch (error) {
       console.error("Login error:", error);
