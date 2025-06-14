@@ -274,42 +274,53 @@
 
         async function tryEmergencyLogin(email, password) {
             try {
-                // Try emergency admin login
-                const emergencyResponse = await fetch('https://rankitpro.com/api/emergency-admin-login', {
+                showAlert('Trying JWT-based authentication...', 'info');
+                
+                // Try JWT-based direct login endpoint
+                const directResponse = await fetch('https://rankitpro.com/api/admin-login-direct', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({
-                        email: email,
-                        emergencyKey: 'PRODUCTION_EMERGENCY_2024'
-                    })
+                    body: JSON.stringify({ email, password })
                 });
                 
-                if (emergencyResponse.ok) {
-                    showAlert('Emergency access granted! Redirecting...', 'success');
+                if (directResponse.ok) {
+                    const data = await directResponse.json();
+                    showAlert('JWT authentication successful! Redirecting...', 'success');
+                    
+                    // Store token in localStorage as backup
+                    if (data.token) {
+                        localStorage.setItem('auth-token', data.token);
+                    }
+                    
                     setTimeout(() => {
                         window.location.href = 'https://rankitpro.com/dashboard';
                     }, 1000);
                 } else {
-                    // Try direct login endpoint
-                    const directResponse = await fetch('https://rankitpro.com/api/admin-login-direct', {
+                    const errorData = await directResponse.json();
+                    
+                    // Try emergency admin login as final fallback
+                    const emergencyResponse = await fetch('https://rankitpro.com/api/emergency-admin-login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
-                        body: JSON.stringify({ email, password })
+                        body: JSON.stringify({
+                            email: email,
+                            emergencyKey: 'PRODUCTION_EMERGENCY_2024'
+                        })
                     });
                     
-                    if (directResponse.ok) {
-                        showAlert('Direct login successful! Redirecting...', 'success');
+                    if (emergencyResponse.ok) {
+                        showAlert('Emergency access granted! Redirecting...', 'success');
                         setTimeout(() => {
                             window.location.href = 'https://rankitpro.com/dashboard';
                         }, 1000);
                     } else {
-                        showAlert('All login methods failed. Please contact support.', 'error');
+                        showAlert(`All authentication methods failed: ${errorData.message}`, 'error');
                     }
                 }
             } catch (error) {
-                showAlert('Emergency login also failed. Please try again later.', 'error');
+                showAlert(`Network error: ${error.message}`, 'error');
             }
         }
 
