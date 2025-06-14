@@ -61,8 +61,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
-  // Production login endpoint - registered first for highest priority
+  // Production login endpoint - using alternative path to bypass static serving
+  app.post("/auth/login", (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    const { email, password } = req.body;
+    
+    if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
+      return res.status(200).json({
+        success: true,
+        user: {
+          id: 1,
+          email: "bill@mrsprinklerrepair.com",
+          role: "super_admin",
+          username: "admin",
+          companyId: 1
+        },
+        message: "Login successful"
+      });
+    } else {
+      return res.status(401).json({ 
+        success: false, 
+        message: "Invalid credentials" 
+      });
+    }
+  });
+
+  // Keep original API endpoint for compatibility
   app.post("/api/login", (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
     const { email, password } = req.body;
     
     if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
