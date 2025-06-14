@@ -536,138 +536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Emergency admin login that bypasses all authentication
-  app.post("/api/admin-login-direct", async (req, res) => {
-    try {
-      const { email, password, emergencyOverride } = req.body;
-      
-      console.log("DIRECT LOGIN: Attempting login for:", email);
-      
-      // Find admin user
-      const targetEmail = email || 'bill@mrsprinklerrepair.com';
-      const user = await storage.getUserByEmail(targetEmail);
-      
-      if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // Emergency bypass for production issues
-      let isPasswordValid = false;
-      
-      // Check for emergency credentials first
-      const emergencyCredentials = [
-        { email: 'bill@mrsprinklerrepair.com', password: 'TempAdmin2024!' },
-        { email: 'bill@mrsprinklerrepair.com', password: 'ProductionAdmin2024!' },
-        { email: 'bill@mrsprinklerrepair.com', password: 'EmergencyAccess2024!' }
-      ];
-      
-      const isEmergencyMatch = emergencyCredentials.some(cred => 
-        cred.email === email && cred.password === password
-      );
-      
-      if (isEmergencyMatch && user.role === 'super_admin') {
-        console.log("EMERGENCY BYPASS: Using hardcoded emergency credentials");
-        isPasswordValid = true;
-      } else {
-        // Try normal password verification
-        try {
-          isPasswordValid = await bcrypt.compare(password, user.password);
-        } catch (bcryptError) {
-          console.log("BCRYPT ERROR: Falling back to emergency bypass");
-          if (user.role === 'super_admin' && password === 'TempAdmin2024!') {
-            isPasswordValid = true;
-          }
-        }
-      }
-      
-      if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // Create JWT token instead of session
-      const jwt = require('jsonwebtoken');
-      const token = jwt.sign(
-        { 
-          userId: user.id, 
-          email: user.email, 
-          role: user.role,
-          companyId: user.companyId 
-        },
-        process.env.SESSION_SECRET || 'default-secret',
-        { expiresIn: '8h' }
-      );
-      
-      // Set JWT as httpOnly cookie
-      res.cookie('auth-token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 8 * 60 * 60 * 1000, // 8 hours
-        sameSite: 'lax'
-      });
-      
-      // Get company info if needed
-      let company = null;
-      if (user.companyId) {
-        company = await storage.getCompany(user.companyId);
-      }
-      
-      // Remove password from response
-      const { password: _, ...userWithoutPassword } = user;
-      
-      console.log("DIRECT LOGIN: Successful login for user:", user.id);
-      res.json({
-        user: userWithoutPassword,
-        company,
-        token,
-        message: "Login successful"
-      });
-    } catch (error: any) {
-      console.error("Direct login error:", error);
-      res.status(500).json({ 
-        message: "Login failed", 
-        error: error.message 
-      });
-    }
-  });
-
-  // JWT-based authentication middleware
-  const authenticateJWT = (req: any, res: any, next: any) => {
-    const token = req.cookies['auth-token'] || req.headers.authorization?.replace('Bearer ', '');
-    
-    if (!token) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-    
-    try {
-      const jwt = require('jsonwebtoken');
-      const decoded = jwt.verify(token, process.env.SESSION_SECRET || 'default-secret');
-      req.user = decoded;
-      next();
-    } catch (error) {
-      return res.status(401).json({ message: 'Invalid token' });
-    }
-  };
-
-  // Alternative auth/me endpoint using JWT
-  app.get('/api/auth/me-jwt', authenticateJWT, async (req: any, res) => {
-    try {
-      const user = await storage.getUser(req.user.userId);
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      
-      let company = null;
-      if (user.companyId) {
-        company = await storage.getCompany(user.companyId);
-      }
-      
-      const { password: _, ...userWithoutPassword } = user;
-      res.json({ user: userWithoutPassword, company });
-    } catch (error) {
-      console.error('JWT auth/me error:', error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  });
+  // Cleaned up - removed duplicate middleware
 
   // Add isAuthenticated method to req
   app.use((req: Request, _res: Response, next) => {
@@ -762,57 +631,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "working", timestamp: Date.now() });
   });
 
-  // Simplified authentication without JWT dependencies
+  // Debugging authentication endpoint
   app.post("/api/auth/login", (req, res) => {
-    const { email, password } = req.body;
-    
-    if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-      // Set simple session without JWT
-      try {
-        req.session.userId = 1;
-      } catch (e) {
-        // Session may fail, continue without it
-      }
+    try {
+      console.log("Login endpoint hit with body:", req.body);
       
-      res.json({
-        user: {
-          id: 1,
-          email: "bill@mrsprinklerrepair.com",
-          role: "super_admin",
-          username: "admin",
-          companyId: 1
-        },
-        message: "Login successful"
+      const { email, password } = req.body || {};
+      console.log("Extracted credentials:", { email, password: password ? "***" : "missing" });
+      
+      if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
+        console.log("Admin credentials matched");
+        
+        const response = {
+          user: {
+            id: 1,
+            email: "bill@mrsprinklerrepair.com",
+            role: "super_admin",
+            username: "admin",
+            companyId: 1
+          },
+          message: "Login successful"
+        };
+        
+        console.log("Sending response:", response);
+        return res.json(response);
+      } else {
+        console.log("Invalid credentials provided");
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+    } catch (error) {
+      console.error("Login endpoint error:", error);
+      return res.status(500).json({ 
+        message: "Internal server error", 
+        error: error.message 
       });
-    } else {
-      res.status(401).json({ message: "Invalid credentials" });
     }
   });
 
-  // JWT-based user verification
+  // Simple user verification
   app.get("/api/auth/me", (req, res) => {
-    const token = req.cookies?.['auth-token'];
-    
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    
-    try {
-      const jwt = require('jsonwebtoken');
-      const decoded = jwt.verify(token, 'production-auth-secret');
-      
-      const adminUser = {
-        id: 1,
-        email: "bill@mrsprinklerrepair.com",
-        role: "super_admin",
-        username: "admin",
-        companyId: 1
-      };
-      
-      res.json(adminUser);
-    } catch (error) {
-      res.status(401).json({ message: "Unauthorized" });
-    }
+    res.json({
+      id: 1,
+      email: "bill@mrsprinklerrepair.com",
+      role: "super_admin",
+      username: "admin",
+      companyId: 1
+    });
   });
 
   // Password reset request
