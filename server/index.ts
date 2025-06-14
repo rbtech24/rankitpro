@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import emailService from "./services/email-service";
 import { validateEnvironment, getFeatureFlags } from "./env-validation";
+import path from "path";
 
 
 const app = express();
@@ -152,6 +153,11 @@ async function createSuperAdminIfNotExists() {
     await setupVite(app, server);
   } else {
     serveStatic(app);
+    
+    // Serve admin access page at /admin-access
+    app.get('/admin-access', (req, res) => {
+      res.sendFile(__dirname + '/../public/admin-access.html');
+    });
   }
 
   // Add explicit 404 handler for API routes AFTER static serving
