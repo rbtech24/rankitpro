@@ -1448,6 +1448,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
+
+  // Company feature management
+  app.put("/api/companies/:id/features", isSuperAdmin, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      const { featuresEnabled } = req.body;
+      
+      if (!companyId || isNaN(companyId)) {
+        return res.status(400).json({ message: "Invalid company ID" });
+      }
+      
+      // Update company features
+      const updatedCompany = await storage.updateCompanyFeatures(companyId, featuresEnabled);
+      
+      if (!updatedCompany) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      
+      res.json(updatedCompany);
+    } catch (error) {
+      console.error("Error updating company features:", error);
+      res.status(500).json({ message: "Failed to update company features" });
+    }
+  });
   
   // Blog post routes
   app.get("/api/blog-posts", isAuthenticated, async (req, res) => {

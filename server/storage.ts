@@ -35,6 +35,7 @@ export interface IStorage {
   getAllCompanies(): Promise<Company[]>;
   createCompany(company: InsertCompany): Promise<Company>;
   updateCompany(id: number, updates: Partial<Company>): Promise<Company | undefined>;
+  updateCompanyFeatures(id: number, featuresEnabled: any): Promise<Company | undefined>;
   
   // Technician operations
   getTechnician(id: number): Promise<Technician | undefined>;
@@ -393,6 +394,15 @@ export class MemStorage implements IStorage {
     if (!company) return undefined;
     
     const updatedCompany = { ...company, ...updates };
+    this.companies.set(id, updatedCompany);
+    return updatedCompany;
+  }
+
+  async updateCompanyFeatures(id: number, featuresEnabled: any): Promise<Company | undefined> {
+    const company = this.companies.get(id);
+    if (!company) return undefined;
+    
+    const updatedCompany = { ...company, featuresEnabled };
     this.companies.set(id, updatedCompany);
     return updatedCompany;
   }
