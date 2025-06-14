@@ -669,29 +669,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "working", timestamp: Date.now() });
   });
 
-  // Direct authentication bypass - highest priority route
-  app.post("/api/auth/login", (req, res) => {
-    res.header('Content-Type', 'application/json');
-    
-    const { email, password } = req.body;
-    
-    if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-      const userResponse = {
-        id: 1,
-        email: "bill@mrsprinklerrepair.com",
-        role: "super_admin",
-        username: "admin",
-        companyId: 1
-      };
-      
-      res.status(200).json({
-        user: userResponse,
-        message: "Login successful"
-      });
-    } else {
-      res.status(401).json({ message: "Invalid credentials" });
-    }
-  });
+  // Removed duplicate authentication endpoint - using main server endpoint instead
 
   // User verification endpoint
   app.get("/api/auth/user", (req, res) => {
