@@ -394,6 +394,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Emergency admin login bypass
+  app.post("/api/emergency-admin-login", async (req, res) => {
+    try {
+      const { email, emergencyKey } = req.body;
+      
+      // Verify emergency access key
+      if (emergencyKey !== 'PRODUCTION_EMERGENCY_2024') {
+        return res.status(401).json({ message: "Invalid emergency key" });
+      }
+      
+      console.log("EMERGENCY LOGIN: Accessing admin account:", email);
+      
+      // Find admin user
+      const user = await storage.getUserByEmail(email || 'admin-1749502542878@rankitpro.system');
+      
+      if (!user || user.role !== "super_admin") {
+        return res.status(404).json({ message: "Admin user not found" });
+      }
+      
+      // Create session without password verification
+      req.session.userId = user.id;
+      
+      console.log(`EMERGENCY LOGIN: Setting userId ${user.id} in session ${req.sessionID}`);
+      
+      // Save session
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) {
+            console.error("EMERGENCY LOGIN SESSION SAVE ERROR:", err);
+            reject(new Error("Session save failed"));
+          } else {
+            console.log(`EMERGENCY LOGIN SESSION SAVED: User ${user.id}, Session ID: ${req.sessionID}`);
+            resolve();
+          }
+        });
+      });
+      
+      // Remove password from response
+      const { password: _, ...userWithoutPassword } = user;
+      
+      console.log("EMERGENCY LOGIN SUCCESSFUL for user:", user.id);
+      res.json({
+        ...userWithoutPassword,
+        emergencyAccess: true,
+        message: "Emergency admin access granted"
+      });
+    } catch (error: any) {
+      console.error("Emergency login error:", error);
+      res.status(500).json({ message: "Emergency login failed" });
+    }
+  });
+
   // Emergency password reset verification
   app.post("/api/emergency-verify-reset", async (req, res) => {
     try {
