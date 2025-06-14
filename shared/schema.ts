@@ -27,6 +27,15 @@ export const companies = pgTable("companies", {
   reviewSettings: text("review_settings"),
   crmIntegrations: text("crm_integrations"), // Stores JSON string with CRM configurations
   crmSyncHistory: text("crm_sync_history"), // Stores JSON string with CRM sync history
+  // Feature permissions based on plan
+  featuresEnabled: jsonb("features_enabled").default({
+    audioTestimonials: false,
+    videoTestimonials: false,
+    advancedAnalytics: false,
+    prioritySupport: false,
+    customBranding: false,
+    apiAccess: false
+  }),
   trialStartDate: timestamp("trial_start_date").defaultNow(),
   trialEndDate: timestamp("trial_end_date"),
   isTrialActive: boolean("is_trial_active").default(true),

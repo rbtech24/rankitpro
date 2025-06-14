@@ -627,6 +627,18 @@ export default function TechnicianMobile() {
         };
       }
       
+      // Prepare testimonial data for submission
+      let testimonialData = null;
+      if (data.customerTestimonial || audioBlob || videoBlob) {
+        testimonialData = {
+          type: testimonialType,
+          content: data.customerTestimonial || '',
+          customerName: data.customerName || 'Anonymous',
+          audioBlob: audioBlob,
+          videoBlob: videoBlob
+        };
+      }
+
       const checkInData = {
         jobType: data.jobType,
         customerName: data.customerName || null,
@@ -636,6 +648,7 @@ export default function TechnicianMobile() {
         workPerformed: data.workPerformed || null,
         materialsUsed: data.materialsUsed || null,
         location: locationData,
+        testimonial: testimonialData,
         offlineId: 'web-' + Date.now()
       };
       

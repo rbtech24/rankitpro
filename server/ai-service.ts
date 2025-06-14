@@ -17,6 +17,11 @@ export interface ContentGenerationParams {
   includeCallToAction?: boolean;
   brandVoice?: string;
   specialInstructions?: string;
+  // Testimonial integration
+  customerTestimonial?: string;
+  testimonialType?: 'text' | 'audio' | 'video';
+  customerName?: string;
+  customerRating?: number;
 }
 
 export interface BlogPostResult {
@@ -47,7 +52,11 @@ async function generateSummaryWithOpenAI(params: ContentGenerationParams): Promi
     seoFocus = true,
     includeCallToAction = false,
     brandVoice,
-    specialInstructions
+    specialInstructions,
+    customerTestimonial,
+    testimonialType,
+    customerName,
+    customerRating
   } = params;
   
   const lengthGuide = {
@@ -70,6 +79,19 @@ async function generateSummaryWithOpenAI(params: ContentGenerationParams): Promi
     general: 'broad audience including all property types'
   };
 
+  // Build testimonial section if available
+  let testimonialSection = '';
+  if (customerTestimonial && customerName) {
+    const ratingStars = customerRating ? '★'.repeat(customerRating) + '☆'.repeat(5 - customerRating) : '';
+    testimonialSection = `
+    Customer Testimonial:
+    - Customer: ${customerName}
+    ${customerRating ? `- Rating: ${ratingStars} (${customerRating}/5 stars)` : ''}
+    - Testimonial Type: ${testimonialType || 'text'} testimonial
+    - Customer Feedback: "${customerTestimonial}"
+    `;
+  }
+
   let prompt = `
     Generate a ${tone} summary for a home service job targeting ${targetAudience}:
     
@@ -77,6 +99,7 @@ async function generateSummaryWithOpenAI(params: ContentGenerationParams): Promi
     Technician: ${technicianName}
     Location: ${location || 'Not specified'}
     Work Details: ${notes}
+    ${testimonialSection}
     
     Writing Requirements:
     - Tone: ${toneGuide[tone]}
@@ -87,6 +110,7 @@ async function generateSummaryWithOpenAI(params: ContentGenerationParams): Promi
     ${includeCallToAction ? '- End with a compelling call-to-action' : ''}
     ${brandVoice ? `- Brand Voice: ${brandVoice}` : ''}
     ${specialInstructions ? `- Special Instructions: ${specialInstructions}` : ''}
+    ${customerTestimonial ? '- Incorporate the customer testimonial naturally to build credibility and trust' : ''}
     
     Create engaging content that showcases expertise and builds trust with potential customers.
   `;
@@ -112,7 +136,29 @@ async function generateBlogPostWithOpenAI(params: ContentGenerationParams): Prom
     throw new Error("OpenAI API key not configured by administrator");
   }
 
-  const { jobType, notes, location, technicianName } = params;
+  const { 
+    jobType, 
+    notes, 
+    location, 
+    technicianName,
+    customerTestimonial,
+    testimonialType,
+    customerName,
+    customerRating
+  } = params;
+  
+  // Build testimonial section if available
+  let testimonialSection = '';
+  if (customerTestimonial && customerName) {
+    const ratingStars = customerRating ? '★'.repeat(customerRating) + '☆'.repeat(5 - customerRating) : '';
+    testimonialSection = `
+    Customer Testimonial:
+    - Customer: ${customerName}
+    ${customerRating ? `- Rating: ${ratingStars} (${customerRating}/5 stars)` : ''}
+    - Testimonial Type: ${testimonialType || 'text'} testimonial
+    - Customer Feedback: "${customerTestimonial}"
+    `;
+  }
   
   const prompt = `
     Generate a professional blog post for a home service job:
@@ -121,8 +167,11 @@ async function generateBlogPostWithOpenAI(params: ContentGenerationParams): Prom
     Technician: ${technicianName}
     Location: ${location || 'Not specified'}
     Notes: ${notes}
+    ${testimonialSection}
     
     Create a detailed, SEO-friendly blog post that describes the job. Use professional language suitable for a home service business website. Include technical details, benefits to the customer, and any relevant maintenance tips.
+    
+    ${customerTestimonial ? 'IMPORTANT: Include the customer testimonial in a prominent section to build credibility and trust. Mention that this was an ' + (testimonialType || 'text') + ' testimonial to highlight the authentic customer feedback.' : ''}
     
     Format the post with a catchy title, an introduction, several informative paragraphs with subheadings, and a conclusion.
     
