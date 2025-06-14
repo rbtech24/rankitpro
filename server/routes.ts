@@ -631,41 +631,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "working", timestamp: Date.now() });
   });
 
-  // Debugging authentication endpoint
+  // Minimal test endpoint to verify routing
   app.post("/api/auth/login", (req, res) => {
-    try {
-      console.log("Login endpoint hit with body:", req.body);
-      
-      const { email, password } = req.body || {};
-      console.log("Extracted credentials:", { email, password: password ? "***" : "missing" });
-      
-      if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-        console.log("Admin credentials matched");
-        
-        const response = {
-          user: {
-            id: 1,
-            email: "bill@mrsprinklerrepair.com",
-            role: "super_admin",
-            username: "admin",
-            companyId: 1
-          },
-          message: "Login successful"
-        };
-        
-        console.log("Sending response:", response);
-        return res.json(response);
-      } else {
-        console.log("Invalid credentials provided");
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-    } catch (error) {
-      console.error("Login endpoint error:", error);
-      return res.status(500).json({ 
-        message: "Internal server error", 
-        error: error.message 
-      });
-    }
+    res.json({ message: "Login endpoint working" });
   });
 
   // Simple user verification
