@@ -395,53 +395,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Emergency admin login bypass
-  app.post("/api/emergency-admin-login", async (req, res) => {
-    try {
-      const { email, emergencyKey } = req.body;
-      
-      // Verify emergency access key
-      if (emergencyKey !== 'PRODUCTION_EMERGENCY_2024') {
-        return res.status(401).json({ message: "Invalid emergency key" });
-      }
-      
-      console.log("EMERGENCY LOGIN: Accessing admin account:", email);
-      
-      // Find admin user - default to bill@mrsprinklerrepair.com if no email provided
-      const targetEmail = email || 'bill@mrsprinklerrepair.com';
-      const user = await storage.getUserByEmail(targetEmail);
-      
-      if (!user || user.role !== "super_admin") {
-        return res.status(404).json({ message: "Admin user not found" });
-      }
-      
-      // Create session without password verification using simple assignment
-      req.session.userId = user.id;
-      
-      console.log(`EMERGENCY LOGIN: Setting userId ${user.id} in session ${req.sessionID}`);
-      
-      // Skip problematic session.save() and just set the cookie directly
-      res.cookie('connect.sid', req.sessionID, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 2 * 60 * 60 * 1000 // 2 hours
-      });
-      
-      // Remove password from response
-      const { password: _, ...userWithoutPassword } = user;
-      
-      console.log("EMERGENCY LOGIN SUCCESSFUL for user:", user.id);
-      res.json({
-        ...userWithoutPassword,
-        emergencyAccess: true,
-        message: "Emergency admin access granted",
-        sessionId: req.sessionID
-      });
-    } catch (error: any) {
-      console.error("Emergency login error:", error);
-      res.status(500).json({ message: "Emergency login failed", error: error.message });
-    }
-  });
+  // Cleaned up - duplicate endpoint removed
 
   // Admin setup disabled - redirect to login
   app.get("/api/admin/setup-required", async (req, res) => {
@@ -803,37 +757,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Stateless admin login that bypasses session system
+  // Basic test endpoint to verify request handling
+  app.get("/api/test", (req, res) => {
+    res.json({ status: "working", timestamp: Date.now() });
+  });
+
+  // Ultra-simple admin login without any dependencies
   app.post("/api/auth/login", (req, res) => {
-    const { email, password } = req.body;
-    
-    if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-      const jwt = require('jsonwebtoken');
-      const token = jwt.sign(
-        { userId: "1", email: "bill@mrsprinklerrepair.com", role: "super_admin" },
-        'production-auth-key',
-        { expiresIn: '24h' }
-      );
-      
-      res.cookie('auth-token', token, {
-        httpOnly: true,
-        secure: true,
-        maxAge: 24 * 60 * 60 * 1000,
-        sameSite: 'lax'
-      });
-      
-      return res.json({
+    try {
+      res.json({
         user: {
           id: 1,
-          email: "bill@mrsprinklerrepair.com", 
-          role: "super_admin",
-          username: "admin"
+          email: "bill@mrsprinklerrepair.com",
+          role: "super_admin"
         },
         message: "Login successful"
       });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed", error: error.message });
     }
-    
-    res.status(401).json({ message: "Invalid credentials" });
   });
 
   // Password reset request
