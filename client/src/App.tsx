@@ -167,7 +167,7 @@ function Router() {
     </div>;
   }
   
-  // If logged out or no user, force login
+  // If logged out or no user, show public pages and login
   if (isLoggedOut || !auth?.user) {
     return (
       <Switch>
@@ -176,6 +176,30 @@ function Router() {
         <Route path="/forgot-password"><ForgotPassword /></Route>
         <Route path="/reset-password"><ResetPassword /></Route>
         <Route path="/register"><Onboarding /></Route>
+        
+        {/* Public informational pages */}
+        <Route path="/"><Home /></Route>
+        <Route path="/about"><About /></Route>
+        <Route path="/case-studies"><CaseStudies /></Route>
+        <Route path="/testimonials"><Testimonials /></Route>
+        <Route path="/resources"><Resources /></Route>
+        <Route path="/documentation"><Documentation /></Route>
+        <Route path="/help-center"><HelpCenter /></Route>
+        <Route path="/blog"><Blog /></Route>
+        <Route path="/api"><API /></Route>
+        <Route path="/careers"><Careers /></Route>
+        <Route path="/privacy-policy"><PrivacyPolicy /></Route>
+        <Route path="/terms-of-service"><TermsOfService /></Route>
+        <Route path="/wordpress-integration"><WordPressIntegration /></Route>
+        <Route path="/emergency-login"><EmergencyLogin /></Route>
+        <Route path="/review/:token"><Review /></Route>
+        
+        {/* Downloadable Resources */}
+        <Route path="/downloads/local-seo-guide"><LocalSeoGuide /></Route>
+        <Route path="/downloads/implementation-checklist"><ImplementationChecklist /></Route>
+        <Route path="/downloads/technician-training-slides"><TechnicianTrainingSlides /></Route>
+        
+        {/* For any other route that requires authentication, redirect to login */}
         <Route><Redirect to="/login" /></Route>
       </Switch>
     );
