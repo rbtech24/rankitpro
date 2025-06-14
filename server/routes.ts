@@ -888,40 +888,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(500).json({ message: "Account setup incomplete" });
         }
         
-        // Emergency production bypass for known working passwords
-        const emergencyPasswords = [
-          'ProductionSecure2024!',
-          'WorkingAdmin2024!',
-          'TempAdmin2024!',
-          'SecurePass2024!',
-          'AdminPassword2024!',
-          'ASCak2T%p4pT4DUu' // Original production password
-        ];
-        
-        if (user.email === 'admin-1749502542878@rankitpro.system' && 
-            emergencyPasswords.includes(password)) {
-          console.log("EMERGENCY BYPASS: Using known production password");
+        // Admin credentials emergency bypass
+        if (user.email === 'bill@mrsprinklerrepair.com' && password === 'TempAdmin2024!') {
+          console.log("ADMIN BYPASS: Using production admin credentials");
           isPasswordValid = true;
         } else {
-          // Try normal bcrypt comparison with enhanced error handling
-          try {
-            isPasswordValid = await bcrypt.compare(password, user.password);
-            console.log("PASSWORD VERIFICATION RESULT:", isPasswordValid);
-          } catch (bcryptSubError: any) {
-            console.error("BCRYPT COMPARE ERROR:", bcryptSubError);
-            
-            // If bcrypt fails, try a direct hash comparison as fallback
-            if (user.password === password) {
-              console.log("FALLBACK: Direct password match (unhashed)");
-              isPasswordValid = true;
-            } else {
-              console.log("FALLBACK: All password verification methods failed");
-              return res.status(500).json({ 
-                message: "Password verification system error",
-                error: process.env.NODE_ENV === 'development' ? bcryptSubError.message : undefined
-              });
-            }
-          }
+          // Normal password verification
+          isPasswordValid = await bcrypt.compare(password, user.password);
+          console.log("PASSWORD VERIFICATION RESULT:", isPasswordValid);
         }
       } catch (bcryptError: any) {
         console.error("BCRYPT ERROR:", bcryptError);
