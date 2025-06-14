@@ -234,25 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Direct authentication bypass for production
-  app.post("/api/direct-login", (req, res) => {
-    const { email, password } = req.body;
-    
-    if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-      res.json({
-        success: true,
-        user: {
-          id: 1,
-          email: "bill@mrsprinklerrepair.com",
-          role: "super_admin",
-          username: "admin",
-          companyId: 1
-        }
-      });
-    } else {
-      res.status(401).json({ success: false, message: "Invalid credentials" });
-    }
-  });
+
 
   // Database health check
   app.get("/api/health/database", async (req, res) => {
@@ -661,50 +643,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "working", timestamp: Date.now() });
   });
 
-  // Working admin authentication endpoint
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
+  // Working admin authentication endpoint - simplified for production
+  app.post("/api/auth/login", (req, res) => {
+    const { email, password } = req.body;
+    
+    console.log("LOGIN ATTEMPT:", email);
+    
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
+    
+    if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
+      const userResponse = {
+        id: 1,
+        email: "bill@mrsprinklerrepair.com",
+        role: "super_admin",
+        username: "admin", 
+        companyId: 1
+      };
       
-      console.log("LOGIN ATTEMPT:", email);
-      
-      if (!email || !password) {
-        return res.status(400).json({ message: "Email and password required" });
-      }
-      
-      if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-        // Set session for compatibility
-        try {
-          if (req.session) {
-            req.session.userId = 1;
-            console.log("SESSION SET: User ID 1");
-          }
-        } catch (sessionError) {
-          console.log("SESSION WARNING:", sessionError);
-          // Continue without session
-        }
-        
-        const userResponse = {
-          id: 1,
-          email: "bill@mrsprinklerrepair.com",
-          role: "super_admin",
-          username: "admin",
-          companyId: 1
-        };
-        
-        res.json({
-          user: userResponse,
-          message: "Login successful"
-        });
-        
-        console.log("LOGIN SUCCESS:", email);
-      } else {
-        console.log("LOGIN FAILED: Invalid credentials for", email);
-        res.status(401).json({ message: "Invalid credentials" });
-      }
-    } catch (error) {
-      console.error("LOGIN ERROR:", error);
-      res.status(500).json({ message: "Server error during login" });
+      console.log("LOGIN SUCCESS:", email);
+      return res.json({
+        user: userResponse,
+        message: "Login successful"
+      });
+    } else {
+      console.log("LOGIN FAILED: Invalid credentials for", email);
+      return res.status(401).json({ message: "Invalid credentials" });
     }
   });
 
@@ -2410,8 +2375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const testimonialsRouter = (await import('./routes/testimonials')).default;
   app.use('/api/testimonials', testimonialsRouter);
 
-  // Setup simple authentication system for production compatibility
-  setupSimpleAuth(app);
+  // Simple authentication endpoints are now integrated directly above
 
   // Initialize the scheduler service to process review follow-ups
   schedulerService.initialize();
