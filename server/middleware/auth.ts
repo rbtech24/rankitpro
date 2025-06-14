@@ -11,23 +11,38 @@ declare global {
   }
 }
 
-// Check if user is authenticated
+// Check if user is authenticated (supports both JWT and session)
 export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
-  // Debug session information
-  console.log("AUTH DEBUG: Session exists:", !!req.session);
-  console.log("AUTH DEBUG: Session ID:", req.sessionID);
-  console.log("AUTH DEBUG: Session userId:", req.session?.userId);
-  console.log("AUTH DEBUG: Cookie header:", req.headers.cookie);
+  let userId: number | null = null;
   
-  if (!req.session || !req.session.userId) {
-    console.log("AUTH DEBUG: No session or userId found");
+  // Try JWT authentication first
+  const token = req.cookies['auth-token'] || req.headers.authorization?.replace('Bearer ', '');
+  if (token) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.verify(token, process.env.SESSION_SECRET || 'default-secret') as any;
+      userId = decoded.userId;
+      console.log("AUTH DEBUG: JWT authentication successful for user:", userId);
+    } catch (jwtError: any) {
+      console.log("AUTH DEBUG: JWT verification failed:", jwtError.message);
+    }
+  }
+  
+  // Fallback to session authentication
+  if (!userId && req.session?.userId) {
+    userId = req.session.userId;
+    console.log("AUTH DEBUG: Session authentication for user:", userId);
+  }
+  
+  if (!userId) {
+    console.log("AUTH DEBUG: No valid authentication found");
     return res.status(401).json({ message: "Unauthorized" });
   }
   
   try {
-    const user = await storage.getUser(req.session.userId);
+    const user = await storage.getUser(userId);
     if (!user) {
-      console.log("AUTH DEBUG: User not found in database for ID:", req.session.userId);
+      console.log("AUTH DEBUG: User not found in database for ID:", userId);
       return res.status(401).json({ message: "User not found" });
     }
     

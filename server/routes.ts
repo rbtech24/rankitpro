@@ -818,36 +818,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email and password are required" });
       }
       
-      // Admin credentials bypass for production
-      if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-        console.log("ADMIN LOGIN: Using production admin credentials");
-        const user = await storage.getUserByEmail(email);
-        if (user && user.role === "super_admin") {
-          console.log("ADMIN LOGIN: Admin user verified, proceeding with login");
-          
-          // Create session
-          req.session.userId = user.id;
-          
-          // Save session
-          await new Promise<void>((resolve, reject) => {
-            req.session.save((err: any) => {
-              if (err) {
-                console.error("SESSION SAVE ERROR:", err);
-                reject(new Error("Session save failed"));
-              } else {
-                console.log("SESSION SAVED: User", user.id);
-                resolve();
-              }
-            });
-          });
-          
-          const { password: _, ...userWithoutPassword } = user;
-          return res.json({
-            message: "Login successful",
-            user: userWithoutPassword
-          });
-        }
-      }
+
       
       // Find user with enhanced error handling
       let user;
@@ -902,31 +873,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
-      // Set session data and save explicitly
-      req.session.userId = user.id;
+      // Create JWT token instead of using broken session system
+      const jwt = require('jsonwebtoken');
+      const token = jwt.sign(
+        { 
+          userId: user.id, 
+          email: user.email, 
+          role: user.role,
+          companyId: user.companyId 
+        },
+        process.env.SESSION_SECRET || 'default-secret',
+        { expiresIn: '24h' }
+      );
       
-      console.log(`LOGIN: Setting userId ${user.id} in session ${req.sessionID}`);
-      console.log("LOGIN: Session before save:", req.session);
-      
-      // Save session with error handling
-      await new Promise<void>((resolve, reject) => {
-        req.session.save((err: any) => {
-          if (err) {
-            console.error("LOGIN SESSION SAVE ERROR:", err);
-            reject(new Error("Session save failed"));
-          } else {
-            console.log(`LOGIN SESSION SAVED: User ${user.id}, Session ID: ${req.sessionID}`);
-            console.log("LOGIN: Session after save:", req.session);
-            resolve();
-          }
-        });
+      // Set JWT as httpOnly cookie for automatic authentication
+      res.cookie('auth-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'lax',
+        path: '/'
       });
+      
+      // Also try to set session as fallback
+      try {
+        req.session.userId = user.id;
+        req.session.save(() => {}); // Don't wait for session save
+      } catch (sessionError) {
+        console.log("Session fallback failed, using JWT only");
+      }
+      
+      // Get company info if user has one
+      let company = null;
+      if (user.companyId) {
+        try {
+          company = await storage.getCompany(user.companyId);
+        } catch (companyError) {
+          console.log("Company lookup failed:", companyError);
+        }
+      }
       
       // Remove password from response
       const { password: _, ...userWithoutPassword } = user;
       
-      console.log("LOGIN SUCCESSFUL for user:", user.id);
-      res.json(userWithoutPassword);
+      console.log("LOGIN SUCCESSFUL for user:", user.id, "using JWT authentication");
+      res.json({
+        user: userWithoutPassword,
+        company,
+        message: "Login successful"
+      });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Server error during login" });
