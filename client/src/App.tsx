@@ -50,6 +50,9 @@ import SetupGuide from "@/pages/setup-guide";
 import AIContentGenerator from "@/pages/ai-content-generator";
 import AdminUserManagement from "@/pages/admin-user-management";
 import AdminFeatures from "@/pages/admin-features";
+import AdminBilling from "@/pages/admin-billing";
+import AdminAnalytics from "@/pages/admin-analytics";
+import AdminSystem from "@/pages/admin-system";
 import WordPressPlugin from "@/pages/wordpress-plugin";
 import TestimonialsPage from "@/pages/testimonials";
 import APICredentials from "@/pages/api-credentials";
@@ -1141,8 +1144,17 @@ function Router() {
       <Route path="/admin-user-management">
         <PrivateRoute component={AdminUserManagement} path="/admin-user-management" role="super_admin" />
       </Route>
-      <Route path="/admin/features">
-        <PrivateRoute component={AdminFeatures} path="/admin/features" role="super_admin" />
+      <Route path="/admin-features">
+        <PrivateRoute component={AdminFeatures} path="/admin-features" role="super_admin" />
+      </Route>
+      <Route path="/admin-billing">
+        <PrivateRoute component={AdminBilling} path="/admin-billing" role="super_admin" />
+      </Route>
+      <Route path="/admin-analytics">
+        <PrivateRoute component={AdminAnalytics} path="/admin-analytics" role="super_admin" />
+      </Route>
+      <Route path="/admin-system">
+        <PrivateRoute component={AdminSystem} path="/admin-system" role="super_admin" />
       </Route>
       <Route path="/system-settings">
         <PrivateRoute component={SystemSettings} path="/system-settings" role="super_admin" />

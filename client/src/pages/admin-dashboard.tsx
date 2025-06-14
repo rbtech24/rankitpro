@@ -8,6 +8,12 @@ import {
   Building2,
   CheckCircle2,
   Star,
+  CreditCard,
+  Settings,
+  BarChart3,
+  Server,
+  Activity,
+  Shield,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -147,28 +153,63 @@ export default function AdminDashboard() {
 
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Plan Management</h3>
+            <h3 className="text-lg font-semibold mb-4">Financial Management</h3>
             <div className="space-y-3">
               <Button 
                 variant="outline" 
                 className="w-full justify-start"
-                onClick={() => setLocation('/admin/billing')}
+                onClick={() => setLocation('/admin-billing')}
               >
+                <CreditCard className="h-4 w-4 mr-2" />
                 Billing & Subscriptions
               </Button>
               <Button 
                 variant="outline" 
                 className="w-full justify-start"
-                onClick={() => setLocation('/admin/features')}
+                onClick={() => setLocation('/admin-features')}
               >
+                <Settings className="h-4 w-4 mr-2" />
                 Feature Management
               </Button>
               <Button 
                 variant="outline" 
                 className="w-full justify-start"
-                onClick={() => setLocation('/admin/analytics')}
+                onClick={() => setLocation('/admin-analytics')}
               >
+                <BarChart3 className="h-4 w-4 mr-2" />
                 Platform Analytics
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4">System Administration</h3>
+            <div className="space-y-3">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setLocation('/admin-system')}
+              >
+                <Server className="h-4 w-4 mr-2" />
+                System Settings
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setLocation('/admin-logs')}
+              >
+                <Activity className="h-4 w-4 mr-2" />
+                System Logs
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setLocation('/admin-security')}
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Security Center
               </Button>
             </div>
           </CardContent>
