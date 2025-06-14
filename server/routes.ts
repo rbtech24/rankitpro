@@ -632,26 +632,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Working admin authentication endpoint
   app.post("/api/auth/login", (req, res) => {
-    const { email, password } = req.body;
-    
-    if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-      // Set session for compatibility
-      if (req.session) {
-        req.session.userId = 1;
-      }
+    try {
+      const { email, password } = req.body;
       
-      res.json({
-        user: {
+      console.log("LOGIN ATTEMPT:", email);
+      
+      if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
+        // Set session for compatibility
+        if (req.session) {
+          req.session.userId = 1;
+          console.log("SESSION SET: User ID 1");
+        }
+        
+        const userResponse = {
           id: 1,
           email: "bill@mrsprinklerrepair.com",
           role: "super_admin",
           username: "admin",
           companyId: 1
-        },
-        message: "Login successful"
-      });
-    } else {
-      res.status(401).json({ message: "Invalid credentials" });
+        };
+        
+        res.json({
+          user: userResponse,
+          message: "Login successful"
+        });
+        
+        console.log("LOGIN SUCCESS:", email);
+      } else {
+        console.log("LOGIN FAILED: Invalid credentials for", email);
+        res.status(401).json({ message: "Invalid credentials" });
+      }
+    } catch (error) {
+      console.error("LOGIN ERROR:", error);
+      res.status(500).json({ message: "Login error" });
     }
   });
 
@@ -2356,6 +2369,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register testimonials routes
   const testimonialsRouter = (await import('./routes/testimonials')).default;
   app.use('/api/testimonials', testimonialsRouter);
+
+  // Setup simple authentication system for production compatibility
+  setupSimpleAuth(app);
 
   // Initialize the scheduler service to process review follow-ups
   schedulerService.initialize();
