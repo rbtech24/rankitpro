@@ -107,6 +107,9 @@ const checkInFormSchema = z.object({
   workPerformed: z.string().optional(),
   materialsUsed: z.string().optional(),
   address: z.string().optional(),
+  // Testimonial fields
+  customerTestimonial: z.string().optional(),
+  testimonialType: z.enum(['text', 'audio', 'video']).optional(),
 });
 
 export default function TechnicianMobile() {
@@ -131,6 +134,14 @@ export default function TechnicianMobile() {
   const [showNewCheckInForm, setShowNewCheckInForm] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   
+  // Testimonial recording states
+  const [isRecordingAudio, setIsRecordingAudio] = useState<boolean>(false);
+  const [isRecordingVideo, setIsRecordingVideo] = useState<boolean>(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [testimonialType, setTestimonialType] = useState<'text' | 'audio' | 'video'>('text');
+  
   const { toast } = useToast();
   
   const loginForm = useForm<z.infer<typeof loginFormSchema>>({
@@ -151,7 +162,9 @@ export default function TechnicianMobile() {
       notes: "",
       workPerformed: "",
       materialsUsed: "",
-      address: ""
+      address: "",
+      customerTestimonial: "",
+      testimonialType: "text"
     }
   });
   
@@ -485,6 +498,118 @@ export default function TechnicianMobile() {
     } catch (error) {
       console.error('Customers fetch error:', error);
     }
+  };
+
+  // Start audio recording for testimonials
+  const startAudioRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks: BlobPart[] = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+        setAudioBlob(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecordingAudio(true);
+
+      toast({
+        title: "Recording started",
+        description: "Recording customer testimonial audio...",
+      });
+    } catch (error) {
+      toast({
+        title: "Recording failed",
+        description: "Unable to access microphone. Please check permissions.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Stop audio recording
+  const stopAudioRecording = () => {
+    if (mediaRecorder && isRecordingAudio) {
+      mediaRecorder.stop();
+      setIsRecordingAudio(false);
+      setMediaRecorder(null);
+      
+      toast({
+        title: "Recording stopped",
+        description: "Audio testimonial saved successfully.",
+      });
+    }
+  };
+
+  // Start video recording for testimonials
+  const startVideoRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user' }, 
+        audio: true 
+      });
+      const recorder = new MediaRecorder(stream);
+      const chunks: BlobPart[] = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const videoBlob = new Blob(chunks, { type: 'video/webm' });
+        setVideoBlob(videoBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecordingVideo(true);
+
+      toast({
+        title: "Video recording started",
+        description: "Recording customer video testimonial...",
+      });
+    } catch (error) {
+      toast({
+        title: "Recording failed",
+        description: "Unable to access camera/microphone. Please check permissions.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Stop video recording
+  const stopVideoRecording = () => {
+    if (mediaRecorder && isRecordingVideo) {
+      mediaRecorder.stop();
+      setIsRecordingVideo(false);
+      setMediaRecorder(null);
+      
+      toast({
+        title: "Recording stopped",
+        description: "Video testimonial saved successfully.",
+      });
+    }
+  };
+
+  // Clear recorded testimonial
+  const clearTestimonial = () => {
+    setAudioBlob(null);
+    setVideoBlob(null);
+    setTestimonialType('text');
+    checkInForm.setValue('customerTestimonial', '');
+    checkInForm.setValue('testimonialType', 'text');
   };
   
   // Create new check-in
@@ -1545,6 +1670,177 @@ export default function TechnicianMobile() {
                 </FormItem>
               )}
             />
+            
+            {/* Customer Testimonial Collection Section */}
+            <div className="border-t pt-6 mt-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <span className="mr-2">🎤</span>
+                Customer Testimonial
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Collect feedback from your customer to build trust and improve your business reputation.
+              </p>
+              
+              {/* Testimonial Type Selection */}
+              <div className="mb-4">
+                <label className="text-sm font-medium mb-2 block">Testimonial Type</label>
+                <div className="flex space-x-2">
+                  <Button
+                    type="button"
+                    variant={testimonialType === 'text' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTestimonialType('text')}
+                  >
+                    Text
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={testimonialType === 'audio' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTestimonialType('audio')}
+                  >
+                    Audio
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={testimonialType === 'video' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setTestimonialType('video')}
+                  >
+                    Video
+                  </Button>
+                </div>
+              </div>
+
+              {/* Text Testimonial */}
+              {testimonialType === 'text' && (
+                <FormField
+                  control={checkInForm.control}
+                  name="customerTestimonial"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Customer Feedback</FormLabel>
+                      <FormControl>
+                        <textarea 
+                          className="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          placeholder="Enter customer's testimonial or feedback here..."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {/* Audio Testimonial */}
+              {testimonialType === 'audio' && (
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-4">
+                    {!isRecordingAudio && !audioBlob && (
+                      <Button
+                        type="button"
+                        onClick={startAudioRecording}
+                        className="flex items-center space-x-2"
+                      >
+                        <span className="w-4 h-4 rounded-full bg-red-500"></span>
+                        <span>Start Recording</span>
+                      </Button>
+                    )}
+                    
+                    {isRecordingAudio && (
+                      <Button
+                        type="button"
+                        onClick={stopAudioRecording}
+                        variant="destructive"
+                        className="flex items-center space-x-2 animate-pulse"
+                      >
+                        <span className="w-4 h-4 rounded-full bg-white"></span>
+                        <span>Stop Recording</span>
+                      </Button>
+                    )}
+                    
+                    {audioBlob && (
+                      <div className="flex items-center space-x-2">
+                        <div className="text-sm text-green-600 flex items-center">
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Audio recorded
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={clearTestimonial}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {audioBlob && (
+                    <audio controls className="w-full">
+                      <source src={URL.createObjectURL(audioBlob)} type="audio/webm" />
+                      Your browser does not support audio playback.
+                    </audio>
+                  )}
+                </div>
+              )}
+
+              {/* Video Testimonial */}
+              {testimonialType === 'video' && (
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-4">
+                    {!isRecordingVideo && !videoBlob && (
+                      <Button
+                        type="button"
+                        onClick={startVideoRecording}
+                        className="flex items-center space-x-2"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>Start Video Recording</span>
+                      </Button>
+                    )}
+                    
+                    {isRecordingVideo && (
+                      <Button
+                        type="button"
+                        onClick={stopVideoRecording}
+                        variant="destructive"
+                        className="flex items-center space-x-2 animate-pulse"
+                      >
+                        <span className="w-4 h-4 rounded-full bg-white"></span>
+                        <span>Stop Recording</span>
+                      </Button>
+                    )}
+                    
+                    {videoBlob && (
+                      <div className="flex items-center space-x-2">
+                        <div className="text-sm text-green-600 flex items-center">
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Video recorded
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={clearTestimonial}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {videoBlob && (
+                    <video controls className="w-full max-h-64 rounded-md">
+                      <source src={URL.createObjectURL(videoBlob)} type="video/webm" />
+                      Your browser does not support video playback.
+                    </video>
+                  )}
+                </div>
+              )}
+            </div>
             
             <div className="mt-6 flex justify-end space-x-2">
               <Button 
