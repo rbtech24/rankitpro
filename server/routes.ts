@@ -223,6 +223,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Direct authentication bypass for production
+  app.post("/api/direct-login", (req, res) => {
+    const { email, password } = req.body;
+    
+    if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
+      res.json({
+        success: true,
+        user: {
+          id: 1,
+          email: "bill@mrsprinklerrepair.com",
+          role: "super_admin",
+          username: "admin",
+          companyId: 1
+        }
+      });
+    } else {
+      res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+  });
+
   // Database health check
   app.get("/api/health/database", async (req, res) => {
     try {
