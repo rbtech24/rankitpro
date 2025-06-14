@@ -27,34 +27,9 @@ export default function AdminSetup() {
   const [isComplete, setIsComplete] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   
-  // Check if admin already exists and redirect immediately
+  // Redirect directly to login page
   useEffect(() => {
-    const checkAndRedirect = async () => {
-      try {
-        const response = await fetch('/api/admin/check-setup');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.adminExists) {
-            setIsRedirecting(true);
-            // Admin exists, redirect to login with pre-filled credentials
-            setTimeout(() => {
-              window.location.href = '/admin-access';
-            }, 1000);
-            return;
-          }
-        }
-      } catch (error) {
-        console.log('Setup check failed, proceeding with bypass');
-      }
-      
-      // Always redirect to admin access portal for production
-      setIsRedirecting(true);
-      setTimeout(() => {
-        window.location.href = '/admin-access';
-      }, 2000);
-    };
-    
-    checkAndRedirect();
+    window.location.href = '/login';
   }, []);
   
   const form = useForm<SetupFormData>({

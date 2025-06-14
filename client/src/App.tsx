@@ -205,6 +205,14 @@ function Router() {
           (auth.user.role === "super_admin" ? <Redirect to="/admin" /> : <Redirect to="/dashboard" />) 
           : <Login />}
       </Route>
+      
+      {/* Admin setup redirect to login */}
+      <Route path="/admin/setup">
+        <Redirect to="/login" />
+      </Route>
+      <Route path="/admin-access">
+        <Redirect to="/login" />
+      </Route>
       <Route path="/forgot-password">
         <ForgotPassword />
       </Route>

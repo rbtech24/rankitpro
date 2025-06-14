@@ -448,20 +448,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Check if admin setup is required
+  // Admin setup disabled - redirect to login
   app.get("/api/admin/setup-required", async (req, res) => {
-    try {
-      const users = await storage.getAllUsers();
-      const adminExists = users.some(user => user.role === "super_admin");
-      
-      res.json({
-        setupRequired: !adminExists,
-        adminExists
-      });
-    } catch (error: any) {
-      console.error("Setup check error:", error);
-      res.status(500).json({ message: "Failed to check setup status" });
-    }
+    res.json({
+      setupRequired: false,
+      adminExists: true
+    });
   });
 
   // One-time admin setup endpoint
