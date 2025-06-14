@@ -446,6 +446,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if admin setup is required
+  app.get("/api/admin/setup-required", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const adminExists = users.some(user => user.role === "super_admin");
+      
+      res.json({
+        setupRequired: !adminExists,
+        adminExists
+      });
+    } catch (error: any) {
+      console.error("Setup check error:", error);
+      res.status(500).json({ message: "Failed to check setup status" });
+    }
+  });
+
+  // One-time admin setup endpoint
+  app.post("/api/admin/setup", async (req, res) => {
+    try {
+      // Check if admin already exists
+      const users = await storage.getAllUsers();
+      const adminExists = users.some(user => user.role === "super_admin");
+      
+      if (adminExists) {
+        return res.status(400).json({ message: "Admin already exists. Setup is not available." });
+      }
+      
+      const { email, password, confirmPassword, companyName } = req.body;
+      
+      // Validation
+      if (!email || !password || !confirmPassword || !companyName) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+      
+      if (password !== confirmPassword) {
+        return res.status(400).json({ message: "Passwords do not match" });
+      }
+      
+      if (password.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Please enter a valid email address" });
+      }
+      
+      console.log("ADMIN SETUP: Creating admin account and company");
+      
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 12);
+      
+      // Create the admin user
+      const adminUser = await storage.createUser({
+        username: email.split('@')[0],
+        email,
+        password: hashedPassword,
+        role: "super_admin",
+        companyId: null,
+        stripeCustomerId: null,
+        stripeSubscriptionId: null
+      });
+      
+      // Create the company
+      const company = await storage.createCompany({
+        name: companyName,
+        plan: "starter",
+        usageLimit: 1000,
+        wordpressConfig: null,
+        javaScriptEmbedConfig: null,
+        reviewSettings: null,
+        stripeCustomerId: null,
+        stripeSubscriptionId: null
+      });
+      
+      // Update admin user with company ID
+      await storage.updateUser(adminUser.id, { companyId: company.id });
+      
+      // Create session
+      req.session.userId = adminUser.id;
+      
+      console.log(`ADMIN SETUP: Admin created successfully - ID: ${adminUser.id}, Company: ${company.id}`);
+      
+      // Save session
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) {
+            console.error("ADMIN SETUP SESSION SAVE ERROR:", err);
+            reject(new Error("Session save failed"));
+          } else {
+            console.log(`ADMIN SETUP SESSION SAVED: User ${adminUser.id}, Session ID: ${req.sessionID}`);
+            resolve();
+          }
+        });
+      });
+      
+      // Return success response
+      const { password: _, ...userWithoutPassword } = adminUser;
+      res.json({
+        message: "Admin setup completed successfully",
+        user: { ...userWithoutPassword, companyId: company.id },
+        company: company
+      });
+      
+    } catch (error: any) {
+      console.error("Admin setup error:", error);
+      res.status(500).json({ 
+        message: "Failed to setup admin account",
+        error: error.message 
+      });
+    }
+  });
+
   // Emergency password reset verification
   app.post("/api/emergency-verify-reset", async (req, res) => {
     try {

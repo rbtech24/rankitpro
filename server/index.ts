@@ -120,8 +120,8 @@ async function createSuperAdminIfNotExists() {
     process.exit(1);
   }
   
-  // Create default super admin user if needed
-  await createSuperAdminIfNotExists();
+  // Admin setup is now handled via one-time setup page
+  // await createSuperAdminIfNotExists();
   
   // Initialize email service
   if (process.env.SENDGRID_API_KEY) {

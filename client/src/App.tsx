@@ -74,6 +74,7 @@ import WordPressCustomFields from "@/pages/wordpress-custom-fields";
 import EmergencyLogin from "@/pages/emergency-login";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
+import AdminSetup from "@/pages/AdminSetup";
 
 
 
@@ -140,6 +141,13 @@ function Router() {
     refetchOnMount: true,
     refetchOnWindowFocus: true
   });
+
+  // Check if admin setup is required
+  const { data: setupStatus, isLoading: setupLoading } = useQuery({
+    queryKey: ["/api/admin/setup-required"],
+    retry: false,
+    staleTime: 0
+  });
   
   // Handle logout parameter to force login page
   const urlParams = new URLSearchParams(window.location.search);
@@ -160,11 +168,28 @@ function Router() {
       setLocation("/login");
     }
   }, [error, auth, setLocation]);
+
+  // Redirect to admin setup if required
+  useEffect(() => {
+    if (setupStatus?.setupRequired && window.location.pathname !== '/admin/setup') {
+      setLocation("/admin/setup");
+    }
+  }, [setupStatus, setLocation]);
   
-  if (isLoading) {
+  if (isLoading || setupLoading) {
     return <div className="h-screen flex items-center justify-center">
       <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
     </div>;
+  }
+
+  // Show admin setup if required
+  if (setupStatus?.setupRequired) {
+    return (
+      <Switch>
+        <Route path="/admin/setup"><AdminSetup /></Route>
+        <Route><AdminSetup /></Route>
+      </Switch>
+    );
   }
   
   // If logged out or no user, show public pages and login
