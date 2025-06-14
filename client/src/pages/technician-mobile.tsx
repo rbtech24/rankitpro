@@ -43,6 +43,7 @@ import { useToast } from '@/hooks/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { hasFeature, getPlanName, getRequiredPlan } from '@/lib/features';
 import { 
   Home, 
   CheckCircle, 
@@ -122,6 +123,7 @@ export default function TechnicianMobile() {
   const [user, setUser] = useState<any>(null);
   const [checkIns, setCheckIns] = useState<any[]>([]);
   const [technicianProfile, setTechnicianProfile] = useState<any>(null);
+  const [company, setCompany] = useState<any>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [schedule, setSchedule] = useState<any[]>([]);
@@ -1696,7 +1698,7 @@ export default function TechnicianMobile() {
                 Collect feedback from your customer to build trust and improve your business reputation.
               </p>
               
-              {/* Testimonial Type Selection */}
+              {/* Testimonial Type Selection with Plan Restrictions */}
               <div className="mb-4">
                 <label className="text-sm font-medium mb-2 block">Testimonial Type</label>
                 <div className="flex space-x-2">
@@ -1708,23 +1710,75 @@ export default function TechnicianMobile() {
                   >
                     Text
                   </Button>
-                  <Button
-                    type="button"
-                    variant={testimonialType === 'audio' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setTestimonialType('audio')}
-                  >
-                    Audio
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={testimonialType === 'video' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setTestimonialType('video')}
-                  >
-                    Video
-                  </Button>
+                  
+                  {/* Audio Testimonials - Pro+ Feature */}
+                  {company && hasFeature(company.plan, 'audioTestimonials') ? (
+                    <Button
+                      type="button"
+                      variant={testimonialType === 'audio' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setTestimonialType('audio')}
+                    >
+                      Audio
+                    </Button>
+                  ) : (
+                    <div className="relative">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled
+                        className="opacity-50"
+                      >
+                        Audio
+                      </Button>
+                      <div className="absolute -top-8 left-0 bg-black text-white text-xs px-2 py-1 rounded opacity-75">
+                        {getPlanName(getRequiredPlan('audioTestimonials'))}+ Feature
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Video Testimonials - Agency Feature */}
+                  {company && hasFeature(company.plan, 'videoTestimonials') ? (
+                    <Button
+                      type="button"
+                      variant={testimonialType === 'video' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setTestimonialType('video')}
+                    >
+                      Video
+                    </Button>
+                  ) : (
+                    <div className="relative">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled
+                        className="opacity-50"
+                      >
+                        Video
+                      </Button>
+                      <div className="absolute -top-8 left-0 bg-black text-white text-xs px-2 py-1 rounded opacity-75">
+                        {getPlanName(getRequiredPlan('videoTestimonials'))}+ Feature
+                      </div>
+                    </div>
+                  )}
                 </div>
+                
+                {/* Plan Upgrade Notice */}
+                {company && !hasFeature(company.plan, 'audioTestimonials') && (
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <div className="flex items-center">
+                      <div className="text-sm">
+                        <p className="font-medium text-blue-800">Upgrade for Enhanced Testimonials</p>
+                        <p className="text-blue-600">
+                          Audio and video testimonials are available on {getPlanName('pro')} and {getPlanName('agency')} plans.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Text Testimonial */}

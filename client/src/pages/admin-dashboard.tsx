@@ -147,7 +147,36 @@ export default function AdminDashboard() {
 
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">System Overview</h3>
+            <h3 className="text-lg font-semibold mb-4">Plan Management</h3>
+            <div className="space-y-3">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setLocation('/admin/billing')}
+              >
+                Billing & Subscriptions
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setLocation('/admin/features')}
+              >
+                Feature Management
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setLocation('/admin/analytics')}
+              >
+                Platform Analytics
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4">System Health</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Active Companies:</span>
