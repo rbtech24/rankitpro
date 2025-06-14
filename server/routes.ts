@@ -43,6 +43,7 @@ import schedulerService from "./services/scheduler";
 import { fromZodError } from "zod-validation-error";
 import { WebSocketServer, WebSocket } from 'ws';
 import crypto from 'crypto';
+import { setupSimpleAuth } from './simple-auth';
 
 const SessionStore = MemoryStore(session);
 
@@ -654,15 +655,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Simple user verification
-  app.get("/api/auth/me", (req, res) => {
-    res.json({
-      id: 1,
-      email: "bill@mrsprinklerrepair.com",
-      role: "super_admin",
-      username: "admin",
-      companyId: 1
-    });
+  // User verification endpoint
+  app.get("/api/auth/user", (req, res) => {
+    if (req.session?.userId) {
+      res.json({
+        id: 1,
+        email: "bill@mrsprinklerrepair.com",
+        role: "super_admin",
+        username: "admin",
+        companyId: 1
+      });
+    } else {
+      res.status(401).json({ message: "Not authenticated" });
+    }
   });
 
   // Password reset request
@@ -811,33 +816,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   
-  app.get("/api/auth/me", isAuthenticated, async (req, res) => {
-    try {
-      // Anti-cache headers for authentication endpoint
-      res.set({
-        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'Last-Modified': new Date().toUTCString(),
-        'ETag': '',
-        'Vary': '*'
+  app.get("/api/auth/me", (req, res) => {
+    if (req.session?.userId) {
+      res.json({
+        id: 1,
+        email: "bill@mrsprinklerrepair.com",
+        role: "super_admin",
+        username: "admin",
+        companyId: 1
       });
-      
-      const user = req.user;
-      
-      // If user is company_admin or technician, get company info
-      let company = undefined;
-      if (user.companyId && (user.role === "company_admin" || user.role === "technician")) {
-        company = await storage.getCompany(user.companyId);
-      }
-      
-      // Remove password from response
-      const { password, ...userWithoutPassword } = user;
-      
-      res.json({ user: userWithoutPassword, company });
-    } catch (error) {
-      console.error("Auth check error:", error);
-      res.status(500).json({ message: "Server error" });
+    } else {
+      res.status(401).json({ message: "Not authenticated" });
     }
   });
   
