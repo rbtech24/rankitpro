@@ -602,9 +602,11 @@ class RankItPro_Visit_Integration {
     public function __construct() {
         $this->apiKey = '${apiKey}';
         $this->apiEndpoint = '${apiEndpoint}api/wordpress/public/visits';
+        $this->reviewsEndpoint = '${apiEndpoint}api/wordpress/public/reviews';
         
-        // Register shortcode
+        // Register shortcodes
         add_shortcode('rankitpro_visits', array($this, 'rankitpro_visits_shortcode'));
+        add_shortcode('rankitpro_reviews', array($this, 'rankitpro_reviews_shortcode'));
         
         // Register widget
         add_action('widgets_init', array($this, 'register_rankitpro_visits_widget'));
@@ -653,6 +655,53 @@ class RankItPro_Visit_Integration {
                 object-fit: cover;
                 border-radius: 3px;
             }
+            .rankitpro-review-list {
+                list-style: none;
+                padding: 0;
+                margin: 0 0 20px 0;
+            }
+            .rankitpro-review-item {
+                border: 1px solid #e5e5e5;
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 20px;
+                background: #fff;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .rankitpro-review-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 15px;
+            }
+            .rankitpro-customer-name {
+                font-weight: bold;
+                font-size: 1.1em;
+                color: #333;
+            }
+            .rankitpro-review-rating {
+                color: #ffc107;
+                font-size: 16px;
+            }
+            .rankitpro-review-feedback {
+                font-style: italic;
+                color: #555;
+                margin: 15px 0;
+                padding: 0 20px;
+                border-left: 3px solid #007cba;
+            }
+            .rankitpro-review-service,
+            .rankitpro-review-tech {
+                font-size: 14px;
+                color: #666;
+                margin: 5px 0;
+            }
+            .rankitpro-review-date {
+                text-align: right;
+                font-size: 12px;
+                color: #999;
+                margin-top: 15px;
+            }
         ');
     }
     
@@ -696,6 +745,54 @@ class RankItPro_Visit_Integration {
             }
             
             $output .= '<div class="rankitpro-visit-meta">' . $date . ' at ' . $time . '</div>';
+            $output .= '</li>';
+        }
+        
+        $output .= '</ul>';
+        $output .= '</div>';
+        
+        return $output;
+    }
+    
+    public function rankitpro_reviews_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 5,
+            'rating' => 'all',
+            'show_photos' => 'true'
+        ), $atts);
+        
+        $reviews = $this->get_reviews($atts['limit'], $atts['rating']);
+        
+        if (empty($reviews)) {
+            return '<p>No customer reviews available.</p>';
+        }
+        
+        $output = '<div class="rankitpro-reviews-container">';
+        $output .= '<ul class="rankitpro-review-list">';
+        
+        foreach ($reviews as $review) {
+            $date = date('F j, Y', strtotime($review->respondedAt));
+            $stars = str_repeat('★', $review->rating) . str_repeat('☆', 5 - $review->rating);
+            
+            $output .= '<li class="rankitpro-review-item">';
+            $output .= '<div class="rankitpro-review-header">';
+            $output .= '<div class="rankitpro-customer-name">' . esc_html($review->customerName) . '</div>';
+            $output .= '<div class="rankitpro-review-rating">' . $stars . ' (' . $review->rating . '/5)</div>';
+            $output .= '</div>';
+            
+            if (!empty($review->feedback)) {
+                $output .= '<div class="rankitpro-review-feedback">"' . esc_html($review->feedback) . '"</div>';
+            }
+            
+            if (!empty($review->jobType)) {
+                $output .= '<div class="rankitpro-review-service">Service: ' . esc_html($review->jobType) . '</div>';
+            }
+            
+            if (!empty($review->technicianName)) {
+                $output .= '<div class="rankitpro-review-tech">Technician: ' . esc_html($review->technicianName) . '</div>';
+            }
+            
+            $output .= '<div class="rankitpro-review-date">' . $date . '</div>';
             $output .= '</li>';
         }
         
