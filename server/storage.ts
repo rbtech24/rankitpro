@@ -382,7 +382,8 @@ export class MemStorage implements IStorage {
       emailVerificationToken: company.emailVerificationToken || null,
       trialStartDate: company.trialStartDate || null,
       isEmailVerified: company.isEmailVerified || false,
-      isTrialActive: company.isTrialActive || null
+      isTrialActive: company.isTrialActive || null,
+      featuresEnabled: company.featuresEnabled || null
     };
     
     this.companies.set(id, newCompany);

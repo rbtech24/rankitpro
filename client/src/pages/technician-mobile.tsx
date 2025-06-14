@@ -305,6 +305,23 @@ export default function TechnicianMobile() {
       setTechnicianProfile(profileData);
       setAuthenticated(true);
       
+      // Fetch company data for plan checking
+      if (profileData.companyId) {
+        try {
+          const companyResponse = await fetch(`/api/companies/${profileData.companyId}`, {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          });
+          if (companyResponse.ok) {
+            const companyData = await companyResponse.json();
+            setCompany(companyData);
+          }
+        } catch (error) {
+          console.error('Error fetching company data:', error);
+        }
+      }
+      
       // Initial data fetch
       await Promise.all([
         fetchCheckIns(),
