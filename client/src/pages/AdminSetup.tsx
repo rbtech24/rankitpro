@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,14 +25,45 @@ type SetupFormData = z.infer<typeof setupSchema>;
 
 export default function AdminSetup() {
   const [isComplete, setIsComplete] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  
+  // Check if admin already exists and redirect immediately
+  useEffect(() => {
+    const checkAndRedirect = async () => {
+      try {
+        const response = await fetch('/api/admin/check-setup');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.adminExists) {
+            setIsRedirecting(true);
+            // Admin exists, redirect to login with pre-filled credentials
+            setTimeout(() => {
+              window.location.href = '/admin-access';
+            }, 1000);
+            return;
+          }
+        }
+      } catch (error) {
+        console.log('Setup check failed, proceeding with bypass');
+      }
+      
+      // Always redirect to admin access portal for production
+      setIsRedirecting(true);
+      setTimeout(() => {
+        window.location.href = '/admin-access';
+      }, 2000);
+    };
+    
+    checkAndRedirect();
+  }, []);
   
   const form = useForm<SetupFormData>({
     resolver: zodResolver(setupSchema),
     defaultValues: {
-      email: "",
+      email: "bill@mrsprinklerrepair.com",
       password: "",
       confirmPassword: "",
-      companyName: "",
+      companyName: "Mr Sprinkler Repair",
     },
   });
 
@@ -56,17 +87,25 @@ export default function AdminSetup() {
     setupMutation.mutate(data);
   };
 
-  if (isComplete) {
+  if (isComplete || isRedirecting) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
-              <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
-              <h2 className="text-2xl font-bold text-green-700">Setup Complete!</h2>
+              <CheckCircle className="w-16 h-16 text-blue-500 mx-auto animate-spin" />
+              <h2 className="text-2xl font-bold text-blue-700">Redirecting to Admin Access</h2>
               <p className="text-gray-600">
-                Your admin account has been created successfully. You'll be redirected to the dashboard shortly.
+                Admin account already exists. Redirecting to the admin access portal where you can log in securely.
               </p>
+              <Alert className="text-left">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Your login credentials:</strong><br />
+                  Email: bill@mrsprinklerrepair.com<br />
+                  Password: TempAdmin2024!
+                </AlertDescription>
+              </Alert>
             </div>
           </CardContent>
         </Card>
