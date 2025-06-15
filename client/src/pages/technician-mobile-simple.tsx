@@ -93,6 +93,48 @@ export default function TechnicianMobile() {
   const user = auth?.user;
   const company = auth?.company;
 
+  // Initialize forms
+  const checkInForm = useForm<CheckInFormData>({
+    resolver: zodResolver(checkInSchema),
+    defaultValues: {
+      jobType: "",
+      customerName: "",
+      customerEmail: "",
+      customerPhone: "",
+      address: "",
+      workPerformed: "",
+      materialsUsed: "",
+      notes: "",
+      requestReview: true,
+      reviewMessage: "",
+    }
+  });
+
+  const reviewForm = useForm<ReviewFormData>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: {
+      customerName: "",
+      customerEmail: "",
+      jobType: "",
+      rating: 5,
+      reviewText: "",
+      workCompleted: "",
+      recommendToOthers: true,
+    }
+  });
+
+  const blogPostForm = useForm<BlogPostFormData>({
+    resolver: zodResolver(blogPostSchema),
+    defaultValues: {
+      title: "",
+      content: "",
+      jobType: "",
+      customerName: "",
+      location: "",
+      tags: "",
+    }
+  });
+
   // Redirect if not authenticated or not a technician
   useEffect(() => {
     if (!authLoading && (!isAuthenticated || !isTechnician)) {
@@ -133,11 +175,19 @@ export default function TechnicianMobile() {
 
   // Create new check-in
   const createCheckInMutation = useMutation({
-    mutationFn: async (checkInData: any) => {
-      return apiRequest('POST', '/api/check-ins', checkInData);
+    mutationFn: async (checkInData: CheckInFormData) => {
+      return apiRequest('POST', '/api/check-ins', {
+        ...checkInData,
+        technicianId: user?.id,
+        companyId: company?.id,
+        location: currentLocation,
+        timestamp: new Date().toISOString(),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/check-ins'] });
+      checkInForm.reset();
+      setActiveTab('home');
       toast({
         title: "Check-in created",
         description: "Your check-in has been recorded successfully",
@@ -146,6 +196,62 @@ export default function TechnicianMobile() {
     onError: (error: Error) => {
       toast({
         title: "Error creating check-in",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Create review
+  const createReviewMutation = useMutation({
+    mutationFn: async (reviewData: ReviewFormData) => {
+      return apiRequest('POST', '/api/reviews', {
+        ...reviewData,
+        technicianId: user?.id,
+        companyId: company?.id,
+        source: 'technician_mobile',
+        timestamp: new Date().toISOString(),
+      });
+    },
+    onSuccess: () => {
+      reviewForm.reset();
+      setActiveTab('home');
+      toast({
+        title: "Review submitted",
+        description: "Customer review has been recorded successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error submitting review",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Create blog post
+  const createBlogPostMutation = useMutation({
+    mutationFn: async (blogData: BlogPostFormData) => {
+      return apiRequest('POST', '/api/blog-posts', {
+        ...blogData,
+        technicianId: user?.id,
+        companyId: company?.id,
+        status: 'draft',
+        timestamp: new Date().toISOString(),
+      });
+    },
+    onSuccess: () => {
+      blogPostForm.reset();
+      setActiveTab('home');
+      toast({
+        title: "Blog post created",
+        description: "Your blog post has been saved as a draft",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error creating blog post",
         description: error.message,
         variant: "destructive"
       });
@@ -288,45 +394,480 @@ export default function TechnicianMobile() {
             <CardHeader>
               <CardTitle>New Check-In</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Job Type</label>
-                <Input placeholder="e.g., Sprinkler Repair" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Customer Name</label>
-                <Input placeholder="Customer name" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Notes</label>
-                <textarea 
-                  className="w-full p-3 border rounded-md"
-                  rows={4}
-                  placeholder="Work performed, materials used, etc."
-                />
-              </div>
-              <div className="flex space-x-2">
-                <Button 
-                  className="flex-1"
-                  disabled={createCheckInMutation.isPending}
-                >
-                  Submit Check-In
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setActiveTab('home')}
-                >
-                  Cancel
-                </Button>
-              </div>
+            <CardContent>
+              <Form {...checkInForm}>
+                <form onSubmit={checkInForm.handleSubmit((data) => createCheckInMutation.mutate(data))} className="space-y-4">
+                  <FormField
+                    control={checkInForm.control}
+                    name="jobType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Job Type *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Sprinkler Repair, Maintenance" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={checkInForm.control}
+                    name="customerName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Name *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Customer's full name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={checkInForm.control}
+                    name="customerEmail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Email *</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="customer@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={checkInForm.control}
+                    name="customerPhone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Phone</FormLabel>
+                        <FormControl>
+                          <Input placeholder="(555) 123-4567" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={checkInForm.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Service Address *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="123 Main St, City, State" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={checkInForm.control}
+                    name="workPerformed"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Work Performed *</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Describe the work completed..."
+                            rows={3}
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={checkInForm.control}
+                    name="materialsUsed"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Materials Used</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="List any materials or parts used..."
+                            rows={2}
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={checkInForm.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Additional Notes</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Any additional notes or observations..."
+                            rows={2}
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="border-t pt-4">
+                    <h3 className="text-lg font-medium mb-3">Review Request</h3>
+                    
+                    <FormField
+                      control={checkInForm.control}
+                      name="requestReview"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              checked={field.value}
+                              onChange={field.onChange}
+                              className="w-4 h-4"
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            Send review request to customer
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+
+                    {checkInForm.watch('requestReview') && (
+                      <FormField
+                        control={checkInForm.control}
+                        name="reviewMessage"
+                        render={({ field }) => (
+                          <FormItem className="mt-3">
+                            <FormLabel>Review Request Message</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Hi [Customer Name], we'd love to hear about your experience with our service today..."
+                                rows={3}
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex space-x-2 pt-4">
+                    <Button 
+                      type="submit"
+                      className="flex-1"
+                      disabled={createCheckInMutation.isPending}
+                    >
+                      {createCheckInMutation.isPending ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Submit Check-In
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      onClick={() => setActiveTab('home')}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </Form>
             </CardContent>
           </Card>
+        )}
+
+        {activeTab === 'reviews' && (
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Star className="w-5 h-5 mr-2" />
+                  Collect Customer Review
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Form {...reviewForm}>
+                  <form onSubmit={reviewForm.handleSubmit((data) => createReviewMutation.mutate(data))} className="space-y-4">
+                    <FormField
+                      control={reviewForm.control}
+                      name="customerName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Customer Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Customer's full name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={reviewForm.control}
+                      name="customerEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Customer Email *</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="customer@example.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={reviewForm.control}
+                      name="jobType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Service Type *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Sprinkler Repair" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={reviewForm.control}
+                      name="rating"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Rating *</FormLabel>
+                          <FormControl>
+                            <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select rating" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="5">⭐⭐⭐⭐⭐ (5 stars)</SelectItem>
+                                <SelectItem value="4">⭐⭐⭐⭐ (4 stars)</SelectItem>
+                                <SelectItem value="3">⭐⭐⭐ (3 stars)</SelectItem>
+                                <SelectItem value="2">⭐⭐ (2 stars)</SelectItem>
+                                <SelectItem value="1">⭐ (1 star)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={reviewForm.control}
+                      name="reviewText"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Review Text *</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="What did the customer think about the service?"
+                              rows={4}
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={reviewForm.control}
+                      name="workCompleted"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Work Completed *</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Brief description of work performed"
+                              rows={2}
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={reviewForm.control}
+                      name="recommendToOthers"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              checked={field.value}
+                              onChange={field.onChange}
+                              className="w-4 h-4"
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-normal">
+                            Customer would recommend to others
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex space-x-2">
+                      <Button 
+                        type="submit"
+                        className="flex-1"
+                        disabled={createReviewMutation.isPending}
+                      >
+                        {createReviewMutation.isPending ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4 mr-2" />
+                            Submit Review
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="w-5 h-5 mr-2" />
+                  Create Blog Post
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Form {...blogPostForm}>
+                  <form onSubmit={blogPostForm.handleSubmit((data) => createBlogPostMutation.mutate(data))} className="space-y-4">
+                    <FormField
+                      control={blogPostForm.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Blog Post Title *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Successful Sprinkler Repair in Downtown" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={blogPostForm.control}
+                      name="jobType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Service Type *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Sprinkler Repair" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={blogPostForm.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Location</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Downtown Dallas" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={blogPostForm.control}
+                      name="content"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Content *</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Describe the work performed, challenges faced, and results achieved..."
+                              rows={6}
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={blogPostForm.control}
+                      name="tags"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tags</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., sprinkler, repair, irrigation (comma-separated)" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Button 
+                      type="submit"
+                      className="w-full"
+                      disabled={createBlogPostMutation.isPending}
+                    >
+                      {createBlogPostMutation.isPending ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        <>
+                          <FileText className="w-4 h-4 mr-2" />
+                          Create Blog Post
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </main>
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="grid grid-cols-4 h-16">
+        <div className="grid grid-cols-3 h-16">
           <button
             onClick={() => setActiveTab('home')}
             className={`flex flex-col items-center justify-center space-y-1 ${
@@ -346,22 +887,13 @@ export default function TechnicianMobile() {
             <span className="text-xs">Check-In</span>
           </button>
           <button
-            onClick={() => setActiveTab('schedule')}
+            onClick={() => setActiveTab('reviews')}
             className={`flex flex-col items-center justify-center space-y-1 ${
-              activeTab === 'schedule' ? 'text-primary bg-primary/10' : 'text-gray-600'
+              activeTab === 'reviews' ? 'text-primary bg-primary/10' : 'text-gray-600'
             }`}
           >
-            <Calendar className="w-5 h-5" />
-            <span className="text-xs">Schedule</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`flex flex-col items-center justify-center space-y-1 ${
-              activeTab === 'profile' ? 'text-primary bg-primary/10' : 'text-gray-600'
-            }`}
-          >
-            <Settings className="w-5 h-5" />
-            <span className="text-xs">Profile</span>
+            <Star className="w-5 h-5" />
+            <span className="text-xs">Reviews</span>
           </button>
         </div>
       </nav>
