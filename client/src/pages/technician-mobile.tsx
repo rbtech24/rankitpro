@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useRoute, Link } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
+import { getCurrentUser, AuthState } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -61,28 +63,8 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-// Mobile JWT auth token management
-const getStoredTokens = () => {
-  try {
-    const accessToken = localStorage.getItem('mobile_access_token');
-    const refreshToken = localStorage.getItem('mobile_refresh_token');
-    return { accessToken, refreshToken };
-  } catch (e) {
-    return { accessToken: null, refreshToken: null };
-  }
-};
-
-const storeTokens = (accessToken: string, refreshToken: string) => {
-  try {
-    localStorage.setItem('mobile_access_token', accessToken);
-    localStorage.setItem('mobile_refresh_token', refreshToken);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
-
-const clearTokens = () => {
+// Authentication utilities
+const clearAuthState = () => {
   try {
     localStorage.removeItem('mobile_access_token');
     localStorage.removeItem('mobile_refresh_token');
@@ -118,12 +100,19 @@ export default function TechnicianMobile() {
   const [match, params] = useRoute('/technician-mobile/:tab');
   const activeTab = match ? params.tab : 'home';
   
-  const [authenticated, setAuthenticated] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [user, setUser] = useState<any>(null);
+  // Use shared authentication state
+  const { data: auth, isLoading: authLoading } = useQuery<AuthState>({
+    queryKey: ["/api/auth/me"],
+    queryFn: getCurrentUser,
+    retry: false,
+    staleTime: 0
+  });
+  
+  const authenticated = !!auth?.user;
+  const user = auth?.user;
+  const company = auth?.company;
   const [checkIns, setCheckIns] = useState<any[]>([]);
   const [technicianProfile, setTechnicianProfile] = useState<any>(null);
-  const [company, setCompany] = useState<any>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [schedule, setSchedule] = useState<any[]>([]);

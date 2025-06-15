@@ -31,7 +31,7 @@ import Billing from "@/pages/billing";
 import TechApp from "@/pages/tech-app";
 import AISettings from "@/pages/ai-settings";
 import Home from "@/pages/home";
-import TechnicianMobile from "@/pages/technician-mobile";
+import TechnicianMobile from "@/pages/technician-mobile-simple";
 import MobileTechApp from "@/pages/mobile-tech-app";
 import Onboarding from "@/pages/onboarding";
 import ReviewRequest from "@/pages/review-request";
