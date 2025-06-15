@@ -37,14 +37,16 @@ export interface AuthState {
 
 export async function login(credentials: LoginCredentials): Promise<AuthState> {
   try {
-    const user = await apiRequest("POST", "/api/auth/login", credentials);
+    const response = await apiRequest("POST", "/api/auth/login", credentials);
+    const user = await response.json();
     
     let company: Company | null = null;
     
     // Get company data if user has companyId
     if (user?.companyId) {
       try {
-        company = await apiRequest("GET", `/api/companies/${user.companyId}`);
+        const companyResponse = await apiRequest("GET", `/api/companies/${user.companyId}`);
+        company = await companyResponse.json();
       } catch (error) {
         console.warn("Failed to fetch company data:", error);
       }
