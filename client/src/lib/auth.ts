@@ -37,97 +37,26 @@ export interface AuthState {
 
 export async function login(credentials: LoginCredentials): Promise<AuthState> {
   try {
-    // Direct authentication bypass for production
-    let user: User | null = null;
+    const user = await apiRequest("POST", "/api/auth/login", credentials);
+    
     let company: Company | null = null;
     
-    // Super Admin Login
-    if (credentials.email === "bill@mrsprinklerrepair.com" && credentials.password === "TempAdmin2024!") {
-      user = {
-        id: 1,
-        username: "admin",
-        email: "bill@mrsprinklerrepair.com",
-        role: "super_admin" as const,
-        companyId: 1
-      };
-      
-      company = {
-        id: 1,
-        name: "Mr. Sprinkler Repair",
-        plan: "agency",
-        usageLimit: 100000
-      };
-    }
-    // Company Admin Login
-    else if (credentials.email === "admin@testcompany.com" && credentials.password === "company123") {
-      user = {
-        id: 3,
-        username: "companyadmin",
-        email: "admin@testcompany.com",
-        role: "company_admin" as const,
-        companyId: 2
-      };
-      
-      company = {
-        id: 2,
-        name: "Test Company Ltd",
-        plan: "pro",
-        usageLimit: 1000
-      };
-    }
-    // Technician Login
-    else if (credentials.email === "tech@testcompany.com" && credentials.password === "tech1234") {
-      user = {
-        id: 4,
-        username: "techuser",
-        email: "tech@testcompany.com",
-        role: "technician" as const,
-        companyId: 2
-      };
-      
-      company = {
-        id: 2,
-        name: "Test Company Ltd",
-        plan: "pro",
-        usageLimit: 1000
-      };
+    // Get company data if user has companyId
+    if (user?.companyId) {
+      try {
+        company = await apiRequest("GET", `/api/companies/${user.companyId}`);
+      } catch (error) {
+        console.warn("Failed to fetch company data:", error);
+      }
     }
     
-    if (user && company) {
-      const authState = { user, company };
-      
-      // Store authentication state in localStorage for persistence
-      localStorage.setItem('authUser', JSON.stringify(user));
-      localStorage.setItem('authCompany', JSON.stringify(company));
-      localStorage.setItem('isAuthenticated', 'true');
-      
-      // Update query cache
-      queryClient.setQueryData(["/api/auth/me"], authState);
-      queryClient.setQueryData(["/api/auth/user"], user);
-      
-      return authState;
-    } else {
-      throw new Error("Invalid credentials");
-    }
-  } catch (error) {
-    // Fallback to API request if direct auth fails
-    try {
-      const response = await apiRequest("POST", "/api/login", credentials);
-      const user = await response.json();
-      
-      // Wait a moment for session cookie to be properly set
-      await new Promise(resolve => setTimeout(resolve, 250));
-      
-      // Fetch complete auth state including company info
-      const authState = await getCurrentUser();
-      
-      // Update query cache with fresh auth data
-      queryClient.setQueryData(["/api/auth/me"], authState);
-      
-      return authState;
-    } catch (fallbackError) {
-      throw new Error("Authentication failed");
-    }
+    // Invalidate auth query to refresh user state
+    queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+    
+    return { user, company };
+  } catch (error: any) {
+    console.error("Login error:", error);
+    throw new Error(error.message || "Login failed");
   }
 }
 
