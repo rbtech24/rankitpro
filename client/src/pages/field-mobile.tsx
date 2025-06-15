@@ -701,18 +701,26 @@ export default function FieldMobile() {
           {!isRecording ? (
             <Button
               onClick={startRecording}
-              className="bg-red-600 hover:bg-red-700"
+              className={`py-4 px-6 text-lg font-semibold ${
+                recordingType === 'audio' 
+                  ? 'bg-blue-600 hover:bg-blue-700' 
+                  : 'bg-purple-600 hover:bg-purple-700'
+              }`}
             >
-              <Mic className="w-4 h-4 mr-2" />
-              Start Recording
+              {recordingType === 'audio' ? (
+                <Mic className="w-5 h-5 mr-2" />
+              ) : (
+                <Video className="w-5 h-5 mr-2" />
+              )}
+              Start {recordingType === 'audio' ? 'Audio' : 'Video'} Recording
             </Button>
           ) : (
             <Button
               onClick={stopRecording}
-              variant="outline"
+              className="bg-red-600 hover:bg-red-700 py-4 px-6 text-lg font-semibold animate-pulse"
             >
-              <Square className="w-4 h-4 mr-2" />
-              Stop Recording
+              <Square className="w-5 h-5 mr-2" />
+              Stop {recordingType === 'audio' ? 'Audio' : 'Video'} Recording
             </Button>
           )}
         </div>
