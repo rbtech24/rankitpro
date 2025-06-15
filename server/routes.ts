@@ -40,6 +40,7 @@ import crmIntegrationRoutes from "./routes/crm-integration";
 import salesRoutes from "./routes/sales";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
+import { analyticsService } from "./services/analytics-service";
 import { fromZodError } from "zod-validation-error";
 import { WebSocketServer, WebSocket } from 'ws';
 import crypto from 'crypto';
