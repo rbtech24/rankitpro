@@ -53,7 +53,7 @@ export async function login(credentials: LoginCredentials): Promise<AuthState> {
     }
     
     // Invalidate auth query to refresh user state
-    queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     
     return { user, company };
   } catch (error: any) {

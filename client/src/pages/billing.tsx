@@ -16,8 +16,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Loader2 } from "lucide-react";
 import StripeConfigNotice from "@/components/billing/stripe-config-notice";
 
-// Initialize Stripe outside of the component
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+// Initialize Stripe conditionally - only if public key is available
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
+  : Promise.resolve(null);
 
 interface PlanFeature {
   name: string;
@@ -236,7 +238,7 @@ export default function Billing() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            {clientSecret && stripePromise ? (
+{clientSecret && import.meta.env.VITE_STRIPE_PUBLIC_KEY ? (
               <Elements stripe={stripePromise} options={{ clientSecret }}>
                 <PaymentForm 
                   clientSecret={clientSecret}
@@ -255,6 +257,8 @@ export default function Billing() {
                   isSubscription={true}
                 />
               </Elements>
+            ) : !import.meta.env.VITE_STRIPE_PUBLIC_KEY ? (
+              <StripeConfigNotice showConfigHelp={true} />
             ) : (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
