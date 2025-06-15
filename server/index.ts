@@ -28,37 +28,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Production authentication bypass - intercept before all middleware
-const authBypass = (req: Request, res: Response, next: NextFunction) => {
-  if (req.method === 'POST' && req.path === '/api/login') {
-    const { email, password } = req.body;
-    
-    if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Cache-Control', 'no-cache');
-      return res.status(200).json({
-        success: true,
-        user: {
-          id: 1,
-          email: "bill@mrsprinklerrepair.com",
-          role: "super_admin",
-          username: "admin",
-          companyId: 1
-        },
-        message: "Login successful"
-      });
-    } else {
-      res.setHeader('Content-Type', 'application/json');
-      return res.status(401).json({ 
-        success: false, 
-        message: "Invalid credentials" 
-      });
-    }
-  }
-  next();
-};
-
-app.use(authBypass);
+// Authentication bypass removed - using proper API endpoints
 
 app.use((req, res, next) => {
   const start = Date.now();

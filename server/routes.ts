@@ -62,59 +62,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
-  // Production login endpoint - using alternative path to bypass static serving
-  app.post("/auth/login", (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    
-    const { email, password } = req.body;
-    
-    if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-      return res.status(200).json({
-        success: true,
-        user: {
-          id: 1,
-          email: "bill@mrsprinklerrepair.com",
-          role: "super_admin",
-          username: "admin",
-          companyId: 1
-        },
-        message: "Login successful"
+  // Main login endpoint
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // Check password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // Check if user is active
+      if (!user.active) {
+        return res.status(401).json({ message: "Account is disabled" });
+      }
+      
+      // Set session
+      req.session.userId = user.id;
+      
+      // Save session with promise
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) {
+            console.error("Login session save error:", err);
+            reject(new Error("Session save failed"));
+          } else {
+            console.log(`Login session saved successfully for user ${user.id}`);
+            resolve();
+          }
+        });
       });
-    } else {
-      return res.status(401).json({ 
-        success: false, 
-        message: "Invalid credentials" 
-      });
-    }
-  });
-
-  // Keep original API endpoint for compatibility
-  app.post("/api/login", (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    
-    const { email, password } = req.body;
-    
-    if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-      return res.status(200).json({
-        success: true,
-        user: {
-          id: 1,
-          email: "bill@mrsprinklerrepair.com",
-          role: "super_admin",
-          username: "admin",
-          companyId: 1
-        },
-        message: "Login successful"
-      });
-    } else {
-      return res.status(401).json({ 
-        success: false, 
-        message: "Invalid credentials" 
-      });
+      
+      // Remove password from response
+      const { password: _, ...userWithoutPassword } = user;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Server error during login" });
     }
   });
   // Create HTTP server to be returned
