@@ -2417,6 +2417,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const testimonialsRouter = (await import('./routes/testimonials')).default;
   app.use('/api/testimonials', testimonialsRouter);
 
+  // Admin analytics endpoints
+  app.get('/api/admin/analytics', isSuperAdmin, async (req: Request, res: Response) => {
+    try {
+      const analytics = await analyticsService.getPlatformAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error('Analytics error:', error);
+      res.status(500).json({ message: 'Failed to fetch analytics' });
+    }
+  });
+
+  app.get('/api/admin/system/health', isSuperAdmin, async (req: Request, res: Response) => {
+    try {
+      const health = await analyticsService.getSystemHealth();
+      res.json(health);
+    } catch (error) {
+      console.error('System health error:', error);
+      res.status(500).json({ message: 'Failed to fetch system health' });
+    }
+  });
+
+  app.get('/api/admin/system/settings', isSuperAdmin, async (req: Request, res: Response) => {
+    try {
+      const settings = await analyticsService.getSystemSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error('System settings error:', error);
+      res.status(500).json({ message: 'Failed to fetch system settings' });
+    }
+  });
+
   // Setup production authentication endpoints
   setupProductionLogin(app);
 

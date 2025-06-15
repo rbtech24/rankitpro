@@ -19,17 +19,19 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 export default function AdminAnalytics() {
   const [timeRange, setTimeRange] = useState("30d");
 
-  const { data: analytics } = useQuery({
-    queryKey: ["/api/admin/analytics", timeRange]
+  const { data: analytics = {
+    revenue: { totalRevenue: 0, revenueGrowth: 0, monthlyRevenue: [] },
+    companies: { activeCompanies: 0, companyGrowth: 0, planDistribution: [], topCompanies: [] },
+    users: { totalUsers: 0, userGrowth: 0, dailyActiveUsers: 0 },
+    performance: { conversionRate: 0, conversionGrowth: 0 },
+    recentActivity: []
+  }, isLoading } = useQuery({
+    queryKey: ["/api/admin/analytics"]
   });
 
-  const { data: platformMetrics } = useQuery({
-    queryKey: ["/api/admin/metrics/platform"]
-  });
-
-  const revenueData = analytics?.revenue || [];
-  const userGrowthData = analytics?.userGrowth || [];
-  const planDistribution = analytics?.planDistribution || [];
+  const revenueData = analytics.revenue?.monthlyRevenue || [];
+  const userGrowthData = analytics.users || {};
+  const planDistribution = analytics.companies?.planDistribution || [];
 
   const COLORS = ['#3B82F6', '#8B5CF6', '#F59E0B', '#10B981'];
 
