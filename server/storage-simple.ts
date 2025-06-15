@@ -83,11 +83,92 @@ export class MemStorage implements IStorage {
   private nextReviewRequestId = 1;
   private nextReviewResponseId = 1;
 
+  private initialized = false;
+
+  private async ensureInitialized() {
+    if (this.initialized) return;
+    
+    const bcrypt = await import('bcrypt');
+    
+    // Create super admin account
+    const superAdmin: User = {
+      id: this.nextUserId++,
+      email: 'bill@mrsprinklerrepair.com',
+      username: 'billsprinkler',
+      password: await bcrypt.hash('TempAdmin2024!', 12),
+      role: 'super_admin',
+      companyId: null,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      createdAt: new Date(),
+      active: true
+    };
+    this.users.set(superAdmin.id, superAdmin);
+
+    // Create test company
+    const testCompany: Company = {
+      id: this.nextCompanyId++,
+      name: 'Test Company Ltd',
+      plan: 'pro',
+      usageLimit: 1000,
+      wordpressConfig: null,
+      javaScriptEmbedConfig: null,
+      reviewSettings: null,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      features: {},
+      customBranding: null,
+      onboardingCompleted: false,
+      totalCheckIns: 0,
+      totalReviews: 0,
+      averageRating: 0,
+      createdAt: new Date()
+    };
+    this.companies.set(testCompany.id, testCompany);
+
+    // Create company admin account
+    const companyAdmin: User = {
+      id: this.nextUserId++,
+      email: 'admin@testcompany.com',
+      username: 'companyadmin',
+      password: await bcrypt.hash('company123', 12),
+      role: 'company_admin',
+      companyId: testCompany.id,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      createdAt: new Date(),
+      active: true
+    };
+    this.users.set(companyAdmin.id, companyAdmin);
+
+    // Create technician account
+    const technician: User = {
+      id: this.nextUserId++,
+      email: 'tech@testcompany.com',
+      username: 'techuser',
+      password: await bcrypt.hash('tech1234', 12),
+      role: 'technician',
+      companyId: testCompany.id,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      createdAt: new Date(),
+      active: true
+    };
+    this.users.set(technician.id, technician);
+
+    this.initialized = true;
+    console.log('✅ Test accounts initialized:');
+    console.log('- Super Admin: bill@mrsprinklerrepair.com / TempAdmin2024!');
+    console.log('- Company Admin: admin@testcompany.com / company123');
+    console.log('- Technician: tech@testcompany.com / tech1234');
+  }
+
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
+    await this.ensureInitialized();
     for (const user of this.users.values()) {
       if (user.email === email) return user;
     }
