@@ -58,26 +58,26 @@
       }
     </script>
     
-    <!-- Service Worker Registration - Conditional -->
+    <!-- Service Worker Management -->
     <script>
+      // Clear existing service workers to prevent cache conflicts
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          fetch('/sw.js')
-            .then(response => {
-              if (response.ok) {
-                navigator.serviceWorker.register('/sw.js')
-                  .then((registration) => {
-                    console.log('SW registered: ', registration);
-                  })
-                  .catch((registrationError) => {
-                    console.log('SW registration failed: ', registrationError);
-                  });
-              }
-            })
-            .catch(() => {
-              // Service worker file not found, skip registration
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister().then(function(boolean) {
+              console.log('Service worker unregistered:', boolean);
             });
+          }
         });
+        
+        // Clear cache
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            for (let name of names) {
+              caches.delete(name);
+            }
+          });
+        }
       }
     </script>
     

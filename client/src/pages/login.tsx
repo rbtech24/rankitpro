@@ -40,15 +40,37 @@ export default function Login() {
   });
   
   const loginMutation = useMutation({
-    mutationFn: login,
-    onSuccess: (authState) => {
-      if (authState.user?.role === "super_admin") {
-        setLocation("/admin");
-      } else {
-        setLocation("/dashboard");
+    mutationFn: async (credentials: LoginFormValues) => {
+      // Clear any cached data before login attempt
+      if ('caches' in window) {
+        try {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+        } catch (error) {
+          console.warn("Failed to clear cache:", error);
+        }
       }
+      
+      return login(credentials);
+    },
+    onSuccess: (authState) => {
+      toast({
+        title: "Login Successful",
+        description: `Welcome back, ${authState.user?.username || 'User'}!`,
+        variant: "default",
+      });
+      
+      // Slight delay to ensure auth state is set
+      setTimeout(() => {
+        if (authState.user?.role === "super_admin") {
+          setLocation("/admin");
+        } else {
+          setLocation("/dashboard");
+        }
+      }, 100);
     },
     onError: (error: Error) => {
+      console.error("Login error:", error);
       toast({
         title: "Login Failed",
         description: error.message || "Please check your credentials and try again.",

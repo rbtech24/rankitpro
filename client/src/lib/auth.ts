@@ -52,30 +52,82 @@ export async function login(credentials: LoginCredentials): Promise<AuthState> {
       }
     }
     
-    // Invalidate auth query to refresh user state
-    queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    // Store auth data in localStorage for session persistence
+    localStorage.setItem('authUser', JSON.stringify(user));
+    localStorage.setItem('authCompany', JSON.stringify(company));
+    localStorage.setItem('isAuthenticated', 'true');
     
-    return { user, company };
+    // Update query cache with auth data
+    const authState = { user, company };
+    queryClient.setQueryData(["/api/auth/me"], authState);
+    
+    return authState;
   } catch (error: any) {
     console.error("Login error:", error);
+    // Clear any stale auth data on login failure
+    localStorage.removeItem('authUser');
+    localStorage.removeItem('authCompany');
+    localStorage.removeItem('isAuthenticated');
     throw new Error(error.message || "Login failed");
   }
 }
 
 export async function register(credentials: RegisterCredentials): Promise<AuthState> {
-  const response = await apiRequest("POST", "/api/auth/register", credentials);
-  const user = await response.json();
-  
-  // Invalidate any auth-related queries
-  queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-  
-  return { user, company: null };
+  try {
+    const response = await apiRequest("POST", "/api/auth/register", credentials);
+    const user = await response.json();
+    
+    let company: Company | null = null;
+    
+    // Get company data if user has companyId
+    if (user?.companyId) {
+      try {
+        const companyResponse = await apiRequest("GET", `/api/companies/${user.companyId}`);
+        company = await companyResponse.json();
+      } catch (error) {
+        console.warn("Failed to fetch company data:", error);
+      }
+    }
+    
+    // Store auth data in localStorage for session persistence
+    localStorage.setItem('authUser', JSON.stringify(user));
+    localStorage.setItem('authCompany', JSON.stringify(company));
+    localStorage.setItem('isAuthenticated', 'true');
+    
+    // Update query cache with auth data
+    const authState = { user, company };
+    queryClient.setQueryData(["/api/auth/me"], authState);
+    
+    return authState;
+  } catch (error: any) {
+    console.error("Registration error:", error);
+    // Clear any stale auth data on registration failure
+    localStorage.removeItem('authUser');
+    localStorage.removeItem('authCompany');
+    localStorage.removeItem('isAuthenticated');
+    throw new Error(error.message || "Registration failed");
+  }
 }
 
 export async function logout(): Promise<void> {
-  // Use the optimized logout function
-  const { performImmediateLogout } = await import('./logout');
-  performImmediateLogout();
+  try {
+    // Call the server logout endpoint
+    await apiRequest("POST", "/api/auth/logout");
+  } catch (error) {
+    console.warn("Server logout failed:", error);
+  } finally {
+    // Always clear local authentication data
+    localStorage.removeItem('authUser');
+    localStorage.removeItem('authCompany');
+    localStorage.removeItem('isAuthenticated');
+    
+    // Clear query cache
+    queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
+    queryClient.clear();
+    
+    // Redirect to login page
+    window.location.href = '/login';
+  }
 }
 
 export async function getCurrentUser(): Promise<AuthState> {
@@ -85,18 +137,31 @@ export async function getCurrentUser(): Promise<AuthState> {
     const storedCompany = localStorage.getItem('authCompany');
     const isAuthenticated = localStorage.getItem('isAuthenticated');
     
+    console.log('getCurrentUser - localStorage check:', { isAuthenticated, hasStoredUser: !!storedUser });
+    
     if (isAuthenticated === 'true' && storedUser) {
       const user = JSON.parse(storedUser);
       const company = storedCompany ? JSON.parse(storedCompany) : null;
+      console.log('getCurrentUser - using localStorage data:', { user, company });
       return { user, company };
     }
     
     // Fallback to API request
-    await new Promise(resolve => setTimeout(resolve, 100));
+    console.log('getCurrentUser - making API request to /api/auth/me');
     const response = await apiRequest("GET", "/api/auth/me");
     const data = await response.json();
+    console.log('getCurrentUser - API response:', data);
+    
+    // Store the response in localStorage for future use
+    if (data.user) {
+      localStorage.setItem('authUser', JSON.stringify(data.user));
+      localStorage.setItem('authCompany', JSON.stringify(data.company));
+      localStorage.setItem('isAuthenticated', 'true');
+    }
+    
     return data;
   } catch (error) {
+    console.log('getCurrentUser - error:', error);
     // Clear any stale auth data on 401 errors
     if ((error as Error).message.includes("401")) {
       queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
