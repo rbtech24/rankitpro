@@ -22,7 +22,8 @@ interface BlogFormData {
 export default function MobileBlogs() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
+  // Form state
   const [blogForm, setBlogForm] = useState<BlogFormData>({
     title: '',
     jobType: '',
@@ -32,23 +33,42 @@ export default function MobileBlogs() {
     photos: []
   });
 
-  const [isGenerating, setIsGenerating] = useState(false);
+  // Fetch user data
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/me'],
+    retry: false,
+  });
 
   // Fetch job types
   const { data: jobTypes } = useQuery({
     queryKey: ['/api/job-types'],
-    retry: false,
+    enabled: !!user,
   });
 
+  // Create blog mutation
   const createBlogMutation = useMutation({
     mutationFn: async (blogData: BlogFormData) => {
-      return await apiRequest('POST', '/api/blog-posts', blogData);
+      const formData = new FormData();
+      formData.append('title', blogData.title);
+      formData.append('jobTypeId', blogData.jobType);
+      formData.append('location', blogData.location);
+      formData.append('description', blogData.content);
+      formData.append('tags', blogData.tags);
+      
+      // Add photos if any
+      blogData.photos.forEach((photo, index) => {
+        formData.append(`photos[${index}]`, photo);
+      });
+
+      return apiRequest('POST', '/api/blogs', formData);
     },
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Blog post created successfully!",
       });
+      
+      // Reset form
       setBlogForm({
         title: '',
         jobType: '',
@@ -57,7 +77,9 @@ export default function MobileBlogs() {
         tags: '',
         photos: []
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/blog-posts'] });
+      
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ['/api/blogs'] });
     },
     onError: (error: Error) => {
       toast({
@@ -68,75 +90,79 @@ export default function MobileBlogs() {
     },
   });
 
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      // Handle photo upload logic here
-      const newPhotos = Array.from(files).map(file => URL.createObjectURL(file));
-      setBlogForm({ ...blogForm, photos: [...blogForm.photos, ...newPhotos] });
-    }
-  };
+  // Generate AI content
+  const generateAIMutation = useMutation({
+    mutationFn: async () => {
+      const prompt = `Create a professional blog post about ${blogForm.jobType} work performed at ${blogForm.location}. Include technical details, benefits to the customer, and professional insights. Make it engaging and informative.`;
+      
+      const response = await apiRequest('POST', '/api/ai/generate-blog', {
+        prompt,
+        jobType: blogForm.jobType,
+        location: blogForm.location
+      });
+      
+      return response;
+    },
+    onSuccess: (data: any) => {
+      if (data.title && data.content) {
+        setBlogForm(prev => ({
+          ...prev,
+          title: data.title,
+          content: data.content,
+          tags: data.tags || prev.tags
+        }));
+        
+        toast({
+          title: "AI Content Generated",
+          description: "Blog content has been generated successfully!",
+        });
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "AI Generation Failed",
+        description: error.message || "Failed to generate AI content",
+        variant: "destructive",
+      });
+    },
+  });
 
+  // Get current location
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
+          
           try {
+            // Use reverse geocoding to get address
             const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+              `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=YOUR_API_KEY`
             );
-            const data = await response.json();
-            const address = data.display_name || `${latitude}, ${longitude}`;
-            setBlogForm({ ...blogForm, location: address });
+            
+            if (response.ok) {
+              const data = await response.json();
+              if (data.results && data.results.length > 0) {
+                const address = data.results[0].formatted;
+                setBlogForm(prev => ({ ...prev, location: address }));
+              }
+            } else {
+              // Fallback to coordinates
+              setBlogForm(prev => ({ ...prev, location: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}` }));
+            }
           } catch (error) {
-            setBlogForm({ ...blogForm, location: `${latitude}, ${longitude}` });
+            // Fallback to coordinates
+            setBlogForm(prev => ({ ...prev, location: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}` }));
           }
         },
         (error) => {
-          console.error('Location error:', error);
+          toast({
+            title: "Location Error",
+            description: "Unable to get current location. Please enter manually.",
+            variant: "destructive",
+          });
         }
       );
-    }
-  };
-
-  const generateAIContent = async () => {
-    if (!blogForm.jobType) {
-      toast({
-        title: "Missing Information",
-        description: "Please select a job type first",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      const response = await apiRequest('POST', '/api/ai/generate-blog-content', {
-        jobType: blogForm.jobType,
-        location: blogForm.location,
-        existingTitle: blogForm.title
-      });
-
-      setBlogForm({
-        ...blogForm,
-        title: response.title || blogForm.title,
-        content: response.content || blogForm.content,
-        tags: response.tags || blogForm.tags
-      });
-
-      toast({
-        title: "Success",
-        description: "AI content generated successfully!",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to generate AI content",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGenerating(false);
     }
   };
 
@@ -158,10 +184,11 @@ export default function MobileBlogs() {
       {/* Header */}
       <header className="bg-white border-b px-4 py-3">
         <div className="flex items-center">
-          <Link href="/technician-mobile-simple">
-            <Button variant="ghost" size="sm" className="mr-3">
+          <Link href="/field-mobile">
+            <a className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mr-4">
               <ArrowLeft className="w-4 h-4" />
-            </Button>
+              <span className="text-sm font-medium">Back</span>
+            </a>
           </Link>
           <h1 className="text-lg font-semibold">Create Blog Post</h1>
         </div>
@@ -178,15 +205,21 @@ export default function MobileBlogs() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Job Type Selection */}
               <div>
-                <label className="text-sm font-medium">Job Type *</label>
-                <Select value={blogForm.jobType} onValueChange={(value) => setBlogForm({...blogForm, jobType: value})}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Job Type *
+                </label>
+                <Select
+                  value={blogForm.jobType}
+                  onValueChange={(value) => setBlogForm(prev => ({ ...prev, jobType: value }))}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select job type" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.isArray(jobTypes) && jobTypes.map((type: any) => (
-                      <SelectItem key={type.id} value={type.name}>
+                      <SelectItem key={type.id} value={type.id}>
                         {type.name}
                       </SelectItem>
                     ))}
@@ -194,97 +227,87 @@ export default function MobileBlogs() {
                 </Select>
               </div>
 
-              <div className="space-y-2 bg-blue-50 p-3 rounded-lg border-2 border-blue-200">
-                <label className="text-sm font-medium text-blue-700">Service Location</label>
+              {/* Location */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Location *
+                </label>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Enter location or use GPS"
                     value={blogForm.location}
-                    onChange={(e) => setBlogForm({...blogForm, location: e.target.value})}
-                    className="flex-1 border-blue-300"
+                    onChange={(e) => setBlogForm(prev => ({ ...prev, location: e.target.value }))}
+                    className="flex-1"
                   />
-                  <Button 
+                  <Button
                     type="button"
-                    onClick={getCurrentLocation} 
-                    variant="outline" 
+                    variant="outline"
                     size="sm"
-                    className="px-3 border-blue-300 text-blue-600 hover:bg-blue-100"
+                    onClick={getCurrentLocation}
+                    className="px-3"
                   >
                     <MapPin className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
-              <Input
-                placeholder="Blog post title *"
-                value={blogForm.title}
-                onChange={(e) => setBlogForm({...blogForm, title: e.target.value})}
-                required
-              />
-
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium">Content *</label>
-                  <Button
-                    type="button"
-                    onClick={generateAIContent}
-                    disabled={isGenerating}
-                    variant="outline"
-                    size="sm"
-                    className="text-purple-600 border-purple-300 hover:bg-purple-50"
-                  >
-                    <Sparkles className="w-4 h-4 mr-1" />
-                    {isGenerating ? 'Generating...' : 'AI Generate'}
-                  </Button>
-                </div>
-                <Textarea
-                  placeholder="Write your blog content or use AI generation..."
-                  value={blogForm.content}
-                  onChange={(e) => setBlogForm({...blogForm, content: e.target.value})}
-                  rows={6}
-                  required
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Blog Title *
+                </label>
+                <Input
+                  placeholder="Enter blog title"
+                  value={blogForm.title}
+                  onChange={(e) => setBlogForm(prev => ({ ...prev, title: e.target.value }))}
                 />
               </div>
 
-              <Input
-                placeholder="Tags (comma separated)"
-                value={blogForm.tags}
-                onChange={(e) => setBlogForm({...blogForm, tags: e.target.value})}
-              />
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Photos</label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                    id="photo-upload"
-                  />
-                  <label htmlFor="photo-upload">
-                    <Button type="button" variant="outline" className="cursor-pointer" asChild>
-                      <span>
-                        <Camera className="w-4 h-4 mr-2" />
-                        Add Photos
-                      </span>
-                    </Button>
-                  </label>
-                  {blogForm.photos.length > 0 && (
-                    <span className="text-sm text-gray-600">
-                      {blogForm.photos.length} photo(s) selected
-                    </span>
-                  )}
-                </div>
+              {/* Content */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Content *
+                </label>
+                <Textarea
+                  placeholder="Write your blog content or use AI generation"
+                  value={blogForm.content}
+                  onChange={(e) => setBlogForm(prev => ({ ...prev, content: e.target.value }))}
+                  rows={8}
+                />
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={createBlogMutation.isPending}
+              {/* Tags */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tags
+                </label>
+                <Input
+                  placeholder="Enter tags separated by commas"
+                  value={blogForm.tags}
+                  onChange={(e) => setBlogForm(prev => ({ ...prev, tags: e.target.value }))}
+                />
+              </div>
+
+              {/* AI Generation Button */}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => generateAIMutation.mutate()}
+                  disabled={generateAIMutation.isPending || !blogForm.jobType || !blogForm.location}
+                  className="flex-1"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  {generateAIMutation.isPending ? 'Generating...' : 'Generate AI Content'}
+                </Button>
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                disabled={createBlogMutation.isPending || !blogForm.title || !blogForm.content}
+                className="w-full"
               >
-                <Upload className="w-4 h-4 mr-2" />
                 {createBlogMutation.isPending ? 'Creating...' : 'Create Blog Post'}
               </Button>
             </form>

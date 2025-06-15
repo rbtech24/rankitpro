@@ -653,26 +653,32 @@ export default function FieldMobile() {
           </SelectContent>
         </Select>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700">Recording Type</label>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <Button
               type="button"
               variant={recordingType === 'audio' ? 'default' : 'outline'}
               onClick={() => setRecordingType('audio')}
-              size="sm"
+              className={`p-4 h-auto flex-col ${
+                recordingType === 'audio' ? 'bg-blue-600 text-white' : 'border-2 border-gray-200'
+              }`}
             >
-              <Mic className="w-4 h-4 mr-1" />
-              Audio
+              <Mic className="w-6 h-6 mb-2" />
+              <span className="text-sm font-medium">Audio Only</span>
+              <span className="text-xs opacity-75">Voice testimonial</span>
             </Button>
             <Button
               type="button"
               variant={recordingType === 'video' ? 'default' : 'outline'}
               onClick={() => setRecordingType('video')}
-              size="sm"
+              className={`p-4 h-auto flex-col ${
+                recordingType === 'video' ? 'bg-purple-600 text-white' : 'border-2 border-gray-200'
+              }`}
             >
-              <Video className="w-4 h-4 mr-1" />
-              Video
+              <Video className="w-6 h-6 mb-2" />
+              <span className="text-sm font-medium">Video</span>
+              <span className="text-xs opacity-75">Video testimonial</span>
             </Button>
           </div>
         </div>
