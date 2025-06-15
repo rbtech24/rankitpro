@@ -737,6 +737,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Frontend compatibility endpoint
+  app.get("/api/auth/me", async (req, res) => {
+    if (req.session?.userId) {
+      try {
+        await storage.ensureInitialized();
+        const user = await storage.getUser(req.session.userId);
+        if (user) {
+          const { password, ...userWithoutPassword } = user;
+          
+          // Get company data if user has companyId
+          let company = null;
+          if (user.companyId) {
+            try {
+              company = await storage.getCompany(user.companyId);
+            } catch (error) {
+              console.warn("Failed to fetch company data:", error);
+            }
+          }
+          
+          res.json({ user: userWithoutPassword, company });
+        } else {
+          res.status(401).json({ message: "User not found" });
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Server error" });
+      }
+    } else {
+      res.status(401).json({ message: "Not authenticated" });
+    }
+  });
+
   // Password reset request
   app.post("/api/auth/forgot-password", async (req, res) => {
     try {
