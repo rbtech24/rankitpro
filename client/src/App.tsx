@@ -32,6 +32,7 @@ import TechApp from "@/pages/tech-app";
 import AISettings from "@/pages/ai-settings";
 import Home from "@/pages/home";
 import TechnicianMobileField from "@/pages/technician-mobile-field";
+import MobileSimple from "@/pages/mobile-simple";
 import MobileTechApp from "@/pages/mobile-tech-app";
 import Onboarding from "@/pages/onboarding";
 import ReviewRequest from "@/pages/review-request";
@@ -1190,10 +1191,13 @@ function Router() {
         <PrivateRoute component={TechApp} path="/tech-app" />
       </Route>
       <Route path="/tech-mobile">
-        <PrivateRoute component={TechnicianMobile} path="/tech-mobile" role="technician" />
+        <PrivateRoute component={TechnicianMobileField} path="/tech-mobile" role="technician" />
+      </Route>
+      <Route path="/mobile">
+        <PrivateRoute component={TechnicianMobileField} path="/mobile" role="technician" />
       </Route>
       <Route path="/technician">
-        <PrivateRoute component={TechnicianMobile} path="/technician" role="technician" />
+        <PrivateRoute component={TechnicianMobileField} path="/technician" role="technician" />
       </Route>
       
       {/* Fallback to 404 */}
