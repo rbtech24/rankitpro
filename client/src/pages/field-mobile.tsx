@@ -19,7 +19,11 @@ import {
   Square,
   Play,
   Send,
-  Star
+  Star,
+  Sparkles,
+  Building,
+  User,
+  Loader2
 } from 'lucide-react';
 import { Link } from 'wouter';
 
@@ -139,7 +143,7 @@ export default function FieldMobile() {
             });
             
             setCheckInForm(prev => ({ ...prev, address: fallbackAddress }));
-            setWrittenReviewForm(prev => ({ ...prev, address: fallbackAddress }));
+            setReviewForm(prev => ({ ...prev, address: fallbackAddress }));
             setAudioReviewForm(prev => ({ ...prev, address: fallbackAddress }));
           }
         },
@@ -423,29 +427,44 @@ export default function FieldMobile() {
           </div>
         </div>
 
-        {/* Customer Information */}
-        <div className="space-y-3">
-          <h3 className="font-medium text-gray-900">Customer Information</h3>
-          
-          <Input
-            placeholder="Customer Name"
-            value={checkInForm.customerName}
-            onChange={(e) => setCheckInForm(prev => ({ ...prev, customerName: e.target.value }))}
-          />
-          
-          <Input
-            placeholder="Customer Email"
-            type="email"
-            value={checkInForm.customerEmail}
-            onChange={(e) => setCheckInForm(prev => ({ ...prev, customerEmail: e.target.value }))}
-          />
-          
-          <Input
-            placeholder="Customer Phone"
-            type="tel"
-            value={checkInForm.customerPhone}
-            onChange={(e) => setCheckInForm(prev => ({ ...prev, customerPhone: e.target.value }))}
-          />
+        {/* AI Content Generation Button */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+          <Button
+            type="button"
+            onClick={() => {
+              if (checkInForm.jobTypeId && checkInForm.workPerformed && checkInForm.materialsUsed) {
+                generateCheckInContent.mutate({
+                  jobTypeId: checkInForm.jobTypeId,
+                  workPerformed: checkInForm.workPerformed,
+                  materialsUsed: checkInForm.materialsUsed,
+                  address: checkInForm.address
+                });
+              } else {
+                toast({
+                  title: "Missing Information",
+                  description: "Please fill in job type, work performed, and materials used first.",
+                  variant: "destructive",
+                });
+              }
+            }}
+            disabled={generateCheckInContent.isPending}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+          >
+            {generateCheckInContent.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Generating AI Summary...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Generate AI Check-in Summary
+              </>
+            )}
+          </Button>
+          <p className="text-xs text-blue-600 mt-2 text-center">
+            AI will create a professional summary based on your work details
+          </p>
         </div>
 
         {/* Job Information */}
@@ -828,6 +847,26 @@ export default function FieldMobile() {
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="container mx-auto p-4 max-w-md">
         <div className="mb-6">
+          {/* Company and Technician Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-lg mb-4 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Building className="w-6 h-6" />
+                <div>
+                  <h2 className="font-semibold text-lg">
+                    {user?.company?.name || 'Loading...'}
+                  </h2>
+                  <div className="flex items-center gap-1 text-blue-100">
+                    <User className="w-4 h-4" />
+                    <span className="text-sm">
+                      {user?.firstName} {user?.lastName}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <h1 className="text-2xl font-bold text-center mb-4">Field Technician App</h1>
           
           {/* Tab Navigation */}
