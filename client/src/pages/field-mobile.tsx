@@ -91,9 +91,16 @@ export default function FieldMobile() {
     enabled: !!user,
   });
 
-  // Get current location with detailed address
+  // Get current location with detailed address  
   useEffect(() => {
+    // Check if we're in a secure context (required for GPS)
+    if (!window.isSecureContext) {
+      console.warn('⚠️ Not in secure context - GPS access may be limited');
+    }
+    
     if (navigator.geolocation) {
+      console.log('🔧 Starting location detection with high accuracy GPS settings...');
+      
       // Force high accuracy GPS, no cached locations
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -105,9 +112,48 @@ export default function FieldMobile() {
             longitude, 
             accuracy: accuracy + 'm',
             timestamp: new Date(position.timestamp).toISOString(),
-            altitudeAccuracy: altitudeAccuracy + 'm' || 'N/A'
+            altitudeAccuracy: altitudeAccuracy + 'm' || 'N/A',
+            source: 'Device GPS Hardware'
           });
-          setLocationDebug(`REAL GPS: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${Math.round(accuracy)}m) at ${new Date(position.timestamp).toLocaleTimeString()}`);
+          
+          // Determine location source based on accuracy
+          let sourceType, isReliable;
+          if (accuracy < 10) {
+            sourceType = 'GPS Satellite (Excellent)';
+            isReliable = true;
+          } else if (accuracy < 50) {
+            sourceType = 'GPS Satellite (Good)';
+            isReliable = true;
+          } else if (accuracy < 100) {
+            sourceType = 'Assisted GPS/WiFi';
+            isReliable = true;
+          } else if (accuracy < 1000) {
+            sourceType = 'Cell Tower';
+            isReliable = false;
+          } else {
+            sourceType = 'IP Geolocation (UNRELIABLE)';
+            isReliable = false;
+          }
+          
+          setLocationDebug(`${sourceType}: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${Math.round(accuracy)}m) ${new Date(position.timestamp).toLocaleTimeString()}`);
+          
+          // Warn about unreliable location and offer manual override
+          if (!isReliable) {
+            console.warn('⚠️ Location accuracy is poor - may be IP-based instead of GPS');
+            toast({
+              title: "Location Quality Warning",
+              description: "Location may not be accurate. You can manually edit the address below.",
+              variant: "destructive",
+            });
+            
+            // Auto-focus the address field for manual correction
+            setTimeout(() => {
+              const addressField = document.querySelector('input[placeholder*="address"]');
+              if (addressField) {
+                addressField.focus();
+              }
+            }, 2000);
+          }
           
           try {
             // Use OpenStreetMap Nominatim for reverse geocoding with better accuracy
