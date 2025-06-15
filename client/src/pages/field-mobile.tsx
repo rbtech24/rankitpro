@@ -91,20 +91,52 @@ export default function FieldMobile() {
     enabled: !!user,
   });
 
-  // Get current location with detailed address  
+  // Get current location with permission checking
   useEffect(() => {
-    // Check if we're in a secure context (required for GPS)
-    if (!window.isSecureContext) {
-      console.warn('⚠️ Not in secure context - GPS access may be limited');
-    }
-    
-    if (navigator.geolocation) {
-      console.log('🔧 Starting location detection with high accuracy GPS settings...');
+    const requestLocation = async () => {
+      // Check if we're in a secure context (required for GPS)
+      if (!window.isSecureContext) {
+        console.warn('⚠️ Not in secure context - GPS access may be limited');
+      }
       
-      // Force high accuracy GPS, no cached locations
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude, accuracy, altitudeAccuracy } = position.coords;
+      // Check permission first if API is available
+      if ('permissions' in navigator) {
+        try {
+          const permission = await navigator.permissions.query({ name: 'geolocation' });
+          console.log('📍 Location permission status:', permission.state);
+          
+          if (permission.state === 'denied') {
+            toast({
+              title: "Location Access Required",
+              description: "Please click the location icon in your browser's address bar to enable GPS access, then refresh this page.",
+              variant: "default",
+            });
+            
+            const fallbackLocation = {
+              streetName: 'Location access blocked',
+              city: '',
+              state: '',
+              zipCode: '',
+              fullAddress: 'Please enter your work location manually'
+            };
+            setCurrentLocation(fallbackLocation);
+            setCheckInForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
+            setReviewForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
+            setAudioReviewForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
+            return;
+          }
+        } catch (error) {
+          console.log('Permissions API not supported, proceeding with location request');
+        }
+      }
+      
+      if (navigator.geolocation) {
+        console.log('🔧 Starting location detection with high accuracy GPS settings...');
+        
+        // Force high accuracy GPS, no cached locations
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude, accuracy, altitudeAccuracy } = position.coords;
           
           // Debug: Log detailed GPS info to verify real location detection
           console.log('🗺️ GPS Location Detected:', { 
@@ -247,7 +279,23 @@ export default function FieldMobile() {
           maximumAge: 0                // No cached locations - get fresh GPS reading
         }
       );
-    }
+      } else {
+        // Fallback when geolocation is not available
+        const fallbackLocation = {
+          streetName: 'Geolocation not available',
+          city: '',
+          state: '',
+          zipCode: '',
+          fullAddress: 'Please enter your work location manually'
+        };
+        setCurrentLocation(fallbackLocation);
+        setCheckInForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
+        setReviewForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
+        setAudioReviewForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
+      }
+    };
+    
+    requestLocation();
   }, [toast]);
 
   // AI content generation for check-ins
