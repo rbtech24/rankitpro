@@ -714,6 +714,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "working", timestamp: Date.now() });
   });
 
+  // AI Content Generation for Check-ins
+  app.post('/api/ai/generate-content', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { prompt, type, context } = req.body;
+      
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ error: 'AI service not configured' });
+      }
+
+      let aiPrompt = prompt;
+      if (type === 'checkin' && context) {
+        aiPrompt = `Create a professional check-in summary for a ${context.jobType} job at ${context.location}.
+        
+Work performed: ${context.workPerformed}
+Materials used: ${context.materialsUsed}
+
+Generate a concise, professional summary (2-3 sentences) that could be shared with the customer and used for business documentation. Focus on the value provided and technical details.`;
+      }
+
+      const content = await generateSummary(aiPrompt);
+      
+      res.json({ content });
+    } catch (error) {
+      console.error('AI content generation error:', error);
+      res.status(500).json({ error: 'Failed to generate AI content' });
+    }
+  });
+
   // Removed duplicate authentication endpoint - using main server endpoint instead
 
   // User verification endpoint

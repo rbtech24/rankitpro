@@ -598,7 +598,7 @@ export default function FieldMobile() {
 
         <Button 
           onClick={() => checkInMutation.mutate(checkInForm)}
-          disabled={checkInMutation.isPending || !checkInForm.customerName || !checkInForm.jobTypeId}
+          disabled={checkInMutation.isPending || !checkInForm.jobTypeId || !checkInForm.workPerformed}
           className="w-full"
         >
           {checkInMutation.isPending ? 'Submitting...' : 'Submit Check-In'}
@@ -854,12 +854,12 @@ export default function FieldMobile() {
                 <Building className="w-6 h-6" />
                 <div>
                   <h2 className="font-semibold text-lg">
-                    {user?.company?.name || 'Loading...'}
+                    {(user as any)?.company?.name || 'Loading...'}
                   </h2>
                   <div className="flex items-center gap-1 text-blue-100">
                     <User className="w-4 h-4" />
                     <span className="text-sm">
-                      {user?.firstName} {user?.lastName}
+                      {(user as any)?.firstName} {(user as any)?.lastName}
                     </span>
                   </div>
                 </div>
