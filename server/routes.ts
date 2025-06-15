@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./storage-simple";
 import { db } from "./db";
 
 // Extend session interface to include userId
@@ -448,6 +448,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Verify the password immediately
       const updatedUser = await storage.getUserByEmail(adminUser.email);
+      if (!updatedUser) {
+        throw new Error("Failed to retrieve updated user");
+      }
       const testVerification = await bcrypt.compare(newPassword, updatedUser.password);
       console.log("EMERGENCY RESET: Immediate verification test:", testVerification);
       
