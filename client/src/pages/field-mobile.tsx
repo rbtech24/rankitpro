@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { getCurrentLocation, checkLocationPermission, getFallbackLocation, formatLocationDisplay } from '@/lib/locationService';
+import type { LocationData } from '@/lib/locationService';
 import {
   Camera,
   MapPin,
@@ -40,14 +42,9 @@ export default function FieldMobile() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Location state
-  const [currentLocation, setCurrentLocation] = useState({
-    streetName: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    fullAddress: ''
-  });
-  const [locationDebug, setLocationDebug] = useState<string>('');
+  const [currentLocation, setCurrentLocation] = useState<LocationData | null>(null);
+  const [locationDebug, setLocationDebug] = useState<string>('Location not detected yet');
+  const [locationLoading, setLocationLoading] = useState(false);
 
   // Form states (removed customer info from check-in)
   const [checkInForm, setCheckInForm] = useState({
@@ -91,211 +88,68 @@ export default function FieldMobile() {
     enabled: !!user,
   });
 
-  // Get current location with permission checking
+  // Initialize GPS location detection
   useEffect(() => {
-    const requestLocation = async () => {
-      // Check if we're in a secure context (required for GPS)
-      if (!window.isSecureContext) {
-        console.warn('⚠️ Not in secure context - GPS access may be limited');
-      }
+    const initializeLocation = async () => {
+      setLocationLoading(true);
       
-      // Check permission first if API is available
-      if ('permissions' in navigator) {
-        try {
-          const permission = await navigator.permissions.query({ name: 'geolocation' });
-          console.log('📍 Location permission status:', permission.state);
-          
-          if (permission.state === 'denied') {
-            toast({
-              title: "Location Access Required",
-              description: "Please click the location icon in your browser's address bar to enable GPS access, then refresh this page.",
-              variant: "default",
-            });
-            
-            const fallbackLocation = {
-              streetName: 'Location access blocked',
-              city: '',
-              state: '',
-              zipCode: '',
-              fullAddress: 'Please enter your work location manually'
-            };
-            setCurrentLocation(fallbackLocation);
-            setCheckInForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
-            setReviewForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
-            setAudioReviewForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
-            return;
-          }
-        } catch (error) {
-          console.log('Permissions API not supported, proceeding with location request');
-        }
-      }
-      
-      if (navigator.geolocation) {
-        console.log('🔧 Starting location detection with high accuracy GPS settings...');
+      try {
+        // Check location permissions first
+        const permission = await checkLocationPermission();
         
-        // Force high accuracy GPS, no cached locations
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const { latitude, longitude, accuracy, altitudeAccuracy } = position.coords;
-          
-          // Debug: Log detailed GPS info to verify real location detection
-          console.log('🗺️ GPS Location Detected:', { 
-            latitude, 
-            longitude, 
-            accuracy: accuracy + 'm',
-            timestamp: new Date(position.timestamp).toISOString(),
-            altitudeAccuracy: altitudeAccuracy + 'm' || 'N/A',
-            source: 'Device GPS Hardware'
+        if (permission.denied) {
+          toast({
+            title: "Location Access Required",
+            description: "Please click the location icon in your browser's address bar to enable GPS access, then refresh this page.",
+            variant: "default",
           });
           
-          // Determine location source based on accuracy
-          let sourceType, isReliable;
-          if (accuracy < 10) {
-            sourceType = 'GPS Satellite (Excellent)';
-            isReliable = true;
-          } else if (accuracy < 50) {
-            sourceType = 'GPS Satellite (Good)';
-            isReliable = true;
-          } else if (accuracy < 100) {
-            sourceType = 'Assisted GPS/WiFi';
-            isReliable = true;
-          } else if (accuracy < 1000) {
-            sourceType = 'Cell Tower';
-            isReliable = false;
-          } else {
-            sourceType = 'IP Geolocation (UNRELIABLE)';
-            isReliable = false;
-          }
-          
-          setLocationDebug(`${sourceType}: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${Math.round(accuracy)}m) ${new Date(position.timestamp).toLocaleTimeString()}`);
-          
-          // Warn about unreliable location and offer manual override
-          if (!isReliable) {
-            console.warn('⚠️ Location accuracy is poor - may be IP-based instead of GPS');
-            toast({
-              title: "Location Quality Warning",
-              description: "Location may not be accurate. You can manually edit the address below.",
-              variant: "destructive",
-            });
-            
-            // Auto-focus the address field for manual correction
-            setTimeout(() => {
-              const addressField = document.querySelector('input[placeholder*="address"]') as HTMLInputElement;
-              if (addressField) {
-                addressField.focus();
-              }
-            }, 2000);
-          }
-          
-          try {
-            // Use OpenStreetMap Nominatim for reverse geocoding with better accuracy
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&extratags=1`
-            );
-            
-            if (response.ok) {
-              const data = await response.json();
-              const address = data.address || {};
-              
-              // Extract detailed address components (no street numbers)
-              const streetName = address.road || '';
-              const city = address.city || address.town || address.village || '';
-              const state = address.state || '';
-              const zipCode = address.postcode || '';
-              
-              const fullAddress = `${streetName}, ${city}, ${state} ${zipCode}`.replace(/,\s*,/g, ',').replace(/^\s*,\s*/, '');
-              
-              setCurrentLocation({
-                streetName: streetName || 'Street not found',
-                city: city || 'City not found',
-                state: state || 'State not found',
-                zipCode: zipCode || 'Zip not found',
-                fullAddress
-              });
-              
-              // Auto-fill address in all forms
-              setCheckInForm(prev => ({ ...prev, address: fullAddress }));
-              setReviewForm(prev => ({ ...prev, address: fullAddress }));
-              setAudioReviewForm(prev => ({ ...prev, address: fullAddress }));
-            }
-          } catch (error) {
-            console.error('Error getting location details:', error);
-            // Fallback to basic coordinates
-            const fallbackAddress = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-            setCurrentLocation({
-              streetName: fallbackAddress,
-              city: '',
-              state: '',
-              zipCode: '',
-              fullAddress: fallbackAddress
-            });
-            
-            setCheckInForm(prev => ({ ...prev, address: fallbackAddress }));
-            setReviewForm(prev => ({ ...prev, address: fallbackAddress }));
-            setAudioReviewForm(prev => ({ ...prev, address: fallbackAddress }));
-          }
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          console.log('Location error details:', {
-            code: error.code,
-            message: error.message,
-            PERMISSION_DENIED: error.PERMISSION_DENIED,
-            POSITION_UNAVAILABLE: error.POSITION_UNAVAILABLE,
-            TIMEOUT: error.TIMEOUT
-          });
-          
-          // Set fallback location that user can edit
-          const fallbackLocation = {
-            streetName: 'Location not detected',
-            city: '',
-            state: '',
-            zipCode: '',
-            fullAddress: 'Please enter your work location manually'
-          };
-          
-          setCurrentLocation(fallbackLocation);
-          setCheckInForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
-          setReviewForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
-          setAudioReviewForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
-          
-          if (error.code === 1) {
-            toast({
-              title: "Location Permission Required",
-              description: "Please allow location access for automatic detection, or enter address manually below.",
-              variant: "default",
-            });
-          } else {
-            toast({
-              title: "Location Access",
-              description: "Unable to detect location automatically. Please enter your work address manually.",
-              variant: "default",
-            });
-          }
-        },
-        {
-          enableHighAccuracy: true,    // Force GPS instead of network/wifi location
-          timeout: 15000,              // 15 second timeout
-          maximumAge: 0                // No cached locations - get fresh GPS reading
+          const fallback = getFallbackLocation();
+          setCurrentLocation(fallback);
+          setCheckInForm(prev => ({ ...prev, address: fallback.fullAddress }));
+          setLocationDebug('Location access denied by user');
+          return;
         }
-      );
-      } else {
-        // Fallback when geolocation is not available
-        const fallbackLocation = {
-          streetName: 'Geolocation not available',
-          city: '',
-          state: '',
-          zipCode: '',
-          fullAddress: 'Please enter your work location manually'
-        };
-        setCurrentLocation(fallbackLocation);
-        setCheckInForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
-        setReviewForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
-        setAudioReviewForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
+
+        // Get high-accuracy GPS location
+        const location = await getCurrentLocation();
+        setCurrentLocation(location);
+        
+        // Update location debug info
+        setLocationDebug(`${location.source}: ±${Math.round(location.accuracy)}m accuracy`);
+        
+        // Auto-fill address in all forms with formatted display
+        const displayAddress = formatLocationDisplay(location);
+        setCheckInForm(prev => ({ ...prev, address: displayAddress }));
+        
+        // Show warning for poor accuracy
+        if (!location.isReliable) {
+          toast({
+            title: "Location Quality Warning", 
+            description: "Location may not be accurate. You can manually edit the address below.",
+            variant: "destructive",
+          });
+        }
+        
+      } catch (error) {
+        console.error('Location detection failed:', error);
+        
+        const fallback = getFallbackLocation();
+        setCurrentLocation(fallback);
+        setCheckInForm(prev => ({ ...prev, address: fallback.fullAddress }));
+        setLocationDebug(error.message);
+        
+        toast({
+          title: "Location Detection",
+          description: error.message,
+          variant: "default",
+        });
+      } finally {
+        setLocationLoading(false);
       }
     };
-    
-    requestLocation();
+
+    initializeLocation();
   }, [toast]);
 
   // AI content generation for check-ins
