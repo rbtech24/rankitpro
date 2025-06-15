@@ -35,6 +35,7 @@ import TechnicianMobileField from "@/pages/technician-mobile-field";
 import MobileSimple from "@/pages/mobile-simple";
 import MobileTechApp from "@/pages/mobile-tech-app";
 import FieldMobile from "@/pages/field-mobile";
+import MobileBlogs from "@/pages/mobile-blogs";
 import Onboarding from "@/pages/onboarding";
 import ReviewRequest from "@/pages/review-request";
 import Review from "@/pages/review";
@@ -201,7 +202,7 @@ function Router() {
     <Switch>
       <Route path="/login">
         {auth?.user && !isLoggedOut ? 
-          (auth.user.role === "technician" ? <Redirect to="/mobile" /> : 
+          (auth.user.role === "technician" ? <Redirect to="/field-mobile" /> : 
            <Redirect to="/dashboard" />) 
           : <Login />}
       </Route>
@@ -255,7 +256,13 @@ function Router() {
       
       {/* Mobile Tech App - Progressive Web App */}
       <Route path="/mobile">
-        <PrivateRoute component={TechnicianMobileField} path="/mobile" role="technician" />
+        <PrivateRoute component={FieldMobile} path="/mobile" role="technician" />
+      </Route>
+      <Route path="/field-mobile">
+        <PrivateRoute component={FieldMobile} path="/field-mobile" role="technician" />
+      </Route>
+      <Route path="/mobile-blogs">
+        <PrivateRoute component={MobileBlogs} path="/mobile-blogs" role="technician" />
       </Route>
       
       {/* Downloadable Resources */}

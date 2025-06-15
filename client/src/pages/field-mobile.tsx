@@ -969,7 +969,7 @@ export default function FieldMobile() {
           <h1 className="text-2xl font-bold text-center mb-4">Field Technician App</h1>
           
           {/* Tab Navigation */}
-          <div className="grid grid-cols-4 gap-1 p-1 bg-gray-200 rounded-lg">
+          <div className="grid grid-cols-3 gap-1 p-1 bg-gray-200 rounded-lg">
             <button
               onClick={() => setActiveTab('checkin')}
               className={`p-2 text-xs font-medium rounded transition-colors ${
@@ -977,14 +977,6 @@ export default function FieldMobile() {
               }`}
             >
               Check-In
-            </button>
-            <button
-              onClick={() => setActiveTab('blog')}
-              className={`p-2 text-xs font-medium rounded transition-colors ${
-                activeTab === 'blog' ? 'bg-white text-blue-600 shadow' : 'text-gray-600'
-              }`}
-            >
-              Blog Post
             </button>
             <button
               onClick={() => setActiveTab('written')}

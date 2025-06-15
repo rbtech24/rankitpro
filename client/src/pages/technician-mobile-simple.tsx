@@ -453,10 +453,48 @@ export default function TechnicianMobile() {
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Service Address *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="123 Main St, City, State" {...field} />
-                        </FormControl>
+                        <FormLabel className="text-blue-700 font-semibold">Service Address *</FormLabel>
+                        <div className="space-y-2 bg-blue-50 p-3 rounded-lg border-2 border-blue-200">
+                          <div className="flex gap-2">
+                            <FormControl>
+                              <Input 
+                                placeholder="Enter street, city, state, zip code" 
+                                {...field} 
+                                className="flex-1 border-blue-300"
+                              />
+                            </FormControl>
+                            <Button 
+                              type="button"
+                              onClick={() => {
+                                if (navigator.geolocation) {
+                                  navigator.geolocation.getCurrentPosition(
+                                    async (position) => {
+                                      const { latitude, longitude } = position.coords;
+                                      try {
+                                        const response = await fetch(
+                                          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+                                        );
+                                        const data = await response.json();
+                                        const address = data.display_name || `${latitude}, ${longitude}`;
+                                        field.onChange(address);
+                                      } catch (error) {
+                                        field.onChange(`${latitude}, ${longitude}`);
+                                      }
+                                    },
+                                    (error) => {
+                                      console.error('Location error:', error);
+                                    }
+                                  );
+                                }
+                              }}
+                              variant="outline" 
+                              size="sm"
+                              className="px-3 border-blue-300 text-blue-600 hover:bg-blue-100"
+                            >
+                              <MapPin className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
