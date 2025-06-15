@@ -23,7 +23,7 @@ import {
 export default function MobileSimple() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState('checkin');
   const [currentLocation, setCurrentLocation] = useState<{latitude: number, longitude: number} | null>(null);
   const [currentAddress, setCurrentAddress] = useState<string>('');
   const [photos, setPhotos] = useState<string[]>([]);
