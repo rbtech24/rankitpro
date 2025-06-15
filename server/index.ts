@@ -141,57 +141,6 @@ async function createSuperAdminIfNotExists() {
   
   const server = await registerRoutes(app);
 
-  // Create HTTP server with authentication interceptor
-  const httpServer = createServer((req: IncomingMessage, res: ServerResponse) => {
-    // Handle authentication request before Express middleware
-    if (req.method === 'POST' && req.url === '/api/login') {
-      let body = '';
-      req.on('data', chunk => {
-        body += chunk.toString();
-      });
-      req.on('end', () => {
-        try {
-          const { email, password } = JSON.parse(body);
-          
-          res.setHeader('Content-Type', 'application/json');
-          res.setHeader('Access-Control-Allow-Origin', '*');
-          res.setHeader('Cache-Control', 'no-cache');
-          
-          if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-            res.statusCode = 200;
-            res.end(JSON.stringify({
-              success: true,
-              user: {
-                id: 1,
-                email: "bill@mrsprinklerrepair.com",
-                role: "super_admin",
-                username: "admin",
-                companyId: 1
-              },
-              message: "Login successful"
-            }));
-          } else {
-            res.statusCode = 401;
-            res.end(JSON.stringify({ 
-              success: false, 
-              message: "Invalid credentials" 
-            }));
-          }
-        } catch (error) {
-          res.statusCode = 400;
-          res.end(JSON.stringify({ 
-            success: false, 
-            message: "Invalid request body" 
-          }));
-        }
-      });
-      return;
-    }
-    
-    // Pass all other requests to Express app
-    app(req as any, res as any);
-  });
-
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes

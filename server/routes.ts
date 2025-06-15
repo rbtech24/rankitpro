@@ -656,13 +656,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         companyId = company.id;
       }
       
-      // Create user
+      // Create user with active status
       const user = await storage.createUser({
         email: data.email,
         username: data.username,
         password: hashedPassword,
         role: data.role,
         companyId,
+        active: true,
       });
       
       // Remove password from response
