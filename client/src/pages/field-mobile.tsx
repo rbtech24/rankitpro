@@ -44,11 +44,8 @@ export default function FieldMobile() {
     fullAddress: ''
   });
 
-  // Form states
+  // Form states (removed customer info from check-in)
   const [checkInForm, setCheckInForm] = useState({
-    customerName: '',
-    customerEmail: '',
-    customerPhone: '',
     jobTypeId: '',
     address: '',
     workPerformed: '',
@@ -89,7 +86,7 @@ export default function FieldMobile() {
     enabled: !!user,
   });
 
-  // Get current location
+  // Get current location with detailed address
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -97,42 +94,53 @@ export default function FieldMobile() {
           const { latitude, longitude } = position.coords;
           
           try {
-            // Use reverse geocoding to get address details
+            // Use OpenStreetMap Nominatim for reverse geocoding (free, no API key needed)
             const response = await fetch(
-              `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=YOUR_API_KEY`
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
             );
             
             if (response.ok) {
               const data = await response.json();
-              if (data.results && data.results.length > 0) {
-                const result = data.results[0];
-                const components = result.components;
-                
-                setCurrentLocation({
-                  streetName: `${components.house_number || ''} ${components.road || ''}`.trim(),
-                  city: components.city || components.town || components.village || '',
-                  state: components.state_code || components.state || '',
-                  zipCode: components.postcode || '',
-                  fullAddress: result.formatted
-                });
-                
-                // Auto-fill address in forms
-                setCheckInForm(prev => ({
-                  ...prev,
-                  address: result.formatted
-                }));
-              }
+              const address = data.address || {};
+              
+              // Extract detailed address components
+              const streetNumber = address.house_number || '';
+              const streetName = address.road || '';
+              const city = address.city || address.town || address.village || '';
+              const state = address.state || '';
+              const zipCode = address.postcode || '';
+              
+              const fullStreet = `${streetNumber} ${streetName}`.trim();
+              const fullAddress = `${fullStreet}, ${city}, ${state} ${zipCode}`.replace(/,\s*,/g, ',').replace(/^\s*,\s*/, '');
+              
+              setCurrentLocation({
+                streetName: fullStreet,
+                city,
+                state,
+                zipCode,
+                fullAddress
+              });
+              
+              // Auto-fill address in all forms
+              setCheckInForm(prev => ({ ...prev, address: fullAddress }));
+              setReviewForm(prev => ({ ...prev, address: fullAddress }));
+              setAudioReviewForm(prev => ({ ...prev, address: fullAddress }));
             }
           } catch (error) {
             console.error('Error getting location details:', error);
             // Fallback to basic coordinates
+            const fallbackAddress = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
             setCurrentLocation({
-              streetName: `Lat: ${latitude.toFixed(4)}`,
-              city: `Lng: ${longitude.toFixed(4)}`,
+              streetName: fallbackAddress,
+              city: '',
               state: '',
               zipCode: '',
-              fullAddress: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+              fullAddress: fallbackAddress
             });
+            
+            setCheckInForm(prev => ({ ...prev, address: fallbackAddress }));
+            setWrittenReviewForm(prev => ({ ...prev, address: fallbackAddress }));
+            setAudioReviewForm(prev => ({ ...prev, address: fallbackAddress }));
           }
         },
         (error) => {
@@ -147,21 +155,76 @@ export default function FieldMobile() {
     }
   }, [toast]);
 
-  // Check-in mutation
+  // AI content generation for check-ins
+  const generateCheckInContent = useMutation({
+    mutationFn: async (data: { jobTypeId: string; workPerformed: string; materialsUsed: string; address: string }) => {
+      const jobType = Array.isArray(jobTypes) ? jobTypes.find((jt: any) => jt.id === data.jobTypeId) : null;
+      const jobTypeName = jobType?.name || 'Service';
+      
+      const prompt = `Create a professional check-in summary for a ${jobTypeName} job at ${data.address}. 
+      Work performed: ${data.workPerformed}
+      Materials used: ${data.materialsUsed}
+      
+      Generate a concise, professional summary that could be shared with the customer and used for business documentation. Include technical details and benefits to the customer.`;
+      
+      return apiRequest('POST', '/api/ai/generate-content', {
+        prompt,
+        type: 'checkin',
+        context: {
+          jobType: jobTypeName,
+          location: data.address,
+          workPerformed: data.workPerformed,
+          materialsUsed: data.materialsUsed
+        }
+      });
+    },
+    onSuccess: (data: any) => {
+      if (data.content) {
+        setCheckInForm(prev => ({ ...prev, notes: data.content }));
+        toast({
+          title: "AI Content Generated",
+          description: "Check-in summary has been generated successfully!",
+        });
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "AI Generation Failed",
+        description: error.message || "Failed to generate AI content",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Check-in mutation (without customer info)
   const checkInMutation = useMutation({
     mutationFn: async (data: any) => {
       const formData = new FormData();
       
-      // Add all form fields
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === 'photos' || key === 'beforePhotos' || key === 'afterPhotos') {
-          (value as File[]).forEach((file, index) => {
-            formData.append(`${key}[${index}]`, file);
-          });
-        } else {
-          formData.append(key, String(value));
-        }
-      });
+      // Only include job-related fields, no customer info
+      formData.append('jobTypeId', data.jobTypeId);
+      formData.append('address', data.address);
+      formData.append('workPerformed', data.workPerformed);
+      formData.append('materialsUsed', data.materialsUsed);
+      formData.append('notes', data.notes);
+      formData.append('requestTextReview', data.requestTextReview.toString());
+      
+      // Add photos
+      if (data.photos) {
+        data.photos.forEach((photo: File, index: number) => {
+          formData.append(`photos[${index}]`, photo);
+        });
+      }
+      if (data.beforePhotos) {
+        data.beforePhotos.forEach((photo: File, index: number) => {
+          formData.append(`beforePhotos[${index}]`, photo);
+        });
+      }
+      if (data.afterPhotos) {
+        data.afterPhotos.forEach((photo: File, index: number) => {
+          formData.append(`afterPhotos[${index}]`, photo);
+        });
+      }
       
       return apiRequest('POST', '/api/checkins', formData);
     },
@@ -171,11 +234,8 @@ export default function FieldMobile() {
         description: "Check-in submitted successfully!",
       });
       
-      // Reset form
+      // Reset form (no customer fields)
       setCheckInForm({
-        customerName: '',
-        customerEmail: '',
-        customerPhone: '',
         jobTypeId: '',
         address: currentLocation.fullAddress,
         workPerformed: '',
