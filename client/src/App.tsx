@@ -31,7 +31,7 @@ import Billing from "@/pages/billing";
 import TechApp from "@/pages/tech-app";
 import AISettings from "@/pages/ai-settings";
 import Home from "@/pages/home";
-import TechnicianMobile from "@/pages/technician-mobile-simple";
+import TechnicianMobileField from "@/pages/technician-mobile-field";
 import MobileTechApp from "@/pages/mobile-tech-app";
 import Onboarding from "@/pages/onboarding";
 import ReviewRequest from "@/pages/review-request";
@@ -253,7 +253,7 @@ function Router() {
       
       {/* Mobile Tech App - Progressive Web App */}
       <Route path="/mobile">
-        <PrivateRoute component={TechnicianMobile} path="/mobile" role="technician" />
+        <PrivateRoute component={TechnicianMobileField} path="/mobile" role="technician" />
       </Route>
       
       {/* Downloadable Resources */}

@@ -35,11 +35,15 @@ import {
 // Check-in form schema
 const checkInSchema = z.object({
   jobTypeId: z.string().min(1, "Job type is required"),
-  customerName: z.string().min(1, "Customer name is required"),
   photos: z.array(z.string()).min(1, "At least one photo is required"),
   notes: z.string().optional(),
   beforePhotos: z.array(z.string()).optional(),
   afterPhotos: z.array(z.string()).optional(),
+  // Customer info only for review requests
+  requestTextReview: z.boolean().default(false),
+  customerName: z.string().optional(),
+  customerEmail: z.string().optional(),
+  customerPhone: z.string().optional(),
 });
 
 // Blog post form schema
@@ -47,10 +51,9 @@ const blogPostSchema = z.object({
   jobTypeId: z.string().min(1, "Job type is required"),
   photos: z.array(z.string()).min(1, "At least one photo is required"),
   description: z.string().min(20, "Description must be at least 20 characters"),
-  customerName: z.string().optional(),
 });
 
-// Review collection form schema
+// Review collection form schema (audio/video testimonials)
 const reviewSchema = z.object({
   customerName: z.string().min(1, "Customer name is required"),
   jobTypeId: z.string().min(1, "Job type is required"),
@@ -97,11 +100,14 @@ export default function TechnicianMobile() {
     resolver: zodResolver(checkInSchema),
     defaultValues: {
       jobTypeId: "",
-      customerName: "",
       photos: [],
       notes: "",
       beforePhotos: [],
       afterPhotos: [],
+      requestTextReview: false,
+      customerName: "",
+      customerEmail: "",
+      customerPhone: "",
     }
   });
 
@@ -121,7 +127,6 @@ export default function TechnicianMobile() {
       jobTypeId: "",
       photos: [],
       description: "",
-      customerName: "",
     }
   });
 
