@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 import {
   Camera,
   MapPin,
@@ -20,6 +22,7 @@ import {
 
 export default function MobileSimple() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('home');
   const [currentLocation, setCurrentLocation] = useState<{latitude: number, longitude: number} | null>(null);
   const [currentAddress, setCurrentAddress] = useState<string>('');
@@ -31,14 +34,52 @@ export default function MobileSimple() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Mock job types
-  const jobTypes = [
-    { id: '1', name: 'Sprinkler Repair' },
-    { id: '2', name: 'Irrigation Installation' },
-    { id: '3', name: 'System Maintenance' },
-    { id: '4', name: 'Leak Detection' },
-    { id: '5', name: 'Winterization' }
-  ];
+  // Get authenticated user
+  const { data: currentUser, isLoading: userLoading, error: userError } = useQuery({
+    queryKey: ['/api/auth/me'],
+    retry: false,
+  });
+
+  // Get job types for the company
+  const { data: jobTypes = [], isLoading: jobTypesLoading } = useQuery({
+    queryKey: ['/api/job-types'],
+    enabled: !!currentUser,
+    retry: false,
+  });
+
+  // Get recent check-ins
+  const { data: recentCheckIns = [], isLoading: checkInsLoading } = useQuery({
+    queryKey: ['/api/check-ins'],
+    enabled: !!currentUser,
+    retry: false,
+  });
+
+  // Show loading state while authenticating
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if not authenticated
+  if (userError || !currentUser) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center p-6">
+          <h2 className="text-xl font-bold mb-4">Authentication Required</h2>
+          <p className="text-muted-foreground mb-4">Please log in to access the mobile interface</p>
+          <Button onClick={() => window.location.href = '/login'}>
+            Go to Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Form states
   const [checkInForm, setCheckInForm] = useState({
@@ -164,7 +205,94 @@ export default function MobileSimple() {
     }
   };
 
-  // Submit check-in
+  // Submit check-in mutation
+  const checkInMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const formData = new FormData();
+      formData.append('jobTypeId', data.jobTypeId);
+      formData.append('notes', data.notes || '');
+      formData.append('address', data.address || currentAddress);
+      formData.append('workPerformed', data.workPerformed || '');
+      formData.append('materialsUsed', data.materialsUsed || '');
+      
+      // Add photos
+      data.photos.forEach((photo: string, index: number) => {
+        formData.append(`photos`, photo);
+      });
+
+      return apiRequest('POST', '/api/check-ins', formData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Check-In Submitted",
+        description: "Job check-in recorded successfully",
+      });
+      
+      // Reset form
+      setCheckInForm({
+        jobTypeId: '',
+        photos: [],
+        notes: '',
+        address: '',
+        workPerformed: '',
+        materialsUsed: ''
+      });
+      setPhotos([]);
+      
+      // Refresh check-ins list
+      queryClient.invalidateQueries({ queryKey: ['/api/check-ins'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Submission Failed",
+        description: error.message || "Could not submit check-in",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Submit review mutation
+  const reviewMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const formData = new FormData();
+      formData.append('customerName', data.customerName);
+      formData.append('jobTypeId', data.jobTypeId);
+      formData.append('reviewType', data.reviewType);
+      
+      if (data.recordingBlob) {
+        formData.append('recording', data.recordingBlob, `review.${data.reviewType === 'video' ? 'webm' : 'wav'}`);
+      }
+
+      return apiRequest('POST', '/api/reviews', formData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Review Submitted",
+        description: "Customer review recorded successfully",
+      });
+      
+      // Reset form
+      setReviewForm({
+        customerName: '',
+        jobTypeId: '',
+        reviewType: 'audio',
+        recordingBlob: null
+      });
+      setRecordingUrl(null);
+      
+      // Refresh reviews list
+      queryClient.invalidateQueries({ queryKey: ['/api/reviews'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Submission Failed",
+        description: error.message || "Could not submit review",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Submit handlers
   const handleCheckInSubmit = () => {
     if (!checkInForm.jobTypeId) {
       toast({
@@ -175,24 +303,13 @@ export default function MobileSimple() {
       return;
     }
 
-    toast({
-      title: "Check-In Submitted",
-      description: "Job check-in recorded successfully",
+    checkInMutation.mutate({
+      ...checkInForm,
+      photos,
+      address: checkInForm.address || currentAddress
     });
-
-    // Reset form
-    setCheckInForm({
-      jobTypeId: '',
-      photos: [],
-      notes: '',
-      address: '',
-      workPerformed: '',
-      materialsUsed: ''
-    });
-    setPhotos([]);
   };
 
-  // Submit review
   const handleReviewSubmit = () => {
     if (!reviewForm.customerName || !reviewForm.jobTypeId) {
       toast({
@@ -203,19 +320,7 @@ export default function MobileSimple() {
       return;
     }
 
-    toast({
-      title: "Review Submitted",
-      description: "Customer review recorded successfully",
-    });
-
-    // Reset form
-    setReviewForm({
-      customerName: '',
-      jobTypeId: '',
-      reviewType: 'audio',
-      recordingBlob: null
-    });
-    setRecordingUrl(null);
+    reviewMutation.mutate(reviewForm);
   };
 
   // Tab navigation
@@ -233,7 +338,9 @@ export default function MobileSimple() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center">
-                  <p className="text-lg font-medium">Welcome, Tech!</p>
+                  <p className="text-lg font-medium">
+                    Welcome, {currentUser?.firstName || currentUser?.email || 'Technician'}!
+                  </p>
                   <p className="text-muted-foreground">Ready for field work</p>
                 </div>
                 
@@ -255,12 +362,19 @@ export default function MobileSimple() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600">5</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {checkInsLoading ? '...' : recentCheckIns?.filter((c: any) => {
+                        const today = new Date().toDateString();
+                        return new Date(c.createdAt).toDateString() === today;
+                      }).length || 0}
+                    </p>
                     <p className="text-sm text-muted-foreground">Jobs Today</p>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">12</p>
-                    <p className="text-sm text-muted-foreground">This Week</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {checkInsLoading ? '...' : recentCheckIns?.length || 0}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Total Jobs</p>
                   </div>
                 </div>
               </CardContent>
