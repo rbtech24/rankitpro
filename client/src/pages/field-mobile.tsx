@@ -148,7 +148,7 @@ export default function FieldMobile() {
             
             // Auto-focus the address field for manual correction
             setTimeout(() => {
-              const addressField = document.querySelector('input[placeholder*="address"]');
+              const addressField = document.querySelector('input[placeholder*="address"]') as HTMLInputElement;
               if (addressField) {
                 addressField.focus();
               }
@@ -212,11 +212,34 @@ export default function FieldMobile() {
             POSITION_UNAVAILABLE: error.POSITION_UNAVAILABLE,
             TIMEOUT: error.TIMEOUT
           });
-          toast({
-            title: "Location Access",
-            description: "Unable to get your current location. Please enable GPS and allow location access.",
-            variant: "destructive",
-          });
+          
+          // Set fallback location that user can edit
+          const fallbackLocation = {
+            streetName: 'Location not detected',
+            city: '',
+            state: '',
+            zipCode: '',
+            fullAddress: 'Please enter your work location manually'
+          };
+          
+          setCurrentLocation(fallbackLocation);
+          setCheckInForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
+          setReviewForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
+          setAudioReviewForm(prev => ({ ...prev, address: fallbackLocation.fullAddress }));
+          
+          if (error.code === 1) {
+            toast({
+              title: "Location Permission Required",
+              description: "Please allow location access for automatic detection, or enter address manually below.",
+              variant: "default",
+            });
+          } else {
+            toast({
+              title: "Location Access",
+              description: "Unable to detect location automatically. Please enter your work address manually.",
+              variant: "default",
+            });
+          }
         },
         {
           enableHighAccuracy: true,    // Force GPS instead of network/wifi location
