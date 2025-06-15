@@ -6,7 +6,13 @@ import { apiRequest } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { 
   Home, 
   CheckCircle, 
@@ -19,8 +25,51 @@ import {
   MapPin,
   Clock,
   PlusCircle,
-  RefreshCw
+  RefreshCw,
+  Send,
+  Star,
+  MessageSquare,
+  FileText
 } from 'lucide-react';
+
+// Check-in form schema
+const checkInSchema = z.object({
+  jobType: z.string().min(1, "Job type is required"),
+  customerName: z.string().min(1, "Customer name is required"),
+  customerEmail: z.string().email("Valid email required"),
+  customerPhone: z.string().optional(),
+  address: z.string().min(1, "Address is required"),
+  workPerformed: z.string().min(1, "Work performed description is required"),
+  materialsUsed: z.string().optional(),
+  notes: z.string().optional(),
+  requestReview: z.boolean().default(true),
+  reviewMessage: z.string().optional(),
+});
+
+// Blog post form schema
+const blogPostSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  content: z.string().min(50, "Content must be at least 50 characters"),
+  jobType: z.string().min(1, "Job type is required"),
+  customerName: z.string().optional(),
+  location: z.string().optional(),
+  tags: z.string().optional(),
+});
+
+// Review collection form schema
+const reviewSchema = z.object({
+  customerName: z.string().min(1, "Customer name is required"),
+  customerEmail: z.string().email("Valid email required"),
+  jobType: z.string().min(1, "Job type is required"),
+  rating: z.number().min(1).max(5),
+  reviewText: z.string().min(10, "Review must be at least 10 characters"),
+  workCompleted: z.string().min(1, "Work completed description is required"),
+  recommendToOthers: z.boolean().default(true),
+});
+
+type CheckInFormData = z.infer<typeof checkInSchema>;
+type BlogPostFormData = z.infer<typeof blogPostSchema>;
+type ReviewFormData = z.infer<typeof reviewSchema>;
 
 export default function TechnicianMobile() {
   const [location, setLocation] = useLocation();
