@@ -83,17 +83,30 @@ export default function MobileSimple() {
 
   // Form states
   const [checkInForm, setCheckInForm] = useState({
-    jobTypeId: '',
-    photos: [] as string[],
-    notes: '',
-    address: '',
+    jobType: '',
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
     workPerformed: '',
-    materialsUsed: ''
+    materialsUsed: '',
+    problemDescription: '',
+    solutionDescription: '',
+    notes: '',
+    requestWrittenReview: false,
+    reviewMessage: ''
+  });
+
+  const [blogForm, setBlogForm] = useState({
+    jobType: '',
+    workDescription: '',
+    location: '',
+    specialNotes: '',
+    targetKeywords: ''
   });
 
   const [reviewForm, setReviewForm] = useState({
     customerName: '',
-    jobTypeId: '',
+    jobType: '',
     reviewType: 'audio' as 'audio' | 'video',
     recordingBlob: null as Blob | null
   });
@@ -205,18 +218,32 @@ export default function MobileSimple() {
     }
   };
 
-  // Submit check-in mutation
+  // Submit check-in with AI generation mutation
   const checkInMutation = useMutation({
     mutationFn: async (data: any) => {
       const formData = new FormData();
-      formData.append('jobTypeId', data.jobTypeId);
-      formData.append('notes', data.notes || '');
-      formData.append('address', data.address || currentAddress);
+      formData.append('jobType', data.jobType);
+      formData.append('customerName', data.customerName || '');
+      formData.append('customerEmail', data.customerEmail || '');
+      formData.append('customerPhone', data.customerPhone || '');
       formData.append('workPerformed', data.workPerformed || '');
       formData.append('materialsUsed', data.materialsUsed || '');
+      formData.append('problemDescription', data.problemDescription || '');
+      formData.append('solutionDescription', data.solutionDescription || '');
+      formData.append('notes', data.notes || '');
+      formData.append('requestWrittenReview', data.requestWrittenReview);
+      formData.append('reviewMessage', data.reviewMessage || '');
+      formData.append('address', currentAddress);
+      formData.append('generateAIContent', 'true'); // Enable AI content generation
+      
+      // Add location data
+      if (currentLocation) {
+        formData.append('latitude', currentLocation.latitude.toString());
+        formData.append('longitude', currentLocation.longitude.toString());
+      }
       
       // Add photos
-      data.photos.forEach((photo: string, index: number) => {
+      photos.forEach((photo: string, index: number) => {
         formData.append(`photos`, photo);
       });
 
@@ -225,27 +252,80 @@ export default function MobileSimple() {
     onSuccess: () => {
       toast({
         title: "Check-In Submitted",
-        description: "Job check-in recorded successfully",
+        description: "Job check-in recorded with AI-generated content",
       });
       
       // Reset form
       setCheckInForm({
-        jobTypeId: '',
-        photos: [],
-        notes: '',
-        address: '',
+        jobType: '',
+        customerName: '',
+        customerEmail: '',
+        customerPhone: '',
         workPerformed: '',
-        materialsUsed: ''
+        materialsUsed: '',
+        problemDescription: '',
+        solutionDescription: '',
+        notes: '',
+        requestWrittenReview: false,
+        reviewMessage: ''
       });
       setPhotos([]);
       
-      // Refresh check-ins list
       queryClient.invalidateQueries({ queryKey: ['/api/check-ins'] });
     },
     onError: (error: any) => {
       toast({
         title: "Submission Failed",
         description: error.message || "Could not submit check-in",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Submit blog post with AI generation mutation
+  const blogMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const formData = new FormData();
+      formData.append('jobType', data.jobType);
+      formData.append('workDescription', data.workDescription);
+      formData.append('location', data.location || currentAddress);
+      formData.append('specialNotes', data.specialNotes || '');
+      formData.append('targetKeywords', data.targetKeywords || '');
+      formData.append('generateAIContent', 'true'); // Enable AI blog generation
+      
+      // Add location data
+      if (currentLocation) {
+        formData.append('latitude', currentLocation.latitude.toString());
+        formData.append('longitude', currentLocation.longitude.toString());
+      }
+      
+      // Add photos for blog
+      photos.forEach((photo: string, index: number) => {
+        formData.append(`photos`, photo);
+      });
+
+      return apiRequest('POST', '/api/blog-posts', formData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Blog Post Created",
+        description: "AI-generated blog post submitted successfully",
+      });
+      
+      // Reset form
+      setBlogForm({
+        jobType: '',
+        workDescription: '',
+        location: '',
+        specialNotes: '',
+        targetKeywords: ''
+      });
+      setPhotos([]);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Submission Failed",
+        description: error.message || "Could not create blog post",
         variant: "destructive",
       });
     },
@@ -294,7 +374,7 @@ export default function MobileSimple() {
 
   // Submit handlers
   const handleCheckInSubmit = () => {
-    if (!checkInForm.jobTypeId) {
+    if (!checkInForm.jobType) {
       toast({
         title: "Missing Information",
         description: "Please select a job type",
@@ -303,15 +383,24 @@ export default function MobileSimple() {
       return;
     }
 
-    checkInMutation.mutate({
-      ...checkInForm,
-      photos,
-      address: checkInForm.address || currentAddress
-    });
+    checkInMutation.mutate(checkInForm);
+  };
+
+  const handleBlogSubmit = () => {
+    if (!blogForm.jobType || !blogForm.workDescription) {
+      toast({
+        title: "Missing Information",
+        description: "Please select job type and describe the work",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    blogMutation.mutate(blogForm);
   };
 
   const handleReviewSubmit = () => {
-    if (!reviewForm.customerName || !reviewForm.jobTypeId) {
+    if (!reviewForm.customerName || !reviewForm.jobType) {
       toast({
         title: "Missing Information",
         description: "Please fill in customer name and job type",

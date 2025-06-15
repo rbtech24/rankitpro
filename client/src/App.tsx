@@ -34,6 +34,7 @@ import Home from "@/pages/home";
 import TechnicianMobileField from "@/pages/technician-mobile-field";
 import MobileSimple from "@/pages/mobile-simple";
 import MobileTechApp from "@/pages/mobile-tech-app";
+import FieldMobile from "@/pages/field-mobile";
 import Onboarding from "@/pages/onboarding";
 import ReviewRequest from "@/pages/review-request";
 import Review from "@/pages/review";
