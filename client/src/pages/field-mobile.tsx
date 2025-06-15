@@ -427,45 +427,7 @@ export default function FieldMobile() {
           </div>
         </div>
 
-        {/* AI Content Generation Button */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-          <Button
-            type="button"
-            onClick={() => {
-              if (checkInForm.jobTypeId && checkInForm.workPerformed && checkInForm.materialsUsed) {
-                generateCheckInContent.mutate({
-                  jobTypeId: checkInForm.jobTypeId,
-                  workPerformed: checkInForm.workPerformed,
-                  materialsUsed: checkInForm.materialsUsed,
-                  address: checkInForm.address
-                });
-              } else {
-                toast({
-                  title: "Missing Information",
-                  description: "Please fill in job type, work performed, and materials used first.",
-                  variant: "destructive",
-                });
-              }
-            }}
-            disabled={generateCheckInContent.isPending}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-          >
-            {generateCheckInContent.isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating AI Summary...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4 mr-2" />
-                Generate AI Check-in Summary
-              </>
-            )}
-          </Button>
-          <p className="text-xs text-blue-600 mt-2 text-center">
-            AI will create a professional summary based on your work details
-          </p>
-        </div>
+
 
         {/* Job Information */}
         <div className="space-y-3">
@@ -594,6 +556,46 @@ export default function FieldMobile() {
           <label htmlFor="requestReview" className="text-sm text-gray-700">
             Request written review from customer
           </label>
+        </div>
+
+        {/* AI Content Generation Button */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+          <Button
+            type="button"
+            onClick={() => {
+              if (checkInForm.jobTypeId && checkInForm.workPerformed && checkInForm.materialsUsed) {
+                generateCheckInContent.mutate({
+                  jobTypeId: checkInForm.jobTypeId,
+                  workPerformed: checkInForm.workPerformed,
+                  materialsUsed: checkInForm.materialsUsed,
+                  address: checkInForm.address
+                });
+              } else {
+                toast({
+                  title: "Missing Information",
+                  description: "Please fill in job type, work performed, and materials used first.",
+                  variant: "destructive",
+                });
+              }
+            }}
+            disabled={generateCheckInContent.isPending}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+          >
+            {generateCheckInContent.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Generating AI Summary...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Generate AI Check-in Summary
+              </>
+            )}
+          </Button>
+          <p className="text-xs text-blue-600 mt-2 text-center">
+            AI will create a professional summary based on your work details
+          </p>
         </div>
 
         <Button 
