@@ -55,6 +55,19 @@ const companyConnections = new Map<number, Set<WebSocket>>();
 const userConnections = new Map<number, WebSocket>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configure session middleware
+  app.use(session({
+    store: new SessionStore({}),
+    secret: process.env.SESSION_SECRET || 'dev-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // Set to true in production with HTTPS
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
+
   // Critical: Force API routes to bypass static file serving
   app.all('/api/*', (req, res, next) => {
     res.header('Content-Type', 'application/json');

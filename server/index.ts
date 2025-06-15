@@ -167,12 +167,12 @@ async function createSuperAdminIfNotExists() {
   const port = process.env.PORT || 5000;
   
   // Add error handling for port conflicts
-  httpServer.on('error', (err: any) => {
+  server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
       console.error(`Port ${port} is already in use. Trying to find an available port...`);
       // Try alternative ports
       const alternativePort = parseInt(port.toString()) + 1;
-      httpServer.listen({
+      server.listen({
         port: alternativePort,
         host: "0.0.0.0",
       }, () => {
@@ -184,7 +184,7 @@ async function createSuperAdminIfNotExists() {
     }
   });
   
-  httpServer.listen({
+  server.listen({
     port,
     host: "0.0.0.0",
   }, () => {
