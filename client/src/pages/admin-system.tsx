@@ -32,11 +32,32 @@ export default function AdminSystem() {
   const queryClient = useQueryClient();
   const [maintenanceMode, setMaintenanceMode] = useState(false);
 
-  const { data: systemStatus } = useQuery({
-    queryKey: ["/api/admin/system/status"]
+  const { data: systemStatus = {
+    server: { status: "operational", uptime: 0, memory: { used: 0, total: 0 } },
+    database: { status: "connected", connections: 0, queryTime: 0 },
+    storage: { used: "0 GB", available: "0 GB" },
+    performance: { cpu: 0, memory: 0 }
+  } } = useQuery({
+    queryKey: ["/api/admin/system/health"]
   });
 
-  const { data: systemSettings } = useQuery({
+  const { data: systemSettings = {
+    platformName: "Rank It Pro",
+    supportEmail: "support@rankitpro.com",
+    allowRegistration: true,
+    sessionTimeout: 120,
+    maxLoginAttempts: 5,
+    require2FA: false,
+    enforceStrongPasswords: true,
+    features: {
+      emailEnabled: true,
+      smsEnabled: false,
+      aiEnabled: true,
+      analyticsEnabled: true,
+      wordpressEnabled: true,
+      apiEnabled: true
+    }
+  } } = useQuery({
     queryKey: ["/api/admin/system/settings"]
   });
 
