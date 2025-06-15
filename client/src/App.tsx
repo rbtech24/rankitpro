@@ -1197,6 +1197,9 @@ function Router() {
       <Route path="/mobile">
         <PrivateRoute component={MobileSimple} path="/mobile" role="technician" />
       </Route>
+      <Route path="/field-mobile">
+        <PrivateRoute component={FieldMobile} path="/field-mobile" role="technician" />
+      </Route>
       <Route path="/technician">
         <PrivateRoute component={TechnicianMobileField} path="/technician" role="technician" />
       </Route>
