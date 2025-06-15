@@ -79,7 +79,7 @@ export default function FieldMobile() {
   });
 
   // Fetch user data
-  const { data: user } = useQuery({
+  const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['/api/auth/me'],
     retry: false,
   });

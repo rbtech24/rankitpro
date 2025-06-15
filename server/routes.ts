@@ -733,7 +733,18 @@ Materials used: ${context.materialsUsed}
 Generate a concise, professional summary (2-3 sentences) that could be shared with the customer and used for business documentation. Focus on the value provided and technical details.`;
       }
 
-      const content = await generateSummary(aiPrompt);
+      // Simple OpenAI integration for content generation
+      const OpenAI = require('openai');
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [{ role: "user", content: aiPrompt }],
+        max_tokens: 200,
+        temperature: 0.7,
+      });
+
+      const content = response.choices[0].message.content;
       
       res.json({ content });
     } catch (error) {
