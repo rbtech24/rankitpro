@@ -65,7 +65,7 @@ export default function Login() {
         if (authState.user?.role === "super_admin") {
           setLocation("/admin");  // Super admins go to admin dashboard
         } else if (authState.user?.role === "technician") {
-          setLocation("/technician");  // Technicians go to mobile interface
+          setLocation("/mobile");  // Technicians go to mobile interface
         } else {
           setLocation("/dashboard");   // Company admins go to dashboard
         }
