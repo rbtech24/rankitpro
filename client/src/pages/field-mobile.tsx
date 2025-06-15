@@ -618,6 +618,18 @@ export default function FieldMobile() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Location Display */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <MapPin className="w-4 h-4 text-blue-600" />
+            <span className="font-medium text-blue-800">Current Location</span>
+          </div>
+          <div className="text-sm text-blue-700">
+            <p className="font-medium">{currentLocation.streetName}</p>
+            <p>{currentLocation.city}, {currentLocation.state} {currentLocation.zipCode}</p>
+          </div>
+        </div>
+
         <Input
           placeholder="Customer Name"
           value={reviewForm.customerName}
@@ -712,6 +724,18 @@ export default function FieldMobile() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Location Display */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <MapPin className="w-4 h-4 text-blue-600" />
+            <span className="font-medium text-blue-800">Current Location</span>
+          </div>
+          <div className="text-sm text-blue-700">
+            <p className="font-medium">{currentLocation.streetName}</p>
+            <p>{currentLocation.city}, {currentLocation.state} {currentLocation.zipCode}</p>
+          </div>
+        </div>
+
         <Input
           placeholder="Customer Name"
           value={audioReviewForm.customerName}

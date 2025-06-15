@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +33,15 @@ export default function MobileBlogs() {
     photos: []
   });
 
+  // Current location state
+  const [currentLocation, setCurrentLocation] = useState({
+    streetName: 'Detecting location...',
+    city: '',
+    state: '',
+    zipCode: '',
+    fullAddress: 'Getting your current location...'
+  });
+
   // Fetch user data
   const { data: user } = useQuery({
     queryKey: ['/api/auth/me'],
@@ -44,6 +53,80 @@ export default function MobileBlogs() {
     queryKey: ['/api/job-types'],
     enabled: !!user,
   });
+
+  // Get current location with detailed address
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          try {
+            // Use OpenStreetMap Nominatim for reverse geocoding (free, no API key needed)
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+            );
+            
+            if (response.ok) {
+              const data = await response.json();
+              const address = data.address || {};
+              
+              // Extract detailed address components
+              const streetNumber = address.house_number || '';
+              const streetName = address.road || '';
+              const city = address.city || address.town || address.village || '';
+              const state = address.state || '';
+              const zipCode = address.postcode || '';
+              
+              const fullStreet = `${streetNumber} ${streetName}`.trim();
+              const fullAddress = `${fullStreet}, ${city}, ${state} ${zipCode}`.replace(/,\s*,/g, ',').replace(/^\s*,\s*/, '');
+              
+              setCurrentLocation({
+                streetName: fullStreet || 'Address not found',
+                city: city || 'City not found',
+                state: state || 'State not found',
+                zipCode: zipCode || 'Zip not found',
+                fullAddress: fullAddress || 'Location not available'
+              });
+
+              // Auto-populate the location field in the form
+              setBlogForm(prev => ({ 
+                ...prev, 
+                location: fullAddress || 'Location not available'
+              }));
+            }
+          } catch (error) {
+            console.error('Error getting address:', error);
+            setCurrentLocation({
+              streetName: 'Unable to detect address',
+              city: '',
+              state: '',
+              zipCode: '',
+              fullAddress: 'Location detection failed'
+            });
+          }
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          setCurrentLocation({
+            streetName: 'Location access denied',
+            city: '',
+            state: '',
+            zipCode: '',
+            fullAddress: 'Please enable location access'
+          });
+        }
+      );
+    } else {
+      setCurrentLocation({
+        streetName: 'Geolocation not supported',
+        city: '',
+        state: '',
+        zipCode: '',
+        fullAddress: 'Location not available'
+      });
+    }
+  }, []);
 
   // Create blog mutation
   const createBlogMutation = useMutation({
@@ -205,6 +288,18 @@ export default function MobileBlogs() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Location Display */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="w-4 h-4 text-blue-600" />
+                  <span className="font-medium text-blue-800">Current Location</span>
+                </div>
+                <div className="text-sm text-blue-700">
+                  <p className="font-medium">{currentLocation.streetName}</p>
+                  <p>{currentLocation.city}, {currentLocation.state} {currentLocation.zipCode}</p>
+                </div>
+              </div>
+
               {/* Job Type Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
