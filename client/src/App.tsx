@@ -36,6 +36,7 @@ import MobileSimple from "@/pages/mobile-simple";
 import MobileTechApp from "@/pages/mobile-tech-app";
 import FieldMobile from "@/pages/field-mobile";
 import MobileBlogs from "@/pages/mobile-blogs";
+import MobileFieldApp from "@/pages/mobile-field-app";
 import Onboarding from "@/pages/onboarding";
 import ReviewRequest from "@/pages/review-request";
 import Review from "@/pages/review";
@@ -1206,6 +1207,9 @@ function Router() {
       </Route>
       <Route path="/field-mobile">
         <PrivateRoute component={FieldMobile} path="/field-mobile" role="technician" />
+      </Route>
+      <Route path="/mobile-field-app">
+        <PrivateRoute component={MobileFieldApp} path="/mobile-field-app" role="technician" />
       </Route>
       <Route path="/technician">
         <PrivateRoute component={TechnicianMobileField} path="/technician" role="technician" />

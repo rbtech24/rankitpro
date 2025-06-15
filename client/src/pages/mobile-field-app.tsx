@@ -148,10 +148,12 @@ export default function MobileFieldApp() {
   // AI content generation for check-ins
   const generateCheckInContent = useMutation({
     mutationFn: async (data: { jobTypeId: string; workPerformed: string; materialsUsed: string }) => {
-      return apiRequest('/api/ai/generate-checkin-content', {
+      const response = await fetch('/api/ai/generate-checkin-content', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      return response.json();
     },
     onSuccess: (data) => {
       setCheckInForm(prev => ({ ...prev, notes: data.generatedContent }));
@@ -176,10 +178,11 @@ export default function MobileFieldApp() {
         formData.append(`photos`, photo);
       });
       
-      return apiRequest('/api/check-ins', {
+      const response = await fetch('/api/check-ins', {
         method: 'POST',
         body: formData,
       });
+      return response.json();
     },
     onSuccess: () => {
       toast({
