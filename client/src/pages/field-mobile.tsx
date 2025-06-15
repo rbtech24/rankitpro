@@ -78,6 +78,7 @@ export default function FieldMobile() {
     customerName: '',
     customerEmail: '',
     customerPhone: '',
+    address: '',
     workPerformed: '',
     materialsUsed: '',
     problemDescription: '',
@@ -89,7 +90,7 @@ export default function FieldMobile() {
   const [blogForm, setBlogForm] = useState({
     jobType: '',
     workDescription: '',
-    location: '',
+    address: '',
     specialNotes: '',
     targetKeywords: ''
   });
@@ -97,11 +98,12 @@ export default function FieldMobile() {
   const [reviewForm, setReviewForm] = useState({
     customerName: '',
     jobType: '',
+    address: '',
     reviewType: 'audio' as 'audio' | 'video',
     recordingBlob: null as Blob | null
   });
 
-  // Get current location
+  // Get current location with reverse geocoding
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -109,8 +111,31 @@ export default function FieldMobile() {
           const { latitude, longitude } = position.coords;
           setCurrentLocation({ latitude, longitude });
           
-          // Reverse geocoding (simplified)
-          setCurrentAddress(`${Math.floor(Math.random() * 9999)} Main St, Service Area, ST 12345`);
+          try {
+            // Use free Nominatim API for reverse geocoding
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+            );
+            const data = await response.json();
+            
+            if (data && data.address) {
+              const addr = data.address;
+              const houseNumber = addr.house_number || '';
+              const street = addr.road || addr.street || '';
+              const city = addr.city || addr.town || addr.village || '';
+              const state = addr.state || '';
+              const zip = addr.postcode || '';
+              
+              const streetAddress = houseNumber && street ? `${houseNumber} ${street}` : street;
+              setCurrentAddress(`${streetAddress}, ${city}, ${state} ${zip}`.replace(/,\s*,/g, ',').trim());
+            } else {
+              // Use coordinates if no address found
+              setCurrentAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+            }
+          } catch (error) {
+            // Use coordinates if API fails
+            setCurrentAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+          }
           
           toast({
             title: "Location Found",
@@ -119,12 +144,23 @@ export default function FieldMobile() {
         },
         (error) => {
           toast({
-            title: "Location Error",
-            description: "Could not get current location",
+            title: "Location Error", 
+            description: "Could not get current location. Please enable location services.",
             variant: "destructive",
           });
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
         }
       );
+    } else {
+      toast({
+        title: "Location Not Supported",
+        description: "Your device doesn't support location services",
+        variant: "destructive",
+      });
     }
   };
 
@@ -206,7 +242,7 @@ export default function FieldMobile() {
       formData.append('notes', data.notes || '');
       formData.append('requestWrittenReview', data.requestWrittenReview.toString());
       formData.append('reviewMessage', data.reviewMessage || '');
-      formData.append('address', currentAddress);
+      formData.append('address', data.address || currentAddress);
       formData.append('generateAIContent', 'true');
       
       if (currentLocation) {
@@ -432,6 +468,25 @@ export default function FieldMobile() {
                 />
               </div>
 
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Service address (street, city, state, zip)"
+                    value={checkInForm.address || currentAddress}
+                    onChange={(e) => setCheckInForm({...checkInForm, address: e.target.value})}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={getCurrentLocation} 
+                    variant="outline" 
+                    size="sm"
+                    className="px-3"
+                  >
+                    <MapPin className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
               <Textarea
                 placeholder="Work performed..."
                 value={checkInForm.workPerformed}
@@ -525,11 +580,24 @@ export default function FieldMobile() {
                 rows={3}
               />
 
-              <Input
-                placeholder="Location/Service area"
-                value={blogForm.location}
-                onChange={(e) => setBlogForm({...blogForm, location: e.target.value})}
-              />
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Service address (street, city, state, zip)"
+                    value={blogForm.address || currentAddress}
+                    onChange={(e) => setBlogForm({...blogForm, address: e.target.value})}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={getCurrentLocation} 
+                    variant="outline" 
+                    size="sm"
+                    className="px-3"
+                  >
+                    <MapPin className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
 
               <Textarea
                 placeholder="Special techniques, challenges, or tips..."
