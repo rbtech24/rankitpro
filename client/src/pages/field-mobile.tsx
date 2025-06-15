@@ -15,7 +15,9 @@ import {
   Mic,
   Video,
   Square,
-  Play
+  Play,
+  MessageSquare,
+  Send
 } from 'lucide-react';
 
 export default function FieldMobile() {
@@ -470,19 +472,20 @@ export default function FieldMobile() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 bg-blue-50 p-3 rounded border">
+                <label className="text-sm font-medium text-blue-800">Service Address</label>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Service address (street, city, state, zip)"
+                    placeholder="Enter street, city, state, zip code"
                     value={checkInForm.address || currentAddress}
                     onChange={(e) => setCheckInForm({...checkInForm, address: e.target.value})}
-                    className="flex-1"
+                    className="flex-1 border-blue-300"
                   />
                   <Button 
                     onClick={getCurrentLocation} 
                     variant="outline" 
                     size="sm"
-                    className="px-3"
+                    className="px-3 border-blue-300 text-blue-600 hover:bg-blue-100"
                   >
                     <MapPin className="w-4 h-4" />
                   </Button>
@@ -582,19 +585,20 @@ export default function FieldMobile() {
                 rows={3}
               />
 
-              <div className="space-y-2">
+              <div className="space-y-2 bg-blue-50 p-3 rounded border">
+                <label className="text-sm font-medium text-blue-800">Service Address</label>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Service address (street, city, state, zip)"
+                    placeholder="Enter street, city, state, zip code"
                     value={blogForm.address || currentAddress}
                     onChange={(e) => setBlogForm({...blogForm, address: e.target.value})}
-                    className="flex-1"
+                    className="flex-1 border-blue-300"
                   />
                   <Button 
                     onClick={getCurrentLocation} 
                     variant="outline" 
                     size="sm"
-                    className="px-3"
+                    className="px-3 border-blue-300 text-blue-600 hover:bg-blue-100"
                   >
                     <MapPin className="w-4 h-4" />
                   </Button>
@@ -662,19 +666,20 @@ export default function FieldMobile() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 bg-blue-50 p-3 rounded border">
+                <label className="text-sm font-medium text-blue-800">Service Address</label>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Service address (street, city, state, zip)"
+                    placeholder="Enter street, city, state, zip code"
                     value={reviewForm.address || currentAddress}
                     onChange={(e) => setReviewForm({...reviewForm, address: e.target.value})}
-                    className="flex-1"
+                    className="flex-1 border-blue-300"
                   />
                   <Button 
                     onClick={getCurrentLocation} 
                     variant="outline" 
                     size="sm"
-                    className="px-3"
+                    className="px-3 border-blue-300 text-blue-600 hover:bg-blue-100"
                   >
                     <MapPin className="w-4 h-4" />
                   </Button>
@@ -839,6 +844,108 @@ export default function FieldMobile() {
           </Card>
         );
 
+      case 'written':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                Written Review Request
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button onClick={getCurrentLocation} variant="outline" size="sm" className="w-full">
+                <MapPin className="w-4 h-4 mr-2" />
+                Get Location
+              </Button>
+
+              {currentAddress && (
+                <div className="p-2 bg-green-50 border border-green-200 rounded text-sm">
+                  📍 {currentAddress}
+                </div>
+              )}
+
+              <Input
+                placeholder="Customer name"
+                value={reviewForm.customerName}
+                onChange={(e) => setReviewForm({...reviewForm, customerName: e.target.value})}
+              />
+
+              <div className="space-y-2">
+                <Select 
+                  value={reviewForm.jobType} 
+                  onValueChange={(value) => setReviewForm({...reviewForm, jobType: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select job type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobTypes?.map((type: any) => (
+                      <SelectItem key={type.id} value={type.name}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2 bg-blue-50 p-3 rounded border">
+                <label className="text-sm font-medium text-blue-800">Service Address</label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter street, city, state, zip code"
+                    value={reviewForm.address || currentAddress}
+                    onChange={(e) => setReviewForm({...reviewForm, address: e.target.value})}
+                    className="flex-1 border-blue-300"
+                  />
+                  <Button 
+                    onClick={getCurrentLocation} 
+                    variant="outline" 
+                    size="sm"
+                    className="px-3 border-blue-300 text-blue-600 hover:bg-blue-100"
+                  >
+                    <MapPin className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <Textarea
+                placeholder="Custom review message (optional)"
+                value={reviewForm.reviewMessage || ''}
+                onChange={(e) => setReviewForm({...reviewForm, reviewMessage: e.target.value})}
+                rows={3}
+              />
+
+              <div className="text-center">
+                <Button
+                  onClick={() => {
+                    if (!reviewForm.customerName || !reviewForm.jobType) {
+                      toast({
+                        title: "Missing Information",
+                        description: "Please fill in customer name and job type",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    // Send written review request
+                    reviewMutation.mutate({
+                      ...reviewForm,
+                      reviewType: 'written',
+                      address: reviewForm.address || currentAddress
+                    });
+                  }}
+                  className="w-full"
+                  size="lg"
+                  disabled={reviewMutation.isPending}
+                >
+                  <Send className="w-5 h-5 mr-2" />
+                  {reviewMutation.isPending ? 'Sending...' : 'Send Review Request'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
       default:
         return null;
     }
@@ -878,20 +985,20 @@ export default function FieldMobile() {
               Blog Post
             </button>
             <button
+              onClick={() => setActiveTab('written')}
+              className={`p-2 text-xs font-medium rounded transition-colors ${
+                activeTab === 'written' ? 'bg-white text-blue-600 shadow' : 'text-gray-600'
+              }`}
+            >
+              Written Review
+            </button>
+            <button
               onClick={() => setActiveTab('audio')}
               className={`p-2 text-xs font-medium rounded transition-colors ${
                 activeTab === 'audio' ? 'bg-white text-blue-600 shadow' : 'text-gray-600'
               }`}
             >
-              Audio Review
-            </button>
-            <button
-              onClick={() => setActiveTab('video')}
-              className={`p-2 text-xs font-medium rounded transition-colors ${
-                activeTab === 'video' ? 'bg-white text-blue-600 shadow' : 'text-gray-600'
-              }`}
-            >
-              Video Review
+              Audio/Video
             </button>
           </div>
         </div>
