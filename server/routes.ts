@@ -718,15 +718,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Removed duplicate authentication endpoint - using main server endpoint instead
 
   // User verification endpoint
-  app.get("/api/auth/user", (req, res) => {
+  app.get("/api/auth/user", async (req, res) => {
     if (req.session?.userId) {
-      res.json({
-        id: 1,
-        email: "bill@mrsprinklerrepair.com",
-        role: "super_admin",
-        username: "admin",
-        companyId: 1
-      });
+      try {
+        await storage.ensureInitialized();
+        const user = await storage.getUser(req.session.userId);
+        if (user) {
+          const { password, ...userWithoutPassword } = user;
+          res.json(userWithoutPassword);
+        } else {
+          res.status(401).json({ message: "User not found" });
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Server error" });
+      }
     } else {
       res.status(401).json({ message: "Not authenticated" });
     }
