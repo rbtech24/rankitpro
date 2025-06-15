@@ -47,6 +47,7 @@ export default function FieldMobile() {
     zipCode: '',
     fullAddress: ''
   });
+  const [locationDebug, setLocationDebug] = useState<string>('');
 
   // Form states (removed customer info from check-in)
   const [checkInForm, setCheckInForm] = useState({
@@ -96,6 +97,10 @@ export default function FieldMobile() {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
+          
+          // Debug: Log actual GPS coordinates to verify real location detection
+          console.log('🗺️ GPS Location Detected:', { latitude, longitude, accuracy: position.coords.accuracy });
+          setLocationDebug(`GPS: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${Math.round(position.coords.accuracy)}m)`);
           
           try {
             // Use OpenStreetMap Nominatim for reverse geocoding with better accuracy
@@ -892,6 +897,13 @@ export default function FieldMobile() {
           </div>
           
           <h1 className="text-2xl font-bold text-center mb-4">Field Technician App</h1>
+          
+          {/* Debug GPS Display */}
+          {locationDebug && (
+            <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-3 py-2 rounded mb-4 text-xs">
+              <strong>Debug GPS:</strong> {locationDebug}
+            </div>
+          )}
           
           {/* Tab Navigation */}
           <div className="grid grid-cols-3 gap-1 p-1 bg-gray-200 rounded-lg">
