@@ -94,13 +94,20 @@ export default function FieldMobile() {
   // Get current location with detailed address
   useEffect(() => {
     if (navigator.geolocation) {
+      // Force high accuracy GPS, no cached locations
       navigator.geolocation.getCurrentPosition(
         async (position) => {
-          const { latitude, longitude } = position.coords;
+          const { latitude, longitude, accuracy, altitudeAccuracy } = position.coords;
           
-          // Debug: Log actual GPS coordinates to verify real location detection
-          console.log('🗺️ GPS Location Detected:', { latitude, longitude, accuracy: position.coords.accuracy });
-          setLocationDebug(`GPS: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${Math.round(position.coords.accuracy)}m)`);
+          // Debug: Log detailed GPS info to verify real location detection
+          console.log('🗺️ GPS Location Detected:', { 
+            latitude, 
+            longitude, 
+            accuracy: accuracy + 'm',
+            timestamp: new Date(position.timestamp).toISOString(),
+            altitudeAccuracy: altitudeAccuracy + 'm' || 'N/A'
+          });
+          setLocationDebug(`REAL GPS: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${Math.round(accuracy)}m) at ${new Date(position.timestamp).toLocaleTimeString()}`);
           
           try {
             // Use OpenStreetMap Nominatim for reverse geocoding with better accuracy
@@ -152,11 +159,23 @@ export default function FieldMobile() {
         },
         (error) => {
           console.error('Error getting location:', error);
+          console.log('Location error details:', {
+            code: error.code,
+            message: error.message,
+            PERMISSION_DENIED: error.PERMISSION_DENIED,
+            POSITION_UNAVAILABLE: error.POSITION_UNAVAILABLE,
+            TIMEOUT: error.TIMEOUT
+          });
           toast({
             title: "Location Access",
-            description: "Unable to get your current location. Please enter the address manually.",
+            description: "Unable to get your current location. Please enable GPS and allow location access.",
             variant: "destructive",
           });
+        },
+        {
+          enableHighAccuracy: true,    // Force GPS instead of network/wifi location
+          timeout: 15000,              // 15 second timeout
+          maximumAge: 0                // No cached locations - get fresh GPS reading
         }
       );
     }

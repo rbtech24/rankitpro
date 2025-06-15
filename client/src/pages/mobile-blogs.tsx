@@ -106,6 +106,13 @@ export default function MobileBlogs() {
         },
         (error) => {
           console.error('Geolocation error:', error);
+          console.log('Location error details:', {
+            code: error.code,
+            message: error.message,
+            PERMISSION_DENIED: error.PERMISSION_DENIED,
+            POSITION_UNAVAILABLE: error.POSITION_UNAVAILABLE,
+            TIMEOUT: error.TIMEOUT
+          });
           setCurrentLocation({
             streetName: 'Location access denied',
             city: '',
@@ -113,6 +120,11 @@ export default function MobileBlogs() {
             zipCode: '',
             fullAddress: 'Please enable location access'
           });
+        },
+        {
+          enableHighAccuracy: true,    // Force GPS instead of network/wifi location
+          timeout: 15000,              // 15 second timeout
+          maximumAge: 0                // No cached locations - get fresh GPS reading
         }
       );
     } else {
