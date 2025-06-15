@@ -362,6 +362,9 @@ export type InsertAiUsageLogs = z.infer<typeof insertAiUsageLogsSchema>;
 export type MonthlyAiUsage = typeof monthlyAiUsage.$inferSelect;
 export type InsertMonthlyAiUsage = z.infer<typeof insertMonthlyAiUsageSchema>;
 
+// API Keys table (alias for apiCredentials)
+export const apiKeys = apiCredentials;
+
 // Types for the new tables
 export type ReviewFollowUpSettings = typeof reviewFollowUpSettings.$inferSelect;
 export type InsertReviewFollowUpSettings = z.infer<typeof insertReviewFollowUpSettingsSchema>;
@@ -436,48 +439,9 @@ export type TechnicianWithStats = Technician & {
 export type APICredentials = typeof apiCredentials.$inferSelect;
 export type InsertAPICredentials = z.infer<typeof insertAPICredentialsSchema>;
 
-// Sales team and commission tracking
-export const salesPeople = pgTable("sales_people", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull(),
-  phone: text("phone"),
-  commissionRate: numeric("commission_rate", { precision: 5, scale: 4 }).notNull(), // e.g., 0.1000 for 10%
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const salesCommissions = pgTable("sales_commissions", {
-  id: serial("id").primaryKey(),
-  salesPersonId: integer("sales_person_id").references(() => salesPeople.id).notNull(),
-  companyId: integer("company_id").references(() => companies.id).notNull(),
-  subscriptionAmount: numeric("subscription_amount", { precision: 10, scale: 2 }).notNull(),
-  commissionAmount: numeric("commission_amount", { precision: 10, scale: 2 }).notNull(),
-  commissionMonth: text("commission_month").notNull(), // YYYY-MM format
-  isPaid: boolean("is_paid").default(false),
-  paidAt: timestamp("paid_at"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const companyAssignments = pgTable("company_assignments", {
-  id: serial("id").primaryKey(),
-  salesPersonId: integer("sales_person_id").references(() => salesPeople.id).notNull(),
-  companyId: integer("company_id").references(() => companies.id).notNull(),
-  assignedAt: timestamp("assigned_at").defaultNow(),
-});
-
-// Schema validation for sales tables
-export const insertSalesPersonSchema = createInsertSchema(salesPeople).omit({ id: true, createdAt: true });
-export const insertSalesCommissionSchema = createInsertSchema(salesCommissions).omit({ id: true, createdAt: true });
-export const insertCompanyAssignmentSchema = createInsertSchema(companyAssignments).omit({ id: true, assignedAt: true });
-
-// Types for sales tables
-export type SalesPerson = typeof salesPeople.$inferSelect;
-export type InsertSalesPerson = z.infer<typeof insertSalesPersonSchema>;
-export type SalesCommission = typeof salesCommissions.$inferSelect;
-export type InsertSalesCommission = z.infer<typeof insertSalesCommissionSchema>;
-export type CompanyAssignment = typeof companyAssignments.$inferSelect;
-export type InsertCompanyAssignment = z.infer<typeof insertCompanyAssignmentSchema>;
+// Create aliases for existing tables used in storage
+export const salesPersons = salesPeople;
+export const commissions = salesCommissions;
 
 // Audio/Video Testimonials
 export const testimonials = pgTable("testimonials", {

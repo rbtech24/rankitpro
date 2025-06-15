@@ -1232,11 +1232,13 @@ export class MemStorage implements IStorage {
 
   async clearPasswordResetToken(userId: number): Promise<void> {
     // Find and remove all tokens for this user
-    for (const [token, tokenData] of this.passwordResetTokens.entries()) {
+    const tokensToDelete: string[] = [];
+    this.passwordResetTokens.forEach((tokenData, token) => {
       if (tokenData.userId === userId) {
-        this.passwordResetTokens.delete(token);
+        tokensToDelete.push(token);
       }
-    }
+    });
+    tokensToDelete.forEach(token => this.passwordResetTokens.delete(token));
   }
 
   // API Credentials methods
@@ -1297,7 +1299,11 @@ export class MemStorage implements IStorage {
   // Sales Commission operations
   async getAllSalesPeople(): Promise<SalesPerson[]> {
     return Array.from(this.salesPeople.values())
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      .sort((a, b) => {
+        const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+        const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+        return bTime - aTime;
+      });
   }
 
   async getSalesPerson(id: number): Promise<SalesPerson | undefined> {
@@ -1386,7 +1392,11 @@ export class MemStorage implements IStorage {
       commissions = commissions.filter(c => c.salesPersonId === salesPersonId);
     }
     
-    return commissions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return commissions.sort((a, b) => {
+      const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+      const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+      return bTime - aTime;
+    });
   }
 
   async markCommissionPaid(commissionId: number): Promise<SalesCommission | undefined> {
@@ -1403,7 +1413,8 @@ export class MemStorage implements IStorage {
     const newCommissions: SalesCommission[] = [];
     
     // Get all companies and their sales people
-    for (const company of this.companies.values()) {
+    const companies = Array.from(this.companies.values());
+    for (const company of companies) {
       const salesPerson = await this.getCompanySalesPerson(company.id);
       
       if (salesPerson && company.stripeSubscriptionId) {
