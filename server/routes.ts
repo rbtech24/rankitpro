@@ -743,7 +743,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const resetExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
       
       // Store reset token (in a real app, store this in database)
-      await storage.setPasswordResetToken(user.id, resetToken, resetExpiry);
+      await storage.setPasswordResetToken(user.email, resetToken, resetExpiry);
       
       // Send email with reset link
       const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
@@ -776,8 +776,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Verify reset token
-      const userId = await storage.verifyPasswordResetToken(token);
-      if (!userId) {
+      const resetUser = await storage.verifyPasswordResetToken(token);
+      if (!resetUser) {
         return res.status(400).json({ message: "Invalid or expired reset token" });
       }
       
@@ -785,10 +785,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hashedPassword = await bcrypt.hash(password, 10);
       
       // Update user password
-      await storage.updateUserPassword(userId, hashedPassword);
+      await storage.updateUserPassword(resetUser.id, hashedPassword);
       
       // Clear reset token
-      await storage.clearPasswordResetToken(userId);
+      await storage.clearPasswordResetToken(resetUser.id);
       
       res.json({ message: "Password reset successful" });
     } catch (error) {
@@ -1292,7 +1292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ message: "Technician record not found" });
         }
         
-        const visits = await storage.getCheckInsByTechnician(technician.id, limitNum);
+        const visits = await storage.getCheckInsByTechnician(technician.id);
         return res.json(visits);
       }
       
@@ -1313,7 +1313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       
-      const visits = await storage.getCheckInsByCompany(queryCompanyId, limitNum);
+      const visits = await storage.getCheckInsByCompany(queryCompanyId);
       res.json(visits);
     } catch (error) {
       console.error("Get visits error:", error);
