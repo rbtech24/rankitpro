@@ -102,7 +102,8 @@ export default function FieldMobile() {
     jobType: '',
     address: '',
     reviewType: 'audio' as 'audio' | 'video',
-    recordingBlob: null as Blob | null
+    recordingBlob: null as Blob | null,
+    reviewMessage: ''
   });
 
   // Get current location with reverse geocoding
@@ -359,7 +360,8 @@ export default function FieldMobile() {
         jobType: '',
         address: '',
         reviewType: 'audio',
-        recordingBlob: null
+        recordingBlob: null,
+        reviewMessage: ''
       });
       setRecordingUrl(null);
     },
@@ -880,7 +882,7 @@ export default function FieldMobile() {
                     <SelectValue placeholder="Select job type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {jobTypes?.map((type: any) => (
+                    {Array.isArray(jobTypes) && jobTypes.map((type: any) => (
                       <SelectItem key={type.id} value={type.name}>
                         {type.name}
                       </SelectItem>
@@ -911,7 +913,7 @@ export default function FieldMobile() {
 
               <Textarea
                 placeholder="Custom review message (optional)"
-                value={reviewForm.reviewMessage || ''}
+                value={reviewForm.reviewMessage}
                 onChange={(e) => setReviewForm({...reviewForm, reviewMessage: e.target.value})}
                 rows={3}
               />
