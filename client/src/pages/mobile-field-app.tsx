@@ -213,10 +213,11 @@ export default function MobileFieldApp() {
         formData.append('photos', photo);
       });
       
-      return apiRequest('/api/blog-posts', {
+      const response = await fetch('/api/blog-posts', {
         method: 'POST',
         body: formData,
       });
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -236,13 +237,15 @@ export default function MobileFieldApp() {
   // Submit written review request (Core Function 3)
   const submitReviewRequest = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/reviews/request', {
+      const response = await fetch('/api/reviews/request', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...reviewForm,
           address: currentLocation ? formatLocationDisplay(currentLocation) : 'Location not detected',
         }),
       });
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -274,10 +277,11 @@ export default function MobileFieldApp() {
         formData.append('recording', recordedBlob, `review.${audioReviewForm.reviewType === 'video' ? 'webm' : 'wav'}`);
       }
       
-      return apiRequest('/api/reviews/audio', {
+      const response = await fetch('/api/reviews/audio', {
         method: 'POST',
         body: formData,
       });
+      return response.json();
     },
     onSuccess: () => {
       toast({
