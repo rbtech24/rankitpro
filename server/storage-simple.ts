@@ -85,7 +85,7 @@ export class MemStorage implements IStorage {
 
   private initialized = false;
 
-  private async ensureInitialized() {
+  async ensureInitialized() {
     if (this.initialized) return;
     
     const bcrypt = await import('bcrypt');

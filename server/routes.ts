@@ -44,8 +44,7 @@ import { analyticsService } from "./services/analytics-service";
 import { fromZodError } from "zod-validation-error";
 import { WebSocketServer, WebSocket } from 'ws';
 import crypto from 'crypto';
-import { setupSimpleAuth } from './simple-auth';
-import { setupProductionLogin } from './production-login';
+// Removed conflicting auth modules
 
 const SessionStore = MemoryStore(session);
 
@@ -2467,8 +2466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Setup production authentication endpoints
-  setupProductionLogin(app);
+  // Production authentication removed - using main auth system
 
   // Initialize the scheduler service to process review follow-ups
   schedulerService.initialize();
