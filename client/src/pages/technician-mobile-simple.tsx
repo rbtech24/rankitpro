@@ -34,37 +34,28 @@ import {
 
 // Check-in form schema
 const checkInSchema = z.object({
-  jobType: z.string().min(1, "Job type is required"),
+  jobTypeId: z.string().min(1, "Job type is required"),
   customerName: z.string().min(1, "Customer name is required"),
-  customerEmail: z.string().email("Valid email required"),
-  customerPhone: z.string().optional(),
-  address: z.string().min(1, "Address is required"),
-  workPerformed: z.string().min(1, "Work performed description is required"),
-  materialsUsed: z.string().optional(),
+  photos: z.array(z.string()).min(1, "At least one photo is required"),
   notes: z.string().optional(),
-  requestReview: z.boolean().default(true),
-  reviewMessage: z.string().optional(),
+  beforePhotos: z.array(z.string()).optional(),
+  afterPhotos: z.array(z.string()).optional(),
 });
 
 // Blog post form schema
 const blogPostSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  content: z.string().min(50, "Content must be at least 50 characters"),
-  jobType: z.string().min(1, "Job type is required"),
+  jobTypeId: z.string().min(1, "Job type is required"),
+  photos: z.array(z.string()).min(1, "At least one photo is required"),
+  description: z.string().min(20, "Description must be at least 20 characters"),
   customerName: z.string().optional(),
-  location: z.string().optional(),
-  tags: z.string().optional(),
 });
 
 // Review collection form schema
 const reviewSchema = z.object({
   customerName: z.string().min(1, "Customer name is required"),
-  customerEmail: z.string().email("Valid email required"),
-  jobType: z.string().min(1, "Job type is required"),
-  rating: z.number().min(1).max(5),
-  reviewText: z.string().min(10, "Review must be at least 10 characters"),
-  workCompleted: z.string().min(1, "Work completed description is required"),
-  recommendToOthers: z.boolean().default(true),
+  jobTypeId: z.string().min(1, "Job type is required"),
+  reviewType: z.enum(['audio', 'video']),
+  recordingBlob: z.any().optional(),
 });
 
 type CheckInFormData = z.infer<typeof checkInSchema>;
@@ -86,6 +77,14 @@ export default function TechnicianMobile() {
 
   const [activeTab, setActiveTab] = useState('home');
   const [currentLocation, setCurrentLocation] = useState<{latitude: number, longitude: number} | null>(null);
+  const [currentAddress, setCurrentAddress] = useState<string>('');
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [beforePhotos, setBeforePhotos] = useState<string[]>([]);
+  const [afterPhotos, setAfterPhotos] = useState<string[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
+  const [reviewType, setReviewType] = useState<'audio' | 'video'>('audio');
   
   // Check authentication and role
   const isAuthenticated = !!auth?.user;
@@ -97,16 +96,12 @@ export default function TechnicianMobile() {
   const checkInForm = useForm<CheckInFormData>({
     resolver: zodResolver(checkInSchema),
     defaultValues: {
-      jobType: "",
+      jobTypeId: "",
       customerName: "",
-      customerEmail: "",
-      customerPhone: "",
-      address: "",
-      workPerformed: "",
-      materialsUsed: "",
+      photos: [],
       notes: "",
-      requestReview: true,
-      reviewMessage: "",
+      beforePhotos: [],
+      afterPhotos: [],
     }
   });
 
@@ -114,24 +109,19 @@ export default function TechnicianMobile() {
     resolver: zodResolver(reviewSchema),
     defaultValues: {
       customerName: "",
-      customerEmail: "",
-      jobType: "",
-      rating: 5,
-      reviewText: "",
-      workCompleted: "",
-      recommendToOthers: true,
+      jobTypeId: "",
+      reviewType: 'audio',
+      recordingBlob: null,
     }
   });
 
   const blogPostForm = useForm<BlogPostFormData>({
     resolver: zodResolver(blogPostSchema),
     defaultValues: {
-      title: "",
-      content: "",
-      jobType: "",
+      jobTypeId: "",
+      photos: [],
+      description: "",
       customerName: "",
-      location: "",
-      tags: "",
     }
   });
 
