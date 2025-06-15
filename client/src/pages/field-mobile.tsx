@@ -267,6 +267,7 @@ export default function FieldMobile() {
         customerName: '',
         customerEmail: '',
         customerPhone: '',
+        address: '',
         workPerformed: '',
         materialsUsed: '',
         problemDescription: '',
@@ -316,7 +317,7 @@ export default function FieldMobile() {
       setBlogForm({
         jobType: '',
         workDescription: '',
-        location: '',
+        address: '',
         specialNotes: '',
         targetKeywords: ''
       });
@@ -354,6 +355,7 @@ export default function FieldMobile() {
       setReviewForm({
         customerName: '',
         jobType: '',
+        address: '',
         reviewType: 'audio',
         recordingBlob: null
       });
@@ -658,6 +660,25 @@ export default function FieldMobile() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Service address (street, city, state, zip)"
+                    value={reviewForm.address || currentAddress}
+                    onChange={(e) => setReviewForm({...reviewForm, address: e.target.value})}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={getCurrentLocation} 
+                    variant="outline" 
+                    size="sm"
+                    className="px-3"
+                  >
+                    <MapPin className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
 
               <div className="text-center space-y-4">
