@@ -98,30 +98,28 @@ export default function FieldMobile() {
           const { latitude, longitude } = position.coords;
           
           try {
-            // Use OpenStreetMap Nominatim for reverse geocoding (free, no API key needed)
+            // Use OpenStreetMap Nominatim for reverse geocoding with better accuracy
             const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&extratags=1`
             );
             
             if (response.ok) {
               const data = await response.json();
               const address = data.address || {};
               
-              // Extract detailed address components
-              const streetNumber = address.house_number || '';
+              // Extract detailed address components (no street numbers)
               const streetName = address.road || '';
               const city = address.city || address.town || address.village || '';
               const state = address.state || '';
               const zipCode = address.postcode || '';
               
-              const fullStreet = `${streetNumber} ${streetName}`.trim();
-              const fullAddress = `${fullStreet}, ${city}, ${state} ${zipCode}`.replace(/,\s*,/g, ',').replace(/^\s*,\s*/, '');
+              const fullAddress = `${streetName}, ${city}, ${state} ${zipCode}`.replace(/,\s*,/g, ',').replace(/^\s*,\s*/, '');
               
               setCurrentLocation({
-                streetName: fullStreet,
-                city,
-                state,
-                zipCode,
+                streetName: streetName || 'Street not found',
+                city: city || 'City not found',
+                state: state || 'State not found',
+                zipCode: zipCode || 'Zip not found',
                 fullAddress
               });
               
