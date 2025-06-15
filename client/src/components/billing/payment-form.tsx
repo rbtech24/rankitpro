@@ -26,6 +26,11 @@ export default function PaymentForm({
     e.preventDefault();
 
     if (!stripe || !elements || !clientSecret) {
+      toast({
+        title: 'Payment system unavailable',
+        description: 'Stripe payment processing is not configured. Please contact support.',
+        variant: 'destructive',
+      });
       return;
     }
 

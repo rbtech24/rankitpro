@@ -63,9 +63,11 @@ export default function Login() {
       // Slight delay to ensure auth state is set
       setTimeout(() => {
         if (authState.user?.role === "super_admin") {
-          setLocation("/admin");
+          setLocation("/admin");  // Super admins go to admin dashboard
+        } else if (authState.user?.role === "technician") {
+          setLocation("/technician");  // Technicians go to mobile interface
         } else {
-          setLocation("/dashboard");
+          setLocation("/dashboard");   // Company admins go to dashboard
         }
       }, 100);
     },

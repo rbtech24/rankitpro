@@ -1191,6 +1191,9 @@ function Router() {
       <Route path="/tech-mobile">
         <PrivateRoute component={TechnicianMobile} path="/tech-mobile" role="technician" />
       </Route>
+      <Route path="/technician">
+        <PrivateRoute component={TechnicianMobile} path="/technician" role="technician" />
+      </Route>
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />
