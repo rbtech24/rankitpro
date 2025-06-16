@@ -759,7 +759,6 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
   app.get("/api/auth/user", async (req, res) => {
     if (req.session?.userId) {
       try {
-        await storage.ensureInitialized();
         const user = await storage.getUser(req.session.userId);
         if (user) {
           const { password, ...userWithoutPassword } = user;
@@ -780,7 +779,6 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
   app.get("/api/auth/me", async (req, res) => {
     if (req.session?.userId) {
       try {
-        await storage.ensureInitialized();
         const user = await storage.getUser(req.session.userId);
         if (user) {
           const { password, ...userWithoutPassword } = user;
