@@ -4,18 +4,21 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
+import { useLocation } from "wouter";
 
 export default function WebsiteIntegration() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const { data: auth } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
     queryFn: getCurrentUser
   });
   
-  // Initialize embed code with company data
-  const embedCode = auth?.company
-    ? `<script src="https://checkin-pro.app/embed/${auth.company.name.toLowerCase().replace(/\s+/g, '-')}?token=a1b2c3d4e5f6g7"></script>`
-    : '<script src="https://checkin-pro.app/embed/your-company-name?token=your-token"></script>';
+  // Generate dynamic embed code with correct domain and company data
+  const companySlug = auth?.company?.name?.toLowerCase().replace(/\s+/g, '-') || 'your-company';
+  const companyId = auth?.company?.id || 'your-company-id';
+  
+  const embedCode = `<script src="https://rankitpro.com/embed/${companySlug}?company=${companyId}&token=${auth?.company?.id || 'your-token'}"></script>`;
   
   const [copied, setCopied] = useState(false);
   
@@ -32,19 +35,14 @@ export default function WebsiteIntegration() {
   };
   
   const handlePluginSettings = () => {
-    toast({
-      title: "Plugin Settings",
-      description: "The WordPress plugin settings would open here.",
-      variant: "default",
-    });
+    // Navigate to integrations page for WordPress setup
+    setLocation('/integrations');
   };
   
   const handlePreviewEmbed = () => {
-    toast({
-      title: "Preview Embed",
-      description: "A preview of the embed would show here.",
-      variant: "default",
-    });
+    // Open preview in new window/tab
+    const previewUrl = `https://rankitpro.com/embed/preview/${companySlug}?company=${companyId}`;
+    window.open(previewUrl, '_blank', 'width=800,height=600');
   };
   
   return (
@@ -77,8 +75,8 @@ export default function WebsiteIntegration() {
               </div>
               
               <div className="text-sm text-gray-500 mb-4">
-                <p>Connected to: <span className="font-medium text-gray-900">{auth?.company?.name?.toLowerCase() || 'yourwebsite'}.com</span></p>
-                <p className="mt-1">Last sync: <span className="font-medium text-gray-900">Today, 2:45 PM</span></p>
+                <p>Connected to: <span className="font-medium text-gray-900">{auth?.company?.name || 'Test Service Company'}</span></p>
+                <p className="mt-1">Last sync: <span className="font-medium text-gray-900">{new Date().toLocaleDateString()} at {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></p>
               </div>
               
               <div>
