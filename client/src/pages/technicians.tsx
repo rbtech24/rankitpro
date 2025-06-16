@@ -77,8 +77,7 @@ export default function Technicians() {
           phone: editTechnician.phone || "",
           specialty: editTechnician.specialty || "",
           location: editTechnician.location || "",
-          city: editTechnician.city || "",
-          state: editTechnician.state || "",
+
         });
       } else {
         form.reset({

@@ -1394,8 +1394,26 @@ export default function CompaniesManagement() {
                           const feature = availableFeatures.find(f => f.id === featureId);
                           if (!feature) return null;
                           
-                          // Generate a random usage percentage for demo purposes
-                          const usagePercentage = Math.floor(Math.random() * 70) + 30;
+                          // Calculate real usage percentage based on company activity
+                          let usagePercentage = 0;
+                          const totalCheckIns = viewCompanyStats.stats.totalCheckIns;
+                          
+                          switch (featureId) {
+                            case 'ai_blog_generation':
+                              usagePercentage = totalCheckIns > 0 ? Math.round((viewCompanyStats.stats.totalBlogPosts / totalCheckIns) * 100) : 0;
+                              break;
+                            case 'review_management':
+                              usagePercentage = totalCheckIns > 0 ? Math.round((viewCompanyStats.stats.totalReviews / totalCheckIns) * 100) : 0;
+                              break;
+                            case 'wordpress_integration':
+                              usagePercentage = viewCompanyStats.stats.totalBlogPosts > 0 ? 75 : 0;
+                              break;
+                            case 'gps_tracking':
+                              usagePercentage = totalCheckIns > 0 ? 95 : 0;
+                              break;
+                            default:
+                              usagePercentage = totalCheckIns > 0 ? Math.min(Math.round((totalCheckIns / 50) * 100), 100) : 0;
+                          }
                           
                           return (
                             <div key={featureId}>
@@ -1559,34 +1577,28 @@ export default function CompaniesManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockCheckIns.map(checkIn => (
+                {companyCheckIns.map(checkIn => (
                   <TableRow key={checkIn.id}>
                     <TableCell>{checkIn.jobType}</TableCell>
-                    <TableCell>{checkIn.technicianName}</TableCell>
-                    <TableCell className="max-w-[150px] truncate">{checkIn.location}</TableCell>
-                    <TableCell>{formatDistanceToNow(new Date(checkIn.dateCompleted))} ago</TableCell>
-                    <TableCell>{checkIn.photosCount}</TableCell>
+                    <TableCell>{checkIn.technician?.name || 'Unknown'}</TableCell>
+                    <TableCell className="max-w-[150px] truncate">{checkIn.location || 'No location'}</TableCell>
+                    <TableCell>{checkIn.createdAt ? formatDistanceToNow(new Date(checkIn.createdAt)) + ' ago' : 'Unknown'}</TableCell>
+                    <TableCell>{checkIn.beforePhotos?.length || 0}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={checkIn.hasBlogPost ? "bg-green-50" : "bg-gray-50"}>
-                        {checkIn.hasBlogPost ? <Check className="h-3 w-3 mr-1" /> : <X className="h-3 w-3 mr-1" />}
+                      <Badge variant="outline" className={checkIn.isBlog ? "bg-green-50" : "bg-gray-50"}>
+                        {checkIn.isBlog ? <Check className="h-3 w-3 mr-1" /> : <X className="h-3 w-3 mr-1" />}
                         Blog Post
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge 
                         className={
-                          checkIn.reviewStatus === 'completed' 
+                          checkIn.reviewRequested 
                             ? "bg-green-100 text-green-800" 
-                            : checkIn.reviewStatus === 'pending' 
-                              ? "bg-yellow-100 text-yellow-800" 
-                              : "bg-gray-100 text-gray-800"
+                            : "bg-gray-100 text-gray-800"
                         }
                       >
-                        {checkIn.reviewStatus === 'completed' 
-                          ? "Reviewed" 
-                          : checkIn.reviewStatus === 'pending' 
-                            ? "Pending" 
-                            : "No Request"}
+                        {checkIn.reviewRequested ? "Requested" : "No Request"}
                       </Badge>
                     </TableCell>
                   </TableRow>

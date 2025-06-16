@@ -40,7 +40,7 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react";
-import DashboardLayout from "@/components/layout/dashboard-layout";
+
 
 interface ReviewMetrics {
   totalRequests: number;
@@ -355,6 +355,6 @@ export default function ReviewAnalytics() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }
