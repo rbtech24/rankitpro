@@ -42,10 +42,10 @@ export default function Sidebar({ className }: SidebarProps) {
             <div className="mb-4">
               <div className="px-3 mb-2 text-xs text-gray-500 uppercase font-semibold">System Administration</div>
               <Link 
-                href="/dashboard" 
+                href="/system-overview" 
                 className={cn(
                   "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 text-gray-700 no-underline",
-                  isActive("/dashboard") && "bg-blue-50 border-l-4 border-blue-600 text-blue-700"
+                  isActive("/system-overview") && "bg-blue-50 border-l-4 border-blue-600 text-blue-700"
                 )}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">

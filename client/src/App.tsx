@@ -127,7 +127,7 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
   // Role-based access control removed - allow normal navigation
   
   if (role && auth.user.role !== role && auth.user.role !== "super_admin") {
-    return <Redirect to="/dashboard" />;
+    return auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : <Redirect to="/dashboard" />;
   }
   
   return <Component {...rest} />;
@@ -205,6 +205,7 @@ function Router() {
       <Route path="/login">
         {auth?.user && !isLoggedOut ? 
           (auth.user.role === "technician" ? <Redirect to="/field-mobile" /> : 
+           auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> :
            <Redirect to="/dashboard" />) 
           : <Login />}
       </Route>
@@ -223,7 +224,9 @@ function Router() {
         <ResetPassword />
       </Route>
       <Route path="/register">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Onboarding />}
+        {auth?.user ? 
+          (auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : <Redirect to="/dashboard" />) 
+          : <Onboarding />}
       </Route>
       {/* Logout route - must be before other routes */}
       <Route path="/logout">
@@ -231,7 +234,9 @@ function Router() {
       </Route>
       
       <Route path="/onboarding">
-        {auth?.user ? <Redirect to="/dashboard" /> : <Onboarding />}
+        {auth?.user ? 
+          (auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : <Redirect to="/dashboard" />) 
+          : <Onboarding />}
       </Route>
       <Route path="/">
         <Home />
