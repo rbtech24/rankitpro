@@ -2900,6 +2900,73 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  // Subscription Plans API
+  app.get("/api/subscription/plans", async (req, res) => {
+    try {
+      const plans = {
+        starter: {
+          name: "Starter",
+          price: 29,
+          interval: "month",
+          description: "For small businesses just getting started",
+          features: {
+            technicians: 3,
+            checkInsPerMonth: 100,
+            aiGeneratedContent: true,
+            basicReporting: true,
+            emailSupport: true,
+            wordpressIntegration: true,
+            customBranding: false,
+            advancedAnalytics: false,
+            prioritySupport: false,
+            apiAccess: false
+          }
+        },
+        pro: {
+          name: "Pro",
+          price: 79,
+          interval: "month",
+          description: "For growing businesses with more needs",
+          features: {
+            technicians: 10,
+            checkInsPerMonth: 500,
+            aiGeneratedContent: true,
+            basicReporting: true,
+            emailSupport: true,
+            wordpressIntegration: true,
+            customBranding: true,
+            advancedAnalytics: true,
+            prioritySupport: true,
+            apiAccess: false
+          }
+        },
+        agency: {
+          name: "Agency",
+          price: 199,
+          interval: "month",
+          description: "For larger businesses with advanced needs",
+          features: {
+            technicians: "Unlimited",
+            checkInsPerMonth: "Unlimited",
+            aiGeneratedContent: true,
+            basicReporting: true,
+            emailSupport: true,
+            wordpressIntegration: true,
+            customBranding: true,
+            advancedAnalytics: true,
+            prioritySupport: true,
+            apiAccess: true
+          }
+        }
+      };
+      
+      res.json({ plans });
+    } catch (error) {
+      console.error("Get subscription plans error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Production authentication removed - using main auth system
 
   // Support Ticket Routes

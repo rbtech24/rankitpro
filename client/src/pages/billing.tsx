@@ -75,6 +75,20 @@ export default function Billing() {
     },
     enabled: !!auth?.company
   });
+
+  // Query for subscription plans
+  const { data: plansData, isLoading: isLoadingPlans } = useQuery({
+    queryKey: ['/api/subscription/plans'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/subscription/plans');
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching plans data:', error);
+        return null;
+      }
+    }
+  });
   
   // Update state based on subscription data
   useEffect(() => {
@@ -394,8 +408,8 @@ export default function Billing() {
                       <CardTitle>Starter</CardTitle>
                       <CardDescription>For small businesses just getting started</CardDescription>
                       <div className="mt-2">
-                        <span className="text-3xl font-bold">${subscriptionData?.plans?.starter?.price || 29}</span>
-                        <span className="text-gray-500">/{subscriptionData?.plans?.starter?.interval || 'month'}</span>
+                        <span className="text-3xl font-bold">${plansData?.plans?.starter?.price || 29}</span>
+                        <span className="text-gray-500">/{plansData?.plans?.starter?.interval || 'month'}</span>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -426,8 +440,8 @@ export default function Billing() {
                       <CardTitle>Pro</CardTitle>
                       <CardDescription>For growing businesses with more needs</CardDescription>
                       <div className="mt-2">
-                        <span className="text-3xl font-bold">$79</span>
-                        <span className="text-gray-500">/month</span>
+                        <span className="text-3xl font-bold">${plansData?.plans?.pro?.price || 79}</span>
+                        <span className="text-gray-500">/{plansData?.plans?.pro?.interval || 'month'}</span>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -458,8 +472,8 @@ export default function Billing() {
                       <CardTitle>Agency</CardTitle>
                       <CardDescription>For larger businesses with advanced needs</CardDescription>
                       <div className="mt-2">
-                        <span className="text-3xl font-bold">$199</span>
-                        <span className="text-gray-500">/month</span>
+                        <span className="text-3xl font-bold">${plansData?.plans?.agency?.price || 199}</span>
+                        <span className="text-gray-500">/{plansData?.plans?.agency?.interval || 'month'}</span>
                       </div>
                     </CardHeader>
                     <CardContent>
