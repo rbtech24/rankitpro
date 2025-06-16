@@ -13,7 +13,8 @@ export function useAuth() {
 
   return {
     user: auth?.user || null,
-    isAuthenticated: auth?.isAuthenticated || false,
+    company: auth?.company || null,
+    isAuthenticated: !!auth?.user,
     isLoading,
     error
   };

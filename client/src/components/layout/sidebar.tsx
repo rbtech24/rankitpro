@@ -103,8 +103,8 @@ export default function Sidebar({ className }: SidebarProps) {
           </>
         )}
 
-        {/* Company Admin View */}
-        {isCompanyAdmin && (
+        {/* Company Admin View - Only show if NOT super admin */}
+        {isCompanyAdmin && !isSuperAdmin && (
           <>
             <div className="mb-4">
               <div className="px-3 mb-2 text-xs text-gray-500 uppercase font-semibold">Main</div>
@@ -240,8 +240,8 @@ export default function Sidebar({ className }: SidebarProps) {
           </>
         )}
 
-        {/* Technician View */}
-        {isTechnician && (
+        {/* Technician View - Only show if NOT super admin */}
+        {isTechnician && !isSuperAdmin && (
           <>
             <div className="mb-4">
               <div className="px-3 mb-2 text-xs text-gray-500 uppercase font-semibold">Field Work</div>
