@@ -68,6 +68,15 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
       return res.json();
     }
   });
+
+  // Get job types
+  const { data: jobTypes, isLoading: jobTypesLoading } = useQuery<JobType[]>({
+    queryKey: ["/api/job-types"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/job-types");
+      return res.json();
+    }
+  });
   
   // Form definition
   const form = useForm<CheckinFormValues>({
@@ -286,6 +295,7 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
+                      disabled={jobTypesLoading}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -293,9 +303,17 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {JOB_TYPES.map((jobType) => (
-                          <SelectItem key={jobType} value={jobType}>{jobType}</SelectItem>
-                        ))}
+                        {jobTypesLoading ? (
+                          <SelectItem value="loading" disabled>Loading job types...</SelectItem>
+                        ) : jobTypes && jobTypes.length > 0 ? (
+                          jobTypes.map((jobType) => (
+                            <SelectItem key={jobType.id} value={jobType.name}>
+                              {jobType.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>No job types found</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />

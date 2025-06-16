@@ -35,9 +35,11 @@ type Technician = TechnicianWithStats;
 const techFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
-  phone: z.string().min(10, "Phone number is required"),
+  phone: z.string().regex(/^\+?[\d\s\-\(\)]{10,}$/, "Please enter a valid phone number"),
   specialty: z.string().optional(),
   location: z.string().min(2, "Location is required"),
+  city: z.string().min(2, "City is required"),
+  state: z.string().min(2, "State is required"),
 });
 
 type TechFormValues = z.infer<typeof techFormSchema>;
@@ -59,6 +61,8 @@ export default function Technicians() {
       phone: "",
       specialty: "",
       location: "",
+      city: "",
+      state: "",
     },
   });
   
@@ -72,6 +76,8 @@ export default function Technicians() {
           phone: editTechnician.phone || "",
           specialty: editTechnician.specialty || "",
           location: editTechnician.location || "",
+          city: editTechnician.city || "",
+          state: editTechnician.state || "",
         });
       } else {
         form.reset({

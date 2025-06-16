@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,12 +23,35 @@ export default function BlogPosts() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: blogPosts, isLoading } = useQuery<BlogPost[]>({
     queryKey: ["/api/blog-posts"],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/blog-posts");
       return res.json();
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      const res = await apiRequest("DELETE", `/api/blog-posts/${postId}`);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Blog post deleted successfully.",
+        variant: "default",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/blog-posts"] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete blog post. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -49,6 +72,12 @@ export default function BlogPosts() {
     if (post) {
       setSelectedPost(post);
       setEditModalOpen(true);
+    }
+  };
+
+  const handleDeletePost = (postId: number) => {
+    if (confirm("Are you sure you want to delete this blog post? This action cannot be undone.")) {
+      deleteMutation.mutate(postId);
     }
   };
   
@@ -124,9 +153,14 @@ export default function BlogPosts() {
                     <span className="text-xs text-gray-400">
                       {post.checkInId ? `From Check-in #${post.checkInId}` : 'Manual Post'}
                     </span>
-                    <Button variant="outline" size="sm" onClick={() => handleEditPost(post.id)}>
-                      Edit
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleEditPost(post.id)}>
+                        Edit
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={() => handleDeletePost(post.id)}>
+                        Delete
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
