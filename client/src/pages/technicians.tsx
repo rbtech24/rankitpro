@@ -35,11 +35,12 @@ type Technician = TechnicianWithStats;
 const techFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
-  phone: z.string().regex(/^\+?[\d\s\-\(\)]{10,}$/, "Please enter a valid phone number"),
+  phone: z.string().regex(/^\(\d{3}\) \d{3}-\d{4}$/, "Phone number must be in format (123) 456-7890"),
   specialty: z.string().optional(),
   location: z.string().min(2, "Location is required"),
   city: z.string().min(2, "City is required"),
   state: z.string().min(2, "State is required"),
+  password: z.string().min(6, "Password must be at least 6 characters").optional(),
 });
 
 type TechFormValues = z.infer<typeof techFormSchema>;

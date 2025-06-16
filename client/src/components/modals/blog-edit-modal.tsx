@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import ReactQuill from 'react-quill';
 import {
   Dialog,
   DialogContent,
@@ -138,14 +138,26 @@ export default function BlogEditModal({ isOpen, onClose, blogPost }: BlogEditMod
           
           <div className="space-y-2">
             <Label htmlFor="content">Content</Label>
-            <Textarea
-              id="content"
+            <ReactQuill
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={setContent}
               placeholder="Enter blog post content"
-              rows={15}
-              className="min-h-[400px]"
-              required
+              modules={{
+                toolbar: [
+                  [{ 'header': [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline', 'strike'],
+                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                  ['blockquote', 'code-block'],
+                  ['link', 'image'],
+                  ['clean']
+                ],
+              }}
+              formats={[
+                'header', 'bold', 'italic', 'underline', 'strike',
+                'list', 'bullet', 'blockquote', 'code-block',
+                'link', 'image'
+              ]}
+              style={{ height: '300px', marginBottom: '50px' }}
             />
           </div>
 

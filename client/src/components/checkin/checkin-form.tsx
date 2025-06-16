@@ -57,6 +57,37 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoPreviewUrls, setPhotoPreviewUrls] = useState<string[]>([]);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+  // Reverse geocoding function
+  const reverseGeocode = async (lat: number, lon: number): Promise<string> => {
+    try {
+      // Using a free geocoding service (Nominatim)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        const address = data.address;
+        
+        // Build a readable address
+        const parts = [];
+        if (address.house_number) parts.push(address.house_number);
+        if (address.road) parts.push(address.road);
+        if (address.city || address.town || address.village) {
+          parts.push(address.city || address.town || address.village);
+        }
+        if (address.state) parts.push(address.state);
+        if (address.postcode) parts.push(address.postcode);
+        
+        return parts.join(', ') || data.display_name;
+      }
+      throw new Error('Geocoding failed');
+    } catch (error) {
+      console.error('Reverse geocoding error:', error);
+      throw error;
+    }
+  };
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -153,10 +184,15 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
         form.setValue("latitude", latitude);
         form.setValue("longitude", longitude);
         
-        // Try to get human-readable address using reverse geocoding
-        // In a real app, you'd use a geocoding service like Google Maps API
-        // For now, we'll just set coordinates as the location string
-        form.setValue("location", `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° W`);
+        // Use reverse geocoding to get street address
+        reverseGeocode(latitude, longitude)
+          .then(address => {
+            form.setValue("location", address);
+          })
+          .catch(() => {
+            // Fallback to coordinates if geocoding fails
+            form.setValue("location", `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+          });
         setIsGettingLocation(false);
       },
       (error) => {
