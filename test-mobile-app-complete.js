@@ -158,12 +158,11 @@ async function testReviewRequest(cookies) {
   try {
     const response = await apiRequest('POST', '/api/review-requests', {
       customerName: 'John Mobile Test',
-      customerEmail: 'john@mobiletest.com',
-      customerPhone: '555-0123',
-      reviewRequest: 'Please leave us a review for our mobile service!',
-      latitude: 40.7128,
-      longitude: -74.0060,
-      address: '123 Test Street, New York, NY 10001'
+      email: 'john@mobiletest.com',
+      phone: '555-0123',
+      method: 'email',
+      jobType: 'General Service',
+      customMessage: 'Please leave us a review for our mobile service!'
     }, cookies);
 
     if (response.status === 200 || response.status === 201) {

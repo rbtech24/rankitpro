@@ -1952,35 +1952,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
   
-  app.post("/api/review-requests", isAuthenticated, async (req, res) => {
-    try {
-      const companyId = req.user.companyId;
-      
-      if (!companyId) {
-        return res.status(400).json({ message: "No company associated with this user" });
-      }
-      
-      const data = insertReviewRequestSchema.parse({
-        ...req.body,
-        companyId
-      });
-      
-      const reviewRequest = await storage.createReviewRequest(data);
-      
-      // In a real app, this would send an email or SMS to the customer
-      // For now, just return the created request
-      
-      res.status(201).json(reviewRequest);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const validationError = fromZodError(error);
-        return res.status(400).json({ message: validationError.message });
-      }
-      
-      console.error("Create review request error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+
   
   // CRM Integration endpoints
   app.get("/api/crm/available", isAuthenticated, async (req, res) => {
