@@ -11,9 +11,11 @@ import { Separator } from "@/components/ui/separator";
 import { Copy, Check, Globe, Code, Users, Settings, Zap, Monitor, Globe2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useLocation } from "wouter";
 
 export default function SetupGuide() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [copiedItems, setCopiedItems] = useState<string[]>([]);
   
   const { data: company } = useQuery<any>({
@@ -308,8 +310,8 @@ export default function SetupGuide() {
                 <div>
                   <Label className="text-base font-semibold">Step 1: Add Technicians</Label>
                   <p className="text-sm text-gray-600 mb-3">Go to the Users section in your dashboard to add technician accounts:</p>
-                  <Button asChild>
-                    <a href="/users">Go to User Management</a>
+                  <Button onClick={() => setLocation('/user-management')}>
+                    Go to User Management
                   </Button>
                 </div>
 
@@ -337,7 +339,7 @@ export default function SetupGuide() {
                     <p className="text-sm mb-2">To log your daily visits:</p>
                     <ol className="text-sm space-y-1 ml-4">
                       <li>1. Open your mobile browser</li>
-                      <li>2. Go to: <strong>{window.location.origin}/mobile</strong></li>
+                      <li>2. Go to: <strong>rankitpro.com/mobile</strong></li>
                       <li>3. Login with your provided credentials</li>
                       <li>4. Add the page to your home screen for easy access</li>
                     </ol>
@@ -372,11 +374,11 @@ export default function SetupGuide() {
                   <Label className="text-base font-semibold">Mobile App URL</Label>
                   <p className="text-sm text-gray-600 mb-3">Share this URL with your technicians:</p>
                   <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
-                    <code className="flex-1 text-sm font-mono">{window.location.origin}/mobile</code>
+                    <code className="flex-1 text-sm font-mono">rankitpro.com/mobile</code>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => copyToClipboard(`${window.location.origin}/mobile`, 'mobile-url')}
+                      onClick={() => copyToClipboard('https://rankitpro.com/mobile', 'mobile-url')}
                     >
                       {copiedItems.includes('mobile-url') ? (
                         <Check className="w-4 h-4" />
