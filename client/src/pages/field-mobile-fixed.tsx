@@ -372,10 +372,14 @@ export default function FieldMobile() {
         formData.append('videoFile', audioReviewForm.videoFile);
       }
 
-      await apiRequest('/api/review-responses', {
+      const response = await fetch('/api/review-responses', {
         method: 'POST',
         body: formData,
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit audio/video review');
+      }
 
       toast({
         title: "Success",

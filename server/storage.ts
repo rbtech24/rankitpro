@@ -1887,6 +1887,11 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
+  // Job Types operations
+  async getJobTypesByCompany(companyId: number): Promise<JobType[]> {
+    return await db.select().from(schema.jobTypes).where(eq(schema.jobTypes.companyId, companyId));
+  }
+
   // Missing methods implementation
   async deleteCheckIn(id: number): Promise<boolean> {
     const result = await db.delete(schema.checkIns).where(eq(schema.checkIns.id, id));

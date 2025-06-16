@@ -1479,8 +1479,24 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       }
       
       // Parse and validate the check-in data with flexible field mapping
+      const jobTypeValue = req.body.jobType || req.body.jobTypeId;
+      let jobTypeName = '';
+      
+      if (jobTypeValue) {
+        // If it's a number (jobTypeId), get the job type name
+        if (!isNaN(jobTypeValue)) {
+          const jobTypes = await storage.getJobTypesByCompany(companyId);
+          const jobType = jobTypes.find(jt => jt.id === parseInt(jobTypeValue));
+          jobTypeName = jobType ? jobType.name : 'General Service';
+        } else {
+          jobTypeName = jobTypeValue;
+        }
+      } else {
+        jobTypeName = 'General Service';
+      }
+
       const checkInData = {
-        jobType: req.body.jobType || req.body.jobTypeId || '1', // Default to first job type
+        jobType: jobTypeName,
         notes: req.body.notes || req.body.description || '',
         latitude: req.body.latitude ? parseFloat(req.body.latitude) : null,
         longitude: req.body.longitude ? parseFloat(req.body.longitude) : null,
@@ -2405,27 +2421,41 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
 
   app.post("/api/review-requests", isAuthenticated, async (req, res) => {
     try {
-      const reviewRequestData = insertReviewRequestSchema.parse(req.body);
+      const companyId = req.user.companyId;
       
-      // Ensure company ID is set - super admin can create for any company, others for their own
-      if (!reviewRequestData.companyId) {
-        if (req.user.role === "super_admin") {
-          return res.status(400).json({ message: "Company ID is required for super admin requests" });
-        }
-        reviewRequestData.companyId = req.user.companyId!;
-      }
-      
-      // Validate user has company association
-      if (!req.user.companyId && req.user.role !== "super_admin") {
+      if (!companyId) {
         return res.status(400).json({ message: "No company associated with this user" });
       }
+
+      // Get technician for the authenticated user
+      let technicianId = req.body.technicianId;
       
-      // Check permissions
-      if (req.user.role !== "super_admin" && req.user.companyId !== reviewRequestData.companyId) {
-        return res.status(403).json({ message: "Forbidden" });
+      if (req.user.role === "technician") {
+        const technicians = await storage.getTechniciansByCompany(companyId);
+        const technician = technicians.find(tech => tech.userId === req.user.id);
+        
+        if (!technician) {
+          return res.status(404).json({ message: "Technician record not found" });
+        }
+        
+        technicianId = technician.id;
       }
-      
-      const reviewRequest = await storage.createReviewRequest(reviewRequestData);
+
+      // Map mobile app fields to server schema
+      const reviewRequestData = {
+        customerName: req.body.customerName,
+        email: req.body.customerEmail || req.body.email || null,
+        phone: req.body.customerPhone || req.body.phone || null,
+        method: req.body.method || 'email',
+        jobType: req.body.jobType || null,
+        customMessage: req.body.reviewRequest || req.body.customMessage || null,
+        technicianId,
+        companyId,
+        status: 'pending'
+      };
+
+      const validatedData = insertReviewRequestSchema.parse(reviewRequestData);
+      const reviewRequest = await storage.createReviewRequest(validatedData);
       res.json(reviewRequest);
     } catch (error) {
       if (error instanceof z.ZodError) {
