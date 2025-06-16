@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { TestimonialRecorder } from '@/components/testimonial-recorder';
 import { apiRequest } from '@/lib/queryClient';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import type { Testimonial } from '@shared/schema';
 import { 
   Video, 
@@ -139,16 +140,19 @@ export default function TestimonialsPage() {
 
   if (showRecorder) {
     return (
-      <TestimonialRecorder
-        technicianId={1} // This would be passed from context/props
-        onSubmit={handleSubmitTestimonial}
-        onCancel={() => setShowRecorder(false)}
-      />
+      <DashboardLayout>
+        <TestimonialRecorder
+          technicianId={1} // This would be passed from context/props
+          onSubmit={handleSubmitTestimonial}
+          onCancel={() => setShowRecorder(false)}
+        />
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Customer Testimonials</h1>
@@ -511,6 +515,7 @@ export default function TestimonialsPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
