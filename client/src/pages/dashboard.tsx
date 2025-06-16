@@ -252,20 +252,6 @@ export default function Dashboard() {
         {isSuperAdmin ? (
           <SuperAdminDashboard />
             
-            {/* Companies Management Tab */}
-            <TabsContent value="companies">
-              <div className="space-y-6">
-                <CompaniesManagement />
-              </div>
-            </TabsContent>
-            
-            {/* Billing & Revenue Tab */}
-            <TabsContent value="billing">
-              <div className="space-y-6">
-                <BillingManagement />
-              </div>
-            </TabsContent>
-            
             {/* Integrations Tab */}
             <TabsContent value="integrations">
               <div className="space-y-6">

@@ -10,7 +10,8 @@ import NotFound from "@/pages/not-found";
 import { performImmediateLogout } from "./lib/logout";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
-import Dashboard from "@/pages/new-dashboard";
+import Dashboard from "@/pages/dashboard-fixed";
+import SubscriptionPlans from "@/pages/subscription-plans";
 import AdminDashboard from "@/pages/admin-dashboard";
 import TechnicianDashboard from "@/pages/technician-dashboard";
 import CheckIns from "@/pages/check-ins";
@@ -1159,6 +1160,9 @@ function Router() {
       </Route>
       <Route path="/admin-system">
         <PrivateRoute component={AdminSystem} path="/admin-system" role="super_admin" />
+      </Route>
+      <Route path="/subscription-plans">
+        <PrivateRoute component={SubscriptionPlans} path="/subscription-plans" role="super_admin" />
       </Route>
       <Route path="/system-settings">
         <PrivateRoute component={SystemSettings} path="/system-settings" role="super_admin" />
