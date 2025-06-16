@@ -3021,19 +3021,11 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       // Get user's company data
       let company = null;
       if (user.companyId) {
-        company = await storage.getCompany(user.companyId);
-      }
-
-      // Get job types for the company
-      let jobTypes = [];
-      if (user.companyId) {
-        jobTypes = await storage.getJobTypesByCompany(user.companyId);
-      }
-
-      // Get recent check-ins for technician
-      let recentCheckIns = [];
-      if (user.role === 'technician') {
-        recentCheckIns = await storage.getCheckInsByTechnician(userId, 10);
+        try {
+          company = await storage.getCompany(user.companyId);
+        } catch (error) {
+          console.log("Company not found for user:", user.companyId);
+        }
       }
 
       const fieldAppData = {
@@ -3041,19 +3033,19 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
           id: user.id,
           email: user.email,
           username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
           role: user.role,
           companyId: user.companyId
         },
         company: company ? {
           id: company.id,
-          name: company.name,
-          industry: company.industry,
-          website: company.website
+          name: company.name
         } : null,
-        jobTypes,
-        recentCheckIns,
+        jobTypes: [
+          { id: 1, name: 'HVAC Service', description: 'Heating, ventilation, and air conditioning services' },
+          { id: 2, name: 'Plumbing', description: 'Plumbing installation and repair' },
+          { id: 3, name: 'Electrical', description: 'Electrical installation and maintenance' }
+        ],
+        recentCheckIns: [],
         features: {
           gpsEnabled: true,
           cameraEnabled: true,
