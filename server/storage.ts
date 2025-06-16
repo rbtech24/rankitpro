@@ -159,6 +159,30 @@ export interface IStorage {
   updateAPICredentialLastUsed(credentialId: number): Promise<void>;
   deactivateAPICredentials(credentialId: number, companyId: number): Promise<boolean>;
   updateAPICredentialSecret(credentialId: number, companyId: number, secretKeyHash: string): Promise<void>;
+
+  // Support Ticket operations
+  createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
+  getSupportTicket(id: number): Promise<SupportTicket | undefined>;
+  getSupportTicketByNumber(ticketNumber: string): Promise<SupportTicket | undefined>;
+  getSupportTicketsByCompany(companyId: number): Promise<SupportTicket[]>;
+  getAllSupportTickets(filters?: {
+    status?: string;
+    priority?: string;
+    category?: string;
+    assignedTo?: number;
+  }): Promise<SupportTicket[]>;
+  updateSupportTicket(id: number, updates: Partial<SupportTicket>): Promise<SupportTicket>;
+  assignSupportTicket(id: number, adminId: number): Promise<SupportTicket>;
+  resolveSupportTicket(id: number, resolution: string, resolvedBy: number): Promise<SupportTicket>;
+  createSupportTicketResponse(response: InsertSupportTicketResponse): Promise<SupportTicketResponse>;
+  getSupportTicketResponses(ticketId: number): Promise<SupportTicketResponse[]>;
+  getSupportTicketStats(): Promise<{
+    totalTickets: number;
+    openTickets: number;
+    resolvedTickets: number;
+    averageResolutionTime: number;
+    ticketsByPriority: { [key: string]: number };
+  }>;
   
   // Sales Commission operations
   getAllSalesPeople(): Promise<SalesPerson[]>;
@@ -2309,22 +2333,33 @@ export class DatabaseStorage implements IStorage {
     category?: string;
     assignedTo?: number;
   }): Promise<SupportTicket[]> {
-    let query = db.select().from(supportTickets);
+    const conditions = [];
     
     if (filters?.status) {
-      query = query.where(eq(supportTickets.status, filters.status));
+      conditions.push(eq(supportTickets.status, filters.status as any));
     }
     if (filters?.priority) {
-      query = query.where(eq(supportTickets.priority, filters.priority));
+      conditions.push(eq(supportTickets.priority, filters.priority as any));
     }
     if (filters?.category) {
-      query = query.where(eq(supportTickets.category, filters.category));
+      conditions.push(eq(supportTickets.category, filters.category as any));
     }
     if (filters?.assignedTo) {
-      query = query.where(eq(supportTickets.assignedTo, filters.assignedTo));
+      conditions.push(eq(supportTickets.assignedTo, filters.assignedTo));
     }
     
-    return await query.orderBy(desc(supportTickets.createdAt));
+    if (conditions.length > 0) {
+      return await db
+        .select()
+        .from(supportTickets)
+        .where(and(...conditions))
+        .orderBy(desc(supportTickets.createdAt));
+    } else {
+      return await db
+        .select()
+        .from(supportTickets)
+        .orderBy(desc(supportTickets.createdAt));
+    }
   }
 
   async updateSupportTicket(id: number, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined> {
