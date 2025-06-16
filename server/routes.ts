@@ -38,6 +38,7 @@ import generateContentRoutes from "./routes/generate-content";
 // Removed conflicting mobile routes
 import crmIntegrationRoutes from "./routes/crm-integration";
 import salesRoutes from "./routes/sales";
+import supportRoutes from "./routes/support";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
 import { analyticsService } from "./services/analytics-service";
@@ -2724,6 +2725,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
   app.use("/api/crm", crmIntegrationRoutes);
   app.use("/api/crm-integration", crmIntegrationRoutes);
   app.use("/api/sales", salesRoutes);
+  app.use("/api/support", supportRoutes);
   
   // MOBILE ROUTES LAST TO PREVENT INTERFERENCE WITH OTHER APIs
   // Removed conflicting mobile authentication routes

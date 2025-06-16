@@ -1159,6 +1159,9 @@ function Router() {
       <Route path="/companies-management">
         <PrivateRoute component={CompaniesManagement} path="/companies-management" role="super_admin" />
       </Route>
+      <Route path="/customer-support">
+        <PrivateRoute component={CustomerSupport} path="/customer-support" role="super_admin" />
+      </Route>
       <Route path="/admin-user-management">
         <PrivateRoute component={AdminUserManagement} path="/admin-user-management" role="super_admin" />
       </Route>
