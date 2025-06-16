@@ -266,6 +266,22 @@ export interface IStorage {
     averageResolutionTime: number;
     ticketsByPriority: { [key: string]: number };
   }>;
+
+  // System Admin Dashboard methods
+  getCompanyCount(): Promise<number>;
+  getActiveCompanyCount(): Promise<number>;
+  getUserCount(): Promise<number>;
+  getTechnicianCount(): Promise<number>;
+  getCheckInCount(): Promise<number>;
+  getReviewCount(): Promise<number>;
+  getAverageRating(): Promise<number>;
+  getCheckInChartData(): Promise<Array<{date: string, count: number}>>;
+  getReviewChartData(): Promise<Array<{date: string, count: number}>>;
+  getCompanyGrowthData(): Promise<Array<{month: string, newCompanies: number}>>;
+  getRevenueData(): Promise<Array<{month: string, revenue: number}>>;
+  getAllCompaniesForAdmin(): Promise<Array<any>>;
+  getRecentSystemActivity(): Promise<Array<{description: string, timestamp: string}>>;
+  getBillingOverview(): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -2087,7 +2103,7 @@ export class DatabaseStorage implements IStorage {
   async getActiveCompanyCount(): Promise<number> {
     const result = await db.select({ count: sql<number>`count(*)` })
       .from(schema.companies)
-      .where(eq(schema.companies.active, true));
+      .where(eq(schema.companies.isTrialActive, true));
     return result[0]?.count || 0;
   }
 
@@ -2180,9 +2196,8 @@ export class DatabaseStorage implements IStorage {
     return await db.select({
       id: schema.companies.id,
       name: schema.companies.name,
-      email: schema.companies.email,
-      subscriptionPlan: schema.companies.subscriptionPlan,
-      active: schema.companies.active,
+      plan: schema.companies.plan,
+      isTrialActive: schema.companies.isTrialActive,
       createdAt: schema.companies.createdAt
     }).from(schema.companies);
   }
@@ -2241,6 +2256,69 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // Blog post implementations using database
+  async getBlogPost(id: number): Promise<BlogPost | undefined> {
+    const [blogPost] = await db.select().from(schema.blogPosts).where(eq(schema.blogPosts.id, id));
+    return blogPost;
+  }
+
+  async getBlogPostsByCompany(companyId: number): Promise<BlogPost[]> {
+    return await db.select().from(schema.blogPosts).where(eq(schema.blogPosts.companyId, companyId));
+  }
+
+  async createBlogPost(blogPostData: InsertBlogPost): Promise<BlogPost> {
+    const [blogPost] = await db.insert(schema.blogPosts).values(blogPostData).returning();
+    return blogPost;
+  }
+
+  async updateBlogPost(id: number, updates: Partial<BlogPost>): Promise<BlogPost> {
+    const [blogPost] = await db.update(schema.blogPosts)
+      .set(updates)
+      .where(eq(schema.blogPosts.id, id))
+      .returning();
+    if (!blogPost) {
+      throw new Error("Blog post not found");
+    }
+    return blogPost;
+  }
+
+  // Review request implementations using database
+  async getReviewRequest(id: number): Promise<ReviewRequest | undefined> {
+    const [reviewRequest] = await db.select().from(schema.reviewRequests).where(eq(schema.reviewRequests.id, id));
+    return reviewRequest;
+  }
+
+  async getReviewRequestsByCompany(companyId: number): Promise<ReviewRequest[]> {
+    return await db.select().from(schema.reviewRequests).where(eq(schema.reviewRequests.companyId, companyId));
+  }
+
+  async createReviewRequest(reviewRequestData: InsertReviewRequest): Promise<ReviewRequest> {
+    const [reviewRequest] = await db.insert(schema.reviewRequests).values(reviewRequestData).returning();
+    return reviewRequest;
+  }
+
+  async updateReviewRequest(id: number, updates: Partial<ReviewRequest>): Promise<ReviewRequest> {
+    const [reviewRequest] = await db.update(schema.reviewRequests)
+      .set(updates)
+      .where(eq(schema.reviewRequests.id, id))
+      .returning();
+    if (!reviewRequest) {
+      throw new Error("Review request not found");
+    }
+    return reviewRequest;
+  }
+
+  // Review response implementations using database
+  async getReviewResponse(id: number): Promise<ReviewResponse | undefined> {
+    const [reviewResponse] = await db.select().from(schema.reviewResponses).where(eq(schema.reviewResponses.id, id));
+    return reviewResponse;
+  }
+
+  async createReviewResponse(reviewResponseData: InsertReviewResponse): Promise<ReviewResponse> {
+    const [reviewResponse] = await db.insert(schema.reviewResponses).values(reviewResponseData).returning();
+    return reviewResponse;
+  }
+
   async getAllSupportTickets(): Promise<Array<any>> {
     try {
       return await db.select().from(schema.supportTickets);
@@ -2249,61 +2327,69 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
   }
-  async getCheckIn(id: number): Promise<CheckIn | null> {
-    const checkIn = this.checkIns.get(id);
-    return checkIn || null;
+  // Database implementations for check-ins
+  async getCheckIn(id: number): Promise<CheckIn | undefined> {
+    const [checkIn] = await db.select().from(schema.checkIns).where(eq(schema.checkIns.id, id));
+    return checkIn;
   }
 
-  async getCheckInsByCompany(companyId: number): Promise<CheckIn[]> {
-    return Array.from(this.checkIns.values()).filter(checkIn => checkIn.companyId === companyId);
+  async getCheckInsByCompany(companyId: number): Promise<CheckInWithTechnician[]> {
+    const checkIns = await db.select({
+      id: schema.checkIns.id,
+      createdAt: schema.checkIns.createdAt,
+      companyId: schema.checkIns.companyId,
+      location: schema.checkIns.location,
+      jobType: schema.checkIns.jobType,
+      notes: schema.checkIns.notes,
+      customerName: schema.checkIns.customerName,
+      customerEmail: schema.checkIns.customerEmail,
+      customerPhone: schema.checkIns.customerPhone,
+      status: schema.checkIns.status,
+      photos: schema.checkIns.photos,
+      latitude: schema.checkIns.latitude,
+      longitude: schema.checkIns.longitude,
+      technicianId: schema.checkIns.technicianId,
+      technician: {
+        id: schema.technicians.id,
+        email: schema.technicians.email,
+        name: schema.technicians.name,
+        createdAt: schema.technicians.createdAt,
+        companyId: schema.technicians.companyId,
+        phone: schema.technicians.phone,
+        specialty: schema.technicians.specialty,
+        location: schema.technicians.location,
+        userId: schema.technicians.userId
+      }
+    })
+    .from(schema.checkIns)
+    .leftJoin(schema.technicians, eq(schema.checkIns.technicianId, schema.technicians.id))
+    .where(eq(schema.checkIns.companyId, companyId));
+
+    return checkIns as CheckInWithTechnician[];
   }
 
   async getCheckInsByTechnician(technicianId: number): Promise<CheckIn[]> {
-    return Array.from(this.checkIns.values()).filter(checkIn => checkIn.technicianId === technicianId);
+    return await db.select().from(schema.checkIns).where(eq(schema.checkIns.technicianId, technicianId));
   }
 
   async createCheckIn(checkInData: InsertCheckIn): Promise<CheckIn> {
-    const checkIn: CheckIn = {
-      id: this.nextCheckInId++,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      latitude: 0,
-      longitude: 0,
-      photos: [],
-      customerSignature: null,
-      estimatedDuration: null,
-      actualDuration: null,
-      followUpRequired: false,
-      customerSatisfaction: null,
-      internalNotes: null,
-      weatherConditions: null,
-      equipmentUsed: [],
-      partsUsed: [],
-      ...checkInData
-    };
-    this.checkIns.set(checkIn.id, checkIn);
+    const [checkIn] = await db.insert(schema.checkIns).values(checkInData).returning();
     return checkIn;
   }
 
   async updateCheckIn(id: number, updates: Partial<CheckIn>): Promise<CheckIn> {
-    const checkIn = this.checkIns.get(id);
+    const [checkIn] = await db.update(schema.checkIns)
+      .set(updates)
+      .where(eq(schema.checkIns.id, id))
+      .returning();
     if (!checkIn) {
       throw new Error("Check-in not found");
     }
-    const updatedCheckIn = { ...checkIn, ...updates, updatedAt: new Date() };
-    this.checkIns.set(id, updatedCheckIn);
-    return updatedCheckIn;
+    return checkIn;
   }
 
-  async getCheckInsWithTechnician(companyId: number): Promise<any[]> {
-    const checkIns = Array.from(this.checkIns.values()).filter(checkIn => checkIn.companyId === companyId);
-    return checkIns.map(checkIn => {
-      const technician = this.users.get(checkIn.technicianId);
-      return {
-        ...checkIn,
-        technician: technician ? { id: technician.id, username: technician.username, email: technician.email } : null
-      };
-    });
+  async getCheckInsWithTechnician(companyId: number): Promise<CheckInWithTechnician[]> {
+    return await this.getCheckInsByCompany(companyId);
   }
 
   async getBlogPost(id: number): Promise<BlogPost | null> {
