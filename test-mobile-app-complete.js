@@ -157,7 +157,7 @@ async function testReviewRequest(cookies) {
   
   try {
     const response = await apiRequest('POST', '/api/review-requests', {
-      customerName: 'John Mobile Test',
+      customerName: 'John Mobile Test Customer',
       email: 'john@mobiletest.com',
       phone: '555-0123',
       method: 'email',

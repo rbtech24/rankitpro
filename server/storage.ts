@@ -698,36 +698,7 @@ export class MemStorage implements IStorage {
       .sort((a, b) => (b.sentAt || new Date(0)).getTime() - (a.sentAt || new Date(0)).getTime());
   }
   
-  async createReviewRequest(reviewRequest: InsertReviewRequest): Promise<ReviewRequest> {
-    const id = this.reviewRequestId++;
-    const sentAt = new Date();
-    const newReviewRequest: ReviewRequest = { 
-      ...reviewRequest, 
-      id, 
-      sentAt,
-      email: reviewRequest.email || null,
-      phone: reviewRequest.phone || null,
-      status: reviewRequest.status || 'pending',
-      jobType: reviewRequest.jobType || null,
-      customMessage: reviewRequest.customMessage || null,
-      token: reviewRequest.token || null
-    };
-    
-    this.reviewRequests.set(id, newReviewRequest);
-    return newReviewRequest;
-  }
-  
-  async updateReviewRequest(id: number, updates: Partial<ReviewRequest>): Promise<ReviewRequest | undefined> {
-    const reviewRequest = this.reviewRequests.get(id);
-    if (!reviewRequest) {
-      return undefined;
-    }
-    
-    const updatedReviewRequest = { ...reviewRequest, ...updates };
-    this.reviewRequests.set(id, updatedReviewRequest);
-    
-    return updatedReviewRequest;
-  }
+
   
   // Stats operations
   // Review response operations
@@ -2432,42 +2403,9 @@ export class DatabaseStorage implements IStorage {
     return blogPost;
   }
 
-  async getReviewRequest(id: number): Promise<ReviewRequest | null> {
-    const reviewRequest = this.reviewRequests.get(id);
-    return reviewRequest || null;
-  }
 
-  async getReviewRequestsByCompany(companyId: number): Promise<ReviewRequest[]> {
-    return Array.from(this.reviewRequests.values()).filter(request => request.companyId === companyId);
-  }
 
-  async createReviewRequest(reviewRequestData: InsertReviewRequest): Promise<ReviewRequest> {
-    const reviewRequest: ReviewRequest = {
-      id: this.nextReviewRequestId++,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      status: "pending",
-      requestToken: Math.random().toString(36).substring(7),
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-      sentAt: null,
-      respondedAt: null,
-      remindersSent: 0,
-      lastReminderAt: null,
-      ...reviewRequestData
-    };
-    this.reviewRequests.set(reviewRequest.id, reviewRequest);
-    return reviewRequest;
-  }
 
-  async updateReviewRequest(id: number, updates: Partial<ReviewRequest>): Promise<ReviewRequest> {
-    const reviewRequest = this.reviewRequests.get(id);
-    if (!reviewRequest) {
-      throw new Error("Review request not found");
-    }
-    const updatedReviewRequest = { ...reviewRequest, ...updates, updatedAt: new Date() };
-    this.reviewRequests.set(id, updatedReviewRequest);
-    return updatedReviewRequest;
-  }
 
   async getReviewResponse(id: number): Promise<ReviewResponse | null> {
     const reviewResponse = this.reviewResponses.get(id);
