@@ -1470,7 +1470,7 @@ export default function CompaniesManagement() {
             <DialogHeader>
               <DialogTitle>Technicians: {selectedCompany?.name}</DialogTitle>
               <DialogDescription>
-                All technicians for {selectedCompany?.name} ({mockTechnicians.length} of {selectedCompany?.maxTechnicians} available slots used)
+                All technicians for {selectedCompany?.name} ({companyTechnicians.length} of {selectedCompany?.maxTechnicians} available slots used)
               </DialogDescription>
             </DialogHeader>
             
@@ -1487,7 +1487,7 @@ export default function CompaniesManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockTechnicians.map(technician => (
+                {companyTechnicians.map(technician => (
                   <TableRow key={technician.id}>
                     <TableCell>
                       <div className="flex items-center">
