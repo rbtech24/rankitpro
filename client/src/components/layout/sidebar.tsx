@@ -14,10 +14,24 @@ export default function Sidebar({ className }: SidebarProps) {
 
   const isActive = (path: string) => location === path;
   
-  // Determine user role
+  // Determine user role - debug logging
   const isSuperAdmin = user?.role === 'super_admin';
   const isCompanyAdmin = user?.role === 'company_admin';
   const isTechnician = user?.role === 'technician';
+  
+  // Debug logging
+  console.log('Sidebar role detection:', {
+    userRole: user?.role,
+    isSuperAdmin,
+    isCompanyAdmin,
+    isTechnician,
+    user: user
+  });
+  
+  // Return early if super admin to debug
+  if (isSuperAdmin) {
+    console.log('Super admin detected - should only show system administration items');
+  }
 
   return (
     <aside className={cn("bg-white border-r border-gray-200 w-64 flex flex-col", className)}>
