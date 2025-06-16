@@ -2711,7 +2711,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
   app.use("/api/integrations", integrationsRoutes);
   app.use("/api/check-ins", checkInRoutes);
   app.use("/api/reviews", reviewRoutes);
-  app.use("/api/blogs", blogRoutes);
+  app.use("/api/blog-posts", blogRoutes);
   app.use("/api/demo", demoRoutes);
   app.use("/api/review-requests", reviewRequestRoutes);
   app.use("/api/review-response", reviewResponseRoutes);

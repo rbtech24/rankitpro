@@ -36,6 +36,9 @@ export default function BlogPosts() {
   const deleteMutation = useMutation({
     mutationFn: async (postId: number) => {
       const res = await apiRequest("DELETE", `/api/blog-posts/${postId}`);
+      if (res.status === 204) {
+        return { success: true };
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -46,7 +49,8 @@ export default function BlogPosts() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/blog-posts"] });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Delete blog post error:", error);
       toast({
         title: "Error",
         description: "Failed to delete blog post. Please try again.",
