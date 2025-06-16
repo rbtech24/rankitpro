@@ -16,12 +16,12 @@ router.get('/embed/:companySlug', async (req, res) => {
 
     // Get company by slug or use test data
     let companyName = 'Test Service Company';
-    let checkIns = [];
+    let checkIns: any[] = [];
 
     try {
       // Try to get real company data
-      const companies = await storage.getCompanies();
-      const company = companies.find(c => 
+      const companies = await storage.getAllCompanies();
+      const company = companies.find((c: any) => 
         c.name.toLowerCase().replace(/\s+/g, '-') === companySlug ||
         companySlug === 'test-service-company'
       );
@@ -29,7 +29,7 @@ router.get('/embed/:companySlug', async (req, res) => {
       if (company) {
         companyName = company.name;
         // Get recent check-ins for this company
-        const allCheckIns = await storage.getCheckIns(company.id);
+        const allCheckIns = await storage.getCheckInsByCompany(company.id);
         checkIns = allCheckIns.slice(0, 5); // Show latest 5 check-ins
       }
     } catch (error) {
@@ -72,7 +72,7 @@ router.get('/embed/:companySlug', async (req, res) => {
       max-width: 500px;
     ">
       <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px;">Recent Service Calls - ${companyName}</h3>
-      ${checkIns.map(checkIn => {
+      ${checkIns.map((checkIn: any) => {
         const initials = checkIn.technician ? 
           (checkIn.technician.firstName?.[0] || '') + (checkIn.technician.lastName?.[0] || '') :
           'TN';
@@ -80,36 +80,7 @@ router.get('/embed/:companySlug', async (req, res) => {
           (Date.now() - new Date(checkIn.createdAt).getTime() < 24 * 60 * 60 * 1000 ? 'Today' : 'Yesterday') :
           'Recently';
         
-        return \`
-          <div style="
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid #f1f5f9;
-          ">
-            <div style="
-              width: 40px;
-              height: 40px;
-              background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: white;
-              font-weight: bold;
-              font-size: 14px;
-            ">${initials}</div>
-            <div style="flex: 1;">
-              <div style="font-weight: 500; color: #1f2937; margin-bottom: 2px;">
-                ${checkIn.jobType}${checkIn.technician ? ' - ' + checkIn.technician.firstName + ' ' + checkIn.technician.lastName : ''}
-              </div>
-              <div style="font-size: 14px; color: #64748b;">
-                ${checkIn.location || 'Service location'} • ${timeAgo}
-              </div>
-            </div>
-          </div>
-        \`;
+        return '<div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f5f9;"><div style="width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">' + initials + '</div><div style="flex: 1;"><div style="font-weight: 500; color: #1f2937; margin-bottom: 2px;">' + checkIn.jobType + (checkIn.technician ? ' - ' + checkIn.technician.firstName + ' ' + checkIn.technician.lastName : '') + '</div><div style="font-size: 14px; color: #64748b;">' + (checkIn.location || 'Service location') + ' • ' + timeAgo + '</div></div></div>';
       }).join('')}
       <div style="
         text-align: center;

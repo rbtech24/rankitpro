@@ -3200,6 +3200,9 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
   // Initialize the scheduler service to process review follow-ups
   schedulerService.initialize();
   
+  // Add embed routes for JavaScript widget
+  app.use('/', embedRoutes);
+  
   const httpServer = createServer(app);
   
   return httpServer;
