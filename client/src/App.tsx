@@ -1094,6 +1094,9 @@ function Router() {
       <Route path="/dashboard">
         <PrivateRoute component={Dashboard} path="/dashboard" />
       </Route>
+      <Route path="/system-overview">
+        <PrivateRoute component={SystemOverview} path="/system-overview" role="super_admin" />
+      </Route>
       <Route path="/admin">
         <PrivateRoute component={AdminDashboard} path="/admin" role="super_admin" />
       </Route>

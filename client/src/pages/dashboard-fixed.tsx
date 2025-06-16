@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import StatsOverview from "@/components/dashboard/stats-overview";
 import RecentVisits from "@/components/dashboard/recent-visits";
@@ -16,6 +17,7 @@ import { AuthState, getCurrentUser } from "@/lib/auth";
 
 export default function Dashboard() {
   const [visitModalOpen, setVisitModalOpen] = useState(false);
+  const [, setLocation] = useLocation();
   
   const { data: auth } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
@@ -28,6 +30,13 @@ export default function Dashboard() {
   const isTechnician = userRole === "technician";
   
   const isAdmin = isSuperAdmin || isCompanyAdmin;
+
+  // Redirect super admins to system overview
+  useEffect(() => {
+    if (isSuperAdmin) {
+      setLocation("/system-overview");
+    }
+  }, [isSuperAdmin, setLocation]);
   
   return (
     <DashboardLayout>
