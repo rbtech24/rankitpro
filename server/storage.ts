@@ -2236,5 +2236,5 @@ export class DatabaseStorage implements IStorage {
   async updateTestimonialApproval(): Promise<any> { throw new Error("Not implemented"); }
 }
 
-// Use MemStorage for now since it has all methods implemented
-export const storage = new MemStorage();
+// Use DatabaseStorage for production to connect to PostgreSQL
+export const storage = new DatabaseStorage();

@@ -1801,6 +1801,158 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
   
+  // CRM Integration endpoints
+  app.get("/api/crm/available", isAuthenticated, async (req, res) => {
+    try {
+      const availableCRMs = [
+        {
+          id: 'hubspot',
+          name: 'HubSpot',
+          description: 'Sync leads and customer data with HubSpot CRM',
+          logo: '/api/crm/logos/hubspot.png',
+          features: ['Leads', 'Contacts', 'Deals', 'Companies'],
+          authType: 'oauth2',
+          setupComplexity: 'medium',
+          isPopular: true
+        },
+        {
+          id: 'salesforce',
+          name: 'Salesforce',
+          description: 'Enterprise CRM integration with Salesforce',
+          logo: '/api/crm/logos/salesforce.png',
+          features: ['Leads', 'Accounts', 'Opportunities', 'Cases'],
+          authType: 'oauth2',
+          setupComplexity: 'high',
+          isPopular: true
+        },
+        {
+          id: 'pipedrive',
+          name: 'Pipedrive',
+          description: 'Simple pipeline management with Pipedrive',
+          logo: '/api/crm/logos/pipedrive.png',
+          features: ['Deals', 'Contacts', 'Organizations'],
+          authType: 'api_key',
+          setupComplexity: 'low',
+          isPopular: false
+        },
+        {
+          id: 'zoho',
+          name: 'Zoho CRM',
+          description: 'Complete business suite integration',
+          logo: '/api/crm/logos/zoho.png',
+          features: ['Leads', 'Contacts', 'Deals', 'Accounts'],
+          authType: 'oauth2',
+          setupComplexity: 'medium',
+          isPopular: false
+        }
+      ];
+      res.json(availableCRMs);
+    } catch (error) {
+      console.error("Get available CRMs error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/crm/configured", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "No company associated with this user" });
+      }
+
+      // Get configured CRM integrations for the company
+      const configuredCRMs = await storage.getCRMIntegrationsByCompany(companyId);
+      res.json(configuredCRMs);
+    } catch (error) {
+      console.error("Get configured CRMs error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.post("/api/crm/configure", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "No company associated with this user" });
+      }
+
+      const { crmType, credentials, settings } = req.body;
+      
+      // Validate required fields
+      if (!crmType || !credentials) {
+        return res.status(400).json({ message: "CRM type and credentials are required" });
+      }
+
+      // Test the connection before saving
+      const connectionTest = await testCRMConnection(crmType, credentials);
+      if (!connectionTest.success) {
+        return res.status(400).json({ 
+          message: "Failed to connect to CRM", 
+          error: connectionTest.error 
+        });
+      }
+
+      const integration = await storage.createCRMIntegration({
+        companyId,
+        crmType,
+        credentials: JSON.stringify(credentials),
+        settings: JSON.stringify(settings || {}),
+        isActive: true,
+        lastSyncAt: null
+      });
+
+      res.status(201).json(integration);
+    } catch (error) {
+      console.error("Configure CRM error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/crm/sync-history", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "No company associated with this user" });
+      }
+
+      const syncHistory = await storage.getCRMSyncHistory(companyId);
+      res.json(syncHistory);
+    } catch (error) {
+      console.error("Get CRM sync history error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.post("/api/crm/sync/:crmId", isAuthenticated, async (req, res) => {
+    try {
+      const { crmId } = req.params;
+      const companyId = req.user.companyId;
+      
+      if (!companyId) {
+        return res.status(400).json({ message: "No company associated with this user" });
+      }
+
+      // Get CRM integration
+      const integration = await storage.getCRMIntegration(parseInt(crmId));
+      if (!integration || integration.companyId !== companyId) {
+        return res.status(404).json({ message: "CRM integration not found" });
+      }
+
+      // Perform sync operation
+      const syncResult = await performCRMSync(integration);
+      
+      // Update last sync time
+      await storage.updateCRMIntegration(integration.id, {
+        lastSyncAt: new Date()
+      });
+
+      res.json(syncResult);
+    } catch (error) {
+      console.error("CRM sync error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Review Analytics endpoints
   app.get("/api/review-analytics/metrics", isAuthenticated, async (req, res) => {
     try {
