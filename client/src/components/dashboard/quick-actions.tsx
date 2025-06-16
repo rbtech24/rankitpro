@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
+import { useLocation } from "wouter";
 
 interface QuickActionsProps {
   onOpenVisitModal: () => void;
@@ -19,6 +20,7 @@ export default function QuickActions({
   onOpenReviewRequestModal
 }: QuickActionsProps) {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const { data: auth } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
     queryFn: getCurrentUser
@@ -35,42 +37,21 @@ export default function QuickActions({
         onOpenVisitModal();
         break;
       case "technician":
-        if (onOpenTechnicianModal) {
-          onOpenTechnicianModal();
-        } else {
-          toast({
-            title: "Coming Soon",
-            description: "This feature is not yet implemented.",
-            variant: "default",
-          });
-        }
+        // Navigate to user management page to add technician
+        setLocation('/user-management');
         break;
       case "blog-post":
-        if (onOpenBlogPostModal) {
-          onOpenBlogPostModal();
-        } else {
-          toast({
-            title: "Coming Soon",
-            description: "This feature is not yet implemented.",
-            variant: "default",
-          });
-        }
+        // Navigate to blog posts page to create new post
+        setLocation('/blog-posts');
         break;
       case "review-request":
-        if (onOpenReviewRequestModal) {
-          onOpenReviewRequestModal();
-        } else {
-          toast({
-            title: "Coming Soon",
-            description: "This feature is not yet implemented.",
-            variant: "default",
-          });
-        }
+        // Navigate to reviews page to send review request
+        setLocation('/reviews');
         break;
       default:
         toast({
-          title: "Coming Soon",
-          description: "This feature is not yet implemented.",
+          title: "Feature Not Available",
+          description: "This action is not available for your role.",
           variant: "default",
         });
     }
