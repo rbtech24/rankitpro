@@ -1498,8 +1498,8 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       const checkInData = {
         jobType: jobTypeName,
         notes: req.body.notes || req.body.description || '',
-        latitude: req.body.latitude ? parseFloat(req.body.latitude) : null,
-        longitude: req.body.longitude ? parseFloat(req.body.longitude) : null,
+        latitude: req.body.latitude ? req.body.latitude.toString() : null,
+        longitude: req.body.longitude ? req.body.longitude.toString() : null,
         location: req.body.location || req.body.address || '',
         photos,
         isBlog: req.body.isBlog === "true" || req.body.isBlog === true,
