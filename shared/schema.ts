@@ -566,3 +566,89 @@ export type Testimonial = typeof testimonials.$inferSelect;
 export type InsertTestimonial = z.infer<typeof insertTestimonialSchema>;
 export type TestimonialApproval = typeof testimonialApprovals.$inferSelect;
 export type InsertTestimonialApproval = z.infer<typeof insertTestimonialApprovalSchema>;
+
+// Support Tickets table for customer support system
+export const supportTickets = pgTable("support_tickets", {
+  id: serial("id").primaryKey(),
+  ticketNumber: text("ticket_number").notNull().unique(), // Format: SUP-YYYYMMDD-XXXX
+  
+  // Submitter information
+  companyId: integer("company_id").references(() => companies.id),
+  submitterId: integer("submitter_id").references(() => users.id).notNull(),
+  submitterName: text("submitter_name").notNull(),
+  submitterEmail: text("submitter_email").notNull(),
+  
+  // Ticket details
+  subject: text("subject").notNull(),
+  description: text("description").notNull(),
+  category: text("category", { 
+    enum: ["technical", "billing", "feature_request", "bug_report", "account", "integration", "other"] 
+  }).notNull(),
+  priority: text("priority", { 
+    enum: ["low", "medium", "high", "urgent"] 
+  }).default("medium").notNull(),
+  
+  // Status tracking
+  status: text("status", { 
+    enum: ["open", "in_progress", "waiting_response", "resolved", "closed"] 
+  }).default("open").notNull(),
+  
+  // Assignment
+  assignedToId: integer("assigned_to_id").references(() => users.id), // Admin user
+  assignedAt: timestamp("assigned_at"),
+  
+  // Resolution
+  resolution: text("resolution"),
+  resolvedAt: timestamp("resolved_at"),
+  resolvedById: integer("resolved_by_id").references(() => users.id),
+  
+  // Metadata
+  attachments: text("attachments").array(), // File URLs
+  tags: text("tags").array(),
+  
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  lastResponseAt: timestamp("last_response_at").defaultNow().notNull()
+});
+
+// Support Ticket Responses table for ticket conversation
+export const supportTicketResponses = pgTable("support_ticket_responses", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").references(() => supportTickets.id, { onDelete: "cascade" }).notNull(),
+  
+  // Response details
+  responderId: integer("responder_id").references(() => users.id).notNull(),
+  responderName: text("responder_name").notNull(),
+  responderType: text("responder_type", { enum: ["admin", "customer"] }).notNull(),
+  
+  // Content
+  message: text("message").notNull(),
+  attachments: text("attachments").array(),
+  
+  // Internal notes (only visible to admins)
+  isInternal: boolean("is_internal").default(false).notNull(),
+  
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+// Insert schemas for support system
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({ 
+  id: true, 
+  ticketNumber: true,
+  createdAt: true, 
+  updatedAt: true,
+  lastResponseAt: true 
+});
+
+export const insertSupportTicketResponseSchema = createInsertSchema(supportTicketResponses).omit({ 
+  id: true, 
+  createdAt: true 
+});
+
+// Types for support system
+export type SupportTicket = typeof supportTickets.$inferSelect;
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+export type SupportTicketResponse = typeof supportTicketResponses.$inferSelect;
+export type InsertSupportTicketResponse = z.infer<typeof insertSupportTicketResponseSchema>;
