@@ -33,19 +33,11 @@ interface Technician {
   name: string;
 }
 
-const JOB_TYPES = [
-  "Plumbing Repair",
-  "Water Heater Installation",
-  "Drain Cleaning",
-  "Sewer Line Repair",
-  "AC Maintenance",
-  "HVAC Repair",
-  "Electrical Repair",
-  "Remodeling",
-  "Flooring Installation",
-  "Roof Repair",
-  "General Maintenance"
-];
+interface JobType {
+  id: number;
+  name: string;
+  description?: string;
+}
 
 // Form schema
 const formSchema = z.object({
