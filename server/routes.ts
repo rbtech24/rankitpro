@@ -883,6 +883,42 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
   
 
 
+  // GET logout route for direct navigation
+  app.get("/api/auth/logout", (req, res) => {
+    // Anti-cache headers to prevent logout response caching
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'Last-Modified': new Date().toUTCString(),
+      'ETag': '',
+      'Vary': '*'
+    });
+    
+    // Get session ID before destroying
+    const sessionId = req.sessionID;
+    
+    // Force immediate session destruction
+    if (req.session) {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Session destruction error:", err);
+        }
+        
+        // Always clear cookies regardless of session destruction result
+        clearAllSessionCookies(res);
+        
+        console.log(`Session ${sessionId} destroyed successfully`);
+        // Redirect to home page after logout
+        res.redirect('/?logged_out=true');
+      });
+    } else {
+      // No session exists, just clear cookies and redirect
+      clearAllSessionCookies(res);
+      res.redirect('/?logged_out=true');
+    }
+  });
+
   app.post("/api/auth/logout", (req, res) => {
     // Anti-cache headers to prevent logout response caching
     res.set({
