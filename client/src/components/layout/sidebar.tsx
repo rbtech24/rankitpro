@@ -14,24 +14,10 @@ export default function Sidebar({ className }: SidebarProps) {
 
   const isActive = (path: string) => location === path;
   
-  // Determine user role - debug logging
+  // Determine user role
   const isSuperAdmin = user?.role === 'super_admin';
   const isCompanyAdmin = user?.role === 'company_admin';
   const isTechnician = user?.role === 'technician';
-  
-  // Debug logging
-  console.log('Sidebar role detection:', {
-    userRole: user?.role,
-    isSuperAdmin,
-    isCompanyAdmin,
-    isTechnician,
-    user: user
-  });
-  
-  // Return early if super admin to debug
-  if (isSuperAdmin) {
-    console.log('Super admin detected - should only show system administration items');
-  }
 
   return (
     <aside className={cn("bg-white border-r border-gray-200 w-64 flex flex-col", className)}>
@@ -117,7 +103,7 @@ export default function Sidebar({ className }: SidebarProps) {
           </>
         )}
 
-        {/* Company Admin View - Only show if NOT super admin */}
+        {/* Company Admin View - Only show if company admin and NOT super admin */}
         {isCompanyAdmin && !isSuperAdmin && (
           <>
             <div className="mb-4">
@@ -153,7 +139,7 @@ export default function Sidebar({ className }: SidebarProps) {
             </div>
 
             <div className="mb-4">
-              <div className="px-3 mb-2 text-xs text-gray-500 uppercase font-semibold">Manage</div>
+              <div className="px-3 mb-2 text-xs text-gray-500 uppercase font-semibold">Management</div>
               <Link href="/technicians">
                 <a className={cn(
                   "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1",
@@ -254,7 +240,7 @@ export default function Sidebar({ className }: SidebarProps) {
           </>
         )}
 
-        {/* Technician View - Only show if NOT super admin */}
+        {/* Technician View - Only show if technician and NOT super admin */}
         {isTechnician && !isSuperAdmin && (
           <>
             <div className="mb-4">
