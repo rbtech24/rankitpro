@@ -31,8 +31,8 @@ router.post("/tickets", isAuthenticated, async (req, res) => {
 
     const ticket = await storage.createSupportTicket(ticketData);
     res.status(201).json(ticket);
-  } catch (error) {
-    if (error instanceof Error && error.name === "ZodError") {
+  } catch (error: any) {
+    if (error.name === "ZodError") {
       const validationError = fromZodError(error);
       return res.status(400).json({ message: validationError.message });
     }
@@ -120,8 +120,8 @@ router.post("/tickets/:id/responses", isAuthenticated, async (req, res) => {
 
     const response = await storage.createSupportTicketResponse(responseData);
     res.status(201).json(response);
-  } catch (error) {
-    if (error instanceof Error && error.name === "ZodError") {
+  } catch (error: any) {
+    if (error.name === "ZodError") {
       const validationError = fromZodError(error);
       return res.status(400).json({ message: validationError.message });
     }
@@ -148,7 +148,7 @@ router.get("/tickets/:id/responses", isAuthenticated, async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const responses = await storage.getSupportResponses(ticketId);
+    const responses = await storage.getSupportTicketResponses(ticketId);
     res.json(responses);
   } catch (error) {
     console.error("Error fetching support responses:", error);

@@ -304,7 +304,7 @@ export default function Billing() {
                   </div>
                   <div className="space-y-1">
                     <h4 className="text-sm font-medium text-gray-500">Billing Cycle</h4>
-                    <p className="text-xl font-semibold">Monthly</p>
+                    <p className="text-xl font-semibold">{subscriptionData?.interval || 'Monthly'}</p>
                   </div>
                   <div className="space-y-1">
                     <h4 className="text-sm font-medium text-gray-500">Next Renewal</h4>
