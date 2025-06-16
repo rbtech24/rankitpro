@@ -132,45 +132,36 @@ export async function logout(): Promise<void> {
 
 export async function getCurrentUser(): Promise<AuthState> {
   try {
-    // Check localStorage first for client-side auth
-    const storedUser = localStorage.getItem('authUser');
-    const storedCompany = localStorage.getItem('authCompany');
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
-    
-    console.log('getCurrentUser - localStorage check:', { isAuthenticated, hasStoredUser: !!storedUser });
-    
-    if (isAuthenticated === 'true' && storedUser) {
-      const user = JSON.parse(storedUser);
-      const company = storedCompany ? JSON.parse(storedCompany) : null;
-      console.log('getCurrentUser - using localStorage data:', { user, company });
-      return { user, company };
-    }
-    
-    // Fallback to API request
-    console.log('getCurrentUser - making API request to /api/auth/me');
+    // Always validate with server first to ensure session is valid
+    console.log('getCurrentUser - validating with server');
     const response = await apiRequest("GET", "/api/auth/me");
     const data = await response.json();
-    console.log('getCurrentUser - API response:', data);
+    console.log('getCurrentUser - server validation successful:', data);
     
-    // Store the response in localStorage for future use
+    // Store the validated response in localStorage
     if (data.user) {
       localStorage.setItem('authUser', JSON.stringify(data.user));
       localStorage.setItem('authCompany', JSON.stringify(data.company));
       localStorage.setItem('isAuthenticated', 'true');
+    } else {
+      // Clear localStorage if no user returned
+      localStorage.removeItem('authUser');
+      localStorage.removeItem('authCompany');
+      localStorage.removeItem('isAuthenticated');
     }
     
     return data;
   } catch (error) {
-    console.log('getCurrentUser - error:', error);
-    // Clear any stale auth data on 401 errors
-    if ((error as Error).message.includes("401")) {
-      queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
-      localStorage.removeItem('authUser');
-      localStorage.removeItem('authCompany');
-      localStorage.removeItem('isAuthenticated');
-      return { user: null, company: null };
-    }
-    throw error;
+    console.log('getCurrentUser - authentication failed:', error);
+    
+    // Clear stale auth data on any authentication failure
+    queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
+    localStorage.removeItem('authUser');
+    localStorage.removeItem('authCompany');
+    localStorage.removeItem('isAuthenticated');
+    
+    // Return empty auth state instead of throwing
+    return { user: null, company: null };
   }
 }
 

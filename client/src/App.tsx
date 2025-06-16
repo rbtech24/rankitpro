@@ -34,7 +34,7 @@ import Home from "@/pages/home";
 import TechnicianMobileField from "@/pages/technician-mobile-field";
 import MobileSimple from "@/pages/mobile-simple";
 import MobileTechApp from "@/pages/mobile-tech-app";
-import FieldMobile from "@/pages/field-mobile";
+import FieldMobile from "@/pages/field-mobile-fixed";
 import MobileBlogs from "@/pages/mobile-blogs";
 import MobileFieldApp from "@/pages/mobile-field-app";
 import Onboarding from "@/pages/onboarding";
