@@ -394,8 +394,8 @@ export default function Billing() {
                       <CardTitle>Starter</CardTitle>
                       <CardDescription>For small businesses just getting started</CardDescription>
                       <div className="mt-2">
-                        <span className="text-3xl font-bold">$29</span>
-                        <span className="text-gray-500">/month</span>
+                        <span className="text-3xl font-bold">${subscriptionData?.plans?.starter?.price || 29}</span>
+                        <span className="text-gray-500">/{subscriptionData?.plans?.starter?.interval || 'month'}</span>
                       </div>
                     </CardHeader>
                     <CardContent>
