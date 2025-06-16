@@ -2,32 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-/* React Quill WYSIWYG Editor Styles */
-.ql-editor {
-  @apply min-h-[200px] text-sm;
+/* TinyMCE WYSIWYG Editor Styles */
+.tox-tinymce {
+  @apply border border-gray-300 rounded-md;
 }
 
-.ql-toolbar {
-  @apply border-gray-300 rounded-t-md;
+.tox .tox-toolbar {
+  @apply border-b border-gray-300;
 }
 
-.ql-container {
-  @apply border-gray-300 rounded-b-md;
+.tox .tox-edit-area {
+  @apply bg-white;
 }
 
-.ql-snow .ql-picker {
-  @apply text-gray-700;
+.tox .tox-menubar {
+  @apply border-b border-gray-300;
 }
 
-.ql-snow .ql-picker-options {
-  @apply bg-white border border-gray-300 rounded shadow-lg;
+.tox .tox-statusbar {
+  @apply border-t border-gray-300;
 }
 
-.ql-snow .ql-picker-item {
-  @apply px-3 py-2 hover:bg-gray-100;
-}
-
-.ql-snow .ql-tooltip {
+.tox-tinymce-aux {
   @apply bg-white border border-gray-300 rounded shadow-lg z-50;
 }
 

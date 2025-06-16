@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import ReactQuill from 'react-quill';
+import { Editor } from '@tinymce/tinymce-react';
 import {
   Dialog,
   DialogContent,
@@ -138,27 +138,31 @@ export default function BlogEditModal({ isOpen, onClose, blogPost }: BlogEditMod
           
           <div className="space-y-2">
             <Label htmlFor="content">Content</Label>
-            <ReactQuill
-              value={content}
-              onChange={setContent}
-              placeholder="Enter blog post content"
-              modules={{
-                toolbar: [
-                  [{ 'header': [1, 2, 3, false] }],
-                  ['bold', 'italic', 'underline', 'strike'],
-                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                  ['blockquote', 'code-block'],
-                  ['link', 'image'],
-                  ['clean']
-                ],
-              }}
-              formats={[
-                'header', 'bold', 'italic', 'underline', 'strike',
-                'list', 'bullet', 'blockquote', 'code-block',
-                'link', 'image'
-              ]}
-              style={{ height: '300px', marginBottom: '50px' }}
-            />
+            <div className="border rounded-md">
+              <Editor
+                apiKey="no-api-key"
+                value={content}
+                onEditorChange={(newContent: string) => setContent(newContent)}
+                init={{
+                  height: 400,
+                  menubar: false,
+                  plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                  ],
+                  toolbar: 'undo redo | blocks | ' +
+                    'bold italic forecolor | alignleft aligncenter ' +
+                    'alignright alignjustify | bullist numlist outdent indent | ' +
+                    'removeformat | help',
+                  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                  placeholder: 'Enter blog post content...',
+                  branding: false,
+                  statusbar: false,
+                  resize: false,
+                }}
+              />
+            </div>
           </div>
 
           {blogPost?.photos && blogPost.photos.length > 0 && (
