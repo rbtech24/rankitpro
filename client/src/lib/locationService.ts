@@ -110,6 +110,8 @@ export async function getCurrentLocation(): Promise<LocationData> {
               .trim();
 
             const locationData: LocationData = {
+              latitude: latitude,
+              longitude: longitude,
               streetName: streetName || 'Street not found',
               city: city || 'City not found',
               state: state || 'State not found',
@@ -130,6 +132,8 @@ export async function getCurrentLocation(): Promise<LocationData> {
           // Fallback to coordinates
           const fallbackAddress = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
           const locationData: LocationData = {
+            latitude: latitude,
+            longitude: longitude,
             streetName: fallbackAddress,
             city: '',
             state: '',

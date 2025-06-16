@@ -1479,11 +1479,11 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       }
       
       const data = insertCheckInSchema.parse({
-        jobType: req.body.jobType,
-        notes: req.body.notes,
+        jobType: req.body.jobType || req.body.jobTypeId,
+        notes: req.body.notes || req.body.description,
         latitude: req.body.latitude,
         longitude: req.body.longitude,
-        location: req.body.location,
+        location: req.body.location || req.body.address,
         photos,
         isBlog: req.body.isBlog === "true",
         technicianId,
