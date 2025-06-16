@@ -206,7 +206,7 @@ function Router() {
     <Switch>
       <Route path="/login">
         {auth?.user && !isLoggedOut ? 
-          (auth.user.role === "technician" ? <Redirect to="/mobile-field-app" /> : 
+          (auth.user.role === "technician" ? <Redirect to="/dashboard" /> : 
            auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> :
            <Redirect to="/dashboard" />) 
           : <Login />}
