@@ -415,8 +415,14 @@ export default function FieldMobile() {
             <span className="font-medium text-blue-800">Current Location</span>
           </div>
           <div className="text-sm text-blue-700">
-            <p className="font-medium">{currentLocation.streetName}</p>
-            <p>{currentLocation.city}, {currentLocation.state} {currentLocation.zipCode}</p>
+            {currentLocation ? (
+              <>
+                <p className="font-medium">{currentLocation.streetName}</p>
+                <p>{currentLocation.city}, {currentLocation.state} {currentLocation.zipCode}</p>
+              </>
+            ) : (
+              <p className="text-gray-500">Detecting location...</p>
+            )}
           </div>
         </div>
 
