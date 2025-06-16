@@ -190,6 +190,32 @@ export interface IStorage {
   updateTestimonialStatus(id: number, status: 'pending' | 'approved' | 'published' | 'rejected', approvedAt?: Date): Promise<Testimonial | null>;
   createTestimonialApproval(data: InsertTestimonialApproval): Promise<TestimonialApproval>;
   getTestimonialApprovalByToken(token: string): Promise<TestimonialApproval | null>;
+
+  // Support Ticket operations
+  createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
+  getSupportTicket(id: number): Promise<SupportTicket | undefined>;
+  getSupportTicketByNumber(ticketNumber: string): Promise<SupportTicket | undefined>;
+  getSupportTicketsByCompany(companyId: number): Promise<SupportTicket[]>;
+  getAllSupportTickets(filters?: {
+    status?: string;
+    priority?: string;
+    category?: string;
+    assignedTo?: number;
+  }): Promise<SupportTicket[]>;
+  updateSupportTicket(id: number, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined>;
+  assignSupportTicket(ticketId: number, adminId: number): Promise<SupportTicket | undefined>;
+  resolveSupportTicket(ticketId: number, resolution: string, resolvedById: number): Promise<SupportTicket | undefined>;
+  
+  // Support Ticket Response operations
+  createSupportTicketResponse(response: InsertSupportTicketResponse): Promise<SupportTicketResponse>;
+  getSupportTicketResponses(ticketId: number): Promise<SupportTicketResponse[]>;
+  getSupportTicketStats(): Promise<{
+    totalTickets: number;
+    openTickets: number;
+    resolvedTickets: number;
+    averageResolutionTime: number;
+    ticketsByPriority: { [key: string]: number };
+  }>;
 }
 
 export class MemStorage implements IStorage {
@@ -2234,6 +2260,154 @@ export class DatabaseStorage implements IStorage {
   async getTestimonialApprovalsByTestimonial(): Promise<any> { throw new Error("Not implemented"); }
   async createTestimonialApproval(): Promise<any> { throw new Error("Not implemented"); }
   async updateTestimonialApproval(): Promise<any> { throw new Error("Not implemented"); }
+
+  // Support Ticket operations
+  async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
+    const [newTicket] = await db
+      .insert(supportTickets)
+      .values(ticket)
+      .returning();
+    return newTicket;
+  }
+
+  async getSupportTicket(id: number): Promise<SupportTicket | undefined> {
+    const [ticket] = await db
+      .select()
+      .from(supportTickets)
+      .where(eq(supportTickets.id, id));
+    return ticket;
+  }
+
+  async getSupportTicketByNumber(ticketNumber: string): Promise<SupportTicket | undefined> {
+    const [ticket] = await db
+      .select()
+      .from(supportTickets)
+      .where(eq(supportTickets.ticketNumber, ticketNumber));
+    return ticket;
+  }
+
+  async getSupportTicketsByCompany(companyId: number): Promise<SupportTicket[]> {
+    return await db
+      .select()
+      .from(supportTickets)
+      .where(eq(supportTickets.companyId, companyId))
+      .orderBy(desc(supportTickets.createdAt));
+  }
+
+  async getAllSupportTickets(filters?: {
+    status?: string;
+    priority?: string;
+    category?: string;
+    assignedTo?: number;
+  }): Promise<SupportTicket[]> {
+    let query = db.select().from(supportTickets);
+    
+    if (filters?.status) {
+      query = query.where(eq(supportTickets.status, filters.status));
+    }
+    if (filters?.priority) {
+      query = query.where(eq(supportTickets.priority, filters.priority));
+    }
+    if (filters?.category) {
+      query = query.where(eq(supportTickets.category, filters.category));
+    }
+    if (filters?.assignedTo) {
+      query = query.where(eq(supportTickets.assignedTo, filters.assignedTo));
+    }
+    
+    return await query.orderBy(desc(supportTickets.createdAt));
+  }
+
+  async updateSupportTicket(id: number, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined> {
+    const [updatedTicket] = await db
+      .update(supportTickets)
+      .set(updates)
+      .where(eq(supportTickets.id, id))
+      .returning();
+    return updatedTicket;
+  }
+
+  async assignSupportTicket(ticketId: number, adminId: number): Promise<SupportTicket | undefined> {
+    const [updatedTicket] = await db
+      .update(supportTickets)
+      .set({ 
+        assignedTo: adminId,
+        status: 'in_progress',
+        updatedAt: new Date()
+      })
+      .where(eq(supportTickets.id, ticketId))
+      .returning();
+    return updatedTicket;
+  }
+
+  async resolveSupportTicket(ticketId: number, resolution: string, resolvedById: number): Promise<SupportTicket | undefined> {
+    const [updatedTicket] = await db
+      .update(supportTickets)
+      .set({ 
+        status: 'resolved',
+        resolution,
+        resolvedAt: new Date(),
+        resolvedBy: resolvedById,
+        updatedAt: new Date()
+      })
+      .where(eq(supportTickets.id, ticketId))
+      .returning();
+    return updatedTicket;
+  }
+
+  // Support Ticket Response operations
+  async createSupportTicketResponse(response: InsertSupportTicketResponse): Promise<SupportTicketResponse> {
+    const [newResponse] = await db
+      .insert(supportTicketResponses)
+      .values(response)
+      .returning();
+    return newResponse;
+  }
+
+  async getSupportTicketResponses(ticketId: number): Promise<SupportTicketResponse[]> {
+    return await db
+      .select()
+      .from(supportTicketResponses)
+      .where(eq(supportTicketResponses.ticketId, ticketId))
+      .orderBy(asc(supportTicketResponses.createdAt));
+  }
+
+  async getSupportTicketStats(): Promise<{
+    totalTickets: number;
+    openTickets: number;
+    resolvedTickets: number;
+    averageResolutionTime: number;
+    ticketsByPriority: { [key: string]: number };
+  }> {
+    const allTickets = await db.select().from(supportTickets);
+    
+    const totalTickets = allTickets.length;
+    const openTickets = allTickets.filter(t => ['open', 'in_progress'].includes(t.status)).length;
+    const resolvedTickets = allTickets.filter(t => t.status === 'resolved').length;
+    
+    // Calculate average resolution time for resolved tickets
+    const resolved = allTickets.filter(t => t.status === 'resolved' && t.resolvedAt);
+    const averageResolutionTime = resolved.length > 0 
+      ? resolved.reduce((sum, ticket) => {
+          const resolutionTime = ticket.resolvedAt!.getTime() - ticket.createdAt.getTime();
+          return sum + (resolutionTime / (1000 * 60 * 60)); // Convert to hours
+        }, 0) / resolved.length
+      : 0;
+    
+    // Count tickets by priority
+    const ticketsByPriority = allTickets.reduce((acc, ticket) => {
+      acc[ticket.priority] = (acc[ticket.priority] || 0) + 1;
+      return acc;
+    }, {} as { [key: string]: number });
+
+    return {
+      totalTickets,
+      openTickets,
+      resolvedTickets,
+      averageResolutionTime,
+      ticketsByPriority
+    };
+  }
 }
 
 // Use DatabaseStorage for production to connect to PostgreSQL
