@@ -40,8 +40,9 @@ export default function SetupGuide() {
     }
   };
 
-  const embedCode = company ? `<script src="${window.location.origin}/api/widget/checkins.js" data-company-id="${company.id}"></script>` : '';
-  const shortcode = company ? `[rankitpro_checkins company="${company.id}"]` : '';
+  const companySlug = company?.name ? company.name.toLowerCase().replace(/\s+/g, '-') : 'your-company';
+  const embedCode = company ? `<script src="https://rankitpro.com/embed/widget.js?token=${company.id}&companySlug=${companySlug}"></script>\n<div id="rankitpro-widget"></div>` : '';
+  const shortcode = company ? `[rankitpro_checkins company_slug="${companySlug}" token="${company.id}"]` : '';
 
   return (
     <DashboardLayout>
@@ -179,12 +180,12 @@ export default function SetupGuide() {
                   
                   <div className="space-y-3">
                     <div className="p-3 bg-gray-50 rounded-lg">
-                      <code className="text-sm font-mono">[rankitpro_checkins company="{company?.id}" limit="5"]</code>
+                      <code className="text-sm font-mono">[rankitpro_checkins company_slug="{companySlug}" token="{company?.id}" limit="5"]</code>
                       <p className="text-xs text-gray-600 mt-1">Show only the 5 most recent check-ins</p>
                     </div>
                     
                     <div className="p-3 bg-gray-50 rounded-lg">
-                      <code className="text-sm font-mono">[rankitpro_checkins company="{company?.id}" service="HVAC Maintenance"]</code>
+                      <code className="text-sm font-mono">[rankitpro_checkins company_slug="{companySlug}" token="{company?.id}" service="HVAC Maintenance"]</code>
                       <p className="text-xs text-gray-600 mt-1">Show only HVAC Maintenance check-ins</p>
                     </div>
                   </div>
