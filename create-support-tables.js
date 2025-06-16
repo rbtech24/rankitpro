@@ -16,28 +16,31 @@ async function createSupportTables() {
   try {
     console.log('🔧 Creating support ticket tables...');
     
-    // Create support_tickets table
+    // Drop and recreate support_tickets table with correct schema structure
+    await pool.query(`DROP TABLE IF EXISTS support_tickets CASCADE`);
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS support_tickets (
+      CREATE TABLE support_tickets (
         id SERIAL PRIMARY KEY,
-        ticket_number VARCHAR NOT NULL UNIQUE,
-        title VARCHAR NOT NULL,
+        ticket_number TEXT NOT NULL UNIQUE,
+        company_id INTEGER,
+        submitter_id INTEGER NOT NULL,
+        submitter_name TEXT NOT NULL,
+        submitter_email TEXT NOT NULL,
+        subject TEXT NOT NULL,
         description TEXT NOT NULL,
-        category VARCHAR NOT NULL DEFAULT 'general',
-        priority VARCHAR NOT NULL DEFAULT 'medium',
-        status VARCHAR NOT NULL DEFAULT 'open',
-        company_id INTEGER NOT NULL DEFAULT 0,
-        submitted_by INTEGER NOT NULL,
-        submitter_name VARCHAR,
-        submitter_email VARCHAR,
-        assigned_to INTEGER,
-        resolved_by_id INTEGER,
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW(),
+        category TEXT NOT NULL,
+        priority TEXT DEFAULT 'medium' NOT NULL,
+        status TEXT DEFAULT 'open' NOT NULL,
+        assigned_to_id INTEGER,
+        assigned_at TIMESTAMP,
+        resolution TEXT,
         resolved_at TIMESTAMP,
-        last_response_at TIMESTAMP,
+        resolved_by_id INTEGER,
+        attachments TEXT[],
         tags TEXT[],
-        attachments TEXT[]
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        updated_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        last_response_at TIMESTAMP DEFAULT NOW() NOT NULL
       )
     `);
     

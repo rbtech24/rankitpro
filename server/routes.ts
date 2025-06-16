@@ -2683,12 +2683,13 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       const ticketNumber = `TICKET-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
       
       const ticketData = {
-        ...req.body,
         companyId,
-        submittedBy: req.user.id,
+        submitterId: req.user.id,
         submitterName: req.user.username || req.user.email,
         submitterEmail: req.user.email,
         ticketNumber,
+        subject: req.body.title || req.body.subject,
+        description: req.body.description,
         status: 'open' as const,
         priority: req.body.priority || 'medium' as const,
         category: req.body.category || 'technical' as const
