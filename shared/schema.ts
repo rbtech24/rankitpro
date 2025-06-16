@@ -137,10 +137,10 @@ export const reviewResponses = pgTable("review_responses", {
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertCompanySchema = createInsertSchema(companies).omit({ id: true, createdAt: true });
 export const insertTechnicianSchema = createInsertSchema(technicians).omit({ id: true, createdAt: true });
-export const insertCheckInSchema = createInsertSchema(checkIns).omit({ id: true, createdAt: true }).extend({
-  customerName: z.string().optional(),
-  latitude: z.string().optional(),
-  longitude: z.string().optional()
+export const insertCheckInSchema = createInsertSchema(checkIns).omit({ id: true, createdAt: true }).partial().extend({
+  jobType: z.string().min(1),
+  technicianId: z.number(),
+  companyId: z.number()
 });
 export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ id: true, createdAt: true });
 export const insertReviewRequestSchema = createInsertSchema(reviewRequests).omit({ id: true, sentAt: true });

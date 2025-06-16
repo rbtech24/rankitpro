@@ -100,10 +100,13 @@ async function testCheckInSubmission(cookies, jobType) {
 
   try {
     const formData = new FormData();
+    formData.append('jobType', jobType.name);
     formData.append('jobTypeId', jobType.id.toString());
+    formData.append('notes', 'Mobile app test check-in with GPS location');
     formData.append('description', 'Mobile app test check-in with GPS location');
     formData.append('latitude', '40.7128');
     formData.append('longitude', '-74.0060');
+    formData.append('location', '123 Test Street, New York, NY 10001');
     formData.append('address', '123 Test Street, New York, NY 10001');
 
     const response = await apiRequest('POST', '/api/check-ins', formData, cookies);
@@ -112,10 +115,12 @@ async function testCheckInSubmission(cookies, jobType) {
       logTest('Check-in submitted successfully', true, 'Mobile GPS check-in working');
       return response.data;
     } else {
+      console.log('Check-in error response:', response.data);
       logTest('Check-in submission failed', false, `Status: ${response.status}`);
       return null;
     }
   } catch (error) {
+    console.log('Check-in error details:', error.response?.data || error.message);
     logTest('Check-in submission error', false, error.message);
     return null;
   }
