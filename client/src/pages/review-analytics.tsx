@@ -104,7 +104,7 @@ export default function ReviewAnalytics() {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   return (
-    <DashboardLayout>
+    <div className="container mx-auto px-4 py-8">
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
