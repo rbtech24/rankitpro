@@ -262,8 +262,8 @@ function main() {
   console.log('4. Upload assets to respective app stores');
 }
 
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-module.exports = { assets, createDirectories, generateAssetConfigs };
+export { assets, createDirectories, generateAssetConfigs };
