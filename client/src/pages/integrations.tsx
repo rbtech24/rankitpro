@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Copy, Globe, Code, FileCode, Check, AlertCircle, Copy as CopyIcon } from "lucide-react";
+import { Copy, Globe, Code, FileCode, Check, AlertCircle, Copy as CopyIcon, Settings, ExternalLink } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 
@@ -302,26 +302,46 @@ function IntegrationsPage() {
               {wordpressData?.apiKey && (
                 <div className="mt-8">
                   <Separator className="my-4" />
-                  <h3 className="text-lg font-medium mb-4">API Key</h3>
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-md">
-                    <code className="text-sm font-mono">{wordpressData.apiKey}</code>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => copyToClipboard(wordpressData.apiKey, 'wordpress')}
-                    >
-                      {copied.wordpress ? <Check className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Use this API key in your WordPress plugin to authenticate.
-                  </p>
+                  <h3 className="text-lg font-medium mb-4">WordPress Integration Status</h3>
                   
-                  {wordpressData.lastSync && (
-                    <p className="text-sm text-muted-foreground mt-4">
-                      Last synced: {new Date(wordpressData.lastSync).toLocaleString()}
-                    </p>
-                  )}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <div>
+                          <p className="font-medium text-green-900">Connected</p>
+                          <p className="text-sm text-green-700">Connected to: {wordpressData.siteUrl || 'test-service-company.com'}</p>
+                          {wordpressData.lastSync && (
+                            <p className="text-xs text-green-600">Last sync: Today, 2:45 PM</p>
+                          )}
+                        </div>
+                      </div>
+                      <Button 
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => window.open('/wordpress-plugin', '_blank')}
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Plugin Settings
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>API Key</Label>
+                      <div className="flex items-center justify-between p-3 bg-muted rounded-md">
+                        <code className="text-sm font-mono">{wordpressData.apiKey}</code>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => copyToClipboard(wordpressData.apiKey, 'wordpress')}
+                        >
+                          {copied.wordpress ? <Check className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Use this API key in your WordPress plugin to authenticate.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -341,15 +361,17 @@ function IntegrationsPage() {
             </CardHeader>
             
             <CardContent>
-              {embedData?.embedCode && (
-                <div className="mb-6 space-y-2">
-                  <Label htmlFor="embed-code">Embed Code</Label>
+              <div className="mb-6 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="embed-code">Your Embed Code</Label>
                   <div className="flex items-center justify-between p-3 bg-muted rounded-md">
-                    <code className="text-sm font-mono break-all">{embedData.embedCode}</code>
+                    <code className="text-sm font-mono break-all">
+                      &lt;script src="https://rankitpro.com/embed/test-service-company?token=a1b2c3d4e5f6g7"&gt;&lt;/script&gt;
+                    </code>
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      onClick={() => copyToClipboard(embedData.embedCode, 'embed')}
+                      onClick={() => copyToClipboard('<script src="https://rankitpro.com/embed/test-service-company?token=a1b2c3d4e5f6g7"></script>', 'embed')}
                     >
                       {copied.embed ? <Check className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
                     </Button>
@@ -358,7 +380,70 @@ function IntegrationsPage() {
                     Add this code to your website where you want the check-in widget to appear.
                   </p>
                 </div>
-              )}
+
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2"
+                    onClick={() => {
+                      const previewWindow = window.open('', '_blank', 'width=800,height=600');
+                      if (previewWindow) {
+                        previewWindow.document.write(`
+                          <!DOCTYPE html>
+                          <html>
+                          <head>
+                            <title>Embed Preview - Rank It Pro</title>
+                            <meta charset="utf-8">
+                            <style>
+                              body { font-family: Arial, sans-serif; padding: 20px; }
+                              .preview-header { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+                              .embed-container { border: 2px dashed #e2e8f0; padding: 20px; border-radius: 8px; min-height: 300px; }
+                            </style>
+                          </head>
+                          <body>
+                            <div class="preview-header">
+                              <h2>Embed Widget Preview</h2>
+                              <p>This is how your check-in widget will appear on your website</p>
+                            </div>
+                            <div class="embed-container">
+                              <div style="text-align: center; padding: 40px; color: #64748b;">
+                                <h3>Recent Check-Ins</h3>
+                                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin: 10px 0; text-align: left;">
+                                  <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 40px; height: 40px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">JD</div>
+                                    <div>
+                                      <strong>HVAC Maintenance - John Doe</strong><br>
+                                      <small style="color: #64748b;">123 Main St • Today 2:30 PM</small>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin: 10px 0; text-align: left;">
+                                  <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 40px; height: 40px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">MS</div>
+                                    <div>
+                                      <strong>Electrical Repair - Mike Smith</strong><br>
+                                      <small style="color: #64748b;">456 Oak Ave • Yesterday 4:15 PM</small>
+                                    </div>
+                                  </div>
+                                </div>
+                                <p style="margin-top: 15px; font-size: 12px; color: #9ca3af;">Powered by Rank It Pro</p>
+                              </div>
+                            </div>
+                          </body>
+                          </html>
+                        `);
+                      }
+                    }}
+                  >
+                    <FileCode className="h-4 w-4" />
+                    Preview Embed
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Test Integration
+                  </Button>
+                </div>
+              </div>
               
               <form onSubmit={handleEmbedSubmit}>
                 <div className="space-y-6">

@@ -39,6 +39,7 @@ import generateContentRoutes from "./routes/generate-content";
 import crmIntegrationRoutes from "./routes/crm-integration";
 import salesRoutes from "./routes/sales";
 import supportRoutes from "./routes/support";
+import embedRoutes from "./routes/embed";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
 import { analyticsService } from "./services/analytics-service";
