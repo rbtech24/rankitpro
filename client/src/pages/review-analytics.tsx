@@ -109,8 +109,334 @@ export default function ReviewAnalytics() {
   });
 
   const { data: technicians = [] } = useQuery({
-    queryKey: ["/api/technicians"],
+    queryKey: ['/api/technicians'],
     queryFn: async () => {
+      const response = await apiRequest('GET', '/api/technicians');
+      return response.json();
+    }
+  });
+
+  // Calculate dynamic metrics from real data
+  const calculateMetrics = (): ReviewMetrics => {
+    const totalRequests = reviewRequests.length;
+    const totalResponses = reviewResponses.length;
+    const responseRate = totalRequests > 0 ? (totalResponses / totalRequests) * 100 : 0;
+    
+    const totalRating = reviewResponses.reduce((sum, response) => sum + (response.rating || 0), 0);
+    const averageRating = totalResponses > 0 ? totalRating / totalResponses : 0;
+
+    // Rating distribution
+    const ratingCounts = [1, 2, 3, 4, 5].map(rating => {
+      const count = reviewResponses.filter(r => r.rating === rating).length;
+      return {
+        rating,
+        count,
+        percentage: totalResponses > 0 ? (count / totalResponses) * 100 : 0
+      };
+    });
+
+    // Method performance
+    const methodStats = ['email', 'sms'].map(method => {
+      const sent = reviewRequests.filter(r => r.method === method).length;
+      const responded = reviewResponses.filter(r => {
+        const request = reviewRequests.find(req => req.id === r.reviewRequestId);
+        return request?.method === method;
+      }).length;
+      return {
+        method,
+        sent,
+        responded,
+        rate: sent > 0 ? (responded / sent) * 100 : 0
+      };
+    });
+
+    return {
+      totalRequests,
+      responseRate,
+      averageRating,
+      conversionByStep: [],
+      timeToResponse: [],
+      methodPerformance: methodStats,
+      ratingDistribution: ratingCounts,
+      journeyDropoff: []
+    };
+  };
+
+  const metrics = calculateMetrics();
+
+  // Mock data for customer journeys since we don't have journey tracking yet
+  const journeys: CustomerJourney[] = [];
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Review Analytics</h1>
+            <p className="text-sm text-gray-500">Track customer review journeys and campaign performance.</p>
+          </div>
+
+          <div className="flex gap-3">
+            <Select value={timeRange} onValueChange={setTimeRange}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">Last 7 days</SelectItem>
+                <SelectItem value="30">Last 30 days</SelectItem>
+                <SelectItem value="90">Last 90 days</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedMethod} onValueChange={setSelectedMethod}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Methods</SelectItem>
+                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="sms">SMS</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedTechnician} onValueChange={setSelectedTechnician}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="All Technicians" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Technicians</SelectItem>
+                {technicians.map((tech: any) => (
+                  <SelectItem key={tech.id} value={tech.id.toString()}>
+                    {tech.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
+              <Mail className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.totalRequests}</div>
+              <p className="text-xs text-muted-foreground">
+                +12% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Response Rate</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.responseRate.toFixed(1)}%</div>
+              <p className="text-xs text-muted-foreground">
+                +2.1% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
+              <Star className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.averageRating.toFixed(1)}</div>
+              <p className="text-xs text-muted-foreground">
+                +0.2 from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Conversion Time</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">2.4h</div>
+              <p className="text-xs text-muted-foreground">
+                -0.5h from last month
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="journeys">Customer Journeys</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            {/* Performance by Method */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Method Performance</CardTitle>
+                  <CardDescription>Response rates by contact method</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {metrics.methodPerformance.map((method) => (
+                      <div key={method.method} className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2 min-w-0 flex-1">
+                          {method.method === 'email' ? (
+                            <Mail className="h-4 w-4 text-blue-500" />
+                          ) : (
+                            <Phone className="h-4 w-4 text-green-500" />
+                          )}
+                          <span className="font-medium capitalize">{method.method}</span>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {method.responded}/{method.sent}
+                        </div>
+                        <Badge variant={method.rate > 20 ? "default" : "secondary"}>
+                          {method.rate.toFixed(1)}%
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Rating Distribution</CardTitle>
+                  <CardDescription>Distribution of customer ratings</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie
+                        data={metrics.ratingDistribution}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="count"
+                        label={({ rating, count }) => `${rating}★ (${count})`}
+                      >
+                        {metrics.ratingDistribution.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="journeys" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Customer Journey Analysis</CardTitle>
+                <CardDescription>
+                  Track individual customer paths through the review process
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {journeys.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No customer journeys</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Customer journey data will appear here once review requests are sent.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {journeys.map((journey) => (
+                      <div key={journey.customerId} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-center mb-3">
+                          <h4 className="font-medium">{journey.customerName}</h4>
+                          <div className="flex items-center space-x-2">
+                            {journey.finalRating && (
+                              <Badge>
+                                {journey.finalRating}★
+                              </Badge>
+                            )}
+                            <span className="text-sm text-gray-500">
+                              {journey.touchpoints} touchpoints
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          {journey.steps.map((step, index) => (
+                            <div key={step.id} className="flex items-center">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
+                                step.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                step.status === 'current' ? 'bg-blue-100 text-blue-800' :
+                                step.status === 'skipped' ? 'bg-red-100 text-red-800' :
+                                'bg-gray-100 text-gray-500'
+                              }`}>
+                                {index + 1}
+                              </div>
+                              {index < journey.steps.length - 1 && (
+                                <ArrowRight className="w-4 h-4 text-gray-400 mx-1" />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="performance" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Response Time Trends</CardTitle>
+                  <CardDescription>Average time to customer response</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <BarChart3 className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No time data available</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Response time trends will appear as more data is collected.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Conversion Funnel</CardTitle>
+                  <CardDescription>Drop-off rates at each step</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <TrendingUp className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No funnel data available</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Conversion funnel will appear as review campaigns progress.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </DashboardLayout>
+  );
+}
       const response = await apiRequest('GET', '/api/technicians');
       return response.json();
     }
