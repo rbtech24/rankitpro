@@ -22,7 +22,8 @@ interface Visit {
   notes?: string;
   location?: string;
   photos: { url: string; filename: string }[];
-  technician: Technician;
+  technician: Technician | null;
+  technicianId?: number;
   createdAt: string;
   latitude?: number;
   longitude?: number;
@@ -142,7 +143,7 @@ export default function RecentVisits() {
               key={visit.id}
               visit={visit}
               onCreatePost={!isSuperAdmin ? () => handleCreatePost(visit.id) : undefined}
-              onRequestReview={isCompanyAdmin ? () => handleRequestReview(visit.id, visit.technician.id) : undefined}
+              onRequestReview={isCompanyAdmin && (visit.technician?.id || visit.technicianId) ? () => handleRequestReview(visit.id, visit.technician?.id || visit.technicianId!) : undefined}
             />
           ))
         ) : (

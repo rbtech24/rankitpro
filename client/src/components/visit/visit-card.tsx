@@ -15,7 +15,7 @@ interface Visit {
   notes?: string;
   location?: string;
   photos: { url: string; filename: string }[];
-  technician: Technician;
+  technician: Technician | null;
   createdAt: string;
   latitude?: number;
   longitude?: number;
@@ -32,15 +32,19 @@ export default function VisitCard({ visit, onCreatePost, onRequestReview, onEdit
   // Format the date as "X time ago"
   const timeAgo = formatDistanceToNow(new Date(visit.createdAt), { addSuffix: true });
   
+  // Safe access to technician data
+  const technicianName = visit.technician?.name || 'Unknown Technician';
+  const technicianInitial = technicianName.charAt(0).toUpperCase();
+  
   return (
     <div className="p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 overflow-hidden">
-            {visit.technician.name.charAt(0).toUpperCase()}
+            {technicianInitial}
           </div>
           <div className="ml-4">
-            <h3 className="text-sm font-medium text-gray-900">{visit.technician.name}</h3>
+            <h3 className="text-sm font-medium text-gray-900">{technicianName}</h3>
             <div className="text-xs text-gray-500">{visit.jobType}</div>
           </div>
         </div>
