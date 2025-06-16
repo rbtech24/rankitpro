@@ -82,174 +82,51 @@ const companySchema = z.object({
   featuresEnabled: z.array(z.string()),
 });
 
-// Mock data for companies
-const mockCompanies = [
-  {
-    id: 1,
-    name: "Top HVAC Solutions",
-    email: "admin@tophvac.com",
-    phoneNumber: "555-123-4567",
-    website: "https://www.tophvacsolutions.com",
-    address: "1234 Cooling Ave",
-    city: "Phoenix",
-    state: "AZ",
-    zipCode: "85001",
-    industry: "HVAC",
-    planId: "2",
-    planName: "Professional",
-    isActive: true,
-    createdAt: "2024-09-05T12:00:00Z",
-    lastLogin: "2025-05-15T09:23:45Z",
-    notes: "Large HVAC provider with multiple locations",
-    maxTechnicians: 15,
-    currentTechnicians: 11,
-    featuresEnabled: ["ai_content", "wordpress_integration", "crm_integration", "review_requests"],
-    stats: {
-      totalCheckIns: 432,
-      activeCheckInsLast30Days: 78,
-      totalTechnicians: 11,
-      totalBlogPosts: 127,
-      totalReviews: 89,
-      avgRating: 4.7
-    }
-  },
-  {
-    id: 2,
-    name: "Ace Plumbing Services",
-    email: "support@aceplumbing.com",
-    phoneNumber: "555-987-6543",
-    website: "https://www.aceplumbingservices.com",
-    address: "567 Pipe St",
-    city: "Chicago",
-    state: "IL",
-    zipCode: "60601",
-    industry: "Plumbing",
-    planId: "1",
-    planName: "Starter",
-    isActive: true,
-    createdAt: "2024-01-22T12:00:00Z",
-    lastLogin: "2025-05-14T14:12:37Z",
-    notes: "Family-owned plumbing business serving Chicago area",
-    maxTechnicians: 5,
-    currentTechnicians: 4,
-    featuresEnabled: ["ai_content", "review_requests"],
-    stats: {
-      totalCheckIns: 245,
-      activeCheckInsLast30Days: 42,
-      totalTechnicians: 4,
-      totalBlogPosts: 68,
-      totalReviews: 53,
-      avgRating: 4.9
-    }
-  },
-  {
-    id: 3,
-    name: "Metro Electrical Contractors",
-    email: "info@metroelectrical.com",
-    phoneNumber: "555-456-7890",
-    website: "https://www.metroelectrical.com",
-    address: "789 Circuit Blvd",
-    city: "Boston",
-    state: "MA",
-    zipCode: "02108",
-    industry: "Electrical",
-    planId: "3",
-    planName: "Enterprise",
-    isActive: true,
-    createdAt: "2025-05-10T12:00:00Z",
-    lastLogin: "2025-05-13T08:45:22Z",
-    notes: "Large electrical contractor with commercial and residential services",
-    maxTechnicians: 50,
-    currentTechnicians: 32,
-    featuresEnabled: ["ai_content", "wordpress_integration", "crm_integration", "review_requests", "custom_branding", "api_access"],
-    stats: {
-      totalCheckIns: 678,
-      activeCheckInsLast30Days: 134,
-      totalTechnicians: 32,
-      totalBlogPosts: 187,
-      totalReviews: 154,
-      avgRating: 4.5
-    }
-  },
-  {
-    id: 4,
-    name: "City Roofing Experts",
-    email: "contact@cityroofing.com",
-    phoneNumber: "555-234-5678",
-    website: "https://www.cityroofingexperts.com",
-    address: "456 Shingle Rd",
-    city: "Seattle",
-    state: "WA",
-    zipCode: "98101",
-    industry: "Roofing",
-    planId: "2",
-    planName: "Professional",
-    isActive: false,
-    createdAt: "2024-11-20T12:00:00Z",
-    lastLogin: "2025-03-10T11:32:17Z",
-    notes: "Account temporarily disabled due to payment issues",
-    maxTechnicians: 15,
-    currentTechnicians: 8,
-    featuresEnabled: ["ai_content", "wordpress_integration", "review_requests"],
-    stats: {
-      totalCheckIns: 321,
-      activeCheckInsLast30Days: 0,
-      totalTechnicians: 8,
-      totalBlogPosts: 94,
-      totalReviews: 72,
-      avgRating: 4.3
-    }
-  },
-  {
-    id: 5,
-    name: "Green Landscaping LLC",
-    email: "hello@greenlandscaping.com",
-    phoneNumber: "555-876-5432",
-    website: "https://www.greenlandscapingllc.com",
-    address: "123 Garden Way",
-    city: "Portland",
-    state: "OR",
-    zipCode: "97201",
-    industry: "Landscaping",
-    planId: "1",
-    planName: "Starter",
-    isActive: true,
-    createdAt: "2024-08-15T12:00:00Z",
-    lastLogin: "2025-05-15T10:15:53Z",
-    notes: "Seasonal business with high activity in spring/summer",
-    maxTechnicians: 5,
-    currentTechnicians: 3,
-    featuresEnabled: ["ai_content", "review_requests"],
-    stats: {
-      totalCheckIns: 187,
-      activeCheckInsLast30Days: 38,
-      totalTechnicians: 3,
-      totalBlogPosts: 54,
-      totalReviews: 47,
-      avgRating: 4.8
-    }
-  }
-];
+// Define types for dynamic data
+interface Company {
+  id: number;
+  name: string;
+  plan: string;
+  createdAt: string;
+  isEmailVerified: boolean;
+  isTrialActive: boolean;
+  usageLimit: number;
+  featuresEnabled: Record<string, any>;
+  stats?: {
+    totalCheckIns: number;
+    totalTechnicians: number;
+    totalBlogPosts: number;
+    totalReviews: number;
+    avgRating: number;
+  };
+}
 
-// Mock data for subscription plans
-const mockPlans = [
+interface SubscriptionPlan {
+  id: string;
+  name: string;
+  price: number;
+  features: string[];
+}
+
+// Subscription plans data
+const subscriptionPlans: SubscriptionPlan[] = [
   {
-    id: "1",
+    id: "starter",
     name: "Starter",
-    monthlyPrice: 99,
-    maxTechnicians: 5
+    price: 99,
+    features: ["Up to 5 technicians", "AI content generation", "Basic review management"]
   },
   {
-    id: "2",
+    id: "professional", 
     name: "Professional",
-    monthlyPrice: 199,
-    maxTechnicians: 15
+    price: 199,
+    features: ["Up to 15 technicians", "WordPress integration", "Advanced analytics", "CRM integration"]
   },
   {
-    id: "3",
-    name: "Enterprise",
-    monthlyPrice: 499,
-    maxTechnicians: 999
+    id: "enterprise",
+    name: "Enterprise", 
+    price: 499,
+    features: ["Unlimited technicians", "Custom branding", "API access", "Priority support"]
   }
 ];
 
@@ -285,7 +162,6 @@ const industries = [
 ];
 
 export default function CompaniesManagement() {
-  const [companies, setCompanies] = useState(mockCompanies);
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const [isAddingCompany, setIsAddingCompany] = useState(false);
   const [isViewingTechnicians, setIsViewingTechnicians] = useState(false);
@@ -297,6 +173,94 @@ export default function CompaniesManagement() {
   const [filteredStatus, setFilteredStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+
+  // Fetch companies from API
+  const { data: companies, isLoading: companiesLoading, refetch: refetchCompanies } = useQuery<Company[]>({
+    queryKey: ['/api/companies'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/companies');
+      return res.json();
+    }
+  });
+
+  // Fetch subscription plans from API
+  const { data: plans, isLoading: plansLoading } = useQuery<SubscriptionPlan[]>({
+    queryKey: ['/api/billing/plans'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/billing/plans');
+      return res.json();
+    }
+  });
+
+  // Create company mutation
+  const createCompanyMutation = useMutation({
+    mutationFn: async (companyData: z.infer<typeof companySchema>) => {
+      const res = await apiRequest('POST', '/api/companies', companyData);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/companies'] });
+      toast({
+        title: "Company Created",
+        description: "Company has been created successfully."
+      });
+      setIsAddingCompany(false);
+      form.reset();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create company",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Update company mutation
+  const updateCompanyMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number, data: z.infer<typeof companySchema> }) => {
+      const res = await apiRequest('PUT', `/api/companies/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/companies'] });
+      toast({
+        title: "Company Updated",
+        description: "Company has been updated successfully."
+      });
+      setSelectedCompany(null);
+      form.reset();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update company",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Toggle company status mutation
+  const toggleStatusMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: number, isActive: boolean }) => {
+      const res = await apiRequest('PUT', `/api/companies/${id}/status`, { isActive });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/companies'] });
+      toast({
+        title: "Status Updated",
+        description: "Company status has been updated successfully."
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update company status",
+        variant: "destructive"
+      });
+    }
+  });
   
   // Company details form
   const form = useForm<z.infer<typeof companySchema>>({
@@ -344,73 +308,22 @@ export default function CompaniesManagement() {
   // Submit handler for company form
   const onSubmit = (data: z.infer<typeof companySchema>) => {
     if (isAddingCompany) {
-      // Add new company
-      const newCompany = {
-        ...data,
-        id: Math.max(...companies.map(c => c.id)) + 1,
-        planName: mockPlans.find(p => p.id === data.planId)?.name || "",
-        createdAt: new Date().toISOString(),
-        lastLogin: null,
-        currentTechnicians: 0,
-        stats: {
-          totalCheckIns: 0,
-          activeCheckInsLast30Days: 0,
-          totalTechnicians: 0,
-          totalBlogPosts: 0,
-          totalReviews: 0,
-          avgRating: 0
-        }
-      };
-      setCompanies([...companies, newCompany]);
-      toast({
-        title: "Company Added",
-        description: `${data.name} has been added successfully.`
-      });
+      createCompanyMutation.mutate(data);
     } else {
-      // Update existing company
-      const updatedCompanies = companies.map(company => {
-        if (company.id === selectedCompany.id) {
-          return { 
-            ...company, 
-            ...data,
-            planName: mockPlans.find(p => p.id === data.planId)?.name || ""
-          };
-        }
-        return company;
-      });
-      setCompanies(updatedCompanies);
-      toast({
-        title: "Company Updated",
-        description: `${data.name} has been updated successfully.`
-      });
+      updateCompanyMutation.mutate({ id: selectedCompany.id, data });
     }
-    
-    // Reset form and close dialog
-    setSelectedCompany(null);
-    setIsAddingCompany(false);
-    form.reset();
   };
   
   // Toggle company status
   const toggleCompanyStatus = (id: number) => {
-    const updatedCompanies = companies.map(company => {
-      if (company.id === id) {
-        return { ...company, isActive: !company.isActive };
-      }
-      return company;
-    });
-    
-    setCompanies(updatedCompanies);
-    
-    const company = companies.find(c => c.id === id);
-    toast({
-      title: company?.isActive ? "Company Deactivated" : "Company Activated",
-      description: `${company?.name} has been ${company?.isActive ? "deactivated" : "activated"}.`
-    });
+    const company = companies?.find(c => c.id === id);
+    if (company) {
+      toggleStatusMutation.mutate({ id, isActive: !company.isEmailVerified });
+    }
   };
   
   // Send support email
-  const sendSupportEmail = (company: any) => {
+  const sendSupportEmail = (company: Company) => {
     toast({
       title: "Support Email Sent",
       description: `A support email has been sent to ${company.name}.`
@@ -418,27 +331,22 @@ export default function CompaniesManagement() {
   };
   
   // Filter companies based on search, industry, plan, and status
-  const filteredCompanies = companies.filter(company => {
+  const filteredCompanies = companies?.filter(company => {
     // Filter by search query
     const matchesSearch = searchQuery === "" || 
-      company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      company.email.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    // Filter by industry
-    const matchesIndustry = filteredIndustry === "all" || 
-      company.industry === filteredIndustry;
+      company.name.toLowerCase().includes(searchQuery.toLowerCase());
     
     // Filter by plan
     const matchesPlan = filteredPlan === "all" || 
-      company.planId === filteredPlan;
+      company.plan === filteredPlan;
     
     // Filter by status
     const matchesStatus = filteredStatus === "all" || 
-      (filteredStatus === "active" && company.isActive) ||
-      (filteredStatus === "inactive" && !company.isActive);
+      (filteredStatus === "active" && company.isEmailVerified) ||
+      (filteredStatus === "inactive" && !company.isEmailVerified);
     
-    return matchesSearch && matchesIndustry && matchesPlan && matchesStatus;
-  });
+    return matchesSearch && matchesPlan && matchesStatus;
+  }) || [];
   
   // Mock technicians for selected company
   const mockTechnicians = selectedCompany ? Array.from({ length: selectedCompany.currentTechnicians }).map((_, index) => ({
