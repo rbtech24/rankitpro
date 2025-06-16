@@ -4,10 +4,9 @@ import { storage } from "../storage";
 const router = Router();
 
 // Serve the JavaScript embed widget
-router.get('/embed/:companySlug', async (req, res) => {
+router.get('/embed/widget.js', async (req, res) => {
   try {
-    const { companySlug } = req.params;
-    const { token } = req.query;
+    const { companySlug, token } = req.query;
 
     // Validate token (basic validation for demo)
     if (!token || typeof token !== 'string') {
