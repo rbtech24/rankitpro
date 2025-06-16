@@ -25,12 +25,11 @@ async function restoreAdminLogin() {
     
     // Insert or update the super admin user
     const result = await pool.query(`
-      INSERT INTO users (username, email, password, role, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, NOW(), NOW())
+      INSERT INTO users (username, email, password, role, created_at)
+      VALUES ($1, $2, $3, $4, NOW())
       ON CONFLICT (email) DO UPDATE SET
         password = $3,
-        role = $4,
-        updated_at = NOW()
+        role = $4
       RETURNING id, username, email, role
     `, ['superadmin', 'admin@rankitpro.com', hashedPassword, 'super_admin']);
     
