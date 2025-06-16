@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage-simple";
+import { storage } from "./storage";
 import { db } from "./db";
 
 // Extend session interface to include userId
@@ -2679,21 +2679,21 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
   // Support Ticket Routes
   app.post("/api/support/tickets", isAuthenticated, async (req, res) => {
     try {
-      const companyId = req.user.companyId;
-      if (!companyId) {
-        return res.status(400).json({ message: "No company associated with this user" });
-      }
-
+      // For super admin, use a default company ID of 0 or create system tickets
+      const companyId = req.user.companyId || 0;
+      
       const ticketNumber = `TICKET-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
       
       const ticketData = {
         ...req.body,
         companyId,
         submittedBy: req.user.id,
+        submitterName: req.user.username || req.user.email,
+        submitterEmail: req.user.email,
         ticketNumber,
         status: 'open' as const,
         priority: req.body.priority || 'medium' as const,
-        category: req.body.category || 'general' as const
+        category: req.body.category || 'technical' as const
       };
 
       const ticket = await storage.createSupportTicket(ticketData);
@@ -2824,6 +2824,8 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       const responseData = {
         ticketId,
         responderId: req.user.id,
+        responderName: req.user.username || req.user.email,
+        responderType: req.user.role === 'super_admin' ? 'admin' as const : 'customer' as const,
         message: req.body.message,
         isInternal: req.body.isInternal || false
       };
