@@ -205,9 +205,12 @@ export default function Technicians() {
     setIsAddModalOpen(true);
   };
 
+  const [viewTechnician, setViewTechnician] = useState<Technician | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
   const handleViewTechnician = (technician: Technician) => {
-    // Show technician details in an alert for now
-    alert(`Technician Details:\n\nName: ${technician.name}\nEmail: ${technician.email}\nPhone: ${technician.phone}\nLocation: ${technician.location}\nSpecialty: ${technician.specialty || 'General'}\nCheck-ins: ${technician.checkinsCount}\nReviews: ${technician.reviewsCount}\nRating: ${technician.rating.toFixed(1)} stars`);
+    setViewTechnician(technician);
+    setIsViewModalOpen(true);
   };
 
   const resetPasswordMutation = useMutation({
@@ -508,21 +511,65 @@ export default function Technicians() {
                   <FormItem>
                     <FormLabel>Phone</FormLabel>
                     <FormControl>
-                      <Input placeholder="(555) 123-4567" {...field} />
+                      <Input 
+                        placeholder="(555) 123-4567" 
+                        {...field}
+                        onChange={(e) => {
+                          // Auto-format phone number
+                          const value = e.target.value.replace(/\D/g, '');
+                          let formatted = value;
+                          if (value.length >= 6) {
+                            formatted = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6, 10)}`;
+                          } else if (value.length >= 3) {
+                            formatted = `(${value.slice(0, 3)}) ${value.slice(3)}`;
+                          }
+                          field.onChange(formatted);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Miami" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., FL" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
               <FormField
                 control={form.control}
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>Service Area</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Miami, FL or Downtown Office" {...field} />
+                      <Input placeholder="e.g., Downtown, North Side, Mobile Unit" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -542,6 +589,22 @@ export default function Technicians() {
                   </FormItem>
                 )}
               />
+              
+              {!editTechnician && (
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Initial Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter initial password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               
               <DialogFooter>
                 <Button
@@ -573,6 +636,103 @@ export default function Technicians() {
               </DialogFooter>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Technician Details View Modal */}
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Technician Details</DialogTitle>
+            <DialogDescription>
+              Complete information for {viewTechnician?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {viewTechnician && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Name</h4>
+                    <p className="text-sm text-gray-900">{viewTechnician.name}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Email</h4>
+                    <p className="text-sm text-gray-900">{viewTechnician.email}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Phone</h4>
+                    <p className="text-sm text-gray-900">{viewTechnician.phone || 'Not provided'}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Location</h4>
+                    <p className="text-sm text-gray-900">{viewTechnician.location || 'Not specified'}</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Specialty</h4>
+                    <p className="text-sm text-gray-900">{viewTechnician.specialty || 'General'}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Total Check-ins</h4>
+                    <p className="text-sm text-gray-900 font-semibold">{viewTechnician.checkinsCount}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Total Reviews</h4>
+                    <p className="text-sm text-gray-900 font-semibold">{viewTechnician.reviewsCount}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Average Rating</h4>
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-900 font-semibold mr-2">{viewTechnician.rating.toFixed(1)}</span>
+                      {renderStars(viewTechnician.rating)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-medium text-gray-500 mb-3">Performance Summary</h4>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-2xl font-bold text-blue-600">{viewTechnician.checkinsCount}</p>
+                    <p className="text-xs text-blue-600">Check-ins</p>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <p className="text-2xl font-bold text-green-600">{viewTechnician.reviewsCount}</p>
+                    <p className="text-xs text-green-600">Reviews</p>
+                  </div>
+                  <div className="bg-yellow-50 p-3 rounded-lg">
+                    <p className="text-2xl font-bold text-yellow-600">{viewTechnician.rating.toFixed(1)}</p>
+                    <p className="text-xs text-yellow-600">Rating</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              setIsViewModalOpen(false);
+              if (viewTechnician) {
+                openEditModal(viewTechnician);
+              }
+            }}>
+              Edit Technician
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

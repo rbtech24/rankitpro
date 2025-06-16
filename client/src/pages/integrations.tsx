@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Copy, Globe, Code, FileCode, Check, AlertCircle, Copy as CopyIcon } from "lucide-react";
+import DashboardLayout from "@/components/layout/dashboard-layout";
 
 
 type WordPressIntegration = {

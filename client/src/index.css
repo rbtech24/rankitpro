@@ -2,6 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* React Quill WYSIWYG Editor Styles */
+.ql-editor {
+  @apply min-h-[200px] text-sm;
+}
+
+.ql-toolbar {
+  @apply border-gray-300 rounded-t-md;
+}
+
+.ql-container {
+  @apply border-gray-300 rounded-b-md;
+}
+
+.ql-snow .ql-picker {
+  @apply text-gray-700;
+}
+
+.ql-snow .ql-picker-options {
+  @apply bg-white border border-gray-300 rounded shadow-lg;
+}
+
+.ql-snow .ql-picker-item {
+  @apply px-3 py-2 hover:bg-gray-100;
+}
+
+.ql-snow .ql-tooltip {
+  @apply bg-white border border-gray-300 rounded shadow-lg z-50;
+}
+
+.ql-snow .ql-tooltip input {
+  @apply border border-gray-300 rounded px-2 py-1;
+}
+
 :root {
       --background: 0 0% 100%;
 --foreground: 198 11% 20%; /* Dark gray from logo #2e3538 */
