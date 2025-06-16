@@ -66,6 +66,20 @@ import LogoutHandler from "@/components/LogoutHandler";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
+// Dashboard wrapper component that redirects super admins
+function DashboardWithRedirect() {
+  const { data: auth } = useQuery<AuthState>({
+    queryKey: ["/api/auth/me"],
+    queryFn: getCurrentUser
+  });
+
+  if (auth?.user?.role === "super_admin") {
+    return <Redirect to="/system-overview" />;
+  }
+
+  return <Dashboard />;
+}
+
 // Informational Pages
 import About from "@/pages/about";
 import CaseStudies from "@/pages/case-studies";
@@ -127,7 +141,7 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
   // Role-based access control removed - allow normal navigation
   
   if (role && auth.user.role !== role && auth.user.role !== "super_admin") {
-    return auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : <Redirect to="/dashboard" />;
+    return <Redirect to="/dashboard" />;
   }
   
   return <Component {...rest} />;
@@ -1092,7 +1106,7 @@ function Router() {
       
       {/* Dashboard Pages */}
       <Route path="/dashboard">
-        <PrivateRoute component={Dashboard} path="/dashboard" />
+        <PrivateRoute component={DashboardWithRedirect} path="/dashboard" />
       </Route>
       <Route path="/system-overview">
         <PrivateRoute component={SystemOverview} path="/system-overview" role="super_admin" />
