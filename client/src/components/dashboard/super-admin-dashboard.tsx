@@ -318,17 +318,12 @@ export default function SuperAdminDashboard() {
       <Tabs defaultValue="companies" className="space-y-6">
         <TabsList>
           <TabsTrigger value="companies">Companies</TabsTrigger>
-          <TabsTrigger value="subscriptions">Subscription Plans</TabsTrigger>
           <TabsTrigger value="health">System Health</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="companies">
           <CompaniesTable />
-        </TabsContent>
-
-        <TabsContent value="subscriptions">
-          <SubscriptionPlansCard />
         </TabsContent>
 
         <TabsContent value="health">
