@@ -20,16 +20,16 @@ router.get("/tickets", isAuthenticated, isSuperAdmin, async (req, res) => {
 // Create a new support ticket
 router.post("/tickets", isAuthenticated, async (req, res) => {
   try {
-    const validatedData = insertSupportTicketSchema.parse(req.body);
-    
-    // Add submitter ID from authenticated user
     const ticketData = {
-      ...validatedData,
+      ...req.body,
       submitterId: req.session.userId!,
-      customerEmail: req.user?.email || "unknown@example.com"
+      submitterName: req.user?.email || "Unknown User",
+      submitterEmail: req.user?.email || "unknown@example.com"
     };
+    
+    const validatedData = insertSupportTicketSchema.parse(ticketData);
 
-    const ticket = await storage.createSupportTicket(ticketData);
+    const ticket = await storage.createSupportTicket(validatedData);
     res.status(201).json(ticket);
   } catch (error: any) {
     if (error.name === "ZodError") {
