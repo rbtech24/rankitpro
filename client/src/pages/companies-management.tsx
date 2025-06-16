@@ -348,47 +348,38 @@ export default function CompaniesManagement() {
     return matchesSearch && matchesPlan && matchesStatus;
   }) || [];
   
-  // Mock technicians for selected company
-  const mockTechnicians = selectedCompany ? Array.from({ length: selectedCompany.currentTechnicians }).map((_, index) => ({
-    id: index + 1,
-    name: `Technician ${index + 1}`,
-    email: `tech${index + 1}@${selectedCompany.name.toLowerCase().replace(/\s+/g, '')}.com`,
-    phone: `555-${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`,
-    title: ["Service Technician", "Senior Technician", "Lead Technician", "Field Supervisor"][Math.floor(Math.random() * 4)],
-    joinedDate: new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)).toISOString(),
-    lastCheckInDate: Math.random() > 0.1 ? new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)).toISOString() : null,
-    checkInsCount: Math.floor(Math.random() * 50) + 1,
-    reviewsCount: Math.floor(Math.random() * 30),
-    rating: (3.5 + Math.random() * 1.5).toFixed(1),
-    status: Math.random() > 0.1 ? "active" : "inactive"
-  })) : [];
+  // Real technicians data for selected company
+  const { data: companyTechnicians = [] } = useQuery({
+    queryKey: ['/api/technicians', selectedCompany?.id],
+    queryFn: async () => {
+      if (!selectedCompany?.id) return [];
+      const response = await apiRequest('GET', `/api/companies/${selectedCompany.id}/technicians`);
+      return response.json();
+    },
+    enabled: !!selectedCompany?.id
+  });
   
-  // Mock check-ins for selected company
-  const mockCheckIns = selectedCompany ? Array.from({ length: 10 }).map((_, index) => ({
-    id: index + 1,
-    jobType: ["Repair", "Installation", "Maintenance", "Inspection", "Emergency"][Math.floor(Math.random() * 5)],
-    technicianName: `Technician ${Math.floor(Math.random() * selectedCompany.currentTechnicians) + 1}`,
-    location: `${["123 Main St", "456 Oak Ave", "789 Pine Rd", "321 Elm Blvd", "654 Maple Ln"][Math.floor(Math.random() * 5)]}, ${selectedCompany.city}, ${selectedCompany.state}`,
-    dateCompleted: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toISOString(),
-    photosCount: Math.floor(Math.random() * 6) + 1,
-    noteLength: Math.floor(Math.random() * 300) + 50,
-    hasBlogPost: Math.random() > 0.3,
-    hasReviewRequest: Math.random() > 0.2,
-    reviewStatus: Math.random() > 0.5 ? (Math.random() > 0.7 ? "completed" : "pending") : "none"
-  })) : [];
+  // Real check-ins data for selected company
+  const { data: companyCheckIns = [] } = useQuery({
+    queryKey: ['/api/check-ins', selectedCompany?.id],
+    queryFn: async () => {
+      if (!selectedCompany?.id) return [];
+      const response = await apiRequest('GET', `/api/companies/${selectedCompany.id}/check-ins`);
+      return response.json();
+    },
+    enabled: !!selectedCompany?.id
+  });
   
-  // Mock reviews for selected company
-  const mockReviews = selectedCompany ? Array.from({ length: 10 }).map((_, index) => ({
-    id: index + 1,
-    customerName: `Customer ${index + 1}`,
-    rating: Math.floor(Math.random() * 2) + 4, // 4 or 5 stars
-    reviewText: "Great service! The technician was professional, on time, and fixed our issue quickly. Would definitely recommend!",
-    technicianName: `Technician ${Math.floor(Math.random() * selectedCompany.currentTechnicians) + 1}`,
-    jobType: ["Repair", "Installation", "Maintenance", "Inspection", "Emergency"][Math.floor(Math.random() * 5)],
-    reviewDate: new Date(Date.now() - Math.floor(Math.random() * 90 * 24 * 60 * 60 * 1000)).toISOString(),
-    platform: ["Google", "Facebook", "Yelp", "Website"][Math.floor(Math.random() * 4)],
-    responseStatus: Math.random() > 0.2 ? "responded" : "pending"
-  })) : [];
+  // Real reviews data for selected company
+  const { data: companyReviews = [] } = useQuery({
+    queryKey: ['/api/review-responses', selectedCompany?.id],
+    queryFn: async () => {
+      if (!selectedCompany?.id) return [];
+      const response = await apiRequest('GET', `/api/companies/${selectedCompany.id}/reviews`);
+      return response.json();
+    },
+    enabled: !!selectedCompany?.id
+  });
   
   return (
     <div className="flex h-screen bg-gray-50">
