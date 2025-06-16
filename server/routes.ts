@@ -3008,6 +3008,68 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  // Mobile field app data endpoint
+  app.get("/api/mobile/field-app-data", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user's company data
+      let company = null;
+      if (user.companyId) {
+        company = await storage.getCompany(user.companyId);
+      }
+
+      // Get job types for the company
+      let jobTypes = [];
+      if (user.companyId) {
+        jobTypes = await storage.getJobTypesByCompany(user.companyId);
+      }
+
+      // Get recent check-ins for technician
+      let recentCheckIns = [];
+      if (user.role === 'technician') {
+        recentCheckIns = await storage.getCheckInsByTechnician(userId, 10);
+      }
+
+      const fieldAppData = {
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          companyId: user.companyId
+        },
+        company: company ? {
+          id: company.id,
+          name: company.name,
+          industry: company.industry,
+          website: company.website
+        } : null,
+        jobTypes,
+        recentCheckIns,
+        features: {
+          gpsEnabled: true,
+          cameraEnabled: true,
+          aiEnabled: true,
+          reviewsEnabled: true,
+          offlineEnabled: true
+        }
+      };
+
+      res.json(fieldAppData);
+    } catch (error) {
+      console.error("Mobile field app data error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Initialize the scheduler service to process review follow-ups
   schedulerService.initialize();
   
