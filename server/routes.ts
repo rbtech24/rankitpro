@@ -2381,19 +2381,76 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
 
   app.post("/api/check-ins", isAuthenticated, async (req, res) => {
     try {
-      const checkInData = insertCheckInSchema.parse(req.body);
+      const companyId = req.user.companyId;
       
-      // Set company ID from user if not provided
-      if (!checkInData.companyId) {
-        checkInData.companyId = req.user.companyId!;
+      if (!companyId) {
+        return res.status(400).json({ message: "No company associated with this user" });
       }
       
-      // Check permissions
-      if (req.user.role !== "super_admin" && req.user.companyId !== checkInData.companyId) {
-        return res.status(403).json({ message: "Forbidden" });
+      // Get technician ID based on user role
+      let technicianId: number;
+      
+      if (req.user.role === "technician") {
+        const technicians = await storage.getTechniciansByCompany(companyId);
+        const technician = technicians.find(tech => tech.userId === req.user.id);
+        
+        if (!technician) {
+          return res.status(404).json({ message: "Technician record not found" });
+        }
+        
+        technicianId = technician.id;
+      } else {
+        // For admin users, get technician ID from request or use first available
+        if (req.body.technicianId) {
+          technicianId = parseInt(req.body.technicianId);
+        } else {
+          const technicians = await storage.getTechniciansByCompany(companyId);
+          if (technicians.length === 0) {
+            return res.status(400).json({ message: "No technicians available" });
+          }
+          technicianId = technicians[0].id;
+        }
       }
       
-      const checkIn = await storage.createCheckIn(checkInData);
+      // Parse and validate the check-in data with flexible field mapping
+      const jobTypeValue = req.body.jobType || req.body.jobTypeId;
+      let jobTypeName = '';
+      
+      if (jobTypeValue) {
+        // If it's a number (jobTypeId), get the job type name
+        if (!isNaN(jobTypeValue)) {
+          const jobTypes = await storage.getJobTypesByCompany(companyId);
+          const jobType = jobTypes.find(jt => jt.id === parseInt(jobTypeValue));
+          jobTypeName = jobType ? jobType.name : 'General Service';
+        } else {
+          jobTypeName = jobTypeValue;
+        }
+      } else {
+        jobTypeName = 'General Service';
+      }
+
+      const checkInData = {
+        jobType: jobTypeName,
+        notes: req.body.notes || req.body.description || '',
+        latitude: req.body.latitude || null,
+        longitude: req.body.longitude || null,
+        location: req.body.location || req.body.address || '',
+        customerName: req.body.customerName || null,
+        customerEmail: req.body.customerEmail || null,
+        customerPhone: req.body.customerPhone || null,
+        isBlog: req.body.isBlog === "true" || req.body.isBlog === true,
+        technicianId,
+        companyId
+      };
+
+      console.log('Check-in data before validation:', checkInData);
+      console.log('Job type name:', jobTypeName);
+      console.log('Technician ID:', technicianId);
+      console.log('Company ID:', companyId);
+
+      const data = insertCheckInSchema.parse(checkInData);
+      
+      const checkIn = await storage.createCheckIn(data);
       res.json(checkIn);
     } catch (error) {
       if (error instanceof z.ZodError) {
