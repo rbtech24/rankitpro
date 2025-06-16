@@ -10,6 +10,7 @@ import WebsiteIntegration from "@/components/dashboard/website-integration";
 import AdminBusinessManagement from "@/components/dashboard/admin-business-management";
 import CompaniesManagement from "@/components/dashboard/companies-management";
 import BillingManagement from "@/components/dashboard/billing-management";
+import SuperAdminDashboard from "@/components/dashboard/super-admin-dashboard";
 import VisitModal from "@/components/modals/visit-modal";
 import MobileVisitModal from "@/components/technician/mobile-visit-modal";
 import TechDashboard from "@/components/technician/tech-dashboard";
@@ -247,24 +248,9 @@ export default function Dashboard() {
           </p>
         </div>
         
-        {/* Super Admin Business Dashboard */}
+        {/* Super Admin System Dashboard */}
         {isSuperAdmin ? (
-          <Tabs defaultValue="overview" className="mb-6">
-            <TabsList className="w-full">
-              <TabsTrigger value="overview">Platform Overview</TabsTrigger>
-              <TabsTrigger value="companies">Companies</TabsTrigger>
-              <TabsTrigger value="billing">Billing & Revenue</TabsTrigger>
-              <TabsTrigger value="integrations">Integrations</TabsTrigger>
-              <TabsTrigger value="operations">Operations</TabsTrigger>
-            </TabsList>
-            
-            {/* Platform Overview Tab */}
-            <TabsContent value="overview">
-              <div className="space-y-6">
-                <StatsOverview />
-                <AdminBusinessManagement />
-              </div>
-            </TabsContent>
+          <SuperAdminDashboard />
             
             {/* Companies Management Tab */}
             <TabsContent value="companies">
