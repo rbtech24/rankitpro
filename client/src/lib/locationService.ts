@@ -4,6 +4,8 @@
  */
 
 export interface LocationData {
+  latitude: number;
+  longitude: number;
   streetName: string;
   city: string;
   state: string;

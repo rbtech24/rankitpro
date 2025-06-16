@@ -121,8 +121,9 @@ export default function FieldMobile() {
     const loadJobTypes = async () => {
       try {
         setLoading(true);
-        const response = await apiRequest('/api/job-types');
-        setJobTypes(response);
+        const response = await apiRequest('GET', '/api/job-types');
+        const data = await response.json();
+        setJobTypes(data);
       } catch (error) {
         console.error('Failed to load job types:', error);
         toast({
@@ -225,10 +226,15 @@ export default function FieldMobile() {
         formData.append(`afterPhotos`, photo);
       });
 
-      await apiRequest('/api/check-ins', {
+      const response = await fetch('/api/check-ins', {
         method: 'POST',
         body: formData,
+        credentials: 'include'
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       toast({
         title: "Success",
@@ -269,15 +275,11 @@ export default function FieldMobile() {
     try {
       setSubmitting(true);
 
-      await apiRequest('/api/blog-posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...blogForm,
-          latitude: currentLocation.latitude,
-          longitude: currentLocation.longitude,
-          address: `${currentLocation.streetName}, ${currentLocation.city}, ${currentLocation.state} ${currentLocation.zipCode}`
-        })
+      await apiRequest('POST', '/api/blog-posts', {
+        ...blogForm,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        address: `${currentLocation.streetName}, ${currentLocation.city}, ${currentLocation.state} ${currentLocation.zipCode}`
       });
 
       toast({
@@ -312,15 +314,11 @@ export default function FieldMobile() {
     try {
       setSubmitting(true);
 
-      await apiRequest('/api/review-requests', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...reviewForm,
-          latitude: currentLocation.latitude,
-          longitude: currentLocation.longitude,
-          address: `${currentLocation.streetName}, ${currentLocation.city}, ${currentLocation.state} ${currentLocation.zipCode}`
-        })
+      await apiRequest('POST', '/api/review-requests', {
+        ...reviewForm,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        address: `${currentLocation.streetName}, ${currentLocation.city}, ${currentLocation.state} ${currentLocation.zipCode}`
       });
 
       toast({
