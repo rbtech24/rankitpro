@@ -2403,32 +2403,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBlogPost(id: number): Promise<BlogPost | null> {
-    const blogPost = this.blogPosts.get(id);
+    const [blogPost] = await db.select().from(blogPosts).where(eq(blogPosts.id, id));
     return blogPost || null;
   }
 
   async getBlogPostsByCompany(companyId: number): Promise<BlogPost[]> {
-    return Array.from(this.blogPosts.values()).filter(post => post.companyId === companyId);
+    return await db.select().from(blogPosts).where(eq(blogPosts.companyId, companyId));
   }
 
   async createBlogPost(blogPostData: InsertBlogPost): Promise<BlogPost> {
-    const blogPost: BlogPost = {
-      id: this.blogPostId++,
-      createdAt: new Date(),
-      ...blogPostData
-    };
-    this.blogPosts.set(blogPost.id, blogPost);
+    const [blogPost] = await db
+      .insert(blogPosts)
+      .values(blogPostData)
+      .returning();
     return blogPost;
   }
 
   async updateBlogPost(id: number, updates: Partial<BlogPost>): Promise<BlogPost> {
-    const blogPost = this.blogPosts.get(id);
+    const [blogPost] = await db
+      .update(blogPosts)
+      .set(updates)
+      .where(eq(blogPosts.id, id))
+      .returning();
+    
     if (!blogPost) {
       throw new Error("Blog post not found");
     }
-    const updatedBlogPost = { ...blogPost, ...updates, updatedAt: new Date() };
-    this.blogPosts.set(id, updatedBlogPost);
-    return updatedBlogPost;
+    return blogPost;
   }
 
   async getReviewRequest(id: number): Promise<ReviewRequest | null> {

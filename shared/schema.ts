@@ -151,7 +151,18 @@ export const insertCheckInSchema = createInsertSchema(checkIns).omit({ id: true,
   isBlog: z.boolean().optional()
 });
 export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ id: true, createdAt: true });
-export const insertReviewRequestSchema = createInsertSchema(reviewRequests).omit({ id: true, sentAt: true });
+export const insertReviewRequestSchema = createInsertSchema(reviewRequests).omit({ id: true, sentAt: true }).extend({
+  customerName: z.string().min(1),
+  email: z.string().email().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  method: z.enum(["email", "sms"]),
+  jobType: z.string().nullable().optional(),
+  customMessage: z.string().nullable().optional(),
+  token: z.string().nullable().optional(),
+  status: z.enum(["pending", "sent", "failed"]).default("pending"),
+  technicianId: z.number(),
+  companyId: z.number()
+});
 export const insertReviewResponseSchema = createInsertSchema(reviewResponses).omit({ id: true, respondedAt: true });
 
 // Types
