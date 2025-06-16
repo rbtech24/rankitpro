@@ -2676,6 +2676,176 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
 
   // Production authentication removed - using main auth system
 
+  // Support Ticket Routes
+  app.post("/api/support/tickets", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "No company associated with this user" });
+      }
+
+      const ticketNumber = `TICKET-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+      
+      const ticketData = {
+        ...req.body,
+        companyId,
+        submittedBy: req.user.id,
+        ticketNumber,
+        status: 'open' as const,
+        priority: req.body.priority || 'medium' as const,
+        category: req.body.category || 'general' as const
+      };
+
+      const ticket = await storage.createSupportTicket(ticketData);
+      res.status(201).json(ticket);
+    } catch (error) {
+      console.error("Create support ticket error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/support/tickets", isAuthenticated, async (req, res) => {
+    try {
+      let tickets;
+      
+      if (req.user.role === "super_admin") {
+        // Super admin sees all tickets
+        const filters = {
+          status: req.query.status as string,
+          priority: req.query.priority as string,
+          category: req.query.category as string,
+          assignedTo: req.query.assignedTo ? parseInt(req.query.assignedTo as string) : undefined
+        };
+        tickets = await storage.getAllSupportTickets(filters);
+      } else {
+        // Company users see only their company's tickets
+        const companyId = req.user.companyId;
+        if (!companyId) {
+          return res.status(400).json({ message: "No company associated with this user" });
+        }
+        tickets = await storage.getSupportTicketsByCompany(companyId);
+      }
+
+      res.json(tickets);
+    } catch (error) {
+      console.error("Get support tickets error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/support/tickets/:id", isAuthenticated, async (req, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const ticket = await storage.getSupportTicket(ticketId);
+      
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket not found" });
+      }
+
+      // Check permissions
+      if (req.user.role !== "super_admin" && req.user.companyId !== ticket.companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const responses = await storage.getSupportTicketResponses(ticketId);
+      res.json({ ...ticket, responses });
+    } catch (error) {
+      console.error("Get support ticket error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.put("/api/support/tickets/:id", isAuthenticated, async (req, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const ticket = await storage.getSupportTicket(ticketId);
+      
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket not found" });
+      }
+
+      // Check permissions
+      if (req.user.role !== "super_admin" && req.user.companyId !== ticket.companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const updatedTicket = await storage.updateSupportTicket(ticketId, {
+        ...req.body,
+        updatedAt: new Date()
+      });
+      
+      res.json(updatedTicket);
+    } catch (error) {
+      console.error("Update support ticket error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.post("/api/support/tickets/:id/assign", isSuperAdmin, async (req, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const { adminId } = req.body;
+      
+      const updatedTicket = await storage.assignSupportTicket(ticketId, adminId);
+      res.json(updatedTicket);
+    } catch (error) {
+      console.error("Assign support ticket error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.post("/api/support/tickets/:id/resolve", isSuperAdmin, async (req, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const { resolution } = req.body;
+      
+      const updatedTicket = await storage.resolveSupportTicket(ticketId, resolution, req.user.id);
+      res.json(updatedTicket);
+    } catch (error) {
+      console.error("Resolve support ticket error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.post("/api/support/tickets/:id/responses", isAuthenticated, async (req, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const ticket = await storage.getSupportTicket(ticketId);
+      
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket not found" });
+      }
+
+      // Check permissions
+      if (req.user.role !== "super_admin" && req.user.companyId !== ticket.companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const responseData = {
+        ticketId,
+        responderId: req.user.id,
+        message: req.body.message,
+        isInternal: req.body.isInternal || false
+      };
+
+      const response = await storage.createSupportTicketResponse(responseData);
+      res.status(201).json(response);
+    } catch (error) {
+      console.error("Create support ticket response error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/support/stats", isSuperAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getSupportTicketStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Get support ticket stats error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Initialize the scheduler service to process review follow-ups
   schedulerService.initialize();
   

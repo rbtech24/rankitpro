@@ -7,11 +7,20 @@ import {
   MonthlyAiUsage, InsertMonthlyAiUsage, APICredentials, InsertAPICredentials,
   SalesPerson, InsertSalesPerson, SalesCommission, InsertSalesCommission,
   CompanyAssignment, InsertCompanyAssignment, Testimonial, InsertTestimonial,
-  TestimonialApproval, InsertTestimonialApproval
+  TestimonialApproval, InsertTestimonialApproval, SupportTicket, InsertSupportTicket,
+  SupportTicketResponse, InsertSupportTicketResponse
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, gte, lte, sql } from "drizzle-orm";
 import * as schema from "@shared/schema";
+
+const {
+  users, companies, technicians, checkIns, blogPosts, reviewRequests, reviewResponses,
+  reviewFollowUpSettings, reviewRequestStatuses, apiCredentials, aiUsageLogs, 
+  wordpressIntegrations, monthlyAiUsage, salesPeople, salesCommissions, 
+  companyAssignments, testimonials, testimonialApprovals, wordpressCustomFields,
+  supportTickets, supportTicketResponses
+} = schema;
 
 export interface IStorage {
   // User operations
