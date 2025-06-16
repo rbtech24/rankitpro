@@ -179,6 +179,8 @@ export async function getCurrentLocation(): Promise<LocationData> {
  */
 export function getFallbackLocation(): LocationData {
   return {
+    latitude: 0,
+    longitude: 0,
     streetName: 'Location not detected',
     city: '',
     state: '',

@@ -2403,11 +2403,8 @@ export class DatabaseStorage implements IStorage {
 
   async createBlogPost(blogPostData: InsertBlogPost): Promise<BlogPost> {
     const blogPost: BlogPost = {
-      id: this.nextBlogPostId++,
+      id: this.blogPostId++,
       createdAt: new Date(),
-      updatedAt: new Date(),
-      publishedAt: null,
-      status: "draft",
       ...blogPostData
     };
     this.blogPosts.set(blogPost.id, blogPost);
