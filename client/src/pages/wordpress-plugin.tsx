@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Download, FileText, Settings, Check, Copy, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 export default function WordPressPlugin() {
   const [copiedItems, setCopiedItems] = useState(new Set<string>());
@@ -249,11 +250,12 @@ new RankItProPlugin();
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">WordPress Plugin</h1>
-        <p className="text-gray-600">Download and install the Rank It Pro WordPress plugin to automatically publish check-ins to your customer's websites.</p>
-      </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">WordPress Plugin</h1>
+          <p className="text-gray-500">Download and install the Rank It Pro WordPress plugin to automatically publish check-ins to your customer's websites.</p>
+        </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Plugin Download Card */}
@@ -480,6 +482,7 @@ new RankItProPlugin();
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Copy, Globe, Code, FileCode, Check, AlertCircle, Copy as CopyIcon } from "lucide-react";
-import DashboardLayout from "@/components/layout/dashboard-layout";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 
 type WordPressIntegration = {
@@ -190,10 +190,16 @@ function IntegrationsPage() {
   };
   
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-4xl font-bold mb-8">Integrations</h1>
-      
-      <Tabs defaultValue="wordpress" className="w-full">
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Integrations</h1>
+          <p className="text-gray-500">
+            Connect your account with WordPress, websites, and other platforms to automatically publish your check-ins and reviews.
+          </p>
+        </div>
+        
+        <Tabs defaultValue="wordpress" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="wordpress">WordPress Integration</TabsTrigger>
           <TabsTrigger value="embed">JavaScript Embed</TabsTrigger>
@@ -482,7 +488,8 @@ function IntegrationsPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
 
