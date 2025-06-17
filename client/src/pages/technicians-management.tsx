@@ -81,15 +81,14 @@ export default function TechniciansManagement() {
 
   const toggleTechnicianMutation = useMutation({
     mutationFn: async (technicianId: number) => {
-      return await apiRequest(`/api/technicians/${technicianId}/toggle-status`, {
-        method: "PATCH",
-      });
+      const response = await apiRequest("PATCH", `/api/technicians/${technicianId}/toggle-status`);
+      return response.json();
     },
     onSuccess: (data, technicianId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/technicians/all"] });
       toast({
         title: "Success",
-        description: data.message,
+        description: data.message || "Technician status updated successfully",
       });
     },
     onError: (error: any) => {

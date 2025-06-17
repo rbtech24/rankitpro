@@ -194,9 +194,9 @@ export default function SystemOverview() {
                   <Star className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.avgRating.toFixed(1)}</div>
+                  <div className="text-2xl font-bold">{stats?.avgRating ? stats.avgRating.toFixed(1) : '0.0'}</div>
                   <p className="text-xs text-muted-foreground">
-                    {stats.totalReviews} reviews
+                    {stats?.totalReviews || 0} reviews
                   </p>
                 </CardContent>
               </Card>
