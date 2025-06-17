@@ -512,7 +512,8 @@ export class MemStorage implements IStorage {
       trialStartDate: company.trialStartDate || null,
       isEmailVerified: company.isEmailVerified || false,
       isTrialActive: company.isTrialActive || null,
-      featuresEnabled: company.featuresEnabled || null
+      featuresEnabled: company.featuresEnabled || null,
+      subscriptionPlanId: company.subscriptionPlanId || null
     };
     
     this.companies.set(id, newCompany);
@@ -580,11 +581,16 @@ export class MemStorage implements IStorage {
     const id = this.technicianId++;
     const createdAt = new Date();
     const newTechnician: Technician = { 
-      ...technician, 
       id, 
       createdAt,
+      name: technician.name,
+      email: technician.email,
+      phone: technician.phone,
+      location: technician.location,
+      companyId: technician.companyId,
       specialty: technician.specialty || null,
-      userId: technician.userId || null
+      userId: technician.userId || null,
+      active: technician.active ?? true
     };
     
     this.technicians.set(id, newTechnician);
@@ -648,12 +654,12 @@ export class MemStorage implements IStorage {
       customerEmail: checkIn.customerEmail || null,
       customerPhone: checkIn.customerPhone || null,
       photos: checkIn.photos || [],
-      beforePhotos: checkIn.beforePhotos || null,
-      afterPhotos: checkIn.afterPhotos || null,
+      beforePhotos: checkIn.beforePhotos ? String(checkIn.beforePhotos) : null,
+      afterPhotos: checkIn.afterPhotos ? String(checkIn.afterPhotos) : null,
       workPerformed: checkIn.workPerformed || null,
       materialsUsed: checkIn.materialsUsed || null,
-      latitude: checkIn.latitude || null,
-      longitude: checkIn.longitude || null,
+      latitude: checkIn.latitude ? String(checkIn.latitude) : null,
+      longitude: checkIn.longitude ? String(checkIn.longitude) : null,
       address: checkIn.address || null,
       city: checkIn.city || null,
       state: checkIn.state || null,
