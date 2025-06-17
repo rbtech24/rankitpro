@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -34,8 +34,13 @@ import {
   Phone, 
   Mail,
   Search,
-  Filter
+  Filter,
+  Power,
+  PowerOff
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
 
 interface Technician {
   id: number;
@@ -61,6 +66,8 @@ export default function TechniciansManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [companyFilter, setCompanyFilter] = useState<string>("all");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: technicians = [], isLoading } = useQuery<Technician[]>({
     queryKey: ["/api/technicians/all"],
@@ -68,6 +75,28 @@ export default function TechniciansManagement() {
 
   const { data: companies = [] } = useQuery<any[]>({
     queryKey: ["/api/companies"],
+  });
+
+  const toggleTechnicianMutation = useMutation({
+    mutationFn: async (technicianId: number) => {
+      return await apiRequest(`/api/technicians/${technicianId}/toggle-status`, {
+        method: "PATCH",
+      });
+    },
+    onSuccess: (data, technicianId) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/technicians/all"] });
+      toast({
+        title: "Success",
+        description: data.message,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update technician status",
+        variant: "destructive",
+      });
+    },
   });
 
   const filteredTechnicians = technicians.filter(tech => {
@@ -209,18 +238,19 @@ export default function TechniciansManagement() {
                   <TableHead>Avg Rating</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Joined</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8">
+                    <TableCell colSpan={10} className="text-center py-8">
                       Loading technicians...
                     </TableCell>
                   </TableRow>
                 ) : filteredTechnicians.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                       No technicians found
                     </TableCell>
                   </TableRow>
@@ -292,6 +322,31 @@ export default function TechniciansManagement() {
                       
                       <TableCell className="text-sm text-muted-foreground">
                         {new Date(technician.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      
+                      <TableCell>
+                        <Button
+                          variant={technician.active ? "outline" : "default"}
+                          size="sm"
+                          onClick={() => toggleTechnicianMutation.mutate(technician.id)}
+                          disabled={toggleTechnicianMutation.isPending}
+                          className={`${technician.active 
+                            ? "text-red-600 hover:text-red-700 hover:bg-red-50" 
+                            : "text-green-600 hover:text-green-700 hover:bg-green-50"
+                          }`}
+                        >
+                          {technician.active ? (
+                            <>
+                              <PowerOff className="h-4 w-4 mr-1" />
+                              Deactivate
+                            </>
+                          ) : (
+                            <>
+                              <Power className="h-4 w-4 mr-1" />
+                              Activate
+                            </>
+                          )}
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
