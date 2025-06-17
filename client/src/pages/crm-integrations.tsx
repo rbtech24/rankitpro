@@ -510,15 +510,22 @@ const SyncSettings = ({
 // Main CRM Integrations Page
 export default function CRMIntegrationsPage() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<string>("housecall");
+  const [activeTab, setActiveTab] = useState<string>("overview");
   const [selectedCRM, setSelectedCRM] = useState<string>("housecall");
   const [configureDialogOpen, setConfigureDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [testStatus, setTestStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   
-  // Fetch available CRMs
+  // Check authentication status
+  const { data: auth, isLoading: authLoading } = useQuery({
+    queryKey: ["/api/auth/me"],
+    retry: false,
+  });
+
+  // Fetch available CRMs - only when authenticated
   const { data: availableCRMsResponse, isLoading: isLoadingAvailableCRMs, error: availableCRMsError } = useQuery({
     queryKey: ['/api/crm/available'],
+    enabled: !!auth?.user,
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', '/api/crm/available');
@@ -537,16 +544,65 @@ export default function CRMIntegrationsPage() {
     staleTime: 60000, // 1 minute
   });
   
-  // Extract the array from the response
-  const availableCRMs = availableCRMsResponse || [];
+  // Extract the array from the response, with fallback for non-authenticated users
+  const fallbackCRMs = [
+    {
+      id: 'servicetitan',
+      name: 'ServiceTitan',
+      description: 'Complete field service management platform with scheduling, dispatching, and customer management',
+      features: ['Customer Management', 'Job Scheduling', 'Invoicing', 'Technician Tracking'],
+      authType: 'oauth2',
+      setupComplexity: 'high',
+      isPopular: true
+    },
+    {
+      id: 'housecallpro',
+      name: 'Housecall Pro',
+      description: 'Simple field service software for scheduling, dispatching, and customer communication',
+      features: ['Scheduling', 'Customer Communication', 'Invoicing', 'Photo Documentation'],
+      authType: 'api_key',
+      setupComplexity: 'medium',
+      isPopular: true
+    },
+    {
+      id: 'jobber',
+      name: 'Jobber',
+      description: 'Home service business management software with quoting, scheduling, and invoicing',
+      features: ['Quoting', 'Scheduling', 'Customer Management', 'Payment Processing'],
+      authType: 'oauth2',
+      setupComplexity: 'medium',
+      isPopular: true
+    },
+    {
+      id: 'hubspot',
+      name: 'HubSpot',
+      description: 'Comprehensive CRM platform with sales, marketing, and customer service tools',
+      features: ['Contact Management', 'Deal Tracking', 'Email Marketing', 'Analytics'],
+      authType: 'oauth2',
+      setupComplexity: 'medium',
+      isPopular: true
+    },
+    {
+      id: 'salesforce',
+      name: 'Salesforce',
+      description: 'Enterprise-grade CRM with advanced customization and automation capabilities',
+      features: ['Lead Management', 'Opportunity Tracking', 'Custom Objects', 'Workflow Automation'],
+      authType: 'oauth2',
+      setupComplexity: 'high',
+      isPopular: true
+    }
+  ];
   
-  // Fetch configured CRMs
+  const availableCRMs = availableCRMsResponse || fallbackCRMs;
+  
+  // Fetch configured CRMs - only when authenticated
   const { 
     data: configuredCRMsResponse,
     isLoading: isLoadingCRMs,
     error: configuredCRMsError
   } = useQuery({
     queryKey: ['/api/crm/configured'],
+    enabled: !!auth?.user,
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', '/api/crm/configured');
@@ -568,13 +624,14 @@ export default function CRMIntegrationsPage() {
   // Extract and process the configured CRMs
   const configuredCRMs = configuredCRMsResponse || [];
   
-  // Fetch CRM sync history
+  // Fetch CRM sync history - only when authenticated
   const { 
     data: syncHistoryResponse,
     isLoading: isLoadingHistory,
     error: syncHistoryError
   } = useQuery({
     queryKey: ['/api/crm/sync-history'],
+    enabled: !!auth?.user,
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', '/api/crm/sync-history');
