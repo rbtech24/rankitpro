@@ -111,10 +111,10 @@ export default function SystemOverview() {
     );
   }
 
-  const checkInsData = Array.isArray(chartData?.checkIns) ? chartData.checkIns : [];
-  const reviewsData = Array.isArray(chartData?.reviews) ? chartData.reviews : [];
-  const companyGrowthData = Array.isArray(chartData?.companyGrowth) ? chartData.companyGrowth : [];
-  const revenueTrendData = Array.isArray(chartData?.revenue) ? chartData.revenue : [];
+  const checkInsData = Array.isArray((chartData as any)?.checkIns) ? (chartData as any).checkIns : [];
+  const reviewsData = Array.isArray((chartData as any)?.reviews) ? (chartData as any).reviews : [];
+  const companyGrowthData = Array.isArray((chartData as any)?.companyGrowth) ? (chartData as any).companyGrowth : [];
+  const revenueTrendData = Array.isArray((chartData as any)?.revenue) ? (chartData as any).revenue : [];
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -155,9 +155,9 @@ export default function SystemOverview() {
                   <Building className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats?.totalCompanies || 0}</div>
+                  <div className="text-2xl font-bold">{(stats as any)?.totalCompanies || 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    {stats?.activeCompanies || 0} active
+                    {(stats as any)?.activeCompanies || 0} active
                   </p>
                 </CardContent>
               </Card>
@@ -168,9 +168,9 @@ export default function SystemOverview() {
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats?.totalUsers || 0}</div>
+                  <div className="text-2xl font-bold">{(stats as any)?.totalUsers || 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    {stats?.totalTechnicians || 0} technicians
+                    {(stats as any)?.totalTechnicians || 0} technicians
                   </p>
                 </CardContent>
               </Card>
@@ -181,7 +181,7 @@ export default function SystemOverview() {
                   <CheckSquare className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats?.totalCheckIns || 0}</div>
+                  <div className="text-2xl font-bold">{(stats as any)?.totalCheckIns || 0}</div>
                   <p className="text-xs text-muted-foreground">
                     Total system check-ins
                   </p>
