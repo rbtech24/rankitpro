@@ -2941,6 +2941,39 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  // Specific status update endpoint
+  app.put("/api/support/tickets/:id/status", isAuthenticated, async (req, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (!status) {
+        return res.status(400).json({ message: "Status is required" });
+      }
+
+      const ticket = await storage.getSupportTicket(ticketId);
+      
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket not found" });
+      }
+
+      // Check permissions
+      if (req.user.role !== "super_admin" && req.user.companyId !== ticket.companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const updatedTicket = await storage.updateSupportTicket(ticketId, {
+        status,
+        updatedAt: new Date()
+      });
+      
+      res.json(updatedTicket);
+    } catch (error) {
+      console.error("Update support ticket status error:", error);
+      res.status(500).json({ message: "Failed to update ticket status" });
+    }
+  });
+
   app.post("/api/support/tickets/:id/assign", isSuperAdmin, async (req, res) => {
     try {
       const ticketId = parseInt(req.params.id);
