@@ -37,8 +37,8 @@ export default function QuickActions({
         onOpenVisitModal();
         break;
       case "technician":
-        // Navigate to user management page to add technician
-        setLocation('/user-management');
+        // Navigate to technicians page to add technician
+        setLocation('/technicians');
         break;
       case "blog-post":
         // Navigate to blog posts page to create new post
