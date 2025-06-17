@@ -2568,7 +2568,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getReviewChartData(): Promise<Array<{date: string, count: number}>> {
-    const reviews = Array.from(this.reviewResponses.values());
+    const reviews = await db.select().from(reviewResponses);
     const last7Days = Array.from({length: 7}, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - i);
@@ -2577,7 +2577,7 @@ export class DatabaseStorage implements IStorage {
 
     return last7Days.map(date => {
       const count = reviews.filter(review => 
-        review.createdAt.toISOString().split('T')[0] === date
+        review.respondedAt && review.respondedAt.toISOString().split('T')[0] === date
       ).length;
       return { date: date.slice(5), count };
     });
@@ -2646,14 +2646,15 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Recent companies
-    const recentCompanies = Array.from(this.companies.values())
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(0, 3);
+    const recentCompanies = await db.select()
+      .from(companies)
+      .orderBy(desc(companies.createdAt))
+      .limit(3);
       
     for (const company of recentCompanies) {
       activities.push({
         description: `New company registered: ${company.name}`,
-        timestamp: company.createdAt.toLocaleString()
+        timestamp: company.createdAt?.toLocaleString() || 'Unknown'
       });
     }
 

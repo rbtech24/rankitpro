@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Sidebar from '@/components/layout/sidebar';
+import Sidebar from '@/components/layout/sidebar-clean';
 import {
   Card,
   CardContent,
