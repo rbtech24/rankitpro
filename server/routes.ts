@@ -28,6 +28,7 @@ import demoRoutes from "./routes/demo";
 import reviewRequestRoutes from "./routes/review-request";
 import reviewResponseRoutes from "./routes/review-response";
 import reviewAutomationRoutes from "./routes/review-automation";
+import adminRoutes from "./routes/admin";
 import wordpressRoutes from "./routes/wordpress-integration";
 import wordpressCustomFieldsRoutes from "./routes/wordpress-custom-fields";
 import jsWidgetRoutes from "./routes/js-widget";
@@ -3272,6 +3273,9 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
 
   // Initialize the scheduler service to process review follow-ups
   schedulerService.initialize();
+  
+  // Register admin routes for subscription management
+  app.use("/api/admin", adminRoutes);
   
   // Add embed routes for JavaScript widget
   app.use('/', embedRoutes);
