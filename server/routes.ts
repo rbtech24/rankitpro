@@ -1259,7 +1259,27 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       res.status(500).json({ message: "Server error" });
     }
   });
+
+  // Get all technicians (Super admin only) - must come before parameterized route
+  app.get("/api/technicians/all", isAuthenticated, async (req, res) => {
+    try {
+      console.log("Technicians/all route hit - user role:", req.user?.role);
+      
+      // Verify user is super admin
+      if (req.user?.role !== "super_admin") {
+        return res.status(403).json({ message: "Forbidden: Requires super admin access" });
+      }
+      
+      const technicians = await storage.getAllTechnicians();
+      console.log("Technicians retrieved successfully:", technicians.length);
+      res.json(technicians);
+    } catch (error) {
+      console.error("Get all technicians error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
   
+  // Get specific technician by ID
   app.get("/api/technicians/:id", isAuthenticated, async (req, res) => {
     try {
       const technicianId = parseInt(req.params.id);
@@ -1738,21 +1758,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
-  // Technicians management (Super admin only)
-  app.get("/api/technicians/all", isAuthenticated, async (req, res) => {
-    try {
-      // Verify user is super admin
-      if (req.user?.role !== "super_admin") {
-        return res.status(403).json({ message: "Forbidden: Requires super admin access" });
-      }
-      
-      const technicians = await storage.getAllTechnicians();
-      res.json(technicians);
-    } catch (error) {
-      console.error("Get all technicians error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+
 
   // Company feature management
   app.put("/api/companies/:id/features", isSuperAdmin, async (req, res) => {
