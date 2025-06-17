@@ -301,7 +301,7 @@ export default function SystemOverview() {
                   <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{health?.avgResponseTime || 0}ms</div>
+                  <div className="text-2xl font-bold">{systemHealth?.avgResponseTime || 0}ms</div>
                   <p className="text-xs text-muted-foreground">
                     Average response time
                   </p>
@@ -314,9 +314,9 @@ export default function SystemOverview() {
                   <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{health?.errorRate || 0}%</div>
+                  <div className="text-2xl font-bold">{systemHealth?.errorRate || 0}%</div>
                   <p className="text-xs text-muted-foreground">
-                    {health?.requestsPerMinute || 0} req/min
+                    {systemHealth?.requestsPerMinute || 0} req/min
                   </p>
                 </CardContent>
               </Card>
@@ -347,14 +347,14 @@ export default function SystemOverview() {
                   <CardTitle>Anthropic Usage</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.anthropicUsageToday}</div>
+                  <div className="text-2xl font-bold">{systemHealth?.anthropicUsageToday || 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    of {stats.anthropicQuota} daily quota
+                    of {systemHealth?.anthropicQuota || 1000} daily quota
                   </p>
                   <div className="w-full bg-secondary rounded-full h-2 mt-2">
                     <div 
                       className="bg-primary h-2 rounded-full" 
-                      style={{ width: `${(stats.anthropicUsageToday / stats.anthropicQuota) * 100}%` }}
+                      style={{ width: `${((systemHealth?.anthropicUsageToday || 0) / (systemHealth?.anthropicQuota || 1000)) * 100}%` }}
                     ></div>
                   </div>
                 </CardContent>
@@ -365,7 +365,7 @@ export default function SystemOverview() {
                   <CardTitle>Active Sessions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.activeConnections}</div>
+                  <div className="text-2xl font-bold">{systemHealth?.activeConnections || 0}</div>
                   <p className="text-xs text-muted-foreground">
                     Current active connections
                   </p>
