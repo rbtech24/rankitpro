@@ -2969,11 +2969,8 @@ export class DatabaseStorage implements IStorage {
         companyId: schema.technicians.companyId,
         active: schema.technicians.active,
         createdAt: schema.technicians.createdAt,
-        company: {
-          id: schema.companies.id,
-          name: schema.companies.name,
-          plan: schema.companies.plan
-        }
+        companyName: schema.companies.name,
+        companyPlan: schema.companies.plan
       })
       .from(schema.technicians)
       .leftJoin(schema.companies, eq(schema.technicians.companyId, schema.companies.id))
@@ -3002,7 +2999,8 @@ export class DatabaseStorage implements IStorage {
 
         const [blogPostsCount] = await db.select({ count: sql<number>`count(*)` })
           .from(schema.blogPosts)
-          .where(eq(schema.blogPosts.technicianId, technicianId));
+          .innerJoin(schema.checkIns, eq(schema.blogPosts.checkInId, schema.checkIns.id))
+          .where(eq(schema.checkIns.technicianId, technicianId));
 
         const [avgRatingResult] = await db.select({ avg: sql<number>`avg(rating)` })
           .from(schema.reviewResponses)
