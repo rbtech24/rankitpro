@@ -121,13 +121,26 @@ export default function TechniciansManagement() {
   const uniqueCompanies = new Set(technicians.map(t => t.companyId)).size;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Technicians Management</h2>
-        <p className="text-muted-foreground">
-          View and manage all technicians across the platform
-        </p>
-      </div>
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
+      
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Technicians Management</h1>
+              <p className="text-gray-600 mt-1">View and manage all technicians across the platform</p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <NotificationBell />
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto p-6">
+          <div className="space-y-6">
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
@@ -358,6 +371,16 @@ export default function TechniciansManagement() {
           </div>
         </CardContent>
       </Card>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="bg-white border-t border-gray-200 px-6 py-4">
+          <div className="text-center text-sm text-gray-500">
+            © 2025 Rank It Pro. All rights reserved.
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }

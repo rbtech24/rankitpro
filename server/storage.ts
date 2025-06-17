@@ -283,6 +283,7 @@ export interface IStorage {
   getAllCompaniesForAdmin(): Promise<Array<any>>;
   getRecentSystemActivity(): Promise<Array<{description: string, timestamp: string}>>;
   getBillingOverview(): Promise<any>;
+  getAIUsageToday(provider: string): Promise<number>;
 }
 
 export class MemStorage implements IStorage {
