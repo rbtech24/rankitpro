@@ -461,7 +461,7 @@ export default function SubscriptionManagement() {
                     {plans.map((plan: SubscriptionPlan) => (
                       <TableRow key={plan.id}>
                         <TableCell className="font-medium">{plan.name}</TableCell>
-                        <TableCell>${plan.price.toFixed(2)}</TableCell>
+                        <TableCell>${parseFloat(plan.price).toFixed(2)}</TableCell>
                         <TableCell className="capitalize">{plan.billingPeriod}</TableCell>
                         <TableCell>
                           {plan.maxTechnicians} techs, {plan.maxCheckIns} check-ins
