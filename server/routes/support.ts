@@ -79,7 +79,7 @@ router.put("/tickets/:id/status", isAuthenticated, isSuperAdmin, async (req, res
       return res.status(400).json({ message: "Invalid status" });
     }
 
-    const ticket = await storage.updateSupportTicketStatus(ticketId, status);
+    const ticket = await storage.updateSupportTicket(ticketId, { status });
     if (!ticket) {
       return res.status(404).json({ message: "Ticket not found" });
     }

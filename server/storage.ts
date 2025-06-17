@@ -2510,7 +2510,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActiveCompanyCount(): Promise<number> {
-    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.companies).where(sql`active = true`);
+    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.companies).where(eq(schema.companies.isTrialActive, true));
     return result[0]?.count || 0;
   }
 
@@ -2589,7 +2589,7 @@ export class DatabaseStorage implements IStorage {
 
   async getRevenueData(): Promise<Array<{month: string, revenue: number}>> {
     // Revenue data based on active companies
-    const activeCompanies = await db.select().from(schema.companies).where(eq(schema.companies.active, true));
+    const activeCompanies = await db.select().from(schema.companies).where(eq(schema.companies.isTrialActive, true));
     const baseRevenue = activeCompanies.length * 99; // $99 per company per month
     
     const last6Months = Array.from({length: 6}, (_, i) => {

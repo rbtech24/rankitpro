@@ -400,12 +400,12 @@ export default function CompaniesManagement() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-2xl">{companies.length}</CardTitle>
+                  <CardTitle className="text-2xl">{companies?.length || 0}</CardTitle>
                   <CardDescription>Total Companies</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-green-600">
-                    {companies.filter(c => c.isActive).length} active
+                    {companies?.filter(c => c.active)?.length || 0} active
                   </p>
                 </CardContent>
               </Card>
