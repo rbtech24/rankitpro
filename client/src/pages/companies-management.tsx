@@ -888,10 +888,10 @@ export default function CompaniesManagement() {
                   <CardContent>
                     <div className="space-y-4">
                       {industries
-                        .filter(industry => companies?.some(c => c.industry === industry) || false)
+                        .filter(industry => (companies || []).some(c => c.industry === industry))
                         .map(industry => {
-                          const count = companies.filter(c => c.industry === industry).length;
-                          const percentage = (count / companies.length) * 100;
+                          const count = (companies || []).filter(c => c.industry === industry).length;
+                          const percentage = companies && companies.length > 0 ? (count / companies.length) * 100 : 0;
                           
                           return (
                             <div key={industry} className="flex items-center">
@@ -919,8 +919,8 @@ export default function CompaniesManagement() {
                   <CardContent>
                     <div className="space-y-4">
                       {['starter', 'pro', 'agency'].map(plan => {
-                        const count = companies?.filter(c => c.plan === plan).length || 0;
-                        const percentage = companies?.length ? (count / companies.length) * 100 : 0;
+                        const count = (companies || []).filter(c => c.plan === plan).length;
+                        const percentage = companies && companies.length > 0 ? (count / companies.length) * 100 : 0;
                         
                         return (
                           <div key={plan} className="flex items-center">
@@ -1030,7 +1030,7 @@ export default function CompaniesManagement() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {companies
+                        {(companies || [])
                           .filter(c => !c.isActive || (c.lastLogin && new Date(c.lastLogin).getTime() < Date.now() - 30 * 24 * 60 * 60 * 1000))
                           .slice(0, 5)
                           .map(company => (
