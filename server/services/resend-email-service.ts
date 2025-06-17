@@ -41,6 +41,12 @@ class ResendEmailService {
       return;
     }
 
+    // Accept test keys for development
+    if (!apiKey.startsWith('re_') && !apiKey.includes('test')) {
+      console.warn('Invalid Resend API key format. Expected format: re_...');
+      return;
+    }
+
     try {
       this.resend = new Resend(apiKey);
       this.isConfigured = true;

@@ -166,16 +166,11 @@ async function createSuperAdminIfNotExists() {
   // Admin setup is now handled via one-time setup page
   // await createSuperAdminIfNotExists();
   
-  // Initialize email service
-  if (process.env.SENDGRID_API_KEY) {
-    const emailInitialized = emailService.initialize();
-    if (emailInitialized) {
-      log("Email service initialized successfully", "info");
-    } else {
-      log("Email service initialization failed - notifications will be disabled", "warn");
-    }
+  // Email service is automatically initialized in the Resend service
+  if (emailService.isEnabled()) {
+    log("Email service initialized successfully", "info");
   } else {
-    log("SENDGRID_API_KEY not found - email notifications will be disabled", "warn");
+    log("Email service initialization failed - notifications will be disabled", "warn");
   }
   
   const server = await registerRoutes(app);

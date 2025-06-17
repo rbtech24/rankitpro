@@ -94,7 +94,7 @@ export function validateEnvironment(): EnvConfig {
 
 export function getFeatureFlags() {
   return {
-    emailEnabled: !!process.env.SENDGRID_API_KEY,
+    emailEnabled: !!process.env.RESEND_API_KEY,
     paymentsEnabled: !!(process.env.STRIPE_SECRET_KEY && 
                        process.env.STRIPE_STARTER_PRICE_ID && 
                        process.env.STRIPE_PRO_PRICE_ID && 
