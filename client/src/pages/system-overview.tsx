@@ -79,6 +79,11 @@ export default function SystemOverview() {
     queryKey: ['/api/admin/recent-activity'],
   });
 
+  const { data: healthMetrics, isLoading: healthLoading } = useQuery({
+    queryKey: ['/api/admin/system-health'],
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
   if (statsLoading || chartLoading) {
     return (
       <div className="flex">
@@ -194,9 +199,9 @@ export default function SystemOverview() {
                   <Star className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats?.avgRating ? stats.avgRating.toFixed(1) : '0.0'}</div>
+                  <div className="text-2xl font-bold">{(stats as any)?.avgRating ? (stats as any).avgRating.toFixed(1) : '0.0'}</div>
                   <p className="text-xs text-muted-foreground">
-                    {stats?.totalReviews || 0} reviews
+                    {(stats as any)?.totalReviews || 0} reviews
                   </p>
                 </CardContent>
               </Card>
@@ -232,8 +237,8 @@ export default function SystemOverview() {
                       <div className="text-center py-4">
                         <RefreshCw className="w-4 h-4 animate-spin mx-auto" />
                       </div>
-                    ) : recentActivity && recentActivity.length > 0 ? (
-                      recentActivity.map((activity: any, index: number) => (
+                    ) : recentActivity && (recentActivity as any).length > 0 ? (
+                      (recentActivity as any).map((activity: any, index: number) => (
                         <div key={index} className="flex items-center">
                           <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
                           <div className="space-y-1">
@@ -264,11 +269,11 @@ export default function SystemOverview() {
                   <Cpu className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.cpuUsage}%</div>
+                  <div className="text-2xl font-bold">{(healthMetrics as any)?.cpuUsage || 0}%</div>
                   <div className="w-full bg-secondary rounded-full h-2 mt-2">
                     <div 
                       className="bg-primary h-2 rounded-full" 
-                      style={{ width: `${stats.cpuUsage}%` }}
+                      style={{ width: `${(healthMetrics as any)?.cpuUsage || 0}%` }}
                     ></div>
                   </div>
                 </CardContent>
@@ -280,7 +285,7 @@ export default function SystemOverview() {
                   <Database className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.memoryUsage}%</div>
+                  <div className="text-2xl font-bold">{(healthMetrics as any)?.memoryUsage || 0}%</div>
                   <div className="w-full bg-secondary rounded-full h-2 mt-2">
                     <div 
                       className="bg-primary h-2 rounded-full" 
