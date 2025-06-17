@@ -1732,8 +1732,13 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
   });
 
   // Technicians management (Super admin only)
-  app.get("/api/technicians/all", isAuthenticated, isSuperAdmin, async (req, res) => {
+  app.get("/api/technicians/all", isAuthenticated, async (req, res) => {
     try {
+      // Verify user is super admin
+      if (req.user?.role !== "super_admin") {
+        return res.status(403).json({ message: "Forbidden: Requires super admin access" });
+      }
+      
       const technicians = await storage.getAllTechnicians();
       res.json(technicians);
     } catch (error) {

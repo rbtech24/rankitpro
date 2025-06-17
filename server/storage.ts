@@ -2240,13 +2240,35 @@ export class DatabaseStorage implements IStorage {
     const totalCompanies = await this.getCompanyCount();
     const activeCompanies = await this.getActiveCompanyCount();
     
+    // Calculate actual revenue from companies based on their plans
+    const companiesWithPlans = await db.select({
+      plan: schema.companies.plan,
+      active: schema.companies.active
+    }).from(schema.companies);
+    
+    const planPricing = {
+      starter: 29,
+      pro: 99, 
+      agency: 299
+    };
+    
+    let totalRevenue = 0;
+    let activeSubscriptions = 0;
+    
+    for (const company of companiesWithPlans) {
+      if (company.active) {
+        totalRevenue += planPricing[company.plan] || 0;
+        activeSubscriptions++;
+      }
+    }
+    
     return {
-      totalRevenue: activeCompanies * 99,
-      monthlyRecurringRevenue: activeCompanies * 99,
+      totalRevenue,
+      monthlyRecurringRevenue: totalRevenue,
       totalCompanies,
-      activeSubscriptions: activeCompanies,
-      churnRate: 0.05, // 5%
-      averageRevenuePerUser: 99
+      activeSubscriptions,
+      churnRate: activeSubscriptions > 0 ? (totalCompanies - activeSubscriptions) / totalCompanies : 0,
+      averageRevenuePerUser: activeSubscriptions > 0 ? totalRevenue / activeSubscriptions : 0
     };
   }
 
