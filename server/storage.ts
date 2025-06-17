@@ -1420,9 +1420,11 @@ export class MemStorage implements IStorage {
     const id = this.salesPersonId++;
     const newSalesPerson: SalesPerson = {
       id,
-      ...salesPerson,
+      name: salesPerson.name,
+      email: salesPerson.email,
       phone: salesPerson.phone ?? null,
       isActive: salesPerson.isActive ?? null,
+      commissionRate: salesPerson.commissionRate || "10",
       createdAt: new Date()
     };
     this.salesPeople.set(id, newSalesPerson);
@@ -2626,10 +2628,17 @@ export class DatabaseStorage implements IStorage {
       customerName: schema.checkIns.customerName,
       customerEmail: schema.checkIns.customerEmail,
       customerPhone: schema.checkIns.customerPhone,
-      status: schema.checkIns.status,
       photos: schema.checkIns.photos,
+      beforePhotos: schema.checkIns.beforePhotos,
+      afterPhotos: schema.checkIns.afterPhotos,
+      workPerformed: schema.checkIns.workPerformed,
+      materialsUsed: schema.checkIns.materialsUsed,
       latitude: schema.checkIns.latitude,
       longitude: schema.checkIns.longitude,
+      address: schema.checkIns.address,
+      city: schema.checkIns.city,
+      state: schema.checkIns.state,
+      zip: schema.checkIns.zip,
       technicianId: schema.checkIns.technicianId,
       technician: {
         id: schema.technicians.id,
@@ -2640,6 +2649,7 @@ export class DatabaseStorage implements IStorage {
         phone: schema.technicians.phone,
         specialty: schema.technicians.specialty,
         location: schema.technicians.location,
+        active: schema.technicians.active,
         userId: schema.technicians.userId
       }
     })
@@ -2655,7 +2665,34 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCheckIn(checkInData: InsertCheckIn): Promise<CheckIn> {
-    const [checkIn] = await db.insert(schema.checkIns).values(checkInData).returning();
+    const [checkIn] = await db.insert(schema.checkIns).values({
+      companyId: checkInData.companyId,
+      jobType: checkInData.jobType,
+      technicianId: checkInData.technicianId,
+      location: checkInData.location || null,
+      notes: checkInData.notes || null,
+      customerName: checkInData.customerName || null,
+      customerEmail: checkInData.customerEmail || null,
+      customerPhone: checkInData.customerPhone || null,
+      workPerformed: checkInData.workPerformed || null,
+      materialsUsed: checkInData.materialsUsed || null,
+      beforePhotos: checkInData.beforePhotos || null,
+      afterPhotos: checkInData.afterPhotos || null,
+      photos: checkInData.photos || null,
+      latitude: checkInData.latitude || null,
+      longitude: checkInData.longitude || null,
+      address: checkInData.address || null,
+      city: checkInData.city || null,
+      state: checkInData.state || null,
+      zip: checkInData.zip || null,
+      estimatedDuration: checkInData.estimatedDuration || null,
+      actualDuration: checkInData.actualDuration || null,
+      followUpRequired: checkInData.followUpRequired || false,
+      followUpNotes: checkInData.followUpNotes || null,
+      customerSatisfactionRating: checkInData.customerSatisfactionRating || null,
+      isReviewRequested: checkInData.isReviewRequested || false,
+      isBlog: checkInData.isBlog || false
+    }).returning();
     return checkIn;
   }
 
@@ -2708,10 +2745,7 @@ export class DatabaseStorage implements IStorage {
 
 
 
-  async getReviewResponse(id: number): Promise<ReviewResponse | null> {
-    const reviewResponse = this.reviewResponses.get(id);
-    return reviewResponse || null;
-  }
+
 
   async getReviewResponsesByCompany(companyId: number): Promise<ReviewResponse[]> {
     return Array.from(this.reviewResponses.values()).filter(response => response.companyId === companyId);
