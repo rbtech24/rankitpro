@@ -301,7 +301,7 @@ export default function SystemOverview() {
                   <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{healthMetrics?.avgResponseTime || 0}ms</div>
+                  <div className="text-2xl font-bold">{healthMetrics?.avgResponseTime || healthMetrics?.averageResponseTime || 0}ms</div>
                   <p className="text-xs text-muted-foreground">
                     Average response time
                   </p>

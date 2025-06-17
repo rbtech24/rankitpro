@@ -277,6 +277,11 @@ function Router() {
         <PrivateRoute component={MobileFieldApp} path="/mobile-field-app" role="technician" />
       </Route>
       
+      {/* Field App Route - Company Admin Access to Mobile Interface */}
+      <Route path="/field-app">
+        <PrivateRoute component={MobileFieldApp} path="/field-app" role="company_admin" />
+      </Route>
+      
       {/* Mobile Tech App - Progressive Web App */}
       <Route path="/mobile">
         <PrivateRoute component={FieldMobile} path="/mobile" role="technician" />
