@@ -111,10 +111,10 @@ export default function SystemOverview() {
     );
   }
 
-  const checkInsData = chartData?.checkIns || [];
-  const reviewsData = chartData?.reviews || [];
-  const companyGrowthData = chartData?.companyGrowth || [];
-  const revenueTrendData = chartData?.revenue || [];
+  const checkInsData = Array.isArray(chartData?.checkIns) ? chartData.checkIns : [];
+  const reviewsData = Array.isArray(chartData?.reviews) ? chartData.reviews : [];
+  const companyGrowthData = Array.isArray(chartData?.companyGrowth) ? chartData.companyGrowth : [];
+  const revenueTrendData = Array.isArray(chartData?.revenue) ? chartData.revenue : [];
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -155,9 +155,9 @@ export default function SystemOverview() {
                   <Building className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalCompanies}</div>
+                  <div className="text-2xl font-bold">{stats?.totalCompanies || 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    {stats.activeCompanies} active
+                    {stats?.activeCompanies || 0} active
                   </p>
                 </CardContent>
               </Card>
@@ -168,9 +168,9 @@ export default function SystemOverview() {
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                  <div className="text-2xl font-bold">{stats?.totalUsers || 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    {stats.totalTechnicians} technicians
+                    {stats?.totalTechnicians || 0} technicians
                   </p>
                 </CardContent>
               </Card>
@@ -181,7 +181,7 @@ export default function SystemOverview() {
                   <CheckSquare className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalCheckIns}</div>
+                  <div className="text-2xl font-bold">{stats?.totalCheckIns || 0}</div>
                   <p className="text-xs text-muted-foreground">
                     Total system check-ins
                   </p>
