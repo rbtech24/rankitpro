@@ -10,7 +10,7 @@ interface EnvConfig {
   PORT?: string;
   SUPER_ADMIN_EMAIL?: string;
   SUPER_ADMIN_PASSWORD?: string;
-  SENDGRID_API_KEY?: string;
+  RESEND_API_KEY?: string;
   STRIPE_SECRET_KEY?: string;
   STRIPE_STARTER_PRICE_ID?: string;
   STRIPE_PRO_PRICE_ID?: string;
@@ -37,8 +37,8 @@ export function validateEnvironment(): EnvConfig {
   }
 
   // Feature availability checks
-  if (!process.env.SENDGRID_API_KEY) {
-    warnings.push("SENDGRID_API_KEY not set - email notifications will be disabled");
+  if (!process.env.RESEND_API_KEY) {
+    warnings.push("RESEND_API_KEY not set - email notifications will be disabled");
   }
 
   const hasStripeKeys = process.env.STRIPE_SECRET_KEY && 
@@ -81,7 +81,7 @@ export function validateEnvironment(): EnvConfig {
     PORT: process.env.PORT,
     SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL,
     SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD,
-    SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_STARTER_PRICE_ID: process.env.STRIPE_STARTER_PRICE_ID,
     STRIPE_PRO_PRICE_ID: process.env.STRIPE_PRO_PRICE_ID,

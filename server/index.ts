@@ -3,7 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
-import emailService from "./services/email-service";
+import emailService from "./services/resend-email-service";
 import { validateEnvironment, getFeatureFlags } from "./env-validation";
 import path from "path";
 import { createServer, IncomingMessage, ServerResponse } from "http";
