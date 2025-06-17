@@ -68,6 +68,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const companySchema = z.object({
   name: z.string().min(3, { message: "Company name must be at least 3 characters." }),
   email: z.string().email({ message: "Must be a valid email address." }),
+  subscriptionPlan: z.enum(["starter", "pro", "agency"], { message: "Please select a subscription plan." }),
   phoneNumber: z.string().min(10, { message: "Phone number must be at least 10 digits." }),
   website: z.string().url({ message: "Must be a valid URL." }).optional().or(z.literal('')),
   address: z.string().min(5, { message: "Address must be at least 5 characters." }),
@@ -761,7 +762,7 @@ export default function CompaniesManagement() {
                   <CardContent>
                     <div className="space-y-4">
                       {industries
-                        .filter(industry => companies.some(c => c.industry === industry))
+                        .filter(industry => companies?.some(c => c.industry === industry) || false)
                         .map(industry => {
                           const count = companies.filter(c => c.industry === industry).length;
                           const percentage = (count / companies.length) * 100;

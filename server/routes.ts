@@ -1687,6 +1687,50 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  // Update company (Super admin only)
+  app.put("/api/companies/:id", isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      const { name, email, subscriptionPlan } = req.body;
+
+      if (!name || !email || !subscriptionPlan) {
+        return res.status(400).json({ message: "Name, email, and subscription plan are required" });
+      }
+
+      const updatedCompany = await storage.updateCompany(companyId, {
+        name,
+        email,
+        subscriptionPlan
+      });
+
+      if (!updatedCompany) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+
+      res.json(updatedCompany);
+    } catch (error) {
+      console.error("Update company error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Delete company (Super admin only)
+  app.delete("/api/companies/:id", isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      const success = await storage.deleteCompany(companyId);
+
+      if (!success) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+
+      res.json({ message: "Company deleted successfully" });
+    } catch (error) {
+      console.error("Delete company error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Technicians management (Super admin only)
   app.get("/api/technicians/all", isAuthenticated, isSuperAdmin, async (req, res) => {
     try {

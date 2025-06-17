@@ -45,6 +45,7 @@ export interface IStorage {
   createCompany(company: InsertCompany): Promise<Company>;
   updateCompany(id: number, updates: Partial<Company>): Promise<Company | undefined>;
   updateCompanyFeatures(id: number, featuresEnabled: any): Promise<Company | undefined>;
+  deleteCompany(id: number): Promise<boolean>;
   
   // Technician operations
   getTechnician(id: number): Promise<Technician | undefined>;
