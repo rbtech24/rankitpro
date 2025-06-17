@@ -7,13 +7,47 @@ import emailService from "./services/email-service";
 import { validateEnvironment, getFeatureFlags } from "./env-validation";
 import path from "path";
 import { createServer, IncomingMessage, ServerResponse } from "http";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 
 const app = express();
 
-// CORS configuration
+// Security middleware - helmet for security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      connectSrc: ["'self'", "https://api.openai.com", "https://api.anthropic.com"]
+    }
+  }
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000, // More restrictive in production
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', limiter);
+
+// Production-ready CORS configuration
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const isProduction = process.env.NODE_ENV === 'production';
+  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5000', 'http://localhost:3000'];
+  
+  const origin = req.headers.origin;
+  if (!isProduction || (origin && allowedOrigins.includes(origin))) {
+    res.header('Access-Control-Allow-Origin', isProduction ? origin : '*');
+  }
+  
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');

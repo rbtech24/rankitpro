@@ -57,16 +57,26 @@ const companyConnections = new Map<number, Set<WebSocket>>();
 const userConnections = new Map<number, WebSocket>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Configure session middleware
+  // Configure session middleware with production-ready settings
+  const isProduction = process.env.NODE_ENV === 'production';
+  const sessionStore = isProduction ? 
+    new (connectPg(session))({
+      conString: process.env.DATABASE_URL,
+      tableName: 'sessions',
+      createTableIfMissing: true
+    }) : 
+    new SessionStore({});
+
   app.use(session({
-    store: new SessionStore({}),
+    store: sessionStore,
     secret: process.env.SESSION_SECRET || 'dev-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // Set to true in production with HTTPS
+      secure: isProduction, // HTTPS only in production
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      sameSite: 'strict',
+      maxAge: isProduction ? 2 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000 // 2 hours in production, 24 hours in dev
     }
   }));
 
