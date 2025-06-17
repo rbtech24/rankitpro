@@ -1597,6 +1597,17 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  // Companies management (Super admin only)
+  app.get("/api/companies", isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const companies = await storage.getAllCompanies();
+      res.json(companies);
+    } catch (error) {
+      console.error("Get companies error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Company feature management
   app.put("/api/companies/:id/features", isSuperAdmin, async (req, res) => {
     try {

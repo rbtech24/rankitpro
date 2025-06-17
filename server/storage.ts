@@ -2164,7 +2164,7 @@ export class DatabaseStorage implements IStorage {
     // Calculate revenue based on active companies and subscription plans
     const result = await db.select({
       month: sql<string>`TO_CHAR(CURRENT_DATE - INTERVAL '1 month' * generate_series(0, 5), 'MM')`,
-      revenue: sql<number>`COUNT(CASE WHEN active = true THEN 1 END) * 99`
+      revenue: sql<number>`COUNT(CASE WHEN is_trial_active = true THEN 1 END) * 99`
     })
     .from(schema.companies)
     .groupBy(sql`TO_CHAR(CURRENT_DATE - INTERVAL '1 month' * generate_series(0, 5), 'MM')`)
@@ -2838,6 +2838,52 @@ export class DatabaseStorage implements IStorage {
       averageResolutionTime,
       ticketsByPriority
     };
+  }
+
+  // Company operations for admin
+  async getAllCompanies(): Promise<Array<Company & { stats?: any }>> {
+    try {
+      const companies = await db.select().from(schema.companies).orderBy(desc(schema.companies.createdAt));
+      
+      // Add stats for each company
+      const companiesWithStats = await Promise.all(companies.map(async (company) => {
+        const [checkInsCount] = await db.select({ count: sql<number>`count(*)` })
+          .from(schema.checkIns)
+          .where(eq(schema.checkIns.companyId, company.id));
+          
+        const [techniciansCount] = await db.select({ count: sql<number>`count(*)` })
+          .from(schema.technicians)
+          .where(eq(schema.technicians.companyId, company.id));
+
+        const [blogPostsCount] = await db.select({ count: sql<number>`count(*)` })
+          .from(schema.blogPosts)
+          .where(eq(schema.blogPosts.companyId, company.id));
+
+        const [reviewsCount] = await db.select({ count: sql<number>`count(*)` })
+          .from(schema.reviewResponses)
+          .where(eq(schema.reviewResponses.companyId, company.id));
+
+        const [avgRatingResult] = await db.select({ avg: sql<number>`avg(rating)` })
+          .from(schema.reviewResponses)
+          .where(eq(schema.reviewResponses.companyId, company.id));
+
+        return {
+          ...company,
+          stats: {
+            totalCheckIns: checkInsCount?.count || 0,
+            totalTechnicians: techniciansCount?.count || 0,
+            totalBlogPosts: blogPostsCount?.count || 0,
+            totalReviews: reviewsCount?.count || 0,
+            avgRating: Math.round((avgRatingResult?.avg || 0) * 10) / 10
+          }
+        };
+      }));
+
+      return companiesWithStats;
+    } catch (error) {
+      console.error("Error fetching companies:", error);
+      return [];
+    }
   }
 }
 
