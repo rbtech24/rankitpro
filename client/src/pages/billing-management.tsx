@@ -239,7 +239,7 @@ export default function BillingManagement() {
   
   return (
     <div className="flex h-screen bg-gray-50">
-      <SidebarComponent />
+      <Sidebar />
       
       <div className="flex-1 overflow-auto p-6">
         <h1 className="text-2xl font-bold mb-6">Billing Management</h1>
