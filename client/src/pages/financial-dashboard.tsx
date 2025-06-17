@@ -204,9 +204,9 @@ export default function FinancialDashboard() {
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${financialMetrics.totalRevenue.toLocaleString()}</div>
+                <div className="text-2xl font-bold">${(financialMetrics.totalRevenue || 0).toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground">
-                  Net: ${financialMetrics.netRevenue.toLocaleString()}
+                  Net: ${(financialMetrics.netRevenue || 0).toLocaleString()}
                 </p>
               </CardContent>
             </Card>
@@ -216,9 +216,9 @@ export default function FinancialDashboard() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${financialMetrics.monthlyRecurringRevenue.toLocaleString()}</div>
+                <div className="text-2xl font-bold">${(financialMetrics.monthlyRecurringRevenue || 0).toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground">
-                  ARPU: ${financialMetrics.averageRevenuePerUser.toFixed(2)}
+                  ARPU: ${(financialMetrics.averageRevenuePerUser || 0).toFixed(2)}
                 </p>
               </CardContent>
             </Card>
@@ -228,9 +228,9 @@ export default function FinancialDashboard() {
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{financialMetrics.activeSubscriptions}</div>
+                <div className="text-2xl font-bold">{financialMetrics.activeSubscriptions || 0}</div>
                 <p className="text-xs text-muted-foreground">
-                  Churn: {(financialMetrics.churnRate * 100).toFixed(1)}%
+                  Churn: {((financialMetrics.churnRate || 0) * 100).toFixed(1)}%
                 </p>
               </CardContent>
             </Card>
@@ -241,12 +241,12 @@ export default function FinancialDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {financialMetrics.totalPayments > 0 
-                    ? ((1 - financialMetrics.failedPayments / financialMetrics.totalPayments) * 100).toFixed(1)
+                  {(financialMetrics.totalPayments || 0) > 0 
+                    ? ((1 - (financialMetrics.failedPayments || 0) / (financialMetrics.totalPayments || 1)) * 100).toFixed(1)
                     : 0}%
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {financialMetrics.failedPayments} failed of {financialMetrics.totalPayments}
+                  {financialMetrics.failedPayments || 0} failed of {financialMetrics.totalPayments || 0}
                 </p>
               </CardContent>
             </Card>
