@@ -2510,7 +2510,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActiveCompanyCount(): Promise<number> {
-    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.companies).where(eq(schema.companies.active, true));
+    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.companies).where(sql`active = true`);
     return result[0]?.count || 0;
   }
 
@@ -2588,8 +2588,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRevenueData(): Promise<Array<{month: string, revenue: number}>> {
-    // Simulated revenue data based on active companies
-    const activeCompanies = Array.from(this.companies.values()).filter(c => c.active);
+    // Revenue data based on active companies
+    const activeCompanies = await db.select().from(schema.companies).where(eq(schema.companies.active, true));
     const baseRevenue = activeCompanies.length * 99; // $99 per company per month
     
     const last6Months = Array.from({length: 6}, (_, i) => {
@@ -2605,11 +2605,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllCompaniesForAdmin(): Promise<Array<any>> {
-    return Array.from(this.companies.values()).map(company => ({
+    const companies = await db.select().from(schema.companies);
+    return companies.map(company => ({
       id: company.id,
       name: company.name,
-      email: company.email,
-      subscriptionPlan: company.subscriptionPlan || 'starter',
+      email: company.email || '',
+      subscriptionPlan: company.plan || 'starter',
       active: company.active,
       createdAt: company.createdAt
     }));
@@ -2619,15 +2620,16 @@ export class DatabaseStorage implements IStorage {
     const activities = [];
     
     // Recent check-ins
-    const recentCheckIns = Array.from(this.checkIns.values())
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(0, 5);
+    const recentCheckIns = await db.select()
+      .from(schema.checkIns)
+      .leftJoin(schema.companies, eq(schema.checkIns.companyId, schema.companies.id))
+      .orderBy(desc(schema.checkIns.createdAt))
+      .limit(5);
     
     for (const checkIn of recentCheckIns) {
-      const company = this.companies.get(checkIn.companyId);
       activities.push({
-        description: `New check-in created by ${company?.name || 'Unknown Company'}`,
-        timestamp: checkIn.createdAt.toLocaleString()
+        description: `New check-in created by ${checkIn.companies?.name || 'Unknown Company'}`,
+        timestamp: checkIn.check_ins.createdAt?.toLocaleString() || 'Unknown'
       });
     }
 
