@@ -11,33 +11,17 @@ declare global {
   }
 }
 
-// Check if user is authenticated (supports both JWT and session)
+// Check if user is authenticated (session-based authentication)
 export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
-  let userId: number | null = null;
-  
-  // Try JWT authentication first
-  const token = req.cookies?.['auth-token'] || req.headers.authorization?.replace('Bearer ', '');
-  if (token) {
-    try {
-      const jwt = require('jsonwebtoken');
-      const decoded = jwt.verify(token, 'production-auth-secret') as any;
-      userId = decoded.userId;
-      console.log("AUTH DEBUG: JWT authentication successful for user:", userId);
-    } catch (jwtError: any) {
-      console.log("AUTH DEBUG: JWT verification failed:", jwtError.message);
-    }
-  }
-  
-  // Fallback to session authentication
-  if (!userId && req.session?.userId) {
-    userId = req.session.userId;
-    console.log("AUTH DEBUG: Session authentication for user:", userId);
-  }
+  // Use session authentication as primary method
+  const userId = req.session?.userId;
   
   if (!userId) {
-    console.log("AUTH DEBUG: No valid authentication found");
-    return res.status(401).json({ message: "Unauthorized" });
+    console.log("AUTH DEBUG: No session found - user not authenticated");
+    return res.status(401).json({ message: "Not authenticated" });
   }
+  
+  console.log("AUTH DEBUG: Session authentication for user:", userId);
   
   try {
     const user = await storage.getUser(userId);
