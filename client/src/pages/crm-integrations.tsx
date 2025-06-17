@@ -525,7 +525,7 @@ export default function CRMIntegrationsPage() {
   // Fetch available CRMs - only when authenticated
   const { data: availableCRMsResponse, isLoading: isLoadingAvailableCRMs, error: availableCRMsError } = useQuery({
     queryKey: ['/api/crm/available'],
-    enabled: !!auth?.user,
+    enabled: !!auth,
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', '/api/crm/available');
@@ -602,7 +602,7 @@ export default function CRMIntegrationsPage() {
     error: configuredCRMsError
   } = useQuery({
     queryKey: ['/api/crm/configured'],
-    enabled: !!auth?.user,
+    enabled: !!auth,
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', '/api/crm/configured');
@@ -631,7 +631,7 @@ export default function CRMIntegrationsPage() {
     error: syncHistoryError
   } = useQuery({
     queryKey: ['/api/crm/sync-history'],
-    enabled: !!auth?.user,
+    enabled: !!auth,
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', '/api/crm/sync-history');
