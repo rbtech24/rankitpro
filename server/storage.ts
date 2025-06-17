@@ -2678,6 +2678,11 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  async getAIUsageToday(provider: string): Promise<number> {
+    // Return 0 for mock data - in production this would query ai_usage_logs table
+    return 0;
+  }
+
   async getAllSupportTickets(): Promise<Array<any>> {
     // Return empty array since no support tickets exist yet
     return [];
