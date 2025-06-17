@@ -2259,7 +2259,7 @@ export class DatabaseStorage implements IStorage {
       .from(schema.aiUsageLogs)
       .where(
         and(
-          eq(schema.aiUsageLogs.provider, provider),
+          sql`provider = ${provider}`,
           sql`date(created_at) = ${today}`
         )
       );
