@@ -1393,13 +1393,13 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
 
       const result = await storage.toggleTechnicianStatus(technicianId);
       
-      if (!result.success) {
+      if (!result) {
         return res.status(500).json({ message: "Failed to toggle technician status" });
       }
 
       res.json({ 
         message: `Technician ${result.active ? 'activated' : 'deactivated'} successfully`,
-        active: result.active 
+        technician: result
       });
     } catch (error) {
       console.error("Toggle technician status error:", error);
@@ -3061,7 +3061,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
           category: req.query.category as string,
           assignedTo: req.query.assignedTo ? parseInt(req.query.assignedTo as string) : undefined
         };
-        tickets = await storage.getAllSupportTickets(filters);
+        tickets = await storage.getAllSupportTickets();
       } else {
         // Company users see only their company's tickets
         const companyId = req.user.companyId;

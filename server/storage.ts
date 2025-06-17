@@ -522,7 +522,7 @@ export class DatabaseStorage implements IStorage {
       latitude: checkIn.latitude?.toString() || null,
       longitude: checkIn.longitude?.toString() || null
     };
-    const [newCheckIn] = await db.insert(checkIns).values(checkInData).returning();
+    const [newCheckIn] = await db.insert(checkIns).values([checkInData]).returning();
     return newCheckIn;
   }
 
@@ -764,6 +764,11 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  async getReviewRequestStatusesByCompany(companyId: number): Promise<any[]> {
+    return await db.select().from(reviewRequests)
+      .where(eq(reviewRequests.companyId, companyId));
+  }
+
   // Stub implementations for remaining interface methods
   async getWordpressCustomFields(id: number): Promise<WordpressCustomFields | undefined> { return undefined; }
   async getWordpressCustomFieldsByCompany(companyId: number): Promise<WordpressCustomFields | undefined> { return undefined; }
@@ -887,7 +892,14 @@ export class DatabaseStorage implements IStorage {
   async getSupportTicketsByCompany(companyId: number): Promise<SupportTicket[]> { return []; }
   async getAllSupportTickets(): Promise<SupportTicket[]> { return []; }
   async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
-    const [newTicket] = await db.insert(supportTickets).values([ticket]).returning();
+    const ticketNumber = `TICKET-${Date.now()}`;
+    const ticketData = {
+      ...ticket,
+      ticketNumber,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const [newTicket] = await db.insert(supportTickets).values([ticketData]).returning();
     return newTicket;
   }
   async updateSupportTicket(id: number, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined> { return undefined; }
