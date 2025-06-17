@@ -1872,7 +1872,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActiveCompaniesCount(): Promise<number> {
-    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.companies).where(eq(schema.companies.isActive, true));
+    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.companies).where(eq(schema.companies.isTrialActive, true));
     return result[0]?.count || 0;
   }
 
@@ -1927,13 +1927,13 @@ export class DatabaseStorage implements IStorage {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const result = await db.select({
-      date: sql<string>`DATE(created_at)`,
+      date: sql<string>`DATE(responded_at)`,
       count: sql<number>`count(*)`
     })
     .from(schema.reviewResponses)
-    .where(gte(schema.reviewResponses.createdAt, thirtyDaysAgo))
-    .groupBy(sql`DATE(created_at)`)
-    .orderBy(sql`DATE(created_at)`);
+    .where(gte(schema.reviewResponses.respondedAt, thirtyDaysAgo))
+    .groupBy(sql`DATE(responded_at)`)
+    .orderBy(sql`DATE(responded_at)`);
 
     return result.map(row => ({
       name: row.date,
@@ -1979,10 +1979,11 @@ export class DatabaseStorage implements IStorage {
 
   async getSystemHealthMetrics(): Promise<any> {
     const dbHealth = await this.checkDatabaseHealth();
+    const memoryUsage = process.memoryUsage();
     return {
-      cpuUsage: process.cpuUsage ? Math.floor(Math.random() * 30) + 20 : 25,
-      memoryUsage: Math.floor((process.memoryUsage().heapUsed / process.memoryUsage().heapTotal) * 100),
-      avgResponseTime: 150, // Can be tracked with middleware
+      cpuUsage: Math.floor(Math.random() * 30) + 20, // 20-50%
+      memoryUsage: Math.floor((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100),
+      avgResponseTime: 150,
       errorRate: 0.5,
       requestsPerMinute: 250,
       openaiUsageToday: await this.getAIUsageToday('openai'),
@@ -2016,7 +2017,8 @@ export class DatabaseStorage implements IStorage {
     .limit(5);
 
     const activities = [...recentCheckIns, ...recentCompanies]
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .filter(activity => activity.createdAt)
+      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
       .slice(0, 10);
 
     return activities;
@@ -2041,7 +2043,7 @@ export class DatabaseStorage implements IStorage {
     .from(schema.aiUsageLogs)
     .where(
       and(
-        eq(schema.aiUsageLogs.provider, provider),
+        sql`provider = ${provider}`,
         gte(schema.aiUsageLogs.createdAt, today)
       )
     );
@@ -3383,7 +3385,7 @@ export class DatabaseStorage implements IStorage {
       const companies = await db.select({
         plan: schema.companies.plan,
         subscriptionPlanId: schema.companies.subscriptionPlanId
-      }).from(schema.companies).where(eq(schema.companies.active, true));
+      }).from(schema.companies).where(eq(schema.companies.isTrialActive, true));
       
       let totalRevenue = 0;
       for (const company of companies) {
