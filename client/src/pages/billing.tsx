@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "@/components/layout/sidebar";
-import TopNav from "@/components/layout/top-nav";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +41,6 @@ const planFeatures: PlanFeature[] = [
 ];
 
 export default function Billing() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
   
   const { data: auth } = useQuery<AuthState>({
@@ -241,7 +239,7 @@ export default function Billing() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <DashboardLayout>
       {/* Payment Modal */}
       <Dialog open={!!clientSecret} onOpenChange={(open) => !open && setClientSecret(null)}>
         <DialogContent className="sm:max-w-[425px]">
@@ -282,12 +280,7 @@ export default function Billing() {
         </DialogContent>
       </Dialog>
       
-      <Sidebar className={`fixed inset-0 z-40 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:translate-x-0 md:relative`} />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <TopNav onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-        
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+      <div className="space-y-6">
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900">Billing & Subscription</h1>
             <p className="text-sm text-gray-500">Manage your subscription plan and billing information.</p>
@@ -504,8 +497,7 @@ export default function Billing() {
               </CardFooter>
             </Card>
           </div>
-        </main>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
