@@ -25,6 +25,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Table,
   TableBody,
   TableCaption,
@@ -61,7 +72,7 @@ import * as z from "zod";
 import Sidebar from '@/components/layout/sidebar';
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatDistanceToNow } from 'date-fns';
-import { Loader2, Users, Briefcase, UserPlus, FileText, Star, BarChart2, Settings2, Mail, AlertTriangle, Check, X } from 'lucide-react';
+import { Loader2, Users, Briefcase, UserPlus, FileText, Star, BarChart2, Settings2, Mail, AlertTriangle, Check, X, Edit2, Trash2, Settings } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Company creation/edit schema
@@ -582,11 +593,104 @@ export default function CompaniesManagement() {
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <Edit2 className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Edit Company</DialogTitle>
+                                  </DialogHeader>
+                                  <Form {...form}>
+                                    <form onSubmit={form.handleSubmit((data) => {
+                                      updateCompanyMutation.mutate({ id: company.id, data });
+                                    })} className="space-y-4">
+                                      <FormField
+                                        control={form.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>Company Name</FormLabel>
+                                            <FormControl>
+                                              <Input {...field} defaultValue={company.name} />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                      <FormField
+                                        control={form.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>Email</FormLabel>
+                                            <FormControl>
+                                              <Input {...field} defaultValue={company.email} />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                      <FormField
+                                        control={form.control}
+                                        name="subscriptionPlan"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>Subscription Plan</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={company.subscriptionPlan}>
+                                              <FormControl>
+                                                <SelectTrigger>
+                                                  <SelectValue placeholder="Select plan" />
+                                                </SelectTrigger>
+                                              </FormControl>
+                                              <SelectContent>
+                                                <SelectItem value="starter">Starter</SelectItem>
+                                                <SelectItem value="pro">Pro</SelectItem>
+                                                <SelectItem value="agency">Agency</SelectItem>
+                                              </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                      <Button type="submit" disabled={updateCompanyMutation.isPending}>
+                                        {updateCompanyMutation.isPending ? "Updating..." : "Update Company"}
+                                      </Button>
+                                    </form>
+                                  </Form>
+                                </DialogContent>
+                              </Dialog>
+                              
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="text-red-600">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Company</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete {company.name}? This action cannot be undone and will remove all associated data including technicians, check-ins, and reviews.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction 
+                                      onClick={() => deleteCompanyMutation.mutate(company.id)}
+                                      className="bg-red-600 hover:bg-red-700"
+                                      disabled={deleteCompanyMutation.isPending}
+                                    >
+                                      {deleteCompanyMutation.isPending ? "Deleting..." : "Delete"}
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                              
                               <Button variant="ghost" size="sm" onClick={() => setSelectedCompany(company)}>
-                                Edit
-                              </Button>
-                              <Button variant="ghost" size="sm" onClick={() => setViewCompanyStats(company)}>
-                                Stats
+                                <Settings className="h-4 w-4" />
                               </Button>
                             </div>
                           </TableCell>
