@@ -93,7 +93,7 @@ export default function SystemOverview() {
     );
   }
 
-  // Default values if data is not available
+  // Use real system statistics from database
   const stats = systemStats || {
     totalCompanies: 0,
     activeCompanies: 0, 
