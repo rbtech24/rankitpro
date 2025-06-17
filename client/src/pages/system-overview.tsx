@@ -336,7 +336,7 @@ export default function SystemOverview() {
                   <div className="w-full bg-secondary rounded-full h-2 mt-2">
                     <div 
                       className="bg-primary h-2 rounded-full" 
-                      style={{ width: `${((healthMetrics?.openaiUsageToday || 0) / (healthMetrics?.openaiQuota || 1000)) * 100}%` }}
+                      style={{ width: `${Math.min(100, ((healthMetrics?.openaiUsageToday || 0) / (healthMetrics?.openaiQuota || 1000)) * 100)}%` }}
                     ></div>
                   </div>
                 </CardContent>
@@ -354,7 +354,7 @@ export default function SystemOverview() {
                   <div className="w-full bg-secondary rounded-full h-2 mt-2">
                     <div 
                       className="bg-primary h-2 rounded-full" 
-                      style={{ width: `${((healthMetrics?.anthropicUsageToday || 0) / (healthMetrics?.anthropicQuota || 1000)) * 100}%` }}
+                      style={{ width: `${Math.min(100, ((healthMetrics?.anthropicUsageToday || 0) / (healthMetrics?.anthropicQuota || 1000)) * 100)}%` }}
                     ></div>
                   </div>
                 </CardContent>
