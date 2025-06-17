@@ -48,6 +48,8 @@ import ImplementationChecklist from "@/pages/downloads/implementation-checklist"
 import TechnicianTrainingSlides from "@/pages/downloads/technician-training-slides";
 import BillingManagement from "@/pages/billing-management";
 import CompaniesManagement from "@/pages/companies-management";
+import SubscriptionManagement from "@/pages/subscription-management";
+import FinancialDashboard from "@/pages/financial-dashboard";
 import TechniciansManagement from "@/pages/technicians-management";
 import SystemSettings from "@/pages/system-settings";
 import SystemOverview from "@/pages/system-overview";
@@ -1199,6 +1201,12 @@ function Router() {
       </Route>
       <Route path="/sales-dashboard">
         <PrivateRoute component={SalesDashboard} path="/sales-dashboard" role="super_admin" />
+      </Route>
+      <Route path="/subscription-management">
+        <PrivateRoute component={SubscriptionManagement} path="/subscription-management" role="super_admin" />
+      </Route>
+      <Route path="/financial-dashboard">
+        <PrivateRoute component={FinancialDashboard} path="/financial-dashboard" role="super_admin" />
       </Route>
       <Route path="/integrations">
         <PrivateRoute component={Integrations} path="/integrations" role="company_admin" />
