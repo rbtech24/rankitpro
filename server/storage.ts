@@ -284,6 +284,29 @@ export interface IStorage {
   getRecentSystemActivity(): Promise<Array<{description: string, timestamp: string}>>;
   getBillingOverview(): Promise<any>;
   getAIUsageToday(provider: string): Promise<number>;
+
+  // Subscription Management methods
+  getSubscriptionPlans(): Promise<any[]>;
+  getSubscriptionPlan(id: number): Promise<any>;
+  createSubscriptionPlan(plan: any): Promise<any>;
+  updateSubscriptionPlan(id: number, updates: any): Promise<any>;
+  deleteSubscriptionPlan(id: number): Promise<boolean>;
+  getSubscriberCountForPlan(planId: number): Promise<number>;
+  getMonthlyRevenueForPlan(planId: number): Promise<number>;
+
+  // Financial Dashboard methods
+  getFinancialMetrics(): Promise<any>;
+  getRevenueTrends(): Promise<any[]>;
+  getPaymentHistory(): Promise<any[]>;
+  getSubscriptionBreakdown(): Promise<any>;
+  getFinancialExportData(): Promise<any[]>;
+
+  // Stripe Webhook handlers
+  handleSuccessfulPayment(paymentData: any): Promise<void>;
+  handleFailedPayment(paymentData: any): Promise<void>;
+  handleSubscriptionCreated(subscriptionData: any): Promise<void>;
+  handleSubscriptionUpdated(subscriptionData: any): Promise<void>;
+  handleSubscriptionCanceled(subscriptionData: any): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
