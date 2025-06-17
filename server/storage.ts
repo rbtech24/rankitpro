@@ -2250,6 +2250,27 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  async getAIUsageToday(provider: string): Promise<number> {
+    const today = new Date().toISOString().split('T')[0];
+    try {
+      const result = await db.select({ 
+        totalCost: sql<number>`coalesce(sum(cast(cost as decimal)), 0)` 
+      })
+      .from(schema.aiUsageLogs)
+      .where(
+        and(
+          eq(schema.aiUsageLogs.provider, provider),
+          sql`date(created_at) = ${today}`
+        )
+      );
+      
+      return result[0]?.totalCost || 0;
+    } catch (error) {
+      console.error(`Error getting AI usage for ${provider}:`, error);
+      return 0;
+    }
+  }
+
   // Blog post implementations using database
   async getBlogPost(id: number): Promise<BlogPost | undefined> {
     const [blogPost] = await db.select().from(schema.blogPosts).where(eq(schema.blogPosts.id, id));
