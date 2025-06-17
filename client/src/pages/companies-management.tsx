@@ -1121,11 +1121,9 @@ export default function CompaniesManagement() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {mockPlans.map(plan => (
-                              <SelectItem key={plan.id} value={plan.id}>
-                                {plan.name} - ${plan.monthlyPrice}/mo
-                              </SelectItem>
-                            ))}
+                            <SelectItem value="starter">Starter - $29/mo</SelectItem>
+                            <SelectItem value="pro">Pro - $79/mo</SelectItem>
+                            <SelectItem value="agency">Agency - $199/mo</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
