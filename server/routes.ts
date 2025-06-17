@@ -840,7 +840,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       const resetExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
       
       // Store reset token (in a real app, store this in database)
-      await storage.setPasswordResetToken(user.email, resetToken, resetExpiry);
+      await storage.setPasswordResetToken(user.id, resetToken, resetExpiry);
       
       // Send email with reset link
       const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
@@ -873,8 +873,8 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       }
       
       // Verify reset token
-      const resetUser = await storage.verifyPasswordResetToken(token);
-      if (!resetUser) {
+      const resetUserId = await storage.verifyPasswordResetToken(token);
+      if (!resetUserId) {
         return res.status(400).json({ message: "Invalid or expired reset token" });
       }
       
@@ -882,10 +882,10 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       const hashedPassword = await bcrypt.hash(password, 10);
       
       // Update user password
-      await storage.updateUserPassword(resetUser.id, hashedPassword);
+      await storage.updateUserPassword(resetUserId, hashedPassword);
       
       // Clear reset token
-      await storage.clearPasswordResetToken(resetUser.id);
+      await storage.clearPasswordResetToken(resetUserId);
       
       res.json({ message: "Password reset successful" });
     } catch (error) {
@@ -1737,8 +1737,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
 
       const updatedCompany = await storage.updateCompany(companyId, {
         name,
-        email,
-        subscriptionPlan
+        plan: subscriptionPlan
       });
 
       if (!updatedCompany) {

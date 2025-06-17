@@ -153,6 +153,10 @@ export interface IStorage {
     reviewResponses: number;
     averageRating: number;
   }>;
+  
+  // AI Usage operations
+  getAIUsageToday(provider: string): Promise<number>;
+  getMonthlyAIUsage(companyId: number, year: number, month: number): Promise<MonthlyAiUsage | undefined>;
 
   // System Admin Dashboard operations
   getCompanyCount(): Promise<number>;
@@ -2041,7 +2045,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  private async getAIUsageToday(provider: string): Promise<number> {
+  async getAIUsageToday(provider: string): Promise<number> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
