@@ -15,6 +15,83 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 // Subscription Plan Management Routes
 
+// Initialize predefined subscription plans
+router.post('/initialize-plans', isSuperAdmin, async (req, res) => {
+  try {
+    // Check if plans already exist
+    const existingPlans = await storage.getSubscriptionPlans();
+    if (existingPlans.length > 0) {
+      return res.json({ message: 'Subscription plans already exist', count: existingPlans.length });
+    }
+
+    // Create the three predefined plans
+    const plans = [
+      {
+        name: 'Starter',
+        price: '29.00',
+        billingPeriod: 'monthly',
+        maxTechnicians: 5,
+        maxCheckIns: 100,
+        features: [
+          'Basic check-in tracking',
+          'Photo uploads',
+          'Email review requests',
+          'Basic analytics',
+          'WordPress integration'
+        ],
+        isActive: true
+      },
+      {
+        name: 'Professional',
+        price: '79.00',
+        billingPeriod: 'monthly',
+        maxTechnicians: 15,
+        maxCheckIns: 500,
+        features: [
+          'All Starter features',
+          'Advanced analytics',
+          'Custom branding',
+          'Audio testimonials',
+          'Priority support',
+          'API access'
+        ],
+        isActive: true
+      },
+      {
+        name: 'Agency',
+        price: '149.00',
+        billingPeriod: 'monthly',
+        maxTechnicians: -1, // Unlimited
+        maxCheckIns: -1, // Unlimited
+        features: [
+          'All Professional features',
+          'Unlimited technicians',
+          'Unlimited check-ins',
+          'Video testimonials',
+          'White-label solution',
+          'Dedicated support',
+          'Custom integrations'
+        ],
+        isActive: true
+      }
+    ];
+
+    const createdPlans = [];
+    for (const planData of plans) {
+      const plan = await storage.createSubscriptionPlan(planData);
+      createdPlans.push(plan);
+    }
+
+    res.json({ 
+      message: 'Successfully created subscription plans', 
+      plans: createdPlans 
+    });
+  } catch (error) {
+    console.error('Error initializing subscription plans:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Get all subscription plans
 router.get('/subscription-plans', isSuperAdmin, async (req, res) => {
   try {

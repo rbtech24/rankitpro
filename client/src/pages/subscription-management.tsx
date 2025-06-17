@@ -106,6 +106,25 @@ export default function SubscriptionManagement() {
     }
   });
 
+  // Initialize subscription plans if none exist
+  const initializePlansMutation = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/admin/initialize-plans').then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/subscription-plans'] });
+      toast({
+        title: "Success",
+        description: "Subscription plans initialized successfully"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to initialize subscription plans",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Fetch subscription plans
   const { data: plans = [], isLoading } = useQuery({
     queryKey: ['/api/admin/subscription-plans'],
