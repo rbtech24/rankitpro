@@ -133,6 +133,10 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
   // Role-based access control removed - allow normal navigation
   
   if (role && auth.user.role !== role && auth.user.role !== "super_admin") {
+    // Redirect based on user role
+    if (auth.user.role === "technician") {
+      return <Redirect to="/mobile-field-app" />;
+    }
     return <Redirect to="/dashboard" />;
   }
   

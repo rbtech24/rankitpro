@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import StatsOverview from "@/components/dashboard/stats-overview";
 import RecentVisits from "@/components/dashboard/recent-visits";
@@ -15,6 +16,7 @@ import { AuthState, getCurrentUser } from "@/lib/auth";
 
 export default function Dashboard() {
   const [visitModalOpen, setVisitModalOpen] = useState(false);
+  const [, setLocation] = useLocation();
   
   const { data: auth } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
@@ -25,6 +27,15 @@ export default function Dashboard() {
   const isSuperAdmin = userRole === "super_admin";
   const isCompanyAdmin = userRole === "company_admin";
   const isTechnician = userRole === "technician";
+
+  // Redirect technicians to enhanced mobile field app
+  useEffect(() => {
+    if (isTechnician) {
+      setTimeout(() => {
+        setLocation("/mobile-field-app");
+      }, 1000); // Short delay to show the loading message
+    }
+  }, [isTechnician, setLocation]);
   
   return (
     <DashboardLayout>
@@ -64,7 +75,10 @@ export default function Dashboard() {
             <WebsiteIntegration />
           </>
         ) : isTechnician ? (
-          <TechDashboard onNewVisit={() => setVisitModalOpen(true)} />
+          <div className="text-center py-8">
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+            <p>Redirecting to Mobile Field App...</p>
+          </div>
         ) : null}
       </div>
       
