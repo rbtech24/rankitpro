@@ -413,7 +413,7 @@ export default function CompaniesManagement() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-2xl">
-                    {companies.reduce((sum, company) => sum + company.currentTechnicians, 0)}
+                    {companies?.reduce((sum, company) => sum + (company.stats?.totalTechnicians || 0), 0) || 0}
                   </CardTitle>
                   <CardDescription>Active Technicians</CardDescription>
                 </CardHeader>
