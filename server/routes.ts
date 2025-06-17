@@ -1263,6 +1263,13 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
   app.get("/api/technicians/:id", isAuthenticated, async (req, res) => {
     try {
       const technicianId = parseInt(req.params.id);
+      
+      // Validate ID parameter
+      if (isNaN(technicianId) || technicianId <= 0) {
+        console.error(`Invalid technician ID parameter: ${req.params.id}`);
+        return res.status(400).json({ message: "Invalid technician ID" });
+      }
+      
       const technician = await storage.getTechnician(technicianId);
       
       if (!technician) {

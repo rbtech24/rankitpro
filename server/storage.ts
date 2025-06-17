@@ -1828,7 +1828,13 @@ export class DatabaseStorage implements IStorage {
 
   // Placeholder implementations for interface compliance
   async getTechnician(id: number): Promise<Technician | undefined> {
-    const [technician] = await db.select().from(schema.technicians).where(eq(schema.technicians.id, id));
+    if (!id || isNaN(Number(id))) {
+      console.error(`getTechnician called with invalid ID: ${id} (type: ${typeof id})`);
+      throw new Error(`Invalid technician ID: ${id}`);
+    }
+    
+    const technicianId = Number(id);
+    const [technician] = await db.select().from(schema.technicians).where(eq(schema.technicians.id, technicianId));
     return technician;
   }
 
@@ -2973,26 +2979,41 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(schema.companies, eq(schema.technicians.companyId, schema.companies.id))
       .orderBy(desc(schema.technicians.createdAt));
 
-      // Add stats for each technician
+      // Add stats for each technician with proper ID validation
       const techniciansWithStats = await Promise.all(technicians.map(async (technician) => {
+        // Validate technician ID is a valid number
+        if (!technician.id || isNaN(Number(technician.id))) {
+          console.warn(`Invalid technician ID: ${technician.id}`);
+          return {
+            ...technician,
+            stats: {
+              totalCheckIns: 0,
+              totalBlogPosts: 0,
+              averageRating: 0
+            }
+          };
+        }
+
+        const technicianId = Number(technician.id);
+
         const [checkInsCount] = await db.select({ count: sql<number>`count(*)` })
           .from(schema.checkIns)
-          .where(eq(schema.checkIns.technicianId, technician.id));
+          .where(eq(schema.checkIns.technicianId, technicianId));
 
         const [blogPostsCount] = await db.select({ count: sql<number>`count(*)` })
           .from(schema.blogPosts)
-          .where(eq(schema.blogPosts.technicianId, technician.id));
+          .where(eq(schema.blogPosts.technicianId, technicianId));
 
         const [avgRatingResult] = await db.select({ avg: sql<number>`avg(rating)` })
           .from(schema.reviewResponses)
-          .where(eq(schema.reviewResponses.technicianId, technician.id));
+          .where(eq(schema.reviewResponses.technicianId, technicianId));
 
         return {
           ...technician,
           stats: {
-            totalCheckIns: checkInsCount?.count || 0,
-            totalBlogPosts: blogPostsCount?.count || 0,
-            averageRating: Math.round((avgRatingResult?.avg || 0) * 10) / 10
+            totalCheckIns: Number(checkInsCount?.count) || 0,
+            totalBlogPosts: Number(blogPostsCount?.count) || 0,
+            averageRating: Math.round((Number(avgRatingResult?.avg) || 0) * 10) / 10
           }
         };
       }));
