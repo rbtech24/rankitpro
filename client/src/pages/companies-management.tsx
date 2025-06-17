@@ -539,22 +539,22 @@ export default function CompaniesManagement() {
                           <TableCell>
                             <div>
                               <div className="font-medium">{company.name}</div>
-                              <div className="text-sm text-gray-500">{company.email}</div>
+                              <div className="text-sm text-gray-500">Not provided</div>
                             </div>
                           </TableCell>
-                          <TableCell>{company.industry}</TableCell>
-                          <TableCell>{company.planName}</TableCell>
-                          <TableCell>{company.currentTechnicians} / {company.maxTechnicians}</TableCell>
-                          <TableCell>{company.stats.totalCheckIns}</TableCell>
+                          <TableCell>Not specified</TableCell>
+                          <TableCell>{company.plan}</TableCell>
+                          <TableCell>{company.stats?.totalTechnicians || 0} / Unlimited</TableCell>
+                          <TableCell>{company.stats?.totalCheckIns || 0}</TableCell>
                           <TableCell>
                             <div className="flex items-center">
-                              <span className="mr-1">{company.stats.avgRating}</span>
+                              <span className="mr-1">{company.stats?.avgRating?.toFixed(1) || "0.0"}</span>
                               <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge className={company.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                              {company.isActive ? "Active" : "Inactive"}
+                            <Badge className={company.isTrialActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                              {company.isTrialActive ? "Active" : "Inactive"}
                             </Badge>
                           </TableCell>
                           <TableCell>

@@ -1608,6 +1608,17 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  // Technicians management (Super admin only)
+  app.get("/api/technicians/all", isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const technicians = await storage.getAllTechnicians();
+      res.json(technicians);
+    } catch (error) {
+      console.error("Get all technicians error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Company feature management
   app.put("/api/companies/:id/features", isSuperAdmin, async (req, res) => {
     try {

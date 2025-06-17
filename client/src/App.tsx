@@ -48,6 +48,7 @@ import ImplementationChecklist from "@/pages/downloads/implementation-checklist"
 import TechnicianTrainingSlides from "@/pages/downloads/technician-training-slides";
 import BillingManagement from "@/pages/billing-management";
 import CompaniesManagement from "@/pages/companies-management";
+import TechniciansManagement from "@/pages/technicians-management";
 import SystemSettings from "@/pages/system-settings";
 import SystemOverview from "@/pages/system-overview";
 import SalesDashboard from "@/pages/sales-dashboard";

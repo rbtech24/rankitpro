@@ -2885,6 +2885,58 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
   }
+
+  // Get all technicians with company info and stats (super admin only)
+  async getAllTechnicians(): Promise<Array<any>> {
+    try {
+      const technicians = await db.select({
+        id: schema.technicians.id,
+        name: schema.technicians.name,
+        email: schema.technicians.email,
+        phone: schema.technicians.phone,
+        active: schema.technicians.active,
+        companyId: schema.technicians.companyId,
+        createdAt: schema.technicians.createdAt,
+        company: {
+          id: schema.companies.id,
+          name: schema.companies.name,
+          plan: schema.companies.plan
+        }
+      })
+      .from(schema.technicians)
+      .leftJoin(schema.companies, eq(schema.technicians.companyId, schema.companies.id))
+      .orderBy(desc(schema.technicians.createdAt));
+
+      // Add stats for each technician
+      const techniciansWithStats = await Promise.all(technicians.map(async (technician) => {
+        const [checkInsCount] = await db.select({ count: sql<number>`count(*)` })
+          .from(schema.checkIns)
+          .where(eq(schema.checkIns.technicianId, technician.id));
+
+        const [blogPostsCount] = await db.select({ count: sql<number>`count(*)` })
+          .from(schema.blogPosts)
+          .where(eq(schema.blogPosts.technicianId, technician.id));
+
+        const [avgRatingResult] = await db.select({ avg: sql<number>`avg(rating)` })
+          .from(schema.reviewResponses)
+          .where(eq(schema.reviewResponses.technicianId, technician.id));
+
+        return {
+          ...technician,
+          stats: {
+            totalCheckIns: checkInsCount?.count || 0,
+            totalBlogPosts: blogPostsCount?.count || 0,
+            averageRating: Math.round((avgRatingResult?.avg || 0) * 10) / 10
+          }
+        };
+      }));
+
+      return techniciansWithStats;
+    } catch (error) {
+      console.error("Error fetching technicians:", error);
+      return [];
+    }
+  }
 }
 
 // Use DatabaseStorage for production to connect to PostgreSQL
