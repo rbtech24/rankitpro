@@ -211,7 +211,7 @@ function Router() {
     <Switch>
       <Route path="/login">
         {auth?.user && !isLoggedOut ? 
-          (auth.user.role === "technician" ? <Redirect to="/dashboard" /> : 
+          (auth.user.role === "technician" ? <Redirect to="/mobile-field-app" /> : 
            auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> :
            <Redirect to="/dashboard" />) 
           : <Login />}
@@ -267,6 +267,11 @@ function Router() {
         <PrivateRoute component={WordPressCustomFields} path="/wordpress-custom-fields" role="company_admin" />
       </Route>
       <Route path="/review/:token"><Review /></Route>
+      
+      {/* Enhanced Mobile Field App - Default for Technicians */}
+      <Route path="/mobile-field-app">
+        <PrivateRoute component={MobileFieldApp} path="/mobile-field-app" role="technician" />
+      </Route>
       
       {/* Mobile Tech App - Progressive Web App */}
       <Route path="/mobile">
