@@ -301,7 +301,7 @@ export default function SystemOverview() {
                   <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.avgResponseTime}ms</div>
+                  <div className="text-2xl font-bold">{health?.avgResponseTime || 0}ms</div>
                   <p className="text-xs text-muted-foreground">
                     Average response time
                   </p>
@@ -314,9 +314,9 @@ export default function SystemOverview() {
                   <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.errorRate}%</div>
+                  <div className="text-2xl font-bold">{health?.errorRate || 0}%</div>
                   <p className="text-xs text-muted-foreground">
-                    {stats.requestsPerMinute} req/min
+                    {health?.requestsPerMinute || 0} req/min
                   </p>
                 </CardContent>
               </Card>
@@ -329,14 +329,14 @@ export default function SystemOverview() {
                   <CardTitle>OpenAI Usage</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.openaiUsageToday}</div>
+                  <div className="text-2xl font-bold">{systemHealth?.openaiUsageToday || 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    of {stats.openaiQuota} daily quota
+                    of {systemHealth?.openaiQuota || 1000} daily quota
                   </p>
                   <div className="w-full bg-secondary rounded-full h-2 mt-2">
                     <div 
                       className="bg-primary h-2 rounded-full" 
-                      style={{ width: `${(stats.openaiUsageToday / stats.openaiQuota) * 100}%` }}
+                      style={{ width: `${((systemHealth?.openaiUsageToday || 0) / (systemHealth?.openaiQuota || 1000)) * 100}%` }}
                     ></div>
                   </div>
                 </CardContent>

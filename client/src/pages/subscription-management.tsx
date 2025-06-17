@@ -213,7 +213,7 @@ export default function SubscriptionManagement() {
     setEditingPlan(plan);
     form.reset({
       name: plan.name,
-      price: plan.price,
+      price: parseFloat(plan.price),
       billingPeriod: plan.billingPeriod,
       maxTechnicians: plan.maxTechnicians,
       maxCheckIns: plan.maxCheckIns,
