@@ -66,6 +66,7 @@ import TestimonialsPage from "@/pages/testimonials";
 import APICredentials from "@/pages/api-credentials";
 import JobTypesManagement from "@/pages/job-types-management";
 import LogoutHandler from "@/components/LogoutHandler";
+import ForceLogout from "@/pages/force-logout";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
@@ -173,6 +174,7 @@ function Router() {
       <Switch>
         <Route path="/login"><Login /></Route>
         <Route path="/logout"><LogoutHandler /></Route>
+        <Route path="/force-logout"><ForceLogout /></Route>
         <Route path="/forgot-password"><ForgotPassword /></Route>
         <Route path="/reset-password"><ResetPassword /></Route>
         <Route path="/register"><Onboarding /></Route>
