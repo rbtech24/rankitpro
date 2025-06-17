@@ -15,10 +15,22 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Loader2 } from "lucide-react";
 import StripeConfigNotice from "@/components/billing/stripe-config-notice";
 
-// Initialize Stripe conditionally - only if public key is available
-const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
-  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
-  : Promise.resolve(null);
+// Initialize Stripe conditionally - only if public key is available and valid
+const getStripePromise = () => {
+  const publicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+  if (!publicKey || !publicKey.startsWith('pk_')) {
+    console.warn('Stripe public key not configured or invalid');
+    return Promise.resolve(null);
+  }
+  try {
+    return loadStripe(publicKey);
+  } catch (error) {
+    console.error('Failed to load Stripe:', error);
+    return Promise.resolve(null);
+  }
+};
+
+const stripePromise = getStripePromise();
 
 interface PlanFeature {
   name: string;

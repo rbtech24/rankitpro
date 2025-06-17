@@ -13,6 +13,11 @@ import helmet from "helmet";
 
 const app = express();
 
+// Trust proxy for production deployments (required for rate limiting)
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Security middleware - helmet for security headers
 app.use(helmet({
   contentSecurityPolicy: {
