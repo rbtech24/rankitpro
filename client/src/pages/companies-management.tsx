@@ -427,13 +427,13 @@ export default function CompaniesManagement() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-2xl">
-                    {companies.reduce((sum, company) => sum + company.stats.totalCheckIns, 0)}
+                    {companies?.reduce((sum, company) => sum + (company.stats?.totalCheckIns || 0), 0) || 0}
                   </CardTitle>
                   <CardDescription>Total Check-ins</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-green-600">
-                    {companies.reduce((sum, company) => sum + company.stats.activeCheckInsLast30Days, 0)} in last 30 days
+                    {companies?.reduce((sum, company) => sum + (company.stats?.totalCheckIns || 0), 0) || 0} in last 30 days
                   </p>
                 </CardContent>
               </Card>
@@ -441,14 +441,16 @@ export default function CompaniesManagement() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-2xl">
-                    {(companies.reduce((sum, company) => sum + (company.stats.avgRating * company.stats.totalReviews), 0) / 
-                     companies.reduce((sum, company) => sum + company.stats.totalReviews, 0)).toFixed(1)}
+                    {companies && companies.length > 0 ? (
+                      (companies.reduce((sum, company) => sum + ((company.stats?.avgRating || 0) * (company.stats?.totalReviews || 0)), 0) / 
+                       Math.max(companies.reduce((sum, company) => sum + (company.stats?.totalReviews || 0), 0), 1)).toFixed(1)
+                    ) : '0.0'}
                   </CardTitle>
                   <CardDescription>Average Rating</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-slate-600">
-                    {companies.reduce((sum, company) => sum + company.stats.totalReviews, 0)} total reviews
+                    {companies?.reduce((sum, company) => sum + (company.stats?.totalReviews || 0), 0) || 0} total reviews
                   </p>
                 </CardContent>
               </Card>
@@ -481,11 +483,9 @@ export default function CompaniesManagement() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Plans</SelectItem>
-                    {mockPlans.map(plan => (
-                      <SelectItem key={plan.id} value={plan.id}>
-                        {plan.name}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="starter">Starter</SelectItem>
+                    <SelectItem value="pro">Pro</SelectItem>
+                    <SelectItem value="agency">Agency</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={filteredStatus} onValueChange={setFilteredStatus}>
@@ -791,13 +791,13 @@ export default function CompaniesManagement() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockPlans.map(plan => {
-                        const count = companies.filter(c => c.planId === plan.id).length;
-                        const percentage = (count / companies.length) * 100;
+                      {['starter', 'pro', 'agency'].map(plan => {
+                        const count = companies?.filter(c => c.plan === plan).length || 0;
+                        const percentage = companies?.length ? (count / companies.length) * 100 : 0;
                         
                         return (
-                          <div key={plan.id} className="flex items-center">
-                            <div className="w-28">{plan.name}</div>
+                          <div key={plan} className="flex items-center">
+                            <div className="w-28 capitalize">{plan}</div>
                             <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
                               <div 
                                 className="h-full bg-primary" 
