@@ -1,0 +1,248 @@
+import { Router } from 'express';
+import { storage } from '../storage';
+import { isSuperAdmin } from '../middleware/auth';
+import { insertSubscriptionPlanSchema } from '@shared/schema';
+import Stripe from 'stripe';
+
+const router = Router();
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16",
+});
+
+// Subscription Plan Management Routes
+
+// Get all subscription plans
+router.get('/subscription-plans', isSuperAdmin, async (req, res) => {
+  try {
+    const plans = await storage.getSubscriptionPlans();
+    
+    // Add subscriber count and revenue for each plan
+    const plansWithStats = await Promise.all(plans.map(async (plan) => {
+      const subscriberCount = await storage.getSubscriberCountForPlan(plan.id);
+      const monthlyRevenue = await storage.getMonthlyRevenueForPlan(plan.id);
+      
+      return {
+        ...plan,
+        subscriberCount,
+        monthlyRevenue
+      };
+    }));
+    
+    res.json(plansWithStats);
+  } catch (error) {
+    console.error('Error fetching subscription plans:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Create new subscription plan
+router.post('/subscription-plans', isSuperAdmin, async (req, res) => {
+  try {
+    const validatedData = insertSubscriptionPlanSchema.parse(req.body);
+    
+    // Create Stripe product and price
+    const stripeProduct = await stripe.products.create({
+      name: validatedData.name,
+      description: `${validatedData.name} subscription plan`,
+    });
+
+    const stripePrice = await stripe.prices.create({
+      product: stripeProduct.id,
+      unit_amount: Math.round(validatedData.price * 100), // Convert to cents
+      currency: 'usd',
+      recurring: {
+        interval: validatedData.billingPeriod === 'yearly' ? 'year' : 'month',
+      },
+    });
+
+    // Create subscription plan in database
+    const plan = await storage.createSubscriptionPlan({
+      ...validatedData,
+      stripeProductId: stripeProduct.id,
+      stripePriceId: stripePrice.id
+    });
+
+    res.json(plan);
+  } catch (error) {
+    console.error('Error creating subscription plan:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update subscription plan
+router.put('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
+  try {
+    const planId = parseInt(req.params.id);
+    const validatedData = insertSubscriptionPlanSchema.parse(req.body);
+    
+    const existingPlan = await storage.getSubscriptionPlan(planId);
+    if (!existingPlan) {
+      return res.status(404).json({ message: 'Subscription plan not found' });
+    }
+
+    // Update Stripe product if it exists
+    if (existingPlan.stripeProductId) {
+      await stripe.products.update(existingPlan.stripeProductId, {
+        name: validatedData.name,
+        description: `${validatedData.name} subscription plan`,
+      });
+    }
+
+    // Update subscription plan in database
+    const updatedPlan = await storage.updateSubscriptionPlan(planId, validatedData);
+    res.json(updatedPlan);
+  } catch (error) {
+    console.error('Error updating subscription plan:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Delete subscription plan
+router.delete('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
+  try {
+    const planId = parseInt(req.params.id);
+    
+    const existingPlan = await storage.getSubscriptionPlan(planId);
+    if (!existingPlan) {
+      return res.status(404).json({ message: 'Subscription plan not found' });
+    }
+
+    // Check if plan has active subscribers
+    const subscriberCount = await storage.getSubscriberCountForPlan(planId);
+    if (subscriberCount > 0) {
+      return res.status(400).json({ 
+        message: 'Cannot delete plan with active subscribers. Please migrate subscribers first.' 
+      });
+    }
+
+    // Archive Stripe product if it exists
+    if (existingPlan.stripeProductId) {
+      await stripe.products.update(existingPlan.stripeProductId, {
+        active: false,
+      });
+    }
+
+    await storage.deleteSubscriptionPlan(planId);
+    res.json({ message: 'Subscription plan deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting subscription plan:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Financial Dashboard Routes
+
+// Get financial metrics
+router.get('/financial/metrics', isSuperAdmin, async (req, res) => {
+  try {
+    const period = req.query.period as string || '12months';
+    const metrics = await storage.getFinancialMetrics(period);
+    res.json(metrics);
+  } catch (error) {
+    console.error('Error fetching financial metrics:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get revenue trends
+router.get('/financial/revenue-trends', isSuperAdmin, async (req, res) => {
+  try {
+    const period = req.query.period as string || '12months';
+    const trends = await storage.getRevenueTrends(period);
+    res.json(trends);
+  } catch (error) {
+    console.error('Error fetching revenue trends:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get payment history
+router.get('/financial/payments', isSuperAdmin, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const payments = await storage.getPaymentHistory(limit, offset);
+    res.json(payments);
+  } catch (error) {
+    console.error('Error fetching payment history:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get subscription breakdown
+router.get('/financial/subscription-breakdown', isSuperAdmin, async (req, res) => {
+  try {
+    const breakdown = await storage.getSubscriptionBreakdown();
+    res.json(breakdown);
+  } catch (error) {
+    console.error('Error fetching subscription breakdown:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Export financial data
+router.get('/financial/export', isSuperAdmin, async (req, res) => {
+  try {
+    const period = req.query.period as string || '12months';
+    const format = req.query.format as string || 'csv';
+    
+    const data = await storage.getFinancialExportData(period);
+    
+    if (format === 'csv') {
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="financial_data_${period}.csv"`);
+      
+      // Convert to CSV format
+      const headers = Object.keys(data[0] || {}).join(',');
+      const rows = data.map(row => Object.values(row).join(','));
+      const csv = [headers, ...rows].join('\n');
+      
+      res.send(csv);
+    } else {
+      res.json(data);
+    }
+  } catch (error) {
+    console.error('Error exporting financial data:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Webhook for Stripe events
+router.post('/stripe/webhook', async (req, res) => {
+  const sig = req.headers['stripe-signature'] as string;
+  
+  try {
+    const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
+    
+    switch (event.type) {
+      case 'payment_intent.succeeded':
+        await storage.handleSuccessfulPayment(event.data.object);
+        break;
+      case 'payment_intent.payment_failed':
+        await storage.handleFailedPayment(event.data.object);
+        break;
+      case 'customer.subscription.created':
+        await storage.handleSubscriptionCreated(event.data.object);
+        break;
+      case 'customer.subscription.updated':
+        await storage.handleSubscriptionUpdated(event.data.object);
+        break;
+      case 'customer.subscription.deleted':
+        await storage.handleSubscriptionCanceled(event.data.object);
+        break;
+      default:
+        console.log(`Unhandled event type ${event.type}`);
+    }
+    
+    res.json({ received: true });
+  } catch (error) {
+    console.error('Stripe webhook error:', error);
+    res.status(400).send(`Webhook Error: ${error.message}`);
+  }
+});
+
+export default router;

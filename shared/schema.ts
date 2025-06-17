@@ -16,18 +16,34 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Subscription plans table
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  billingPeriod: text("billing_period", { enum: ["monthly", "yearly"] }).notNull(),
+  maxTechnicians: integer("max_technicians").notNull(),
+  maxCheckIns: integer("max_check_ins").notNull(),
+  features: jsonb("features").default([]).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  stripeProductId: text("stripe_product_id"),
+  stripePriceId: text("stripe_price_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Companies table
 export const companies = pgTable("companies", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   plan: text("plan", { enum: ["starter", "pro", "agency"] }).notNull().default("starter"),
+  subscriptionPlanId: integer("subscription_plan_id").references(() => subscriptionPlans.id),
   usageLimit: integer("usage_limit").notNull().default(50),
   wordpressConfig: text("wordpress_config"),
   javaScriptEmbedConfig: text("javascript_embed_config"),
   reviewSettings: text("review_settings"),
-  crmIntegrations: text("crm_integrations"), // Stores JSON string with CRM configurations
-  crmSyncHistory: text("crm_sync_history"), // Stores JSON string with CRM sync history
-  // Feature permissions based on plan
+  crmIntegrations: text("crm_integrations"),
+  crmSyncHistory: text("crm_sync_history"),
   featuresEnabled: jsonb("features_enabled").default({
     audioTestimonials: false,
     videoTestimonials: false,
@@ -670,6 +686,68 @@ export const insertSupportTicketResponseSchema = createInsertSchema(supportTicke
   id: true, 
   createdAt: true 
 });
+
+// Payment transactions table
+export const paymentTransactions = pgTable("payment_transactions", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  subscriptionPlanId: integer("subscription_plan_id").references(() => subscriptionPlans.id),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").default("USD").notNull(),
+  status: text("status", { enum: ["success", "failed", "pending", "refunded"] }).notNull(),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  stripeChargeId: text("stripe_charge_id"),
+  paymentMethod: text("payment_method"), // card, bank_transfer, etc.
+  billingPeriod: text("billing_period", { enum: ["monthly", "yearly"] }),
+  metadata: jsonb("metadata").default({}),
+  failureReason: text("failure_reason"),
+  refundAmount: numeric("refund_amount", { precision: 10, scale: 2 }),
+  refundedAt: timestamp("refunded_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Subscription status table
+export const subscriptionStatus = pgTable("subscription_status", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  subscriptionPlanId: integer("subscription_plan_id").references(() => subscriptionPlans.id).notNull(),
+  status: text("status", { enum: ["active", "canceled", "past_due", "unpaid", "trialing"] }).notNull(),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  canceledAt: timestamp("canceled_at"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
+  trialStart: timestamp("trial_start"),
+  trialEnd: timestamp("trial_end"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Insert schemas for subscription plans
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertPaymentTransactionSchema = createInsertSchema(paymentTransactions).omit({
+  id: true,
+  createdAt: true
+});
+
+export const insertSubscriptionStatusSchema = createInsertSchema(subscriptionStatus).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+// Types for subscription system
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
+export type InsertPaymentTransaction = z.infer<typeof insertPaymentTransactionSchema>;
+export type SubscriptionStatus = typeof subscriptionStatus.$inferSelect;
+export type InsertSubscriptionStatus = z.infer<typeof insertSubscriptionStatusSchema>;
 
 // Types for support system
 export type SupportTicket = typeof supportTickets.$inferSelect;
