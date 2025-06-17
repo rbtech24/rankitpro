@@ -213,7 +213,7 @@ export default function SubscriptionManagement() {
     setEditingPlan(plan);
     form.reset({
       name: plan.name,
-      price: parseFloat(plan.price),
+      price: typeof plan.price === 'string' ? parseFloat(plan.price) : plan.price,
       billingPeriod: plan.billingPeriod,
       maxTechnicians: plan.maxTechnicians,
       maxCheckIns: plan.maxCheckIns,
@@ -461,7 +461,7 @@ export default function SubscriptionManagement() {
                     {plans.map((plan: SubscriptionPlan) => (
                       <TableRow key={plan.id}>
                         <TableCell className="font-medium">{plan.name}</TableCell>
-                        <TableCell>${parseFloat(plan.price).toFixed(2)}</TableCell>
+                        <TableCell>${typeof plan.price === 'string' ? parseFloat(plan.price).toFixed(2) : plan.price.toFixed(2)}</TableCell>
                         <TableCell className="capitalize">{plan.billingPeriod}</TableCell>
                         <TableCell>
                           {plan.maxTechnicians} techs, {plan.maxCheckIns} check-ins
