@@ -33,102 +33,105 @@ export default function Sidebar({ className }: SidebarProps) {
       
       <div className="flex-1 overflow-y-auto">
         <nav className="px-4 py-6 space-y-2">
-          {/* Main Section */}
-          <div className="mb-6">
-            <div className="px-3 mb-3 text-xs text-gray-500 uppercase font-semibold tracking-wider">Main</div>
-            
-            <Link href="/dashboard">
-              <div className={cn(
-                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
-                isActive("/dashboard") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
-              )}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
-                  <rect width="7" height="9" x="3" y="3" rx="1"/>
-                  <rect width="7" height="5" x="14" y="3" rx="1"/>
-                  <rect width="7" height="9" x="14" y="12" rx="1"/>
-                  <rect width="7" height="5" x="3" y="16" rx="1"/>
-                </svg>
-                Dashboard
-              </div>
-            </Link>
+          {/* Main Section - Only for Company Admins and Technicians */}
+          {!isSuperAdmin && (
+            <div className="mb-6">
+              <div className="px-3 mb-3 text-xs text-gray-500 uppercase font-semibold tracking-wider">Main</div>
+              
+              <Link href="/dashboard">
+                <div className={cn(
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
+                  isActive("/dashboard") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
+                )}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                    <rect width="7" height="9" x="3" y="3" rx="1"/>
+                    <rect width="7" height="5" x="14" y="3" rx="1"/>
+                    <rect width="7" height="9" x="14" y="12" rx="1"/>
+                    <rect width="7" height="5" x="3" y="16" rx="1"/>
+                  </svg>
+                  Dashboard
+                </div>
+              </Link>
 
-            <Link href="/setup-guide">
-              <div className={cn(
-                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
-                isActive("/setup-guide") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
-              )}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
-                  <path d="M9 12l2 2 4-4"/>
-                  <path d="M21 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
-                  <path d="M3 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
-                  <path d="M12 21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
-                  <path d="M12 3c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
-                  <path d="m18.364 18.364.707-.707-.707-.707-.707.707.707.707z"/>
-                  <path d="m5.636 5.636.707-.707-.707-.707-.707.707.707.707z"/>
-                  <path d="m18.364 5.636-.707-.707-.707.707.707.707.707-.707z"/>
-                  <path d="m5.636 18.364-.707-.707-.707.707.707.707.707-.707z"/>
-                </svg>
-                Setup Guide
-              </div>
-            </Link>
+              <Link href="/setup-guide">
+                <div className={cn(
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
+                  isActive("/setup-guide") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
+                )}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                    <path d="M9 12l2 2 4-4"/>
+                    <path d="M21 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
+                    <path d="M3 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
+                    <path d="M12 21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
+                    <path d="M12 3c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
+                    <path d="m18.364 18.364.707-.707-.707-.707-.707.707.707.707z"/>
+                    <path d="m5.636 5.636.707-.707-.707-.707-.707.707.707.707z"/>
+                    <path d="m18.364 5.636-.707-.707-.707.707.707.707.707-.707z"/>
+                    <path d="m5.636 18.364-.707-.707-.707.707.707.707.707-.707z"/>
+                  </svg>
+                  Setup Guide
+                </div>
+              </Link>
 
-            <Link href="/check-ins">
-              <div className={cn(
-                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
-                isActive("/check-ins") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
-              )}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
-                  <path d="M9 11H5a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4m4-6h6a2 2 0 0 1 2 2v3c0 1.1-.9 2-2 2h-6m-4 0V9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-1"/>
-                </svg>
-                Visits
-              </div>
-            </Link>
+              <Link href="/check-ins">
+                <div className={cn(
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
+                  isActive("/check-ins") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
+                )}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                    <path d="M9 11H5a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4m4-6h6a2 2 0 0 1 2 2v3c0 1.1-.9 2-2 2h-6m-4 0V9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-1"/>
+                  </svg>
+                  Visits
+                </div>
+              </Link>
 
-            <Link href="/blog-posts">
-              <div className={cn(
-                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
-                isActive("/blog-posts") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
-              )}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
-                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                  <polyline points="14,2 14,8 20,8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                  <polyline points="10,9 9,9 8,9"/>
-                </svg>
-                Blog Posts
-              </div>
-            </Link>
+              <Link href="/blog-posts">
+                <div className={cn(
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
+                  isActive("/blog-posts") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
+                )}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10,9 9,9 8,9"/>
+                  </svg>
+                  Blog Posts
+                </div>
+              </Link>
 
-            <Link href="/reviews">
-              <div className={cn(
-                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
-                isActive("/reviews") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
-              )}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
-                  <polygon points="12,2 15.09,8.26 22,9 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9 8.91,8.26"/>
-                </svg>
-                Reviews
-              </div>
-            </Link>
+              <Link href="/reviews">
+                <div className={cn(
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
+                  isActive("/reviews") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
+                )}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                    <polygon points="12,2 15.09,8.26 22,9 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9 8.91,8.26"/>
+                  </svg>
+                  Reviews
+                </div>
+              </Link>
 
-            <Link href="/review-analytics">
-              <div className={cn(
-                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
-                isActive("/review-analytics") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
-              )}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
-                  <path d="M3 3v18h18"/>
-                  <path d="m19 9-5 5-4-4-3 3"/>
-                </svg>
-                Review Analytics
-              </div>
-            </Link>
-          </div>
+              <Link href="/review-analytics">
+                <div className={cn(
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
+                  isActive("/review-analytics") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
+                )}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                    <path d="M3 3v18h18"/>
+                    <path d="m19 9-5 5-4-4-3 3"/>
+                  </svg>
+                  Review Analytics
+                </div>
+              </Link>
+            </div>
+          )}
 
-          {/* Management Section */}
-          <div className="mb-6">
-            <div className="px-3 mb-3 text-xs text-gray-500 uppercase font-semibold tracking-wider">Management</div>
+          {/* Management Section - Only for Company Admins */}
+          {!isSuperAdmin && (
+            <div className="mb-6">
+              <div className="px-3 mb-3 text-xs text-gray-500 uppercase font-semibold tracking-wider">Management</div>
             
             <Link href="/technicians">
               <div className={cn(
@@ -210,7 +213,8 @@ export default function Sidebar({ className }: SidebarProps) {
                 CRM Integrations
               </div>
             </Link>
-          </div>
+            </div>
+          )}
 
           {/* Account Section */}
           <div className="mb-6">
