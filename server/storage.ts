@@ -2894,8 +2894,9 @@ export class DatabaseStorage implements IStorage {
         name: schema.technicians.name,
         email: schema.technicians.email,
         phone: schema.technicians.phone,
-        active: schema.technicians.active,
+        specialty: schema.technicians.specialty,
         companyId: schema.technicians.companyId,
+        active: schema.technicians.active,
         createdAt: schema.technicians.createdAt,
         company: {
           id: schema.companies.id,
@@ -2935,6 +2936,45 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error fetching technicians:", error);
       return [];
+    }
+  }
+
+  // Toggle technician active status
+  async toggleTechnicianStatus(id: number): Promise<{ success: boolean; active: boolean }> {
+    try {
+      // First get current status
+      const [currentTechnician] = await db.select({ active: schema.technicians.active })
+        .from(schema.technicians)
+        .where(eq(schema.technicians.id, id));
+
+      if (!currentTechnician) {
+        return { success: false, active: false };
+      }
+
+      // Toggle the status
+      const newActiveStatus = !currentTechnician.active;
+      
+      await db.update(schema.technicians)
+        .set({ active: newActiveStatus })
+        .where(eq(schema.technicians.id, id));
+
+      return { success: true, active: newActiveStatus };
+    } catch (error) {
+      console.error("Error toggling technician status:", error);
+      return { success: false, active: false };
+    }
+  }
+
+  // Set technician active status
+  async setTechnicianStatus(id: number, active: boolean): Promise<boolean> {
+    try {
+      await db.update(schema.technicians)
+        .set({ active })
+        .where(eq(schema.technicians.id, id));
+      return true;
+    } catch (error) {
+      console.error("Error setting technician status:", error);
+      return false;
     }
   }
 }

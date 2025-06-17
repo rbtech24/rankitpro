@@ -1332,6 +1332,85 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  // Toggle technician active status (super admin and company admin)
+  app.patch("/api/technicians/:id/toggle-status", isAuthenticated, async (req, res) => {
+    try {
+      const technicianId = parseInt(req.params.id);
+      
+      if (isNaN(technicianId)) {
+        return res.status(400).json({ message: "Invalid technician ID" });
+      }
+
+      // Get technician to check permissions
+      const technician = await storage.getTechnician(technicianId);
+      if (!technician) {
+        return res.status(404).json({ message: "Technician not found" });
+      }
+
+      // Check permissions - super admin or company admin of the technician's company
+      if (req.user.role !== "super_admin" && 
+          (req.user.role !== "company_admin" || req.user.companyId !== technician.companyId)) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const result = await storage.toggleTechnicianStatus(technicianId);
+      
+      if (!result.success) {
+        return res.status(500).json({ message: "Failed to toggle technician status" });
+      }
+
+      res.json({ 
+        message: `Technician ${result.active ? 'activated' : 'deactivated'} successfully`,
+        active: result.active 
+      });
+    } catch (error) {
+      console.error("Toggle technician status error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Set technician active status (super admin and company admin)
+  app.patch("/api/technicians/:id/status", isAuthenticated, async (req, res) => {
+    try {
+      const technicianId = parseInt(req.params.id);
+      const { active } = req.body;
+      
+      if (isNaN(technicianId)) {
+        return res.status(400).json({ message: "Invalid technician ID" });
+      }
+
+      if (typeof active !== 'boolean') {
+        return res.status(400).json({ message: "Active status must be a boolean" });
+      }
+
+      // Get technician to check permissions
+      const technician = await storage.getTechnician(technicianId);
+      if (!technician) {
+        return res.status(404).json({ message: "Technician not found" });
+      }
+
+      // Check permissions - super admin or company admin of the technician's company
+      if (req.user.role !== "super_admin" && 
+          (req.user.role !== "company_admin" || req.user.companyId !== technician.companyId)) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const success = await storage.setTechnicianStatus(technicianId, active);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Failed to update technician status" });
+      }
+
+      res.json({ 
+        message: `Technician ${active ? 'activated' : 'deactivated'} successfully`,
+        active 
+      });
+    } catch (error) {
+      console.error("Set technician status error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Create user account for technician
   app.post("/api/technicians/:id/create-account", isCompanyAdmin, async (req, res) => {
     try {

@@ -57,6 +57,7 @@ export const technicians = pgTable("technicians", {
   location: text("location").notNull(),
   userId: integer("user_id").references(() => users.id),
   companyId: integer("company_id").references(() => companies.id).notNull(),
+  active: boolean("active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
