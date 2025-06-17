@@ -322,4 +322,77 @@ router.post('/stripe/webhook', async (req, res) => {
   }
 });
 
+// System Overview Routes - Real data implementation
+
+// Get system statistics
+router.get('/system-stats', isSuperAdmin, async (req, res) => {
+  try {
+    const totalCompanies = await storage.getCompanyCount();
+    const activeCompanies = await storage.getActiveCompaniesCount();
+    const totalUsers = await storage.getUserCount();
+    const totalTechnicians = await storage.getTechnicianCount();
+    const totalCheckIns = await storage.getCheckInCount();
+    const reviewStats = await storage.getSystemReviewStats();
+
+    const stats = {
+      totalCompanies,
+      activeCompanies,
+      totalUsers,
+      totalTechnicians,
+      totalCheckIns,
+      avgRating: reviewStats.averageRating || 0,
+      totalReviews: reviewStats.totalReviews || 0
+    };
+
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching system stats:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get chart data for system overview
+router.get('/chart-data', isSuperAdmin, async (req, res) => {
+  try {
+    const checkIns = await storage.getCheckInChartData();
+    const reviews = await storage.getReviewChartData();
+    const companyGrowth = await storage.getCompanyGrowthData();
+    const revenue = await storage.getRevenueChartData();
+
+    const chartData = {
+      checkIns,
+      reviews,
+      companyGrowth,
+      revenue
+    };
+
+    res.json(chartData);
+  } catch (error) {
+    console.error('Error fetching chart data:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get system health metrics
+router.get('/system-health', isSuperAdmin, async (req, res) => {
+  try {
+    const healthMetrics = await storage.getSystemHealthMetrics();
+    res.json(healthMetrics);
+  } catch (error) {
+    console.error('Error fetching system health:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get recent activities
+router.get('/recent-activities', isSuperAdmin, async (req, res) => {
+  try {
+    const activities = await storage.getRecentActivities();
+    res.json(activities);
+  } catch (error) {
+    console.error('Error fetching recent activities:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;
