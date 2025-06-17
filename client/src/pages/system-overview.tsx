@@ -301,7 +301,7 @@ export default function SystemOverview() {
                   <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{systemHealth?.avgResponseTime || 0}ms</div>
+                  <div className="text-2xl font-bold">{healthMetrics?.avgResponseTime || 0}ms</div>
                   <p className="text-xs text-muted-foreground">
                     Average response time
                   </p>
@@ -314,9 +314,9 @@ export default function SystemOverview() {
                   <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{systemHealth?.errorRate || 0}%</div>
+                  <div className="text-2xl font-bold">{healthMetrics?.errorRate || 0}%</div>
                   <p className="text-xs text-muted-foreground">
-                    {systemHealth?.requestsPerMinute || 0} req/min
+                    {healthMetrics?.requestsPerMinute || 0} req/min
                   </p>
                 </CardContent>
               </Card>
@@ -329,14 +329,14 @@ export default function SystemOverview() {
                   <CardTitle>OpenAI Usage</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{systemHealth?.openaiUsageToday || 0}</div>
+                  <div className="text-2xl font-bold">{healthMetrics?.openaiUsageToday || 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    of {systemHealth?.openaiQuota || 1000} daily quota
+                    of {healthMetrics?.openaiQuota || 1000} daily quota
                   </p>
                   <div className="w-full bg-secondary rounded-full h-2 mt-2">
                     <div 
                       className="bg-primary h-2 rounded-full" 
-                      style={{ width: `${((systemHealth?.openaiUsageToday || 0) / (systemHealth?.openaiQuota || 1000)) * 100}%` }}
+                      style={{ width: `${((healthMetrics?.openaiUsageToday || 0) / (healthMetrics?.openaiQuota || 1000)) * 100}%` }}
                     ></div>
                   </div>
                 </CardContent>
@@ -347,14 +347,14 @@ export default function SystemOverview() {
                   <CardTitle>Anthropic Usage</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{systemHealth?.anthropicUsageToday || 0}</div>
+                  <div className="text-2xl font-bold">{healthMetrics?.anthropicUsageToday || 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    of {systemHealth?.anthropicQuota || 1000} daily quota
+                    of {healthMetrics?.anthropicQuota || 1000} daily quota
                   </p>
                   <div className="w-full bg-secondary rounded-full h-2 mt-2">
                     <div 
                       className="bg-primary h-2 rounded-full" 
-                      style={{ width: `${((systemHealth?.anthropicUsageToday || 0) / (systemHealth?.anthropicQuota || 1000)) * 100}%` }}
+                      style={{ width: `${((healthMetrics?.anthropicUsageToday || 0) / (healthMetrics?.anthropicQuota || 1000)) * 100}%` }}
                     ></div>
                   </div>
                 </CardContent>
@@ -365,7 +365,7 @@ export default function SystemOverview() {
                   <CardTitle>Active Sessions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{systemHealth?.activeConnections || 0}</div>
+                  <div className="text-2xl font-bold">{healthMetrics?.activeConnections || 0}</div>
                   <p className="text-xs text-muted-foreground">
                     Current active connections
                   </p>
@@ -427,7 +427,7 @@ export default function SystemOverview() {
                     <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
                     <p>Loading companies...</p>
                   </div>
-                ) : companies && companies.length > 0 ? (
+                ) : companies && Array.isArray(companies) && companies.length > 0 ? (
                   <Table>
                     <TableHeader>
                       <TableRow>
