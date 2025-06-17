@@ -119,7 +119,15 @@ router.get('/subscription-plans', isSuperAdmin, async (req, res) => {
 // Create new subscription plan
 router.post('/subscription-plans', isSuperAdmin, async (req, res) => {
   try {
-    const validatedData = insertSubscriptionPlanSchema.parse(req.body);
+    console.log('Creating subscription plan with data:', req.body);
+    
+    // Validate the request data - convert price to string
+    const requestData = {
+      ...req.body,
+      price: req.body.price.toString() // Convert number to string for schema validation
+    };
+    const validatedData = insertSubscriptionPlanSchema.parse(requestData);
+    console.log('Validated data:', validatedData);
     
     // Create Stripe product and price
     const stripeProduct = await stripe.products.create({
@@ -129,7 +137,7 @@ router.post('/subscription-plans', isSuperAdmin, async (req, res) => {
 
     const stripePrice = await stripe.prices.create({
       product: stripeProduct.id,
-      unit_amount: Math.round(validatedData.price * 100), // Convert to cents
+      unit_amount: Math.round(Number(validatedData.price) * 100), // Convert to cents
       currency: 'usd',
       recurring: {
         interval: validatedData.billingPeriod === 'yearly' ? 'year' : 'month',
@@ -139,14 +147,20 @@ router.post('/subscription-plans', isSuperAdmin, async (req, res) => {
     // Create subscription plan in database
     const plan = await storage.createSubscriptionPlan({
       ...validatedData,
+      price: validatedData.price.toString(), // Ensure price is string for database
       stripeProductId: stripeProduct.id,
       stripePriceId: stripePrice.id
     });
 
+    console.log('Created plan:', plan);
     res.json(plan);
   } catch (error) {
     console.error('Error creating subscription plan:', error);
-    res.status(500).json({ message: 'Server error' });
+    if (error instanceof Error) {
+      res.status(400).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'Server error' });
+    }
   }
 });
 
