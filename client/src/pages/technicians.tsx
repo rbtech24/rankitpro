@@ -45,7 +45,6 @@ const techFormSchema = z.object({
 type TechFormValues = z.infer<typeof techFormSchema>;
 
 export default function Technicians() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editTechnician, setEditTechnician] = useState<Technician | null>(null);
@@ -451,8 +450,6 @@ export default function Technicians() {
               </div>
             </CardContent>
           </Card>
-        </main>
-      </div>
       
       {/* Add/Edit Technician Modal */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
@@ -727,6 +724,6 @@ export default function Technicians() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </DashboardLayout>
   );
 }
