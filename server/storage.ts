@@ -2584,7 +2584,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCompanyGrowthData(): Promise<Array<{month: string, newCompanies: number}>> {
-    const companies = Array.from(this.companies.values());
+    const allCompanies = await db.select().from(companies);
     const last6Months = Array.from({length: 6}, (_, i) => {
       const date = new Date();
       date.setMonth(date.getMonth() - i);
@@ -2592,7 +2592,7 @@ export class DatabaseStorage implements IStorage {
     }).reverse();
 
     return last6Months.map(month => {
-      const count = companies.filter(company => 
+      const count = allCompanies.filter(company => 
         company.createdAt.toISOString().slice(0, 7) === month
       ).length;
       return { month: month.slice(5), newCompanies: count };
