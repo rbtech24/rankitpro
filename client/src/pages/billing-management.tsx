@@ -41,7 +41,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { Edit2, Trash2, Plus, DollarSign, Users, CreditCard, TrendingUp } from "lucide-react";
 import * as z from "zod";
-import SidebarComponent from '@/components/layout/sidebar';
+import Sidebar from '@/components/layout/sidebar-clean';
 
 // Plan creation schema
 const planSchema = z.object({
