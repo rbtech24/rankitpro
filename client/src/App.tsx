@@ -284,10 +284,10 @@ function Router() {
       
       {/* Mobile Tech App - Progressive Web App */}
       <Route path="/mobile">
-        <PrivateRoute component={FieldMobile} path="/mobile" role="technician" />
+        <PrivateRoute component={MobileFieldApp} path="/mobile" role="technician" />
       </Route>
       <Route path="/field-mobile">
-        <PrivateRoute component={FieldMobile} path="/field-mobile" role="technician" />
+        <PrivateRoute component={MobileFieldApp} path="/field-mobile" role="technician" />
       </Route>
       <Route path="/mobile-blogs">
         <PrivateRoute component={MobileBlogs} path="/mobile-blogs" role="technician" />
