@@ -2240,24 +2240,27 @@ export class DatabaseStorage implements IStorage {
     const totalCompanies = await this.getCompanyCount();
     const activeCompanies = await this.getActiveCompanyCount();
     
+    // Get real subscription plans with actual pricing
+    const subscriptionPlans = await db.select().from(schema.subscriptionPlans);
+    const planPricing: Record<string, number> = {};
+    
+    for (const plan of subscriptionPlans) {
+      planPricing[plan.name.toLowerCase()] = plan.monthlyPrice;
+    }
+    
     // Calculate actual revenue from companies based on their plans
     const companiesWithPlans = await db.select({
       plan: schema.companies.plan,
-      active: schema.companies.active
+      isActive: schema.companies.isActive
     }).from(schema.companies);
-    
-    const planPricing = {
-      starter: 29,
-      pro: 99, 
-      agency: 299
-    };
     
     let totalRevenue = 0;
     let activeSubscriptions = 0;
     
     for (const company of companiesWithPlans) {
-      if (company.active) {
-        totalRevenue += planPricing[company.plan] || 0;
+      if (company.isActive) {
+        const planPrice = planPricing[company.plan?.toLowerCase() || ''] || 0;
+        totalRevenue += planPrice;
         activeSubscriptions++;
       }
     }

@@ -65,7 +65,7 @@ import {
   MessageSquare,
   Save
 } from 'lucide-react';
-import Sidebar from '@/components/layout/sidebar';
+import Sidebar from '@/components/layout/sidebar-clean';
 
 // Email settings schema
 const emailSettingsSchema = z.object({

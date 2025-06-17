@@ -93,27 +93,23 @@ export default function SystemOverview() {
     );
   }
 
-  // Use real system statistics from database
-  const stats = systemStats || {
-    totalCompanies: 0,
-    activeCompanies: 0, 
-    totalUsers: 0,
-    totalTechnicians: 0,
-    totalCheckIns: 0,
-    totalReviews: 0,
-    avgRating: 0,
-    cpuUsage: 0,
-    memoryUsage: 0,
-    diskUsage: 0,
-    activeConnections: 0,
-    requestsPerMinute: 0,
-    avgResponseTime: 0,
-    errorRate: 0,
-    openaiUsageToday: 0,
-    openaiQuota: 10000,
-    anthropicUsageToday: 0,
-    anthropicQuota: 5000
-  };
+  // Only use real system statistics from database - no fallback values
+  const stats = systemStats;
+  
+  // Don't render if no data available
+  if (!stats) {
+    return (
+      <div className="flex">
+        <Sidebar />
+        <div className="flex-1 p-8">
+          <div className="text-center py-12">
+            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" />
+            <p>Loading system statistics...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const checkInsData = chartData?.checkIns || [];
   const reviewsData = chartData?.reviews || [];
