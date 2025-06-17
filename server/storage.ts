@@ -2505,38 +2505,42 @@ export class DatabaseStorage implements IStorage {
 
   // System Admin Dashboard implementations
   async getCompanyCount(): Promise<number> {
-    return this.companies.size;
+    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.companies);
+    return result[0]?.count || 0;
   }
 
   async getActiveCompanyCount(): Promise<number> {
-    return Array.from(this.companies.values()).filter(company => company.active).length;
+    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.companies).where(eq(schema.companies.active, true));
+    return result[0]?.count || 0;
   }
 
   async getUserCount(): Promise<number> {
-    return this.users.size;
+    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.users);
+    return result[0]?.count || 0;
   }
 
   async getTechnicianCount(): Promise<number> {
-    return this.technicians.size;
+    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.technicians);
+    return result[0]?.count || 0;
   }
 
   async getCheckInCount(): Promise<number> {
-    return this.checkIns.size;
+    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.checkIns);
+    return result[0]?.count || 0;
   }
 
   async getReviewCount(): Promise<number> {
-    return this.reviewResponses.size;
+    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.reviewResponses);
+    return result[0]?.count || 0;
   }
 
   async getAverageRating(): Promise<number> {
-    const responses = Array.from(this.reviewResponses.values());
-    if (responses.length === 0) return 0;
-    const total = responses.reduce((sum, response) => sum + (response.rating || 0), 0);
-    return total / responses.length;
+    const result = await db.select({ avg: sql<number>`avg(rating)` }).from(schema.reviewResponses);
+    return result[0]?.avg || 0;
   }
 
   async getCheckInChartData(): Promise<Array<{date: string, count: number}>> {
-    const checkIns = Array.from(this.checkIns.values());
+    const checkIns = await db.select().from(schema.checkIns).orderBy(desc(schema.checkIns.createdAt));
     const last7Days = Array.from({length: 7}, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - i);
@@ -2545,7 +2549,7 @@ export class DatabaseStorage implements IStorage {
 
     return last7Days.map(date => {
       const count = checkIns.filter(checkIn => 
-        checkIn.createdAt.toISOString().split('T')[0] === date
+        checkIn.createdAt && checkIn.createdAt.toISOString().split('T')[0] === date
       ).length;
       return { date: date.slice(5), count };
     });
