@@ -241,6 +241,28 @@ export default function CompaniesManagement() {
     }
   });
 
+  // Delete company mutation
+  const deleteCompanyMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest('DELETE', `/api/companies/${id}`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/companies'] });
+      toast({
+        title: "Company Deleted",
+        description: "Company has been deleted successfully."
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error", 
+        description: error.message || "Failed to delete company",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Toggle company status mutation
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: number, isActive: boolean }) => {
@@ -332,7 +354,7 @@ export default function CompaniesManagement() {
   };
   
   // Filter companies based on search, industry, plan, and status
-  const filteredCompanies = companies?.filter(company => {
+  const filteredCompanies = (companies || []).filter(company => {
     // Filter by search query
     const matchesSearch = searchQuery === "" || 
       company.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -834,8 +856,8 @@ export default function CompaniesManagement() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {companies
-                        .sort((a, b) => b.stats.activeCheckInsLast30Days - a.stats.activeCheckInsLast30Days)
+                      {(companies || [])
+                        .sort((a, b) => (b.stats?.activeCheckInsLast30Days || 0) - (a.stats?.activeCheckInsLast30Days || 0))
                         .map(company => (
                           <TableRow key={company.id}>
                             <TableCell className="font-medium">{company.name}</TableCell>
@@ -873,8 +895,8 @@ export default function CompaniesManagement() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {companies
-                          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                        {(companies || [])
+                          .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
                           .slice(0, 5)
                           .map(company => (
                             <TableRow key={company.id}>

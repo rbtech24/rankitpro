@@ -1811,6 +1811,17 @@ export class DatabaseStorage implements IStorage {
     return updatedCompany;
   }
 
+  async deleteCompany(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(schema.companies)
+        .where(eq(schema.companies.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Delete company error:", error);
+      return false;
+    }
+  }
+
   // For brevity, I'll implement just the essential methods for authentication testing
   // The remaining methods would follow the same pattern
 
