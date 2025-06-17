@@ -24,7 +24,8 @@ import {
   User,
   Loader2,
   CheckCircle,
-  MessageSquare
+  MessageSquare,
+  LogOut
 } from 'lucide-react';
 
 export default function MobileFieldApp() {
@@ -716,13 +717,49 @@ export default function MobileFieldApp() {
     </Card>
   );
 
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/auth/logout'),
+    onSuccess: () => {
+      toast({
+        title: "Logged out successfully",
+        description: "You have been signed out of the system.",
+      });
+      queryClient.clear();
+      window.location.href = '/';
+    },
+    onError: () => {
+      toast({
+        title: "Logout failed",
+        description: "There was an error logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="px-4 py-3">
-          <h1 className="text-xl font-bold text-gray-900">Mobile Field App</h1>
-          <p className="text-sm text-gray-600">Professional service management tools</p>
+        <div className="px-4 py-3 flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Mobile Field App</h1>
+            <p className="text-sm text-gray-600">Professional service management tools</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            disabled={logoutMutation.isPending}
+            className="flex items-center gap-2"
+          >
+            <LogOut className="w-4 h-4" />
+            {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
+          </Button>
         </div>
       </div>
 

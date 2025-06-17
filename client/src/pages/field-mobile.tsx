@@ -25,7 +25,8 @@ import {
   Sparkles,
   Building,
   User,
-  Loader2
+  Loader2,
+  LogOut
 } from 'lucide-react';
 import { Link } from 'wouter';
 
@@ -868,6 +869,30 @@ export default function FieldMobile() {
     }
   };
 
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/auth/logout'),
+    onSuccess: () => {
+      toast({
+        title: "Logged out successfully",
+        description: "You have been signed out of the system.",
+      });
+      queryClient.clear();
+      window.location.href = '/';
+    },
+    onError: () => {
+      toast({
+        title: "Logout failed",
+        description: "There was an error logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="container mx-auto p-4 max-w-md">
@@ -889,6 +914,16 @@ export default function FieldMobile() {
                   </div>
                 </div>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                disabled={logoutMutation.isPending}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                <LogOut className="w-4 h-4 mr-1" />
+                {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
+              </Button>
             </div>
           </div>
           
