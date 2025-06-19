@@ -3432,7 +3432,6 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
           features: {
             technicians: 3,
             checkInsPerMonth: 100,
-            aiGeneratedContent: true,
             basicReporting: true,
             emailSupport: true,
             wordpressIntegration: true,
@@ -3450,7 +3449,6 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
           features: {
             technicians: 10,
             checkInsPerMonth: 500,
-            aiGeneratedContent: true,
             basicReporting: true,
             emailSupport: true,
             wordpressIntegration: true,
@@ -3468,7 +3466,6 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
           features: {
             technicians: "Unlimited",
             checkInsPerMonth: "Unlimited",
-            aiGeneratedContent: true,
             basicReporting: true,
             emailSupport: true,
             wordpressIntegration: true,

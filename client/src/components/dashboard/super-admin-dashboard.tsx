@@ -191,7 +191,7 @@ export default function SuperAdminDashboard() {
             <div className="p-4 border rounded-lg">
               <h3 className="font-medium mb-2">Starter Plan</h3>
               <p className="text-2xl font-bold mb-1">$29/month</p>
-              <p className="text-sm text-gray-500 mb-3">Up to 5 users, 100 AI generations</p>
+              <p className="text-sm text-gray-500 mb-3">Up to 3 technicians, 100 check-ins</p>
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -205,7 +205,7 @@ export default function SuperAdminDashboard() {
             <div className="p-4 border rounded-lg">
               <h3 className="font-medium mb-2">Professional Plan</h3>
               <p className="text-2xl font-bold mb-1">$79/month</p>
-              <p className="text-sm text-gray-500 mb-3">Up to 20 users, 500 AI generations</p>
+              <p className="text-sm text-gray-500 mb-3">Up to 10 technicians, 500 check-ins</p>
               <Button 
                 variant="outline" 
                 size="sm" 

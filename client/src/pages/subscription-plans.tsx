@@ -42,7 +42,7 @@ export default function SubscriptionPlans() {
       price: 29,
       interval: 'month',
       userLimit: 5,
-      aiGenerationLimit: 100,
+      aiGenerationLimit: 0,
       features: ['Basic check-ins', 'Photo documentation', 'Customer reviews', 'Email support'],
       active: true
     },
@@ -53,8 +53,8 @@ export default function SubscriptionPlans() {
       price: 79,
       interval: 'month',
       userLimit: 20,
-      aiGenerationLimit: 500,
-      features: ['All Starter features', 'AI content generation', 'WordPress integration', 'Priority support', 'Advanced analytics'],
+      aiGenerationLimit: 0,
+      features: ['All Starter features', 'WordPress integration', 'Priority support', 'Advanced analytics'],
       active: true
     },
     {
@@ -64,7 +64,7 @@ export default function SubscriptionPlans() {
       price: 199,
       interval: 'month',
       userLimit: -1, // Unlimited
-      aiGenerationLimit: 2000,
+      aiGenerationLimit: 0,
       features: ['All Professional features', 'Unlimited users', 'White-label options', 'Custom integrations', 'Dedicated support'],
       active: true
     }
