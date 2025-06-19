@@ -589,6 +589,8 @@ export class WordPressService {
  * Description: Integrates with Rank it Pro to display technician visits on your website
  * Version: 1.0.0
  * Author: Rank it Pro
+ * Text Domain: rankitpro
+ * Domain Path: /languages
  */
 
 if (!defined('ABSPATH')) {
@@ -606,6 +608,10 @@ class RankItPro_Visit_Integration {
         $this->apiEndpoint = '${apiEndpoint}api/wordpress/public/visits';
         $this->reviewsEndpoint = '${apiEndpoint}api/wordpress/public/reviews';
         
+        // Register activation/deactivation hooks
+        register_activation_hook(__FILE__, array($this, 'activate_plugin'));
+        register_deactivation_hook(__FILE__, array($this, 'deactivate_plugin'));
+        
         // Register shortcodes
         add_shortcode('rankitpro_visits', array($this, 'rankitpro_visits_shortcode'));
         add_shortcode('rankitpro_reviews', array($this, 'rankitpro_reviews_shortcode'));
@@ -615,9 +621,202 @@ class RankItPro_Visit_Integration {
         
         // Add settings page
         add_action('admin_menu', array($this, 'add_admin_menu'));
+        add_action('admin_init', array($this, 'register_plugin_settings'));
         
         // Enqueue styles
         add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'));
+        
+        // Add admin notices
+        add_action('admin_notices', array($this, 'admin_notices'));
+        
+        // Load text domain for translations
+        add_action('plugins_loaded', array($this, 'load_textdomain'));
+    }
+    
+    // Load plugin text domain for translations
+    public function load_textdomain() {
+        load_plugin_textdomain('rankitpro', false, dirname(plugin_basename(__FILE__)) . '/languages/');
+    }
+    
+    // Plugin activation
+    public function activate_plugin() {
+        // Set default options
+        add_option('rankitpro_api_key', '${apiKey}');
+        add_option('rankitpro_auto_sync', '1');
+        add_option('rankitpro_show_photos', '1');
+        add_option('rankitpro_cache_duration', '3600');
+        
+        // Create database table for local cache if needed
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rankitpro_cache';
+        
+        $charset_collate = $wpdb->get_charset_collate();
+        
+        $sql = "CREATE TABLE $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            cache_key varchar(255) NOT NULL,
+            cache_value longtext NOT NULL,
+            expires datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY cache_key (cache_key)
+        ) $charset_collate;";
+        
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql);
+        
+        // Flush rewrite rules
+        flush_rewrite_rules();
+        
+        // Set activation notice
+        set_transient('rankitpro_activation_notice', true, 5);
+    }
+    
+    // Plugin deactivation
+    public function deactivate_plugin() {
+        // Clear any scheduled events
+        wp_clear_scheduled_hook('rankitpro_sync_data');
+        
+        // Flush rewrite rules
+        flush_rewrite_rules();
+        
+        // Clean up transients
+        delete_transient('rankitpro_activation_notice');
+        delete_transient('rankitpro_api_status');
+    }
+    
+    // Register plugin settings
+    public function register_plugin_settings() {
+        // Register setting group
+        register_setting('rankitpro_settings_group', 'rankitpro_api_key', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => '${apiKey}'
+        ));
+        
+        register_setting('rankitpro_settings_group', 'rankitpro_auto_sync', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => true
+        ));
+        
+        register_setting('rankitpro_settings_group', 'rankitpro_show_photos', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => true
+        ));
+        
+        register_setting('rankitpro_settings_group', 'rankitpro_cache_duration', array(
+            'type' => 'integer',
+            'sanitize_callback' => 'absint',
+            'default' => 3600
+        ));
+        
+        // Add settings sections
+        add_settings_section(
+            'rankitpro_api_section',
+            __('API Configuration', 'rankitpro'),
+            array($this, 'api_section_callback'),
+            'rankitpro-settings'
+        );
+        
+        add_settings_section(
+            'rankitpro_display_section',
+            __('Display Options', 'rankitpro'),
+            array($this, 'display_section_callback'),
+            'rankitpro-settings'
+        );
+        
+        // Add settings fields
+        add_settings_field(
+            'rankitpro_api_key',
+            __('API Key', 'rankitpro'),
+            array($this, 'api_key_field_callback'),
+            'rankitpro-settings',
+            'rankitpro_api_section'
+        );
+        
+        add_settings_field(
+            'rankitpro_auto_sync',
+            __('Auto Sync', 'rankitpro'),
+            array($this, 'auto_sync_field_callback'),
+            'rankitpro-settings',
+            'rankitpro_api_section'
+        );
+        
+        add_settings_field(
+            'rankitpro_show_photos',
+            __('Show Photos', 'rankitpro'),
+            array($this, 'show_photos_field_callback'),
+            'rankitpro-settings',
+            'rankitpro_display_section'
+        );
+        
+        add_settings_field(
+            'rankitpro_cache_duration',
+            __('Cache Duration (seconds)', 'rankitpro'),
+            array($this, 'cache_duration_field_callback'),
+            'rankitpro-settings',
+            'rankitpro_display_section'
+        );
+    }
+    
+    // Settings section callbacks
+    public function api_section_callback() {
+        echo '<p>' . __('Configure your Rank It Pro API connection settings.', 'rankitpro') . '</p>';
+    }
+    
+    public function display_section_callback() {
+        echo '<p>' . __('Customize how your check-ins and reviews are displayed.', 'rankitpro') . '</p>';
+    }
+    
+    // Settings field callbacks
+    public function api_key_field_callback() {
+        $value = get_option('rankitpro_api_key', '${apiKey}');
+        echo '<input type="text" id="rankitpro_api_key" name="rankitpro_api_key" value="' . esc_attr($value) . '" class="regular-text" />';
+        echo '<p class="description">' . __('Your unique API key from Rank It Pro dashboard.', 'rankitpro') . '</p>';
+    }
+    
+    public function auto_sync_field_callback() {
+        $value = get_option('rankitpro_auto_sync', true);
+        echo '<input type="checkbox" id="rankitpro_auto_sync" name="rankitpro_auto_sync" value="1"' . checked(1, $value, false) . ' />';
+        echo '<label for="rankitpro_auto_sync">' . __('Automatically sync new check-ins', 'rankitpro') . '</label>';
+    }
+    
+    public function show_photos_field_callback() {
+        $value = get_option('rankitpro_show_photos', true);
+        echo '<input type="checkbox" id="rankitpro_show_photos" name="rankitpro_show_photos" value="1"' . checked(1, $value, false) . ' />';
+        echo '<label for="rankitpro_show_photos">' . __('Display photos in check-ins', 'rankitpro') . '</label>';
+    }
+    
+    public function cache_duration_field_callback() {
+        $value = get_option('rankitpro_cache_duration', 3600);
+        echo '<input type="number" id="rankitpro_cache_duration" name="rankitpro_cache_duration" value="' . esc_attr($value) . '" min="300" max="86400" class="small-text" />';
+        echo '<p class="description">' . __('How long to cache API responses (300-86400 seconds).', 'rankitpro') . '</p>';
+    }
+    
+    // Admin notices
+    public function admin_notices() {
+        // Show activation notice
+        if (get_transient('rankitpro_activation_notice')) {
+            echo '<div class="notice notice-success is-dismissible">';
+            echo '<p>' . __('Rank It Pro plugin activated successfully! Configure your settings to get started.', 'rankitpro') . '</p>';
+            echo '</div>';
+            delete_transient('rankitpro_activation_notice');
+        }
+        
+        // Check API connection and show notice if failed
+        $api_status = get_transient('rankitpro_api_status');
+        if ($api_status === false) {
+            $connection_test = $this->test_api_connection();
+            set_transient('rankitpro_api_status', $connection_test ? 'connected' : 'failed', 300);
+            $api_status = $connection_test ? 'connected' : 'failed';
+        }
+        
+        if ($api_status === 'failed') {
+            echo '<div class="notice notice-error">';
+            echo '<p>' . __('Rank It Pro API connection failed. Please check your API key in the settings.', 'rankitpro') . '</p>';
+            echo '</div>';
+        }
     }
     
     public function enqueue_styles() {
@@ -716,7 +915,7 @@ class RankItPro_Visit_Integration {
         $check_ins = $this->get_check_ins($atts['limit'], $atts['type']);
         
         if (empty($check_ins)) {
-            return '<p>No recent visits available.</p>';
+            return '<p>' . __('No recent visits available.', 'rankitpro') . '</p>';
         }
         
         $output = '<div class="rankitpro-visits-container">';
@@ -766,7 +965,7 @@ class RankItPro_Visit_Integration {
         $reviews = $this->get_reviews($atts['limit'], $atts['rating']);
         
         if (empty($reviews)) {
-            return '<p>No customer reviews available.</p>';
+            return '<p>' . __('No customer reviews available.', 'rankitpro') . '</p>';
         }
         
         $output = '<div class="rankitpro-reviews-container">';
@@ -867,28 +1066,142 @@ class RankItPro_Visit_Integration {
     }
     
     public function display_settings_page() {
+        // Handle form submission
+        if (isset($_POST['submit']) && check_admin_referer('rankitpro_settings_nonce')) {
+            $this->handle_settings_save();
+        }
+        
         ?>
         <div class="wrap">
-            <h1>Rank it Pro Integration Settings</h1>
+            <h1><?php _e('Rank It Pro Integration Settings', 'rankitpro'); ?></h1>
+            
+            <form method="post" action="">
+                <?php 
+                settings_fields('rankitpro_settings_group');
+                do_settings_sections('rankitpro-settings');
+                wp_nonce_field('rankitpro_settings_nonce');
+                submit_button(__('Save Settings', 'rankitpro'));
+                ?>
+            </form>
+            
             <div class="card">
-                <h2>How to Use</h2>
-                <p>Use the <code>[rankitpro_visits]</code> shortcode to display your recent technician visits anywhere on your site.</p>
-                <h3>Shortcode Options</h3>
+                <h2><?php _e('How to Use', 'rankitpro'); ?></h2>
+                <p><?php _e('Use shortcodes to display your technician visits and customer reviews anywhere on your site.', 'rankitpro'); ?></p>
+                
+                <h3><?php _e('Available Shortcodes', 'rankitpro'); ?></h3>
+                <table class="widefat">
+                    <thead>
+                        <tr>
+                            <th><?php _e('Shortcode', 'rankitpro'); ?></th>
+                            <th><?php _e('Description', 'rankitpro'); ?></th>
+                            <th><?php _e('Parameters', 'rankitpro'); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>[rankitpro_visits]</code></td>
+                            <td><?php _e('Display recent technician visits', 'rankitpro'); ?></td>
+                            <td>limit, type</td>
+                        </tr>
+                        <tr>
+                            <td><code>[rankitpro_reviews]</code></td>
+                            <td><?php _e('Display customer reviews and testimonials', 'rankitpro'); ?></td>
+                            <td>limit, rating, show_photos</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3><?php _e('Examples', 'rankitpro'); ?></h3>
                 <ul>
-                    <li><code>limit</code> - Number of visits to display (default: 5)</li>
-                    <li><code>type</code> - Filter by job type (default: 'all')</li>
+                    <li><code>[rankitpro_visits limit="3" type="Plumbing"]</code> - <?php _e('Show 3 latest plumbing visits', 'rankitpro'); ?></li>
+                    <li><code>[rankitpro_reviews limit="5" rating="5"]</code> - <?php _e('Show 5 five-star reviews', 'rankitpro'); ?></li>
                 </ul>
-                <h3>Example</h3>
-                <p><code>[rankitpro_visits limit="3" type="Plumbing"]</code></p>
             </div>
+            
             <div class="card" style="margin-top: 20px;">
-                <h2>API Connection</h2>
-                <p>Status: <strong><?php echo $this->test_api_connection() ? 'Connected' : 'Not Connected'; ?></strong></p>
-                <p>API Key: <code><?php echo esc_html($this->apiKey); ?></code></p>
-                <p>Endpoint: <code><?php echo esc_html($this->apiEndpoint); ?></code></p>
+                <h2><?php _e('API Connection Status', 'rankitpro'); ?></h2>
+                <p><?php _e('Status:', 'rankitpro'); ?> <strong><?php echo $this->test_api_connection() ? __('Connected', 'rankitpro') : __('Not Connected', 'rankitpro'); ?></strong></p>
+                <p><?php _e('API Key:', 'rankitpro'); ?> <code><?php echo esc_html(substr($this->apiKey, 0, 8) . '...' . substr($this->apiKey, -4)); ?></code></p>
+                <p><?php _e('Endpoint:', 'rankitpro'); ?> <code><?php echo esc_html($this->apiEndpoint); ?></code></p>
+                
+                <p>
+                    <button type="button" class="button button-secondary" onclick="testApiConnection()"><?php _e('Test Connection', 'rankitpro'); ?></button>
+                    <span id="connection-test-result"></span>
+                </p>
             </div>
+            
+            <script>
+            function testApiConnection() {
+                const button = document.querySelector('button[onclick="testApiConnection()"]');
+                const result = document.getElementById('connection-test-result');
+                
+                button.disabled = true;
+                button.textContent = '<?php _e('Testing...', 'rankitpro'); ?>';
+                result.innerHTML = '';
+                
+                fetch(ajaxurl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=rankitpro_test_connection&nonce=' + '<?php echo wp_create_nonce('rankitpro_test_nonce'); ?>'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        result.innerHTML = '<span style="color: green;">✓ <?php _e('Connection successful!', 'rankitpro'); ?></span>';
+                    } else {
+                        result.innerHTML = '<span style="color: red;">✗ <?php _e('Connection failed:', 'rankitpro'); ?> ' + data.data + '</span>';
+                    }
+                })
+                .catch(error => {
+                    result.innerHTML = '<span style="color: red;">✗ <?php _e('Error testing connection', 'rankitpro'); ?></span>';
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.textContent = '<?php _e('Test Connection', 'rankitpro'); ?>';
+                });
+            }
+            </script>
         </div>
         <?php
+    }
+    
+    // Handle settings save with proper nonce validation
+    private function handle_settings_save() {
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'rankitpro'));
+        }
+        
+        // Update options with sanitization
+        if (isset($_POST['rankitpro_api_key'])) {
+            update_option('rankitpro_api_key', sanitize_text_field($_POST['rankitpro_api_key']));
+        }
+        
+        if (isset($_POST['rankitpro_auto_sync'])) {
+            update_option('rankitpro_auto_sync', '1');
+        } else {
+            update_option('rankitpro_auto_sync', '0');
+        }
+        
+        if (isset($_POST['rankitpro_show_photos'])) {
+            update_option('rankitpro_show_photos', '1');
+        } else {
+            update_option('rankitpro_show_photos', '0');
+        }
+        
+        if (isset($_POST['rankitpro_cache_duration'])) {
+            $cache_duration = absint($_POST['rankitpro_cache_duration']);
+            if ($cache_duration >= 300 && $cache_duration <= 86400) {
+                update_option('rankitpro_cache_duration', $cache_duration);
+            }
+        }
+        
+        // Clear API status cache to force recheck
+        delete_transient('rankitpro_api_status');
+        
+        // Show success message
+        add_settings_error('rankitpro_messages', 'rankitpro_message', __('Settings saved successfully!', 'rankitpro'), 'success');
     }
     
     private function test_api_connection() {
@@ -912,8 +1225,8 @@ class RankItPro_Visits_Widget extends WP_Widget {
     public function __construct() {
         parent::__construct(
             'rankitpro_visits_widget',
-            'Recent Visits',
-            array('description' => 'Display your recent technician visits')
+            __('Recent Visits', 'rankitpro'),
+            array('description' => __('Display your recent technician visits', 'rankitpro'))
         );
     }
     
