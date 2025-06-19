@@ -71,6 +71,7 @@ import Documentation from "@/pages/documentation";
 import InstallationGuide from "@/pages/installation-guide";
 import APIDocumentation from "@/pages/api-documentation";
 import Troubleshooting from "@/pages/troubleshooting";
+import PlatformSetupGuide from "@/pages/platform-setup-guide";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
@@ -1132,6 +1133,9 @@ function Router() {
       </Route>
       <Route path="/setup-guide">
         <PrivateRoute component={SetupGuide} path="/setup-guide" role="company_admin" />
+      </Route>
+      <Route path="/platform-setup-guide">
+        <PrivateRoute component={PlatformSetupGuide} path="/platform-setup-guide" role="company_admin" />
       </Route>
       <Route path="/check-ins">
         <PrivateRoute component={CheckIns} path="/check-ins" />
