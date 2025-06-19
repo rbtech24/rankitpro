@@ -254,11 +254,22 @@ router.get('/financial/revenue-trends', isSuperAdmin, async (req, res) => {
 router.get('/financial/payments', isSuperAdmin, async (req, res) => {
   try {
     const limit = parseInt(req.query.limit as string) || 50;
-    const offset = parseInt(req.query.offset as string) || 0;
-    const payments = await storage.getPaymentHistory(limit, offset);
+    const payments = await storage.getPaymentHistory(limit);
     res.json(payments);
   } catch (error) {
     console.error('Error fetching payment history:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get signup metrics
+router.get('/signup-metrics', isSuperAdmin, async (req, res) => {
+  try {
+    const period = req.query.period as string || '12months';
+    const signups = await storage.getSignupMetrics(period);
+    res.json(signups);
+  } catch (error) {
+    console.error('Error fetching signup metrics:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

@@ -1225,6 +1225,9 @@ function Router() {
       <Route path="/financial-dashboard">
         <PrivateRoute component={FinancialDashboard} path="/financial-dashboard" role="super_admin" />
       </Route>
+      <Route path="/super-admin-finance">
+        <PrivateRoute component={SuperAdminFinance} path="/super-admin-finance" role="super_admin" />
+      </Route>
       <Route path="/integrations">
         <PrivateRoute component={Integrations} path="/integrations" role="company_admin" />
       </Route>
