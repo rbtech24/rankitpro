@@ -385,53 +385,154 @@ function IntegrationsPage() {
                   <Button 
                     variant="outline" 
                     className="flex items-center gap-2"
-                    onClick={() => {
-                      const previewWindow = window.open('', '_blank', 'width=800,height=600');
-                      if (previewWindow) {
-                        previewWindow.document.write(`
-                          <!DOCTYPE html>
-                          <html>
-                          <head>
-                            <title>Embed Preview - Rank It Pro</title>
-                            <meta charset="utf-8">
-                            <style>
-                              body { font-family: Arial, sans-serif; padding: 20px; }
-                              .preview-header { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-                              .embed-container { border: 2px dashed #e2e8f0; padding: 20px; border-radius: 8px; min-height: 300px; }
-                            </style>
-                          </head>
-                          <body>
-                            <div class="preview-header">
-                              <h2>Embed Widget Preview</h2>
-                              <p>This is how your check-in widget will appear on your website</p>
-                            </div>
-                            <div class="embed-container">
+                    onClick={async () => {
+                      try {
+                        // Fetch real check-in data for preview
+                        const checkInsRes = await apiRequest("GET", "/api/check-ins?limit=3");
+                        const checkIns = await checkInsRes.json();
+                        
+                        const previewWindow = window.open('', '_blank', 'width=800,height=600');
+                        if (previewWindow) {
+                          let checkInHTML = '';
+                          
+                          if (checkIns && checkIns.length > 0) {
+                            checkInHTML = checkIns.map((checkIn: any) => {
+                              const techInitials = checkIn.technicianName ? 
+                                checkIn.technicianName.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 
+                                'T';
+                              const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                              const color = colors[Math.floor(Math.random() * colors.length)];
+                              
+                              return `
+                                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin: 10px 0; text-align: left; background: white;">
+                                  <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 40px; height: 40px; background: ${color}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">${techInitials}</div>
+                                    <div style="flex: 1;">
+                                      <strong style="color: #1f2937;">${checkIn.jobType} - ${checkIn.technicianName || 'Technician'}</strong><br>
+                                      <small style="color: #64748b;">${checkIn.address || 'Service Location'} • ${new Date(checkIn.createdAt).toLocaleDateString()}</small>
+                                      ${checkIn.notes ? `<div style="margin-top: 5px; font-size: 13px; color: #374151;">${checkIn.notes.substring(0, 100)}${checkIn.notes.length > 100 ? '...' : ''}</div>` : ''}
+                                    </div>
+                                  </div>
+                                </div>
+                              `;
+                            }).join('');
+                          } else {
+                            checkInHTML = `
                               <div style="text-align: center; padding: 40px; color: #64748b;">
-                                <h3>Recent Check-Ins</h3>
-                                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin: 10px 0; text-align: left;">
-                                  <div style="display: flex; align-items: center; gap: 10px;">
-                                    <div style="width: 40px; height: 40px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">JD</div>
-                                    <div>
-                                      <strong>HVAC Maintenance - John Doe</strong><br>
-                                      <small style="color: #64748b;">123 Main St • Today 2:30 PM</small>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin: 10px 0; text-align: left;">
-                                  <div style="display: flex; align-items: center; gap: 10px;">
-                                    <div style="width: 40px; height: 40px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">MS</div>
-                                    <div>
-                                      <strong>Electrical Repair - Mike Smith</strong><br>
-                                      <small style="color: #64748b;">456 Oak Ave • Yesterday 4:15 PM</small>
-                                    </div>
-                                  </div>
-                                </div>
-                                <p style="margin-top: 15px; font-size: 12px; color: #9ca3af;">Powered by Rank It Pro</p>
+                                <div style="margin-bottom: 15px;">📋</div>
+                                <h4 style="margin: 0 0 10px 0; color: #374151;">No Check-ins Yet</h4>
+                                <p style="margin: 0; font-size: 14px;">Create your first check-in using the mobile app to see it appear here.</p>
                               </div>
-                            </div>
-                          </body>
-                          </html>
-                        `);
+                            `;
+                          }
+                          
+                          previewWindow.document.write(`
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                              <title>Embed Preview - ${auth?.company?.name || 'Your Company'}</title>
+                              <meta charset="utf-8">
+                              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                              <style>
+                                body { 
+                                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+                                  padding: 20px; 
+                                  background: #f8fafc;
+                                  margin: 0;
+                                }
+                                .preview-header { 
+                                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                  color: white;
+                                  padding: 20px; 
+                                  border-radius: 12px; 
+                                  margin-bottom: 20px; 
+                                  text-align: center;
+                                }
+                                .preview-header h2 { margin: 0 0 8px 0; font-size: 24px; }
+                                .preview-header p { margin: 0; opacity: 0.9; font-size: 14px; }
+                                .embed-container { 
+                                  background: white;
+                                  border: 2px solid #e2e8f0; 
+                                  padding: 25px; 
+                                  border-radius: 12px; 
+                                  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                                }
+                                .widget-header {
+                                  text-align: center;
+                                  margin-bottom: 20px;
+                                  padding-bottom: 15px;
+                                  border-bottom: 1px solid #e2e8f0;
+                                }
+                                .widget-header h3 {
+                                  margin: 0 0 5px 0;
+                                  color: #1f2937;
+                                  font-size: 20px;
+                                }
+                                .powered-by {
+                                  text-align: center;
+                                  margin-top: 20px;
+                                  padding-top: 15px;
+                                  border-top: 1px solid #e2e8f0;
+                                  font-size: 12px;
+                                  color: #9ca3af;
+                                }
+                                .powered-by a {
+                                  color: #3b82f6;
+                                  text-decoration: none;
+                                }
+                              </style>
+                            </head>
+                            <body>
+                              <div class="preview-header">
+                                <h2>Live Embed Preview</h2>
+                                <p>This is how your check-in widget will appear on your website</p>
+                              </div>
+                              <div class="embed-container">
+                                <div class="widget-header">
+                                  <h3>Recent Service Check-ins</h3>
+                                  <p style="margin: 0; color: #64748b; font-size: 14px;">${auth?.company?.name || 'Your Company'}</p>
+                                </div>
+                                ${checkInHTML}
+                                <div class="powered-by">
+                                  Powered by <a href="https://rankitpro.com" target="_blank">Rank It Pro</a>
+                                </div>
+                              </div>
+                            </body>
+                            </html>
+                          `);
+                          previewWindow.document.close();
+                        }
+                      } catch (error) {
+                        console.error('Preview error:', error);
+                        // Fallback to basic preview
+                        const previewWindow = window.open('', '_blank', 'width=800,height=600');
+                        if (previewWindow) {
+                          previewWindow.document.write(`
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                              <title>Embed Preview - ${auth?.company?.name || 'Your Company'}</title>
+                              <meta charset="utf-8">
+                              <style>
+                                body { font-family: Arial, sans-serif; padding: 20px; background: #f8fafc; }
+                                .preview-header { background: #3b82f6; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+                                .embed-container { background: white; border: 2px solid #e2e8f0; padding: 25px; border-radius: 8px; text-align: center; }
+                              </style>
+                            </head>
+                            <body>
+                              <div class="preview-header">
+                                <h2>Embed Preview</h2>
+                                <p>Unable to load live data - please ensure you're logged in</p>
+                              </div>
+                              <div class="embed-container">
+                                <h3>Check-in Widget</h3>
+                                <p>Your actual check-ins will appear here when the widget is embedded on your website.</p>
+                              </div>
+                            </body>
+                            </html>
+                          `);
+                          previewWindow.document.close();
+                        }
                       }
                     }}
                   >
