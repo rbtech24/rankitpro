@@ -1850,11 +1850,14 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateSubscriptionPlanYearlyPrice(planId: number, yearlyPrice: number): Promise<SubscriptionPlan | null> {
+  async updateSubscriptionPlanYearlyPrice(planId: number, yearlyPrice: number): Promise<any | null> {
     try {
       const [updatedPlan] = await db
         .update(subscriptionPlans)
-        .set({ yearlyPrice })
+        .set({ 
+          yearlyPrice: yearlyPrice.toString(),
+          updatedAt: new Date()
+        })
         .where(eq(subscriptionPlans.id, planId))
         .returning();
       
