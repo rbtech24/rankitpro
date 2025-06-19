@@ -47,6 +47,11 @@ function IntegrationsPage() {
   
   const [copied, setCopied] = useState<{wordpress?: boolean, embed?: boolean}>({});
   
+  // Get current user and company data
+  const { data: auth } = useQuery<{user: any, company: any}>({
+    queryKey: ["/api/auth/me"],
+  });
+  
   // WordPress integration
   const { data: wordpressData, isLoading: wpLoading, refetch: refetchWordPress } = useQuery({
     queryKey: ['/api/integration/wordpress'],
@@ -391,7 +396,7 @@ function IntegrationsPage() {
                         const checkInsRes = await apiRequest("GET", "/api/check-ins?limit=3");
                         const checkIns = await checkInsRes.json();
                         
-                        const previewWindow = window.open('', '_blank', 'width=800,height=600');
+                        const previewWindow = window.open('about:blank', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
                         if (previewWindow) {
                           let checkInHTML = '';
                           
@@ -505,13 +510,14 @@ function IntegrationsPage() {
                       } catch (error) {
                         console.error('Preview error:', error);
                         // Fallback to basic preview
-                        const previewWindow = window.open('', '_blank', 'width=800,height=600');
+                        const previewWindow = window.open('about:blank', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
                         if (previewWindow) {
+                          const companyName = auth?.company?.name || 'Your Company';
                           previewWindow.document.write(`
                             <!DOCTYPE html>
                             <html>
                             <head>
-                              <title>Embed Preview - ${auth?.company?.name || 'Your Company'}</title>
+                              <title>Embed Preview - ${companyName}</title>
                               <meta charset="utf-8">
                               <style>
                                 body { font-family: Arial, sans-serif; padding: 20px; background: #f8fafc; }
