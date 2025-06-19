@@ -375,7 +375,7 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
           customerName: values.customerName,
           customerEmail: values.customerEmail || null,
           customerPhone: values.customerPhone || null,
-          visitId: result.id,
+          visitId: visitResult.id,
           jobType: values.jobType,
           technicianId: parseInt(values.technicianId),
         });
@@ -396,6 +396,7 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
   };
   
   return (
+    <>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <Card>
@@ -708,5 +709,15 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
         </div>
       </form>
     </Form>
+    
+    {/* Usage Limit Modal */}
+    {showUsageLimitModal && usageLimitData && (
+      <UsageLimitModal
+        isOpen={showUsageLimitModal}
+        onClose={() => setShowUsageLimitModal(false)}
+        usageData={usageLimitData}
+      />
+    )}
+    </>
   );
 }

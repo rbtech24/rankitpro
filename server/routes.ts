@@ -1684,6 +1684,23 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       res.status(500).json({ message: "Server error" });
     }
   });
+
+  // Comprehensive plan limits endpoint
+  app.get("/api/plan-limits", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user.companyId;
+      
+      if (!companyId) {
+        return res.status(400).json({ message: "No company associated with this user" });
+      }
+      
+      const planLimits = await storage.checkPlanLimits(companyId);
+      res.json(planLimits);
+    } catch (error) {
+      console.error("Get plan limits error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
   
   app.post("/api/visits", isAuthenticated, upload.array("photos", 5), async (req, res) => {
     try {

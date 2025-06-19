@@ -640,6 +640,58 @@ export class DatabaseStorage implements IStorage {
     return result[0]?.count || 0;
   }
 
+  // Enhanced plan limit checking
+  async checkPlanLimits(companyId: number): Promise<{
+    canCreateCheckIn: boolean;
+    canAddTechnician: boolean;
+    canUseFeature: (feature: string) => boolean;
+    currentCheckIns: number;
+    currentTechnicians: number;
+    checkInLimit: number;
+    technicianLimit: number;
+    planName: string;
+    features: string[];
+    limits: {
+      checkInsReached: boolean;
+      techniciansReached: boolean;
+    };
+  }> {
+    const company = await this.getCompany(companyId);
+    if (!company) {
+      throw new Error('Company not found');
+    }
+
+    // Get current usage
+    const currentCheckIns = await this.getMonthlyCheckInCount(companyId);
+    const technicians = await this.getTechniciansByCompany(companyId);
+    const currentTechnicians = technicians.length;
+    
+    // Get subscription plan limits
+    const subscriptionPlan = await this.getSubscriptionPlan(company.subscriptionPlanId || 3);
+    const checkInLimit = subscriptionPlan?.maxCheckIns || 50;
+    const technicianLimit = subscriptionPlan?.maxTechnicians || 5;
+    const planFeatures = (subscriptionPlan?.features as string[]) || [];
+    
+    const checkInsReached = currentCheckIns >= checkInLimit;
+    const techniciansReached = currentTechnicians >= technicianLimit;
+
+    return {
+      canCreateCheckIn: !checkInsReached,
+      canAddTechnician: !techniciansReached,
+      canUseFeature: (feature: string) => planFeatures.includes(feature),
+      currentCheckIns,
+      currentTechnicians,
+      checkInLimit,
+      technicianLimit,
+      planName: subscriptionPlan?.name || 'Starter',
+      features: planFeatures,
+      limits: {
+        checkInsReached,
+        techniciansReached
+      }
+    };
+  }
+
   async checkUsageLimits(companyId: number): Promise<{
     canCreateCheckIn: boolean;
     currentUsage: number;
