@@ -122,33 +122,15 @@ interface Company {
 }
 
 interface SubscriptionPlan {
-  id: string;
+  id: number;
   name: string;
-  price: number;
+  price: string;
+  yearlyPrice: string;
+  maxTechnicians: number;
+  maxSubmissions: number;
   features: string[];
+  isActive: boolean;
 }
-
-// Subscription plans data
-const subscriptionPlans: SubscriptionPlan[] = [
-  {
-    id: "starter",
-    name: "Starter",
-    price: 99,
-    features: ["Up to 5 technicians", "AI content generation", "Basic review management"]
-  },
-  {
-    id: "professional", 
-    name: "Professional",
-    price: 199,
-    features: ["Up to 15 technicians", "WordPress integration", "Advanced analytics", "CRM integration"]
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise", 
-    price: 499,
-    features: ["Unlimited technicians", "Custom branding", "API access", "Priority support"]
-  }
-];
 
 // Available features
 const availableFeatures = [
@@ -1260,9 +1242,18 @@ export default function CompaniesManagement() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="starter">Starter - $29/mo</SelectItem>
-                            <SelectItem value="pro">Pro - $79/mo</SelectItem>
-                            <SelectItem value="agency">Agency - $199/mo</SelectItem>
+                            {plansLoading ? (
+                              <SelectItem value="" disabled>Loading plans...</SelectItem>
+                            ) : subscriptionPlans && subscriptionPlans.length > 0 ? (
+                              subscriptionPlans.map((plan: SubscriptionPlan) => (
+                                <SelectItem key={plan.id} value={plan.id.toString()}>
+                                  {plan.name} - ${plan.price}/mo
+                                  {plan.yearlyPrice && ` (${plan.yearlyPrice}/year)`}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="" disabled>No plans available</SelectItem>
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
