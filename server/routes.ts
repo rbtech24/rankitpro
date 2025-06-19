@@ -2112,6 +2112,75 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  // Customer management endpoint
+  app.get("/api/customers", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user.role !== "company_admin" && req.user.role !== "super_admin") {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const companyId = req.user.companyId;
+      if (!companyId) {
+        return res.status(400).json({ error: "Invalid company ID" });
+      }
+
+      // Get unique customers from check-ins
+      const customers = await storage.getCustomersByCompany(companyId);
+      res.json(customers);
+    } catch (error) {
+      console.error("Customers error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Mobile status endpoint
+  app.get("/api/mobile/status", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user.companyId;
+      
+      res.json({
+        pwaEnabled: true,
+        offlineSupport: true,
+        gpsTracking: true,
+        photoUpload: true,
+        techniciansEnabled: companyId ? true : false,
+        lastSync: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Mobile status error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Review automation settings endpoint (simplified path)
+  app.get("/api/review-automation/settings", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user.role !== "company_admin" && req.user.role !== "super_admin") {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const companyId = req.user.companyId;
+      if (!companyId) {
+        return res.status(400).json({ error: "Invalid company ID" });
+      }
+
+      const settings = await storage.getReviewFollowUpSettings(companyId);
+      res.json(settings || {
+        companyId,
+        initialDelayHours: 24,
+        enableFollowUps: true,
+        firstFollowUpDays: 3,
+        secondFollowUpDays: 7,
+        finalFollowUpDays: 14,
+        maxFollowUps: 3,
+        emailTemplate: "Thank you for choosing our services! We'd love to hear about your experience."
+      });
+    } catch (error) {
+      console.error("Review automation settings error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   app.get("/api/admin/billing-overview", isAuthenticated, async (req, res) => {
     try {
       if (req.user.role !== "super_admin") {

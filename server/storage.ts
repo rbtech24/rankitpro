@@ -158,6 +158,7 @@ export interface IStorage {
   getAllAIUsage(): Promise<any[]>;
   getAllSupportTickets(): Promise<any[]>;
   getDatabaseHealth(): Promise<any>;
+  getCustomersByCompany(companyId: number): Promise<any[]>;
   getUserCount(): Promise<number>;
   getTechnicianCount(): Promise<number>;
   getCheckInCount(): Promise<number>;
@@ -484,8 +485,32 @@ export class DatabaseStorage implements IStorage {
         tableCount: 0,
         connectionStatus: 'failed',
         lastCheck: new Date(),
-        error: error.message
+        error: (error as Error).message
       };
+    }
+  }
+
+  async getCustomersByCompany(companyId: number): Promise<any[]> {
+    try {
+      const customers = await db.execute(sql`
+        SELECT DISTINCT 
+          customer_name as name,
+          customer_email as email, 
+          customer_phone as phone,
+          address as serviceAddress,
+          COUNT(*) as totalServices,
+          MAX(created_at) as lastService
+        FROM check_ins 
+        WHERE company_id = ${companyId}
+          AND customer_name IS NOT NULL
+        GROUP BY customer_name, customer_email, customer_phone, address
+        ORDER BY MAX(created_at) DESC
+      `);
+      
+      return customers.rows || [];
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      return [];
     }
   }
 
