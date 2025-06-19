@@ -640,19 +640,53 @@ export class DatabaseStorage implements IStorage {
     return result[0]?.count || 0;
   }
 
-  // Enhanced plan limit checking
+  // New unified submissions counter - counts check-ins, blog posts, and reviews together
+  async getMonthlySubmissionCount(companyId: number): Promise<number> {
+    const [checkInsResult, reviewsResult] = await Promise.all([
+      // Count monthly check-ins (including blog posts via isBlog flag)
+      db.select({ count: sql`COUNT(*)::int` })
+        .from(checkIns)
+        .where(
+          and(
+            eq(checkIns.companyId, companyId),
+            sql`EXTRACT(MONTH FROM ${checkIns.createdAt}) = EXTRACT(MONTH FROM CURRENT_DATE)`,
+            sql`EXTRACT(YEAR FROM ${checkIns.createdAt}) = EXTRACT(YEAR FROM CURRENT_DATE)`
+          )
+        ),
+      
+      // Count monthly review requests
+      db.select({ count: sql`COUNT(*)::int` })
+        .from(reviewRequests)
+        .where(
+          and(
+            eq(reviewRequests.companyId, companyId),
+            sql`EXTRACT(MONTH FROM ${reviewRequests.createdAt}) = EXTRACT(MONTH FROM CURRENT_DATE)`,
+            sql`EXTRACT(YEAR FROM ${reviewRequests.createdAt}) = EXTRACT(YEAR FROM CURRENT_DATE)`
+          )
+        )
+    ]);
+
+    const checkInsCount = checkInsResult[0]?.count || 0;
+    const reviewsCount = reviewsResult[0]?.count || 0;
+
+    // Return total submissions across all types
+    return checkInsCount + reviewsCount;
+  }
+
+  // Enhanced plan limit checking with unified submissions
   async checkPlanLimits(companyId: number): Promise<{
-    canCreateCheckIn: boolean;
+    canCreateSubmission: boolean;
     canAddTechnician: boolean;
     canUseFeature: (feature: string) => boolean;
-    currentCheckIns: number;
+    currentSubmissions: number;
     currentTechnicians: number;
-    checkInLimit: number;
+    submissionLimit: number;
     technicianLimit: number;
     planName: string;
     features: string[];
+    submissionTypes: string[];
     limits: {
-      checkInsReached: boolean;
+      submissionsReached: boolean;
       techniciansReached: boolean;
     };
   }> {
@@ -661,32 +695,34 @@ export class DatabaseStorage implements IStorage {
       throw new Error('Company not found');
     }
 
-    // Get current usage
-    const currentCheckIns = await this.getMonthlyCheckInCount(companyId);
+    // Get current usage across all submission types
+    const currentSubmissions = await this.getMonthlySubmissionCount(companyId);
     const technicians = await this.getTechniciansByCompany(companyId);
     const currentTechnicians = technicians.length;
     
     // Get subscription plan limits
     const subscriptionPlan = await this.getSubscriptionPlan(company.subscriptionPlanId || 3);
-    const checkInLimit = subscriptionPlan?.maxCheckIns || 50;
+    const submissionLimit = subscriptionPlan?.maxSubmissions || subscriptionPlan?.maxCheckIns || 50;
     const technicianLimit = subscriptionPlan?.maxTechnicians || 5;
     const planFeatures = (subscriptionPlan?.features as string[]) || [];
+    const submissionTypes = ['check_ins', 'blog_posts', 'reviews']; // All submission types count toward limit
     
-    const checkInsReached = currentCheckIns >= checkInLimit;
+    const submissionsReached = currentSubmissions >= submissionLimit;
     const techniciansReached = currentTechnicians >= technicianLimit;
 
     return {
-      canCreateCheckIn: !checkInsReached,
+      canCreateSubmission: !submissionsReached,
       canAddTechnician: !techniciansReached,
       canUseFeature: (feature: string) => planFeatures.includes(feature),
-      currentCheckIns,
+      currentSubmissions,
       currentTechnicians,
-      checkInLimit,
+      submissionLimit,
       technicianLimit,
       planName: subscriptionPlan?.name || 'Starter',
       features: planFeatures,
+      submissionTypes,
       limits: {
-        checkInsReached,
+        submissionsReached,
         techniciansReached
       }
     };
