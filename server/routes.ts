@@ -3483,15 +3483,42 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       if (!yearlyPrice || yearlyPrice < 0) {
         return res.status(400).json({ message: 'Valid yearly price is required' });
       }
-      
+
+      // Get the plan details first
+      const plans = await storage.getSubscriptionPlans();
+      const plan = plans.find(p => p.id === planId);
+      if (!plan) {
+        return res.status(404).json({ message: 'Plan not found' });
+      }
+
+      // Update the plan in database
       const updatedPlan = await storage.updateSubscriptionPlanYearlyPrice(planId, yearlyPrice);
       if (!updatedPlan) {
-        return res.status(404).json({ message: 'Plan not found' });
+        return res.status(404).json({ message: 'Failed to update plan' });
+      }
+
+      // Auto-create or update Stripe price for yearly billing
+      const stripeService = (await import('./services/stripe-service')).stripeService;
+      if (stripeService.isStripeAvailable()) {
+        try {
+          const stripePriceId = await stripeService.getPriceId(plan.name, yearlyPrice, 'year');
+          if (stripePriceId) {
+            // Update the plan with new Stripe price ID
+            await storage.updateSubscriptionPlan(planId, {
+              stripePriceIdYearly: stripePriceId
+            });
+            console.log(`Auto-created Stripe yearly price ${stripePriceId} for ${plan.name} at $${yearlyPrice}/year`);
+          }
+        } catch (stripeError) {
+          console.warn('Failed to auto-create Stripe price, but plan updated:', stripeError);
+        }
       }
       
       res.json({ 
-        message: 'Yearly price updated successfully',
-        plan: updatedPlan
+        message: 'Yearly price updated successfully with automatic Stripe integration',
+        plan: updatedPlan,
+        yearlyPrice,
+        discountPercent: plan.price ? Math.round(((parseFloat(plan.price) * 12 - yearlyPrice) / (parseFloat(plan.price) * 12)) * 100) : 0
       });
     } catch (error) {
       console.error('Error updating yearly price:', error);

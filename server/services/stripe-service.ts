@@ -69,6 +69,79 @@ export class StripeService {
   }
 
   /**
+   * Create or update Stripe price for a subscription plan
+   * This eliminates the need to manually configure price IDs when prices change
+   */
+  async createOrUpdatePlanPrice(planName: string, amount: number, interval: 'month' | 'year'): Promise<string | null> {
+    if (!this.isStripeAvailable()) {
+      console.warn("Stripe not available - skipping price creation");
+      return null;
+    }
+
+    try {
+      // Create a new price object in Stripe
+      const price = await stripe!.prices.create({
+        unit_amount: Math.round(amount * 100), // Convert to cents
+        currency: 'usd',
+        recurring: {
+          interval: interval
+        },
+        product_data: {
+          name: `${planName} Plan`,
+          description: `${planName} subscription - ${interval}ly billing`
+        },
+        metadata: {
+          plan: planName.toLowerCase(),
+          interval: interval,
+          created_by: 'rank_it_pro_admin'
+        }
+      });
+
+      console.log(`Created Stripe price ${price.id} for ${planName} ${interval}ly at $${amount}`);
+      return price.id;
+    } catch (error) {
+      console.error(`Failed to create Stripe price for ${planName}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Get the appropriate price ID for a plan, creating it if necessary
+   */
+  async getPriceId(planName: string, amount: number, interval: 'month' | 'year' = 'month'): Promise<string | null> {
+    if (!this.isStripeAvailable()) {
+      return null;
+    }
+
+    // Try to find existing price first
+    try {
+      const prices = await stripe!.prices.list({
+        limit: 100,
+        metadata: {
+          plan: planName.toLowerCase(),
+          interval: interval
+        }
+      });
+
+      // Look for a price with the exact amount
+      const exactPrice = prices.data.find(price => 
+        price.unit_amount === Math.round(amount * 100) && 
+        price.active
+      );
+
+      if (exactPrice) {
+        return exactPrice.id;
+      }
+
+      // If no exact match, create a new price
+      return await this.createOrUpdatePlanPrice(planName, amount, interval);
+    } catch (error) {
+      console.error('Error finding or creating price:', error);
+      return await this.createOrUpdatePlanPrice(planName, amount, interval);
+    }
+  }
+
+  /**
    * Get or create a subscription for a user
    */
   async getOrCreateSubscription(userId: number, plan: string): Promise<{
