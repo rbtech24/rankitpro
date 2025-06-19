@@ -213,6 +213,21 @@ export default function Sidebar({ className }: SidebarProps) {
                 CRM Integrations
               </div>
             </Link>
+
+            <Link href="/shortcode-demo">
+              <div className={cn(
+                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
+                isActive("/shortcode-demo") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
+              )}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                  <path d="M7 8h10"/>
+                  <path d="M7 12h4"/>
+                  <path d="M7 16h1"/>
+                  <rect width="18" height="18" x="3" y="3" rx="2"/>
+                </svg>
+                Shortcode Testing
+              </div>
+            </Link>
             </div>
           )}
 

@@ -1575,7 +1575,7 @@ export class DatabaseStorage implements IStorage {
         const subscriberCount = await db
           .select({ count: sql<number>`count(*)` })
           .from(companies)
-          .where(eq(companies.subscriptionPlan, plan.name));
+          .where(eq(companies.subscriptionPlanId, plan.id));
         
         const count = subscriberCount[0]?.count || 0;
         const revenue = count * parseFloat(plan.price.toString());
