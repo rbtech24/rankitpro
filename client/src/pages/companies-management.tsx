@@ -204,10 +204,10 @@ export default function CompaniesManagement() {
   });
 
   // Fetch subscription plans from API
-  const { data: plans, isLoading: plansLoading } = useQuery<SubscriptionPlan[]>({
-    queryKey: ['/api/billing/plans'],
+  const { data: subscriptionPlans, isLoading: plansLoading } = useQuery({
+    queryKey: ['/api/admin/subscription-plans'],
     queryFn: async () => {
-      const res = await apiRequest('GET', '/api/billing/plans');
+      const res = await apiRequest('GET', '/api/admin/subscription-plans');
       return res.json();
     }
   });
@@ -802,7 +802,7 @@ export default function CompaniesManagement() {
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Enabled Features</h3>
                         <div className="flex flex-wrap gap-2 mt-1">
-                          {selectedCompany.featuresEnabled.map(featureId => (
+                          {(selectedCompany.featuresEnabled || []).map((featureId: any) => (
                             <Badge key={featureId} variant="outline" className="bg-blue-50">
                               {availableFeatures.find(f => f.id === featureId)?.name}
                             </Badge>
