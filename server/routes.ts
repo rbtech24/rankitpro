@@ -3470,6 +3470,35 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  // Quick yearly price adjustment endpoint for super admins
+  app.patch('/api/subscription-plans/:id/yearly-price', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ message: 'Super admin access required' });
+      }
+      
+      const planId = parseInt(req.params.id);
+      const { yearlyPrice } = req.body;
+      
+      if (!yearlyPrice || yearlyPrice < 0) {
+        return res.status(400).json({ message: 'Valid yearly price is required' });
+      }
+      
+      const updatedPlan = await storage.updateSubscriptionPlanYearlyPrice(planId, yearlyPrice);
+      if (!updatedPlan) {
+        return res.status(404).json({ message: 'Plan not found' });
+      }
+      
+      res.json({ 
+        message: 'Yearly price updated successfully',
+        plan: updatedPlan
+      });
+    } catch (error) {
+      console.error('Error updating yearly price:', error);
+      res.status(500).json({ message: 'Failed to update yearly price' });
+    }
+  });
+
   // Subscription Plans API
   app.get("/api/subscription/plans", async (req, res) => {
     try {

@@ -43,19 +43,25 @@ import { Edit2, Trash2, Plus, DollarSign, Users, CreditCard, TrendingUp } from "
 import * as z from "zod";
 import Sidebar from '@/components/layout/sidebar-clean';
 
-// Plan creation schema
+// Plan creation schema with yearly pricing support
 const planSchema = z.object({
   name: z.string().min(3, { message: "Plan name must be at least 3 characters." }),
   description: z.string().min(10, { message: "Description must be at least 10 characters." }),
   monthlyPrice: z.number().min(0, { message: "Price must be a positive number." }),
   yearlyPrice: z.number().min(0, { message: "Yearly price must be a positive number." }),
   maxTechnicians: z.number().min(1, { message: "Must allow at least 1 technician." }),
-  maxCheckinsPerMonth: z.number().min(1, { message: "Must allow at least 1 check-in per month." }),
+  maxSubmissions: z.number().min(1, { message: "Must allow at least 1 submission per month." }),
   features: z.array(z.string()),
   isActive: z.boolean(),
   isFeatured: z.boolean(),
   stripePriceIdMonthly: z.string().optional(),
   stripePriceIdYearly: z.string().optional(),
+});
+
+// Quick price adjustment schema for yearly pricing
+const priceAdjustmentSchema = z.object({
+  yearlyPrice: z.number().min(0, { message: "Yearly price must be a positive number." }),
+  discountPercent: z.number().min(0).max(50, { message: "Discount must be between 0% and 50%." }).optional(),
 });
 
 // Subscription status badge color map
@@ -98,7 +104,17 @@ export default function BillingManagement() {
   const [editingPlan, setEditingPlan] = useState<any>(null);
   const [isAddingPlan, setIsAddingPlan] = useState(false);
   const [viewingCompany, setViewingCompany] = useState<any>(null);
+  const [adjustingPrice, setAdjustingPrice] = useState<any>(null);
   const { toast } = useToast();
+
+  // Form for quick price adjustments
+  const priceForm = useForm<z.infer<typeof priceAdjustmentSchema>>({
+    resolver: zodResolver(priceAdjustmentSchema),
+    defaultValues: {
+      yearlyPrice: 0,
+      discountPercent: 15
+    }
+  });
   
   // Form for creating/editing plans
   const form = useForm<z.infer<typeof planSchema>>({
@@ -188,24 +204,63 @@ export default function BillingManagement() {
     }
   });
 
+  // Quick price adjustment mutation
+  const adjustPriceMutation = useMutation({
+    mutationFn: async ({ id, yearlyPrice }: { id: number, yearlyPrice: number }) => {
+      const response = await apiRequest('PATCH', `/api/subscription-plans/${id}/yearly-price`, { yearlyPrice });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/subscription-plans'] });
+      toast({
+        title: "Yearly Price Updated",
+        description: "Annual pricing has been updated successfully."
+      });
+      setAdjustingPrice(null);
+      priceForm.reset();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update yearly price",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Initialize form with plan data when editing
   useEffect(() => {
     if (editingPlan) {
       form.reset({
         name: editingPlan.name,
         description: editingPlan.description,
-        monthlyPrice: editingPlan.monthlyPrice,
-        yearlyPrice: editingPlan.yearlyPrice,
+        monthlyPrice: editingPlan.price,
+        yearlyPrice: editingPlan.yearlyPrice || 0,
         maxTechnicians: editingPlan.maxTechnicians,
-        maxCheckinsPerMonth: editingPlan.maxCheckinsPerMonth,
+        maxSubmissions: editingPlan.maxSubmissions || 100,
         features: editingPlan.features || [],
         isActive: editingPlan.isActive,
         isFeatured: editingPlan.isFeatured,
-        stripePriceIdMonthly: editingPlan.stripePriceIdMonthly || "",
+        stripePriceIdMonthly: editingPlan.stripePriceId || "",
         stripePriceIdYearly: editingPlan.stripePriceIdYearly || ""
       });
     }
   }, [editingPlan, form]);
+
+  // Initialize price form when adjusting prices
+  useEffect(() => {
+    if (adjustingPrice) {
+      const monthlyPrice = adjustingPrice.price || 0;
+      const currentYearlyPrice = adjustingPrice.yearlyPrice || monthlyPrice * 10;
+      const discountPercent = monthlyPrice > 0 ? 
+        Math.round(((monthlyPrice * 12 - currentYearlyPrice) / (monthlyPrice * 12)) * 100) : 15;
+      
+      priceForm.reset({
+        yearlyPrice: currentYearlyPrice,
+        discountPercent
+      });
+    }
+  }, [adjustingPrice, priceForm]);
   
   // Submit handler for plan form
   const onSubmit = (data: z.infer<typeof planSchema>) => {

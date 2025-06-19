@@ -1849,6 +1849,21 @@ export class DatabaseStorage implements IStorage {
       return false;
     }
   }
+
+  async updateSubscriptionPlanYearlyPrice(planId: number, yearlyPrice: number): Promise<SubscriptionPlan | null> {
+    try {
+      const [updatedPlan] = await db
+        .update(subscriptionPlans)
+        .set({ yearlyPrice })
+        .where(eq(subscriptionPlans.id, planId))
+        .returning();
+      
+      return updatedPlan || null;
+    } catch (error) {
+      console.error('Error updating yearly price:', error);
+      return null;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
