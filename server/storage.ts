@@ -160,9 +160,6 @@ export interface IStorage {
   getAllSupportTickets(): Promise<any[]>;
   getDatabaseHealth(): Promise<any>;
   getCustomersByCompany(companyId: number): Promise<any[]>;
-  getUserCount(): Promise<number>;
-  getTechnicianCount(): Promise<number>;
-  getCheckInCount(): Promise<number>;
   getBlogPostCount(): Promise<number>;
   getSystemHealth(): Promise<{
     status: "healthy" | "degraded" | "down";
@@ -171,6 +168,20 @@ export interface IStorage {
     activeConnections: number;
     lastBackup?: Date;
   }>;
+  
+  // Chart data operations for super admin
+  getCheckInChartData(): Promise<{ date: string; count: number }[]>;
+  getReviewChartData(): Promise<{ month: string; reviews: number }[]>;
+  getCompanyGrowthData(): Promise<{ month: string; companies: number }[]>;
+  getRevenueData(): Promise<{ month: string; revenue: number }[]>;
+  getAllCompaniesForAdmin(): Promise<Company[]>;
+  getRecentSystemActivity(): Promise<{
+    action: string;
+    description: string;
+    timestamp: string;
+    companyName?: string;
+    userName?: string;
+  }[]>;
   
   // API Credentials operations
   getAPICredentials(companyId: number): Promise<APICredentials | undefined>;
@@ -1330,6 +1341,215 @@ export class DatabaseStorage implements IStorage {
       agency: 3,
       total: 13
     };
+  }
+
+  // Chart data operations for super admin
+  async getCheckInChartData(): Promise<{ date: string; count: number }[]> {
+    try {
+      // Get check-ins data from the last 6 months
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+      const checkInData = await db
+        .select({
+          date: sql<string>`DATE_TRUNC('month', ${checkIns.createdAt})`,
+          count: sql<number>`COUNT(*)`
+        })
+        .from(checkIns)
+        .where(gte(checkIns.createdAt, sixMonthsAgo))
+        .groupBy(sql`DATE_TRUNC('month', ${checkIns.createdAt})`)
+        .orderBy(sql`DATE_TRUNC('month', ${checkIns.createdAt})`);
+
+      return checkInData.map(row => ({
+        date: new Date(row.date).toISOString().slice(0, 7), // Format as YYYY-MM
+        count: row.count
+      }));
+    } catch (error) {
+      console.error('Error fetching check-in chart data:', error);
+      return [];
+    }
+  }
+
+  async getReviewChartData(): Promise<{ month: string; reviews: number }[]> {
+    try {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+      const reviewData = await db
+        .select({
+          month: sql<string>`DATE_TRUNC('month', ${reviewResponses.createdAt})`,
+          reviews: sql<number>`COUNT(*)`
+        })
+        .from(reviewResponses)
+        .where(gte(reviewResponses.createdAt, sixMonthsAgo))
+        .groupBy(sql`DATE_TRUNC('month', ${reviewResponses.createdAt})`)
+        .orderBy(sql`DATE_TRUNC('month', ${reviewResponses.createdAt})`);
+
+      return reviewData.map(row => ({
+        month: new Date(row.month).toLocaleDateString('en-US', { month: 'short' }),
+        reviews: row.reviews
+      }));
+    } catch (error) {
+      console.error('Error fetching review chart data:', error);
+      return [];
+    }
+  }
+
+  async getCompanyGrowthData(): Promise<{ month: string; companies: number }[]> {
+    try {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+      const companyData = await db
+        .select({
+          month: sql<string>`DATE_TRUNC('month', ${companies.createdAt})`,
+          companies: sql<number>`COUNT(*)`
+        })
+        .from(companies)
+        .where(gte(companies.createdAt, sixMonthsAgo))
+        .groupBy(sql`DATE_TRUNC('month', ${companies.createdAt})`)
+        .orderBy(sql`DATE_TRUNC('month', ${companies.createdAt})`);
+
+      return companyData.map(row => ({
+        month: new Date(row.month).toLocaleDateString('en-US', { month: 'short' }),
+        companies: row.companies
+      }));
+    } catch (error) {
+      console.error('Error fetching company growth data:', error);
+      return [];
+    }
+  }
+
+  async getRevenueData(): Promise<{ month: string; revenue: number }[]> {
+    try {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+      // Calculate revenue based on subscription plans
+      const revenueData = await db
+        .select({
+          month: sql<string>`DATE_TRUNC('month', ${companies.createdAt})`,
+          plan: companies.plan,
+          count: sql<number>`COUNT(*)`
+        })
+        .from(companies)
+        .where(gte(companies.createdAt, sixMonthsAgo))
+        .groupBy(sql`DATE_TRUNC('month', ${companies.createdAt})`, companies.plan)
+        .orderBy(sql`DATE_TRUNC('month', ${companies.createdAt})`);
+
+      // Convert to revenue data by applying plan pricing
+      const planPricing = { starter: 29, pro: 99, agency: 299 };
+      const monthlyRevenue = new Map<string, number>();
+
+      revenueData.forEach(row => {
+        const monthKey = new Date(row.month).toLocaleDateString('en-US', { month: 'short' });
+        const revenue = (planPricing[row.plan as keyof typeof planPricing] || 0) * row.count;
+        monthlyRevenue.set(monthKey, (monthlyRevenue.get(monthKey) || 0) + revenue);
+      });
+
+      return Array.from(monthlyRevenue.entries()).map(([month, revenue]) => ({
+        month,
+        revenue
+      }));
+    } catch (error) {
+      console.error('Error fetching revenue data:', error);
+      return [];
+    }
+  }
+
+  async getAllCompaniesForAdmin(): Promise<Company[]> {
+    try {
+      return await db.select().from(companies).orderBy(desc(companies.createdAt));
+    } catch (error) {
+      console.error('Error fetching companies for admin:', error);
+      return [];
+    }
+  }
+
+  async getRecentSystemActivity(): Promise<{
+    action: string;
+    description: string;
+    timestamp: string;
+    companyName?: string;
+    userName?: string;
+  }[]> {
+    try {
+      const activities = [];
+
+      // Get recent check-ins
+      const recentCheckIns = await db
+        .select({
+          id: checkIns.id,
+          customerName: checkIns.customerName,
+          createdAt: checkIns.createdAt,
+          companyName: companies.name
+        })
+        .from(checkIns)
+        .leftJoin(companies, eq(checkIns.companyId, companies.id))
+        .orderBy(desc(checkIns.createdAt))
+        .limit(5);
+
+      recentCheckIns.forEach(checkIn => {
+        activities.push({
+          action: 'check_in_created',
+          description: `New check-in completed for ${checkIn.customerName}`,
+          timestamp: checkIn.createdAt.toISOString(),
+          companyName: checkIn.companyName || 'Unknown Company'
+        });
+      });
+
+      // Get recent companies
+      const recentCompanies = await db
+        .select({
+          id: companies.id,
+          name: companies.name,
+          createdAt: companies.createdAt
+        })
+        .from(companies)
+        .orderBy(desc(companies.createdAt))
+        .limit(3);
+
+      recentCompanies.forEach(company => {
+        activities.push({
+          action: 'company_created',
+          description: `New company registered: ${company.name}`,
+          timestamp: company.createdAt.toISOString(),
+          companyName: company.name
+        });
+      });
+
+      // Get recent users
+      const recentUsers = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          role: users.role,
+          createdAt: users.createdAt,
+          companyName: companies.name
+        })
+        .from(users)
+        .leftJoin(companies, eq(users.companyId, companies.id))
+        .orderBy(desc(users.createdAt))
+        .limit(3);
+
+      recentUsers.forEach(user => {
+        activities.push({
+          action: 'user_created',
+          description: `New ${user.role} user created: ${user.email}`,
+          timestamp: user.createdAt.toISOString(),
+          companyName: user.companyName || 'No Company',
+          userName: user.email
+        });
+      });
+
+      // Sort all activities by timestamp and return top 10
+      return activities
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 10);
+    } catch (error) {
+      console.error('Error fetching recent system activity:', error);
+      return [];
+    }
   }
 }
 
