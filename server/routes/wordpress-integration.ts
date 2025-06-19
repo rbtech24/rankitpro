@@ -212,17 +212,8 @@ Version: 1.0.0
 Author: Rank It Pro
 `;
 
-    // Create a complete plugin file with embedded instructions
-    const completePlugin = `<?php
-/*
-Plugin Name: Rank It Pro Integration
-Description: ${readmeContent.replace(/\n/g, '\n * ')}
-Version: 1.0.0
-Author: Rank It Pro
-*/
-
-${pluginCode}
-?>`;
+    // The plugin code already contains the complete PHP structure
+    const completePlugin = pluginCode;
 
     // Create ZIP file for WordPress plugin
     const archive = archiver('zip', {

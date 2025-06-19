@@ -599,6 +599,8 @@ class RankItPro_Visit_Integration {
     private $apiKey;
     private $apiEndpoint;
 
+    private $reviewsEndpoint;
+
     public function __construct() {
         $this->apiKey = '${apiKey}';
         $this->apiEndpoint = '${apiEndpoint}api/wordpress/public/visits';
@@ -813,6 +815,30 @@ class RankItPro_Visit_Integration {
         
         if (is_wp_error($response)) {
             error_log('Rank it Pro Integration: API request failed - ' . $response->get_error_message());
+            return array();
+        }
+        
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body);
+        
+        if (empty($data) || is_wp_error($data)) {
+            return array();
+        }
+        
+        return $data;
+    }
+    
+    private function get_reviews($limit = 5, $rating = 'all') {
+        $url = add_query_arg(array(
+            'apiKey' => $this->apiKey,
+            'limit' => $limit,
+            'rating' => $rating
+        ), $this->reviewsEndpoint);
+        
+        $response = wp_remote_get($url);
+        
+        if (is_wp_error($response)) {
+            error_log('Rank it Pro Integration: Reviews API request failed - ' . $response->get_error_message());
             return array();
         }
         
