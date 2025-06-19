@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACME Home Services - WordPress Integration Shortcodes</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .shortcode-section { background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .shortcode-code { background: #333; color: #fff; padding: 15px; border-radius: 5px; font-family: monospace; overflow-x: auto; }
+        .preview { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        h1 { color: #0088d2; text-align: center; }
+        h2 { color: #333; border-bottom: 2px solid #0088d2; padding-bottom: 10px; }
+        .feature { background: #e8f4f8; padding: 15px; margin: 10px 0; border-left: 4px solid #0088d2; }
+    </style>
+</head>
+<body>
+    <h1>🏠 ACME Home Services - WordPress Integration Guide</h1>
+    
+    <div class="feature">
+        <h3>Complete WordPress Integration for ACME Home Services</h3>
+        <p><strong>Company:</strong> ACME Home Services (ID: 14)</p>
+        <p><strong>Technician:</strong> John Smith (ID: 10)</p>
+        <p><strong>Sample Service:</strong> HVAC Maintenance completed on Oak Street, Dallas</p>
+        <p><strong>Integration Status:</strong> ✅ Active with webhook support</p>
+    </div>
+
+    <div class="shortcode-section">
+        <h2>🔧 1. Recent Check-Ins Widget</h2>
+        <p>Display recent service check-ins from your technicians</p>
+        <div class="shortcode-code">
+[rankitpro_checkins company="14" limit="5" show_photos="true"]
+        </div>
+        <div class="preview">
+            <h4>Recent Service Check-Ins</h4>
+            <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0;">
+                <strong>HVAC Maintenance</strong> - John Smith<br>
+                <small>📍 Oak Street, Dallas, TX | June 19, 2025</small><br>
+                Customer: Sarah Johnson<br>
+                Services: Filter replacement, coil cleaning, system testing
+            </div>
+        </div>
+    </div>
+
+    <div class="shortcode-section">
+        <h2>📝 2. Latest Blog Posts</h2>
+        <p>Show AI-generated blog posts from your service visits</p>
+        <div class="shortcode-code">
+[rankitpro_blogs company="14" limit="3" show_excerpt="true"]
+        </div>
+        <div class="preview">
+            <h4>Latest Service Stories</h4>
+            <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0;">
+                <h5>Professional HVAC Maintenance Service in Dallas - ACME Home Services</h5>
+                <p>At ACME Home Services, we recently completed a comprehensive HVAC maintenance service for a valued customer on Oak Street in Dallas...</p>
+                <small>Posted: June 19, 2025</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="shortcode-section">
+        <h2>⭐ 3. Customer Reviews</h2>
+        <p>Display customer testimonials and reviews</p>
+        <div class="shortcode-code">
+[rankitpro_reviews company="14" limit="5" show_rating="true"]
+        </div>
+        <div class="preview">
+            <h4>What Our Customers Say</h4>
+            <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0;">
+                <div style="color: #ffa500;">⭐⭐⭐⭐⭐</div>
+                <p>"ACME Home Services provided exceptional HVAC maintenance! John was professional, thorough, and explained everything clearly. My AC is running perfectly now. Highly recommend their services!"</p>
+                <small>- Sarah Johnson, HVAC Maintenance</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="shortcode-section">
+        <h2>👥 4. Technician Profiles</h2>
+        <p>Showcase your team of professionals</p>
+        <div class="shortcode-code">
+[rankitpro_technicians company="14" show_specialization="true"]
+        </div>
+        <div class="preview">
+            <h4>Our Expert Technicians</h4>
+            <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0;">
+                <strong>John Smith</strong><br>
+                <small>Specialization: HVAC | Location: Dallas, TX</small><br>
+                <small>📧 john@acmeservices.com | 📞 555-0123</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="shortcode-section">
+        <h2>📊 5. Service Statistics</h2>
+        <p>Show your company's service metrics</p>
+        <div class="shortcode-code">
+[rankitpro_stats company="14" show_totals="true"]
+        </div>
+        <div class="preview">
+            <h4>Our Service Record</h4>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div style="text-align: center; background: #f0f0f0; padding: 15px; border-radius: 5px;">
+                    <strong>1</strong><br><small>Total Check-ins</small>
+                </div>
+                <div style="text-align: center; background: #f0f0f0; padding: 15px; border-radius: 5px;">
+                    <strong>1</strong><br><small>Blog Posts</small>
+                </div>
+                <div style="text-align: center; background: #f0f0f0; padding: 15px; border-radius: 5px;">
+                    <strong>1</strong><br><small>Technicians</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="shortcode-section">
+        <h2>🎯 6. Combined Service Showcase</h2>
+        <p>Complete service display with check-ins, blogs, and reviews</p>
+        <div class="shortcode-code">
+[rankitpro_showcase company="14" sections="checkins,blogs,reviews" limit="3"]
+        </div>
+        <div class="preview">
+            <h4>ACME Home Services - Complete Service Overview</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="border: 1px solid #ddd; padding: 15px;">
+                    <h5>Recent Services</h5>
+                    <p>HVAC Maintenance - Oak Street, Dallas</p>
+                </div>
+                <div style="border: 1px solid #ddd; padding: 15px;">
+                    <h5>Latest Blog</h5>
+                    <p>Professional HVAC Maintenance Service in Dallas</p>
+                </div>
+                <div style="border: 1px solid #ddd; padding: 15px;">
+                    <h5>Customer Review</h5>
+                    <p>⭐⭐⭐⭐⭐ "Exceptional service!"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="shortcode-section">
+        <h2>🔗 7. API Integration Endpoints</h2>
+        <p>Direct API access for custom integrations</p>
+        <div class="shortcode-code">
+<!-- Recent Check-ins API -->
+GET /api/public/check-ins?company=14&limit=5
+
+<!-- Blog Posts API -->
+GET /api/public/blog-posts?company=14&limit=3
+
+<!-- Reviews API -->
+GET /api/public/reviews?company=14&limit=5
+
+<!-- Technicians API -->
+GET /api/public/technicians?company=14
+        </div>
+    </div>
+
+    <div class="shortcode-section">
+        <h2>⚙️ 8. WordPress Plugin Installation</h2>
+        <div class="feature">
+            <h4>Installation Steps:</h4>
+            <ol>
+                <li>Download the Rank It Pro WordPress plugin</li>
+                <li>Upload to your WordPress site</li>
+                <li>Configure with your Company ID: <strong>14</strong></li>
+                <li>Set webhook URL: <code>https://acmehomeservices.com/wp-json/rankitpro/v1/webhook</code></li>
+                <li>Add shortcodes to your pages and posts</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="shortcode-section">
+        <h2>🚀 9. Advanced Features</h2>
+        <div class="feature">
+            <h4>Automated Features:</h4>
+            <ul>
+                <li>✅ Real-time check-in publishing via webhooks</li>
+                <li>✅ AI-generated SEO blog posts from service visits</li>
+                <li>✅ Automated review request emails</li>
+                <li>✅ GPS location tracking for service verification</li>
+                <li>✅ Before/after photo documentation</li>
+                <li>✅ Customer testimonial collection</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="shortcode-section">
+        <h2>📱 10. Mobile App Integration</h2>
+        <div class="feature">
+            <h4>Technician Mobile App Features:</h4>
+            <ul>
+                <li>📍 GPS check-in at customer locations</li>
+                <li>📷 Photo documentation (before/after)</li>
+                <li>📝 Service notes and work performed</li>
+                <li>🎤 Customer testimonial recording</li>
+                <li>🌐 Offline capabilities with sync</li>
+            </ul>
+            <p><strong>App URL:</strong> <code>https://app.rankitpro.com/field</code></p>
+        </div>
+    </div>
+
+    <div class="shortcode-section">
+        <h2>🔧 11. Customization Options</h2>
+        <div class="shortcode-code">
+<!-- Customization Parameters -->
+company="14"                    # Your company ID
+limit="5"                      # Number of items to show
+show_photos="true"             # Display photos
+show_rating="true"             # Show star ratings
+show_excerpt="true"            # Show blog excerpts
+show_specialization="true"     # Show technician specialties
+sections="checkins,blogs,reviews" # Sections to display
+theme="modern"                 # Theme style (modern, classic, minimal)
+        </div>
+    </div>
+
+    <div class="feature" style="text-align: center; margin: 40px 0;">
+        <h3>🎉 ACME Home Services WordPress Integration is Ready!</h3>
+        <p>Your complete workflow is now set up with:</p>
+        <ul style="text-align: left; display: inline-block;">
+            <li>✅ Company account configured</li>
+            <li>✅ Technician John Smith created</li>
+            <li>✅ Sample HVAC service check-in completed</li>
+            <li>✅ AI-generated blog post published</li>
+            <li>✅ Review request system active</li>
+            <li>✅ WordPress shortcodes generated</li>
+            <li>✅ Mobile app ready for field use</li>
+        </ul>
+        <p><strong>Next Steps:</strong> Install the WordPress plugin and start using the shortcodes above!</p>
+    </div>
+
+</body>
+</html>
