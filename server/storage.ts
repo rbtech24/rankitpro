@@ -781,13 +781,13 @@ export class DatabaseStorage implements IStorage {
         subscriptionPlanId: companies.subscriptionPlanId,
         createdAt: companies.createdAt,
         name: companies.name
-      }).from(companies).where(
-        and(
-          eq(companies.isTrialActive, true),
-          not(like(companies.name, '%Test%')),
-          not(like(companies.name, '%Debug%')),
-          not(like(companies.name, '%Tech Test%'))
-        )
+      }).from(companies).where(eq(companies.isTrialActive, true));
+      
+      // Filter out test data in application code
+      const filteredRealCompanies = realCompaniesData.filter(company => 
+        !company.name.includes('Test') && 
+        !company.name.includes('Debug') && 
+        !company.name.includes('Tech Test')
       );
       
       let totalMRR = 0;
@@ -795,7 +795,7 @@ export class DatabaseStorage implements IStorage {
       
       const planPrices = { starter: 29, pro: 79, agency: 149 };
       
-      for (const company of realCompaniesData) {
+      for (const company of filteredRealCompanies) {
         const monthlyPrice = planPrices[company.plan as keyof typeof planPrices] || 29;
         totalMRR += monthlyPrice;
         totalARR += monthlyPrice * 12;
@@ -806,11 +806,11 @@ export class DatabaseStorage implements IStorage {
       currentMonth.setDate(1);
       currentMonth.setHours(0, 0, 0, 0);
       
-      const monthlySignups = realCompaniesData.filter(company => 
+      const monthlySignups = filteredRealCompanies.filter(company => 
         company.createdAt && new Date(company.createdAt) >= currentMonth
       ).length;
 
-      const realCompanyCount = realCompaniesData.length;
+      const realCompanyCount = filteredRealCompanies.length;
 
       return {
         totalRevenue: totalARR,
