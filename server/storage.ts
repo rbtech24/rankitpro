@@ -384,8 +384,40 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteCompany(id: number): Promise<boolean> {
-    const result = await db.delete(companies).where(eq(companies.id, id));
-    return result.rowCount ? result.rowCount > 0 : false;
+    try {
+      // Delete all related data first to avoid foreign key constraint violations
+      
+      // Delete blog posts
+      await db.delete(blogPosts).where(eq(blogPosts.companyId, id));
+      
+      // Delete check-ins
+      await db.delete(checkIns).where(eq(checkIns.companyId, id));
+      
+      // Delete technicians
+      await db.delete(technicians).where(eq(technicians.companyId, id));
+      
+      // Delete users associated with this company
+      await db.delete(users).where(eq(users.companyId, id));
+      
+      // Delete review requests
+      await db.delete(reviewRequests).where(eq(reviewRequests.companyId, id));
+      
+      // Delete review responses
+      await db.delete(reviewResponses).where(eq(reviewResponses.companyId, id));
+      
+      // Delete support tickets
+      await db.delete(supportTickets).where(eq(supportTickets.companyId, id));
+      
+      // Delete API credentials
+      await db.delete(apiCredentials).where(eq(apiCredentials.companyId, id));
+      
+      // Finally delete the company
+      const result = await db.delete(companies).where(eq(companies.id, id));
+      return result.rowCount ? result.rowCount > 0 : false;
+    } catch (error) {
+      console.error('Error deleting company:', error);
+      throw error;
+    }
   }
 
   async getCompanyCount(): Promise<number> {
