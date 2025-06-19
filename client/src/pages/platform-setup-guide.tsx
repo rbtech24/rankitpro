@@ -27,37 +27,12 @@ export default function PlatformSetupGuide() {
     });
   };
 
-  const shortcodes = {
-    visits: {
-      basic: "[rankitpro_visits]",
-      withParams: "[rankitpro_visits limit=\"5\" company_slug=\"your-company\"]",
-      customized: "[rankitpro_visits limit=\"10\" show_photos=\"true\" show_location=\"true\"]"
-    },
-    reviews: {
-      basic: "[rankitpro_reviews]",
-      withParams: "[rankitpro_reviews limit=\"3\" rating_min=\"4\"]",
-      customized: "[rankitpro_reviews limit=\"5\" show_photos=\"true\" layout=\"grid\"]"
-    },
-    testimonials: {
-      basic: "[rankitpro_testimonials]",
-      withParams: "[rankitpro_testimonials limit=\"3\" featured_only=\"true\"]"
-    },
-    recentWork: {
-      basic: "[rankitpro_recent_work]",
-      withParams: "[rankitpro_recent_work limit=\"6\" show_before_after=\"true\"]"
-    },
-    technicianProfile: {
-      basic: "[rankitpro_technician_profile]",
-      withParams: "[rankitpro_technician_profile technician_id=\"123\" show_stats=\"true\"]"
-    }
-  };
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Platform Setup Guide</h1>
-          <p className="text-gray-600 mt-2">Get your Rank It Pro platform integrated with your website and start generating automatic SEO content from technician visits. (Updated - Fixed Display Issues)</p>
+          <p className="text-gray-600 mt-2">Get your Rank It Pro platform integrated with your website and start generating automatic SEO content from technician visits.</p>
         </div>
 
         <Tabs defaultValue="overview" className="w-full">
@@ -97,33 +72,39 @@ export default function PlatformSetupGuide() {
                   Platform Overview
                 </CardTitle>
                 <CardDescription>
-                  Welcome to Rank It Pro! Follow these steps to integrate our platform with your website and start showcasing your technician's work.
+                  Choose your integration method and get started with Rank It Pro.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-semibold text-green-700 mb-2">✓ Step 1: WordPress Integration</h3>
-                    <p className="text-sm text-gray-600">Install our WordPress plugin to automatically display check-ins and reviews on your site.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">WordPress Integration</h3>
+                    <p className="text-gray-600">Perfect for WordPress websites. Install our plugin and use shortcodes to display content.</p>
+                    <div className="space-y-2">
+                      <Badge variant="secondary">Auto Blog Posts</Badge>
+                      <Badge variant="secondary">SEO Optimized</Badge>
+                      <Badge variant="secondary">Easy Setup</Badge>
+                    </div>
                   </div>
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-semibold text-blue-700 mb-2">⚡ Step 2: Mobile App Setup</h3>
-                    <p className="text-sm text-gray-600">Set up technicians with the mobile app for easy field check-ins and photo uploads.</p>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-semibold text-purple-700 mb-2">🧪 Step 3: Test & Verify</h3>
-                    <p className="text-sm text-gray-600">Create test check-ins and verify everything displays correctly on your website.</p>
+                  
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Any Website Integration</h3>
+                    <p className="text-gray-600">Works with any website platform using JavaScript embed codes.</p>
+                    <div className="space-y-2">
+                      <Badge variant="secondary">Universal</Badge>
+                      <Badge variant="secondary">Customizable</Badge>
+                      <Badge variant="secondary">Real-time</Badge>
+                    </div>
                   </div>
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-semibold text-blue-900 mb-2">Platform Benefits</h4>
+                  <h4 className="font-semibold text-blue-900 mb-2">Quick Start Checklist:</h4>
                   <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Automatic SEO content generation from service visits</li>
-                    <li>• Professional photo galleries and before/after showcases</li>
-                    <li>• Customer review management and display</li>
-                    <li>• Mobile-first technician interface</li>
-                    <li>• Real-time website integration</li>
+                    <li>✓ Choose your integration method (WordPress or Any Website)</li>
+                    <li>✓ Add technician users to your account</li>
+                    <li>✓ Set up mobile app access for field technicians</li>
+                    <li>✓ Test the complete workflow</li>
                   </ul>
                 </div>
               </CardContent>
@@ -281,9 +262,9 @@ export default function PlatformSetupGuide() {
                     </div>
                   </div>
 
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <h4 className="font-semibold text-blue-900 mb-2">Pro Tip:</h4>
-                    <p className="text-sm text-blue-800">Blog posts include SEO-optimized content, location data, and service photos that help improve your local search rankings.</p>
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <h4 className="font-semibold text-green-900 mb-2">Pro Tip:</h4>
+                    <p className="text-sm text-green-800">Blog posts include SEO-optimized content, location data, and service photos that help improve your local search rankings.</p>
                   </div>
                 </div>
               </CardContent>
@@ -299,7 +280,7 @@ export default function PlatformSetupGuide() {
                   Any Website Integration
                 </CardTitle>
                 <CardDescription>
-                  Add Rank It Pro to any website using JavaScript embed codes.
+                  Works with Wix, Squarespace, GoDaddy, custom HTML sites, and any platform that allows custom code.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -310,7 +291,7 @@ export default function PlatformSetupGuide() {
                     
                     <div className="flex items-center gap-2">
                       <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border overflow-x-auto break-all">
-                        &lt;script src="https://rankitpro.com/embed/rankitpro.min.js"&gt;&lt;/script&gt;
+                        {'<script src="https://rankitpro.com/embed/rankitpro.min.js"></script>'}
                       </div>
                       <Button 
                         size="sm" 
@@ -329,7 +310,7 @@ export default function PlatformSetupGuide() {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border overflow-x-auto break-all">
-                          &lt;div id="rankitpro-visits" data-api-key="YOUR_API_KEY" data-limit="5"&gt;&lt;/div&gt;
+                          {'<div id="rankitpro-visits" data-api-key="YOUR_API_KEY" data-limit="5"></div>'}
                         </div>
                         <Button 
                           size="sm" 
@@ -342,48 +323,13 @@ export default function PlatformSetupGuide() {
                       
                       <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200">
                         <p className="text-sm text-yellow-800">
-                          <strong>Important:</strong> Replace "YOUR_API_KEY" with your actual API key from the API Credentials section.
+                          <strong>Important:</strong> Replace "YOUR_API_KEY" with your actual API key from the WordPress Integration section above.
                         </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Step 3: Customization Options</h3>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <h4 className="font-medium mb-2">Data Attributes</h4>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <code className="bg-gray-100 px-2 py-1 rounded">data-limit</code>
-                              <span className="text-gray-600">Number of items</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <code className="bg-gray-100 px-2 py-1 rounded">data-theme</code>
-                              <span className="text-gray-600">light, dark, auto</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <code className="bg-gray-100 px-2 py-1 rounded">data-layout</code>
-                              <span className="text-gray-600">grid, list, carousel</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-medium mb-2">Available Containers</h4>
-                          <div className="space-y-2 text-sm">
-                            <div><code className="bg-gray-100 px-2 py-1 rounded">rankitpro-visits</code></div>
-                            <div><code className="bg-gray-100 px-2 py-1 rounded">rankitpro-reviews</code></div>
-                            <div><code className="bg-gray-100 px-2 py-1 rounded">rankitpro-testimonials</code></div>
-                            <div><code className="bg-gray-100 px-2 py-1 rounded">rankitpro-gallery</code></div>
-                          </div>
-                        </div>
                       </div>
                       
                       <div className="flex items-center gap-2">
                         <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border overflow-x-auto break-all">
-                          &lt;div id="rankitpro-reviews" data-api-key="YOUR_API_KEY" data-limit="3" data-theme="light" data-layout="grid"&gt;&lt;/div&gt;
+                          {'<div id="rankitpro-reviews" data-api-key="YOUR_API_KEY" data-limit="3" data-theme="light" data-layout="grid"></div>'}
                         </div>
                         <Button 
                           size="sm" 
@@ -392,6 +338,53 @@ export default function PlatformSetupGuide() {
                         >
                           {copiedItems.has('reviews-div') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                         </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3">Step 3: Platform-Specific Instructions</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <h4 className="font-medium">Wix</h4>
+                        <ol className="text-sm text-gray-600 space-y-1">
+                          <li>1. Go to your site editor</li>
+                          <li>2. Click "Add" → "Embed"</li>
+                          <li>3. Choose "Custom Code"</li>
+                          <li>4. Paste the embed code</li>
+                          <li>5. Save and publish</li>
+                        </ol>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <h4 className="font-medium">Squarespace</h4>
+                        <ol className="text-sm text-gray-600 space-y-1">
+                          <li>1. Edit your page</li>
+                          <li>2. Add a "Code Block"</li>
+                          <li>3. Paste the embed code</li>
+                          <li>4. Click "Apply"</li>
+                          <li>5. Save your changes</li>
+                        </ol>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <h4 className="font-medium">GoDaddy Website Builder</h4>
+                        <ol className="text-sm text-gray-600 space-y-1">
+                          <li>1. Edit your website</li>
+                          <li>2. Add "HTML" section</li>
+                          <li>3. Paste the embed code</li>
+                          <li>4. Save and publish</li>
+                        </ol>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <h4 className="font-medium">Custom HTML</h4>
+                        <ol className="text-sm text-gray-600 space-y-1">
+                          <li>1. Open your HTML file</li>
+                          <li>2. Find where you want check-ins</li>
+                          <li>3. Paste the embed code</li>
+                          <li>4. Save and upload</li>
+                        </ol>
                       </div>
                     </div>
                   </div>
@@ -406,77 +399,36 @@ export default function PlatformSetupGuide() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5" />
-                  Add Users & Technicians
+                  User Management
                 </CardTitle>
                 <CardDescription>
-                  Set up your team members and technicians for field check-ins.
+                  Add technicians and manage user roles for your organization.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold mb-3">Step 1: Add Technicians</h3>
-                    <p className="text-gray-600 mb-3">Go to the Technicians section in your dashboard to add team members:</p>
-                    
-                    <div className="bg-gray-50 p-4 rounded-lg border">
-                      <ol className="space-y-2 text-sm">
-                        <li>1. Click "Add Technician" in your dashboard</li>
-                        <li>2. Enter their name, email, and specialty</li>
-                        <li>3. Set their role and permissions</li>
-                        <li>4. Send them the mobile app URL: <code className="bg-white px-2 py-1 rounded">rankitpro.com/mobile</code></li>
-                      </ol>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Step 2: Technician Login Credentials</h3>
-                    <p className="text-gray-600 mb-3">Each technician will receive:</p>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium text-green-700 mb-2">Mobile App Access</h4>
-                        <ul className="text-sm text-gray-600 space-y-1">
-                          <li>• Email and password login</li>
-                          <li>• Mobile-optimized interface</li>
-                          <li>• Photo upload capability</li>
-                          <li>• GPS location tracking</li>
-                        </ul>
-                      </div>
-                      
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium text-blue-700 mb-2">Dashboard Access (Optional)</h4>
-                        <ul className="text-sm text-gray-600 space-y-1">
-                          <li>• View their own check-ins</li>
-                          <li>• Edit visit details</li>
-                          <li>• See customer feedback</li>
-                          <li>• Track performance stats</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Step 3: User Roles & Permissions</h3>
-                    <div className="space-y-3">
+                    <h3 className="text-lg font-semibold mb-3">User Roles Overview</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 mb-2">
                           <h4 className="font-medium">Company Admin</h4>
-                          <Badge variant="secondary">Full Access</Badge>
+                          <Badge variant="outline">Admin</Badge>
                         </div>
-                        <p className="text-sm text-gray-600">Complete platform access, user management, integrations, billing</p>
+                        <p className="text-sm text-gray-600">Full access to company settings, user management, and all data</p>
                       </div>
                       
                       <div className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 mb-2">
                           <h4 className="font-medium">Technician</h4>
-                          <Badge variant="outline">Field Access</Badge>
+                          <Badge variant="outline">Field User</Badge>
                         </div>
-                        <p className="text-sm text-gray-600">Mobile app access, check-in creation, photo uploads, basic reporting</p>
+                        <p className="text-sm text-gray-600">Create check-ins, upload photos, manage their own service records</p>
                       </div>
                       
                       <div className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">Manager</h4>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-medium">Supervisor</h4>
                           <Badge variant="outline">Supervisor</Badge>
                         </div>
                         <p className="text-sm text-gray-600">View all technician data, approve check-ins, generate reports</p>
@@ -579,11 +531,10 @@ export default function PlatformSetupGuide() {
                   <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                     <h4 className="font-semibold text-green-900 mb-2">Best Practices:</h4>
                     <ul className="text-sm text-green-800 space-y-1">
-                      <li>• Take photos before, during, and after service</li>
-                      <li>• Include detailed service notes</li>
-                      <li>• Verify customer information is accurate</li>
-                      <li>• Use GPS for accurate location data</li>
-                      <li>• Submit check-ins promptly after service completion</li>
+                      <li>• Train technicians to take before/after photos</li>
+                      <li>• Encourage detailed work descriptions</li>
+                      <li>• Enable location services for accurate GPS data</li>
+                      <li>• Check internet connection before creating check-ins</li>
                     </ul>
                   </div>
                 </div>
@@ -698,7 +649,6 @@ export default function PlatformSetupGuide() {
                       <li>✓ Location and service details are accurate</li>
                       <li>✓ WordPress blog posts generate automatically</li>
                       <li>✓ Mobile app allows easy check-in creation</li>
-                      <li>✓ SEO content includes relevant keywords</li>
                     </ul>
                   </div>
                 </div>
