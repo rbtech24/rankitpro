@@ -130,7 +130,7 @@ export default function AIWriter() {
               ) : checkIns && checkIns.length > 0 ? (
                 checkIns.map((checkIn) => (
                   <SelectItem key={checkIn.id} value={checkIn.id.toString()}>
-                    {checkIn.jobType} - {checkIn.technician.name}
+                    {checkIn.jobType} - {checkIn.technician?.name || 'Unknown Technician'}
                   </SelectItem>
                 ))
               ) : (
