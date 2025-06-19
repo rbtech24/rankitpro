@@ -10,6 +10,7 @@ import SuperAdminDashboard from "@/components/dashboard/super-admin-dashboard";
 import VisitModal from "@/components/modals/visit-modal";
 import MobileVisitModal from "@/components/technician/mobile-visit-modal";
 import TechDashboard from "@/components/technician/tech-dashboard";
+import UsageWarningBanner from "@/components/usage-warning-banner";
 
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "@/lib/auth";
@@ -56,6 +57,9 @@ export default function Dashboard() {
           <SuperAdminDashboard />
         ) : isCompanyAdmin ? (
           <>
+            {/* Usage Warning Banner for Company Admins */}
+            <UsageWarningBanner />
+            
             {/* Company Admin Dashboard */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <StatsOverview />

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import UsageLimitModal from "@/components/usage-limit-modal";
 
 // Reverse geocoding function to convert coordinates to address
 async function reverseGeocode(latitude: number, longitude: number): Promise<string> {
@@ -118,6 +119,8 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoPreviewUrls, setPhotoPreviewUrls] = useState<string[]>([]);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [showUsageLimitModal, setShowUsageLimitModal] = useState(false);
+  const [usageLimitData, setUsageLimitData] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -220,12 +223,32 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
         onSuccess();
       }
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: `Failed to submit check-in: ${error.message}`,
-        variant: "destructive",
-      });
+    onError: async (error: Error) => {
+      // Check if this is a usage limit error
+      if (error.message.includes("USAGE_LIMIT_EXCEEDED") || error.message.includes("Monthly check-in limit reached")) {
+        try {
+          // Fetch current usage data to show in modal
+          const response = await apiRequest("GET", "/api/usage-limits");
+          const usageData = await response.json();
+          setUsageLimitData(usageData);
+          setShowUsageLimitModal(true);
+        } catch (usageError) {
+          // Fallback usage data if API call fails
+          setUsageLimitData({
+            currentUsage: 0,
+            limit: 50,
+            planName: 'Current Plan',
+            limitReached: true
+          });
+          setShowUsageLimitModal(true);
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: `Failed to submit check-in: ${error.message}`,
+          variant: "destructive",
+        });
+      }
     }
   });
   
