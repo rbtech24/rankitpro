@@ -1999,6 +1999,119 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  app.get("/api/admin/users", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user.role !== "super_admin") {
+        return res.status(403).json({ message: "Access denied - Super admin required" });
+      }
+
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Admin users error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/admin/subscriptions", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user.role !== "super_admin") {
+        return res.status(403).json({ message: "Access denied - Super admin required" });
+      }
+
+      const subscriptions = await storage.getAllSubscriptions();
+      res.json(subscriptions);
+    } catch (error) {
+      console.error("Admin subscriptions error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/admin/transactions", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user.role !== "super_admin") {
+        return res.status(403).json({ message: "Access denied - Super admin required" });
+      }
+
+      const transactions = await storage.getAllTransactions();
+      res.json(transactions);
+    } catch (error) {
+      console.error("Admin transactions error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/admin/ai-usage", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user.role !== "super_admin") {
+        return res.status(403).json({ message: "Access denied - Super admin required" });
+      }
+
+      const aiUsage = await storage.getAllAIUsage();
+      res.json(aiUsage);
+    } catch (error) {
+      console.error("Admin AI usage error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/admin/support-tickets", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user.role !== "super_admin") {
+        return res.status(403).json({ message: "Access denied - Super admin required" });
+      }
+
+      const tickets = await storage.getAllSupportTickets();
+      res.json(tickets);
+    } catch (error) {
+      console.error("Admin support tickets error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/admin/database-health", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user.role !== "super_admin") {
+        return res.status(403).json({ message: "Access denied - Super admin required" });
+      }
+
+      const dbHealth = await storage.getDatabaseHealth();
+      res.json(dbHealth);
+    } catch (error) {
+      console.error("Database health error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/admin/system-config", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user.role !== "super_admin") {
+        return res.status(403).json({ message: "Access denied - Super admin required" });
+      }
+
+      const config = {
+        environment: process.env.NODE_ENV || 'development',
+        features: {
+          aiEnabled: !!process.env.OPENAI_API_KEY,
+          emailEnabled: !!process.env.RESEND_API_KEY,
+          stripeEnabled: !!process.env.STRIPE_SECRET_KEY,
+          webhooksEnabled: true
+        },
+        limits: {
+          maxCompanies: 1000,
+          maxUsersPerCompany: 100,
+          maxCheckInsPerDay: 500,
+          maxAIRequests: 1000
+        }
+      };
+
+      res.json(config);
+    } catch (error) {
+      console.error("System config error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   app.get("/api/admin/billing-overview", isAuthenticated, async (req, res) => {
     try {
       if (req.user.role !== "super_admin") {
