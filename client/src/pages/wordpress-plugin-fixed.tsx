@@ -67,7 +67,7 @@ export default function WordPressPlugin() {
   };
 
   const apiCredentials = {
-    apiUrl: `https://yourcompany.rankitpro.com`,
+    apiUrl: `https://rankitpro.com`,
     apiKey: `rip_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`,
     secretKey: `rip_secret_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
   };

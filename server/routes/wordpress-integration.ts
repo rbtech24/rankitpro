@@ -347,7 +347,7 @@ router.get('/embed', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
         }
         
         // Generate the JavaScript embed code
-        const apiEndpoint = process.env.API_ENDPOINT || `https://${req.headers.host}`;
+        const apiEndpoint = process.env.API_ENDPOINT || 'https://rankitpro.com';
         const embedCode = WordPressService.generateJavaScriptEmbedCode(apiKey, apiEndpoint);
         
         // Save the JavaScript embed code to the company

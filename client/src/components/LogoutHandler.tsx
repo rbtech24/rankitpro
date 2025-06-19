@@ -32,8 +32,7 @@ export default function LogoutHandler() {
         window.location.hostname,
         '.' + window.location.hostname,
         '.onrender.com',
-        '.replit.app',
-        '.replit.dev'
+        '.rankitpro.com'
       ];
       
       document.cookie.split(";").forEach(cookie => {
