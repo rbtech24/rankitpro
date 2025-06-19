@@ -392,10 +392,8 @@ function IntegrationsPage() {
                     className="flex items-center gap-2"
                     onClick={async () => {
                       try {
-                        // Fetch real check-in data for preview
                         const checkInsRes = await apiRequest("GET", "/api/check-ins?limit=3");
                         const checkIns = await checkInsRes.json();
-                        
                         const previewWindow = window.open('about:blank', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
                         if (previewWindow) {
                           let checkInHTML = '';
@@ -509,36 +507,11 @@ function IntegrationsPage() {
                         }
                       } catch (error) {
                         console.error('Preview error:', error);
-                        // Fallback to basic preview
-                        const previewWindow = window.open('about:blank', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-                        if (previewWindow) {
-                          const companyName = auth?.company?.name || 'Your Company';
-                          previewWindow.document.write(`
-                            <!DOCTYPE html>
-                            <html>
-                            <head>
-                              <title>Embed Preview - ${companyName}</title>
-                              <meta charset="utf-8">
-                              <style>
-                                body { font-family: Arial, sans-serif; padding: 20px; background: #f8fafc; }
-                                .preview-header { background: #3b82f6; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
-                                .embed-container { background: white; border: 2px solid #e2e8f0; padding: 25px; border-radius: 8px; text-align: center; }
-                              </style>
-                            </head>
-                            <body>
-                              <div class="preview-header">
-                                <h2>Embed Preview</h2>
-                                <p>Unable to load live data - please ensure you're logged in</p>
-                              </div>
-                              <div class="embed-container">
-                                <h3>Check-in Widget</h3>
-                                <p>Your actual check-ins will appear here when the widget is embedded on your website.</p>
-                              </div>
-                            </body>
-                            </html>
-                          `);
-                          previewWindow.document.close();
-                        }
+                        toast({
+                          title: "Preview Error",
+                          description: "Unable to load preview. Please try again.",
+                          variant: "destructive"
+                        });
                       }
                     }}
                   >
