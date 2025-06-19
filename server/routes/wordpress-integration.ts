@@ -223,11 +223,68 @@ Author: Rank It Pro
 ${pluginCode}
 ?>`;
 
-    // Set the response headers for downloading the plugin
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader('Content-Disposition', 'attachment; filename=rank-it-pro-plugin.php');
-    
-    return res.send(completePlugin);
+    // Create ZIP file for WordPress plugin
+    const archiver = require('archiver');
+    const archive = archiver('zip', {
+      zlib: { level: 9 } // Maximum compression
+    });
+
+    // Set proper headers for ZIP download
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename=rank-it-pro-plugin.zip');
+
+    // Pipe archive data to response
+    archive.pipe(res);
+
+    // Add the main plugin file
+    archive.append(completePlugin, { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
+
+    // Add readme file
+    archive.append(readmeContent, { name: 'rank-it-pro-plugin/README.md' });
+
+    // Add plugin assets directory structure
+    const cssContent = `/* Rank It Pro Plugin Styles */
+.rank-it-pro-widget {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  background: #fff;
+}
+
+.rank-it-pro-checkin {
+  border-left: 4px solid #0073aa;
+  padding-left: 15px;
+  margin-bottom: 20px;
+}
+
+.rank-it-pro-date {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.rank-it-pro-location {
+  color: #0073aa;
+  font-weight: 500;
+}`;
+
+    archive.append(cssContent, { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
+
+    // Add JavaScript file
+    const jsContent = `// Rank It Pro Plugin JavaScript
+jQuery(document).ready(function($) {
+  // Initialize plugin functionality
+  $('.rank-it-pro-widget').each(function() {
+    // Add any interactive features here
+  });
+});`;
+
+    archive.append(jsContent, { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
+
+    // Finalize the archive
+    archive.finalize();
+
+    return;
   } catch (error) {
     console.error('Error generating WordPress plugin:', error);
     return res.status(500).json({ error: 'Error generating WordPress plugin' });
