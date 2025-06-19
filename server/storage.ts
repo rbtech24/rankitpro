@@ -19,7 +19,8 @@ const {
   reviewFollowUpSettings, reviewRequestStatuses, apiCredentials, aiUsageLogs, 
   wordpressIntegrations, monthlyAiUsage, salesPeople, salesCommissions, 
   companyAssignments, testimonials, testimonialApprovals, wordpressCustomFields,
-  supportTickets, supportTicketResponses, subscriptionStatus, paymentTransactions
+  supportTickets, supportTicketResponses, subscriptionStatus, paymentTransactions,
+  subscriptionPlans
 } = schema;
 
 export interface IStorage {

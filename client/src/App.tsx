@@ -48,6 +48,7 @@ import ImplementationChecklist from "@/pages/downloads/implementation-checklist"
 import TechnicianTrainingSlides from "@/pages/downloads/technician-training-slides";
 import BillingManagement from "@/pages/billing-management";
 import CompaniesManagement from "@/pages/companies-management";
+import ShortcodeDemo from "@/pages/shortcode-demo";
 import SubscriptionManagement from "@/pages/subscription-management";
 import FinancialDashboard from "@/pages/financial-dashboard";
 import SuperAdminFinance from "@/pages/super-admin-finance";
@@ -1221,6 +1222,9 @@ function Router() {
       </Route>
       <Route path="/subscription-management">
         <PrivateRoute component={SubscriptionManagement} path="/subscription-management" role="super_admin" />
+      </Route>
+      <Route path="/shortcode-demo">
+        <PrivateRoute component={ShortcodeDemo} path="/shortcode-demo" role="super_admin" />
       </Route>
       <Route path="/financial-dashboard">
         <PrivateRoute component={FinancialDashboard} path="/financial-dashboard" role="super_admin" />
