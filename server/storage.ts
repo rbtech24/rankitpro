@@ -11,7 +11,7 @@ import {
   SupportTicketResponse, InsertSupportTicketResponse
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, gte, lte, sql } from "drizzle-orm";
+import { eq, and, desc, asc, gte, lte, sql, not, like } from "drizzle-orm";
 import * as schema from "@shared/schema";
 
 const {
@@ -775,42 +775,52 @@ export class DatabaseStorage implements IStorage {
       const totalCompanies = await this.getCompanyCount();
       const activeCompanies = await this.getActiveCompaniesCount();
       
-      // Calculate MRR from active subscriptions
-      const activeCompaniesData = await db.select({
+      // Only count companies that are NOT test data
+      const realCompaniesData = await db.select({
         plan: companies.plan,
         subscriptionPlanId: companies.subscriptionPlanId,
-        createdAt: companies.createdAt
-      }).from(companies).where(eq(companies.isTrialActive, true));
+        createdAt: companies.createdAt,
+        name: companies.name
+      }).from(companies).where(
+        and(
+          eq(companies.isTrialActive, true),
+          not(like(companies.name, '%Test%')),
+          not(like(companies.name, '%Debug%')),
+          not(like(companies.name, '%Tech Test%'))
+        )
+      );
       
       let totalMRR = 0;
       let totalARR = 0;
       
       const planPrices = { starter: 29, pro: 79, agency: 149 };
       
-      for (const company of activeCompaniesData) {
+      for (const company of realCompaniesData) {
         const monthlyPrice = planPrices[company.plan as keyof typeof planPrices] || 29;
         totalMRR += monthlyPrice;
         totalARR += monthlyPrice * 12;
       }
 
-      // Calculate signups this month
+      // Calculate signups this month (excluding test data)
       const currentMonth = new Date();
       currentMonth.setDate(1);
       currentMonth.setHours(0, 0, 0, 0);
       
-      const monthlySignups = activeCompaniesData.filter(company => 
+      const monthlySignups = realCompaniesData.filter(company => 
         company.createdAt && new Date(company.createdAt) >= currentMonth
       ).length;
+
+      const realCompanyCount = realCompaniesData.length;
 
       return {
         totalRevenue: totalARR,
         monthlyRecurringRevenue: totalMRR,
         annualRecurringRevenue: totalARR,
-        totalCompanies,
-        activeSubscriptions: activeCompanies,
+        totalCompanies: realCompanyCount,
+        activeSubscriptions: realCompanyCount,
         monthlySignups,
-        churnRate: 0, // Calculate based on cancellations
-        averageRevenuePerUser: activeCompanies > 0 ? totalMRR / activeCompanies : 0
+        churnRate: 0,
+        averageRevenuePerUser: realCompanyCount > 0 ? totalMRR / realCompanyCount : 0
       };
     } catch (error) {
       console.error('Error calculating financial metrics:', error);
