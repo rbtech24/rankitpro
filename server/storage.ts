@@ -1650,6 +1650,36 @@ export class DatabaseStorage implements IStorage {
       return 0;
     }
   }
+
+  async deleteCheckIn(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(checkIns).where(eq(checkIns.id, id));
+      return (result.rowCount || 0) > 0;
+    } catch (error) {
+      console.error('Error deleting check-in:', error);
+      return false;
+    }
+  }
+
+  async deleteBlogPost(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(blogPosts).where(eq(blogPosts.id, id));
+      return (result.rowCount || 0) > 0;
+    } catch (error) {
+      console.error('Error deleting blog post:', error);
+      return false;
+    }
+  }
+
+  async deleteReviewResponse(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(reviewResponses).where(eq(reviewResponses.id, id));
+      return (result.rowCount || 0) > 0;
+    } catch (error) {
+      console.error('Error deleting review response:', error);
+      return false;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -647,7 +647,20 @@ class RankItProIntegration {
         
         $output = '<div class="rankitpro-checkins">';
         foreach ($data as $visit) {
-            $output .= '<div class="visit-item">';
+            $date = date('M j, Y', strtotime($visit['createdAt']));
+            $jobType = esc_html($visit['jobType']);
+            $location = !empty($visit['location']) ? esc_html($visit['location']) : 'Location not specified';
+            $notes = !empty($visit['notes']) ? esc_html($visit['notes']) : 'No additional notes';
+            
+            $output .= '<div class="visit-item">
+                <div class="visit-header">
+                    <h4>' . $jobType . '</h4>
+                    <span class="visit-date">' . $date . '</span>
+                </div>
+                <div class="visit-content">
+                    <p><strong>Location:</strong> ' . $location . '</p>
+                    <p><strong>Notes:</strong> ' . $notes . '</p>
+                </div>';
             $output .= '<h4>Service Visit - ' . esc_html($visit['jobType'] ?? 'General Service') . '</h4>';
             if (!empty($visit['location'])) {
                 $output .= '<p><strong>Location:</strong> ' . esc_html($visit['location']) . '</p>';
