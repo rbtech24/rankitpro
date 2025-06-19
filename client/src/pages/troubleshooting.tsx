@@ -1,178 +1,223 @@
-import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { 
-  Search, 
   AlertTriangle, 
   CheckCircle, 
-  Info, 
-  ChevronDown, 
-  ChevronRight,
-  Wifi,
-  Smartphone,
-  Globe,
-  Settings,
+  XCircle, 
+  Wifi, 
+  Smartphone, 
+  Globe, 
+  Settings, 
   Users,
-  Lock
+  Camera,
+  MapPin,
+  MessageSquare,
+  RefreshCw,
+  HelpCircle
 } from "lucide-react";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 export default function Troubleshooting() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [openSections, setOpenSections] = useState<Set<string>>(new Set());
-
-  const toggleSection = (sectionId: string) => {
-    const newOpenSections = new Set(openSections);
-    if (newOpenSections.has(sectionId)) {
-      newOpenSections.delete(sectionId);
-    } else {
-      newOpenSections.add(sectionId);
-    }
-    setOpenSections(newOpenSections);
-  };
-
-  const troubleshootingItems = [
+  const commonIssues = [
     {
-      id: "mobile-login",
-      category: "Mobile Access",
-      title: "Technicians Can't Log Into Mobile App",
-      icon: <Smartphone className="w-5 h-5 text-blue-600" />,
-      severity: "high",
-      solution: [
-        "Verify technician credentials were created correctly in Management → Technicians",
-        "Check that the technician account is marked as 'Active'",
-        "Ensure technicians are using the correct mobile URL: yoursite.com/mobile",
-        "Try logging in with the same credentials on desktop to verify account works",
-        "Clear mobile browser cache and cookies, then try again"
-      ],
-      prevention: "Always test new technician accounts immediately after creation and provide clear login instructions."
+      category: "Mobile App",
+      icon: Smartphone,
+      color: "text-blue-600",
+      issues: [
+        {
+          problem: "GPS location not accurate",
+          symptoms: ["Wrong address shown", "Location off by several blocks", "Cannot detect location"],
+          solutions: [
+            "Enable high accuracy GPS in device settings",
+            "Clear browser cache and reload the app",
+            "Ensure location permissions are granted",
+            "Try moving to an open area with clear sky view",
+            "Restart the mobile browser"
+          ],
+          priority: "high"
+        },
+        {
+          problem: "Photos not uploading",
+          symptoms: ["Upload button grayed out", "Photos appear but don't save", "Error message on photo submission"],
+          solutions: [
+            "Check internet connection strength",
+            "Reduce photo file size (under 5MB per photo)",
+            "Clear browser storage and try again",
+            "Ensure camera permissions are enabled",
+            "Try taking photos in better lighting"
+          ],
+          priority: "medium"
+        },
+        {
+          problem: "App won't install on home screen",
+          symptoms: ["Add to Home Screen option missing", "App icon doesn't appear", "Opens in browser instead of app"],
+          solutions: [
+            "Use Safari on iOS or Chrome on Android",
+            "Visit the full URL (not a shortened link)",
+            "Clear browser cache and try again",
+            "Check if browser supports PWA installation",
+            "Try visiting from the browser menu, not a link"
+          ],
+          priority: "medium"
+        }
+      ]
     },
     {
-      id: "photos-not-uploading",
-      category: "Mobile Access",
-      title: "Photos Not Uploading from Mobile",
-      icon: <Smartphone className="w-5 h-5 text-orange-600" />,
-      severity: "medium",
-      solution: [
-        "Check mobile device has stable internet connection",
-        "Verify camera permissions are enabled for the browser",
-        "Try reducing photo file size - large images may fail to upload",
-        "Ensure sufficient storage space on mobile device",
-        "Test upload with a different photo to isolate the issue",
-        "Switch to Wi-Fi if using cellular data with poor signal"
-      ],
-      prevention: "Train technicians to check connectivity before starting visits and take multiple smaller photos instead of very large ones."
+      category: "WordPress Integration",
+      icon: Globe,
+      color: "text-green-600",
+      issues: [
+        {
+          problem: "Plugin not activating",
+          symptoms: ["Error message during activation", "Plugin appears inactive", "Missing from plugins list"],
+          solutions: [
+            "Check WordPress version compatibility (5.0+)",
+            "Verify plugin file was uploaded correctly",
+            "Check for PHP errors in WordPress error logs",
+            "Ensure proper file permissions",
+            "Try deactivating other plugins temporarily"
+          ],
+          priority: "high"
+        },
+        {
+          problem: "Shortcodes not displaying content",
+          symptoms: ["Shortcode text shows instead of content", "Empty space where content should be", "Error messages in shortcode area"],
+          solutions: [
+            "Verify API credentials are correct",
+            "Check if your company has published check-ins",
+            "Ensure shortcode syntax is correct",
+            "Clear WordPress cache",
+            "Check if plugin settings are configured properly"
+          ],
+          priority: "medium"
+        },
+        {
+          problem: "Auto-publishing not working",
+          symptoms: ["New check-ins don't appear on website", "Manual sync required", "Webhook errors in logs"],
+          solutions: [
+            "Verify webhook URL is accessible",
+            "Check WordPress site security settings",
+            "Ensure auto-publish is enabled in plugin settings",
+            "Test webhook endpoint manually",
+            "Check for conflicting security plugins"
+          ],
+          priority: "medium"
+        }
+      ]
     },
     {
-      id: "wordpress-not-publishing",
-      category: "Website Integration",
-      title: "Check-ins Not Publishing to WordPress",
-      icon: <Globe className="w-5 h-5 text-purple-600" />,
-      severity: "high",
-      solution: [
-        "Verify WordPress credentials in Management → Website Integration",
-        "Check that WordPress site is accessible and not in maintenance mode",
-        "Ensure the WordPress plugin is installed and activated",
-        "Verify auto-publishing is enabled in integration settings",
-        "Test with a manual publish first to confirm connection",
-        "Check WordPress user has sufficient permissions (Editor or Administrator)"
-      ],
-      prevention: "Regularly test the WordPress connection and monitor for any plugin conflicts or hosting changes."
+      category: "Account & Authentication",
+      icon: Users,
+      color: "text-purple-600",
+      issues: [
+        {
+          problem: "Cannot log in to dashboard",
+          symptoms: ["Invalid credentials error", "Page won't load after login", "Session expires immediately"],
+          solutions: [
+            "Verify email and password are correct",
+            "Clear browser cookies and cache",
+            "Try logging in from incognito/private mode",
+            "Check if account is active and not suspended",
+            "Contact support if password reset doesn't work"
+          ],
+          priority: "high"
+        },
+        {
+          problem: "Technician accounts not working",
+          symptoms: ["Technicians can't access mobile app", "Role permissions not correct", "Account shows as inactive"],
+          solutions: [
+            "Verify technician email addresses are correct",
+            "Check if accounts are activated in company admin",
+            "Ensure proper role assignments",
+            "Have technicians clear their browser cache",
+            "Verify company subscription includes technician accounts"
+          ],
+          priority: "medium"
+        }
+      ]
     },
     {
-      id: "reviews-not-sending",
-      category: "Review System",
-      title: "Review Requests Not Being Sent",
-      icon: <Settings className="w-5 h-5 text-green-600" />,
-      severity: "medium",
-      solution: [
-        "Check email/SMS service configuration in system settings",
-        "Verify customer email addresses are valid and properly formatted",
-        "Ensure review automation is enabled and configured",
-        "Check spam folders - review emails might be filtered",
-        "Verify phone numbers are in correct format for SMS (+1-555-0123)",
-        "Test with your own email/phone first to confirm delivery"
-      ],
-      prevention: "Regularly monitor review request delivery rates and maintain clean customer contact lists."
-    },
-    {
-      id: "slow-performance",
-      category: "Performance",
-      title: "Dashboard Loading Slowly",
-      icon: <Wifi className="w-5 h-5 text-red-600" />,
-      severity: "low",
-      solution: [
-        "Clear browser cache and cookies",
-        "Check internet connection speed and stability",
-        "Close unnecessary browser tabs to free up memory",
-        "Try accessing from a different device or browser",
-        "Disable browser extensions that might interfere",
-        "Contact support if issues persist across multiple devices"
-      ],
-      prevention: "Keep browsers updated and avoid running too many applications simultaneously."
-    },
-    {
-      id: "api-authentication",
-      category: "API Integration",
-      title: "API Requests Returning 401 Unauthorized",
-      icon: <Lock className="w-5 h-5 text-red-600" />,
-      severity: "high",
-      solution: [
-        "Verify API key is correct and hasn't expired",
-        "Check Authorization header format: 'Bearer YOUR_API_KEY'",
-        "Ensure API key has proper permissions for the endpoint",
-        "Generate a new API key if the current one is compromised",
-        "Verify the request is being sent to the correct API endpoint",
-        "Check for any special characters in the API key that might need encoding"
-      ],
-      prevention: "Store API keys securely and rotate them regularly. Monitor API usage for unusual patterns."
-    },
-    {
-      id: "gps-not-working",
-      category: "Mobile Access",
-      title: "GPS Location Not Being Captured",
-      icon: <Smartphone className="w-5 h-5 text-orange-600" />,
-      severity: "medium",
-      solution: [
-        "Enable location services in mobile device settings",
-        "Grant location permission to the browser app",
-        "Ensure GPS/Location is turned on in device settings",
-        "Try refreshing the page to re-request location access",
-        "Move to an area with better GPS signal (away from tall buildings)",
-        "Use Wi-Fi location if GPS is unavailable"
-      ],
-      prevention: "Train technicians on proper location settings and have them test GPS before first visit."
-    },
-    {
-      id: "missing-technicians",
-      category: "User Management",
-      title: "Technicians Not Showing in Lists",
-      icon: <Users className="w-5 h-5 text-blue-600" />,
-      severity: "medium",
-      solution: [
-        "Check that technician accounts are marked as 'Active'",
-        "Verify technicians are assigned to the correct company",
-        "Refresh the page to reload technician data",
-        "Check user role permissions - ensure you have admin access",
-        "Verify the technician was created successfully and wasn't deleted",
-        "Check for any filters that might be hiding technicians"
-      ],
-      prevention: "Maintain accurate technician records and regularly audit user accounts."
+      category: "Reviews & Automation",
+      icon: MessageSquare,
+      color: "text-orange-600",
+      issues: [
+        {
+          problem: "Review emails not sending",
+          symptoms: ["Customers not receiving review requests", "No emails in automation dashboard", "Email bounces reported"],
+          solutions: [
+            "Check customer email addresses are valid",
+            "Verify email templates are configured",
+            "Check spam/junk folders",
+            "Ensure email automation is enabled",
+            "Verify email service configuration"
+          ],
+          priority: "medium"
+        },
+        {
+          problem: "Review links not working",
+          symptoms: ["404 error when customers click review links", "Review form won't load", "Submissions not saving"],
+          solutions: [
+            "Check if review page URL is correct",
+            "Verify SSL certificate is valid",
+            "Clear customer's browser cache",
+            "Test review form with different browsers",
+            "Check if review collection is enabled"
+          ],
+          priority: "low"
+        }
+      ]
     }
   ];
 
-  const filteredItems = troubleshootingItems.filter(item =>
-    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.solution.some(step => step.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const diagnosticSteps = [
+    {
+      title: "Check System Status",
+      description: "Verify if the issue is on your end or a system-wide problem",
+      steps: [
+        "Visit the status page to check for known issues",
+        "Test with a different device or browser",
+        "Check if other users in your company have the same issue",
+        "Verify your internet connection is stable"
+      ]
+    },
+    {
+      title: "Clear Cache & Data",
+      description: "Resolve many issues by clearing stored data",
+      steps: [
+        "Clear browser cache and cookies",
+        "Log out and log back in",
+        "Remove app from home screen and reinstall",
+        "Clear local storage data"
+      ]
+    },
+    {
+      title: "Check Permissions",
+      description: "Ensure all required permissions are granted",
+      steps: [
+        "Verify location access is enabled",
+        "Check camera permissions for photo uploads",
+        "Ensure notification permissions if using alerts",
+        "Confirm microphone access for audio features"
+      ]
+    },
+    {
+      title: "Test Basic Functions",
+      description: "Isolate the problem by testing core features",
+      steps: [
+        "Try logging in from a clean browser session",
+        "Test creating a simple check-in without photos",
+        "Verify GPS location detection works",
+        "Check if data syncs across devices"
+      ]
+    }
+  ];
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
       case "high": return "destructive";
       case "medium": return "default";
       case "low": return "secondary";
@@ -180,192 +225,281 @@ export default function Troubleshooting() {
     }
   };
 
-  const categories = ["All", "Mobile Access", "Website Integration", "Review System", "Performance", "API Integration", "User Management"];
-  const [selectedCategory, setSelectedCategory] = useState("All");
-
-  const categoryFilteredItems = selectedCategory === "All" 
-    ? filteredItems 
-    : filteredItems.filter(item => item.category === selectedCategory);
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case "high": return <XCircle className="h-4 w-4" />;
+      case "medium": return <AlertTriangle className="h-4 w-4" />;
+      case "low": return <HelpCircle className="h-4 w-4" />;
+      default: return <CheckCircle className="h-4 w-4" />;
+    }
+  };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">Troubleshooting Guide</h1>
-        <p className="text-xl text-gray-600">
-          Find solutions to common issues and get your system running smoothly
-        </p>
-      </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Troubleshooting</h1>
+          <p className="text-gray-500">
+            Common issues and step-by-step solutions to get you back up and running
+          </p>
+        </div>
 
-      {/* Quick Actions */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CheckCircle className="w-6 h-6 text-green-600" />
-            Quick System Health Check
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="p-4 border rounded-lg text-center">
-              <Wifi className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <h3 className="font-semibold text-sm">Connection</h3>
-              <p className="text-xs text-green-600">Online</p>
-            </div>
-            <div className="p-4 border rounded-lg text-center">
-              <Globe className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <h3 className="font-semibold text-sm">Website</h3>
-              <p className="text-xs text-green-600">Connected</p>
-            </div>
-            <div className="p-4 border rounded-lg text-center">
-              <Users className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <h3 className="font-semibold text-sm">Technicians</h3>
-              <p className="text-xs text-blue-600">Active</p>
-            </div>
-            <div className="p-4 border rounded-lg text-center">
-              <Settings className="w-8 h-8 mx-auto mb-2 text-orange-600" />
-              <h3 className="font-semibold text-sm">Services</h3>
-              <p className="text-xs text-orange-600">Running</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        <Tabs defaultValue="issues" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="issues" className="flex items-center">
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Common Issues
+            </TabsTrigger>
+            <TabsTrigger value="diagnostics" className="flex items-center">
+              <Settings className="h-4 w-4 mr-2" />
+              Diagnostics
+            </TabsTrigger>
+            <TabsTrigger value="contact" className="flex items-center">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Get Help
+            </TabsTrigger>
+          </TabsList>
 
-      {/* Search and Filter */}
-      <Card className="mb-8">
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search troubleshooting topics..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Common Issues */}
-      <div className="space-y-4">
-        {categoryFilteredItems.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <Info className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-semibold mb-2">No Results Found</h3>
-              <p className="text-gray-600">Try adjusting your search terms or browse by category.</p>
-            </CardContent>
-          </Card>
-        ) : (
-          categoryFilteredItems.map((item) => (
-            <Card key={item.id}>
-              <Collapsible 
-                open={openSections.has(item.id)}
-                onOpenChange={() => toggleSection(item.id)}
-              >
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-3">
-                        {item.icon}
-                        <div className="text-left">
-                          <CardTitle className="text-lg">{item.title}</CardTitle>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-xs">
-                              {item.category}
-                            </Badge>
-                            <Badge variant={getSeverityColor(item.severity)} className="text-xs">
-                              {item.severity} priority
+          {/* Common Issues */}
+          <TabsContent value="issues" className="space-y-6">
+            {commonIssues.map((category) => (
+              <Card key={category.category}>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <category.icon className={`h-5 w-5 mr-2 ${category.color}`} />
+                    {category.category}
+                  </CardTitle>
+                  <CardDescription>
+                    Common problems and solutions for {category.category.toLowerCase()}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Accordion type="single" collapsible className="w-full">
+                    {category.issues.map((issue, index) => (
+                      <AccordionItem key={index} value={`item-${category.category}-${index}`}>
+                        <AccordionTrigger className="text-left">
+                          <div className="flex items-center justify-between w-full mr-4">
+                            <span className="font-medium">{issue.problem}</span>
+                            <Badge variant={getPriorityColor(issue.priority)} className="flex items-center">
+                              {getPriorityIcon(issue.priority)}
+                              <span className="ml-1 capitalize">{issue.priority}</span>
                             </Badge>
                           </div>
-                        </div>
-                      </div>
-                      {openSections.has(item.id) ? (
-                        <ChevronDown className="w-5 h-5 text-gray-400" />
-                      ) : (
-                        <ChevronRight className="w-5 h-5 text-gray-400" />
-                      )}
-                    </div>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                
-                <CollapsibleContent>
-                  <CardContent className="pt-0">
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold mb-3 text-green-700">Solution Steps:</h4>
-                        <ol className="list-decimal list-inside space-y-2 ml-4">
-                          {item.solution.map((step, index) => (
-                            <li key={index} className="text-gray-700">{step}</li>
-                          ))}
-                        </ol>
-                      </div>
-                      
-                      <Alert>
-                        <Info className="h-4 w-4" />
-                        <AlertDescription>
-                          <strong>Prevention:</strong> {item.prevention}
-                        </AlertDescription>
-                      </Alert>
-                    </div>
-                  </CardContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
-          ))
-        )}
-      </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-4 pt-2">
+                            <div>
+                              <h4 className="font-medium text-sm mb-2 text-gray-700">Symptoms:</h4>
+                              <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                                {issue.symptoms.map((symptom, symptomIndex) => (
+                                  <li key={symptomIndex}>{symptom}</li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-sm mb-2 text-gray-700">Solutions:</h4>
+                              <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                                {issue.solutions.map((solution, solutionIndex) => (
+                                  <li key={solutionIndex} className="flex items-start">
+                                    <span className="mr-2">{solutionIndex + 1}.</span>
+                                    <span>{solution}</span>
+                                  </li>
+                                ))}
+                              </ol>
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
 
-      {/* Emergency Contact */}
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="w-6 h-6 text-red-600" />
-            Still Having Issues?
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 border rounded-lg">
-              <h3 className="font-semibold mb-2">Contact Support</h3>
-              <p className="text-sm text-gray-600 mb-3">Get direct help from our technical team</p>
-              <Button size="sm">Open Support Ticket</Button>
+          {/* Diagnostics */}
+          <TabsContent value="diagnostics" className="space-y-6">
+            <Alert>
+              <Settings className="h-4 w-4" />
+              <AlertDescription>
+                Follow these diagnostic steps in order to identify and resolve most issues.
+                Each step helps narrow down the cause of the problem.
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {diagnosticSteps.map((step, index) => (
+                <Card key={index}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                        {index + 1}
+                      </div>
+                      {step.title}
+                    </CardTitle>
+                    <CardDescription>{step.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ol className="space-y-2">
+                      {step.steps.map((stepItem, stepIndex) => (
+                        <li key={stepIndex} className="flex items-start text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 mr-2 flex-shrink-0" />
+                          <span>{stepItem}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            <div className="text-center p-4 border rounded-lg">
-              <h3 className="font-semibold mb-2">Live Chat</h3>
-              <p className="text-sm text-gray-600 mb-3">Chat with support during business hours</p>
-              <Button variant="outline" size="sm">Start Chat</Button>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <RefreshCw className="h-5 w-5 mr-2 text-blue-600" />
+                  System Health Check
+                </CardTitle>
+                <CardDescription>Quick checks to verify system functionality</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="flex items-center p-3 border rounded-lg">
+                    <Wifi className="h-6 w-6 text-green-600 mr-3" />
+                    <div>
+                      <div className="font-medium text-sm">Connectivity</div>
+                      <div className="text-xs text-gray-500">API reachable</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center p-3 border rounded-lg">
+                    <MapPin className="h-6 w-6 text-green-600 mr-3" />
+                    <div>
+                      <div className="font-medium text-sm">GPS Services</div>
+                      <div className="text-xs text-gray-500">Location available</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center p-3 border rounded-lg">
+                    <Camera className="h-6 w-6 text-green-600 mr-3" />
+                    <div>
+                      <div className="font-medium text-sm">Camera Access</div>
+                      <div className="text-xs text-gray-500">Photos enabled</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center p-3 border rounded-lg">
+                    <Globe className="h-6 w-6 text-green-600 mr-3" />
+                    <div>
+                      <div className="font-medium text-sm">Sync Status</div>
+                      <div className="text-xs text-gray-500">Data syncing</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Get Help */}
+          <TabsContent value="contact" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
+                    Live Support
+                  </CardTitle>
+                  <CardDescription>Get immediate help from our support team</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <div className="font-medium">Live Chat</div>
+                      <div className="text-sm text-gray-500">Average response: 2 minutes</div>
+                    </div>
+                    <Button size="sm">Start Chat</Button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <div className="font-medium">Email Support</div>
+                      <div className="text-sm text-gray-500">support@rankitpro.com</div>
+                    </div>
+                    <Button variant="outline" size="sm">Send Email</Button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <div className="font-medium">Phone Support</div>
+                      <div className="text-sm text-gray-500">Business hours only</div>
+                    </div>
+                    <Button variant="outline" size="sm">Call Now</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Before Contacting Support</CardTitle>
+                  <CardDescription>Help us help you faster by gathering this information</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-start">
+                      <CheckCircle className="h-4 w-4 text-green-600 mt-1 mr-2" />
+                      <div className="text-sm">
+                        <div className="font-medium">Error messages</div>
+                        <div className="text-gray-500">Screenshot any error messages you see</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <CheckCircle className="h-4 w-4 text-green-600 mt-1 mr-2" />
+                      <div className="text-sm">
+                        <div className="font-medium">Steps to reproduce</div>
+                        <div className="text-gray-500">What you were doing when the issue occurred</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <CheckCircle className="h-4 w-4 text-green-600 mt-1 mr-2" />
+                      <div className="text-sm">
+                        <div className="font-medium">Device information</div>
+                        <div className="text-gray-500">Browser type, device model, operating system</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <CheckCircle className="h-4 w-4 text-green-600 mt-1 mr-2" />
+                      <div className="text-sm">
+                        <div className="font-medium">Account details</div>
+                        <div className="text-gray-500">Company name and user role</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-            <div className="text-center p-4 border rounded-lg">
-              <h3 className="font-semibold mb-2">Knowledge Base</h3>
-              <p className="text-sm text-gray-600 mb-3">Browse detailed documentation</p>
-              <Button variant="outline" size="sm">View Docs</Button>
-            </div>
-          </div>
-          
-          <Alert className="mt-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              <strong>For urgent technical issues:</strong> Include your company name, 
-              technician details, and specific error messages when contacting support.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Self-Service Resources</CardTitle>
+                <CardDescription>Additional resources to help resolve issues independently</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <Globe className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                    <div className="font-medium">Knowledge Base</div>
+                    <div className="text-sm text-gray-500">Comprehensive guides and FAQs</div>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <Users className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                    <div className="font-medium">Community Forum</div>
+                    <div className="text-sm text-gray-500">Connect with other users</div>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <Settings className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                    <div className="font-medium">Video Tutorials</div>
+                    <div className="text-sm text-gray-500">Step-by-step walkthroughs</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </DashboardLayout>
   );
 }

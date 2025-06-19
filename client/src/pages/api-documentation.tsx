@@ -1,23 +1,31 @@
-import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Copy, Check, Code, Lock, Globe, Zap } from "lucide-react";
+import { 
+  Code, 
+  Key, 
+  Database, 
+  Smartphone, 
+  CheckCircle, 
+  Copy,
+  ExternalLink,
+  Shield,
+  Zap,
+  Globe
+} from "lucide-react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
-export default function ApiDocumentation() {
+export default function APIDocumentation() {
+  const [copiedItems, setCopiedItems] = useState(new Set<string>());
   const { toast } = useToast();
-  const [copiedItems, setCopiedItems] = useState<Set<string>>(new Set());
 
   const copyToClipboard = (text: string, itemId: string) => {
     navigator.clipboard.writeText(text);
-    setCopiedItems(prev => new Set([...prev, itemId]));
-    toast({
-      title: "Copied!",
-      description: "Code copied to clipboard",
-    });
+    setCopiedItems(prev => new Set(prev).add(itemId));
     setTimeout(() => {
       setCopiedItems(prev => {
         const newSet = new Set(prev);
@@ -25,712 +33,541 @@ export default function ApiDocumentation() {
         return newSet;
       });
     }, 2000);
+    toast({
+      title: "Copied!",
+      description: "Code copied to clipboard",
+    });
+  };
+
+  const endpoints = [
+    {
+      method: "GET",
+      path: "/api/check-ins",
+      description: "Retrieve all check-ins for your company",
+      auth: "Required",
+      parameters: [
+        { name: "limit", type: "integer", required: false, description: "Number of results (default: 20)" },
+        { name: "page", type: "integer", required: false, description: "Page number for pagination" },
+        { name: "technician_id", type: "integer", required: false, description: "Filter by technician" }
+      ]
+    },
+    {
+      method: "POST",
+      path: "/api/check-ins",
+      description: "Create a new service check-in",
+      auth: "Required",
+      parameters: [
+        { name: "jobType", type: "string", required: true, description: "Type of service performed" },
+        { name: "notes", type: "string", required: false, description: "Service notes and details" },
+        { name: "latitude", type: "number", required: true, description: "GPS latitude" },
+        { name: "longitude", type: "number", required: true, description: "GPS longitude" },
+        { name: "customerId", type: "integer", required: true, description: "Customer identifier" }
+      ]
+    },
+    {
+      method: "GET",
+      path: "/api/technicians",
+      description: "List all technicians in your company",
+      auth: "Required",
+      parameters: [
+        { name: "active", type: "boolean", required: false, description: "Filter by active status" }
+      ]
+    },
+    {
+      method: "GET",
+      path: "/api/reviews",
+      description: "Get customer reviews and ratings",
+      auth: "Required",
+      parameters: [
+        { name: "status", type: "string", required: false, description: "Filter by review status" },
+        { name: "rating", type: "integer", required: false, description: "Filter by minimum rating" }
+      ]
+    }
+  ];
+
+  const webhookEvents = [
+    {
+      event: "check_in.created",
+      description: "Triggered when a new check-in is submitted",
+      payload: "Check-in data with technician and customer details"
+    },
+    {
+      event: "review.received",
+      description: "Triggered when a customer submits a review",
+      payload: "Review data with rating and customer feedback"
+    },
+    {
+      event: "technician.status_changed",
+      description: "Triggered when technician availability changes",
+      payload: "Technician data with updated status"
+    }
+  ];
+
+  const sampleResponses = {
+    checkIns: `{
+  "data": [
+    {
+      "id": 123,
+      "jobType": "Plumbing Repair",
+      "technician": {
+        "id": 45,
+        "name": "John Smith",
+        "email": "john@company.com"
+      },
+      "customer": {
+        "id": 67,
+        "name": "Jane Doe",
+        "address": "123 Main St, Los Angeles, CA"
+      },
+      "location": {
+        "latitude": 34.052235,
+        "longitude": -118.243683,
+        "address": "Los Angeles, CA"
+      },
+      "notes": "Fixed leaking sink in master bathroom",
+      "photos": ["photo1.jpg", "photo2.jpg"],
+      "createdAt": "2024-06-19T15:30:22Z",
+      "status": "completed"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 150,
+    "pages": 8
+  }
+}`,
+    authentication: `curl -X POST https://api.rankitpro.com/v1/auth/login \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "email": "admin@yourcompany.com",
+    "password": "your_password"
+  }'
+
+Response:
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires": "2024-06-20T15:30:22Z",
+  "user": {
+    "id": 1,
+    "email": "admin@yourcompany.com",
+    "role": "company_admin",
+    "company": "Your Company Name"
+  }
+}`,
+    webhook: `{
+  "event": "check_in.created",
+  "timestamp": "2024-06-19T15:30:22Z",
+  "data": {
+    "id": 123,
+    "jobType": "Plumbing Repair",
+    "technician": {
+      "id": 45,
+      "name": "John Smith"
+    },
+    "customer": {
+      "id": 67,
+      "name": "Jane Doe"
+    },
+    "location": {
+      "latitude": 34.052235,
+      "longitude": -118.243683
+    },
+    "notes": "Fixed leaking sink",
+    "createdAt": "2024-06-19T15:30:22Z"
+  }
+}`
+  };
+
+  const getMethodColor = (method: string) => {
+    switch (method) {
+      case "GET": return "bg-green-100 text-green-800";
+      case "POST": return "bg-blue-100 text-blue-800";
+      case "PUT": return "bg-orange-100 text-orange-800";
+      case "DELETE": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">API Documentation</h1>
-        <p className="text-xl text-gray-600">
-          Complete reference for integrating with Rank It Pro's REST API
-        </p>
-      </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">API Documentation</h1>
+          <p className="text-gray-500">
+            Complete reference for integrating with the Rank It Pro API
+          </p>
+        </div>
 
-      {/* Quick Start */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="w-6 h-6 text-blue-600" />
-            Quick Start
-          </CardTitle>
-          <CardDescription>
-            Get started with the Rank It Pro API in minutes
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 border rounded-lg text-center">
-              <Lock className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <h3 className="font-semibold">1. Get API Key</h3>
-              <p className="text-sm text-gray-600">Generate your API credentials</p>
-            </div>
-            <div className="p-4 border rounded-lg text-center">
-              <Code className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <h3 className="font-semibold">2. Make Request</h3>
-              <p className="text-sm text-gray-600">Send authenticated requests</p>
-            </div>
-            <div className="p-4 border rounded-lg text-center">
-              <Globe className="w-8 h-8 mx-auto mb-2 text-purple-600" />
-              <h3 className="font-semibold">3. Build Integration</h3>
-              <p className="text-sm text-gray-600">Create powerful automations</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview" className="flex items-center">
+              <Code className="h-4 w-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="endpoints" className="flex items-center">
+              <Database className="h-4 w-4 mr-2" />
+              Endpoints
+            </TabsTrigger>
+            <TabsTrigger value="webhooks" className="flex items-center">
+              <Zap className="h-4 w-4 mr-2" />
+              Webhooks
+            </TabsTrigger>
+            <TabsTrigger value="examples" className="flex items-center">
+              <Globe className="h-4 w-4 mr-2" />
+              Examples
+            </TabsTrigger>
+          </TabsList>
 
-      <Tabs defaultValue="authentication" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="authentication">Auth</TabsTrigger>
-          <TabsTrigger value="visits">Visits</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews</TabsTrigger>
-          <TabsTrigger value="technicians">Technicians</TabsTrigger>
-          <TabsTrigger value="content">Content</TabsTrigger>
-          <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
-        </TabsList>
-
-        {/* Authentication */}
-        <TabsContent value="authentication">
-          <Card>
-            <CardHeader>
-              <CardTitle>Authentication</CardTitle>
-              <CardDescription>
-                Secure your API requests with API key authentication
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Alert>
-                <Lock className="h-4 w-4" />
-                <AlertDescription>
-                  All API requests must include your API key in the Authorization header.
-                </AlertDescription>
-              </Alert>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Getting Your API Key</h3>
-                <ol className="list-decimal list-inside space-y-2 ml-4">
-                  <li>Navigate to Management → API Credentials</li>
-                  <li>Click "Generate New API Key"</li>
-                  <li>Copy and securely store your API key</li>
-                  <li>Use the key in all API requests</li>
-                </ol>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Authentication Header</h3>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg relative">
-                  <code className="text-sm">
-                    Authorization: Bearer YOUR_API_KEY
-                  </code>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 text-gray-300 hover:text-white"
-                    onClick={() => copyToClipboard("Authorization: Bearer YOUR_API_KEY", "auth-header")}
-                  >
-                    {copiedItems.has("auth-header") ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Example Request</h3>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg relative">
-                  <pre className="text-sm overflow-x-auto">
-{`curl -X GET "https://yourapi.rankitpro.com/api/visits" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json"`}
-                  </pre>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 text-gray-300 hover:text-white"
-                    onClick={() => copyToClipboard(`curl -X GET "https://yourapi.rankitpro.com/api/visits" \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json"`, "auth-example")}
-                  >
-                    {copiedItems.has("auth-example") ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Visits API */}
-        <TabsContent value="visits">
-          <div className="space-y-6">
+          {/* Overview */}
+          <TabsContent value="overview" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Visits API</CardTitle>
-                <CardDescription>
-                  Manage service visits and check-ins
-                </CardDescription>
+                <CardTitle className="flex items-center">
+                  <Key className="h-5 w-5 mr-2 text-blue-600" />
+                  Authentication
+                </CardTitle>
+                <CardDescription>All API requests require authentication using API keys or session tokens</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                
-                {/* Get Visits */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Badge variant="secondary">GET</Badge>
-                    <code className="text-sm bg-gray-100 px-2 py-1 rounded">/api/visits</code>
-                  </div>
-                  <p className="text-gray-600 mb-3">Retrieve all visits for your company</p>
+              <CardContent>
+                <div className="space-y-4">
+                  <Alert>
+                    <Shield className="h-4 w-4" />
+                    <AlertDescription>
+                      API keys are unique to your company and should be kept secure. Never expose them in client-side code.
+                    </AlertDescription>
+                  </Alert>
                   
-                  <h4 className="font-semibold mb-2">Response Example:</h4>
-                  <div className="bg-gray-900 text-gray-100 p-4 rounded-lg relative">
-                    <pre className="text-sm overflow-x-auto">
-{`{
-  "visits": [
-    {
-      "id": 1,
-      "jobType": "HVAC Repair",
-      "address": "123 Main St, City, State",
-      "customerName": "John Smith",
-      "customerEmail": "john@example.com",
-      "technicianId": 5,
-      "notes": "Replaced air filter, checked refrigerant levels",
-      "photos": ["photo1.jpg", "photo2.jpg"],
-      "location": "40.7128,-74.0060",
-      "createdAt": "2024-01-15T10:30:00Z",
-      "completedAt": "2024-01-15T12:15:00Z"
-    }
-  ]
-}`}
-                    </pre>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-2 right-2 text-gray-300 hover:text-white"
-                      onClick={() => copyToClipboard(`{
-  "visits": [
-    {
-      "id": 1,
-      "jobType": "HVAC Repair",
-      "address": "123 Main St, City, State",
-      "customerName": "John Smith",
-      "customerEmail": "john@example.com",
-      "technicianId": 5,
-      "notes": "Replaced air filter, checked refrigerant levels",
-      "photos": ["photo1.jpg", "photo2.jpg"],
-      "location": "40.7128,-74.0060",
-      "createdAt": "2024-01-15T10:30:00Z",
-      "completedAt": "2024-01-15T12:15:00Z"
-    }
-  ]
-}`, "visits-response")}
-                    >
-                      {copiedItems.has("visits-response") ? (
-                        <Check className="w-4 h-4" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </Button>
+                  <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-400">Header Format:</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard('Authorization: Bearer YOUR_API_KEY', 'auth-header')}
+                        className="text-green-400 hover:text-green-300"
+                      >
+                        {copiedItems.has('auth-header') ? (
+                          <CheckCircle className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <div>Authorization: Bearer YOUR_API_KEY</div>
                   </div>
-                </div>
 
-                {/* Create Visit */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Badge variant="default">POST</Badge>
-                    <code className="text-sm bg-gray-100 px-2 py-1 rounded">/api/visits</code>
-                  </div>
-                  <p className="text-gray-600 mb-3">Create a new service visit</p>
-                  
-                  <h4 className="font-semibold mb-2">Request Body:</h4>
-                  <div className="bg-gray-900 text-gray-100 p-4 rounded-lg relative">
-                    <pre className="text-sm overflow-x-auto">
-{`{
-  "jobType": "Plumbing Repair",
-  "address": "456 Oak Ave, City, State",
-  "customerName": "Jane Doe",
-  "customerEmail": "jane@example.com",
-  "customerPhone": "+1-555-0123",
-  "technicianId": 3,
-  "notes": "Fixed leaking faucet in kitchen",
-  "location": "40.7589,-73.9851",
-  "photos": ["before.jpg", "after.jpg"]
-}`}
-                    </pre>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-2 right-2 text-gray-300 hover:text-white"
-                      onClick={() => copyToClipboard(`{
-  "jobType": "Plumbing Repair",
-  "address": "456 Oak Ave, City, State",
-  "customerName": "Jane Doe",
-  "customerEmail": "jane@example.com",
-  "customerPhone": "+1-555-0123",
-  "technicianId": 3,
-  "notes": "Fixed leaking faucet in kitchen",
-  "location": "40.7589,-73.9851",
-  "photos": ["before.jpg", "after.jpg"]
-}`, "create-visit")}
-                    >
-                      {copiedItems.has("create-visit") ? (
-                        <Check className="w-4 h-4" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </Button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 border rounded-lg">
+                      <div className="font-medium mb-2">Base URL</div>
+                      <div className="text-sm text-gray-600 font-mono bg-gray-100 p-2 rounded">
+                        https://api.rankitpro.com/v1
+                      </div>
+                    </div>
+                    <div className="p-4 border rounded-lg">
+                      <div className="font-medium mb-2">Content Type</div>
+                      <div className="text-sm text-gray-600 font-mono bg-gray-100 p-2 rounded">
+                        application/json
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </TabsContent>
 
-        {/* Reviews API */}
-        <TabsContent value="reviews">
-          <Card>
-            <CardHeader>
-              <CardTitle>Reviews API</CardTitle>
-              <CardDescription>
-                Manage customer reviews and feedback
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              
-              {/* Get Reviews */}
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="secondary">GET</Badge>
-                  <code className="text-sm bg-gray-100 px-2 py-1 rounded">/api/review-responses</code>
-                </div>
-                <p className="text-gray-600 mb-3">Retrieve all customer reviews</p>
-                
-                <h4 className="font-semibold mb-2">Response Example:</h4>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg relative">
-                  <pre className="text-sm overflow-x-auto">
-{`{
-  "reviews": [
-    {
-      "id": 1,
-      "customerName": "Mike Johnson",
-      "rating": 5,
-      "feedback": "Excellent service! Very professional and thorough.",
-      "reviewRequestId": 15,
-      "technicianId": 3,
-      "publicDisplay": true,
-      "respondedAt": "2024-01-15T14:30:00Z"
-    }
-  ]
-}`}
-                  </pre>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 text-gray-300 hover:text-white"
-                    onClick={() => copyToClipboard(`{
-  "reviews": [
-    {
-      "id": 1,
-      "customerName": "Mike Johnson",
-      "rating": 5,
-      "feedback": "Excellent service! Very professional and thorough.",
-      "reviewRequestId": 15,
-      "technicianId": 3,
-      "publicDisplay": true,
-      "respondedAt": "2024-01-15T14:30:00Z"
-    }
-  ]
-}`, "reviews-response")}
-                  >
-                    {copiedItems.has("reviews-response") ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Send Review Request */}
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="default">POST</Badge>
-                  <code className="text-sm bg-gray-100 px-2 py-1 rounded">/api/review-requests</code>
-                </div>
-                <p className="text-gray-600 mb-3">Send a review request to a customer</p>
-                
-                <h4 className="font-semibold mb-2">Request Body:</h4>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg relative">
-                  <pre className="text-sm overflow-x-auto">
-{`{
-  "customerName": "Sarah Wilson",
-  "customerEmail": "sarah@example.com",
-  "customerPhone": "+1-555-0199",
-  "technicianId": 5,
-  "jobType": "HVAC Maintenance",
-  "method": "email",
-  "customMessage": "Thank you for choosing our service!"
-}`}
-                  </pre>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 text-gray-300 hover:text-white"
-                    onClick={() => copyToClipboard(`{
-  "customerName": "Sarah Wilson",
-  "customerEmail": "sarah@example.com",
-  "customerPhone": "+1-555-0199",
-  "technicianId": 5,
-  "jobType": "HVAC Maintenance",
-  "method": "email",
-  "customMessage": "Thank you for choosing our service!"
-}`, "review-request")}
-                  >
-                    {copiedItems.has("review-request") ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Technicians API */}
-        <TabsContent value="technicians">
-          <Card>
-            <CardHeader>
-              <CardTitle>Technicians API</CardTitle>
-              <CardDescription>
-                Manage your technician workforce
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              
-              {/* Get Technicians */}
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="secondary">GET</Badge>
-                  <code className="text-sm bg-gray-100 px-2 py-1 rounded">/api/technicians</code>
-                </div>
-                <p className="text-gray-600 mb-3">Retrieve all technicians in your company</p>
-                
-                <h4 className="font-semibold mb-2">Response Example:</h4>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg relative">
-                  <pre className="text-sm overflow-x-auto">
-{`{
-  "technicians": [
-    {
-      "id": 1,
-      "name": "John Smith",
-      "email": "john@company.com",
-      "phone": "+1-555-0100",
-      "specialty": "HVAC",
-      "userId": 10,
-      "createdAt": "2024-01-01T00:00:00Z"
-    }
-  ]
-}`}
-                  </pre>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 text-gray-300 hover:text-white"
-                    onClick={() => copyToClipboard(`{
-  "technicians": [
-    {
-      "id": 1,
-      "name": "John Smith",
-      "email": "john@company.com",
-      "phone": "+1-555-0100",
-      "specialty": "HVAC",
-      "userId": 10,
-      "createdAt": "2024-01-01T00:00:00Z"
-    }
-  ]
-}`, "technicians-response")}
-                  >
-                    {copiedItems.has("technicians-response") ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Add Technician */}
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="default">POST</Badge>
-                  <code className="text-sm bg-gray-100 px-2 py-1 rounded">/api/technicians</code>
-                </div>
-                <p className="text-gray-600 mb-3">Add a new technician to your team</p>
-                
-                <h4 className="font-semibold mb-2">Request Body:</h4>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg relative">
-                  <pre className="text-sm overflow-x-auto">
-{`{
-  "name": "Mike Johnson",
-  "email": "mike@company.com",
-  "phone": "+1-555-0123",
-  "specialty": "Plumbing"
-}`}
-                  </pre>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 text-gray-300 hover:text-white"
-                    onClick={() => copyToClipboard(`{
-  "name": "Mike Johnson",
-  "email": "mike@company.com",
-  "phone": "+1-555-0123",
-  "specialty": "Plumbing"
-}`, "add-technician")}
-                  >
-                    {copiedItems.has("add-technician") ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Content API */}
-        <TabsContent value="content">
-          <Card>
-            <CardHeader>
-              <CardTitle>Content API</CardTitle>
-              <CardDescription>
-                Manage AI-generated blog posts and content
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              
-              {/* Get Blog Posts */}
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="secondary">GET</Badge>
-                  <code className="text-sm bg-gray-100 px-2 py-1 rounded">/api/blog-posts</code>
-                </div>
-                <p className="text-gray-600 mb-3">Retrieve all published blog posts</p>
-                
-                <h4 className="font-semibold mb-2">Response Example:</h4>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg relative">
-                  <pre className="text-sm overflow-x-auto">
-{`{
-  "posts": [
-    {
-      "id": 1,
-      "title": "5 Signs Your HVAC System Needs Maintenance",
-      "content": "Regular HVAC maintenance is crucial...",
-      "checkInId": 15,
-      "photos": ["hvac1.jpg", "hvac2.jpg"],
-      "createdAt": "2024-01-15T16:00:00Z"
-    }
-  ]
-}`}
-                  </pre>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 text-gray-300 hover:text-white"
-                    onClick={() => copyToClipboard(`{
-  "posts": [
-    {
-      "id": 1,
-      "title": "5 Signs Your HVAC System Needs Maintenance",
-      "content": "Regular HVAC maintenance is crucial...",
-      "checkInId": 15,
-      "photos": ["hvac1.jpg", "hvac2.jpg"],
-      "createdAt": "2024-01-15T16:00:00Z"
-    }
-  ]
-}`, "blog-posts-response")}
-                  >
-                    {copiedItems.has("blog-posts-response") ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Generate Content */}
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="default">POST</Badge>
-                  <code className="text-sm bg-gray-100 px-2 py-1 rounded">/api/content/generate</code>
-                </div>
-                <p className="text-gray-600 mb-3">Generate AI content from a service visit</p>
-                
-                <h4 className="font-semibold mb-2">Request Body:</h4>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg relative">
-                  <pre className="text-sm overflow-x-auto">
-{`{
-  "visitId": 15,
-  "contentType": "blog_post",
-  "aiProvider": "openai",
-  "customPrompt": "Focus on energy efficiency tips"
-}`}
-                  </pre>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 text-gray-300 hover:text-white"
-                    onClick={() => copyToClipboard(`{
-  "visitId": 15,
-  "contentType": "blog_post",
-  "aiProvider": "openai",
-  "customPrompt": "Focus on energy efficiency tips"
-}`, "generate-content")}
-                  >
-                    {copiedItems.has("generate-content") ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Webhooks */}
-        <TabsContent value="webhooks">
-          <Card>
-            <CardHeader>
-              <CardTitle>Webhooks</CardTitle>
-              <CardDescription>
-                Real-time notifications for events in your system
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Alert>
-                <Zap className="h-4 w-4" />
-                <AlertDescription>
-                  Webhooks allow you to receive real-time notifications when events occur in your Rank It Pro account.
-                </AlertDescription>
-              </Alert>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Available Events</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-semibold">visit.created</h4>
-                    <p className="text-sm text-gray-600">Fired when a new visit is created</p>
+            <Card>
+              <CardHeader>
+                <CardTitle>Rate Limits</CardTitle>
+                <CardDescription>API usage limits and best practices</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">1000</div>
+                    <div className="text-sm text-gray-600">Requests per hour</div>
                   </div>
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-semibold">review.received</h4>
-                    <p className="text-sm text-gray-600">Fired when a customer submits a review</p>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">50</div>
+                    <div className="text-sm text-gray-600">Requests per minute</div>
                   </div>
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-semibold">content.published</h4>
-                    <p className="text-sm text-gray-600">Fired when blog content is published</p>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-semibold">technician.added</h4>
-                    <p className="text-sm text-gray-600">Fired when a new technician is added</p>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">10MB</div>
+                    <div className="text-sm text-gray-600">Max payload size</div>
                   </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Webhook Payload Example</h3>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg relative">
-                  <pre className="text-sm overflow-x-auto">
-{`{
-  "event": "visit.created",
-  "timestamp": "2024-01-15T10:30:00Z",
-  "data": {
-    "visit": {
-      "id": 1,
-      "jobType": "HVAC Repair",
-      "customerName": "John Smith",
-      "technicianId": 5,
-      "createdAt": "2024-01-15T10:30:00Z"
-    }
-  }
-}`}
-                  </pre>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 text-gray-300 hover:text-white"
-                    onClick={() => copyToClipboard(`{
-  "event": "visit.created",
-  "timestamp": "2024-01-15T10:30:00Z",
-  "data": {
-    "visit": {
-      "id": 1,
-      "jobType": "HVAC Repair",
-      "customerName": "John Smith",
-      "technicianId": 5,
-      "createdAt": "2024-01-15T10:30:00Z"
-    }
-  }
-}`, "webhook-payload")}
-                  >
-                    {copiedItems.has("webhook-payload") ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
+            <Card>
+              <CardHeader>
+                <CardTitle>Status Codes</CardTitle>
+                <CardDescription>HTTP status codes used by the API</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <span className="font-mono font-bold text-green-600">200</span>
+                      <span className="ml-3">Success - Request completed successfully</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <span className="font-mono font-bold text-blue-600">201</span>
+                      <span className="ml-3">Created - Resource created successfully</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <span className="font-mono font-bold text-orange-600">400</span>
+                      <span className="ml-3">Bad Request - Invalid request format</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <span className="font-mono font-bold text-red-600">401</span>
+                      <span className="ml-3">Unauthorized - Invalid or missing API key</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <span className="font-mono font-bold text-red-600">429</span>
+                      <span className="ml-3">Too Many Requests - Rate limit exceeded</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Endpoints */}
+          <TabsContent value="endpoints" className="space-y-6">
+            <div className="space-y-4">
+              {endpoints.map((endpoint, index) => (
+                <Card key={index}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Badge className={`mr-3 ${getMethodColor(endpoint.method)}`}>
+                          {endpoint.method}
+                        </Badge>
+                        <span className="font-mono">{endpoint.path}</span>
+                      </div>
+                      <Badge variant="outline">{endpoint.auth}</Badge>
+                    </CardTitle>
+                    <CardDescription>{endpoint.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium mb-3">Parameters</h4>
+                        <div className="space-y-2">
+                          {endpoint.parameters.map((param, paramIndex) => (
+                            <div key={paramIndex} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <span className="font-mono text-sm font-medium">{param.name}</span>
+                                <Badge variant="outline" className="text-xs">{param.type}</Badge>
+                                {param.required && <Badge variant="destructive" className="text-xs">Required</Badge>}
+                              </div>
+                              <div className="text-sm text-gray-600 max-w-md text-right">
+                                {param.description}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-gray-400">Example Request:</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(`curl -X ${endpoint.method} https://api.rankitpro.com/v1${endpoint.path}`, `endpoint-${index}`)}
+                            className="text-green-400 hover:text-green-300"
+                          >
+                            {copiedItems.has(`endpoint-${index}`) ? (
+                              <CheckCircle className="h-4 w-4" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                        <div>{`curl -X ${endpoint.method} https://api.rankitpro.com/v1${endpoint.path} \\`}</div>
+                        <div>  -H "Authorization: Bearer YOUR_API_KEY"</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Webhooks */}
+          <TabsContent value="webhooks" className="space-y-6">
+            <Alert>
+              <Zap className="h-4 w-4" />
+              <AlertDescription>
+                Webhooks allow you to receive real-time notifications when events occur in your account.
+                Configure webhook URLs in your dashboard settings.
+              </AlertDescription>
+            </Alert>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Available Events</CardTitle>
+                <CardDescription>Events that can trigger webhook notifications</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {webhookEvents.map((webhook, index) => (
+                    <div key={index} className="flex items-start justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="font-mono font-medium text-blue-600 mb-1">{webhook.event}</div>
+                        <div className="text-sm text-gray-600 mb-2">{webhook.description}</div>
+                        <div className="text-xs text-gray-500">Payload: {webhook.payload}</div>
+                      </div>
+                      <Badge variant="outline">Active</Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Webhook Security</CardTitle>
+                <CardDescription>Verify webhook authenticity using signatures</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
+                  <div className="mb-2 text-gray-400">Signature Verification (Node.js):</div>
+                  <div className="space-y-1 text-xs">
+                    <div>const crypto = require('crypto');</div>
+                    <div>const signature = crypto</div>
+                    <div>  .createHmac('sha256', process.env.WEBHOOK_SECRET)</div>
+                    <div>  .update(JSON.stringify(payload))</div>
+                    <div>  .digest('hex');</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Examples */}
+          <TabsContent value="examples" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Authentication Example</CardTitle>
+                <CardDescription>How to authenticate and get an access token</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-400">Request:</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(sampleResponses.authentication, 'auth-example')}
+                      className="text-green-400 hover:text-green-300"
+                    >
+                      {copiedItems.has('auth-example') ? (
+                        <CheckCircle className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <pre className="whitespace-pre-wrap text-xs">{sampleResponses.authentication}</pre>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Check-ins Response</CardTitle>
+                <CardDescription>Sample response from the check-ins endpoint</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-400">Response:</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(sampleResponses.checkIns, 'checkins-example')}
+                      className="text-green-400 hover:text-green-300"
+                    >
+                      {copiedItems.has('checkins-example') ? (
+                        <CheckCircle className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <pre className="whitespace-pre-wrap text-xs">{sampleResponses.checkIns}</pre>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Webhook Payload</CardTitle>
+                <CardDescription>Sample webhook notification payload</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-400">Webhook Payload:</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(sampleResponses.webhook, 'webhook-example')}
+                      className="text-green-400 hover:text-green-300"
+                    >
+                      {copiedItems.has('webhook-example') ? (
+                        <CheckCircle className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <pre className="whitespace-pre-wrap text-xs">{sampleResponses.webhook}</pre>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Support Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <ExternalLink className="h-5 w-5 mr-2 text-blue-600" />
+              Additional Resources
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                <Smartphone className="h-8 w-8 text-blue-600 mr-3" />
+                <div>
+                  <div className="font-medium">Mobile SDK</div>
+                  <div className="text-sm text-gray-500">iOS and Android development kits</div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Error Codes */}
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Error Codes</CardTitle>
-          <CardDescription>
-            Common HTTP status codes and their meanings
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">200</Badge>
-                <span className="text-sm">Success</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">201</Badge>
-                <span className="text-sm">Created</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="destructive">400</Badge>
-                <span className="text-sm">Bad Request</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="destructive">401</Badge>
-                <span className="text-sm">Unauthorized</span>
+              <div className="flex items-center p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                <Code className="h-8 w-8 text-green-600 mr-3" />
+                <div>
+                  <div className="font-medium">Code Examples</div>
+                  <div className="text-sm text-gray-500">Sample implementations in multiple languages</div>
+                </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Badge variant="destructive">403</Badge>
-                <span className="text-sm">Forbidden</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="destructive">404</Badge>
-                <span className="text-sm">Not Found</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="destructive">429</Badge>
-                <span className="text-sm">Rate Limited</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="destructive">500</Badge>
-                <span className="text-sm">Server Error</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 }

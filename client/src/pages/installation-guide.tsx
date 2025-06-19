@@ -1,307 +1,444 @@
-import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Download, Globe, Code, Users, Settings, AlertTriangle, Info } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { 
+  Download, 
+  Smartphone, 
+  Globe, 
+  Settings, 
+  CheckCircle, 
+  AlertCircle,
+  Copy,
+  ExternalLink,
+  Play,
+  FileText
+} from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 export default function InstallationGuide() {
+  const [copiedItems, setCopiedItems] = useState(new Set<string>());
+  const { toast } = useToast();
+
+  const copyToClipboard = (text: string, itemId: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedItems(prev => new Set(prev).add(itemId));
+    setTimeout(() => {
+      setCopiedItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(itemId);
+        return newSet;
+      });
+    }, 2000);
+    toast({
+      title: "Copied!",
+      description: "Code copied to clipboard",
+    });
+  };
+
+  const mobileSteps = [
+    {
+      step: 1,
+      title: "Open in Mobile Browser",
+      description: "Visit your dashboard URL on your mobile device",
+      code: "https://your-company.rankitpro.com",
+      badge: "Required"
+    },
+    {
+      step: 2,
+      title: "Add to Home Screen",
+      description: "Tap the share button and select 'Add to Home Screen'",
+      details: "iOS: Share button → Add to Home Screen\nAndroid: Menu → Add to Home Screen",
+      badge: "Essential"
+    },
+    {
+      step: 3,
+      title: "Grant Location Access",
+      description: "Allow location permissions for GPS check-ins",
+      details: "Required for accurate service location tracking",
+      badge: "Critical"
+    },
+    {
+      step: 4,
+      title: "Enable Camera Access",
+      description: "Allow camera permissions for photo documentation",
+      details: "Needed for before/after service photos",
+      badge: "Required"
+    }
+  ];
+
+  const wordpressSteps = [
+    {
+      step: 1,
+      title: "Download Plugin",
+      description: "Get the WordPress plugin from your dashboard",
+      action: "Go to Integrations → WordPress Plugin → Download",
+      badge: "Start Here"
+    },
+    {
+      step: 2,
+      title: "Upload to WordPress",
+      description: "Install the plugin in your WordPress admin",
+      action: "Plugins → Add New → Upload Plugin → Choose File",
+      badge: "Installation"
+    },
+    {
+      step: 3,
+      title: "Activate Plugin",
+      description: "Activate the Rank It Pro plugin",
+      action: "Find 'Rank It Pro Integration' and click Activate",
+      badge: "Required"
+    },
+    {
+      step: 4,
+      title: "Configure Settings",
+      description: "Enter your API credentials",
+      action: "Settings → Rank It Pro Integration",
+      badge: "Configuration"
+    }
+  ];
+
+  const shortcodes = [
+    {
+      name: "Recent Check-ins",
+      code: '[rankitpro_checkins limit="5"]',
+      description: "Display latest service visits"
+    },
+    {
+      name: "Service Areas",
+      code: '[rankitpro_locations]',
+      description: "Show service coverage map"
+    },
+    {
+      name: "Technician Profiles",
+      code: '[rankitpro_technicians]',
+      description: "Display team member profiles"
+    },
+    {
+      name: "Customer Reviews",
+      code: '[rankitpro_reviews limit="3"]',
+      description: "Show customer testimonials"
+    }
+  ];
+
+  const getBadgeVariant = (badge: string) => {
+    switch (badge) {
+      case "Critical":
+      case "Required":
+        return "destructive";
+      case "Essential":
+      case "Start Here":
+        return "default";
+      case "Configuration":
+      case "Installation":
+        return "secondary";
+      default:
+        return "outline";
+    }
+  };
+
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">Installation Guide</h1>
-        <p className="text-xl text-gray-600">
-          Complete setup instructions for implementing Rank It Pro in your home service business
-        </p>
-      </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Installation Guide</h1>
+          <p className="text-gray-500">
+            Step-by-step instructions for setting up mobile app and WordPress integration
+          </p>
+        </div>
 
-      {/* Quick Start Overview */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CheckCircle className="w-6 h-6 text-green-600" />
-            Quick Start Overview
-          </CardTitle>
-          <CardDescription>
-            Get up and running with Rank It Pro in 4 simple steps
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="text-center p-4 border rounded-lg">
-              <Users className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <h3 className="font-semibold">1. Account Setup</h3>
-              <p className="text-sm text-gray-600">Create accounts and configure users</p>
+        <Tabs defaultValue="mobile" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="mobile" className="flex items-center">
+              <Smartphone className="h-4 w-4 mr-2" />
+              Mobile App
+            </TabsTrigger>
+            <TabsTrigger value="wordpress" className="flex items-center">
+              <Globe className="h-4 w-4 mr-2" />
+              WordPress
+            </TabsTrigger>
+            <TabsTrigger value="shortcodes" className="flex items-center">
+              <FileText className="h-4 w-4 mr-2" />
+              Shortcodes
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Mobile Installation */}
+          <TabsContent value="mobile" className="space-y-6">
+            <Alert>
+              <Smartphone className="h-4 w-4" />
+              <AlertDescription>
+                The mobile app is a Progressive Web App (PWA) that works on any device with a modern browser.
+                No app store download required!
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {mobileSteps.map((step) => (
+                <Card key={step.step}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span className="flex items-center">
+                        <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                          {step.step}
+                        </div>
+                        {step.title}
+                      </span>
+                      <Badge variant={getBadgeVariant(step.badge)}>{step.badge}</Badge>
+                    </CardTitle>
+                    <CardDescription>{step.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {step.code && (
+                      <div className="bg-gray-100 p-3 rounded-lg font-mono text-sm mb-3">
+                        <div className="flex items-center justify-between">
+                          <span>{step.code}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(step.code, `mobile-${step.step}`)}
+                          >
+                            {copiedItems.has(`mobile-${step.step}`) ? (
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    {step.details && (
+                      <div className="text-sm text-gray-600 whitespace-pre-line">
+                        {step.details}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            <div className="text-center p-4 border rounded-lg">
-              <Globe className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <h3 className="font-semibold">2. Website Integration</h3>
-              <p className="text-sm text-gray-600">Connect your WordPress site</p>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Play className="h-5 w-5 mr-2 text-green-600" />
+                  Testing Your Mobile Setup
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center p-3 border rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                    <div>
+                      <div className="font-medium">Test GPS Location</div>
+                      <div className="text-sm text-gray-500">Verify location accuracy within 100 meters</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center p-3 border rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                    <div>
+                      <div className="font-medium">Test Photo Capture</div>
+                      <div className="text-sm text-gray-500">Take before/after photos successfully</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center p-3 border rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                    <div>
+                      <div className="font-medium">Complete Test Check-in</div>
+                      <div className="text-sm text-gray-500">Submit a full check-in with all details</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* WordPress Installation */}
+          <TabsContent value="wordpress" className="space-y-6">
+            <Alert>
+              <Globe className="h-4 w-4" />
+              <AlertDescription>
+                WordPress integration requires WordPress 5.0+ and the ability to upload plugins.
+                Contact your web developer if you need assistance.
+              </AlertDescription>
+            </Alert>
+
+            <div className="space-y-4">
+              {wordpressSteps.map((step, index) => (
+                <Card key={step.step}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg font-bold">
+                        {step.step}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-semibold text-lg">{step.title}</h3>
+                          <Badge variant={getBadgeVariant(step.badge)}>{step.badge}</Badge>
+                        </div>
+                        <p className="text-gray-600 mb-3">{step.description}</p>
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <div className="font-medium text-blue-900 text-sm">Action Required:</div>
+                          <div className="text-blue-800 text-sm">{step.action}</div>
+                        </div>
+                      </div>
+                    </div>
+                    {index < wordpressSteps.length - 1 && <Separator className="mt-6" />}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            <div className="text-center p-4 border rounded-lg">
-              <Code className="w-8 h-8 mx-auto mb-2 text-purple-600" />
-              <h3 className="font-semibold">3. Mobile Setup</h3>
-              <p className="text-sm text-gray-600">Configure technician mobile access</p>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Settings className="h-5 w-5 mr-2 text-blue-600" />
+                  Plugin Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div>
+                      <label className="font-medium text-sm">API Endpoint</label>
+                      <div className="bg-gray-100 p-2 rounded font-mono text-sm">
+                        https://api.rankitpro.com/v1
+                      </div>
+                    </div>
+                    <div>
+                      <label className="font-medium text-sm">Company ID</label>
+                      <div className="bg-gray-100 p-2 rounded font-mono text-sm">
+                        Your unique company identifier
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="font-medium text-sm">Auto-Sync</label>
+                      <div className="text-sm text-gray-600">
+                        Enable automatic check-in publishing
+                      </div>
+                    </div>
+                    <div>
+                      <label className="font-medium text-sm">Photo Upload</label>
+                      <div className="text-sm text-gray-600">
+                        Include technician photos in posts
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Shortcodes */}
+          <TabsContent value="shortcodes" className="space-y-6">
+            <Alert>
+              <FileText className="h-4 w-4" />
+              <AlertDescription>
+                Shortcodes allow you to display your service data anywhere on your WordPress site.
+                Simply copy and paste these codes into any post, page, or widget.
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {shortcodes.map((shortcode) => (
+                <Card key={shortcode.name}>
+                  <CardHeader>
+                    <CardTitle className="text-lg">{shortcode.name}</CardTitle>
+                    <CardDescription>{shortcode.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
+                      <div className="flex items-center justify-between">
+                        <span>{shortcode.code}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(shortcode.code, shortcode.name)}
+                          className="text-green-400 hover:text-green-300"
+                        >
+                          {copiedItems.has(shortcode.name) ? (
+                            <CheckCircle className="h-4 w-4" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            <div className="text-center p-4 border rounded-lg">
-              <Settings className="w-8 h-8 mx-auto mb-2 text-orange-600" />
-              <h3 className="font-semibold">4. Configure Features</h3>
-              <p className="text-sm text-gray-600">Set up automation and reviews</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Step 1: Account Setup */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-6 h-6 text-blue-600" />
-            Step 1: Account Setup
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Company Admin Account</h3>
-            <ol className="list-decimal list-inside space-y-2 ml-4">
-              <li>Log in with your company admin credentials</li>
-              <li>Navigate to Settings to configure your company profile</li>
-              <li>Add your business name, contact information, and service areas</li>
-              <li>Choose your subscription plan (Starter, Pro, or Agency)</li>
-            </ol>
-          </div>
-          
-          <Separator />
-          
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Add Technicians</h3>
-            <ol className="list-decimal list-inside space-y-2 ml-4">
-              <li>Go to Management → Technicians</li>
-              <li>Click "Add New Technician"</li>
-              <li>Enter technician details: name, email, phone, specialty</li>
-              <li>System will automatically generate login credentials</li>
-              <li>Share login details with your technicians</li>
-            </ol>
-          </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Advanced Shortcode Options</CardTitle>
+                <CardDescription>Customize your shortcodes with additional parameters</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="font-medium mb-2">Limit Results</div>
+                    <div className="bg-gray-100 p-3 rounded font-mono text-sm">
+                      [rankitpro_checkins limit="10"]
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-medium mb-2">Filter by Technician</div>
+                    <div className="bg-gray-100 p-3 rounded font-mono text-sm">
+                      [rankitpro_checkins technician="john-smith"]
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-medium mb-2">Date Range</div>
+                    <div className="bg-gray-100 p-3 rounded font-mono text-sm">
+                      [rankitpro_checkins from="2024-01-01" to="2024-12-31"]
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-medium mb-2">Custom Styling</div>
+                    <div className="bg-gray-100 p-3 rounded font-mono text-sm">
+                      [rankitpro_checkins class="my-custom-style" theme="dark"]
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              Technicians will use these credentials to access the mobile check-in interface from the field.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-
-      {/* Step 2: Website Integration */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="w-6 h-6 text-green-600" />
-            Step 2: Website Integration
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-3">WordPress Integration</h3>
-            <ol className="list-decimal list-inside space-y-2 ml-4">
-              <li>Navigate to Management → Website Integration</li>
-              <li>Choose "WordPress Plugin" option</li>
-              <li>Download the Rank It Pro WordPress plugin</li>
-              <li>Install the plugin on your WordPress site</li>
-              <li>Enter your site URL and WordPress credentials</li>
-              <li>Configure auto-publishing settings for check-ins and blog posts</li>
-            </ol>
-            
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-semibold text-blue-900 mb-2">Plugin Features:</h4>
-              <ul className="list-disc list-inside text-blue-800 space-y-1">
-                <li>Automatic check-in publishing with SEO optimization</li>
-                <li>Custom post types for service visits</li>
-                <li>Review display widgets</li>
-                <li>Service area and technician pages</li>
-              </ul>
-            </div>
-          </div>
-          
-          <Separator />
-          
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Non-WordPress Sites</h3>
-            <ol className="list-decimal list-inside space-y-2 ml-4">
-              <li>Choose "JavaScript Embed" option</li>
-              <li>Copy the provided JavaScript embed code</li>
-              <li>Add the code to your website's header or footer</li>
-              <li>Configure display options and styling</li>
-            </ol>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Step 3: Mobile Setup */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Code className="w-6 h-6 text-purple-600" />
-            Step 3: Mobile Setup for Technicians
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Mobile Access Setup</h3>
-            <ol className="list-decimal list-inside space-y-2 ml-4">
-              <li>Share the mobile app URL with your technicians: <code className="bg-gray-100 px-2 py-1 rounded">yoursite.com/mobile</code></li>
-              <li>Technicians log in using their provided credentials</li>
-              <li>Enable location services for GPS tracking</li>
-              <li>Test the check-in process with a sample visit</li>
-            </ol>
-          </div>
-          
-          <div className="mt-4 p-4 bg-purple-50 rounded-lg">
-            <h4 className="font-semibold text-purple-900 mb-2">Mobile Features:</h4>
-            <ul className="list-disc list-inside text-purple-800 space-y-1">
-              <li>GPS location tracking for each visit</li>
-              <li>Photo upload (before, during, after)</li>
-              <li>Service notes and customer information</li>
-              <li>Offline capability for poor signal areas</li>
-            </ul>
-          </div>
-
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Ensure technicians have reliable internet access for photo uploads and data synchronization.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-
-      {/* Step 4: Configure Features */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="w-6 h-6 text-orange-600" />
-            Step 4: Configure Advanced Features
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Review Automation</h3>
-            <ol className="list-decimal list-inside space-y-2 ml-4">
-              <li>Navigate to Reviews → Review Automation</li>
-              <li>Configure automatic review request timing</li>
-              <li>Customize email and SMS templates</li>
-              <li>Set up follow-up sequences</li>
-              <li>Enable smart timing based on customer behavior</li>
-            </ol>
-          </div>
-          
-          <Separator />
-          
-          <div>
-            <h3 className="text-lg font-semibold mb-3">AI Content Generation</h3>
-            <ol className="list-decimal list-inside space-y-2 ml-4">
-              <li>Go to Settings → AI Settings</li>
-              <li>Choose your preferred AI provider (OpenAI, Claude, or Grok)</li>
-              <li>Configure content generation preferences</li>
-              <li>Set up blog post automation from check-ins</li>
-            </ol>
-          </div>
-          
-          <Separator />
-          
-          <div>
-            <h3 className="text-lg font-semibold mb-3">CRM Integration (Optional)</h3>
-            <ol className="list-decimal list-inside space-y-2 ml-4">
-              <li>Navigate to Management → Integrations</li>
-              <li>Choose your CRM platform (Housecall Pro, ServiceTitan, etc.)</li>
-              <li>Enter your CRM API credentials</li>
-              <li>Configure sync settings and field mapping</li>
-              <li>Test the integration with sample data</li>
-            </ol>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Testing & Verification */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CheckCircle className="w-6 h-6 text-green-600" />
-            Testing & Verification
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Complete Installation Checklist:</h3>
+        {/* Support Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <AlertCircle className="h-5 w-5 mr-2 text-orange-600" />
+              Need Help with Installation?
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm">Company profile configured</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm">Technicians added and notified</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm">Website integration active</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm">Mobile access tested</span>
+              <div className="flex items-center p-4 border rounded-lg">
+                <ExternalLink className="h-8 w-8 text-blue-600 mr-3" />
+                <div>
+                  <div className="font-medium">Video Tutorials</div>
+                  <div className="text-sm text-gray-500">Watch step-by-step installation videos</div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm">Review automation configured</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm">AI content generation enabled</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm">Sample check-in completed</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm">Content published to website</span>
+              <div className="flex items-center p-4 border rounded-lg">
+                <Download className="h-8 w-8 text-green-600 mr-3" />
+                <div>
+                  <div className="font-medium">PDF Guides</div>
+                  <div className="text-sm text-gray-500">Download printable installation guides</div>
                 </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Support Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Need Help?</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 border rounded-lg">
-              <h3 className="font-semibold mb-2">Documentation</h3>
-              <p className="text-sm text-gray-600 mb-3">Detailed guides and tutorials</p>
-              <Button variant="outline" size="sm">View Docs</Button>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <h3 className="font-semibold mb-2">Support Center</h3>
-              <p className="text-sm text-gray-600 mb-3">Get help from our team</p>
-              <Button variant="outline" size="sm">Contact Support</Button>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <h3 className="font-semibold mb-2">Video Tutorials</h3>
-              <p className="text-sm text-gray-600 mb-3">Step-by-step video guides</p>
-              <Button variant="outline" size="sm">Watch Videos</Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 }

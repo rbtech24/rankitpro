@@ -21,9 +21,7 @@ import ReviewAnalytics from "@/pages/review-analytics-clean";
 import AnalyticsDashboard from "@/pages/analytics-dashboard-simple";
 import Notifications from "@/pages/notifications";
 import Technicians from "@/pages/technicians";
-import InstallationGuide from "@/pages/installation-guide";
-import ApiDocumentation from "@/pages/api-documentation";
-import Troubleshooting from "@/pages/troubleshooting";
+
 import CustomerSupport from "@/pages/customer-support";
 import Users from "@/pages/users";
 import Integrations from "@/pages/integrations";
@@ -69,6 +67,10 @@ import APICredentials from "@/pages/api-credentials";
 import JobTypesManagement from "@/pages/job-types-management";
 import LogoutHandler from "@/components/LogoutHandler";
 import ForceLogout from "@/pages/force-logout";
+import Documentation from "@/pages/documentation";
+import InstallationGuide from "@/pages/installation-guide";
+import APIDocumentation from "@/pages/api-documentation";
+import Troubleshooting from "@/pages/troubleshooting";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
@@ -79,7 +81,6 @@ import About from "@/pages/about";
 import CaseStudies from "@/pages/case-studies";
 import Testimonials from "@/pages/testimonials";
 import Resources from "@/pages/resources";
-import Documentation from "@/pages/documentation";
 import HelpCenter from "@/pages/help-center";
 import Blog from "@/pages/blog";
 import API from "@/pages/api";
@@ -1243,7 +1244,23 @@ function Router() {
       </Route>
       <Route path="/api-credentials">
         <PrivateRoute component={APICredentials} path="/api-credentials" role="company_admin" />
+      </Route>
+      <Route path="/ai-content-generator">
         <PrivateRoute component={AIContentGenerator} path="/ai-content-generator" role="company_admin" />
+      </Route>
+      
+      {/* Documentation Pages */}
+      <Route path="/documentation">
+        <PrivateRoute component={Documentation} path="/documentation" />
+      </Route>
+      <Route path="/installation-guide">
+        <PrivateRoute component={InstallationGuide} path="/installation-guide" />
+      </Route>
+      <Route path="/api-documentation">
+        <PrivateRoute component={APIDocumentation} path="/api-documentation" />
+      </Route>
+      <Route path="/troubleshooting">
+        <PrivateRoute component={Troubleshooting} path="/troubleshooting" />
       </Route>
       <Route path="/settings">
         <PrivateRoute component={Settings} path="/settings" />
