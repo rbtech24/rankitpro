@@ -1969,7 +1969,8 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
         cpuUsage: Math.min(cpuUsagePercent, 100), // Cap at 100%
         memoryUsage: memoryUsagePercent,
         diskUsage: 25, // Static for now - would need fs.statSync in production
-        activeConnections: totalUsers, // Approximate based on active users
+        activeConnections: 1, // Current active database connections
+        activeSessions: req.sessionStore ? Object.keys(req.sessionStore.sessions || {}).length : 0, // Real active sessions
         requestsPerMinute: Math.round(totalCheckIns / (uptime / 60)), // Requests per minute estimate
         avgResponseTime: Math.round(memUsage.heapUsed / 1000000), // Memory-based response time estimate
         errorRate: 0.1, // Low error rate for healthy system
