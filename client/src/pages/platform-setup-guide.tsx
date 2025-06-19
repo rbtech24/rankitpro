@@ -57,7 +57,7 @@ export default function PlatformSetupGuide() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Platform Setup Guide</h1>
-          <p className="text-gray-600 mt-2">Get your Rank It Pro platform integrated with your website and start generating automatic SEO content from technician visits.</p>
+          <p className="text-gray-600 mt-2">Get your Rank It Pro platform integrated with your website and start generating automatic SEO content from technician visits. (Updated - Fixed Display Issues)</p>
         </div>
 
         <Tabs defaultValue="overview" className="w-full">
