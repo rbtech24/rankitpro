@@ -249,32 +249,90 @@ export default function WordPressPlugin() {
               <div className="space-y-3">
                 <h4 className="font-medium text-sm">Available Shortcodes</h4>
                 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_checkins]</code>
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
-                      onClick={() => copyToClipboard('[rank_it_pro_checkins]', 'shortcode1')}
-                    >
-                      {copiedItems.has('shortcode1') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                    </Button>
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_checkins]</code>
+                      <Button 
+                        size="sm" 
+                        variant="ghost"
+                        onClick={() => copyToClipboard('[rank_it_pro_checkins]', 'shortcode1')}
+                      >
+                        {copiedItems.has('shortcode1') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-600">Display all recent check-ins</p>
                   </div>
-                  <p className="text-xs text-gray-600">Display all recent check-ins</p>
-                </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_recent limit="3"]</code>
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
-                      onClick={() => copyToClipboard('[rank_it_pro_recent limit="3"]', 'shortcode2')}
-                    >
-                      {copiedItems.has('shortcode2') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                    </Button>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_recent limit="3"]</code>
+                      <Button 
+                        size="sm" 
+                        variant="ghost"
+                        onClick={() => copyToClipboard('[rank_it_pro_recent limit="3"]', 'shortcode2')}
+                      >
+                        {copiedItems.has('shortcode2') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-600">Show latest 3 check-ins</p>
                   </div>
-                  <p className="text-xs text-gray-600">Show latest 3 check-ins</p>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_checkins type="Plumbing"]</code>
+                      <Button 
+                        size="sm" 
+                        variant="ghost"
+                        onClick={() => copyToClipboard('[rank_it_pro_checkins type="Plumbing"]', 'shortcode3')}
+                      >
+                        {copiedItems.has('shortcode3') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-600">Show only plumbing service check-ins</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_checkins limit="5" type="HVAC"]</code>
+                      <Button 
+                        size="sm" 
+                        variant="ghost"
+                        onClick={() => copyToClipboard('[rank_it_pro_checkins limit="5" type="HVAC"]', 'shortcode4')}
+                      >
+                        {copiedItems.has('shortcode4') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-600">Show 5 latest HVAC check-ins</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_gallery limit="6"]</code>
+                      <Button 
+                        size="sm" 
+                        variant="ghost"
+                        onClick={() => copyToClipboard('[rank_it_pro_gallery limit="6"]', 'shortcode5')}
+                      >
+                        {copiedItems.has('shortcode5') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-600">Photo gallery of recent work</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_testimonials]</code>
+                      <Button 
+                        size="sm" 
+                        variant="ghost"
+                        onClick={() => copyToClipboard('[rank_it_pro_testimonials]', 'shortcode6')}
+                      >
+                        {copiedItems.has('shortcode6') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-600">Display customer testimonials</p>
+                  </div>
                 </div>
               </div>
             </CardContent>
