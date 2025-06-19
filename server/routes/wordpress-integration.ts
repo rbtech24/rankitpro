@@ -734,4 +734,145 @@ router.post('/custom-fields/sync', isAuthenticated, isCompanyAdmin, async (req: 
   }
 });
 
+// Public API endpoints for WordPress shortcodes (no authentication required)
+
+// Public endpoint for blog posts
+router.get('/public/blogs', async (req: Request, res: Response) => {
+  try {
+    const { apiKey, limit = 3, category = 'all' } = req.query;
+    
+    if (!apiKey) {
+      return res.status(400).json({ error: 'API key is required' });
+    }
+    
+    // Find company by API key
+    const companies = await storage.getAllCompanies();
+    const company = companies.find(c => {
+      if (c.wordpressConfig) {
+        try {
+          const config = JSON.parse(c.wordpressConfig);
+          return config.apiKey === apiKey;
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    });
+    
+    if (!company) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+    
+    // Get blog posts for the company
+    const blogPosts = await storage.getBlogPostsByCompany(company.id);
+    
+    let filteredPosts = blogPosts;
+    if (category !== 'all') {
+      filteredPosts = blogPosts.filter(post => post.jobType === category);
+    }
+    
+    // Limit results
+    const limitedPosts = filteredPosts.slice(0, parseInt(limit as string));
+    
+    return res.json(limitedPosts);
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Public endpoint for audio testimonials
+router.get('/public/audio-testimonials', async (req: Request, res: Response) => {
+  try {
+    const { apiKey, limit = 5 } = req.query;
+    
+    if (!apiKey) {
+      return res.status(400).json({ error: 'API key is required' });
+    }
+    
+    // Find company by API key
+    const companies = await storage.getAllCompanies();
+    const company = companies.find(c => {
+      if (c.wordpressConfig) {
+        try {
+          const config = JSON.parse(c.wordpressConfig);
+          return config.apiKey === apiKey;
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    });
+    
+    if (!company) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+    
+    // Get check-ins with audio testimonials
+    const checkIns = await storage.getCheckInsByCompany(company.id);
+    const audioTestimonials = checkIns
+      .filter(checkIn => checkIn.audioUrl)
+      .slice(0, parseInt(limit as string))
+      .map(checkIn => ({
+        customerName: checkIn.customerName,
+        audioUrl: checkIn.audioUrl,
+        transcript: checkIn.audioTranscript || checkIn.notes,
+        rating: 5, // Default rating since we don't have review ratings linked
+        date: checkIn.completionDate
+      }));
+    
+    return res.json(audioTestimonials);
+  } catch (error) {
+    console.error('Error fetching audio testimonials:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Public endpoint for video testimonials
+router.get('/public/video-testimonials', async (req: Request, res: Response) => {
+  try {
+    const { apiKey, limit = 3 } = req.query;
+    
+    if (!apiKey) {
+      return res.status(400).json({ error: 'API key is required' });
+    }
+    
+    // Find company by API key
+    const companies = await storage.getAllCompanies();
+    const company = companies.find(c => {
+      if (c.wordpressConfig) {
+        try {
+          const config = JSON.parse(c.wordpressConfig);
+          return config.apiKey === apiKey;
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    });
+    
+    if (!company) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+    
+    // Get check-ins with video testimonials
+    const checkIns = await storage.getCheckInsByCompany(company.id);
+    const videoTestimonials = checkIns
+      .filter(checkIn => checkIn.videoUrl)
+      .slice(0, parseInt(limit as string))
+      .map(checkIn => ({
+        customerName: checkIn.customerName,
+        videoUrl: checkIn.videoUrl,
+        description: checkIn.notes || 'Video testimonial',
+        rating: 5, // Default rating since we don't have review ratings linked
+        date: checkIn.completionDate
+      }));
+    
+    return res.json(videoTestimonials);
+  } catch (error) {
+    console.error('Error fetching video testimonials:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
