@@ -14,9 +14,7 @@ import helmet from "helmet";
 const app = express();
 
 // Trust proxy for production deployments (required for rate limiting)
-if (process.env.NODE_ENV === 'production') {
-  app.set('trust proxy', 1);
-}
+app.set('trust proxy', true);
 
 // Security middleware - helmet for security headers
 app.use(helmet({
@@ -32,13 +30,15 @@ app.use(helmet({
   }
 }));
 
-// Rate limiting
+// Rate limiting with proper proxy configuration
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: process.env.NODE_ENV === 'production' ? 100 : 1000, // More restrictive in production
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  // Skip rate limiting in development to avoid proxy header issues
+  skip: (req) => process.env.NODE_ENV !== 'production',
 });
 
 app.use('/api/', limiter);

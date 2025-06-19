@@ -164,7 +164,7 @@ router.get('/plugin', isAuthenticated, isCompanyAdmin, async (req: Request, res:
     
     // Generate the WordPress plugin code
     const apiEndpoint = process.env.API_ENDPOINT || `https://${req.headers.host}`;
-    const pluginCode = WordPressService.generatePluginCode(apiKey, apiEndpoint);
+    const pluginCode = await WordPressService.generatePluginCode(apiKey, apiEndpoint);
     
     // Create installation instructions to include with the plugin
     const readmeContent = `# Rank It Pro WordPress Plugin
@@ -212,12 +212,22 @@ Version: 1.0.0
 Author: Rank It Pro
 `;
 
-    // The plugin code already contains the complete PHP structure
-    const completePlugin = pluginCode;
+    // Validate plugin code exists
+    if (!pluginCode || typeof pluginCode !== 'string') {
+      return res.status(500).json({ error: 'Failed to generate plugin code' });
+    }
 
     // Create ZIP file for WordPress plugin
     const archive = archiver('zip', {
       zlib: { level: 9 } // Maximum compression
+    });
+
+    // Handle archive errors
+    archive.on('error', (err) => {
+      console.error('Archive error:', err);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Failed to create plugin archive' });
+      }
     });
 
     // Set proper headers for ZIP download
@@ -228,10 +238,10 @@ Author: Rank It Pro
     archive.pipe(res);
 
     // Add the main plugin file
-    archive.append(completePlugin, { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
+    archive.append(Buffer.from(pluginCode, 'utf8'), { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
 
     // Add readme file
-    archive.append(readmeContent, { name: 'rank-it-pro-plugin/README.md' });
+    archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/README.md' });
 
     // Add plugin assets directory structure
     const cssContent = `/* Rank It Pro Plugin Styles */
@@ -259,7 +269,7 @@ Author: Rank It Pro
   font-weight: 500;
 }`;
 
-    archive.append(cssContent, { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
+    archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
 
     // Add JavaScript file
     const jsContent = `// Rank It Pro Plugin JavaScript
@@ -270,7 +280,7 @@ jQuery(document).ready(function($) {
   });
 });`;
 
-    archive.append(jsContent, { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
+    archive.append(Buffer.from(jsContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
 
     // Finalize the archive
     archive.finalize();
