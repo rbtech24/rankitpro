@@ -104,12 +104,20 @@ interface Company {
   isTrialActive: boolean;
   usageLimit: number;
   featuresEnabled: Record<string, any>;
+  email?: string;
+  industry?: string;
+  subscriptionPlan?: string;
+  planName?: string;
+  active?: boolean;
+  isActive?: boolean;
+  lastLogin?: string;
   stats?: {
     totalCheckIns: number;
     totalTechnicians: number;
     totalBlogPosts: number;
     totalReviews: number;
     avgRating: number;
+    activeCheckInsLast30Days?: number;
   };
 }
 
@@ -467,7 +475,7 @@ export default function CompaniesManagement() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-green-600">
-                    {companies?.reduce((sum, company) => sum + (company.stats?.totalCheckIns || 0), 0) || 0} in last 30 days
+                    {companies?.reduce((sum, company) => sum + (company.stats?.activeCheckInsLast30Days || 0), 0) || 0} in last 30 days
                   </p>
                 </CardContent>
               </Card>

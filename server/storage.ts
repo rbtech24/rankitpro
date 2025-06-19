@@ -196,6 +196,14 @@ export interface IStorage {
   createMonthlyAIUsage(usage: InsertMonthlyAiUsage): Promise<MonthlyAiUsage>;
   updateMonthlyAIUsage(companyId: number, year: number, month: number, updates: Partial<MonthlyAiUsage>): Promise<MonthlyAiUsage | undefined>;
   
+  // Subscription Plan operations
+  getSubscriptionPlans(): Promise<any[]>;
+  getSubscriptionPlan(id: number): Promise<any | undefined>;
+  createSubscriptionPlan(plan: any): Promise<any>;
+  updateSubscriptionPlan(id: number, updates: any): Promise<any | undefined>;
+  deleteSubscriptionPlan(id: number): Promise<boolean>;
+  getSubscriberCountForPlan(planId: number): Promise<number>;
+
   // Sales operations
   getSalesPerson(id: number): Promise<SalesPerson | undefined>;
   getSalesPersonByUserId(userId: number): Promise<SalesPerson | undefined>;
@@ -1470,7 +1478,7 @@ export class DatabaseStorage implements IStorage {
     userName?: string;
   }[]> {
     try {
-      const activities = [];
+      const activities: any[] = [];
 
       // Get recent check-ins
       const recentCheckIns = await db
@@ -1486,12 +1494,14 @@ export class DatabaseStorage implements IStorage {
         .limit(5);
 
       recentCheckIns.forEach(checkIn => {
-        activities.push({
-          action: 'check_in_created',
-          description: `New check-in completed for ${checkIn.customerName}`,
-          timestamp: checkIn.createdAt.toISOString(),
-          companyName: checkIn.companyName || 'Unknown Company'
-        });
+        if (checkIn.createdAt) {
+          activities.push({
+            action: 'check_in_created',
+            description: `New check-in completed for ${checkIn.customerName}`,
+            timestamp: checkIn.createdAt.toISOString(),
+            companyName: checkIn.companyName || 'Unknown Company'
+          });
+        }
       });
 
       // Get recent companies
@@ -1506,12 +1516,14 @@ export class DatabaseStorage implements IStorage {
         .limit(3);
 
       recentCompanies.forEach(company => {
-        activities.push({
-          action: 'company_created',
-          description: `New company registered: ${company.name}`,
-          timestamp: company.createdAt.toISOString(),
-          companyName: company.name
-        });
+        if (company.createdAt) {
+          activities.push({
+            action: 'company_created',
+            description: `New company registered: ${company.name}`,
+            timestamp: company.createdAt.toISOString(),
+            companyName: company.name
+          });
+        }
       });
 
       // Get recent users
@@ -1529,13 +1541,15 @@ export class DatabaseStorage implements IStorage {
         .limit(3);
 
       recentUsers.forEach(user => {
-        activities.push({
-          action: 'user_created',
-          description: `New ${user.role} user created: ${user.email}`,
-          timestamp: user.createdAt.toISOString(),
-          companyName: user.companyName || 'No Company',
-          userName: user.email
-        });
+        if (user.createdAt) {
+          activities.push({
+            action: 'user_created',
+            description: `New ${user.role} user created: ${user.email}`,
+            timestamp: user.createdAt.toISOString(),
+            companyName: user.companyName || 'No Company',
+            userName: user.email
+          });
+        }
       });
 
       // Sort all activities by timestamp and return top 10
@@ -1545,6 +1559,140 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error fetching recent system activity:', error);
       return [];
+    }
+  }
+
+  // Subscription Plan operations
+  async getSubscriptionPlans(): Promise<any[]> {
+    try {
+      // Return predefined subscription plans with subscriber counts
+      const plans = [
+        {
+          id: 1,
+          name: 'Starter',
+          price: '29.00',
+          billingPeriod: 'monthly',
+          maxTechnicians: 5,
+          maxCheckIns: 100,
+          features: [
+            'Basic check-in tracking',
+            'Photo uploads',
+            'Email review requests',
+            'Basic analytics',
+            'WordPress integration'
+          ],
+          isActive: true,
+          subscriberCount: await this.getSubscriberCountForPlan(1),
+          revenue: 0
+        },
+        {
+          id: 2,
+          name: 'Professional',
+          price: '79.00',
+          billingPeriod: 'monthly',
+          maxTechnicians: 15,
+          maxCheckIns: 500,
+          features: [
+            'All Starter features',
+            'Advanced analytics',
+            'Custom branding',
+            'Audio testimonials',
+            'Priority support',
+            'API access'
+          ],
+          isActive: true,
+          subscriberCount: await this.getSubscriberCountForPlan(2),
+          revenue: 0
+        },
+        {
+          id: 3,
+          name: 'Agency',
+          price: '149.00',
+          billingPeriod: 'monthly',
+          maxTechnicians: -1, // Unlimited
+          maxCheckIns: -1, // Unlimited
+          features: [
+            'All Professional features',
+            'Unlimited technicians',
+            'Unlimited check-ins',
+            'Video testimonials',
+            'Audio testimonials',
+            'White-label solution',
+            'Dedicated support',
+            'Custom integrations'
+          ],
+          isActive: true,
+          subscriberCount: await this.getSubscriberCountForPlan(3),
+          revenue: 0
+        }
+      ];
+
+      // Calculate revenue for each plan
+      plans.forEach(plan => {
+        plan.revenue = plan.subscriberCount * parseFloat(plan.price);
+      });
+
+      return plans;
+    } catch (error) {
+      console.error('Error fetching subscription plans:', error);
+      return [];
+    }
+  }
+
+  async getSubscriptionPlan(id: number): Promise<any | undefined> {
+    const plans = await this.getSubscriptionPlans();
+    return plans.find(plan => plan.id === id);
+  }
+
+  async createSubscriptionPlan(planData: any): Promise<any> {
+    // In a real implementation, this would save to a subscription_plans table
+    // For now, we'll simulate creating a plan with a new ID
+    const plans = await this.getSubscriptionPlans();
+    const newId = Math.max(...plans.map(p => p.id), 0) + 1;
+    
+    const newPlan = {
+      id: newId,
+      ...planData,
+      subscriberCount: 0,
+      revenue: 0,
+      isActive: true
+    };
+
+    return newPlan;
+  }
+
+  async updateSubscriptionPlan(id: number, updates: any): Promise<any | undefined> {
+    // In a real implementation, this would update the subscription_plans table
+    const plan = await this.getSubscriptionPlan(id);
+    if (!plan) return undefined;
+
+    return { ...plan, ...updates };
+  }
+
+  async deleteSubscriptionPlan(id: number): Promise<boolean> {
+    // In a real implementation, this would delete from subscription_plans table
+    // For now, we'll just verify the plan exists
+    const plan = await this.getSubscriptionPlan(id);
+    return !!plan;
+  }
+
+  async getSubscriberCountForPlan(planId: number): Promise<number> {
+    try {
+      // Count companies using each plan
+      const planNames = { 1: 'starter', 2: 'professional', 3: 'agency' };
+      const planName = planNames[planId as keyof typeof planNames];
+      
+      if (!planName) return 0;
+
+      const result = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(companies)
+        .where(sql`${companies.plan} = ${planName}`);
+
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error('Error getting subscriber count:', error);
+      return 0;
     }
   }
 }
