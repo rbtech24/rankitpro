@@ -3172,6 +3172,64 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  // Billing/Subscription Plans CRUD API
+  app.get('/api/billing/plans', async (req: any, res) => {
+    try {
+      const plans = await storage.getSubscriptionPlans();
+      res.json(plans);
+    } catch (error) {
+      console.error('Error fetching subscription plans:', error);
+      res.status(500).json({ message: 'Failed to fetch subscription plans' });
+    }
+  });
+
+  app.post('/api/billing/plans', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ message: 'Forbidden' });
+      }
+      const plan = await storage.createSubscriptionPlan(req.body);
+      res.json(plan);
+    } catch (error) {
+      console.error('Error creating subscription plan:', error);
+      res.status(500).json({ message: 'Failed to create subscription plan' });
+    }
+  });
+
+  app.put('/api/billing/plans/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ message: 'Forbidden' });
+      }
+      const planId = parseInt(req.params.id);
+      const plan = await storage.updateSubscriptionPlan(planId, req.body);
+      if (!plan) {
+        return res.status(404).json({ message: 'Plan not found' });
+      }
+      res.json(plan);
+    } catch (error) {
+      console.error('Error updating subscription plan:', error);
+      res.status(500).json({ message: 'Failed to update subscription plan' });
+    }
+  });
+
+  app.delete('/api/billing/plans/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ message: 'Forbidden' });
+      }
+      const planId = parseInt(req.params.id);
+      const success = await storage.deleteSubscriptionPlan(planId);
+      if (!success) {
+        return res.status(404).json({ message: 'Plan not found' });
+      }
+      res.json({ message: 'Plan deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting subscription plan:', error);
+      res.status(500).json({ message: 'Failed to delete subscription plan' });
+    }
+  });
+
   // Subscription Plans API
   app.get("/api/subscription/plans", async (req, res) => {
     try {
