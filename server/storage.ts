@@ -48,6 +48,7 @@ export interface IStorage {
   deleteCompany(id: number): Promise<boolean>;
   getCompanyCount(): Promise<number>;
   getActiveCompaniesCount(): Promise<number>;
+  expireCompanyTrial(companyId: number): Promise<void>;
   
   // Technician operations
   getTechnician(id: number): Promise<Technician | undefined>;
@@ -325,8 +326,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCompany(company: InsertCompany): Promise<Company> {
-    const [newCompany] = await db.insert(companies).values(company).returning();
+    const trialStartDate = new Date();
+    const trialEndDate = new Date(trialStartDate.getTime() + (14 * 24 * 60 * 60 * 1000)); // 14 days from now
+    
+    const companyData = {
+      ...company,
+      trialStartDate,
+      trialEndDate,
+      isTrialActive: true
+    };
+    
+    const [newCompany] = await db.insert(companies).values(companyData).returning();
     return newCompany;
+  }
+
+  async expireCompanyTrial(companyId: number): Promise<void> {
+    try {
+      await db.update(companies)
+        .set({ isTrialActive: false })
+        .where(eq(companies.id, companyId));
+    } catch (error) {
+      console.error('Error expiring company trial:', error);
+      throw error;
+    }
   }
 
   async updateCompany(id: number, updates: Partial<Company>): Promise<Company | undefined> {

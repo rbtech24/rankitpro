@@ -17,6 +17,7 @@ import { generateSummary, generateBlogPost } from "./ai-service";
 import { insertUserSchema, insertCompanySchema, insertTechnicianSchema, insertCheckInSchema, insertBlogPostSchema, insertReviewRequestSchema, insertAPICredentialsSchema } from "@shared/schema";
 import { apiCredentialService } from "./services/api-credentials";
 import { isAuthenticated, isCompanyAdmin, isSuperAdmin, belongsToCompany } from "./middleware/auth";
+import { enforceTrialLimits } from "./middleware/trial-enforcement";
 import multer from "multer";
 import { z } from "zod";
 import integrationsRoutes from "./routes/integrations";
@@ -302,6 +303,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api', (req, res, next) => {
     res.header('Content-Type', 'application/json');
     next();
+  });
+
+  // Apply trial enforcement middleware to all API routes except auth and health
+  app.use('/api', (req, res, next) => {
+    // Skip trial enforcement for health checks and auth endpoints
+    if (req.path.startsWith('/health') || req.path.startsWith('/auth')) {
+      return next();
+    }
+    enforceTrialLimits(req as any, res, next);
   });
 
   // API Health Check - Must come before authentication middleware
