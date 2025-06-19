@@ -150,13 +150,13 @@ export default function PlatformSetupGuide() {
                     
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border">
-                          {shortcodes.visits.basic}
+                        <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border break-all">
+                          [rankitpro_visits]
                         </div>
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => copyToClipboard(shortcodes.visits.basic, 'visits-basic')}
+                          onClick={() => copyToClipboard('[rankitpro_visits]', 'visits-basic')}
                         >
                           {copiedItems.has('visits-basic') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                         </Button>
@@ -181,13 +181,13 @@ export default function PlatformSetupGuide() {
                       </div>
                       
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border">
-                          {shortcodes.visits.customized}
+                        <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border break-all">
+                          [rankitpro_visits limit="10" show_photos="true" show_location="true"]
                         </div>
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => copyToClipboard(shortcodes.visits.customized, 'visits-custom')}
+                          onClick={() => copyToClipboard('[rankitpro_visits limit="10" show_photos="true" show_location="true"]', 'visits-custom')}
                         >
                           {copiedItems.has('visits-custom') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                         </Button>
@@ -201,26 +201,26 @@ export default function PlatformSetupGuide() {
                     
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border">
-                          {shortcodes.reviews.basic}
+                        <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border break-all">
+                          [rankitpro_reviews]
                         </div>
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => copyToClipboard(shortcodes.reviews.basic, 'reviews-basic')}
+                          onClick={() => copyToClipboard('[rankitpro_reviews]', 'reviews-basic')}
                         >
                           {copiedItems.has('reviews-basic') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                         </Button>
                       </div>
                       
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border">
-                          {shortcodes.reviews.customized}
+                        <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border break-all">
+                          [rankitpro_reviews limit="5" show_photos="true" layout="grid"]
                         </div>
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => copyToClipboard(shortcodes.reviews.customized, 'reviews-custom')}
+                          onClick={() => copyToClipboard('[rankitpro_reviews limit="5" show_photos="true" layout="grid"]', 'reviews-custom')}
                         >
                           {copiedItems.has('reviews-custom') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                         </Button>
@@ -234,13 +234,13 @@ export default function PlatformSetupGuide() {
                       <div className="space-y-2">
                         <h4 className="font-medium">Recent Work Gallery</h4>
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 p-2 bg-gray-50 rounded font-mono text-xs border">
-                            {shortcodes.recentWork.basic}
+                          <div className="flex-1 p-2 bg-gray-50 rounded font-mono text-xs border break-all">
+                            [rankitpro_recent_work]
                           </div>
                           <Button 
                             size="sm" 
                             variant="outline"
-                            onClick={() => copyToClipboard(shortcodes.recentWork.basic, 'work-basic')}
+                            onClick={() => copyToClipboard('[rankitpro_recent_work]', 'work-basic')}
                           >
                             {copiedItems.has('work-basic') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                           </Button>
@@ -250,13 +250,13 @@ export default function PlatformSetupGuide() {
                       <div className="space-y-2">
                         <h4 className="font-medium">Testimonials</h4>
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 p-2 bg-gray-50 rounded font-mono text-xs border">
-                            {shortcodes.testimonials.basic}
+                          <div className="flex-1 p-2 bg-gray-50 rounded font-mono text-xs border break-all">
+                            [rankitpro_testimonials]
                           </div>
                           <Button 
                             size="sm" 
                             variant="outline"
-                            onClick={() => copyToClipboard(shortcodes.testimonials.basic, 'testimonials-basic')}
+                            onClick={() => copyToClipboard('[rankitpro_testimonials]', 'testimonials-basic')}
                           >
                             {copiedItems.has('testimonials-basic') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                           </Button>
@@ -266,13 +266,13 @@ export default function PlatformSetupGuide() {
                       <div className="space-y-2">
                         <h4 className="font-medium">Technician Profile</h4>
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 p-2 bg-gray-50 rounded font-mono text-xs border">
-                            {shortcodes.technicianProfile.basic}
+                          <div className="flex-1 p-2 bg-gray-50 rounded font-mono text-xs border break-all">
+                            [rankitpro_technician_profile]
                           </div>
                           <Button 
                             size="sm" 
                             variant="outline"
-                            onClick={() => copyToClipboard(shortcodes.technicianProfile.basic, 'profile-basic')}
+                            onClick={() => copyToClipboard('[rankitpro_technician_profile]', 'profile-basic')}
                           >
                             {copiedItems.has('profile-basic') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                           </Button>
@@ -309,8 +309,8 @@ export default function PlatformSetupGuide() {
                     <p className="text-gray-600 mb-3">Add this script tag to your website's head section:</p>
                     
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border overflow-x-auto">
-                        {'<script src="https://rankitpro.com/embed/rankitpro.min.js"></script>'}
+                      <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border overflow-x-auto break-all">
+                        &lt;script src="https://rankitpro.com/embed/rankitpro.min.js"&gt;&lt;/script&gt;
                       </div>
                       <Button 
                         size="sm" 
@@ -328,8 +328,8 @@ export default function PlatformSetupGuide() {
                     
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border overflow-x-auto">
-                          {'<div id="rankitpro-visits" data-api-key="YOUR_API_KEY" data-limit="5"></div>'}
+                        <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border overflow-x-auto break-all">
+                          &lt;div id="rankitpro-visits" data-api-key="YOUR_API_KEY" data-limit="5"&gt;&lt;/div&gt;
                         </div>
                         <Button 
                           size="sm" 
@@ -382,8 +382,8 @@ export default function PlatformSetupGuide() {
                       </div>
                       
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border overflow-x-auto">
-                          {'<div id="rankitpro-reviews" data-api-key="YOUR_API_KEY" data-limit="3" data-theme="light" data-layout="grid"></div>'}
+                        <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-sm border overflow-x-auto break-all">
+                          &lt;div id="rankitpro-reviews" data-api-key="YOUR_API_KEY" data-limit="3" data-theme="light" data-layout="grid"&gt;&lt;/div&gt;
                         </div>
                         <Button 
                           size="sm" 
