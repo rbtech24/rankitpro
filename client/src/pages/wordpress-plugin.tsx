@@ -27,7 +27,7 @@ export default function WordPressPlugin() {
     });
   };
 
-  const downloadPlugin = () => {
+  const downloadPlugin = async () => {
     // Create a blob with the plugin content
     const pluginContent = `<?php
 /**
