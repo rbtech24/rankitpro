@@ -778,13 +778,21 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
 
   // Removed duplicate authentication endpoint - using main server endpoint instead
 
-  // User verification endpoint
+  // User verification endpoint with trial status
   app.get("/api/auth/user", async (req, res) => {
     if (req.session?.userId) {
       try {
         const user = await storage.getUser(req.session.userId);
         if (user) {
           const { password, ...userWithoutPassword } = user;
+          
+          // Add trial status for company users
+          if (user.companyId && user.role !== 'super_admin') {
+            const { getTrialStatus } = await import('./middleware/trial-enforcement');
+            const trialStatus = await getTrialStatus(user.companyId);
+            (userWithoutPassword as any).trialStatus = trialStatus;
+          }
+          
           res.json(userWithoutPassword);
         } else {
           res.status(401).json({ message: "User not found" });
@@ -795,6 +803,27 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       }
     } else {
       res.status(401).json({ message: "Not authenticated" });
+    }
+  });
+
+  // Trial status endpoint
+  app.get("/api/trial/status", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role === 'super_admin') {
+        return res.json({ subscriptionActive: true, expired: false });
+      }
+
+      if (!req.user.companyId) {
+        return res.status(400).json({ error: 'No company associated with user' });
+      }
+
+      const { getTrialStatus } = await import('./middleware/trial-enforcement');
+      const trialStatus = await getTrialStatus(req.user.companyId);
+      
+      res.json(trialStatus);
+    } catch (error) {
+      console.error('Error getting trial status:', error);
+      res.status(500).json({ error: 'Failed to get trial status' });
     }
   });
 
