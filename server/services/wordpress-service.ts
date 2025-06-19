@@ -342,6 +342,9 @@ class RankItProIntegration {
         add_action('init', array($this, 'init'));
         add_shortcode('rankitpro_visits', array($this, 'rankitpro_visits_shortcode'));
         add_shortcode('rankitpro_reviews', array($this, 'rankitpro_reviews_shortcode'));
+        add_shortcode('rankitpro_blogs', array($this, 'rankitpro_blogs_shortcode'));
+        add_shortcode('rankitpro_audio_testimonials', array($this, 'rankitpro_audio_testimonials_shortcode'));
+        add_shortcode('rankitpro_video_testimonials', array($this, 'rankitpro_video_testimonials_shortcode'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'));
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_plugin_settings'));
@@ -356,13 +359,35 @@ class RankItProIntegration {
     }
     
     public function add_admin_menu() {
-        add_submenu_page(
-            'edit.php?post_type=page',
-            'Rank It Pro Settings',
+        // Add main menu item
+        add_menu_page(
             'Rank It Pro',
+            'Rank It Pro',
+            'manage_options',
+            'rankitpro-main',
+            array($this, 'display_main_page'),
+            'dashicons-star-filled',
+            30
+        );
+        
+        // Add settings submenu
+        add_submenu_page(
+            'rankitpro-main',
+            'Settings',
+            'Settings',
             'manage_options',
             'rankitpro-settings',
             array($this, 'display_settings_page')
+        );
+        
+        // Add shortcodes help submenu
+        add_submenu_page(
+            'rankitpro-main',
+            'Shortcodes',
+            'Shortcodes',
+            'manage_options',
+            'rankitpro-shortcodes',
+            array($this, 'display_shortcodes_page')
         );
     }
     
@@ -446,6 +471,140 @@ class RankItProIntegration {
         <?php
     }
     
+    public function display_main_page() {
+        ?>
+        <div class="wrap">
+            <h1>Rank It Pro Integration</h1>
+            <div class="rankitpro-dashboard">
+                <div class="rankitpro-card">
+                    <h2>Connection Status</h2>
+                    <p id="connection-status">
+                        <button class="button button-primary" onclick="testConnection()">Test Connection</button>
+                        <span id="status-indicator">Unknown</span>
+                    </p>
+                </div>
+                
+                <div class="rankitpro-card">
+                    <h2>Quick Actions</h2>
+                    <p>
+                        <a href="<?php echo admin_url('admin.php?page=rankitpro-settings'); ?>" class="button">Settings</a>
+                        <a href="<?php echo admin_url('admin.php?page=rankitpro-shortcodes'); ?>" class="button">View Shortcodes</a>
+                    </p>
+                </div>
+                
+                <div class="rankitpro-card">
+                    <h2>Recent Activity</h2>
+                    <div id="recent-activity">
+                        <p>Loading recent check-ins...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+            function testConnection() {
+                const indicator = document.getElementById('status-indicator');
+                indicator.textContent = 'Testing...';
+                
+                const apiKey = '<?php echo esc_js(get_option('rankitpro_api_key', '${apiKey}')); ?>';
+                const apiEndpoint = '<?php echo esc_js(get_option('rankitpro_api_endpoint', '${apiEndpoint}')); ?>';
+                
+                fetch(apiEndpoint + '/api/health', {
+                    headers: {
+                        'X-RankItPro-API-Key': apiKey
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    indicator.textContent = data.status === 'ok' ? 'Connected ✓' : 'Failed ✗';
+                })
+                .catch(error => {
+                    indicator.textContent = 'Failed ✗';
+                });
+            }
+            </script>
+        </div>
+        <?php
+    }
+    
+    public function display_shortcodes_page() {
+        ?>
+        <div class="wrap">
+            <h1>Rank It Pro Shortcodes</h1>
+            
+            <div class="rankitpro-shortcodes-help">
+                <div class="shortcode-section">
+                    <h2>Service Visits</h2>
+                    <p>Display recent service visits and check-ins:</p>
+                    <code>[rankitpro_visits limit="5" display="grid" show_photos="true"]</code>
+                    
+                    <h4>Parameters:</h4>
+                    <ul>
+                        <li><strong>limit</strong>: Number of visits to show (default: 5)</li>
+                        <li><strong>display</strong>: Layout style - grid, list, or carousel (default: grid)</li>
+                        <li><strong>show_photos</strong>: Show technician photos (default: true)</li>
+                        <li><strong>job_type</strong>: Filter by specific job type (optional)</li>
+                        <li><strong>technician_id</strong>: Filter by specific technician (optional)</li>
+                    </ul>
+                </div>
+                
+                <div class="shortcode-section">
+                    <h2>Customer Reviews</h2>
+                    <p>Display customer reviews and ratings:</p>
+                    <code>[rankitpro_reviews limit="3" rating="4" show_stars="true"]</code>
+                    
+                    <h4>Parameters:</h4>
+                    <ul>
+                        <li><strong>limit</strong>: Number of reviews to show (default: 3)</li>
+                        <li><strong>rating</strong>: Minimum star rating to display (default: all)</li>
+                        <li><strong>show_stars</strong>: Display star ratings (default: true)</li>
+                    </ul>
+                </div>
+                
+                <div class="shortcode-section">
+                    <h2>Blog Posts</h2>
+                    <p>Display AI-generated blog posts from your service visits:</p>
+                    <code>[rankitpro_blogs limit="3" category="all" show_excerpt="true"]</code>
+                    
+                    <h4>Parameters:</h4>
+                    <ul>
+                        <li><strong>limit</strong>: Number of blog posts to show (default: 3)</li>
+                        <li><strong>category</strong>: Filter by job type category (default: all)</li>
+                        <li><strong>show_excerpt</strong>: Show post excerpts (default: true)</li>
+                        <li><strong>show_date</strong>: Show publication date (default: true)</li>
+                    </ul>
+                </div>
+                
+                <div class="shortcode-section">
+                    <h2>Audio Testimonials</h2>
+                    <p>Display audio testimonials from customers:</p>
+                    <code>[rankitpro_audio_testimonials limit="5" autoplay="false"]</code>
+                    
+                    <h4>Parameters:</h4>
+                    <ul>
+                        <li><strong>limit</strong>: Number of audio testimonials to show (default: 5)</li>
+                        <li><strong>autoplay</strong>: Auto-play audio (default: false)</li>
+                        <li><strong>controls</strong>: Show audio controls (default: true)</li>
+                    </ul>
+                </div>
+                
+                <div class="shortcode-section">
+                    <h2>Video Testimonials</h2>
+                    <p>Display video testimonials from customers:</p>
+                    <code>[rankitpro_video_testimonials limit="3" thumbnail_size="medium"]</code>
+                    
+                    <h4>Parameters:</h4>
+                    <ul>
+                        <li><strong>limit</strong>: Number of video testimonials to show (default: 3)</li>
+                        <li><strong>thumbnail_size</strong>: Video thumbnail size - small, medium, large (default: medium)</li>
+                        <li><strong>autoplay</strong>: Auto-play videos (default: false)</li>
+                        <li><strong>controls</strong>: Show video controls (default: true)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+    
     public function rankitpro_visits_shortcode($atts) {
         $atts = shortcode_atts(array(
             'limit' => 5,
@@ -525,6 +684,184 @@ class RankItProIntegration {
             if (!empty($review['feedback'])) {
                 $output .= '<p>' . esc_html($review['feedback']) . '</p>';
             }
+            $output .= '</div>';
+        }
+        $output .= '</div>';
+        
+        return $output;
+    }
+    
+    /**
+     * Blog posts shortcode
+     */
+    public function rankitpro_blogs_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 3,
+            'category' => 'all',
+            'show_excerpt' => 'true',
+            'show_date' => 'true'
+        ), $atts, 'rankitpro_blogs');
+        
+        $api_key = get_option('rankitpro_api_key', '${apiKey}');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        
+        if (empty($api_key) || empty($api_endpoint)) {
+            return '<p>Please configure your API settings.</p>';
+        }
+        
+        $url = rtrim($api_endpoint, '/') . '/api/wordpress/public/blogs?apiKey=' . urlencode($api_key) . '&limit=' . intval($atts['limit']) . '&category=' . urlencode($atts['category']);
+        $response = wp_remote_get($url, array('timeout' => 30));
+        
+        if (is_wp_error($response)) {
+            return '<p>Error loading blog posts.</p>';
+        }
+        
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        if (!$data) {
+            return '<p>No blog posts available.</p>';
+        }
+        
+        $output = '<div class="rankitpro-blogs">';
+        foreach ($data as $blog) {
+            $output .= '<article class="blog-item">';
+            $output .= '<h3>' . esc_html($blog['title'] ?? 'Blog Post') . '</h3>';
+            
+            if ($atts['show_date'] === 'true' && !empty($blog['createdAt'])) {
+                $output .= '<div class="blog-date">' . date('F j, Y', strtotime($blog['createdAt'])) . '</div>';
+            }
+            
+            if ($atts['show_excerpt'] === 'true' && !empty($blog['content'])) {
+                $excerpt = wp_trim_words(strip_tags($blog['content']), 30);
+                $output .= '<div class="blog-excerpt">' . esc_html($excerpt) . '</div>';
+            }
+            
+            if (!empty($blog['jobType'])) {
+                $output .= '<div class="blog-category">Category: ' . esc_html($blog['jobType']) . '</div>';
+            }
+            
+            $output .= '</article>';
+        }
+        $output .= '</div>';
+        
+        return $output;
+    }
+    
+    /**
+     * Audio testimonials shortcode
+     */
+    public function rankitpro_audio_testimonials_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 5,
+            'autoplay' => 'false',
+            'controls' => 'true'
+        ), $atts, 'rankitpro_audio_testimonials');
+        
+        $api_key = get_option('rankitpro_api_key', '${apiKey}');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        
+        if (empty($api_key) || empty($api_endpoint)) {
+            return '<p>Please configure your API settings.</p>';
+        }
+        
+        $url = rtrim($api_endpoint, '/') . '/api/wordpress/public/audio-testimonials?apiKey=' . urlencode($api_key) . '&limit=' . intval($atts['limit']);
+        $response = wp_remote_get($url, array('timeout' => 30));
+        
+        if (is_wp_error($response)) {
+            return '<p>Error loading audio testimonials.</p>';
+        }
+        
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        if (!$data) {
+            return '<p>No audio testimonials available.</p>';
+        }
+        
+        $output = '<div class="rankitpro-audio-testimonials">';
+        foreach ($data as $testimonial) {
+            $output .= '<div class="audio-testimonial-item">';
+            $output .= '<h4>' . esc_html($testimonial['customerName'] ?? 'Customer') . '</h4>';
+            
+            if (!empty($testimonial['audioUrl'])) {
+                $autoplay_attr = $atts['autoplay'] === 'true' ? ' autoplay' : '';
+                $controls_attr = $atts['controls'] === 'true' ? ' controls' : '';
+                
+                $output .= '<audio' . $controls_attr . $autoplay_attr . '>';
+                $output .= '<source src="' . esc_url($testimonial['audioUrl']) . '" type="audio/mpeg">';
+                $output .= 'Your browser does not support the audio element.';
+                $output .= '</audio>';
+            }
+            
+            if (!empty($testimonial['transcript'])) {
+                $output .= '<div class="audio-transcript">' . esc_html($testimonial['transcript']) . '</div>';
+            }
+            
+            if (!empty($testimonial['rating'])) {
+                $stars = str_repeat('★', $testimonial['rating']) . str_repeat('☆', 5 - $testimonial['rating']);
+                $output .= '<div class="rating">' . $stars . '</div>';
+            }
+            
+            $output .= '</div>';
+        }
+        $output .= '</div>';
+        
+        return $output;
+    }
+    
+    /**
+     * Video testimonials shortcode
+     */
+    public function rankitpro_video_testimonials_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 3,
+            'thumbnail_size' => 'medium',
+            'autoplay' => 'false',
+            'controls' => 'true'
+        ), $atts, 'rankitpro_video_testimonials');
+        
+        $api_key = get_option('rankitpro_api_key', '${apiKey}');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        
+        if (empty($api_key) || empty($api_endpoint)) {
+            return '<p>Please configure your API settings.</p>';
+        }
+        
+        $url = rtrim($api_endpoint, '/') . '/api/wordpress/public/video-testimonials?apiKey=' . urlencode($api_key) . '&limit=' . intval($atts['limit']);
+        $response = wp_remote_get($url, array('timeout' => 30));
+        
+        if (is_wp_error($response)) {
+            return '<p>Error loading video testimonials.</p>';
+        }
+        
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        if (!$data) {
+            return '<p>No video testimonials available.</p>';
+        }
+        
+        $size_class = 'size-' . esc_attr($atts['thumbnail_size']);
+        
+        $output = '<div class="rankitpro-video-testimonials ' . $size_class . '">';
+        foreach ($data as $testimonial) {
+            $output .= '<div class="video-testimonial-item">';
+            $output .= '<h4>' . esc_html($testimonial['customerName'] ?? 'Customer') . '</h4>';
+            
+            if (!empty($testimonial['videoUrl'])) {
+                $autoplay_attr = $atts['autoplay'] === 'true' ? ' autoplay' : '';
+                $controls_attr = $atts['controls'] === 'true' ? ' controls' : '';
+                
+                $output .= '<video' . $controls_attr . $autoplay_attr . ' class="' . $size_class . '">';
+                $output .= '<source src="' . esc_url($testimonial['videoUrl']) . '" type="video/mp4">';
+                $output .= 'Your browser does not support the video element.';
+                $output .= '</video>';
+            }
+            
+            if (!empty($testimonial['description'])) {
+                $output .= '<div class="video-description">' . esc_html($testimonial['description']) . '</div>';
+            }
+            
+            if (!empty($testimonial['rating'])) {
+                $stars = str_repeat('★', $testimonial['rating']) . str_repeat('☆', 5 - $testimonial['rating']);
+                $output .= '<div class="rating">' . $stars . '</div>';
+            }
+            
             $output .= '</div>';
         }
         $output .= '</div>';
