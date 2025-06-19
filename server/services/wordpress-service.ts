@@ -604,9 +604,9 @@ class RankItPro_Visit_Integration {
     private $reviewsEndpoint;
 
     public function __construct() {
-        $this->apiKey = '${apiKey}';
-        $this->apiEndpoint = '${apiEndpoint}api/wordpress/public/visits';
-        $this->reviewsEndpoint = '${apiEndpoint}api/wordpress/public/reviews';
+        $this->apiKey = get_option('rankitpro_api_key', '');
+        $this->apiEndpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}') . 'api/wordpress/public/visits';
+        $this->reviewsEndpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}') . 'api/wordpress/public/reviews';
         
         // Register activation/deactivation hooks
         register_activation_hook(__FILE__, array($this, 'activate_plugin'));
@@ -641,7 +641,8 @@ class RankItPro_Visit_Integration {
     // Plugin activation
     public function activate_plugin() {
         // Set default options
-        add_option('rankitpro_api_key', '${apiKey}');
+        add_option('rankitpro_api_key', '');
+        add_option('rankitpro_api_endpoint', '${apiEndpoint}');
         add_option('rankitpro_auto_sync', '1');
         add_option('rankitpro_show_photos', '1');
         add_option('rankitpro_cache_duration', '3600');
@@ -690,7 +691,13 @@ class RankItPro_Visit_Integration {
         register_setting('rankitpro_settings_group', 'rankitpro_api_key', array(
             'type' => 'string',
             'sanitize_callback' => 'sanitize_text_field',
-            'default' => '${apiKey}'
+            'default' => ''
+        ));
+        
+        register_setting('rankitpro_settings_group', 'rankitpro_api_endpoint', array(
+            'type' => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+            'default' => '${apiEndpoint}'
         ));
         
         register_setting('rankitpro_settings_group', 'rankitpro_auto_sync', array(
@@ -736,6 +743,14 @@ class RankItPro_Visit_Integration {
         );
         
         add_settings_field(
+            'rankitpro_api_endpoint',
+            __('API Endpoint', 'rankitpro'),
+            array($this, 'api_endpoint_field_callback'),
+            'rankitpro-settings',
+            'rankitpro_api_section'
+        );
+        
+        add_settings_field(
             'rankitpro_auto_sync',
             __('Auto Sync', 'rankitpro'),
             array($this, 'auto_sync_field_callback'),
@@ -771,9 +786,15 @@ class RankItPro_Visit_Integration {
     
     // Settings field callbacks
     public function api_key_field_callback() {
-        $value = get_option('rankitpro_api_key', '${apiKey}');
-        echo '<input type="text" id="rankitpro_api_key" name="rankitpro_api_key" value="' . esc_attr($value) . '" class="regular-text" />';
+        $value = get_option('rankitpro_api_key', '');
+        echo '<input type="text" id="rankitpro_api_key" name="rankitpro_api_key" value="' . esc_attr($value) . '" class="regular-text" placeholder="' . __('Enter your API key', 'rankitpro') . '" />';
         echo '<p class="description">' . __('Your unique API key from Rank It Pro dashboard.', 'rankitpro') . '</p>';
+    }
+    
+    public function api_endpoint_field_callback() {
+        $value = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        echo '<input type="url" id="rankitpro_api_endpoint" name="rankitpro_api_endpoint" value="' . esc_attr($value) . '" class="regular-text" />';
+        echo '<p class="description">' . __('Your Rank It Pro API endpoint URL.', 'rankitpro') . '</p>';
     }
     
     public function auto_sync_field_callback() {
@@ -1121,8 +1142,18 @@ class RankItPro_Visit_Integration {
             <div class="card" style="margin-top: 20px;">
                 <h2><?php _e('API Connection Status', 'rankitpro'); ?></h2>
                 <p><?php _e('Status:', 'rankitpro'); ?> <strong><?php echo $this->test_api_connection() ? __('Connected', 'rankitpro') : __('Not Connected', 'rankitpro'); ?></strong></p>
-                <p><?php _e('API Key:', 'rankitpro'); ?> <code><?php echo esc_html(substr($this->apiKey, 0, 8) . '...' . substr($this->apiKey, -4)); ?></code></p>
-                <p><?php _e('Endpoint:', 'rankitpro'); ?> <code><?php echo esc_html($this->apiEndpoint); ?></code></p>
+                <?php 
+                $api_key = get_option('rankitpro_api_key', '');
+                $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+                ?>
+                <p><?php _e('API Key:', 'rankitpro'); ?> <code><?php 
+                    if (!empty($api_key)) {
+                        echo esc_html(substr($api_key, 0, 8) . '...' . substr($api_key, -4));
+                    } else {
+                        echo __('Not configured', 'rankitpro');
+                    }
+                ?></code></p>
+                <p><?php _e('Endpoint:', 'rankitpro'); ?> <code><?php echo esc_html($api_endpoint); ?></code></p>
                 
                 <p>
                     <button type="button" class="button button-secondary" onclick="testApiConnection()"><?php _e('Test Connection', 'rankitpro'); ?></button>
@@ -1176,6 +1207,10 @@ class RankItPro_Visit_Integration {
         // Update options with sanitization
         if (isset($_POST['rankitpro_api_key'])) {
             update_option('rankitpro_api_key', sanitize_text_field($_POST['rankitpro_api_key']));
+        }
+        
+        if (isset($_POST['rankitpro_api_endpoint'])) {
+            update_option('rankitpro_api_endpoint', esc_url_raw($_POST['rankitpro_api_endpoint']));
         }
         
         if (isset($_POST['rankitpro_auto_sync'])) {
