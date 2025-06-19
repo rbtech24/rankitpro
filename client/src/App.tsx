@@ -50,6 +50,7 @@ import BillingManagement from "@/pages/billing-management";
 import CompaniesManagement from "@/pages/companies-management";
 import SubscriptionManagement from "@/pages/subscription-management";
 import FinancialDashboard from "@/pages/financial-dashboard";
+import SuperAdminFinance from "@/pages/super-admin-finance";
 import TechniciansManagement from "@/pages/technicians-management";
 import SystemSettings from "@/pages/system-settings";
 import SystemOverview from "@/pages/system-overview";

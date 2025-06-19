@@ -230,8 +230,7 @@ router.delete('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
 // Get financial metrics
 router.get('/financial/metrics', isSuperAdmin, async (req, res) => {
   try {
-    const period = req.query.period as string || '12months';
-    const metrics = await storage.getFinancialMetrics(period);
+    const metrics = await storage.getFinancialMetrics();
     res.json(metrics);
   } catch (error) {
     console.error('Error fetching financial metrics:', error);
