@@ -53,25 +53,7 @@ export default function Sidebar({ className }: SidebarProps) {
                 </div>
               </Link>
 
-              <Link href="/setup-guide">
-                <div className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
-                  isActive("/setup-guide") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
-                )}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
-                    <path d="M9 12l2 2 4-4"/>
-                    <path d="M21 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
-                    <path d="M3 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
-                    <path d="M12 21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
-                    <path d="M12 3c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
-                    <path d="m18.364 18.364.707-.707-.707-.707-.707.707.707.707z"/>
-                    <path d="m5.636 5.636.707-.707-.707-.707-.707.707.707.707z"/>
-                    <path d="m18.364 5.636-.707-.707-.707.707.707.707.707-.707z"/>
-                    <path d="m5.636 18.364-.707-.707-.707.707.707.707.707-.707z"/>
-                  </svg>
-                  Setup Guide
-                </div>
-              </Link>
+
 
               <Link href="/check-ins">
                 <div className={cn(
@@ -355,6 +337,26 @@ export default function Sidebar({ className }: SidebarProps) {
               Help & Support
             </h3>
             
+            <Link href="/setup-guide">
+              <div className={cn(
+                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
+                isActive("/setup-guide") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
+              )}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                  <path d="M9 12l2 2 4-4"/>
+                  <path d="M21 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
+                  <path d="M3 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
+                  <path d="M12 21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
+                  <path d="M12 3c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"/>
+                  <path d="m18.364 18.364.707-.707-.707-.707-.707.707.707.707z"/>
+                  <path d="m5.636 5.636.707-.707-.707-.707-.707.707.707.707z"/>
+                  <path d="m18.364 5.636-.707-.707-.707.707.707.707.707-.707z"/>
+                  <path d="m5.636 18.364-.707-.707-.707.707.707.707.707-.707z"/>
+                </svg>
+                Platform Setup Guide
+              </div>
+            </Link>
+
             <Link href="/documentation">
               <div className={cn(
                 "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
