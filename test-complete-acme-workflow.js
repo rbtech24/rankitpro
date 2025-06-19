@@ -3,7 +3,7 @@
  * Tests the entire system from company signup through WordPress integration
  */
 
-const fs = require('fs');
+import fs from 'fs';
 
 async function apiRequest(method, endpoint, data = null, cookies = '') {
   const fetch = (await import('node-fetch')).default;
