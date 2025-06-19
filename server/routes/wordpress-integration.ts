@@ -5,6 +5,7 @@ import { isAuthenticated, isCompanyAdmin } from '../middleware/auth';
 import { WordPressService, WordPressCredentials } from '../services/wordpress-service';
 import crypto from 'crypto';
 import { insertWordpressCustomFieldsSchema } from '@shared/schema';
+import archiver from 'archiver';
 
 const router = Router();
 
@@ -224,7 +225,6 @@ ${pluginCode}
 ?>`;
 
     // Create ZIP file for WordPress plugin
-    const archiver = require('archiver');
     const archive = archiver('zip', {
       zlib: { level: 9 } // Maximum compression
     });
