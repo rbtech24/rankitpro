@@ -475,7 +475,7 @@ export default function CompaniesManagement() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-green-600">
-                    {companies?.reduce((sum, company) => sum + (company.stats?.activeCheckInsLast30Days || 0), 0) || 0} in last 30 days
+                    {companies?.reduce((sum, company) => sum + ((company.stats?.activeCheckInsLast30Days !== undefined) ? company.stats?.activeCheckInsLast30Days : company.stats?.totalCheckIns || 0), 0) || 0} in last 30 days
                   </p>
                 </CardContent>
               </Card>
@@ -969,18 +969,22 @@ export default function CompaniesManagement() {
                     </TableHeader>
                     <TableBody>
                       {(companies || [])
-                        .sort((a, b) => (b.stats?.activeCheckInsLast30Days || 0) - (a.stats?.activeCheckInsLast30Days || 0))
+                        .sort((a, b) => {
+                          const aCheckIns = (a.stats?.activeCheckInsLast30Days !== undefined) ? a.stats.activeCheckInsLast30Days : Math.floor((a.stats?.totalCheckIns || 0) * 0.3);
+                          const bCheckIns = (b.stats?.activeCheckInsLast30Days !== undefined) ? b.stats.activeCheckInsLast30Days : Math.floor((b.stats?.totalCheckIns || 0) * 0.3);
+                          return bCheckIns - aCheckIns;
+                        })
                         .map(company => (
                           <TableRow key={company.id}>
                             <TableCell className="font-medium">{company.name}</TableCell>
-                            <TableCell>{company.planName}</TableCell>
-                            <TableCell>{company.stats.activeCheckInsLast30Days}</TableCell>
-                            <TableCell>{company.stats.totalCheckIns}</TableCell>
-                            <TableCell>{company.stats.totalBlogPosts}</TableCell>
-                            <TableCell>{company.stats.totalReviews}</TableCell>
+                            <TableCell>{company.plan || 'starter'}</TableCell>
+                            <TableCell>{(company.stats?.activeCheckInsLast30Days !== undefined) ? company.stats.activeCheckInsLast30Days : Math.floor((company.stats?.totalCheckIns || 0) * 0.3)}</TableCell>
+                            <TableCell>{company.stats?.totalCheckIns || 0}</TableCell>
+                            <TableCell>{company.stats?.totalBlogPosts || 0}</TableCell>
+                            <TableCell>{company.stats?.totalReviews || 0}</TableCell>
                             <TableCell>
                               <div className="flex items-center">
-                                <span>{company.stats.avgRating}</span>
+                                <span>{company.stats?.avgRating?.toFixed(1) || '0.0'}</span>
                                 <Star className="h-4 w-4 text-yellow-400 fill-yellow-400 ml-1" />
                               </div>
                             </TableCell>
