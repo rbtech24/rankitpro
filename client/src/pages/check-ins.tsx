@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import CheckinCard from "@/components/checkin/checkin-card";
 import CheckinModal from "@/components/modals/checkin-modal";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Trash2 } from "lucide-react";
 
 interface Technician {
   id: number;
@@ -31,22 +32,62 @@ interface CheckIn {
 export default function CheckIns() {
   const [checkInModalOpen, setCheckInModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: checkIns = [], isLoading, refetch } = useQuery<CheckIn[]>({
     queryKey: ["/api/check-ins"],
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (checkInId: number) => {
+      const res = await apiRequest("DELETE", `/api/check-ins/${checkInId}`);
+      if (res.status === 204 || res.ok) {
+        return { success: true };
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Check-in deleted successfully.",
+        variant: "default",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/check-ins"] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete check-in. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const filteredCheckIns = checkIns.filter(checkIn => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
-      checkIn.jobType.toLowerCase().includes(query) ||
-      checkIn.technician.name.toLowerCase().includes(query) ||
+      checkIn.jobType?.toLowerCase().includes(query) ||
+      checkIn.technician?.name?.toLowerCase().includes(query) ||
       (checkIn.notes && checkIn.notes.toLowerCase().includes(query)) ||
       (checkIn.location && checkIn.location.toLowerCase().includes(query))
     );
   });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredCheckIns.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedCheckIns = filteredCheckIns.slice(startIndex, endIndex);
+
+  const handleDeleteCheckIn = (checkInId: number) => {
+    if (confirm("Are you sure you want to delete this check-in? This action cannot be undone.")) {
+      deleteMutation.mutate(checkInId);
+    }
+  };
   
   const handleCreatePost = async (checkInId: number) => {
     try {
@@ -145,36 +186,80 @@ export default function CheckIns() {
             <CardTitle className="text-lg font-medium text-gray-900">All Check-ins</CardTitle>
           </CardHeader>
           
-          <div className="divide-y divide-gray-200">
-            {isLoading ? (
-              <div className="p-6 text-center">
-                <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2" />
-                <p className="text-gray-500">Loading check-ins...</p>
+          <div className="max-h-[600px] overflow-y-auto">
+            <div className="divide-y divide-gray-200">
+              {isLoading ? (
+                <div className="p-6 text-center">
+                  <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2" />
+                  <p className="text-gray-500">Loading check-ins...</p>
+                </div>
+              ) : paginatedCheckIns.length > 0 ? (
+                paginatedCheckIns.map((checkIn) => (
+                  <div key={checkIn.id} className="relative group">
+                    <CheckinCard
+                      checkIn={checkIn}
+                      onCreatePost={() => handleCreatePost(checkIn.id)}
+                      onRequestReview={() => {
+                        handleRequestReview(checkIn.id, checkIn.technician?.id || 0);
+                      }}
+                    />
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteCheckIn(checkIn.id)}
+                        disabled={deleteMutation.isPending}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-6 text-center">
+                  <p className="text-gray-500">
+                    {searchQuery 
+                      ? "No check-ins found matching your search." 
+                      : "No check-ins found. Create your first check-in to get started."}
+                  </p>
+                  <Button className="mt-4" onClick={() => setCheckInModalOpen(true)}>
+                    Create Visit
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Pagination */}
+          {filteredCheckIns.length > itemsPerPage && (
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+              <div className="text-sm text-gray-500">
+                Showing {startIndex + 1} to {Math.min(endIndex, filteredCheckIns.length)} of {filteredCheckIns.length} results
               </div>
-            ) : filteredCheckIns.length > 0 ? (
-              filteredCheckIns.map((checkIn) => (
-                <CheckinCard
-                  key={checkIn.id}
-                  checkIn={checkIn}
-                  onCreatePost={() => handleCreatePost(checkIn.id)}
-                  onRequestReview={() => {
-                    handleRequestReview(checkIn.id, checkIn.technician.id);
-                  }}
-                />
-              ))
-            ) : (
-              <div className="p-6 text-center">
-                <p className="text-gray-500">
-                  {searchQuery 
-                    ? "No check-ins found matching your search." 
-                    : "No check-ins found. Create your first check-in to get started."}
-                </p>
-                <Button className="mt-4" onClick={() => setCheckInModalOpen(true)}>
-                  Create Visit
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <span className="px-3 py-1 text-sm text-gray-600">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </Card>
       
         <CheckinModal 
