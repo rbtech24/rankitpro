@@ -1667,6 +1667,23 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       res.status(500).json({ message: "Server error" });
     }
   });
+
+  // Usage limits endpoint
+  app.get("/api/usage-limits", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user.companyId;
+      
+      if (!companyId) {
+        return res.status(400).json({ message: "No company associated with this user" });
+      }
+      
+      const usageLimits = await storage.checkUsageLimits(companyId);
+      res.json(usageLimits);
+    } catch (error) {
+      console.error("Get usage limits error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
   
   app.post("/api/visits", isAuthenticated, upload.array("photos", 5), async (req, res) => {
     try {
@@ -1674,6 +1691,22 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       
       if (!companyId) {
         return res.status(400).json({ message: "No company associated with this user" });
+      }
+      
+      // Check usage limits before creating check-in
+      const usageLimits = await storage.checkUsageLimits(companyId);
+      
+      if (!usageLimits.canCreateCheckIn) {
+        return res.status(429).json({
+          message: "Monthly check-in limit reached",
+          error: "USAGE_LIMIT_EXCEEDED",
+          details: {
+            currentUsage: usageLimits.currentUsage,
+            limit: usageLimits.limit,
+            planName: usageLimits.planName
+          },
+          upgradeRequired: true
+        });
       }
       
       // For now, we'll just get the technician ID from the request

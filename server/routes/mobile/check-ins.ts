@@ -207,6 +207,22 @@ router.post('/', isAuthenticated, async (req, res) => {
   try {
     const data = checkInSchema.parse(req.body);
     
+    // Check usage limits before creating check-in
+    const usageLimits = await storage.checkUsageLimits(req.user.companyId);
+    
+    if (!usageLimits.canCreateCheckIn) {
+      return res.status(429).json({
+        message: "Monthly check-in limit reached",
+        error: "USAGE_LIMIT_EXCEEDED",
+        details: {
+          currentUsage: usageLimits.currentUsage,
+          limit: usageLimits.limit,
+          planName: usageLimits.planName
+        },
+        upgradeRequired: true
+      });
+    }
+    
     // Get technician details
     const technicians = await storage.getTechniciansByCompany(req.user.companyId);
     const technician = technicians.find(tech => tech.userId === req.user.id);

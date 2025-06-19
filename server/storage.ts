@@ -622,6 +622,55 @@ export class DatabaseStorage implements IStorage {
     return updatedTechnician;
   }
 
+  // Usage tracking and limit enforcement
+  async getMonthlyCheckInCount(companyId: number): Promise<number> {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(checkIns)
+      .where(
+        and(
+          eq(checkIns.companyId, companyId),
+          sql`${checkIns.createdAt} >= ${startOfMonth}`
+        )
+      );
+    
+    return result[0]?.count || 0;
+  }
+
+  async checkUsageLimits(companyId: number): Promise<{
+    canCreateCheckIn: boolean;
+    currentUsage: number;
+    limit: number;
+    planName: string;
+    limitReached: boolean;
+  }> {
+    const company = await this.getCompany(companyId);
+    if (!company) {
+      throw new Error('Company not found');
+    }
+
+    // Get current monthly usage
+    const currentUsage = await this.getMonthlyCheckInCount(companyId);
+    
+    // Get subscription plan limits
+    const subscriptionPlan = await this.getSubscriptionPlan(company.subscriptionPlanId || 3); // Default to Starter
+    const limit = subscriptionPlan?.maxCheckIns || 50; // Default limit
+    
+    const limitReached = currentUsage >= limit;
+    const canCreateCheckIn = !limitReached;
+
+    return {
+      canCreateCheckIn,
+      currentUsage,
+      limit,
+      planName: subscriptionPlan?.name || 'Starter',
+      limitReached
+    };
+  }
+
   // Check-in operations
   async getCheckIn(id: number): Promise<CheckIn | undefined> {
     const [checkIn] = await db.select().from(checkIns).where(eq(checkIns.id, id));
