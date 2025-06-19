@@ -28,219 +28,42 @@ export default function WordPressPlugin() {
   };
 
   const downloadPlugin = async () => {
-    // Create a blob with the plugin content
-    const pluginContent = `<?php
-/**
- * Plugin Name: Rank It Pro Integration
- * Plugin URI: https://rankitpro.com
- * Description: Automatically publish technician check-ins to your WordPress site for improved local SEO and customer transparency.
- * Version: 1.0.0
- * Author: Rank It Pro
- * Author URI: https://rankitpro.com
- * Text Domain: rank-it-pro
- * Domain Path: /languages
- */
+    try {
+      // Call the backend endpoint to generate and download the ZIP file
+      const response = await fetch('/api/wordpress/plugin', {
+        method: 'GET',
+        credentials: 'include', // Include session cookies for authentication
+      });
 
-// Prevent direct access
-if (!defined('ABSPATH')) {
-    exit;
-}
+      if (!response.ok) {
+        throw new Error('Failed to generate plugin');
+      }
 
-// Define plugin constants
-define('RANK_IT_PRO_VERSION', '1.0.0');
-define('RANK_IT_PRO_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('RANK_IT_PRO_PLUGIN_URL', plugin_dir_url(__FILE__));
+      // Get the ZIP file as a blob
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'rank-it-pro-plugin.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
 
-class RankItProPlugin {
-    
-    public function __construct() {
-        add_action('init', array($this, 'init'));
-        register_activation_hook(__FILE__, array($this, 'activate'));
-        register_deactivation_hook(__FILE__, array($this, 'deactivate'));
+      toast({
+        title: "Plugin Downloaded!",
+        description: "WordPress plugin ZIP file ready for installation",
+      });
+    } catch (error) {
+      console.error('Error downloading plugin:', error);
+      toast({
+        title: "Download Failed",
+        description: "Could not download the WordPress plugin. Please try again.",
+        variant: "destructive",
+      });
     }
-    
-    public function init() {
-        // Admin menu
-        add_action('admin_menu', array($this, 'admin_menu'));
-        
-        // Settings
-        add_action('admin_init', array($this, 'admin_init'));
-        
-        // AJAX handlers
-        add_action('wp_ajax_rank_it_pro_test_connection', array($this, 'test_connection'));
-        add_action('wp_ajax_rank_it_pro_sync_checkins', array($this, 'sync_checkins'));
-        
-        // Webhook endpoint for receiving check-ins
-        add_action('rest_api_init', array($this, 'register_webhook_endpoint'));
-        
-        // Schedule sync if enabled
-        if (get_option('rank_it_pro_auto_sync', false)) {
-            add_action('rank_it_pro_sync_event', array($this, 'sync_checkins'));
-            if (!wp_next_scheduled('rank_it_pro_sync_event')) {
-                wp_schedule_event(time(), 'hourly', 'rank_it_pro_sync_event');
-            }
-        }
-    }
-    
-    public function activate() {
-        // Create custom post type for check-ins
-        $this->create_checkin_post_type();
-        flush_rewrite_rules();
-        
-        // Set default options
-        add_option('rank_it_pro_api_url', '');
-        add_option('rank_it_pro_api_key', '');
-        add_option('rank_it_pro_secret_key', '');
-        add_option('rank_it_pro_auto_sync', true);
-        add_option('rank_it_pro_post_status', 'publish');
-        add_option('rank_it_pro_post_category', '');
-    }
-    
-    public function deactivate() {
-        wp_clear_scheduled_hook('rank_it_pro_sync_event');
-    }
-    
-    public function admin_menu() {
-        add_options_page(
-            'Rank It Pro Settings',
-            'Rank It Pro',
-            'manage_options',
-            'rank-it-pro',
-            array($this, 'admin_page')
-        );
-    }
-    
-    public function admin_init() {
-        register_setting('rank_it_pro_settings', 'rank_it_pro_api_url');
-        register_setting('rank_it_pro_settings', 'rank_it_pro_api_key');
-        register_setting('rank_it_pro_settings', 'rank_it_pro_secret_key');
-        register_setting('rank_it_pro_settings', 'rank_it_pro_auto_sync');
-        register_setting('rank_it_pro_settings', 'rank_it_pro_post_status');
-        register_setting('rank_it_pro_settings', 'rank_it_pro_post_category');
-    }
-    
-    public function admin_page() {
-        ?>
-        <div class="wrap">
-            <h1>Rank It Pro Integration Settings</h1>
-            
-            <div class="notice notice-info">
-                <p><strong>Welcome to Rank It Pro!</strong> This plugin automatically publishes your technician check-ins to your WordPress site, boosting your local SEO and keeping customers informed.</p>
-            </div>
-            
-            <form method="post" action="options.php">
-                <?php settings_fields('rank_it_pro_settings'); ?>
-                
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">
-                            <label for="rank_it_pro_api_url">Rank It Pro API URL</label>
-                        </th>
-                        <td>
-                            <input type="url" id="rank_it_pro_api_url" name="rank_it_pro_api_url" 
-                                   value="<?php echo esc_attr(get_option('rank_it_pro_api_url')); ?>" 
-                                   class="regular-text" placeholder="https://your-domain.rankitpro.com" />
-                            <p class="description">Your Rank It Pro platform URL (found in your dashboard)</p>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <th scope="row">
-                            <label for="rank_it_pro_api_key">API Key</label>
-                        </th>
-                        <td>
-                            <input type="text" id="rank_it_pro_api_key" name="rank_it_pro_api_key" 
-                                   value="<?php echo esc_attr(get_option('rank_it_pro_api_key')); ?>" 
-                                   class="regular-text" />
-                            <p class="description">Your WordPress API key from Rank It Pro dashboard</p>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <th scope="row">
-                            <label for="rank_it_pro_secret_key">Secret Key</label>
-                        </th>
-                        <td>
-                            <input type="password" id="rank_it_pro_secret_key" name="rank_it_pro_secret_key" 
-                                   value="<?php echo esc_attr(get_option('rank_it_pro_secret_key')); ?>" 
-                                   class="regular-text" />
-                            <p class="description">Your WordPress secret key from Rank It Pro dashboard</p>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <th scope="row">Post Settings</th>
-                        <td>
-                            <fieldset>
-                                <label>
-                                    <input type="checkbox" name="rank_it_pro_auto_sync" value="1" 
-                                           <?php checked(get_option('rank_it_pro_auto_sync'), 1); ?> />
-                                    Automatically sync check-ins hourly
-                                </label>
-                                <br><br>
-                                
-                                <label for="rank_it_pro_post_status">Post Status:</label>
-                                <select id="rank_it_pro_post_status" name="rank_it_pro_post_status">
-                                    <option value="publish" <?php selected(get_option('rank_it_pro_post_status'), 'publish'); ?>>Published</option>
-                                    <option value="draft" <?php selected(get_option('rank_it_pro_post_status'), 'draft'); ?>>Draft</option>
-                                    <option value="private" <?php selected(get_option('rank_it_pro_post_status'), 'private'); ?>>Private</option>
-                                </select>
-                                <br><br>
-                                
-                                <label for="rank_it_pro_post_category">Default Category:</label>
-                                <?php wp_dropdown_categories(array(
-                                    'name' => 'rank_it_pro_post_category',
-                                    'selected' => get_option('rank_it_pro_post_category'),
-                                    'show_option_none' => 'Select Category',
-                                    'option_none_value' => ''
-                                )); ?>
-                            </fieldset>
-                        </td>
-                    </tr>
-                </table>
-                
-                <?php submit_button(); ?>
-            </form>
-            
-            <hr>
-            
-            <h2>Connection Test</h2>
-            <p>Test your connection to the Rank It Pro platform:</p>
-            <button type="button" id="test-connection" class="button button-secondary">Test Connection</button>
-            <div id="connection-result" style="margin-top: 10px;"></div>
-            
-            <hr>
-            
-            <h2>Manual Sync</h2>
-            <p>Manually sync recent check-ins from your Rank It Pro platform:</p>
-            <button type="button" id="manual-sync" class="button button-secondary">Sync Now</button>
-            <div id="sync-result" style="margin-top: 10px;"></div>
-        </div>
-        <?php
-    }
-    
-    // Additional methods would continue here...
-}
-
-// Initialize the plugin
-new RankItProPlugin();
-
-?>`;
-
-    const blob = new Blob([pluginContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'rank-it-pro-plugin.php';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    toast({
-      title: "Plugin Downloaded!",
-      description: "Upload the plugin file to your WordPress site",
-    });
   };
 
   const apiCredentials = {
@@ -257,231 +80,266 @@ new RankItProPlugin();
           <p className="text-gray-500">Download and install the Rank It Pro WordPress plugin to automatically publish check-ins to your customer's websites.</p>
         </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Plugin Download Card */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Download className="w-5 h-5" />
-              Download Plugin
-            </CardTitle>
-            <CardDescription>
-              Get the latest version of the Rank It Pro WordPress plugin for seamless integration
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div>
-                <h3 className="font-semibold text-blue-900">Rank It Pro Plugin v1.0.0</h3>
-                <p className="text-sm text-blue-700">Complete WordPress integration with automatic sync</p>
-                <div className="flex gap-2 mt-2">
-                  <Badge variant="secondary">Latest</Badge>
-                  <Badge variant="outline">Stable</Badge>
-                </div>
-              </div>
-              <Button onClick={downloadPlugin} className="bg-blue-600 hover:bg-blue-700">
-                <Download className="w-4 h-4 mr-2" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Plugin Download Card */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5" />
                 Download Plugin
-              </Button>
-            </div>
+              </CardTitle>
+              <CardDescription>
+                Get the latest version of the Rank It Pro WordPress plugin for seamless integration
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div>
+                  <h3 className="font-semibold text-blue-900">Rank It Pro Plugin v1.0.0</h3>
+                  <p className="text-sm text-blue-700">Complete WordPress integration with automatic sync</p>
+                  <div className="flex gap-2 mt-2">
+                    <Badge variant="secondary">Latest</Badge>
+                    <Badge variant="outline">Stable</Badge>
+                  </div>
+                </div>
+                <Button onClick={downloadPlugin} className="bg-blue-600 hover:bg-blue-700">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download ZIP
+                </Button>
+              </div>
 
-            <Separator />
+              <Separator />
 
-            <div className="space-y-4">
-              <h3 className="font-semibold">Installation Instructions</h3>
-              <div className="space-y-3">
-                <div className="flex gap-3">
-                  <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">1</div>
-                  <div>
-                    <p className="font-medium">Download the plugin file</p>
-                    <p className="text-sm text-gray-600">Click the download button above to get the plugin file</p>
+              <div className="space-y-4">
+                <h3 className="font-semibold">Installation Instructions</h3>
+                <div className="space-y-3">
+                  <div className="flex gap-3">
+                    <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">1</div>
+                    <div>
+                      <p className="font-medium">Download the plugin ZIP file</p>
+                      <p className="text-sm text-gray-600">Click the download button above to get the complete plugin package</p>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex gap-3">
-                  <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">2</div>
-                  <div>
-                    <p className="font-medium">Upload to WordPress</p>
-                    <p className="text-sm text-gray-600">Go to Plugins → Add New → Upload Plugin in your WordPress admin</p>
+                  <div className="flex gap-3">
+                    <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">2</div>
+                    <div>
+                      <p className="font-medium">Upload to WordPress</p>
+                      <p className="text-sm text-gray-600">Go to Plugins → Add New → Upload Plugin in your WordPress admin</p>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex gap-3">
-                  <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">3</div>
-                  <div>
-                    <p className="font-medium">Activate the plugin</p>
-                    <p className="text-sm text-gray-600">Install and activate the plugin in your WordPress dashboard</p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-3">
-                  <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">4</div>
-                  <div>
-                    <p className="font-medium">Configure settings</p>
-                    <p className="text-sm text-gray-600">Use the API credentials from the configuration panel to connect</p>
+                  <div className="flex gap-3">
+                    <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                    <div>
+                      <p className="font-medium">Activate and configure</p>
+                      <p className="text-sm text-gray-600">Activate the plugin and configure your API credentials</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Configuration Panel */}
+              <Separator />
+
+              <div className="space-y-4">
+                <h3 className="font-semibold">Plugin Features</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm">Automatic Sync</p>
+                      <p className="text-xs text-gray-600">Real-time check-in publishing</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm">Shortcode Support</p>
+                      <p className="text-xs text-gray-600">Easy content embedding</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm">SEO Optimized</p>
+                      <p className="text-xs text-gray-600">Local SEO benefits</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm">Responsive Design</p>
+                      <p className="text-xs text-gray-600">Mobile-friendly display</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Configuration Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Configuration
+              </CardTitle>
+              <CardDescription>
+                API credentials for plugin setup
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">API URL</label>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="text" 
+                    value={apiCredentials.apiUrl}
+                    readOnly
+                    className="flex-1 px-3 py-2 text-xs border rounded-md bg-gray-50"
+                  />
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => copyToClipboard(apiCredentials.apiUrl, 'apiUrl')}
+                  >
+                    {copiedItems.has('apiUrl') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">API Key</label>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="text" 
+                    value={apiCredentials.apiKey}
+                    readOnly
+                    className="flex-1 px-3 py-2 text-xs border rounded-md bg-gray-50 font-mono"
+                  />
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => copyToClipboard(apiCredentials.apiKey, 'apiKey')}
+                  >
+                    {copiedItems.has('apiKey') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Secret Key</label>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="password" 
+                    value={apiCredentials.secretKey}
+                    readOnly
+                    className="flex-1 px-3 py-2 text-xs border rounded-md bg-gray-50 font-mono"
+                  />
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => copyToClipboard(apiCredentials.secretKey, 'secretKey')}
+                  >
+                    {copiedItems.has('secretKey') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm">Available Shortcodes</h4>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_checkins]</code>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => copyToClipboard('[rank_it_pro_checkins]', 'shortcode1')}
+                    >
+                      {copiedItems.has('shortcode1') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-600">Display all recent check-ins</p>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_recent limit="3"]</code>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => copyToClipboard('[rank_it_pro_recent limit="3"]', 'shortcode2')}
+                    >
+                      {copiedItems.has('shortcode2') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-600">Show latest 3 check-ins</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Documentation Section */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
-              API Configuration
+              <FileText className="w-5 h-5" />
+              Plugin Documentation
             </CardTitle>
             <CardDescription>
-              Copy these credentials to configure the WordPress plugin
+              Complete setup and usage guide
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700">API URL</label>
-              <div className="flex mt-1">
-                <code className="flex-1 p-2 bg-gray-100 border rounded-l text-xs font-mono">
-                  {apiCredentials.apiUrl}
-                </code>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-l-none border-l-0"
-                  onClick={() => copyToClipboard(apiCredentials.apiUrl, 'api-url')}
-                >
-                  {copiedItems.has('api-url') ? (
-                    <Check className="w-4 h-4" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                </Button>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h3 className="font-semibold">Setup Requirements</h3>
+                <ul className="space-y-2 text-sm text-gray-600">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-500" />
+                    WordPress 5.0 or higher
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-500" />
+                    PHP 7.4 or higher
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-500" />
+                    Active Rank It Pro account
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-500" />
+                    SSL certificate (recommended)
+                  </li>
+                </ul>
               </div>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-gray-700">API Key</label>
-              <div className="flex mt-1">
-                <code className="flex-1 p-2 bg-gray-100 border rounded-l text-xs font-mono">
-                  {apiCredentials.apiKey}
-                </code>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-l-none border-l-0"
-                  onClick={() => copyToClipboard(apiCredentials.apiKey, 'api-key')}
-                >
-                  {copiedItems.has('api-key') ? (
-                    <Check className="w-4 h-4" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-gray-700">Secret Key</label>
-              <div className="flex mt-1">
-                <code className="flex-1 p-2 bg-gray-100 border rounded-l text-xs font-mono">
-                  {apiCredentials.secretKey}
-                </code>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-l-none border-l-0"
-                  onClick={() => copyToClipboard(apiCredentials.secretKey, 'secret-key')}
-                >
-                  {copiedItems.has('secret-key') ? (
-                    <Check className="w-4 h-4" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
 
-            <div className="pt-4 border-t">
-              <p className="text-xs text-gray-500">
-                These credentials are unique to your account and allow the WordPress plugin to securely connect to your Rank It Pro platform.
-              </p>
+              <div className="space-y-4">
+                <h3 className="font-semibold">Support Resources</h3>
+                <div className="space-y-2">
+                  <a href="/installation-guide" className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800">
+                    <ExternalLink className="w-4 h-4" />
+                    Installation Guide
+                  </a>
+                  <a href="/troubleshooting" className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800">
+                    <ExternalLink className="w-4 h-4" />
+                    Troubleshooting FAQ
+                  </a>
+                  <a href="/api-documentation" className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800">
+                    <ExternalLink className="w-4 h-4" />
+                    Developer Documentation
+                  </a>
+                  <a href="/documentation" className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800">
+                    <ExternalLink className="w-4 h-4" />
+                    Support Portal
+                  </a>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Features Overview */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Plugin Features</CardTitle>
-          <CardDescription>
-            What the WordPress plugin provides for your customers
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <h4 className="font-semibold">Automatic Publishing</h4>
-              <p className="text-sm text-gray-600">Check-ins are automatically converted to WordPress posts with photos and service details</p>
-            </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-semibold">SEO Optimized</h4>
-              <p className="text-sm text-gray-600">Posts are structured for maximum search engine visibility with local keywords</p>
-            </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-semibold">Real-time Sync</h4>
-              <p className="text-sm text-gray-600">Webhook integration ensures immediate publishing when check-ins are completed</p>
-            </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-semibold">Custom Fields</h4>
-              <p className="text-sm text-gray-600">Service details are stored as structured data for theme customization</p>
-            </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-semibold">Photo Management</h4>
-              <p className="text-sm text-gray-600">Before/during/after photos are automatically imported to WordPress media library</p>
-            </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-semibold">Easy Configuration</h4>
-              <p className="text-sm text-gray-600">Simple setup wizard guides customers through the connection process</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Documentation Links */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Documentation & Support
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
-            <Button variant="outline" className="flex items-center gap-2">
-              <ExternalLink className="w-4 h-4" />
-              Installation Guide
-            </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <ExternalLink className="w-4 h-4" />
-              API Documentation
-            </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <ExternalLink className="w-4 h-4" />
-              Troubleshooting
-            </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <ExternalLink className="w-4 h-4" />
-              Customer Support
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
       </div>
     </DashboardLayout>
   );
