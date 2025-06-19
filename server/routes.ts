@@ -1822,6 +1822,93 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  // Delete check-in (company admin and super admin)
+  app.delete("/api/check-ins/:id", isAuthenticated, async (req, res) => {
+    try {
+      const checkInId = parseInt(req.params.id);
+      
+      if (isNaN(checkInId)) {
+        return res.status(400).json({ message: "Invalid check-in ID" });
+      }
+
+      // Get check-in to verify permissions
+      const checkIn = await storage.getCheckIn(checkInId);
+      if (!checkIn) {
+        return res.status(404).json({ message: "Check-in not found" });
+      }
+
+      // Check permissions - super admin or company admin of the same company
+      if (req.user.role !== "super_admin" && 
+          (req.user.role !== "company_admin" || req.user.companyId !== checkIn.companyId)) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      await storage.deleteCheckIn(checkInId);
+      res.json({ message: "Check-in deleted successfully" });
+    } catch (error) {
+      console.error("Delete check-in error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Delete blog post (company admin and super admin)
+  app.delete("/api/blog-posts/:id", isAuthenticated, async (req, res) => {
+    try {
+      const blogPostId = parseInt(req.params.id);
+      
+      if (isNaN(blogPostId)) {
+        return res.status(400).json({ message: "Invalid blog post ID" });
+      }
+
+      // Get blog post to verify permissions
+      const blogPost = await storage.getBlogPost(blogPostId);
+      if (!blogPost) {
+        return res.status(404).json({ message: "Blog post not found" });
+      }
+
+      // Check permissions - super admin or company admin of the same company
+      if (req.user.role !== "super_admin" && 
+          (req.user.role !== "company_admin" || req.user.companyId !== blogPost.companyId)) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      await storage.deleteBlogPost(blogPostId);
+      res.json({ message: "Blog post deleted successfully" });
+    } catch (error) {
+      console.error("Delete blog post error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Delete review response (company admin and super admin)
+  app.delete("/api/review-responses/:id", isAuthenticated, async (req, res) => {
+    try {
+      const reviewId = parseInt(req.params.id);
+      
+      if (isNaN(reviewId)) {
+        return res.status(400).json({ message: "Invalid review ID" });
+      }
+
+      // Get review to verify permissions
+      const review = await storage.getReviewResponse(reviewId);
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+
+      // Check permissions - super admin or company admin of the same company
+      if (req.user.role !== "super_admin" && 
+          (req.user.role !== "company_admin" || req.user.companyId !== review.companyId)) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      await storage.deleteReviewResponse(reviewId);
+      res.json({ message: "Review deleted successfully" });
+    } catch (error) {
+      console.error("Delete review error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Companies management (Super admin only)
   app.get("/api/companies", isAuthenticated, isSuperAdmin, async (req, res) => {
     try {

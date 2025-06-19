@@ -340,11 +340,13 @@ if (!defined('ABSPATH')) {
 class RankItProIntegration {
     public function __construct() {
         add_action('init', array($this, 'init'));
-        add_shortcode('rankitpro_visits', array($this, 'rankitpro_visits_shortcode'));
-        add_shortcode('rankitpro_reviews', array($this, 'rankitpro_reviews_shortcode'));
+        add_shortcode('rankitpro_checkins', array($this, 'rankitpro_checkins_shortcode'));
         add_shortcode('rankitpro_blogs', array($this, 'rankitpro_blogs_shortcode'));
         add_shortcode('rankitpro_audio_testimonials', array($this, 'rankitpro_audio_testimonials_shortcode'));
         add_shortcode('rankitpro_video_testimonials', array($this, 'rankitpro_video_testimonials_shortcode'));
+        // Legacy support
+        add_shortcode('rankitpro_visits', array($this, 'rankitpro_checkins_shortcode'));
+        add_shortcode('rankitpro_reviews', array($this, 'rankitpro_audio_testimonials_shortcode'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'));
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_plugin_settings'));
@@ -618,14 +620,14 @@ class RankItProIntegration {
         <?php
     }
     
-    public function rankitpro_visits_shortcode($atts) {
+    public function rankitpro_checkins_shortcode($atts) {
         $atts = shortcode_atts(array(
             'limit' => 5,
             'type' => 'all'
         ), $atts);
         
-        $api_key = get_option('rankitpro_api_key');
-        $api_endpoint = get_option('rankitpro_api_endpoint');
+        $api_key = get_option('rankitpro_api_key', '${apiKey}');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings in the admin panel.</p>';
@@ -635,30 +637,156 @@ class RankItProIntegration {
         $response = wp_remote_get($url, array('timeout' => 30));
         
         if (is_wp_error($response)) {
-            return '<p>Error loading visits.</p>';
+            return '<p>Error loading service visits.</p>';
         }
         
         $data = json_decode(wp_remote_retrieve_body($response), true);
-        if (!$data) {
-            return '<p>No visits available.</p>';
+        if (!$data || !is_array($data)) {
+            return '<p>No service visits available.</p>';
         }
         
-        $output = '<div class="rankitpro-visits">';
+        $output = '<div class="rankitpro-checkins">';
         foreach ($data as $visit) {
             $output .= '<div class="visit-item">';
-            $output .= '<h4>' . esc_html($visit['customerName'] ?? 'Customer') . '</h4>';
-            $output .= '<p><strong>Service:</strong> ' . esc_html($visit['serviceDescription'] ?? 'Service visit') . '</p>';
+            $output .= '<h4>Service Visit - ' . esc_html($visit['jobType'] ?? 'General Service') . '</h4>';
             if (!empty($visit['location'])) {
                 $output .= '<p><strong>Location:</strong> ' . esc_html($visit['location']) . '</p>';
             }
-            if (!empty($visit['checkedInAt'])) {
-                $output .= '<p><strong>Date:</strong> ' . date('F j, Y', strtotime($visit['checkedInAt'])) . '</p>';
+            if (!empty($visit['notes'])) {
+                $output .= '<p><strong>Notes:</strong> ' . esc_html($visit['notes']) . '</p>';
+            }
+            if (!empty($visit['createdAt'])) {
+                $output .= '<p><strong>Date:</strong> ' . date('F j, Y', strtotime($visit['createdAt'])) . '</p>';
             }
             $output .= '</div>';
         }
         $output .= '</div>';
         
         return $output;
+    }
+    
+    public function rankitpro_blogs_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 3
+        ), $atts);
+        
+        $api_key = get_option('rankitpro_api_key', '${apiKey}');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        
+        if (empty($api_key) || empty($api_endpoint)) {
+            return '<p>Please configure your API settings in the admin panel.</p>';
+        }
+        
+        $url = rtrim($api_endpoint, '/') . '/api/wordpress/public/blogs?apiKey=' . urlencode($api_key) . '&limit=' . intval($atts['limit']);
+        $response = wp_remote_get($url, array('timeout' => 30));
+        
+        if (is_wp_error($response)) {
+            return '<p>Error loading blog posts.</p>';
+        }
+        
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        if (!$data || !is_array($data)) {
+            return '<p>No blog posts available.</p>';
+        }
+        
+        $output = '<div class="rankitpro-blogs">';
+        foreach ($data as $blog) {
+            $output .= '<div class="blog-item">';
+            $output .= '<h4>' . esc_html($blog['title'] ?? 'Blog Post') . '</h4>';
+            if (!empty($blog['content'])) {
+                $content = wp_trim_words($blog['content'], 30, '...');
+                $output .= '<p>' . esc_html($content) . '</p>';
+            }
+            if (!empty($blog['createdAt'])) {
+                $output .= '<p><small>Published: ' . date('F j, Y', strtotime($blog['createdAt'])) . '</small></p>';
+            }
+            $output .= '</div>';
+        }
+        $output .= '</div>';
+        
+        return $output;
+    }
+    
+    public function rankitpro_audio_testimonials_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 5
+        ), $atts);
+        
+        $api_key = get_option('rankitpro_api_key', '${apiKey}');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        
+        if (empty($api_key) || empty($api_endpoint)) {
+            return '<p>Please configure your API settings in the admin panel.</p>';
+        }
+        
+        $url = rtrim($api_endpoint, '/') . '/api/wordpress/public/audio-testimonials?apiKey=' . urlencode($api_key) . '&limit=' . intval($atts['limit']);
+        $response = wp_remote_get($url, array('timeout' => 30));
+        
+        if (is_wp_error($response)) {
+            return '<p>Error loading audio testimonials.</p>';
+        }
+        
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        if (!$data || !is_array($data) || empty($data)) {
+            return '<p>No audio testimonials available yet.</p>';
+        }
+        
+        $output = '<div class="rankitpro-audio-testimonials">';
+        foreach ($data as $testimonial) {
+            $output .= '<div class="testimonial-item">';
+            if (!empty($testimonial['audioUrl'])) {
+                $output .= '<audio controls><source src="' . esc_url($testimonial['audioUrl']) . '" type="audio/mpeg">Your browser does not support audio.</audio>';
+            }
+            if (!empty($testimonial['transcript'])) {
+                $output .= '<p>' . esc_html($testimonial['transcript']) . '</p>';
+            }
+            $output .= '</div>';
+        }
+        $output .= '</div>';
+        
+        return $output;
+    }
+    
+    public function rankitpro_video_testimonials_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 3
+        ), $atts);
+        
+        $api_key = get_option('rankitpro_api_key', '${apiKey}');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        
+        if (empty($api_key) || empty($api_endpoint)) {
+            return '<p>Please configure your API settings in the admin panel.</p>';
+        }
+        
+        $url = rtrim($api_endpoint, '/') . '/api/wordpress/public/video-testimonials?apiKey=' . urlencode($api_key) . '&limit=' . intval($atts['limit']);
+        $response = wp_remote_get($url, array('timeout' => 30));
+        
+        if (is_wp_error($response)) {
+            return '<p>Error loading video testimonials.</p>';
+        }
+        
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        if (!$data || !is_array($data) || empty($data)) {
+            return '<p>No video testimonials available yet.</p>';
+        }
+        
+        $output = '<div class="rankitpro-video-testimonials">';
+        foreach ($data as $testimonial) {
+            $output .= '<div class="testimonial-item">';
+            if (!empty($testimonial['videoUrl'])) {
+                $output .= '<video controls width="320" height="240"><source src="' . esc_url($testimonial['videoUrl']) . '" type="video/mp4">Your browser does not support video.</video>';
+            }
+            $output .= '</div>';
+        }
+        $output .= '</div>';
+        
+        return $output;
+    }
+    
+    // Legacy shortcode support
+    public function rankitpro_visits_shortcode($atts) {
+        return $this->rankitpro_checkins_shortcode($atts);
     }
     
     public function rankitpro_reviews_shortcode($atts) {
