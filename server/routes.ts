@@ -2084,6 +2084,39 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       res.status(500).json({ message: "Server error" });
     }
   });
+
+  // Delete blog post (company admin and super admin)
+  app.delete("/api/blog-posts/:id", isAuthenticated, async (req, res) => {
+    try {
+      const blogPostId = parseInt(req.params.id);
+      
+      if (isNaN(blogPostId)) {
+        return res.status(400).json({ message: "Invalid blog post ID" });
+      }
+
+      // Get blog post to verify permissions
+      const blogPost = await storage.getBlogPost(blogPostId);
+      if (!blogPost) {
+        return res.status(404).json({ message: "Blog post not found" });
+      }
+
+      // Check permissions - super admin or company admin of the same company
+      if (req.user.role !== "super_admin" && 
+          (req.user.role !== "company_admin" || req.user.companyId !== blogPost.companyId)) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const success = await storage.deleteBlogPost(blogPostId);
+      if (!success) {
+        return res.status(500).json({ message: "Failed to delete blog post" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Delete blog post error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
   
   // System Admin API endpoints for real data
   app.get("/api/admin/system-stats", isAuthenticated, async (req, res) => {

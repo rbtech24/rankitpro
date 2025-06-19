@@ -151,7 +151,7 @@ export default function BlogPosts() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-600 line-clamp-3 mb-4">
-                    {post.content.substring(0, 150)}...
+                    {post.content ? post.content.substring(0, 150) + (post.content.length > 150 ? '...' : '') : 'No content available'}
                   </p>
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-gray-400">
