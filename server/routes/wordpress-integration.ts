@@ -456,17 +456,14 @@ router.get('/public/check-ins', async (req: Request, res: Response) => {
     
     // Get all companies and find the one with the matching API key
     const companies = await storage.getAllCompanies();
-    console.log(`[DEBUG] Found ${companies.length} companies, searching for API key: ${apiKey}`);
     
     for (const company of companies) {
       if (company.wordpressConfig) {
         try {
           const config = JSON.parse(company.wordpressConfig);
-          console.log(`[DEBUG] Company ${company.id} has API key: ${config.apiKey}`);
           
           if (config.apiKey === apiKey) {
             companyId = company.id;
-            console.log(`[DEBUG] Found matching company: ${companyId}`);
             break;
           }
         } catch (error) {
@@ -495,9 +492,14 @@ router.get('/public/check-ins', async (req: Request, res: Response) => {
       
       if (checkIn.photos) {
         try {
-          photoUrls = JSON.parse(checkIn.photos as string);
+          if (typeof checkIn.photos === 'string' && checkIn.photos.trim()) {
+            photoUrls = JSON.parse(checkIn.photos);
+          } else if (Array.isArray(checkIn.photos)) {
+            photoUrls = checkIn.photos;
+          }
         } catch (error) {
-          console.error('Failed to parse photo URLs:', error);
+          // Silently handle invalid JSON, default to empty array
+          photoUrls = [];
         }
       }
       
