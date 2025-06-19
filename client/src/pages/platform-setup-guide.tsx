@@ -508,12 +508,12 @@ export default function PlatformSetupGuide() {
                     
                     <div className="flex items-center gap-2">
                       <div className="flex-1 p-3 bg-gray-50 rounded-md font-mono text-lg border">
-                        rankitpro.com/mobile
+                        rankitpro.com/field-app
                       </div>
                       <Button 
                         size="sm" 
                         variant="outline"
-                        onClick={() => copyToClipboard('rankitpro.com/mobile', 'mobile-url')}
+                        onClick={() => copyToClipboard('rankitpro.com/field-app', 'mobile-url')}
                       >
                         {copiedItems.has('mobile-url') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                       </Button>
@@ -611,7 +611,7 @@ export default function PlatformSetupGuide() {
                     
                     <div className="bg-gray-50 p-4 rounded-lg border">
                       <ol className="space-y-2 text-sm">
-                        <li>1. Go to the mobile app: <code className="bg-white px-2 py-1 rounded">rankitpro.com/mobile</code></li>
+                        <li>1. Go to the mobile app: <code className="bg-white px-2 py-1 rounded">rankitpro.com/field-app</code></li>
                         <li>2. Login with technician credentials</li>
                         <li>3. Create a test visit with photos and notes</li>
                         <li>4. Select "Check-in" and submit</li>
