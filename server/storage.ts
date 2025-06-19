@@ -1565,74 +1565,28 @@ export class DatabaseStorage implements IStorage {
   // Subscription Plan operations
   async getSubscriptionPlans(): Promise<any[]> {
     try {
-      // Return predefined subscription plans with subscriber counts
-      const plans = [
-        {
-          id: 1,
-          name: 'Starter',
-          price: '29.00',
-          billingPeriod: 'monthly',
-          maxTechnicians: 5,
-          maxCheckIns: 100,
-          features: [
-            'Basic check-in tracking',
-            'Photo uploads',
-            'Email review requests',
-            'Basic analytics',
-            'WordPress integration'
-          ],
-          isActive: true,
-          subscriberCount: await this.getSubscriberCountForPlan(1),
-          revenue: 0
-        },
-        {
-          id: 2,
-          name: 'Professional',
-          price: '79.00',
-          billingPeriod: 'monthly',
-          maxTechnicians: 15,
-          maxCheckIns: 500,
-          features: [
-            'All Starter features',
-            'Advanced analytics',
-            'Custom branding',
-            'Audio testimonials',
-            'Priority support',
-            'API access'
-          ],
-          isActive: true,
-          subscriberCount: await this.getSubscriberCountForPlan(2),
-          revenue: 0
-        },
-        {
-          id: 3,
-          name: 'Agency',
-          price: '149.00',
-          billingPeriod: 'monthly',
-          maxTechnicians: -1, // Unlimited
-          maxCheckIns: -1, // Unlimited
-          features: [
-            'All Professional features',
-            'Unlimited technicians',
-            'Unlimited check-ins',
-            'Video testimonials',
-            'Audio testimonials',
-            'White-label solution',
-            'Dedicated support',
-            'Custom integrations'
-          ],
-          isActive: true,
-          subscriberCount: await this.getSubscriberCountForPlan(3),
-          revenue: 0
-        }
-      ];
-
-      // Calculate revenue for each plan
-      plans.forEach(plan => {
-        plan.revenue = plan.subscriberCount * parseFloat(plan.price);
-      });
-
-      return plans;
+      // Get real subscription plans from database
+      const plans = await db.select().from(subscriptionPlans);
+      
+      // Calculate real subscriber counts and revenue for each plan
+      const plansWithMetrics = await Promise.all(plans.map(async (plan) => {
+        // Count companies actually using this plan
+        const subscriberCount = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(companies)
+          .where(eq(companies.subscriptionPlan, plan.name));
+        
+        const count = subscriberCount[0]?.count || 0;
+        const revenue = count * parseFloat(plan.price.toString());
+        
+        return {
+          ...plan,
+          subscriberCount: count,
+          revenue: revenue
+        };
+      }));
+      
+      return plansWithMetrics;
     } catch (error) {
       console.error('Error fetching subscription plans:', error);
       return [];
