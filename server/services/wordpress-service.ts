@@ -448,20 +448,33 @@ class RankItProIntegration {
                 
                 <h2>Available Shortcodes</h2>
                 <div class="rankitpro-shortcodes">
-                    <h3>Visits Shortcode</h3>
-                    <p><code>[rankitpro_visits limit="5" type="all"]</code></p>
-                    <p>Display recent service visits. Options:</p>
+                    <h3>Service Visits Shortcode</h3>
+                    <p><code>[rankitpro_checkins limit="5" type="all"]</code></p>
+                    <p>Display recent service visits and check-ins. Options:</p>
                     <ul>
                         <li><strong>limit</strong>: Number of visits to show (default: 5)</li>
                         <li><strong>type</strong>: Type of visits to show ("all", "maintenance", "repair", etc.)</li>
                     </ul>
                     
-                    <h3>Reviews Shortcode</h3>
-                    <p><code>[rankitpro_reviews limit="3" rating="all"]</code></p>
-                    <p>Display customer reviews. Options:</p>
+                    <h3>Blog Posts Shortcode</h3>
+                    <p><code>[rankitpro_blogs limit="3"]</code></p>
+                    <p>Display recent blog posts from your service team. Options:</p>
                     <ul>
-                        <li><strong>limit</strong>: Number of reviews to show (default: 3)</li>
-                        <li><strong>rating</strong>: Minimum rating to show ("all", "5", "4", etc.)</li>
+                        <li><strong>limit</strong>: Number of blog posts to show (default: 3)</li>
+                    </ul>
+                    
+                    <h3>Audio Testimonials Shortcode</h3>
+                    <p><code>[rankitpro_audio_testimonials limit="5"]</code></p>
+                    <p>Display audio testimonials from customers. Options:</p>
+                    <ul>
+                        <li><strong>limit</strong>: Number of testimonials to show (default: 5)</li>
+                    </ul>
+                    
+                    <h3>Video Testimonials Shortcode</h3>
+                    <p><code>[rankitpro_video_testimonials limit="3"]</code></p>
+                    <p>Display video testimonials from customers. Options:</p>
+                    <ul>
+                        <li><strong>limit</strong>: Number of testimonials to show (default: 3)</li>
                     </ul>
                 </div>
                 
