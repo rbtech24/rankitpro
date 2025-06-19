@@ -17,11 +17,14 @@ if (process.env.STRIPE_SECRET_KEY) {
   });
 }
 
-// Define price IDs for different subscription plans
+// Define price IDs for different subscription plans (monthly and yearly)
 const PRICE_IDS = {
-  starter: process.env.STRIPE_STARTER_PRICE_ID || "price_1QVjyeJA4p6J7X8dMjQi4qCT",
-  pro: process.env.STRIPE_PRO_PRICE_ID || "price_1QVjzPJA4p6J7X8dGnH8fY2K", 
-  agency: process.env.STRIPE_AGENCY_PRICE_ID || "price_1QVk0MJA4p6J7X8dZkL3nP9R"
+  starter_monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || "price_1QVjyeJA4p6J7X8dMjQi4qCT",
+  starter_yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID || "price_starter_yearly_fallback",
+  pro_monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || "price_1QVjzPJA4p6J7X8dGnH8fY2K",
+  pro_yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID || "price_pro_yearly_fallback",
+  agency_monthly: process.env.STRIPE_AGENCY_MONTHLY_PRICE_ID || "price_1QVk0MJA4p6J7X8dZkL3nP9R",
+  agency_yearly: process.env.STRIPE_AGENCY_YEARLY_PRICE_ID || "price_agency_yearly_fallback"
 };
 
 // Validate price IDs on startup
