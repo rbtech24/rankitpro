@@ -37,10 +37,10 @@ export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, on
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 overflow-hidden">
-            {checkIn.technician.name.charAt(0).toUpperCase()}
+            {checkIn.technician?.name ? checkIn.technician.name.charAt(0).toUpperCase() : 'T'}
           </div>
           <div className="ml-4">
-            <h3 className="text-sm font-medium text-gray-900">{checkIn.technician.name}</h3>
+            <h3 className="text-sm font-medium text-gray-900">{checkIn.technician?.name || 'Unknown Technician'}</h3>
             <div className="text-xs text-gray-500">{checkIn.jobType}</div>
           </div>
         </div>

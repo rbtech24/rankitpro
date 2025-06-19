@@ -661,15 +661,15 @@ class RankItProIntegration {
                     <p><strong>Location:</strong> ' . $location . '</p>
                     <p><strong>Notes:</strong> ' . $notes . '</p>
                 </div>';
-            $output .= '<h4>Service Visit - ' . esc_html($visit['jobType'] ?? 'General Service') . '</h4>';
-            if (!empty($visit['location'])) {
-                $output .= '<p><strong>Location:</strong> ' . esc_html($visit['location']) . '</p>';
-            }
-            if (!empty($visit['notes'])) {
-                $output .= '<p><strong>Notes:</strong> ' . esc_html($visit['notes']) . '</p>';
-            }
-            if (!empty($visit['createdAt'])) {
-                $output .= '<p><strong>Date:</strong> ' . date('F j, Y', strtotime($visit['createdAt'])) . '</p>';
+            // Display photos if available
+            if (!empty($visit['photoUrls']) && is_array($visit['photoUrls'])) {
+                $output .= '<div class="visit-photos">';
+                foreach ($visit['photoUrls'] as $photo) {
+                    if (!empty($photo['url'])) {
+                        $output .= '<img src="' . esc_url($photo['url']) . '" alt="Service Photo" style="max-width: 200px; margin: 5px;" />';
+                    }
+                }
+                $output .= '</div>';
             }
             $output .= '</div>';
         }
@@ -680,7 +680,50 @@ class RankItProIntegration {
     
     public function rankitpro_blogs_shortcode($atts) {
         $atts = shortcode_atts(array(
-            'limit' => 3
+            'limit' => 3,
+            'category' => 'all'
+        ), $atts);
+        
+        $api_key = get_option('rankitpro_api_key', '${apiKey}');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        
+        if (empty($api_key) || empty($api_endpoint)) {
+            return '<p>Please configure your API settings in the admin panel.</p>';
+        }
+        
+        $url = rtrim($api_endpoint, '/') . '/api/wordpress/public/blogs?apiKey=' . urlencode($api_key) . '&limit=' . intval($atts['limit']) . '&category=' . urlencode($atts['category']);
+        $response = wp_remote_get($url, array('timeout' => 30));
+        
+        if (is_wp_error($response)) {
+            return '<p>Error loading blog posts.</p>';
+        }
+        
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        if (!$data || !is_array($data)) {
+            return '<p>No blog posts available.</p>';
+        }
+        
+        $output = '<div class="rankitpro-blogs">';
+        foreach ($data as $blog) {
+            $output .= '<div class="blog-item">';
+            $output .= '<h4>' . esc_html($blog['title'] ?? 'Blog Post') . '</h4>';
+            if (!empty($blog['content'])) {
+                $content = wp_trim_words($blog['content'], 30, '...');
+                $output .= '<p>' . esc_html($content) . '</p>';
+            }
+            if (!empty($blog['createdAt'])) {
+                $output .= '<p><small>Published: ' . date('F j, Y', strtotime($blog['createdAt'])) . '</small></p>';
+            }
+            $output .= '</div>';
+        }
+        $output .= '</div>';
+        
+        return $output;
+    }
+    
+    public function rankitpro_audio_testimonials_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 5
         ), $atts);
         
         $api_key = get_option('rankitpro_api_key', '${apiKey}');
