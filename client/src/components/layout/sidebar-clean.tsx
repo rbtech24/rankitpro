@@ -200,6 +200,41 @@ export default function Sidebar({ className }: SidebarProps) {
             </div>
           )}
 
+          {/* Help & Support Section - For Company Admins */}
+          {!isSuperAdmin && (
+            <div className="mb-6">
+              <div className="px-3 mb-3 text-xs text-gray-500 uppercase font-semibold tracking-wider">Help & Support</div>
+              
+              <Link href="/support">
+                <div className={cn(
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
+                  isActive("/support") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
+                )}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+                  </svg>
+                  Support Tickets
+                </div>
+              </Link>
+
+              <Link href="/platform-setup-guide">
+                <div className={cn(
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
+                  isActive("/platform-setup-guide") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
+                )}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10,9 9,9 8,9"/>
+                  </svg>
+                  Setup Guide
+                </div>
+              </Link>
+            </div>
+          )}
+
           {/* Account Section */}
           <div className="mb-6">
             <div className="px-3 mb-3 text-xs text-gray-500 uppercase font-semibold tracking-wider">Account</div>

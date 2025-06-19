@@ -23,6 +23,7 @@ import Notifications from "@/pages/notifications";
 import Technicians from "@/pages/technicians";
 
 import CustomerSupport from "@/pages/customer-support";
+import Support from "@/pages/support";
 import Users from "@/pages/users";
 import Integrations from "@/pages/integrations";
 import Settings from "@/pages/settings";
