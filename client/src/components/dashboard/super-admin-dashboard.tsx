@@ -219,7 +219,7 @@ export default function SuperAdminDashboard() {
             <div className="p-4 border rounded-lg">
               <h3 className="font-medium mb-2">Agency Plan</h3>
               <p className="text-2xl font-bold mb-1">$199/month</p>
-              <p className="text-sm text-gray-500 mb-3">Unlimited users, 2000 AI generations</p>
+              <p className="text-sm text-gray-500 mb-3">Unlimited technicians, unlimited check-ins</p>
               <Button 
                 variant="outline" 
                 size="sm" 
