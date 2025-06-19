@@ -6,10 +6,23 @@ import { fromZodError } from "zod-validation-error";
 
 const router = Router();
 
-// Get all support tickets (Super admin only)
-router.get("/tickets", isAuthenticated, isSuperAdmin, async (req, res) => {
+// Get support tickets (Super admin sees all, company admins see their company's tickets)
+router.get("/tickets", isAuthenticated, async (req, res) => {
   try {
-    const tickets = await storage.getAllSupportTickets();
+    let tickets;
+    
+    if (req.user?.role === "super_admin") {
+      // Super admin sees all tickets
+      tickets = await storage.getAllSupportTickets();
+    } else {
+      // Company users see only their company's tickets
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "No company associated with this user" });
+      }
+      tickets = await storage.getSupportTicketsByCompany(companyId);
+    }
+    
     res.json(tickets);
   } catch (error) {
     console.error("Error fetching support tickets:", error);
