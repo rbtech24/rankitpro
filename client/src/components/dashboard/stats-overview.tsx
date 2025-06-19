@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 
 interface CompanyStats {
   totalCheckins: number;
@@ -11,6 +12,8 @@ interface CompanyStats {
 }
 
 export default function StatsOverview() {
+  const [, setLocation] = useLocation();
+  
   const { data: stats, isLoading } = useQuery<CompanyStats>({
     queryKey: ["/api/company-stats"],
     queryFn: async () => {
@@ -69,7 +72,12 @@ export default function StatsOverview() {
         </CardContent>
         <div className="bg-gray-50 px-5 py-2">
           <div className="text-sm flex justify-between">
-            <span className="font-medium text-primary-600 hover:text-primary-500 cursor-pointer">View all</span>
+            <span 
+              className="font-medium text-primary-600 hover:text-primary-500 cursor-pointer"
+              onClick={() => setLocation('/check-ins')}
+            >
+              View all
+            </span>
             <span className="text-green-600">↑ 14%</span>
           </div>
         </div>
@@ -96,7 +104,12 @@ export default function StatsOverview() {
         </CardContent>
         <div className="bg-gray-50 px-5 py-2">
           <div className="text-sm flex justify-between">
-            <span className="font-medium text-primary-600 hover:text-primary-500 cursor-pointer">Manage</span>
+            <span 
+              className="font-medium text-primary-600 hover:text-primary-500 cursor-pointer"
+              onClick={() => setLocation('/technicians')}
+            >
+              Manage
+            </span>
             {stats?.activeTechs ? (
               <span className="text-green-600">↑ {stats.activeTechs > 1 ? `${stats.activeTechs} techs` : '1 tech'}</span>
             ) : (
@@ -131,7 +144,12 @@ export default function StatsOverview() {
         </CardContent>
         <div className="bg-gray-50 px-5 py-2">
           <div className="text-sm flex justify-between">
-            <span className="font-medium text-primary-600 hover:text-primary-500 cursor-pointer">View all</span>
+            <span 
+              className="font-medium text-primary-600 hover:text-primary-500 cursor-pointer"
+              onClick={() => setLocation('/blog-posts')}
+            >
+              View all
+            </span>
             <span className="text-green-600">↑ 8%</span>
           </div>
         </div>
@@ -158,7 +176,12 @@ export default function StatsOverview() {
         </CardContent>
         <div className="bg-gray-50 px-5 py-2">
           <div className="text-sm flex justify-between">
-            <span className="font-medium text-primary-600 hover:text-primary-500 cursor-pointer">Send new</span>
+            <span 
+              className="font-medium text-primary-600 hover:text-primary-500 cursor-pointer"
+              onClick={() => setLocation('/review-request')}
+            >
+              Send new
+            </span>
             <span className="text-green-600">↑ 22%</span>
           </div>
         </div>
