@@ -1488,6 +1488,75 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
 
+  // Company-specific data endpoints for shortcode demo
+  app.get("/api/companies/:id/check-ins", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      
+      // Check permissions - super admin can access all companies
+      if (req.user.role !== "super_admin" && req.user.companyId !== companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const checkIns = await storage.getCheckInsByCompany(companyId);
+      res.json(checkIns || []);
+    } catch (error) {
+      console.error("Get company check-ins error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/companies/:id/blog-posts", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      
+      // Check permissions - super admin can access all companies
+      if (req.user.role !== "super_admin" && req.user.companyId !== companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const blogPosts = await storage.getBlogPostsByCompany(companyId);
+      res.json(blogPosts || []);
+    } catch (error) {
+      console.error("Get company blog posts error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/companies/:id/reviews", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      
+      // Check permissions - super admin can access all companies
+      if (req.user.role !== "super_admin" && req.user.companyId !== companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const reviews = await storage.getReviewResponsesByCompany(companyId);
+      res.json(reviews || []);
+    } catch (error) {
+      console.error("Get company reviews error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/companies/:id/technicians", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      
+      // Check permissions - super admin can access all companies
+      if (req.user.role !== "super_admin" && req.user.companyId !== companyId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const technicians = await storage.getTechniciansByCompany(companyId);
+      res.json(technicians || []);
+    } catch (error) {
+      console.error("Get company technicians error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Create user account for technician
   app.post("/api/technicians/:id/create-account", isCompanyAdmin, async (req, res) => {
     try {
