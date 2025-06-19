@@ -370,28 +370,8 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
     
     // Handle review request if customer information is provided
     if (values.sendReviewRequest && values.customerName) {
-      try {
-        await apiRequest("POST", "/api/review-requests", {
-          customerName: values.customerName,
-          customerEmail: values.customerEmail || null,
-          customerPhone: values.customerPhone || null,
-          visitId: visitResult.id,
-          jobType: values.jobType,
-          technicianId: parseInt(values.technicianId),
-        });
-        
-        toast({
-          title: "Review Request Scheduled",
-          description: `Review request will be sent to ${values.customerName} via ${values.customerEmail ? 'email' : 'SMS'}.`,
-        });
-      } catch (error) {
-        console.error("Failed to create review request:", error);
-        toast({
-          title: "Review Request Failed",
-          description: "The visit was created but the review request could not be scheduled.",
-          variant: "destructive",
-        });
-      }
+      // Note: Review request will be handled after successful visit creation
+      console.log("Review request will be processed after visit creation");
     }
   };
   
