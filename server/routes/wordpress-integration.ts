@@ -736,6 +736,65 @@ router.post('/custom-fields/sync', isAuthenticated, isCompanyAdmin, async (req: 
 
 // Public API endpoints for WordPress shortcodes (no authentication required)
 
+// Public endpoint for check-ins/service visits
+router.get('/public/check-ins', async (req: Request, res: Response) => {
+  try {
+    const { apiKey, limit = 5, jobType = 'all' } = req.query;
+    
+    if (!apiKey) {
+      return res.status(400).json({ error: 'API key is required' });
+    }
+    
+    // Find company by API key
+    const companies = await storage.getAllCompanies();
+    const company = companies.find(c => {
+      if (c.wordpressConfig) {
+        try {
+          const config = JSON.parse(c.wordpressConfig);
+          return config.apiKey === apiKey;
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    });
+    
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+    
+    // Get check-ins for the company
+    const checkIns = await storage.getCheckInsByCompany(company.id);
+    
+    let filteredCheckIns = checkIns;
+    if (jobType !== 'all') {
+      filteredCheckIns = checkIns.filter(checkIn => checkIn.jobType === jobType);
+    }
+    
+    // Transform data for WordPress display and limit results
+    const limitedCheckIns = filteredCheckIns
+      .slice(0, parseInt(limit as string))
+      .map(checkIn => ({
+        id: checkIn.id,
+        jobType: checkIn.jobType,
+        customerName: checkIn.customerName,
+        customerAddress: checkIn.customerAddress || checkIn.visitLocation,
+        workPerformed: checkIn.workPerformed,
+        materialsUsed: checkIn.materialsUsed,
+        notes: checkIn.notes,
+        photos: checkIn.photos || [],
+        completionDate: checkIn.visitDate || checkIn.createdAt,
+        technicianName: checkIn.technicianName || 'Unknown Technician',
+        rating: 5 // Default rating for service visits
+      }));
+    
+    return res.json(limitedCheckIns);
+  } catch (error) {
+    console.error('Error fetching check-ins:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Public endpoint for blog posts
 router.get('/public/blogs', async (req: Request, res: Response) => {
   try {
@@ -767,9 +826,7 @@ router.get('/public/blogs', async (req: Request, res: Response) => {
     const blogPosts = await storage.getBlogPostsByCompany(company.id);
     
     let filteredPosts = blogPosts;
-    if (category !== 'all') {
-      filteredPosts = blogPosts.filter(post => post.jobType === category);
-    }
+    // Note: Blog posts don't have jobType property, filtering by category not implemented
     
     // Limit results
     const limitedPosts = filteredPosts.slice(0, parseInt(limit as string));
