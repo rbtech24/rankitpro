@@ -42,7 +42,7 @@ async function runFinalProductionTest() {
     console.log('\n📊 SUPER ADMIN SYSTEM');
     const superAdminLogin = await apiRequest('POST', '/api/auth/login', {
       email: 'admin@rankitpro.com',
-      password: 'SuperAdmin2024!'
+      password: 'Admin2024!'
     });
     
     const superAdminCookies = superAdminLogin.headers.get('set-cookie')?.split(';')[0] || '';
