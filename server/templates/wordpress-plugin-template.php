@@ -198,6 +198,54 @@ class RankItProIntegration {
                     <h2><?php _e('Display Options', 'rankitpro'); ?></h2>
                     <table class="form-table">
                         <tr>
+                            <th scope="row">
+                                <label for="rankitpro_enable_schema"><?php _e('Enable Schema.org Markup', 'rankitpro'); ?></label>
+                            </th>
+                            <td>
+                                <input type="checkbox" id="rankitpro_enable_schema" name="rankitpro_enable_schema" 
+                                       value="1" <?php checked(get_option('rankitpro_enable_schema', 1)); ?> />
+                                <p class="description">
+                                    <?php _e('Automatically generate Schema.org structured data for better SEO and local search visibility.', 'rankitpro'); ?>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="rankitpro_business_name"><?php _e('Business Name', 'rankitpro'); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="rankitpro_business_name" name="rankitpro_business_name" 
+                                       value="<?php echo esc_attr(get_option('rankitpro_business_name', get_bloginfo('name'))); ?>" class="regular-text" />
+                                <p class="description">
+                                    <?php _e('Business name for Schema.org markup (defaults to site title).', 'rankitpro'); ?>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="rankitpro_business_phone"><?php _e('Business Phone', 'rankitpro'); ?></label>
+                            </th>
+                            <td>
+                                <input type="tel" id="rankitpro_business_phone" name="rankitpro_business_phone" 
+                                       value="<?php echo esc_attr(get_option('rankitpro_business_phone', '')); ?>" class="regular-text" />
+                                <p class="description">
+                                    <?php _e('Business phone number for local search optimization.', 'rankitpro'); ?>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="rankitpro_business_address"><?php _e('Business Address', 'rankitpro'); ?></label>
+                            </th>
+                            <td>
+                                <textarea id="rankitpro_business_address" name="rankitpro_business_address" 
+                                          class="regular-text" rows="3"><?php echo esc_textarea(get_option('rankitpro_business_address', '')); ?></textarea>
+                                <p class="description">
+                                    <?php _e('Business address for local Schema.org markup.', 'rankitpro'); ?>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
                             <th scope="row"><?php _e('Show Photos', 'rankitpro'); ?></th>
                             <td>
                                 <label for="rankitpro_show_photos">
@@ -584,12 +632,170 @@ class RankItProIntegration {
         return $data;
     }
     
+    // Schema.org markup generation methods
+    private function generate_local_business_schema() {
+        $business_name = get_option('rankitpro_business_name', get_bloginfo('name'));
+        $business_phone = get_option('rankitpro_business_phone', '');
+        $business_address = get_option('rankitpro_business_address', '');
+        
+        $schema = array(
+            '@context' => 'https://schema.org',
+            '@type' => 'LocalBusiness',
+            'name' => $business_name,
+            'description' => 'Professional service provider offering quality maintenance and repair services',
+            'url' => home_url(),
+            'telephone' => $business_phone,
+            'address' => array(
+                '@type' => 'PostalAddress',
+                'streetAddress' => $business_address
+            ),
+            'serviceType' => array('HVAC', 'Plumbing', 'Electrical', 'General Maintenance'),
+            'areaServed' => array(
+                '@type' => 'State',
+                'name' => 'Local Area'
+            )
+        );
+        
+        return '<script type="application/ld+json">' . json_encode($schema, JSON_PRETTY_PRINT) . '</script>';
+    }
+    
+    private function generate_service_schema($visit) {
+        $business_name = get_option('rankitpro_business_name', get_bloginfo('name'));
+        
+        $schema = array(
+            '@context' => 'https://schema.org',
+            '@type' => 'Service',
+            'name' => $visit['jobType'] ?? 'Professional Service',
+            'description' => $visit['notes'] ?? 'Professional service completed',
+            'provider' => array(
+                '@type' => 'LocalBusiness',
+                'name' => $business_name,
+                'url' => home_url()
+            ),
+            'serviceType' => $visit['jobType'] ?? 'General Service',
+            'dateModified' => date('c', strtotime($visit['createdAt'] ?? 'now'))
+        );
+        
+        if (!empty($visit['photoUrls'])) {
+            $schema['image'] = array_map(function($photo) use ($visit) {
+                return array(
+                    '@type' => 'ImageObject',
+                    'url' => $photo,
+                    'caption' => ($visit['jobType'] ?? 'Service') . ' documentation photo'
+                );
+            }, $visit['photoUrls']);
+        }
+        
+        return '<script type="application/ld+json">' . json_encode($schema, JSON_PRETTY_PRINT) . '</script>';
+    }
+    
+    private function generate_review_schema($review) {
+        $business_name = get_option('rankitpro_business_name', get_bloginfo('name'));
+        
+        $schema = array(
+            '@context' => 'https://schema.org',
+            '@type' => 'Review',
+            'reviewRating' => array(
+                '@type' => 'Rating',
+                'ratingValue' => $review['rating'] ?? 5,
+                'bestRating' => 5,
+                'worstRating' => 1
+            ),
+            'author' => array(
+                '@type' => 'Person',
+                'name' => $review['customerName'] ?? 'Satisfied Customer'
+            ),
+            'reviewBody' => $review['comment'] ?? 'Excellent service provided',
+            'datePublished' => date('c', strtotime($review['createdAt'] ?? 'now')),
+            'itemReviewed' => array(
+                '@type' => 'LocalBusiness',
+                'name' => $business_name,
+                'serviceType' => $review['serviceType'] ?? 'Professional Service'
+            )
+        );
+        
+        return '<script type="application/ld+json">' . json_encode($schema, JSON_PRETTY_PRINT) . '</script>';
+    }
+    
+    private function generate_aggregate_rating_schema($reviews) {
+        if (empty($reviews)) return '';
+        
+        $business_name = get_option('rankitpro_business_name', get_bloginfo('name'));
+        $total_rating = array_sum(array_column($reviews, 'rating'));
+        $average_rating = $total_rating / count($reviews);
+        
+        $schema = array(
+            '@context' => 'https://schema.org',
+            '@type' => 'LocalBusiness',
+            'name' => $business_name,
+            'aggregateRating' => array(
+                '@type' => 'AggregateRating',
+                'ratingValue' => round($average_rating, 1),
+                'reviewCount' => count($reviews),
+                'bestRating' => 5,
+                'worstRating' => 1
+            )
+        );
+        
+        return '<script type="application/ld+json">' . json_encode($schema, JSON_PRETTY_PRINT) . '</script>';
+    }
+    
+    private function generate_blog_posting_schema($post) {
+        $business_name = get_option('rankitpro_business_name', get_bloginfo('name'));
+        
+        $schema = array(
+            '@context' => 'https://schema.org',
+            '@type' => 'BlogPosting',
+            'headline' => $post['title'] ?? 'Service Case Study',
+            'articleBody' => $post['content'] ?? 'Professional service documentation',
+            'datePublished' => date('c', strtotime($post['createdAt'] ?? 'now')),
+            'author' => array(
+                '@type' => 'Organization',
+                'name' => $business_name
+            ),
+            'publisher' => array(
+                '@type' => 'Organization',
+                'name' => $business_name
+            ),
+            'mainEntityOfPage' => array(
+                '@type' => 'WebPage',
+                '@id' => get_permalink()
+            ),
+            'keywords' => array($post['serviceType'] ?? 'professional service', 'case study', 'documentation'),
+            'articleSection' => 'Service Case Studies'
+        );
+        
+        if (!empty($post['images'])) {
+            $schema['image'] = array_map(function($image) {
+                return array(
+                    '@type' => 'ImageObject',
+                    'url' => $image,
+                    'caption' => 'Service documentation photo'
+                );
+            }, $post['images']);
+        }
+        
+        return '<script type="application/ld+json">' . json_encode($schema, JSON_PRETTY_PRINT) . '</script>';
+    }
+
     private function render_visits($visits, $atts) {
         if (empty($visits)) {
             return '<p>' . __('No recent visits available.', 'rankitpro') . '</p>';
         }
         
-        $output = '<div class="rankitpro-visits">';
+        $output = '';
+        
+        // Add schema markup for local business
+        if (get_option('rankitpro_enable_schema', true)) {
+            $output .= $this->generate_local_business_schema();
+            
+            // Add service schema for each visit
+            foreach ($visits as $visit) {
+                $output .= $this->generate_service_schema($visit);
+            }
+        }
+        
+        $output .= '<div class="rankitpro-visits">';
         foreach ($visits as $visit) {
             $output .= '<div class="rankitpro-visit-item">';
             $output .= '<h4>' . esc_html($visit['jobType'] ?? 'Service Visit') . '</h4>';

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { storage } from '../storage';
 import { isAuthenticated, isCompanyAdmin } from '../middleware/auth';
 import { WordPressService, WordPressCredentials } from '../services/wordpress-service';
+import { schemaMarkupService, BusinessInfo, ServiceVisit, ReviewData } from '../services/schema-markup-service';
 import crypto from 'crypto';
 import { insertWordpressCustomFieldsSchema } from '@shared/schema';
 import archiver from 'archiver';
@@ -865,6 +866,92 @@ router.get('/public/video-testimonials', async (req: Request, res: Response) => 
   } catch (error) {
     console.error('Error fetching video testimonials:', error);
     return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Generate schema markup for WordPress content
+router.get('/schema/:contentType/:contentId', async (req: Request, res: Response) => {
+  const { contentType, contentId } = req.params;
+  const { companyId } = req.query;
+
+  try {
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID required' });
+    }
+
+    const company = await storage.getCompany(parseInt(companyId as string));
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    const businessInfo: BusinessInfo = {
+      name: company.name,
+      serviceTypes: ["HVAC", "Plumbing", "Electrical", "General Maintenance"],
+      description: `Professional ${company.name} services`,
+      website: `https://${company.name.toLowerCase().replace(/\s+/g, '')}.com`
+    };
+
+    let schemaMarkup = '';
+
+    switch (contentType) {
+      case 'visit':
+        const checkIn = await storage.getCheckIn(parseInt(contentId));
+        if (checkIn) {
+          const visit: ServiceVisit = {
+            id: checkIn.id,
+            jobType: checkIn.jobType,
+            customerName: checkIn.customerName,
+            address: checkIn.customerAddress,
+            completedAt: checkIn.createdAt,
+            photos: checkIn.photos || [],
+            description: checkIn.notes || checkIn.aiGeneratedContent,
+            technician: checkIn.technicianName
+          };
+          schemaMarkup = schemaMarkupService.generateServiceSchema(visit, businessInfo);
+        }
+        break;
+
+      case 'review':
+        const reviewResponse = await storage.getReviewResponse(parseInt(contentId));
+        if (reviewResponse) {
+          const review: ReviewData = {
+            rating: reviewResponse.rating,
+            reviewText: reviewResponse.comment,
+            customerName: reviewResponse.customerName || 'Satisfied Customer',
+            serviceType: 'Professional Service',
+            reviewDate: reviewResponse.createdAt,
+            businessName: company.name
+          };
+          schemaMarkup = schemaMarkupService.generateReviewSchema(review);
+        }
+        break;
+
+      case 'business':
+        schemaMarkup = schemaMarkupService.generateLocalBusinessSchema(businessInfo);
+        break;
+
+      case 'aggregate':
+        const reviews = await storage.getReviewsByCompany(parseInt(companyId as string));
+        const reviewData: ReviewData[] = reviews.map(r => ({
+          rating: r.rating,
+          reviewText: r.comment,
+          customerName: r.customerName || 'Customer',
+          serviceType: 'Professional Service',
+          reviewDate: r.createdAt,
+          businessName: company.name
+        }));
+        schemaMarkup = schemaMarkupService.generateAggregateRatingSchema(reviewData, businessInfo);
+        break;
+
+      default:
+        return res.status(400).json({ error: 'Invalid content type' });
+    }
+
+    res.setHeader('Content-Type', 'text/html');
+    res.send(schemaMarkup);
+  } catch (error) {
+    console.error('Schema generation error:', error);
+    res.status(500).json({ error: 'Failed to generate schema markup' });
   }
 });
 
