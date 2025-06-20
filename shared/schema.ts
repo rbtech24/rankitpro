@@ -21,6 +21,7 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  yearlyPrice: numeric("yearly_price", { precision: 10, scale: 2 }),
   billingPeriod: text("billing_period", { enum: ["monthly", "yearly"] }).notNull(),
   maxTechnicians: integer("max_technicians").notNull(),
   maxCheckIns: integer("max_check_ins").notNull(),
@@ -133,6 +134,7 @@ export const reviewRequests = pgTable("review_requests", {
   token: text("token"),
   status: text("status", { enum: ["pending", "sent", "failed"] }).notNull().default("pending"),
   sentAt: timestamp("sent_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
   technicianId: integer("technician_id").references(() => technicians.id).notNull(),
   companyId: integer("company_id").references(() => companies.id).notNull(),
 });
@@ -147,6 +149,7 @@ export const reviewResponses = pgTable("review_responses", {
   technicianId: integer("technician_id").references(() => technicians.id).notNull(),
   companyId: integer("company_id").references(() => companies.id).notNull(),
   publicDisplay: boolean("public_display").default(false), // Whether this can be displayed publicly
+  createdAt: timestamp("created_at").defaultNow(),
   respondedAt: timestamp("responded_at").defaultNow(),
 });
 

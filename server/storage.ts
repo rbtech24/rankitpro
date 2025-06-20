@@ -1693,6 +1693,10 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getAllCompaniesForAdmin(): Promise<Company[]> {
+    return this.getSystemAllCompanies();
+  }
+
   async getSystemAllCompanies(): Promise<Company[]> {
     try {
       return await db.select().from(companies).orderBy(desc(companies.createdAt));
@@ -1700,6 +1704,16 @@ export class DatabaseStorage implements IStorage {
       console.error('Error fetching companies for admin:', error);
       return [];
     }
+  }
+
+  async getRecentSystemActivity(): Promise<{
+    action: string;
+    description: string;
+    timestamp: string;
+    companyName?: string;
+    userName?: string;
+  }[]> {
+    return this.getSystemRecentActivity();
   }
 
   async getSystemRecentActivity(): Promise<{
