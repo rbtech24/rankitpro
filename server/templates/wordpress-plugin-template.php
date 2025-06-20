@@ -307,6 +307,19 @@ class RankItProIntegration {
                 </div>
                 
                 <div class="shortcode-section">
+                    <h3><?php _e('Service Blog Posts', 'rankitpro'); ?></h3>
+                    <code>[rankitpro_blog]</code>
+                    <p><?php _e('Display professional service blog posts with detailed case studies.', 'rankitpro'); ?></p>
+                    <h4><?php _e('Parameters:', 'rankitpro'); ?></h4>
+                    <ul>
+                        <li><strong>limit</strong> - <?php _e('Number of blog posts to show (default: 5)', 'rankitpro'); ?></li>
+                        <li><strong>type</strong> - <?php _e('Filter by service type (default: all)', 'rankitpro'); ?></li>
+                        <li><strong>show_full</strong> - <?php _e('Show full blog posts (true/false, default: false)', 'rankitpro'); ?></li>
+                        <li><strong>technician</strong> - <?php _e('Filter by technician (default: all)', 'rankitpro'); ?></li>
+                    </ul>
+                </div>
+                
+                <div class="shortcode-section">
                     <h3><?php _e('Technician Profile', 'rankitpro'); ?></h3>
                     <code>[rankitpro_technician_profile]</code>
                     <p><?php _e('Display technician profile with recent work and reviews.', 'rankitpro'); ?></p>
@@ -572,34 +585,148 @@ class RankItProIntegration {
     
     private function render_reviews($reviews, $atts) {
         if (empty($reviews)) {
-            return '<p>' . __('No customer reviews available.', 'rankitpro') . '</p>';
+            return '<div class="rankitpro-no-content">' . __('No customer reviews available.', 'rankitpro') . '</div>';
         }
         
-        $output = '<div class="rankitpro-reviews">';
+        $output = '<div class="rankitpro-reviews-container">';
+        
         foreach ($reviews as $review) {
-            $output .= '<div class="rankitpro-review-item">';
+            $output .= '<div class="review-container">';
             
+            // Review Header
+            $output .= '<div class="review-header">';
+            $output .= '<h1 class="review-title">Customer Review</h1>';
+            
+            $output .= '<div class="customer-info">';
             if ($atts['show_names'] === 'true') {
-                $output .= '<h4>' . esc_html($review['customerName'] ?? 'Customer') . '</h4>';
+                $output .= '<span class="customer-name">Customer: ' . esc_html($review['customerName'] ?? 'Customer') . '</span>';
+            } else {
+                $output .= '<span class="customer-name">Verified Customer</span>';
+            }
+            $output .= '<span class="review-date">' . date('F j, Y', strtotime($review['respondedAt'] ?? $review['createdAt'])) . '</span>';
+            $output .= '</div>';
+            
+            // Location
+            if (!empty($review['location'])) {
+                $output .= '<div class="review-location">' . esc_html($review['location']) . '</div>';
             }
             
+            // Star Rating
             if (!empty($review['rating'])) {
-                $output .= '<div class="rankitpro-rating">';
+                $output .= '<div class="star-rating">';
+                $output .= '<div class="stars">';
                 for ($i = 1; $i <= 5; $i++) {
-                    $output .= $i <= $review['rating'] ? '★' : '☆';
+                    $starClass = $i <= $review['rating'] ? 'star' : 'star empty';
+                    $output .= '<span class="' . $starClass . '">★</span>';
                 }
+                $output .= '</div>';
+                $output .= '<span class="rating-text">' . $review['rating'] . '.0 out of 5 stars</span>';
                 $output .= '</div>';
             }
             
-            if (!empty($review['feedback'])) {
-                $output .= '<blockquote>' . esc_html($review['feedback']) . '</blockquote>';
+            $output .= '<div class="verified-badge">Verified Purchase</div>';
+            $output .= '</div>';
+            
+            // Map Container (if location coordinates available)
+            if (!empty($review['latitude']) && !empty($review['longitude'])) {
+                $output .= '<div class="map-container">';
+                $output .= '<div class="map-placeholder">';
+                $output .= '<div class="map-marker"></div>';
+                $output .= '<div class="map-controls">';
+                $output .= '<button class="map-btn">+</button>';
+                $output .= '<button class="map-btn">−</button>';
+                $output .= '</div>';
+                $output .= '</div>';
+                $output .= '</div>';
             }
             
-            $output .= '<div class="rankitpro-meta">' . date('F j, Y', strtotime($review['respondedAt'])) . '</div>';
+            // Review Content
+            $output .= '<div class="review-content">';
+            
+            if (!empty($review['feedback'])) {
+                $output .= '<div class="review-text">' . esc_html($review['feedback']) . '</div>';
+            }
+            
+            // Service Details (if available from related job)
+            if (!empty($review['serviceDetails'])) {
+                $output .= '<div class="service-details">';
+                $output .= '<div class="service-title">Services Completed:</div>';
+                $output .= '<ul class="service-list">';
+                foreach ($review['serviceDetails'] as $service) {
+                    $output .= '<li class="service-item">' . esc_html($service) . '</li>';
+                }
+                $output .= '</ul>';
+                $output .= '</div>';
+            }
+            
+            // Photos Section
+            if ($atts['show_photos'] === 'true' && !empty($review['photos'])) {
+                $output .= '<div class="photos-section">';
+                $output .= '<div class="photos-grid">';
+                
+                foreach ($review['photos'] as $index => $photo) {
+                    $label = $index === 0 ? 'Before' : 'After';
+                    $photoClass = $index === 0 ? 'before-photo' : 'after-photo';
+                    
+                    $output .= '<div class="photo-container">';
+                    $output .= '<img class="photo ' . $photoClass . '" src="' . esc_url($photo) . '" alt="' . __('Service photo', 'rankitpro') . '" />';
+                    $output .= '<div class="photo-label">' . $label . '</div>';
+                    $output .= '</div>';
+                }
+                
+                $output .= '</div>';
+                $output .= '</div>';
+            }
+            
+            // Recommendation
+            if (!empty($review['wouldRecommend']) && $review['wouldRecommend']) {
+                $output .= '<div class="recommendation">';
+                $output .= '<div class="recommendation-text">';
+                $output .= 'I would definitely recommend this service to anyone needing professional repairs. Excellent results!';
+                $output .= '</div>';
+                $output .= '</div>';
+            }
+            
+            $output .= '</div>';
+            
+            // Helpful Section
+            $output .= '<div class="helpful-section">';
+            $output .= '<span class="helpful-text">Was this review helpful?</span>';
+            $output .= '<div class="helpful-buttons">';
+            $output .= '<button class="helpful-btn">👍 Yes</button>';
+            $output .= '<button class="helpful-btn">👎 No</button>';
+            $output .= '</div>';
+            $output .= '</div>';
+            
+            // Hashtags
+            if (!empty($review['jobType']) || !empty($review['location'])) {
+                $output .= '<div class="hashtags">';
+                
+                if (!empty($review['jobType'])) {
+                    $jobType = strtolower(str_replace(' ', '-', $review['jobType']));
+                    $output .= '<a href="#" class="hashtag">#' . $jobType . '</a>';
+                }
+                
+                if (!empty($review['city'])) {
+                    $city = strtolower(str_replace(' ', '', $review['city']));
+                    $output .= '<a href="#" class="hashtag">#' . $city . '</a>';
+                }
+                
+                $output .= '<a href="#" class="hashtag">#excellent-service</a>';
+                $output .= '<a href="#" class="hashtag">#professional-repair</a>';
+                
+                if (!empty($review['rating']) && $review['rating'] == 5) {
+                    $output .= '<a href="#" class="hashtag">#five-stars</a>';
+                }
+                
+                $output .= '<a href="#" class="hashtag">#recommended</a>';
+                $output .= '</div>';
+            }
+            
             $output .= '</div>';
         }
-        $output .= '</div>';
         
+        $output .= '</div>';
         return $output;
     }
     
@@ -646,6 +773,146 @@ class RankItProIntegration {
         if ($atts['show_reviews'] === 'true' && !empty($profile['reviews'])) {
             $output .= '<h4>' . __('Customer Reviews', 'rankitpro') . '</h4>';
             $output .= $this->render_reviews($profile['reviews'], array('show_names' => 'true'));
+        }
+        
+        $output .= '</div>';
+        return $output;
+    }
+    
+    private function render_blogs($blogs, $atts) {
+        if (empty($blogs)) {
+            return '<div class="rankitpro-no-content">' . __('No blog posts available.', 'rankitpro') . '</div>';
+        }
+        
+        $output = '<div class="rankitpro-blogs-container">';
+        
+        foreach ($blogs as $blog) {
+            $output .= '<article class="blog-container">';
+            
+            // Blog Header
+            $output .= '<header class="blog-header">';
+            $output .= '<h1 class="blog-title">' . esc_html($blog['title'] ?? 'Service Blog Post') . '</h1>';
+            if (!empty($blog['subtitle'])) {
+                $output .= '<p class="blog-subtitle">' . esc_html($blog['subtitle']) . '</p>';
+            }
+            $output .= '</header>';
+            
+            // Blog Meta
+            $output .= '<div class="blog-meta">';
+            $output .= '<div class="meta-grid">';
+            
+            if (!empty($blog['technicianName'])) {
+                $output .= '<div class="meta-item">';
+                $output .= '<span class="meta-icon">👨‍🔧</span>';
+                $output .= '<span class="meta-label">Technician:</span>';
+                $output .= '<span>' . esc_html($blog['technicianName']) . '</span>';
+                $output .= '</div>';
+            }
+            
+            if (!empty($blog['createdAt'])) {
+                $output .= '<div class="meta-item">';
+                $output .= '<span class="meta-icon">📅</span>';
+                $output .= '<span class="meta-label">Service Date:</span>';
+                $output .= '<span>' . date('F j, Y', strtotime($blog['createdAt'])) . '</span>';
+                $output .= '</div>';
+            }
+            
+            if (!empty($blog['jobType'])) {
+                $output .= '<div class="meta-item">';
+                $output .= '<span class="meta-icon">🏠</span>';
+                $output .= '<span class="meta-label">Service Type:</span>';
+                $output .= '<span>' . esc_html($blog['jobType']) . '</span>';
+                $output .= '</div>';
+            }
+            
+            $output .= '</div>';
+            $output .= '</div>';
+            
+            // Blog Content
+            $output .= '<main class="blog-content">';
+            
+            if (!empty($blog['description'])) {
+                $output .= '<div class="intro-text">' . esc_html($blog['description']) . '</div>';
+            }
+            
+            // Location Section
+            if (!empty($blog['location'])) {
+                $output .= '<div class="location-section">';
+                $output .= '<h3 class="location-title">Service Location Details</h3>';
+                $output .= '<p><strong>Address:</strong> ' . esc_html($blog['location']) . '</p>';
+                
+                if (!empty($blog['latitude']) && !empty($blog['longitude'])) {
+                    $output .= '<div class="map-container">';
+                    $output .= '<div class="map-placeholder">';
+                    $output .= '<div class="map-marker"></div>';
+                    $output .= '<div class="map-controls">';
+                    $output .= '<button class="map-btn">+</button>';
+                    $output .= '<button class="map-btn">−</button>';
+                    $output .= '</div>';
+                    $output .= '</div>';
+                    $output .= '</div>';
+                }
+                
+                $output .= '</div>';
+            }
+            
+            // Work Details Section
+            if (!empty($blog['workDetails'])) {
+                $output .= '<div class="work-details">';
+                $output .= '<h3 class="section-title">Work Completed</h3>';
+                $output .= '<ul class="work-list">';
+                
+                foreach ($blog['workDetails'] as $detail) {
+                    $output .= '<li class="work-item">';
+                    $output .= '<div class="work-item-text">';
+                    $output .= '<div class="work-item-title">' . esc_html($detail['title'] ?? 'Service Item') . '</div>';
+                    if (!empty($detail['description'])) {
+                        $output .= '<div class="work-item-desc">' . esc_html($detail['description']) . '</div>';
+                    }
+                    $output .= '</div>';
+                    $output .= '</li>';
+                }
+                
+                $output .= '</ul>';
+                $output .= '</div>';
+            }
+            
+            // Photos Section
+            if (!empty($blog['photos'])) {
+                $output .= '<section class="section photos-section">';
+                $output .= '<h2 class="section-title">Before & After Documentation</h2>';
+                $output .= '<div class="photos-grid">';
+                
+                foreach ($blog['photos'] as $index => $photo) {
+                    $label = $index === 0 ? 'Before' : 'After';
+                    $photoClass = $index === 0 ? 'before-photo' : 'after-photo';
+                    
+                    $output .= '<div class="photo-container">';
+                    $output .= '<img class="photo ' . $photoClass . '" src="' . esc_url($photo) . '" alt="' . __('Service photo', 'rankitpro') . '" />';
+                    $output .= '<div class="photo-label">' . $label . '</div>';
+                    $output .= '</div>';
+                }
+                
+                $output .= '</div>';
+                $output .= '</section>';
+            }
+            
+            // Tags Section
+            if (!empty($blog['tags'])) {
+                $output .= '<div class="tags-section">';
+                $output .= '<h3 class="tags-title">Related Topics</h3>';
+                $output .= '<div class="tags-container">';
+                
+                foreach ($blog['tags'] as $tag) {
+                    $output .= '<a href="#" class="tag">' . esc_html($tag) . '</a>';
+                }
+                
+                $output .= '</div>';
+                $output .= '</div>';
+            }
+            
+            $output .= '</main>';
+            $output .= '</article>';
         }
         
         $output .= '</div>';
