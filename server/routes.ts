@@ -56,7 +56,6 @@ const SessionStore = MemoryStore(session);
 const companyConnections = new Map<number, Set<WebSocket>>();
 // Map to store active WebSocket connections by user ID
 const userConnections = new Map<number, WebSocket>();
-const userConnections = new Map<number, WebSocket>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configure session middleware with production-ready settings

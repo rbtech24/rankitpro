@@ -1020,7 +1020,7 @@ export class DatabaseStorage implements IStorage {
     ];
   }
 
-  async getReviewChartData(): Promise<any[]> {
+  async getAdminReviewChartData(): Promise<any[]> {
     try {
       const result = await db.select({
         month: sql<string>`to_char(responded_at, 'Mon')`,
@@ -1040,7 +1040,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getCompanyGrowthData(): Promise<any[]> {
+  async getAdminCompanyGrowthData(): Promise<any[]> {
     const result = await db.select({
       month: sql<string>`to_char(created_at, 'Mon')`,
       companies: sql<number>`count(*)`
@@ -1055,7 +1055,7 @@ export class DatabaseStorage implements IStorage {
     ];
   }
 
-  async getRevenueData(): Promise<any[]> {
+  async getAdminRevenueData(): Promise<any[]> {
     const result = await db.select({
       month: sql<string>`to_char(created_at, 'YYYY-MM')`,
       revenue: sql<number>`sum(amount)`
@@ -1070,11 +1070,11 @@ export class DatabaseStorage implements IStorage {
     ];
   }
 
-  async getAllCompaniesForAdmin(): Promise<Company[]> {
+  async getAdminAllCompanies(): Promise<Company[]> {
     return await db.select().from(companies);
   }
 
-  async getRecentSystemActivity(): Promise<any[]> {
+  async getAdminRecentSystemActivity(): Promise<any[]> {
     try {
       const recentCheckIns = await db.select({
         action: sql<string>`'Check-in submitted'`,
@@ -1653,6 +1653,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRevenueData(): Promise<{ month: string; revenue: number }[]> {
+    return this.getSystemRevenueData();
+  }
+
+  async getSystemRevenueData(): Promise<{ month: string; revenue: number }[]> {
     try {
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
@@ -1689,7 +1693,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getAllCompaniesForAdmin(): Promise<Company[]> {
+  async getSystemAllCompanies(): Promise<Company[]> {
     try {
       return await db.select().from(companies).orderBy(desc(companies.createdAt));
     } catch (error) {
@@ -1698,7 +1702,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getRecentSystemActivity(): Promise<{
+  async getSystemRecentActivity(): Promise<{
     action: string;
     description: string;
     timestamp: string;
