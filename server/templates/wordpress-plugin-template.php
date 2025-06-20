@@ -44,6 +44,7 @@ class RankItProIntegration {
         add_shortcode('rankitpro_testimonials', array($this, 'testimonials_shortcode'));
         add_shortcode('rankitpro_recent_work', array($this, 'recent_work_shortcode'));
         add_shortcode('rankitpro_technician_profile', array($this, 'technician_profile_shortcode'));
+        add_shortcode('rankitpro_blog', array($this, 'blog_shortcode'));
         
         // Widget
         add_action('widgets_init', array($this, 'register_widgets'));
@@ -410,8 +411,17 @@ class RankItProIntegration {
     }
     
     public function enqueue_scripts() {
-        wp_enqueue_style('rankitpro-style', $this->plugin_url . 'assets/style.css', array(), $this->version);
-        wp_enqueue_script('rankitpro-script', $this->plugin_url . 'assets/script.js', array('jquery'), $this->version, true);
+        // Enqueue the main RankItPro stylesheet
+        wp_enqueue_style('rankitpro-styles', $this->plugin_url . 'rankitpro-styles.css', array(), $this->version);
+        
+        // Enqueue optional JavaScript for interactive features
+        wp_enqueue_script('rankitpro-script', $this->plugin_url . 'rankitpro-script.js', array('jquery'), $this->version, true);
+        
+        // Localize script for AJAX calls
+        wp_localize_script('rankitpro-script', 'rankitpro_ajax', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('rankitpro_nonce')
+        ));
     }
     
     // Shortcode handlers
@@ -476,6 +486,18 @@ class RankItProIntegration {
         
         $profile = $this->get_api_data('technician_profile', $atts);
         return $this->render_technician_profile($profile, $atts);
+    }
+    
+    public function blog_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 5,
+            'type' => 'all',
+            'show_full' => 'false',
+            'technician' => 'all'
+        ), $atts, 'rankitpro_blog');
+        
+        $blogs = $this->get_api_data('blogs', $atts);
+        return $this->render_blogs($blogs, $atts);
     }
     
     // API and rendering methods
