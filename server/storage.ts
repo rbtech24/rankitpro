@@ -10,7 +10,7 @@ import {
   TestimonialApproval, InsertTestimonialApproval, SupportTicket, InsertSupportTicket,
   SupportTicketResponse, InsertSupportTicketResponse
 } from "@shared/schema";
-import { db } from "./db";
+import { db, queryWithRetry } from "./db";
 import { eq, and, desc, asc, gte, lte, sql, not, like } from "drizzle-orm";
 import * as schema from "@shared/schema";
 
@@ -256,13 +256,17 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    return queryWithRetry(async () => {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user;
+    });
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user;
+    return queryWithRetry(async () => {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+      return user;
+    });
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
