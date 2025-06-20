@@ -45,6 +45,7 @@ class RankItProIntegration {
         add_shortcode('rankitpro_recent_work', array($this, 'recent_work_shortcode'));
         add_shortcode('rankitpro_technician_profile', array($this, 'technician_profile_shortcode'));
         add_shortcode('rankitpro_blog', array($this, 'blog_shortcode'));
+        add_shortcode('rankitpro_video_testimonials', array($this, 'video_testimonials_shortcode'));
         
         // Widget
         add_action('widgets_init', array($this, 'register_widgets'));
@@ -320,6 +321,20 @@ class RankItProIntegration {
                 </div>
                 
                 <div class="shortcode-section">
+                    <h3><?php _e('Video Testimonials', 'rankitpro'); ?></h3>
+                    <code>[rankitpro_video_testimonials]</code>
+                    <p><?php _e('Display professional video testimonials with interactive player controls.', 'rankitpro'); ?></p>
+                    <h4><?php _e('Parameters:', 'rankitpro'); ?></h4>
+                    <ul>
+                        <li><strong>limit</strong> - <?php _e('Number of videos to show (default: 3)', 'rankitpro'); ?></li>
+                        <li><strong>show_controls</strong> - <?php _e('Show video controls (true/false, default: true)', 'rankitpro'); ?></li>
+                        <li><strong>show_transcript</strong> - <?php _e('Show video transcript (true/false, default: true)', 'rankitpro'); ?></li>
+                        <li><strong>show_related</strong> - <?php _e('Show related videos (true/false, default: true)', 'rankitpro'); ?></li>
+                        <li><strong>autoplay</strong> - <?php _e('Enable autoplay (true/false, default: false)', 'rankitpro'); ?></li>
+                    </ul>
+                </div>
+                
+                <div class="shortcode-section">
                     <h3><?php _e('Technician Profile', 'rankitpro'); ?></h3>
                     <code>[rankitpro_technician_profile]</code>
                     <p><?php _e('Display technician profile with recent work and reviews.', 'rankitpro'); ?></p>
@@ -511,6 +526,19 @@ class RankItProIntegration {
         
         $blogs = $this->get_api_data('blogs', $atts);
         return $this->render_blogs($blogs, $atts);
+    }
+    
+    public function video_testimonials_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 3,
+            'show_controls' => 'true',
+            'show_transcript' => 'true',
+            'show_related' => 'true',
+            'autoplay' => 'false'
+        ), $atts, 'rankitpro_video_testimonials');
+        
+        $videos = $this->get_api_data('video_testimonials', $atts);
+        return $this->render_video_testimonials($videos, $atts);
     }
     
     // API and rendering methods
@@ -913,6 +941,195 @@ class RankItProIntegration {
             
             $output .= '</main>';
             $output .= '</article>';
+        }
+        
+        $output .= '</div>';
+        return $output;
+    }
+    
+    private function render_video_testimonials($videos, $atts) {
+        if (empty($videos)) {
+            return '<div class="rankitpro-no-content">' . __('No video testimonials available.', 'rankitpro') . '</div>';
+        }
+        
+        $output = '<div class="rankitpro-video-testimonials-container">';
+        
+        foreach ($videos as $video) {
+            $output .= '<div class="video-review-container">';
+            
+            // Video Header
+            $output .= '<div class="video-header">';
+            $output .= '<h1 class="video-title">Video Review</h1>';
+            
+            $output .= '<div class="reviewer-info">';
+            $output .= '<span class="reviewer-name">Reviewer: ' . esc_html($video['customerName'] ?? 'Customer') . '</span>';
+            $output .= '<span class="video-date">' . date('F j, Y', strtotime($video['createdAt'])) . '</span>';
+            $output .= '</div>';
+            
+            if (!empty($video['location'])) {
+                $output .= '<div class="location">' . esc_html($video['location']) . '</div>';
+            }
+            
+            // Star Rating
+            if (!empty($video['rating'])) {
+                $output .= '<div class="star-rating">';
+                $output .= '<div class="stars">';
+                for ($i = 1; $i <= 5; $i++) {
+                    $output .= '<span class="star">★</span>';
+                }
+                $output .= '</div>';
+                $output .= '<span class="rating-text">' . $video['rating'] . '.0 out of 5 stars</span>';
+                $output .= '</div>';
+            }
+            
+            // Video Stats
+            $output .= '<div class="video-stats">';
+            $output .= '<div class="stat-item"><span>👁️</span><span>' . ($video['views'] ?? '0') . ' views</span></div>';
+            $output .= '<div class="stat-item"><span>👍</span><span>' . ($video['likes'] ?? '0') . ' likes</span></div>';
+            $output .= '<div class="stat-item"><span>📺</span><span>' . ($video['duration'] ?? '0:00') . ' duration</span></div>';
+            $output .= '</div>';
+            
+            $output .= '<div class="verified-video">Verified Customer Video</div>';
+            $output .= '</div>';
+            
+            // Video Container
+            $output .= '<div class="video-container">';
+            $output .= '<div class="video-player">';
+            
+            if (!empty($video['videoUrl'])) {
+                $output .= '<video class="rankitpro-video-player" controls>';
+                $output .= '<source src="' . esc_url($video['videoUrl']) . '" type="video/mp4">';
+                $output .= 'Your browser does not support the video tag.';
+                $output .= '</video>';
+            } else {
+                $output .= '<div class="video-thumbnail">';
+                $output .= '<div class="play-button">';
+                $output .= '<div class="play-icon"></div>';
+                $output .= '</div>';
+                $output .= '</div>';
+            }
+            
+            if (!empty($video['duration'])) {
+                $output .= '<div class="video-duration">' . esc_html($video['duration']) . '</div>';
+            }
+            $output .= '</div>';
+            
+            if ($atts['show_controls'] === 'true') {
+                $output .= '<div class="video-controls">';
+                $output .= '<button class="control-btn">⏯️</button>';
+                $output .= '<div class="progress-bar">';
+                $output .= '<div class="progress-fill">';
+                $output .= '<div class="progress-handle"></div>';
+                $output .= '</div>';
+                $output .= '</div>';
+                $output .= '<div class="time-display">0:00 / ' . ($video['duration'] ?? '0:00') . '</div>';
+                $output .= '<button class="control-btn">🔊</button>';
+                $output .= '<button class="control-btn">⛶</button>';
+                $output .= '</div>';
+            }
+            
+            $output .= '</div>';
+            
+            // Map Container
+            if (!empty($video['latitude']) && !empty($video['longitude'])) {
+                $output .= '<div class="map-container">';
+                $output .= '<div class="map-placeholder">';
+                $output .= '<div class="map-marker"></div>';
+                $output .= '</div>';
+                $output .= '</div>';
+            }
+            
+            // Video Content
+            $output .= '<div class="video-content">';
+            
+            if (!empty($video['description'])) {
+                $output .= '<div class="video-description">' . esc_html($video['description']) . '</div>';
+            }
+            
+            // Service Showcase
+            if (!empty($video['serviceHighlights'])) {
+                $output .= '<div class="service-showcase">';
+                $output .= '<div class="showcase-title">Featured in Video:</div>';
+                $output .= '<ul class="showcase-list">';
+                foreach ($video['serviceHighlights'] as $highlight) {
+                    $output .= '<li class="showcase-item">' . esc_html($highlight) . '</li>';
+                }
+                $output .= '</ul>';
+                $output .= '</div>';
+            }
+            
+            // Engagement Stats
+            $output .= '<div class="engagement-stats">';
+            $output .= '<div class="stat-card">';
+            $output .= '<span class="stat-number">' . ($video['likes'] ?? '0') . '</span>';
+            $output .= '<span class="stat-label">Likes</span>';
+            $output .= '</div>';
+            $output .= '<div class="stat-card">';
+            $output .= '<span class="stat-number">' . ($video['comments'] ?? '0') . '</span>';
+            $output .= '<span class="stat-label">Comments</span>';
+            $output .= '</div>';
+            $output .= '<div class="stat-card">';
+            $output .= '<span class="stat-number">' . ($video['shares'] ?? '0') . '</span>';
+            $output .= '<span class="stat-label">Shares</span>';
+            $output .= '</div>';
+            $output .= '</div>';
+            
+            // Transcript
+            if ($atts['show_transcript'] === 'true' && !empty($video['transcript'])) {
+                $output .= '<div class="transcript-section">';
+                $output .= '<div class="transcript-title">Video Transcript (Excerpt):</div>';
+                $output .= '<div class="transcript-text">' . esc_html($video['transcript']) . '</div>';
+                $output .= '</div>';
+            }
+            
+            // Action Buttons
+            $output .= '<div class="action-buttons">';
+            $output .= '<button class="action-btn primary">👍 Like Video</button>';
+            $output .= '<button class="action-btn">📤 Share</button>';
+            $output .= '<button class="action-btn">💾 Save</button>';
+            $output .= '<button class="action-btn">📝 Comment</button>';
+            $output .= '</div>';
+            
+            $output .= '</div>';
+            
+            // Related Videos
+            if ($atts['show_related'] === 'true' && !empty($video['relatedVideos'])) {
+                $output .= '<div class="related-videos">';
+                $output .= '<div class="related-title">Related Service Videos</div>';
+                $output .= '<div class="related-grid">';
+                
+                foreach ($video['relatedVideos'] as $related) {
+                    $output .= '<div class="related-item">';
+                    $output .= '<div class="related-thumb">';
+                    $output .= '<div class="related-play"></div>';
+                    $output .= '</div>';
+                    $output .= '<div class="related-info">';
+                    $output .= '<div class="related-title-text">' . esc_html($related['title'] ?? 'Related Video') . '</div>';
+                    $output .= '<div class="related-duration">' . esc_html($related['duration'] ?? '0:00') . '</div>';
+                    $output .= '</div>';
+                    $output .= '</div>';
+                }
+                
+                $output .= '</div>';
+                $output .= '</div>';
+            }
+            
+            // Hashtags
+            $output .= '<div class="hashtags">';
+            if (!empty($video['jobType'])) {
+                $jobType = strtolower(str_replace(' ', '-', $video['jobType']));
+                $output .= '<a href="#" class="hashtag">#' . $jobType . '-video</a>';
+            }
+            if (!empty($video['city'])) {
+                $city = strtolower(str_replace(' ', '', $video['city']));
+                $output .= '<a href="#" class="hashtag">#' . $city . '</a>';
+            }
+            $output .= '<a href="#" class="hashtag">#customer-review</a>';
+            $output .= '<a href="#" class="hashtag">#professional-service</a>';
+            $output .= '<a href="#" class="hashtag">#five-star-review</a>';
+            $output .= '</div>';
+            
+            $output .= '</div>';
         }
         
         $output .= '</div>';
