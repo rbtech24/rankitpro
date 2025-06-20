@@ -112,6 +112,12 @@ class RankItProIntegration {
         register_setting('rankitpro_settings', 'rankitpro_auto_refresh', array(
             'sanitize_callback' => 'rest_sanitize_boolean'
         ));
+        register_setting('rankitpro_settings', 'rankitpro_enable_schema', array(
+            'sanitize_callback' => 'rest_sanitize_boolean'
+        ));
+        register_setting('rankitpro_settings', 'rankitpro_business_name');
+        register_setting('rankitpro_settings', 'rankitpro_business_phone');
+        register_setting('rankitpro_settings', 'rankitpro_business_address');
     }
     
     public function admin_notices() {

@@ -248,14 +248,15 @@ Author: Rank It Pro
 
     // Add complete professional CSS styles from template
     try {
-      // Read the complete CSS template
-      const cssTemplatePath = path.join(__dirname, '../templates/rankitpro-styles.css');
+      // Use import.meta.url for ES modules
+      const currentDir = path.dirname(new URL(import.meta.url).pathname);
+      const cssTemplatePath = path.join(currentDir, '../templates/rankitpro-styles.css');
       const cssContent = fs.readFileSync(cssTemplatePath, 'utf8');
       
       archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
 
       // Read the complete JavaScript template
-      const jsTemplatePath = path.join(__dirname, '../templates/rankitpro-script.js');
+      const jsTemplatePath = path.join(currentDir, '../templates/rankitpro-script.js');
       const jsContent = fs.readFileSync(jsTemplatePath, 'utf8');
       
       archive.append(Buffer.from(jsContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
