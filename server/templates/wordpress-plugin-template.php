@@ -493,17 +493,50 @@ class RankItProIntegration {
     }
     
     public function enqueue_scripts() {
-        // Enqueue the main RankItPro stylesheet
-        wp_enqueue_style('rankitpro-styles', $this->plugin_url . 'rankitpro-styles.css', array(), $this->version);
+        // Only load assets if shortcode is present on current page
+        if ($this->has_shortcode_on_page()) {
+            // Enqueue the main RankItPro stylesheet
+            if (file_exists($this->plugin_path . 'assets/css/rank-it-pro.css')) {
+                wp_enqueue_style('rankitpro-styles', $this->plugin_url . 'assets/css/rank-it-pro.css', array(), $this->version);
+            }
+            
+            // Enqueue optional JavaScript for interactive features
+            if (file_exists($this->plugin_path . 'assets/js/rank-it-pro.js')) {
+                wp_enqueue_script('rankitpro-script', $this->plugin_url . 'assets/js/rank-it-pro.js', array('jquery'), $this->version, true);
+                
+                // Localize script for AJAX calls
+                wp_localize_script('rankitpro-script', 'rankitpro_ajax', array(
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('rankitpro_nonce')
+                ));
+            }
+        }
+    }
+    
+    private function has_shortcode_on_page() {
+        global $post;
         
-        // Enqueue optional JavaScript for interactive features
-        wp_enqueue_script('rankitpro-script', $this->plugin_url . 'rankitpro-script.js', array('jquery'), $this->version, true);
+        if (!$post) {
+            return false;
+        }
         
-        // Localize script for AJAX calls
-        wp_localize_script('rankitpro-script', 'rankitpro_ajax', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('rankitpro_nonce')
-        ));
+        $shortcodes = array(
+            'rankitpro_visits',
+            'rankitpro_reviews', 
+            'rankitpro_testimonials',
+            'rankitpro_recent_work',
+            'rankitpro_technician_profile',
+            'rankitpro_blog',
+            'rankitpro_video_testimonials'
+        );
+        
+        foreach ($shortcodes as $shortcode) {
+            if (has_shortcode($post->post_content, $shortcode)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     // Shortcode handlers
@@ -514,6 +547,14 @@ class RankItProIntegration {
             'technician' => 'all',
             'show_photos' => 'true'
         ), $atts, 'rankitpro_visits');
+        
+        // Validate and sanitize attributes
+        $atts = $this->validate_shortcode_atts($atts, array(
+            'limit' => array('type' => 'int', 'min' => 1, 'max' => 50),
+            'type' => array('type' => 'string', 'allowed' => array('all', 'hvac', 'plumbing', 'electrical', 'general')),
+            'technician' => array('type' => 'string'),
+            'show_photos' => array('type' => 'bool')
+        ));
         
         $visits = $this->get_api_data('visits', $atts);
         return $this->render_visits($visits, $atts);
@@ -621,7 +662,13 @@ class RankItProIntegration {
         
         if (is_wp_error($response)) {
             error_log('Rank It Pro API Error: ' . $response->get_error_message());
-            return array();
+            return $this->get_error_response(__('Unable to connect to Rank It Pro service. Please check your API settings.', 'rankitpro'));
+        }
+        
+        $response_code = wp_remote_retrieve_response_code($response);
+        if ($response_code !== 200) {
+            error_log('Rank It Pro API HTTP Error: ' . $response_code);
+            return $this->get_error_response(__('Service temporarily unavailable. Please try again later.', 'rankitpro'));
         }
         
         $body = wp_remote_retrieve_body($response);
@@ -629,7 +676,7 @@ class RankItProIntegration {
         
         if (!$data || isset($data['error'])) {
             error_log('Rank It Pro API Response Error: ' . ($data['error'] ?? 'Unknown error'));
-            return array();
+            return $this->get_error_response(__('Content could not be loaded. Please verify your API configuration.', 'rankitpro'));
         }
         
         $cache_duration = get_option('rankitpro_cache_duration', 3600);
@@ -784,9 +831,49 @@ class RankItProIntegration {
         return '<script type="application/ld+json">' . json_encode($schema, JSON_PRETTY_PRINT) . '</script>';
     }
 
+    private function get_error_response($message) {
+        return array('error' => true, 'message' => $message);
+    }
+    
+    private function validate_shortcode_atts($atts, $validation_rules) {
+        foreach ($validation_rules as $key => $rules) {
+            if (!isset($atts[$key])) continue;
+            
+            switch ($rules['type']) {
+                case 'int':
+                    $atts[$key] = absint($atts[$key]);
+                    if (isset($rules['min']) && $atts[$key] < $rules['min']) {
+                        $atts[$key] = $rules['min'];
+                    }
+                    if (isset($rules['max']) && $atts[$key] > $rules['max']) {
+                        $atts[$key] = $rules['max'];
+                    }
+                    break;
+                    
+                case 'string':
+                    $atts[$key] = sanitize_text_field($atts[$key]);
+                    if (isset($rules['allowed']) && !in_array($atts[$key], $rules['allowed'])) {
+                        $atts[$key] = $rules['allowed'][0]; // Default to first allowed value
+                    }
+                    break;
+                    
+                case 'bool':
+                    $atts[$key] = ($atts[$key] === 'true' || $atts[$key] === '1') ? 'true' : 'false';
+                    break;
+            }
+        }
+        
+        return $atts;
+    }
+
     private function render_visits($visits, $atts) {
+        // Handle error responses
+        if (is_array($visits) && isset($visits['error'])) {
+            return '<div class="rankitpro-error">' . esc_html($visits['message']) . '</div>';
+        }
+        
         if (empty($visits)) {
-            return '<p>' . __('No recent visits available.', 'rankitpro') . '</p>';
+            return '<div class="rankitpro-no-content">' . __('No recent visits available.', 'rankitpro') . '</div>';
         }
         
         $output = '';
