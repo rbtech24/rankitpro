@@ -530,7 +530,7 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async getAllSupportTickets(): Promise<any[]> {
+  async getAllSupportTicketsForStats(): Promise<any[]> {
     const result = await db.select().from(supportTickets);
     return result;
   }
@@ -1575,8 +1575,8 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  // Chart data operations for super admin
-  async getCheckInChartData(): Promise<{ date: string; count: number }[]> {
+  // Chart data operations for super admin - renamed to avoid duplicate
+  async getAdminCheckInChartData(): Promise<{ date: string; count: number }[]> {
     try {
       // Get check-ins data from the last 6 months
       const sixMonthsAgo = new Date();
