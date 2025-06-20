@@ -376,8 +376,8 @@ export default function FinancialDashboard() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {(subscriptionBreakdown || []).map((plan: SubscriptionData) => (
-                            <TableRow key={plan.planName}>
+                          {(subscriptionBreakdown || []).map((plan: SubscriptionData, index: number) => (
+                            <TableRow key={`${plan.planName}-${index}`}>
                               <TableCell className="font-medium">{plan.planName}</TableCell>
                               <TableCell>{plan.subscribers}</TableCell>
                               <TableCell>${plan.revenue.toLocaleString()}</TableCell>

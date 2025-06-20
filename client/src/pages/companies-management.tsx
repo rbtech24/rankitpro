@@ -784,11 +784,11 @@ export default function CompaniesManagement() {
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Enabled Features</h3>
                         <div className="flex flex-wrap gap-2 mt-1">
-                          {Array.isArray(selectedCompany.featuresEnabled) ? selectedCompany.featuresEnabled.map((featureId: any) => (
+                          {(Array.isArray(selectedCompany.featuresEnabled) ? selectedCompany.featuresEnabled : []).map((featureId: any) => (
                             <Badge key={featureId} variant="outline" className="bg-blue-50">
                               {availableFeatures.find(f => f.id === featureId)?.name}
                             </Badge>
-                          )) : []}
+                          ))}
                         </div>
                       </div>
                     </CardContent>
