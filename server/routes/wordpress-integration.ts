@@ -6,6 +6,8 @@ import { WordPressService, WordPressCredentials } from '../services/wordpress-se
 import crypto from 'crypto';
 import { insertWordpressCustomFieldsSchema } from '@shared/schema';
 import archiver from 'archiver';
+import fs from 'fs';
+import path from 'path';
 
 const router = Router();
 
@@ -243,44 +245,33 @@ Author: Rank It Pro
     // Add readme file
     archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/README.md' });
 
-    // Add plugin assets directory structure
-    const cssContent = `/* Rank It Pro Plugin Styles */
-.rank-it-pro-widget {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  margin: 20px 0;
-  background: #fff;
-}
+    // Add complete professional CSS styles from template
+    try {
+      // Read the complete CSS template
+      const cssTemplatePath = path.join(__dirname, '../templates/rankitpro-styles.css');
+      const cssContent = fs.readFileSync(cssTemplatePath, 'utf8');
+      
+      archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
 
-.rank-it-pro-checkin {
-  border-left: 4px solid #0073aa;
-  padding-left: 15px;
-  margin-bottom: 20px;
-}
-
-.rank-it-pro-date {
-  color: #666;
-  font-size: 0.9em;
-}
-
-.rank-it-pro-location {
-  color: #0073aa;
-  font-weight: 500;
-}`;
-
-    archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
-
-    // Add JavaScript file
-    const jsContent = `// Rank It Pro Plugin JavaScript
-jQuery(document).ready(function($) {
-  // Initialize plugin functionality
-  $('.rank-it-pro-widget').each(function() {
-    // Add any interactive features here
-  });
-});`;
-
-    archive.append(Buffer.from(jsContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
+      // Read the complete JavaScript template
+      const jsTemplatePath = path.join(__dirname, '../templates/rankitpro-script.js');
+      const jsContent = fs.readFileSync(jsTemplatePath, 'utf8');
+      
+      archive.append(Buffer.from(jsContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
+    } catch (error) {
+      console.error('Error reading template files:', error);
+      // Fallback to basic CSS if templates not found
+      const fallbackCSS = `/* Rank It Pro Plugin Styles */
+.rankitpro-container { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.rankitpro-visit-card { max-width: 450px; margin: 20px auto; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; border: 1px solid #eee; }
+.rankitpro-review-card { max-width: 500px; margin: 20px auto; background: white; border-radius: 12px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); padding: 25px; border: 1px solid #f0f0f0; }
+.rankitpro-blog-card { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e0e0e0; }`;
+      
+      const fallbackJS = `jQuery(document).ready(function($) { $('.rankitpro-container').addClass('loaded'); });`;
+      
+      archive.append(Buffer.from(fallbackCSS, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
+      archive.append(Buffer.from(fallbackJS, 'utf8'), { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
+    }
 
     // Finalize the archive
     archive.finalize();
