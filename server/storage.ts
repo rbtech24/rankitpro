@@ -1609,16 +1609,16 @@ export class DatabaseStorage implements IStorage {
 
       const reviewData = await db
         .select({
-          month: sql<string>`DATE_TRUNC('month', ${reviewResponses.createdAt})`,
-          reviews: sql<number>`COUNT(*)`
+          month: sql<string>`to_char(date_trunc('month', ${reviewResponses.createdAt}), 'YYYY-MM')`,
+          reviews: sql<number>`count(*)`
         })
         .from(reviewResponses)
         .where(gte(reviewResponses.createdAt, sixMonthsAgo))
-        .groupBy(sql`DATE_TRUNC('month', ${reviewResponses.createdAt})`)
-        .orderBy(sql`DATE_TRUNC('month', ${reviewResponses.createdAt})`);
+        .groupBy(sql`date_trunc('month', ${reviewResponses.createdAt})`)
+        .orderBy(sql`date_trunc('month', ${reviewResponses.createdAt})`);
 
       return reviewData.map(row => ({
-        month: new Date(row.month).toLocaleDateString('en-US', { month: 'short' }),
+        month: new Date(row.month + '-01').toLocaleDateString('en-US', { month: 'short' }),
         reviews: row.reviews
       }));
     } catch (error) {
