@@ -784,11 +784,11 @@ export default function CompaniesManagement() {
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Enabled Features</h3>
                         <div className="flex flex-wrap gap-2 mt-1">
-                          {(selectedCompany.featuresEnabled || []).map((featureId: any) => (
+                          {Array.isArray(selectedCompany.featuresEnabled) ? selectedCompany.featuresEnabled.map((featureId: any) => (
                             <Badge key={featureId} variant="outline" className="bg-blue-50">
                               {availableFeatures.find(f => f.id === featureId)?.name}
                             </Badge>
-                          ))}
+                          )) : []}
                         </div>
                       </div>
                     </CardContent>
@@ -1243,7 +1243,7 @@ export default function CompaniesManagement() {
                           </FormControl>
                           <SelectContent>
                             {plansLoading ? (
-                              <SelectItem value="" disabled>Loading plans...</SelectItem>
+                              <SelectItem value="loading" disabled>Loading plans...</SelectItem>
                             ) : subscriptionPlans && subscriptionPlans.length > 0 ? (
                               subscriptionPlans.map((plan: SubscriptionPlan) => (
                                 <SelectItem key={plan.id} value={plan.id.toString()}>
@@ -1252,7 +1252,7 @@ export default function CompaniesManagement() {
                                 </SelectItem>
                               ))
                             ) : (
-                              <SelectItem value="" disabled>No plans available</SelectItem>
+                              <SelectItem value="none" disabled>No plans available</SelectItem>
                             )}
                           </SelectContent>
                         </Select>

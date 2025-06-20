@@ -1867,6 +1867,26 @@ export class DatabaseStorage implements IStorage {
       return null;
     }
   }
+
+  async getMonthlyRevenueForPlan(planId: number): Promise<number> {
+    try {
+      const result = await db
+        .select({
+          revenue: sql<number>`COALESCE(SUM(CAST(${subscriptionPlans.price} AS DECIMAL)), 0)`
+        })
+        .from(companies)
+        .innerJoin(subscriptionPlans, eq(companies.plan, subscriptionPlans.name))
+        .where(and(
+          eq(subscriptionPlans.id, planId),
+          eq(companies.isEmailVerified, true)
+        ));
+      
+      return result[0]?.revenue || 0;
+    } catch (error) {
+      console.error('Error getting monthly revenue for plan:', error);
+      return 0;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
