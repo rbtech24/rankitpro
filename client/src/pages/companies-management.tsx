@@ -1518,7 +1518,7 @@ export default function CompaniesManagement() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {viewCompanyStats.featuresEnabled.map(featureId => {
+                        {(Array.isArray(viewCompanyStats.featuresEnabled) ? viewCompanyStats.featuresEnabled : []).map(featureId => {
                           const feature = availableFeatures.find(f => f.id === featureId);
                           if (!feature) return null;
                           
@@ -1560,7 +1560,7 @@ export default function CompaniesManagement() {
                         })}
                         
                         {availableFeatures
-                          .filter(f => !viewCompanyStats.featuresEnabled.includes(f.id))
+                          .filter(f => !(Array.isArray(viewCompanyStats.featuresEnabled) ? viewCompanyStats.featuresEnabled : []).includes(f.id))
                           .slice(0, 2)
                           .map(feature => (
                             <div key={feature.id}>

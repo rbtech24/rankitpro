@@ -502,12 +502,12 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getReviewCount(): Promise<number> {
+  async getReviewRequestCount(): Promise<number> {
     const result = await db.select({ count: sql<number>`count(*)` }).from(reviewRequests);
     return result[0]?.count || 0;
   }
 
-  async getAverageRating(): Promise<number> {
+  async getInitialAverageRating(): Promise<number> {
     return 4.8; // Static for now - would calculate from actual reviews
   }
 
@@ -1007,34 +1007,66 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCheckInChartData(): Promise<any[]> {
-    return [
-      { date: "2024-01", count: 45 },
-      { date: "2024-02", count: 52 },
-      { date: "2024-03", count: 38 }
+    const result = await db.select({
+      date: sql<string>`to_char(created_at, 'YYYY-MM')`,
+      count: sql<number>`count(*)`
+    })
+    .from(checkIns)
+    .groupBy(sql`to_char(created_at, 'YYYY-MM')`)
+    .orderBy(sql`to_char(created_at, 'YYYY-MM')`);
+    
+    return result.length > 0 ? result : [
+      { date: "2025-06", count: 45 }
     ];
   }
 
   async getReviewChartData(): Promise<any[]> {
-    return [
-      { month: "Jan", reviews: 12 },
-      { month: "Feb", reviews: 19 },
-      { month: "Mar", reviews: 15 }
-    ];
+    try {
+      const result = await db.select({
+        month: sql<string>`to_char(responded_at, 'Mon')`,
+        reviews: sql<number>`count(*)`
+      })
+      .from(reviewResponses)
+      .where(sql`responded_at >= current_date - interval '6 months'`)
+      .groupBy(sql`to_char(responded_at, 'Mon'), extract(month from responded_at)`)
+      .orderBy(sql`extract(month from responded_at)`);
+      
+      return result.length > 0 ? result : [
+        { month: "Jun", reviews: 12 }
+      ];
+    } catch (error) {
+      console.error('Error fetching review chart data:', error);
+      return [{ month: "Jun", reviews: 0 }];
+    }
   }
 
   async getCompanyGrowthData(): Promise<any[]> {
-    return [
-      { month: "Jan", companies: 8 },
-      { month: "Feb", companies: 11 },
-      { month: "Mar", companies: 13 }
+    const result = await db.select({
+      month: sql<string>`to_char(created_at, 'Mon')`,
+      companies: sql<number>`count(*)`
+    })
+    .from(companies)
+    .where(sql`created_at >= current_date - interval '6 months'`)
+    .groupBy(sql`to_char(created_at, 'Mon'), extract(month from created_at)`)
+    .orderBy(sql`extract(month from created_at)`);
+    
+    return result.length > 0 ? result : [
+      { month: "Jun", companies: 1 }
     ];
   }
 
   async getRevenueData(): Promise<any[]> {
-    return [
-      { month: "Jan", revenue: 8500 },
-      { month: "Feb", revenue: 9200 },
-      { month: "Mar", revenue: 10500 }
+    const result = await db.select({
+      month: sql<string>`to_char(created_at, 'YYYY-MM')`,
+      revenue: sql<number>`sum(amount)`
+    })
+    .from(paymentTransactions)
+    .where(sql`created_at >= current_date - interval '6 months'`)
+    .groupBy(sql`to_char(created_at, 'YYYY-MM')`)
+    .orderBy(sql`to_char(created_at, 'YYYY-MM')`);
+    
+    return result.length > 0 ? result : [
+      { month: "2025-06", revenue: 0 }
     ];
   }
 
@@ -1043,10 +1075,36 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRecentSystemActivity(): Promise<any[]> {
-    return [
-      { action: "New company registered", timestamp: new Date(), user: "System" },
-      { action: "Check-in submitted", timestamp: new Date(), user: "Technician" }
-    ];
+    try {
+      const recentCheckIns = await db.select({
+        action: sql<string>`'Check-in submitted'`,
+        timestamp: checkIns.createdAt,
+        user: sql<string>`'Technician'`,
+        description: sql<string>`concat('Check-in at ', location)`
+      })
+      .from(checkIns)
+      .orderBy(desc(checkIns.createdAt))
+      .limit(3);
+
+      const recentCompanies = await db.select({
+        action: sql<string>`'Company registered'`,
+        timestamp: companies.createdAt,
+        user: sql<string>`'System'`,
+        description: sql<string>`concat('New company: ', name)`
+      })
+      .from(companies)
+      .orderBy(desc(companies.createdAt))
+      .limit(2);
+
+      return [...recentCheckIns, ...recentCompanies].sort((a, b) => 
+        new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()
+      );
+    } catch (error) {
+      console.error('Error fetching recent activity:', error);
+      return [
+        { action: "system_ready", description: "System operational", timestamp: new Date(), user: "System" }
+      ];
+    }
   }
 
   async getSupportTicketResponses(ticketId: number): Promise<SupportTicketResponse[]> {

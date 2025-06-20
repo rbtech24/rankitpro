@@ -9,6 +9,7 @@ import path from "path";
 import { createServer, IncomingMessage, ServerResponse } from "http";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import MemoryOptimizer from "./services/memory-optimizer";
 
 
 const app = express();
@@ -172,6 +173,10 @@ async function createSuperAdminIfNotExists() {
   } else {
     log("Email service initialization failed - notifications will be disabled", "warn");
   }
+  
+  // Initialize memory optimizer
+  const memoryOptimizer = MemoryOptimizer.getInstance();
+  memoryOptimizer.initialize();
   
   const server = await registerRoutes(app);
 
