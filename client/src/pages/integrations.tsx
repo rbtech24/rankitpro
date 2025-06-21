@@ -216,8 +216,39 @@ function IntegrationsPage() {
     }
   };
 
-  const downloadWordPressPlugin = () => {
-    window.open('/api/integration/wordpress/download-plugin', '_blank');
+  const downloadWordPressPlugin = async () => {
+    try {
+      const response = await fetch('/api/integration/wordpress/download-plugin', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate plugin');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'rank-it-pro-plugin.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Plugin Downloaded!",
+        description: "WordPress plugin ZIP file ready for installation",
+      });
+    } catch (error) {
+      console.error('Error downloading plugin:', error);
+      toast({
+        title: "Download Failed",
+        description: "Could not download the WordPress plugin. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
