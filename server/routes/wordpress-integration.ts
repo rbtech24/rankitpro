@@ -114,7 +114,7 @@ router.post('/config', isAuthenticated, isCompanyAdmin, async (req: Request, res
 });
 
 // Generate a WordPress plugin for the company
-router.get('/plugin', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+router.get('/download-plugin', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
   const companyId = req.user?.companyId;
   
   if (!companyId) {
