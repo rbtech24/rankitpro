@@ -166,7 +166,7 @@ router.get('/download-plugin', isAuthenticated, isCompanyAdmin, async (req: Requ
     }
     
     // Generate the WordPress plugin code
-    const apiEndpoint = process.env.API_ENDPOINT || `https://${req.headers.host}`;
+    const apiEndpoint = 'https://rankitpro.com/api';
     const pluginCode = await WordPressService.generatePluginCode(apiKey, apiEndpoint);
     
     // Create installation instructions to include with the plugin
