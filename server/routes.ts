@@ -125,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error("Login session save error:", err);
             reject(new Error("Session save failed"));
           } else {
-            console.log(`Login session saved successfully for user ${user.id}`);
+            console.log("Login session saved successfully for user ${user.id}");
             resolve();
           }
         });
@@ -165,7 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (userId) {
             // Store connection by user ID
             userConnections.set(parseInt(userId), ws);
-            console.log(`User ${userId} connected via WebSocket`);
+            console.log("User ${userId} connected via WebSocket");
           }
           
           if (companyId) {
@@ -175,7 +175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               companyConnections.set(companyId, new Set());
             }
             companyConnections.get(companyId)?.add(ws);
-            console.log(`Client subscribed to company ${companyId} updates`);
+            console.log("Client subscribed to company ${companyId} updates");
           }
         }
       } catch (error) {
@@ -191,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       Array.from(userConnections.entries()).forEach(([userId, connection]) => {
         if (connection === ws) {
           userConnections.delete(userId);
-          console.log(`User ${userId} disconnected`);
+          console.log("User ${userId} disconnected");
         }
       });
       
@@ -199,7 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       Array.from(companyConnections.entries()).forEach(([companyId, connections]) => {
         if (connections.has(ws)) {
           connections.delete(ws);
-          console.log(`Client unsubscribed from company ${companyId} updates`);
+          console.log("Client unsubscribed from company ${companyId} updates");
           
           // Clean up empty sets
           if (connections.size === 0) {
@@ -384,7 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       healthCheck.features.database = true;
     } catch (error) {
       healthCheck.features.database = false;
-      healthCheck.errors.push(`Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      healthCheck.errors.push("Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}");
       healthCheck.status = "degraded";
     }
 
@@ -577,7 +577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create session
       req.session.userId = adminUser.id;
       
-      console.log(`ADMIN SETUP: Admin created successfully - ID: ${adminUser.id}, Company: ${company.id}`);
+      console.log("ADMIN SETUP: Admin created successfully - ID: ${adminUser.id}, Company: ${company.id}");
       
       // Save session
       await new Promise<void>((resolve, reject) => {
@@ -586,7 +586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error("ADMIN SETUP SESSION SAVE ERROR:", err);
             reject(new Error("Session save failed"));
           } else {
-            console.log(`ADMIN SETUP SESSION SAVED: User ${adminUser.id}, Session ID: ${req.sessionID}`);
+            console.log("ADMIN SETUP SESSION SAVED: User ${adminUser.id}, Session ID: ${req.sessionID}");
             resolve();
           }
         });
@@ -715,7 +715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error("Registration session save error:", err);
             reject(new Error("Session save failed"));
           } else {
-            console.log(`Registration session saved successfully for user ${user.id}`);
+            console.log("Registration session saved successfully for user ${user.id}");
             resolve();
           }
         });
@@ -883,7 +883,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       await storage.setPasswordResetToken(user.id, resetToken, resetExpiry);
       
       // Send email with reset link
-      const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
+      const resetUrl = "${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}";
       
       try {
         await emailService.sendPasswordResetEmail(email, user.username, resetUrl);
@@ -961,7 +961,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
         // Always clear cookies regardless of session destruction result
         clearAllSessionCookies(res);
         
-        console.log(`Session ${sessionId} destroyed successfully`);
+        console.log("Session ${sessionId} destroyed successfully");
         // Redirect to home page after logout
         res.redirect('/?logged_out=true');
       });
@@ -996,7 +996,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
         // Always clear cookies regardless of session destruction result
         clearAllSessionCookies(res);
         
-        console.log(`Session ${sessionId} destroyed successfully`);
+        console.log("Session ${sessionId} destroyed successfully");
         res.json({ 
           message: "Logged out successfully",
           timestamp: new Date().toISOString(),
@@ -1337,7 +1337,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       
       // Validate ID parameter
       if (isNaN(technicianId) || technicianId <= 0) {
-        console.error(`Invalid technician ID parameter: ${req.params.id}`);
+        console.error("Invalid technician ID parameter: ${req.params.id}");
         return res.status(400).json({ message: "Invalid technician ID" });
       }
       
@@ -1438,7 +1438,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       }
 
       res.json({ 
-        message: `Technician ${result.active ? 'activated' : 'deactivated'} successfully`,
+        message: "Technician ${result.active ? 'activated' : 'deactivated'} successfully",
         technician: result
       });
     } catch (error) {
@@ -1480,7 +1480,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
       }
 
       res.json({ 
-        message: `Technician ${active ? 'activated' : 'deactivated'} successfully`,
+        message: "Technician ${active ? 'activated' : 'deactivated'} successfully",
         active 
       });
     } catch (error) {
@@ -1751,7 +1751,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
           // For now, just store a mock URL
           photos.push({
             filename: file.originalname,
-            url: `https://checkinpro.app/uploads/${file.originalname}`
+            url: "https://checkinpro.app/uploads/${file.originalname}"
           });
         }
       }
@@ -2082,7 +2082,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
           // In a real app, upload to S3 and store the URL
           photos.push({
             filename: file.originalname,
-            url: `https://checkinpro.app/uploads/${file.originalname}`
+            url: "https://checkinpro.app/uploads/${file.originalname}"
           });
         }
       }
@@ -3465,7 +3465,7 @@ For support, contact Rank It Pro team.
             const location = $(this).closest('.rankitpro-visit-card').find('.rankitpro-visit-location').text();
             if (location) {
                 const encodedLocation = encodeURIComponent(location.replace('📍', '').trim());
-                window.open(`https://maps.google.com/maps?q=${encodedLocation}`, '_blank');
+                window.open("https://maps.google.com/maps?q=" + encodedLocation + "", '_blank');
             }
         });
         
@@ -3948,7 +3948,7 @@ For support, contact Rank It Pro team.
             const location = $(this).closest('.rankitpro-visit-card').find('.rankitpro-visit-location').text();
             if (location) {
                 const encodedLocation = encodeURIComponent(location.replace('📍', '').trim());
-                window.open(`https://maps.google.com/maps?q=${encodedLocation}`, '_blank');
+                window.open("https://maps.google.com/maps?q=" + encodedLocation + "", '_blank');
             }
         });
         
@@ -4472,7 +4472,7 @@ For support, contact Rank It Pro team.
             await storage.updateSubscriptionPlan(planId, {
               stripePriceIdYearly: stripePriceId
             });
-            console.log(`Auto-created Stripe yearly price ${stripePriceId} for ${plan.name} at $${yearlyPrice}/year`);
+            console.log("Auto-created Stripe yearly price ${stripePriceId} for ${plan.name} at $${yearlyPrice}/year");
           }
         } catch (stripeError) {
           console.warn('Failed to auto-create Stripe price, but plan updated:', stripeError);
@@ -4563,7 +4563,7 @@ For support, contact Rank It Pro team.
       // For super admin, use a default company ID of 0 or create system tickets
       const companyId = req.user.companyId || 0;
       
-      const ticketNumber = `TICKET-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+      const ticketNumber = "TICKET-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}";
       
       const ticketData = {
         companyId,
