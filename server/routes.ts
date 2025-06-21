@@ -3236,7 +3236,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
         } catch (e) {}
       }
       
-      const pluginCode = `<?php
+      const pluginCode = \`<?php
 /*
 Plugin Name: Rank It Pro Integration
 Description: WordPress integration for Rank It Pro SaaS platform
@@ -3250,12 +3250,12 @@ if (!defined('ABSPATH')) {
 }
 
 class RankItProPlugin {
-    private $api_key = '${apiKey}';
-    private $api_endpoint = 'https://rankitpro.com/api';
+    private \$api_key = '\${apiKey}';
+    private \$api_endpoint = 'https://rankitpro.com/api';
     
     public function __construct() {
-        add_action('init', array($this, 'init'));
-        add_action('admin_menu', array($this, 'admin_menu'));
+        add_action('init', array(\$this, 'init'));
+        add_action('admin_menu', array(\$this, 'admin_menu'));
     }
     
     public function init() {
@@ -3268,21 +3268,21 @@ class RankItProPlugin {
             'Rank It Pro',
             'manage_options',
             'rankitpro-settings',
-            array($this, 'settings_page')
+            array(\$this, 'settings_page')
         );
     }
     
     public function settings_page() {
         echo '<div class="wrap">';
         echo '<h1>Rank It Pro Integration</h1>';
-        echo '<p>API Key: ' . esc_html($this->api_key) . '</p>';
-        echo '<p>Endpoint: ' . esc_html($this->api_endpoint) . '</p>';
+        echo '<p>API Key: ' . esc_html(\$this->api_key) . '</p>';
+        echo '<p>Endpoint: ' . esc_html(\$this->api_endpoint) . '</p>';
         echo '</div>';
     }
 }
 
 new RankItProPlugin();
-?>`;
+?>\`;
       
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
@@ -3301,7 +3301,7 @@ new RankItProPlugin();
       archive.pipe(res);
       archive.append(Buffer.from(pluginCode, 'utf8'), { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
       
-      const readmeContent = `# Rank It Pro WordPress Plugin
+      const readmeContent = \`# Rank It Pro WordPress Plugin
 
 ## Installation
 1. Upload this ZIP file to WordPress admin > Plugins > Add New > Upload Plugin
@@ -3309,58 +3309,613 @@ new RankItProPlugin();
 3. Go to Settings > Rank It Pro to view configuration
 
 ## Configuration
-- API Key: ${apiKey}
+- API Key: \${apiKey}
 - Endpoint: https://rankitpro.com/api
 
 ## Support
 For support, contact Rank It Pro team.
-`;
+\`;
 
-      // Add CSS file for styling
-      const cssContent = `/* Rank It Pro WordPress Plugin Styles */
-.rank-it-pro-widget {
-    border: 1px solid #ddd;
+      // Complete CSS with all original functionality
+      const cssContent = `/* RankItPro WordPress Integration Styles - Complete Original Code */
+
+/* Reset and Base Styles */
+.rankitpro-container * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.rankitpro-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Service Visit/Check-in Card Styles */
+.rankitpro-visit-card {
+    max-width: 450px;
+    margin: 20px auto;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #eee;
+}
+
+.rankitpro-visit-header {
     padding: 20px;
-    margin: 20px 0;
-    background: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: white;
+    border-bottom: 1px solid #eee;
 }
 
-.rank-it-pro-checkin {
+.rankitpro-visit-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
     margin-bottom: 15px;
-    padding: 15px;
-    border-left: 4px solid #0073aa;
-    background: #f9f9f9;
 }
 
-.rank-it-pro-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #23282d;
-}`;
+.rankitpro-visit-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
 
-      // Add JavaScript file for functionality  
-      const jsContent = `/* Rank It Pro WordPress Plugin JavaScript */
-(function($) {
-    'use strict';
-    
-    function initRankItProWidgets() {
-        $('.rank-it-pro-widget').each(function() {
-            var $widget = $(this);
-            var apiKey = $widget.data('api-key') || '${apiKey}';
-            var endpoint = $widget.data('endpoint') || 'https://rankitpro.com/api';
-            
-            loadCheckIns($widget, apiKey, endpoint);
-        });
+.rankitpro-technician {
+    font-size: 14px;
+    color: #666;
+}
+
+.rankitpro-visit-date {
+    font-size: 14px;
+    color: #666;
+}
+
+.rankitpro-visit-location {
+    display: flex;
+    align-items: center;
+    color: #e91e63;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.rankitpro-visit-location::before {
+    content: "📍";
+    margin-right: 8px;
+}
+
+/* Map Container */
+.rankitpro-map-container {
+    height: 200px;
+    position: relative;
+    background: #e8f5e8;
+    border: 1px solid #ddd;
+    margin: 0 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.rankitpro-map-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #e8f5e8 25%, #f0f8f0 25%, #f0f8f0 50%, #e8f5e8 50%, #e8f5e8 75%, #f0f8f0 75%);
+    background-size: 20px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.rankitpro-map-marker {
+    width: 30px;
+    height: 30px;
+    background: #2196f3;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    position: relative;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.rankitpro-map-marker::after {
+    content: '';
+    width: 14px;
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Visit Description */
+.rankitpro-visit-description {
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #444;
+    text-align: center;
+}
+
+/* Photos Section */
+.rankitpro-photos-section {
+    padding: 0 20px 20px 20px;
+}
+
+.rankitpro-photos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.rankitpro-photo-container {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.rankitpro-photo {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.rankitpro-photo:hover {
+    transform: scale(1.05);
+}
+
+.rankitpro-photo-label {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Blog Post Styles */
+.rankitpro-blog-card {
+    max-width: 600px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+}
+
+.rankitpro-blog-header {
+    padding: 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.rankitpro-blog-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.3;
+}
+
+.rankitpro-blog-content {
+    padding: 25px;
+}
+
+/* Review Card Styles */
+.rankitpro-review-card {
+    max-width: 500px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    padding: 25px;
+    border: 1px solid #f0f0f0;
+    position: relative;
+}
+
+.rankitpro-star {
+    color: #ffd700;
+    font-size: 18px;
+}
+
+.rankitpro-star.empty {
+    color: #e0e0e0;
+}
+
+/* Testimonial Styles */
+.rankitpro-testimonial-card {
+    max-width: 400px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+    border: 1px solid #e8e8e8;
+    transition: all 0.3s ease;
+}
+
+.rankitpro-audio-player,
+.rankitpro-video-player {
+    width: 100%;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+/* Loading States */
+.rankitpro-loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.rankitpro-loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #333;
+    border-radius: 50%;
+    animation: rankitpro-spin 1s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes rankitpro-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error States */
+.rankitpro-error {
+    background: #fee;
+    border: 1px solid #fcc;
+    color: #a00;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .rankitpro-visit-card,
+    .rankitpro-blog-card,
+    .rankitpro-review-card,
+    .rankitpro-testimonial-card {
+        margin: 15px;
+        max-width: none;
     }
     
-    $(document).ready(function() {
-        initRankItProWidgets();
-    });
+    .rankitpro-photos-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .rankitpro-container {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+    }
     
-})(jQuery);`;
+    .rankitpro-map-container {
+        display: none;
+    }
+}\`;
+
+      // Complete JavaScript with all original functionality
+      const jsContent = `/* RankItPro WordPress Integration JavaScript - Complete Original Code */
+
+(function(\$) {
+    'use strict';
+
+    // Initialize when document is ready
+    \$(document).ready(function() {
+        initRankItPro();
+    });
+
+    function initRankItPro() {
+        console.log('RankItPro WordPress Integration Loading...');
+        
+        // Initialize photo lightbox
+        initPhotoLightbox();
+        
+        // Initialize map interactions
+        initMapInteractions();
+        
+        // Initialize audio/video players
+        initMediaPlayers();
+        
+        // Initialize lazy loading for images
+        initLazyLoading();
+        
+        // Initialize AJAX refresh functionality
+        initAutoRefresh();
+        
+        // Initialize star ratings
+        initStarRatings();
+        
+        console.log('RankItPro WordPress Integration Loaded Successfully!');
+    }
+
+    // Photo lightbox functionality
+    function initPhotoLightbox() {
+        \$('.rankitpro-photo').on('click', function(e) {
+            e.preventDefault();
+            
+            const imgSrc = \$(this).attr('src');
+            const imgAlt = \$(this).attr('alt') || '';
+            
+            // Create lightbox overlay
+            const lightbox = \$(\\\`
+                <div class="rankitpro-lightbox">
+                    <div class="rankitpro-lightbox-overlay"></div>
+                    <div class="rankitpro-lightbox-content">
+                        <img src="\\\${imgSrc}" alt="\\\${imgAlt}">
+                        <button class="rankitpro-lightbox-close">&times;</button>
+                    </div>
+                </div>
+            \\\`);
+            
+            \$('body').append(lightbox);
+            lightbox.fadeIn(300);
+            
+            // Close lightbox handlers
+            lightbox.find('.rankitpro-lightbox-close, .rankitpro-lightbox-overlay').on('click', function() {
+                lightbox.fadeOut(300, function() {
+                    lightbox.remove();
+                });
+            });
+            
+            // Close on escape key
+            \$(document).on('keyup.rankitpro-lightbox', function(e) {
+                if (e.keyCode === 27) {
+                    lightbox.fadeOut(300, function() {
+                        lightbox.remove();
+                    });
+                    \$(document).off('keyup.rankitpro-lightbox');
+                }
+            });
+        });
+    }
+
+    // Map interaction functionality
+    function initMapInteractions() {
+        \$('.rankitpro-map-container').on('click', function() {
+            const location = \$(this).closest('.rankitpro-visit-card').find('.rankitpro-visit-location').text();
+            if (location) {
+                const encodedLocation = encodeURIComponent(location.replace('📍', '').trim());
+                window.open(\\\`https://maps.google.com/maps?q=\\\${encodedLocation}\\\`, '_blank');
+            }
+        });
+        
+        // Add hover effect to maps
+        \$('.rankitpro-map-container').hover(
+            function() {
+                \$(this).css('cursor', 'pointer');
+                \$(this).find('.rankitpro-map-placeholder').css('opacity', '0.8');
+            },
+            function() {
+                \$(this).find('.rankitpro-map-placeholder').css('opacity', '1');
+            }
+        );
+    }
+
+    // Media player initialization
+    function initMediaPlayers() {
+        // Audio player enhancements
+        \$('.rankitpro-audio-player').each(function() {
+            const audio = this;
+            const container = \$(this).closest('.rankitpro-testimonial-card');
+            
+            audio.addEventListener('play', function() {
+                container.addClass('playing');
+            });
+            
+            audio.addEventListener('pause', function() {
+                container.removeClass('playing');
+            });
+            
+            audio.addEventListener('ended', function() {
+                container.removeClass('playing');
+            });
+        });
+        
+        // Video player enhancements
+        \$('.rankitpro-video-player').each(function() {
+            const video = this;
+            const container = \$(this).closest('.rankitpro-testimonial-card');
+            
+            video.addEventListener('play', function() {
+                container.addClass('playing');
+            });
+            
+            video.addEventListener('pause', function() {
+                container.removeClass('playing');
+            });
+            
+            video.addEventListener('ended', function() {
+                container.removeClass('playing');
+            });
+        });
+    }
+
+    // Lazy loading for images
+    function initLazyLoading() {
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        img.classList.add('loaded');
+                        imageObserver.unobserve(img);
+                    }
+                });
+            });
+
+            document.querySelectorAll('img[data-src]').forEach(img => {
+                imageObserver.observe(img);
+            });
+        }
+    }
+
+    // Auto-refresh functionality
+    function initAutoRefresh() {
+        const autoRefresh = \$('.rankitpro-container').data('auto-refresh');
+        const refreshInterval = \$('.rankitpro-container').data('refresh-interval') || 300000; // 5 minutes default
+        
+        if (autoRefresh && typeof rankitpro_ajax !== 'undefined') {
+            setInterval(function() {
+                refreshRankItProContent();
+            }, refreshInterval);
+        }
+    }
+
+    // Refresh content via AJAX
+    function refreshRankItProContent() {
+        \$('.rankitpro-container').each(function() {
+            const container = \$(this);
+            const shortcode = container.data('shortcode');
+            const params = container.data('params') || {};
+            
+            if (shortcode && typeof rankitpro_ajax !== 'undefined') {
+                \$.ajax({
+                    url: rankitpro_ajax.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'rankitpro_refresh_content',
+                        shortcode: shortcode,
+                        params: params,
+                        nonce: rankitpro_ajax.nonce
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            container.html(response.data);
+                            // Re-initialize features for new content
+                            initPhotoLightbox();
+                            initMapInteractions();
+                            initMediaPlayers();
+                            initStarRatings();
+                        }
+                    },
+                    error: function() {
+                        console.log('RankItPro: Failed to refresh content');
+                    }
+                });
+            }
+        });
+    }
+
+    // Star rating interaction
+    function initStarRatings() {
+        \$('.rankitpro-review-rating').each(function() {
+            const rating = \$(this).data('rating');
+            const stars = \$(this).find('.rankitpro-star');
+            
+            stars.each(function(index) {
+                if (index < rating) {
+                    \$(this).removeClass('empty');
+                } else {
+                    \$(this).addClass('empty');
+                }
+            });
+        });
+    }
+
+    // Initialize star ratings on page load
+    \$(window).on('load', function() {
+        initStarRatings();
+    });
+
+})(jQuery);
+
+// CSS for lightbox (injected via JavaScript to avoid conflicts)
+(function() {
+    const lightboxCSS = \\\`
+        .rankitpro-lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            display: none;
+        }
+        .rankitpro-lightbox-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        .rankitpro-lightbox-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .rankitpro-lightbox-content img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        .rankitpro-lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .rankitpro-lightbox-close:hover {
+            opacity: 0.7;
+        }
+        .rankitpro-testimonial-card.playing {
+            box-shadow: 0 5px 25px rgba(255, 107, 107, 0.3);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        img.lazy {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        img.lazy.loaded {
+            opacity: 1;
+        }
+        .rankitpro-map-container:hover .rankitpro-map-placeholder {
+            opacity: 0.8;
+        }
+    \\\`;
+    
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = lightboxCSS;
+    document.getElementsByTagName('head')[0].appendChild(style);
+})();\`;
       
       archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/README.md' });
       archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
@@ -3392,7 +3947,7 @@ For support, contact Rank It Pro team.
         } catch (e) {}
       }
       
-      const pluginCode = `<?php
+      const pluginCode = \`<?php
 /*
 Plugin Name: Rank It Pro Integration
 Description: WordPress integration for Rank It Pro SaaS platform
@@ -3406,12 +3961,12 @@ if (!defined('ABSPATH')) {
 }
 
 class RankItProPlugin {
-    private $api_key = '${apiKey}';
-    private $api_endpoint = 'https://rankitpro.com/api';
+    private \$api_key = '\${apiKey}';
+    private \$api_endpoint = 'https://rankitpro.com/api';
     
     public function __construct() {
-        add_action('init', array($this, 'init'));
-        add_action('admin_menu', array($this, 'admin_menu'));
+        add_action('init', array(\$this, 'init'));
+        add_action('admin_menu', array(\$this, 'admin_menu'));
     }
     
     public function init() {
@@ -3424,21 +3979,21 @@ class RankItProPlugin {
             'Rank It Pro',
             'manage_options',
             'rankitpro-settings',
-            array($this, 'settings_page')
+            array(\$this, 'settings_page')
         );
     }
     
     public function settings_page() {
         echo '<div class="wrap">';
         echo '<h1>Rank It Pro Integration</h1>';
-        echo '<p>API Key: ' . esc_html($this->api_key) . '</p>';
-        echo '<p>Endpoint: ' . esc_html($this->api_endpoint) . '</p>';
+        echo '<p>API Key: ' . esc_html(\$this->api_key) . '</p>';
+        echo '<p>Endpoint: ' . esc_html(\$this->api_endpoint) . '</p>';
         echo '</div>';
     }
 }
 
 new RankItProPlugin();
-?>`;
+?>\`;
       
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
@@ -3457,7 +4012,7 @@ new RankItProPlugin();
       archive.pipe(res);
       archive.append(Buffer.from(pluginCode, 'utf8'), { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
       
-      const readmeContent = `# Rank It Pro WordPress Plugin
+      const readmeContent = \`# Rank It Pro WordPress Plugin
 
 ## Installation
 1. Upload this ZIP file to WordPress admin > Plugins > Add New > Upload Plugin
@@ -3465,58 +4020,613 @@ new RankItProPlugin();
 3. Go to Settings > Rank It Pro to view configuration
 
 ## Configuration
-- API Key: ${apiKey}
+- API Key: \${apiKey}
 - Endpoint: https://rankitpro.com/api
 
 ## Support
 For support, contact Rank It Pro team.
-`;
+\`;
 
-      // Add CSS file for styling
-      const cssContent = `/* Rank It Pro WordPress Plugin Styles */
-.rank-it-pro-widget {
-    border: 1px solid #ddd;
+      // Complete CSS with all original functionality - SECOND ENDPOINT
+      const cssContent = `/* RankItPro WordPress Integration Styles - Complete Original Code */
+
+/* Reset and Base Styles */
+.rankitpro-container * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.rankitpro-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Service Visit/Check-in Card Styles */
+.rankitpro-visit-card {
+    max-width: 450px;
+    margin: 20px auto;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #eee;
+}
+
+.rankitpro-visit-header {
     padding: 20px;
-    margin: 20px 0;
-    background: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: white;
+    border-bottom: 1px solid #eee;
 }
 
-.rank-it-pro-checkin {
+.rankitpro-visit-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
     margin-bottom: 15px;
-    padding: 15px;
-    border-left: 4px solid #0073aa;
-    background: #f9f9f9;
 }
 
-.rank-it-pro-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #23282d;
-}`;
+.rankitpro-visit-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
 
-      // Add JavaScript file for functionality  
-      const jsContent = `/* Rank It Pro WordPress Plugin JavaScript */
-(function($) {
-    'use strict';
-    
-    function initRankItProWidgets() {
-        $('.rank-it-pro-widget').each(function() {
-            var $widget = $(this);
-            var apiKey = $widget.data('api-key') || '${apiKey}';
-            var endpoint = $widget.data('endpoint') || 'https://rankitpro.com/api';
-            
-            loadCheckIns($widget, apiKey, endpoint);
-        });
+.rankitpro-technician {
+    font-size: 14px;
+    color: #666;
+}
+
+.rankitpro-visit-date {
+    font-size: 14px;
+    color: #666;
+}
+
+.rankitpro-visit-location {
+    display: flex;
+    align-items: center;
+    color: #e91e63;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.rankitpro-visit-location::before {
+    content: "📍";
+    margin-right: 8px;
+}
+
+/* Map Container */
+.rankitpro-map-container {
+    height: 200px;
+    position: relative;
+    background: #e8f5e8;
+    border: 1px solid #ddd;
+    margin: 0 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.rankitpro-map-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #e8f5e8 25%, #f0f8f0 25%, #f0f8f0 50%, #e8f5e8 50%, #e8f5e8 75%, #f0f8f0 75%);
+    background-size: 20px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.rankitpro-map-marker {
+    width: 30px;
+    height: 30px;
+    background: #2196f3;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    position: relative;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.rankitpro-map-marker::after {
+    content: '';
+    width: 14px;
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Visit Description */
+.rankitpro-visit-description {
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #444;
+    text-align: center;
+}
+
+/* Photos Section */
+.rankitpro-photos-section {
+    padding: 0 20px 20px 20px;
+}
+
+.rankitpro-photos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.rankitpro-photo-container {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.rankitpro-photo {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.rankitpro-photo:hover {
+    transform: scale(1.05);
+}
+
+.rankitpro-photo-label {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Blog Post Styles */
+.rankitpro-blog-card {
+    max-width: 600px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+}
+
+.rankitpro-blog-header {
+    padding: 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.rankitpro-blog-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.3;
+}
+
+.rankitpro-blog-content {
+    padding: 25px;
+}
+
+/* Review Card Styles */
+.rankitpro-review-card {
+    max-width: 500px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    padding: 25px;
+    border: 1px solid #f0f0f0;
+    position: relative;
+}
+
+.rankitpro-star {
+    color: #ffd700;
+    font-size: 18px;
+}
+
+.rankitpro-star.empty {
+    color: #e0e0e0;
+}
+
+/* Testimonial Styles */
+.rankitpro-testimonial-card {
+    max-width: 400px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+    border: 1px solid #e8e8e8;
+    transition: all 0.3s ease;
+}
+
+.rankitpro-audio-player,
+.rankitpro-video-player {
+    width: 100%;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+/* Loading States */
+.rankitpro-loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.rankitpro-loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #333;
+    border-radius: 50%;
+    animation: rankitpro-spin 1s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes rankitpro-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error States */
+.rankitpro-error {
+    background: #fee;
+    border: 1px solid #fcc;
+    color: #a00;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .rankitpro-visit-card,
+    .rankitpro-blog-card,
+    .rankitpro-review-card,
+    .rankitpro-testimonial-card {
+        margin: 15px;
+        max-width: none;
     }
     
-    $(document).ready(function() {
-        initRankItProWidgets();
-    });
+    .rankitpro-photos-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .rankitpro-container {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+    }
     
-})(jQuery);`;
+    .rankitpro-map-container {
+        display: none;
+    }
+}\`;
+
+      // Complete JavaScript with all original functionality - SECOND ENDPOINT
+      const jsContent = `/* RankItPro WordPress Integration JavaScript - Complete Original Code */
+
+(function(\$) {
+    'use strict';
+
+    // Initialize when document is ready
+    \$(document).ready(function() {
+        initRankItPro();
+    });
+
+    function initRankItPro() {
+        console.log('RankItPro WordPress Integration Loading...');
+        
+        // Initialize photo lightbox
+        initPhotoLightbox();
+        
+        // Initialize map interactions
+        initMapInteractions();
+        
+        // Initialize audio/video players
+        initMediaPlayers();
+        
+        // Initialize lazy loading for images
+        initLazyLoading();
+        
+        // Initialize AJAX refresh functionality
+        initAutoRefresh();
+        
+        // Initialize star ratings
+        initStarRatings();
+        
+        console.log('RankItPro WordPress Integration Loaded Successfully!');
+    }
+
+    // Photo lightbox functionality
+    function initPhotoLightbox() {
+        \$('.rankitpro-photo').on('click', function(e) {
+            e.preventDefault();
+            
+            const imgSrc = \$(this).attr('src');
+            const imgAlt = \$(this).attr('alt') || '';
+            
+            // Create lightbox overlay
+            const lightbox = \$(\\\`
+                <div class="rankitpro-lightbox">
+                    <div class="rankitpro-lightbox-overlay"></div>
+                    <div class="rankitpro-lightbox-content">
+                        <img src="\\\${imgSrc}" alt="\\\${imgAlt}">
+                        <button class="rankitpro-lightbox-close">&times;</button>
+                    </div>
+                </div>
+            \\\`);
+            
+            \$('body').append(lightbox);
+            lightbox.fadeIn(300);
+            
+            // Close lightbox handlers
+            lightbox.find('.rankitpro-lightbox-close, .rankitpro-lightbox-overlay').on('click', function() {
+                lightbox.fadeOut(300, function() {
+                    lightbox.remove();
+                });
+            });
+            
+            // Close on escape key
+            \$(document).on('keyup.rankitpro-lightbox', function(e) {
+                if (e.keyCode === 27) {
+                    lightbox.fadeOut(300, function() {
+                        lightbox.remove();
+                    });
+                    \$(document).off('keyup.rankitpro-lightbox');
+                }
+            });
+        });
+    }
+
+    // Map interaction functionality
+    function initMapInteractions() {
+        \$('.rankitpro-map-container').on('click', function() {
+            const location = \$(this).closest('.rankitpro-visit-card').find('.rankitpro-visit-location').text();
+            if (location) {
+                const encodedLocation = encodeURIComponent(location.replace('📍', '').trim());
+                window.open(\\\`https://maps.google.com/maps?q=\\\${encodedLocation}\\\`, '_blank');
+            }
+        });
+        
+        // Add hover effect to maps
+        \$('.rankitpro-map-container').hover(
+            function() {
+                \$(this).css('cursor', 'pointer');
+                \$(this).find('.rankitpro-map-placeholder').css('opacity', '0.8');
+            },
+            function() {
+                \$(this).find('.rankitpro-map-placeholder').css('opacity', '1');
+            }
+        );
+    }
+
+    // Media player initialization
+    function initMediaPlayers() {
+        // Audio player enhancements
+        \$('.rankitpro-audio-player').each(function() {
+            const audio = this;
+            const container = \$(this).closest('.rankitpro-testimonial-card');
+            
+            audio.addEventListener('play', function() {
+                container.addClass('playing');
+            });
+            
+            audio.addEventListener('pause', function() {
+                container.removeClass('playing');
+            });
+            
+            audio.addEventListener('ended', function() {
+                container.removeClass('playing');
+            });
+        });
+        
+        // Video player enhancements
+        \$('.rankitpro-video-player').each(function() {
+            const video = this;
+            const container = \$(this).closest('.rankitpro-testimonial-card');
+            
+            video.addEventListener('play', function() {
+                container.addClass('playing');
+            });
+            
+            video.addEventListener('pause', function() {
+                container.removeClass('playing');
+            });
+            
+            video.addEventListener('ended', function() {
+                container.removeClass('playing');
+            });
+        });
+    }
+
+    // Lazy loading for images
+    function initLazyLoading() {
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        img.classList.add('loaded');
+                        imageObserver.unobserve(img);
+                    }
+                });
+            });
+
+            document.querySelectorAll('img[data-src]').forEach(img => {
+                imageObserver.observe(img);
+            });
+        }
+    }
+
+    // Auto-refresh functionality
+    function initAutoRefresh() {
+        const autoRefresh = \$('.rankitpro-container').data('auto-refresh');
+        const refreshInterval = \$('.rankitpro-container').data('refresh-interval') || 300000; // 5 minutes default
+        
+        if (autoRefresh && typeof rankitpro_ajax !== 'undefined') {
+            setInterval(function() {
+                refreshRankItProContent();
+            }, refreshInterval);
+        }
+    }
+
+    // Refresh content via AJAX
+    function refreshRankItProContent() {
+        \$('.rankitpro-container').each(function() {
+            const container = \$(this);
+            const shortcode = container.data('shortcode');
+            const params = container.data('params') || {};
+            
+            if (shortcode && typeof rankitpro_ajax !== 'undefined') {
+                \$.ajax({
+                    url: rankitpro_ajax.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'rankitpro_refresh_content',
+                        shortcode: shortcode,
+                        params: params,
+                        nonce: rankitpro_ajax.nonce
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            container.html(response.data);
+                            // Re-initialize features for new content
+                            initPhotoLightbox();
+                            initMapInteractions();
+                            initMediaPlayers();
+                            initStarRatings();
+                        }
+                    },
+                    error: function() {
+                        console.log('RankItPro: Failed to refresh content');
+                    }
+                });
+            }
+        });
+    }
+
+    // Star rating interaction
+    function initStarRatings() {
+        \$('.rankitpro-review-rating').each(function() {
+            const rating = \$(this).data('rating');
+            const stars = \$(this).find('.rankitpro-star');
+            
+            stars.each(function(index) {
+                if (index < rating) {
+                    \$(this).removeClass('empty');
+                } else {
+                    \$(this).addClass('empty');
+                }
+            });
+        });
+    }
+
+    // Initialize star ratings on page load
+    \$(window).on('load', function() {
+        initStarRatings();
+    });
+
+})(jQuery);
+
+// CSS for lightbox (injected via JavaScript to avoid conflicts)
+(function() {
+    const lightboxCSS = \\\`
+        .rankitpro-lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            display: none;
+        }
+        .rankitpro-lightbox-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        .rankitpro-lightbox-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .rankitpro-lightbox-content img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        .rankitpro-lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .rankitpro-lightbox-close:hover {
+            opacity: 0.7;
+        }
+        .rankitpro-testimonial-card.playing {
+            box-shadow: 0 5px 25px rgba(255, 107, 107, 0.3);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        img.lazy {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        img.lazy.loaded {
+            opacity: 1;
+        }
+        .rankitpro-map-container:hover .rankitpro-map-placeholder {
+            opacity: 0.8;
+        }
+    \\\`;
+    
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = lightboxCSS;
+    document.getElementsByTagName('head')[0].appendChild(style);
+})();\`;
       
       archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/README.md' });
       archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
