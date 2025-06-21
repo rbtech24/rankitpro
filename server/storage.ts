@@ -11,7 +11,7 @@ import {
   SupportTicketResponse, InsertSupportTicketResponse
 } from "@shared/schema";
 import { db, queryWithRetry } from "./db";
-import { eq, and, desc, asc, gte, lte, sql, not, like } from "drizzle-orm";
+import { eq, and, desc, asc, gte, lt, lte, sql, not, like } from "drizzle-orm";
 import * as schema from "@shared/schema";
 
 const {

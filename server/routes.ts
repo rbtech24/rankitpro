@@ -3228,6 +3228,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
   app.use("/api/review-response", reviewResponseRoutes);
   app.use("/api/review-automation", reviewAutomationRoutes);
   app.use("/api/wordpress", wordpressRoutes);
+  app.use("/api/integration", wordpressRoutes);
   app.use("/api/wordpress-custom-fields", wordpressCustomFieldsRoutes);
   app.use("/api/js-widget", jsWidgetRoutes);
   app.use("/api/billing", billingRoutes);

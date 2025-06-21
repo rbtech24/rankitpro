@@ -49,6 +49,9 @@ export default function APICredentials() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [visibleSecrets, setVisibleSecrets] = useState<Set<number>>(new Set());
   const [newCredentials, setNewCredentials] = useState<{apiKey: string; secretKey: string} | null>(null);
+  
+  // Get current domain for API endpoint URL
+  const baseUrl = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}` : '';
 
   const form = useForm<CreateCredentialForm>({
     resolver: zodResolver(createCredentialSchema),
