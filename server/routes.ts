@@ -3315,8 +3315,56 @@ new RankItProPlugin();
 ## Support
 For support, contact Rank It Pro team.
 `;
+
+      // Add CSS file for styling
+      const cssContent = `/* Rank It Pro WordPress Plugin Styles */
+.rank-it-pro-widget {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.rank-it-pro-checkin {
+    margin-bottom: 15px;
+    padding: 15px;
+    border-left: 4px solid #0073aa;
+    background: #f9f9f9;
+}
+
+.rank-it-pro-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #23282d;
+}`;
+
+      // Add JavaScript file for functionality  
+      const jsContent = `/* Rank It Pro WordPress Plugin JavaScript */
+(function($) {
+    'use strict';
+    
+    function initRankItProWidgets() {
+        $('.rank-it-pro-widget').each(function() {
+            var $widget = $(this);
+            var apiKey = $widget.data('api-key') || '${apiKey}';
+            var endpoint = $widget.data('endpoint') || 'https://rankitpro.com/api';
+            
+            loadCheckIns($widget, apiKey, endpoint);
+        });
+    }
+    
+    $(document).ready(function() {
+        initRankItProWidgets();
+    });
+    
+})(jQuery);`;
       
       archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/README.md' });
+      archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
+      archive.append(Buffer.from(jsContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
       await archive.finalize();
       
     } catch (error) {
@@ -3423,8 +3471,56 @@ new RankItProPlugin();
 ## Support
 For support, contact Rank It Pro team.
 `;
+
+      // Add CSS file for styling
+      const cssContent = `/* Rank It Pro WordPress Plugin Styles */
+.rank-it-pro-widget {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.rank-it-pro-checkin {
+    margin-bottom: 15px;
+    padding: 15px;
+    border-left: 4px solid #0073aa;
+    background: #f9f9f9;
+}
+
+.rank-it-pro-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #23282d;
+}`;
+
+      // Add JavaScript file for functionality  
+      const jsContent = `/* Rank It Pro WordPress Plugin JavaScript */
+(function($) {
+    'use strict';
+    
+    function initRankItProWidgets() {
+        $('.rank-it-pro-widget').each(function() {
+            var $widget = $(this);
+            var apiKey = $widget.data('api-key') || '${apiKey}';
+            var endpoint = $widget.data('endpoint') || 'https://rankitpro.com/api';
+            
+            loadCheckIns($widget, apiKey, endpoint);
+        });
+    }
+    
+    $(document).ready(function() {
+        initRankItProWidgets();
+    });
+    
+})(jQuery);`;
       
       archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/README.md' });
+      archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
+      archive.append(Buffer.from(jsContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
       await archive.finalize();
       
     } catch (error) {
