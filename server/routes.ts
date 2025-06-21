@@ -3218,6 +3218,9 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
   
+  // Setup WordPress routes from fixed module
+  setupWordPressRoutes(app);
+
   // WordPress plugin download routes - MUST BE FIRST to prevent frontend routing conflicts
   app.get("/api/integration/wordpress/download-plugin", isAuthenticated, isCompanyAdmin, async (req, res) => {
     console.log('WordPress plugin download - integration endpoint called');
@@ -3658,15 +3661,15 @@ For support, contact Rank It Pro team.
             const imgAlt = \$(this).attr('alt') || '';
             
             // Create lightbox overlay
-            const lightbox = \$(\\`
+            const lightbox = \$(`
                 <div class="rankitpro-lightbox">
                     <div class="rankitpro-lightbox-overlay"></div>
                     <div class="rankitpro-lightbox-content">
-                        <img src="\\\${imgSrc}" alt="\\\${imgAlt}">
+                        <img src="\${imgSrc}" alt="\${imgAlt}">
                         <button class="rankitpro-lightbox-close">&times;</button>
                     </div>
                 </div>
-            \\`);
+            `);
             
             \$('body').append(lightbox);
             lightbox.fadeIn(300);
@@ -3696,7 +3699,7 @@ For support, contact Rank It Pro team.
             const location = \$(this).closest('.rankitpro-visit-card').find('.rankitpro-visit-location').text();
             if (location) {
                 const encodedLocation = encodeURIComponent(location.replace('📍', '').trim());
-                window.open(\\`https://maps.google.com/maps?q=\\\${encodedLocation}\\`, '_blank');
+                window.open(`https://maps.google.com/maps?q=\${encodedLocation}`, '_blank');
             }
         });
         
@@ -3844,7 +3847,7 @@ For support, contact Rank It Pro team.
 
 // CSS for lightbox (injected via JavaScript to avoid conflicts)
 (function() {
-    const lightboxCSS = \\`
+    const lightboxCSS = `
         .rankitpro-lightbox {
             position: fixed;
             top: 0;
@@ -3909,7 +3912,7 @@ For support, contact Rank It Pro team.
         .rankitpro-map-container:hover .rankitpro-map-placeholder {
             opacity: 0.8;
         }
-    \\`;
+    `;
     
     const style = document.createElement('style');
     style.type = 'text/css';
@@ -4369,15 +4372,15 @@ For support, contact Rank It Pro team.
             const imgAlt = \$(this).attr('alt') || '';
             
             // Create lightbox overlay
-            const lightbox = \$(\\`
+            const lightbox = \$(`
                 <div class="rankitpro-lightbox">
                     <div class="rankitpro-lightbox-overlay"></div>
                     <div class="rankitpro-lightbox-content">
-                        <img src="\\\${imgSrc}" alt="\\\${imgAlt}">
+                        <img src="\${imgSrc}" alt="\${imgAlt}">
                         <button class="rankitpro-lightbox-close">&times;</button>
                     </div>
                 </div>
-            \\`);
+            `);
             
             \$('body').append(lightbox);
             lightbox.fadeIn(300);
@@ -4407,7 +4410,7 @@ For support, contact Rank It Pro team.
             const location = \$(this).closest('.rankitpro-visit-card').find('.rankitpro-visit-location').text();
             if (location) {
                 const encodedLocation = encodeURIComponent(location.replace('📍', '').trim());
-                window.open(\\`https://maps.google.com/maps?q=\\\${encodedLocation}\\`, '_blank');
+                window.open(`https://maps.google.com/maps?q=\${encodedLocation}`, '_blank');
             }
         });
         
@@ -4555,7 +4558,7 @@ For support, contact Rank It Pro team.
 
 // CSS for lightbox (injected via JavaScript to avoid conflicts)
 (function() {
-    const lightboxCSS = \\`
+    const lightboxCSS = `
         .rankitpro-lightbox {
             position: fixed;
             top: 0;
@@ -4620,7 +4623,7 @@ For support, contact Rank It Pro team.
         .rankitpro-map-container:hover .rankitpro-map-placeholder {
             opacity: 0.8;
         }
-    \\`;
+    `;
     
     const style = document.createElement('style');
     style.type = 'text/css';
