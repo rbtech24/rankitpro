@@ -134,12 +134,11 @@ router.get('/download-plugin', async (req: Request, res: Response) => {
     console.log('WordPress plugin generation starting for company:', user.companyId);
   
     const companyId = req.user?.companyId;
-  
-  if (!companyId) {
-    return res.status(400).json({ error: 'No company associated with this account' });
-  }
-  
-  try {
+    
+    if (!companyId) {
+      return res.status(400).json({ error: 'No company associated with this account' });
+    }
+    
     const company = await storage.getCompany(companyId);
     
     if (!company) {
