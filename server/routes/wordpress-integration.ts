@@ -114,7 +114,12 @@ router.post('/config', isAuthenticated, isCompanyAdmin, async (req: Request, res
 });
 
 // Generate a WordPress plugin for the company
-router.get('/download-plugin', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+router.get('/download-plugin', async (req: Request, res: Response) => {
+  // Check authentication manually to avoid redirect issues with ZIP downloads
+  if (!req.user || req.user.role !== 'company_admin') {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
   const companyId = req.user?.companyId;
   
   if (!companyId) {
@@ -275,10 +280,8 @@ Author: Rank It Pro
       archive.append(Buffer.from(fallbackJS, 'utf8'), { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
     }
 
-    // Finalize the archive
-    archive.finalize();
-
-    return;
+    // Finalize the archive (this is async)
+    await archive.finalize();
   } catch (error) {
     console.error('Error generating WordPress plugin:', error);
     return res.status(500).json({ error: 'Error generating WordPress plugin' });
