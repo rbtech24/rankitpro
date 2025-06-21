@@ -3288,7 +3288,7 @@ new RankItProPlugin();
       res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
       res.setHeader('Cache-Control', 'no-cache');
       
-      const archiver = require('archiver');
+      const archiver = (await import('archiver')).default;
       const archive = archiver('zip');
       
       archive.on('error', (err) => {
