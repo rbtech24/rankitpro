@@ -3254,7 +3254,7 @@ if (!defined('ABSPATH')) {
 }
 
 class RankItProPlugin {
-    private $api_key = '${apiKey}';
+    private $api_key = '" + apiKey + "';
     private $api_endpoint = 'https://rankitpro.com/api';
     
     public function __construct() {
@@ -3313,7 +3313,7 @@ new RankItProPlugin();
 3. Go to Settings > Rank It Pro to view configuration
 
 ## Configuration
-- API Key: ${apiKey}
+- API Key: " + apiKey + "
 - Endpoint: https://rankitpro.com/api
 
 ## Support
@@ -3322,282 +3322,40 @@ For support, contact Rank It Pro team.
 
       // Complete CSS with all original functionality
       const cssContent = `/* RankItPro WordPress Integration - Complete Styles */
-.rankitpro-container * { margin: 0; padding: 0; box-sizing: border-box; }
-.rankitpro-container { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #333; line-height: 1.6; }
-.rankitpro-visit-title { font-size: 24px; font-weight: 600; color: #333; margin-bottom: 15px; }
-.rankitpro-visit-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.rankitpro-technician { font-size: 14px; color: #666; }
-.rankitpro-visit-date { font-size: 14px; color: #666; }
-.rankitpro-visit-location { display: flex; align-items: center; color: #e91e63; font-size: 14px; font-weight: 500; }
-.rankitpro-visit-location::before { content: "📍"; margin-right: 8px; }
-.rankitpro-map-container { height: 200px; position: relative; background: #e8f5e8; border: 1px solid #ddd; margin: 0 20px; border-radius: 8px; overflow: hidden; cursor: pointer; }
-.rankitpro-map-placeholder { width: 100%; height: 100%; background: linear-gradient(45deg, #e8f5e8 25%, #f0f8f0 25%, #f0f8f0 50%, #e8f5e8 50%, #e8f5e8 75%, #f0f8f0 75%); background-size: 20px 20px; display: flex; align-items: center; justify-content: center; position: relative; }
-.rankitpro-map-marker { width: 30px; height: 30px; background: #2196f3; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); position: relative; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-.rankitpro-map-marker::after { content: ''; width: 14px; height: 14px; background: white; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg); }
-.rankitpro-visit-description { padding: 20px; font-size: 14px; line-height: 1.8; color: #444; text-align: center; }
-.rankitpro-photos-section { padding: 0 20px 20px 20px; }
-.rankitpro-photos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.rankitpro-photo-container { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-.rankitpro-photo { width: 100%; height: 150px; object-fit: cover; display: block; cursor: pointer; transition: transform 0.3s ease; }
-.rankitpro-photo:hover { transform: scale(1.05); }
-.rankitpro-photo-label { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-.rankitpro-blog-card { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e0e0e0; }
-.rankitpro-blog-header { padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-.rankitpro-blog-title { font-size: 26px; font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
-.rankitpro-blog-content { padding: 25px; }
-.rankitpro-review-card { max-width: 500px; margin: 20px auto; background: white; border-radius: 12px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); padding: 25px; border: 1px solid #f0f0f0; position: relative; }
-.rankitpro-star { color: #ffd700; font-size: 18px; }
-.rankitpro-star.empty { color: #e0e0e0; }
-.rankitpro-testimonial-card { max-width: 400px; margin: 20px auto; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e8e8e8; transition: all 0.3s ease; }
-.rankitpro-audio-player, .rankitpro-video-player { width: 100%; border-radius: 8px; background: #f8f9fa; }
-.rankitpro-loading { text-align: center; padding: 40px; color: #666; }
-.rankitpro-loading::after { content: ''; display: inline-block; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #333; border-radius: 50%; animation: rankitpro-spin 1s linear infinite; margin-left: 10px; }
-@keyframes rankitpro-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-.rankitpro-error { background: #fee; border: 1px solid #fcc; color: #a00; padding: 15px; border-radius: 8px; text-align: center; margin: 20px; }
-.rankitpro-lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; display: none; }
-.rankitpro-lightbox-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); }
-.rankitpro-lightbox-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 90%; max-height: 90%; }
-.rankitpro-lightbox-content img { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); }
-.rankitpro-lightbox-close { position: absolute; top: -40px; right: 0; background: none; border: none; color: white; font-size: 30px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
-.rankitpro-lightbox-close:hover { opacity: 0.7; }
-.rankitpro-testimonial-card.playing { box-shadow: 0 5px 25px rgba(255, 107, 107, 0.3); transform: translateY(-2px); transition: all 0.3s ease; }
-img.lazy { opacity: 0; transition: opacity 0.3s; }
-img.lazy.loaded { opacity: 1; }
-.rankitpro-map-container:hover .rankitpro-map-placeholder { opacity: 0.8; }
-@media (max-width: 768px) { .rankitpro-visit-card, .rankitpro-blog-card, .rankitpro-review-card, .rankitpro-testimonial-card { margin: 15px; max-width: none; } .rankitpro-photos-grid { grid-template-columns: 1fr; } }
-@media print { .rankitpro-container { box-shadow: none !important; border: 1px solid #ccc !important; } .rankitpro-map-container { display: none; } }`;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #eee;
-}
 
-.rankitpro-visit-header {
-    padding: 20px;
-    background: white;
-    border-bottom: 1px solid #eee;
-}
 
-.rankitpro-visit-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 15px;
-}
 
-.rankitpro-visit-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
 
-.rankitpro-technician {
-    font-size: 14px;
-    color: #666;
-}
 
-.rankitpro-visit-date {
-    font-size: 14px;
-    color: #666;
-}
-
-.rankitpro-visit-location {
-    display: flex;
-    align-items: center;
-    color: #e91e63;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.rankitpro-visit-location::before {
-    content: "📍";
-    margin-right: 8px;
-}
 
 /* Map Container */
-.rankitpro-map-container {
-    height: 200px;
-    position: relative;
-    background: #e8f5e8;
-    border: 1px solid #ddd;
-    margin: 0 20px;
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-}
 
-.rankitpro-map-placeholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, #e8f5e8 25%, #f0f8f0 25%, #f0f8f0 50%, #e8f5e8 50%, #e8f5e8 75%, #f0f8f0 75%);
-    background-size: 20px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
 
-.rankitpro-map-marker {
-    width: 30px;
-    height: 30px;
-    background: #2196f3;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    position: relative;
-    border: 3px solid white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
 
-.rankitpro-map-marker::after {
-    content: '';
-    width: 14px;
-    height: 14px;
-    background: white;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(45deg);
-}
 
 /* Visit Description */
-.rankitpro-visit-description {
-    padding: 20px;
-    font-size: 14px;
-    line-height: 1.8;
-    color: #444;
-    text-align: center;
-}
 
 /* Photos Section */
-.rankitpro-photos-section {
-    padding: 0 20px 20px 20px;
-}
 
-.rankitpro-photos-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
 
-.rankitpro-photo-container {
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
 
-.rankitpro-photo {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    display: block;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
 
-.rankitpro-photo:hover {
-    transform: scale(1.05);
-}
 
-.rankitpro-photo-label {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-}
 
 /* Blog Post Styles */
-.rankitpro-blog-card {
-    max-width: 600px;
-    margin: 20px auto;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    overflow: hidden;
-    border: 1px solid #e0e0e0;
-}
 
-.rankitpro-blog-header {
-    padding: 25px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
 
-.rankitpro-blog-title {
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: 10px;
-    line-height: 1.3;
-}
 
-.rankitpro-blog-content {
-    padding: 25px;
-}
 
 /* Review Card Styles */
-.rankitpro-review-card {
-    max-width: 500px;
-    margin: 20px auto;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-    padding: 25px;
-    border: 1px solid #f0f0f0;
-    position: relative;
-}
 
-.rankitpro-star {
-    color: #ffd700;
-    font-size: 18px;
-}
 
-.rankitpro-star.empty {
-    color: #e0e0e0;
-}
 
 /* Testimonial Styles */
-.rankitpro-testimonial-card {
-    max-width: 400px;
-    margin: 20px auto;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    overflow: hidden;
-    border: 1px solid #e8e8e8;
-    transition: all 0.3s ease;
-}
 
-.rankitpro-audio-player,
-.rankitpro-video-player {
-    width: 100%;
-    border-radius: 8px;
-    background: #f8f9fa;
-}
 
 /* Loading States */
-.rankitpro-loading {
-    text-align: center;
-    padding: 40px;
-    color: #666;
-}
 
-.rankitpro-loading::after {
-    content: '';
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #333;
-    border-radius: 50%;
-    animation: rankitpro-spin 1s linear infinite;
-    margin-left: 10px;
-}
 
 @keyframes rankitpro-spin {
     0% { transform: rotate(0deg); }
@@ -3605,15 +3363,6 @@ img.lazy.loaded { opacity: 1; }
 }
 
 /* Error States */
-.rankitpro-error {
-    background: #fee;
-    border: 1px solid #fcc;
-    color: #a00;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: center;
-    margin: 20px;
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -3989,7 +3738,7 @@ if (!defined('ABSPATH')) {
 }
 
 class RankItProPlugin {
-    private $api_key = '${apiKey}';
+    private $api_key = '" + apiKey + "';
     private $api_endpoint = 'https://rankitpro.com/api';
     
     public function __construct() {
@@ -4048,7 +3797,7 @@ new RankItProPlugin();
 3. Go to Settings > Rank It Pro to view configuration
 
 ## Configuration
-- API Key: ${apiKey}
+- API Key: " + apiKey + "
 - Endpoint: https://rankitpro.com/api
 
 ## Support
@@ -4059,247 +3808,45 @@ For support, contact Rank It Pro team.
       const cssContent = `/* RankItPro WordPress Integration Styles - Complete Original Code */
 
 /* Reset and Base Styles */
-.rankitpro-container * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
-.rankitpro-container {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: #333;
-    line-height: 1.6;
-}
 
 /* Service Visit/Check-in Card Styles */
 
-.rankitpro-visit-header {
-    padding: 20px;
-    background: white;
-    border-bottom: 1px solid #eee;
-}
 
-.rankitpro-visit-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 15px;
-}
 
-.rankitpro-visit-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
 
-.rankitpro-technician {
-    font-size: 14px;
-    color: #666;
-}
 
-.rankitpro-visit-date {
-    font-size: 14px;
-    color: #666;
-}
 
-.rankitpro-visit-location {
-    display: flex;
-    align-items: center;
-    color: #e91e63;
-    font-size: 14px;
-    font-weight: 500;
-}
 
-.rankitpro-visit-location::before {
-    content: "📍";
-    margin-right: 8px;
-}
 
 /* Map Container */
-.rankitpro-map-container {
-    height: 200px;
-    position: relative;
-    background: #e8f5e8;
-    border: 1px solid #ddd;
-    margin: 0 20px;
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-}
 
-.rankitpro-map-placeholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, #e8f5e8 25%, #f0f8f0 25%, #f0f8f0 50%, #e8f5e8 50%, #e8f5e8 75%, #f0f8f0 75%);
-    background-size: 20px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
 
-.rankitpro-map-marker {
-    width: 30px;
-    height: 30px;
-    background: #2196f3;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    position: relative;
-    border: 3px solid white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
 
-.rankitpro-map-marker::after {
-    content: '';
-    width: 14px;
-    height: 14px;
-    background: white;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(45deg);
-}
 
 /* Visit Description */
-.rankitpro-visit-description {
-    padding: 20px;
-    font-size: 14px;
-    line-height: 1.8;
-    color: #444;
-    text-align: center;
-}
 
 /* Photos Section */
-.rankitpro-photos-section {
-    padding: 0 20px 20px 20px;
-}
 
-.rankitpro-photos-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
 
-.rankitpro-photo-container {
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
 
-.rankitpro-photo {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    display: block;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
 
-.rankitpro-photo:hover {
-    transform: scale(1.05);
-}
 
-.rankitpro-photo-label {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-}
 
 /* Blog Post Styles */
-.rankitpro-blog-card {
-    max-width: 600px;
-    margin: 20px auto;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    overflow: hidden;
-    border: 1px solid #e0e0e0;
-}
 
-.rankitpro-blog-header {
-    padding: 25px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
 
-.rankitpro-blog-title {
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: 10px;
-    line-height: 1.3;
-}
 
-.rankitpro-blog-content {
-    padding: 25px;
-}
 
 /* Review Card Styles */
-.rankitpro-review-card {
-    max-width: 500px;
-    margin: 20px auto;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-    padding: 25px;
-    border: 1px solid #f0f0f0;
-    position: relative;
-}
 
-.rankitpro-star {
-    color: #ffd700;
-    font-size: 18px;
-}
 
-.rankitpro-star.empty {
-    color: #e0e0e0;
-}
 
 /* Testimonial Styles */
-.rankitpro-testimonial-card {
-    max-width: 400px;
-    margin: 20px auto;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    overflow: hidden;
-    border: 1px solid #e8e8e8;
-    transition: all 0.3s ease;
-}
 
-.rankitpro-audio-player,
-.rankitpro-video-player {
-    width: 100%;
-    border-radius: 8px;
-    background: #f8f9fa;
-}
 
 /* Loading States */
-.rankitpro-loading {
-    text-align: center;
-    padding: 40px;
-    color: #666;
-}
 
-.rankitpro-loading::after {
-    content: '';
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #333;
-    border-radius: 50%;
-    animation: rankitpro-spin 1s linear infinite;
-    margin-left: 10px;
-}
 
 @keyframes rankitpro-spin {
     0% { transform: rotate(0deg); }
@@ -4307,15 +3854,6 @@ For support, contact Rank It Pro team.
 }
 
 /* Error States */
-.rankitpro-error {
-    background: #fee;
-    border: 1px solid #fcc;
-    color: #a00;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: center;
-    margin: 20px;
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {
