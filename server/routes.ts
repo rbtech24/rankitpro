@@ -42,6 +42,7 @@ import crmIntegrationRoutes from "./routes/crm-integration";
 import salesRoutes from "./routes/sales";
 import supportRoutes from "./routes/support";
 import embedRoutes from "./routes/embed";
+import wordpressPluginRoutes from "./routes/wordpress-plugin";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
 import { analyticsService } from "./services/analytics-service";
