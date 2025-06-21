@@ -312,14 +312,11 @@ Author: Rank It Pro
     }
 
     // Finalize the archive
-    archive.finalize();
+    await archive.finalize();
   } catch (error) {
     console.error('Error generating WordPress plugin:', error);
-    if (!res.headersSent) {
-      return res.status(500).json({ error: 'Error generating WordPress plugin' });
-    }
+    return res.status(500).json({ error: 'Error generating WordPress plugin' });
   }
-});
 });
 
 // Generate JavaScript embed code for the company
