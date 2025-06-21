@@ -583,7 +583,7 @@ function IntegrationsPage() {
                       <Label htmlFor="tech-photos">Show technician photos</Label>
                       <Switch 
                         id="tech-photos" 
-                        checked={embedForm.showTechPhotos} 
+                        checked={embedForm?.showTechPhotos || false} 
                         onCheckedChange={(checked) => setEmbedForm({ ...embedForm, showTechPhotos: checked })}
                       />
                     </div>
@@ -591,7 +591,7 @@ function IntegrationsPage() {
                       <Label htmlFor="checkin-photos">Show check-in photos</Label>
                       <Switch 
                         id="checkin-photos" 
-                        checked={embedForm.showCheckInPhotos} 
+                        checked={embedForm?.showCheckInPhotos || false} 
                         onCheckedChange={(checked) => setEmbedForm({ ...embedForm, showCheckInPhotos: checked })}
                       />
                     </div>
@@ -599,7 +599,7 @@ function IntegrationsPage() {
                       <Label htmlFor="link-posts">Link to full posts</Label>
                       <Switch 
                         id="link-posts" 
-                        checked={embedForm.linkFullPosts} 
+                        checked={embedForm?.linkFullPosts || false} 
                         onCheckedChange={(checked) => setEmbedForm({ ...embedForm, linkFullPosts: checked })}
                       />
                     </div>
@@ -613,7 +613,7 @@ function IntegrationsPage() {
                         type="number"
                         min="1"
                         max="20"
-                        value={embedForm.maxCheckIns}
+                        value={embedForm?.maxCheckIns || 5}
                         onChange={(e) => setEmbedForm({ ...embedForm, maxCheckIns: parseInt(e.target.value) || 5 })}
                       />
                     </div>
@@ -621,7 +621,7 @@ function IntegrationsPage() {
                     <div className="space-y-2">
                       <Label htmlFor="width">Widget width</Label>
                       <Select 
-                        value={embedForm.width} 
+                        value={embedForm?.width || "full"} 
                         onValueChange={(value: "full" | "fixed") => setEmbedForm({ ...embedForm, width: value })}
                       >
                         <SelectTrigger>
