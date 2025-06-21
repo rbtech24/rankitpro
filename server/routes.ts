@@ -3435,15 +3435,7 @@ For support, contact Rank It Pro team.
             const imgAlt = $(this).attr('alt') || '';
             
             // Create lightbox overlay
-            const lightbox = $(`
-                <div class="rankitpro-lightbox">
-                    <div class="rankitpro-lightbox-overlay"></div>
-                    <div class="rankitpro-lightbox-content">
-                        <img src="" + imgSrc + "" alt="" + imgAlt + "">
-                        <button class="rankitpro-lightbox-close">&times;</button>
-                    </div>
-                </div>
-            `);
+            const lightbox = $("<div class="rankitpro-lightbox"><div class="rankitpro-lightbox-overlay"></div><div class="rankitpro-lightbox-content"><img src="" + imgSrc + "" alt="" + imgAlt + ""><button class="rankitpro-lightbox-close">&times;</button></div></div>");
             
             $('body').append(lightbox);
             lightbox.fadeIn(300);
@@ -3926,15 +3918,7 @@ For support, contact Rank It Pro team.
             const imgAlt = $(this).attr('alt') || '';
             
             // Create lightbox overlay
-            const lightbox = $(`
-                <div class="rankitpro-lightbox">
-                    <div class="rankitpro-lightbox-overlay"></div>
-                    <div class="rankitpro-lightbox-content">
-                        <img src="" + imgSrc + "" alt="" + imgAlt + "">
-                        <button class="rankitpro-lightbox-close">&times;</button>
-                    </div>
-                </div>
-            `);
+            const lightbox = $("<div class="rankitpro-lightbox"><div class="rankitpro-lightbox-overlay"></div><div class="rankitpro-lightbox-content"><img src="" + imgSrc + "" alt="" + imgAlt + ""><button class="rankitpro-lightbox-close">&times;</button></div></div>");
             
             $('body').append(lightbox);
             lightbox.fadeIn(300);
