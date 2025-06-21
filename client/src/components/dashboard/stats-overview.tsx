@@ -9,6 +9,12 @@ interface CompanyStats {
   activeTechs: number;
   blogPosts: number;
   reviewRequests: number;
+  trends: {
+    checkinsChange: number;
+    techsChange: number;
+    blogPostsChange: number;
+    reviewRequestsChange: number;
+  };
 }
 
 export default function StatsOverview() {
@@ -78,7 +84,11 @@ export default function StatsOverview() {
             >
               View all
             </span>
-            <span className="text-green-600">↑ 14%</span>
+            {stats?.trends?.checkinsChange !== undefined && (
+              <span className={`${stats.trends.checkinsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {stats.trends.checkinsChange >= 0 ? '↑' : '↓'} {Math.abs(stats.trends.checkinsChange)}%
+              </span>
+            )}
           </div>
         </div>
       </Card>
@@ -111,7 +121,7 @@ export default function StatsOverview() {
               Manage
             </span>
             {stats?.activeTechs ? (
-              <span className="text-green-600">↑ {stats.activeTechs > 1 ? `${stats.activeTechs} techs` : '1 tech'}</span>
+              <span className="text-gray-600">{stats.activeTechs > 1 ? `${stats.activeTechs} techs` : '1 tech'}</span>
             ) : (
               <span className="text-gray-500">No techs</span>
             )}
@@ -150,7 +160,11 @@ export default function StatsOverview() {
             >
               View all
             </span>
-            <span className="text-green-600">↑ 8%</span>
+            {stats?.trends?.blogPostsChange !== undefined && (
+              <span className={`${stats.trends.blogPostsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {stats.trends.blogPostsChange >= 0 ? '↑' : '↓'} {Math.abs(stats.trends.blogPostsChange)}%
+              </span>
+            )}
           </div>
         </div>
       </Card>
@@ -182,7 +196,11 @@ export default function StatsOverview() {
             >
               Send new
             </span>
-            <span className="text-green-600">↑ 22%</span>
+            {stats?.trends?.reviewRequestsChange !== undefined && (
+              <span className={`${stats.trends.reviewRequestsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {stats.trends.reviewRequestsChange >= 0 ? '↑' : '↓'} {Math.abs(stats.trends.reviewRequestsChange)}%
+              </span>
+            )}
           </div>
         </div>
       </Card>

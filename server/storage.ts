@@ -938,12 +938,79 @@ export class DatabaseStorage implements IStorage {
     reviewRequests: number;
     reviewResponses: number;
     averageRating: number;
+    trends: {
+      checkinsChange: number;
+      techsChange: number;
+      blogPostsChange: number;
+      reviewRequestsChange: number;
+    };
   }> {
+    // Current counts
     const [checkInCount] = await db.select({ count: sql<number>`count(*)` }).from(checkIns).where(eq(checkIns.companyId, companyId));
     const [techCount] = await db.select({ count: sql<number>`count(*)` }).from(technicians).where(eq(technicians.companyId, companyId));
     const [blogCount] = await db.select({ count: sql<number>`count(*)` }).from(blogPosts).where(eq(blogPosts.companyId, companyId));
     const [reviewReqCount] = await db.select({ count: sql<number>`count(*)` }).from(reviewRequests).where(eq(reviewRequests.companyId, companyId));
     const [reviewRespCount] = await db.select({ count: sql<number>`count(*)` }).from(reviewResponses).where(eq(reviewResponses.companyId, companyId));
+
+    // Calculate trends (compare last 30 days vs previous 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
+    // Last 30 days counts
+    const [recentCheckIns] = await db.select({ count: sql<number>`count(*)` })
+      .from(checkIns)
+      .where(and(
+        eq(checkIns.companyId, companyId),
+        gte(checkIns.createdAt, thirtyDaysAgo)
+      ));
+
+    const [recentBlogs] = await db.select({ count: sql<number>`count(*)` })
+      .from(blogPosts)
+      .where(and(
+        eq(blogPosts.companyId, companyId),
+        gte(blogPosts.createdAt, thirtyDaysAgo)
+      ));
+
+    const [recentReviews] = await db.select({ count: sql<number>`count(*)` })
+      .from(reviewRequests)
+      .where(and(
+        eq(reviewRequests.companyId, companyId),
+        gte(reviewRequests.createdAt, thirtyDaysAgo)
+      ));
+
+    // Previous 30 days counts (30-60 days ago)
+    const [previousCheckIns] = await db.select({ count: sql<number>`count(*)` })
+      .from(checkIns)
+      .where(and(
+        eq(checkIns.companyId, companyId),
+        gte(checkIns.createdAt, sixtyDaysAgo),
+        lt(checkIns.createdAt, thirtyDaysAgo)
+      ));
+
+    const [previousBlogs] = await db.select({ count: sql<number>`count(*)` })
+      .from(blogPosts)
+      .where(and(
+        eq(blogPosts.companyId, companyId),
+        gte(blogPosts.createdAt, sixtyDaysAgo),
+        lt(blogPosts.createdAt, thirtyDaysAgo)
+      ));
+
+    const [previousReviews] = await db.select({ count: sql<number>`count(*)` })
+      .from(reviewRequests)
+      .where(and(
+        eq(reviewRequests.companyId, companyId),
+        gte(reviewRequests.createdAt, sixtyDaysAgo),
+        lt(reviewRequests.createdAt, thirtyDaysAgo)
+      ));
+
+    // Calculate percentage changes
+    const calculateChange = (current: number, previous: number): number => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
 
     return {
       totalCheckins: checkInCount?.count || 0,
@@ -951,7 +1018,13 @@ export class DatabaseStorage implements IStorage {
       blogPosts: blogCount?.count || 0,
       reviewRequests: reviewReqCount?.count || 0,
       reviewResponses: reviewRespCount?.count || 0,
-      averageRating: 4.5
+      averageRating: 4.5,
+      trends: {
+        checkinsChange: calculateChange(recentCheckIns?.count || 0, previousCheckIns?.count || 0),
+        techsChange: calculateChange(techCount?.count || 0, techCount?.count || 0), // Techs change is typically 0 unless adding/removing
+        blogPostsChange: calculateChange(recentBlogs?.count || 0, previousBlogs?.count || 0),
+        reviewRequestsChange: calculateChange(recentReviews?.count || 0, previousReviews?.count || 0)
+      }
     };
   }
 
