@@ -190,7 +190,7 @@ router.get('/plugin', async (req: Request, res: Response) => {
     req.user = user; // Set user for downstream code
     console.log('WordPress plugin generation starting for company:', user.companyId);
   
-  const companyId = req.user?.companyId;
+    const companyId = req.user?.companyId;
   
   if (!companyId) {
     return res.status(400).json({ error: 'No company associated with this account' });
@@ -347,6 +347,7 @@ Author: Rank It Pro
       return res.status(500).json({ error: 'Error generating WordPress plugin' });
     }
   }
+});
 });
 
 export default router;
