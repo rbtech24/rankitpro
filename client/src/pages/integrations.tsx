@@ -113,8 +113,16 @@ function IntegrationsPage() {
 
   // Set embed form data from API response
   useEffect(() => {
-    if (embedData) {
-      setEmbedForm(embedData.settings);
+    if (embedData?.settings) {
+      setEmbedForm({
+        showTechPhotos: embedData.settings.showTechPhotos ?? true,
+        showCheckInPhotos: embedData.settings.showCheckInPhotos ?? true,
+        maxCheckIns: embedData.settings.maxCheckIns ?? 5,
+        linkFullPosts: embedData.settings.linkFullPosts ?? true,
+        customCss: embedData.settings.customCss ?? '',
+        width: embedData.settings.width ?? 'full',
+        fixedWidth: embedData.settings.fixedWidth ?? 400,
+      });
     }
   }, [embedData]);
 
