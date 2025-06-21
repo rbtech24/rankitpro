@@ -50,8 +50,8 @@ export default function APICredentials() {
   const [visibleSecrets, setVisibleSecrets] = useState<Set<number>>(new Set());
   const [newCredentials, setNewCredentials] = useState<{apiKey: string; secretKey: string} | null>(null);
   
-  // Get current domain for API endpoint URL
-  const baseUrl = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}` : '';
+  // Get current domain for API endpoint URL - use production domain
+  const baseUrl = 'https://rankitpro.com';
 
   const form = useForm<CreateCredentialForm>({
     resolver: zodResolver(createCredentialSchema),

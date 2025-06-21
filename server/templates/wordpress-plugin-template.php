@@ -152,7 +152,7 @@ class RankItProIntegration {
         }
         
         $api_key = get_option('rankitpro_api_key', '');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '');
+        $api_endpoint = get_option('rankitpro_api_endpoint', 'https://rankitpro.com/api');
         $cache_duration = get_option('rankitpro_cache_duration', 3600);
         $show_photos = get_option('rankitpro_show_photos', 1);
         $auto_refresh = get_option('rankitpro_auto_refresh', 1);
