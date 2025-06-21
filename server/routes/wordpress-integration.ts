@@ -341,7 +341,17 @@ router.get('/embed', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
         
         // Generate the JavaScript embed code
         const apiEndpoint = process.env.API_ENDPOINT || 'https://rankitpro.com';
-        const embedCode = WordPressService.generateJavaScriptEmbedCode(apiKey, apiEndpoint);
+        const embedCode = `<script>
+(function() {
+  window.RankItProConfig = {
+    apiKey: '${apiKey}',
+    endpoint: '${apiEndpoint}'
+  };
+  var script = document.createElement('script');
+  script.src = '${apiEndpoint}/widget.js';
+  document.head.appendChild(script);
+})();
+</script>`;
         
         // Save the JavaScript embed code to the company
         await storage.updateCompany(companyId, {

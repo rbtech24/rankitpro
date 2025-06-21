@@ -186,6 +186,10 @@ export interface IStorage {
   
   // API Credentials operations
   getAPICredentials(companyId: number): Promise<APICredentials | undefined>;
+  getAPICredentialsByCompany(companyId: number): Promise<APICredentials[]>;
+  createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials>;
+  updateAPICredentials(id: number, updates: Partial<APICredentials>): Promise<APICredentials | undefined>;
+  deleteAPICredentials(id: number): Promise<boolean>;
   createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials>;
   updateAPICredentials(companyId: number, updates: Partial<APICredentials>): Promise<APICredentials | undefined>;
   
@@ -1515,6 +1519,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAPICredentials(companyId: number): Promise<APICredentials | undefined> { return undefined; }
+  async getAPICredentialsByCompany(companyId: number): Promise<APICredentials[]> {
+    const results = await db.select().from(apiCredentials)
+      .where(eq(apiCredentials.companyId, companyId))
+      .orderBy(desc(apiCredentials.createdAt));
+    return results;
+  }
+
   async createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials> {
     const [newCredentials] = await db.insert(apiCredentials).values(credentials).returning();
     return newCredentials;
