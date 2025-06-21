@@ -749,12 +749,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let aiPrompt = prompt;
       if (type === 'checkin' && context) {
-        aiPrompt = "Create a professional check-in summary for a ${context.jobType} job at ${context.location}.
+        aiPrompt = "Create a professional check-in summary for a ${context.jobType} job at ${context.location}."
         
 Work performed: ${context.workPerformed}
 Materials used: ${context.materialsUsed}
 
-Generate a concise, professional summary (2-3 sentences) that could be shared with the customer and used for business documentation. Focus on the value provided and technical details.";
+Generate a concise, professional summary (2-3 sentences) that could be shared with the customer and used for business documentation. Focus on the value provided and technical details.";"
       }
 
       // Simple OpenAI integration for content generation
