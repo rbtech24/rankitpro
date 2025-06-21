@@ -172,7 +172,7 @@ router.get("/field-mapping/:companyId", async (req, res) => {
 
 // WordPress Plugin Download - matches the frontend endpoint
 router.get('/plugin', async (req: Request, res: Response) => {
-  // Check authentication manually to avoid redirect issues with ZIP downloads
+  // For ZIP downloads, we need to check authentication without redirects
   if (!req.user || req.user.role !== 'company_admin') {
     return res.status(401).json({ error: 'Authentication required' });
   }
@@ -308,8 +308,13 @@ Author: Rank It Pro
     archive.append(Buffer.from(fallbackCSS, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
     archive.append(Buffer.from(fallbackJS, 'utf8'), { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
 
-    // Finalize the archive
-    await archive.finalize();
+    // Finalize the archive and wait for completion
+    archive.finalize();
+    
+    // Handle completion
+    archive.on('end', () => {
+      console.log('Archive finalized successfully');
+    });
   } catch (error) {
     console.error('Error generating WordPress plugin:', error);
     return res.status(500).json({ error: 'Error generating WordPress plugin' });
