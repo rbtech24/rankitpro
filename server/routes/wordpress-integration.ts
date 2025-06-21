@@ -113,12 +113,25 @@ router.post('/config', isAuthenticated, isCompanyAdmin, async (req: Request, res
   }
 });
 
-// Generate a WordPress plugin for the company
-router.get('/download-plugin', isAuthenticated, async (req: Request, res: Response) => {
-  // Additional role check for company admin
-  if (!req.user || req.user.role !== 'company_admin') {
-    return res.status(403).json({ error: 'Company admin access required' });
+// Generate a WordPress plugin for the company - using direct session check to avoid redirects
+router.get('/download-plugin', async (req: Request, res: Response) => {
+  // Direct session authentication check without middleware redirect
+  const userId = req.session?.userId;
+  
+  if (!userId) {
+    return res.status(401).json({ error: 'Authentication required' });
   }
+  
+  try {
+    const user = await storage.getUser(userId);
+    console.log('WordPress plugin download - User found:', user ? `${user.email} (${user.role})` : 'Not found');
+    
+    if (!user || user.role !== 'company_admin') {
+      return res.status(403).json({ error: 'Company admin access required' });
+    }
+    
+    req.user = user; // Set user for downstream code
+    console.log('WordPress plugin generation starting for company:', user.companyId);
   
   const companyId = req.user?.companyId;
   
@@ -296,6 +309,9 @@ Author: Rank It Pro
 
     // Finalize the archive
     await archive.finalize();
+  } catch (authError) {
+    console.error('Authentication error:', authError);
+    return res.status(401).json({ error: 'Authentication failed' });
   } catch (error) {
     console.error('Error generating WordPress plugin:', error);
     return res.status(500).json({ error: 'Error generating WordPress plugin' });
