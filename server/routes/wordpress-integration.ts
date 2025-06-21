@@ -241,6 +241,7 @@ Author: Rank It Pro
     // Set proper headers for ZIP download
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', 'attachment; filename=rank-it-pro-plugin.zip');
+    res.setHeader('Cache-Control', 'no-cache');
 
     // Pipe archive data to response
     archive.pipe(res);
