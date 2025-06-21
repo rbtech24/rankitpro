@@ -3218,6 +3218,223 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
     }
   });
   
+  // WordPress plugin download routes - MUST BE FIRST to prevent frontend routing conflicts
+  app.get("/api/integration/wordpress/download-plugin", isAuthenticated, isCompanyAdmin, async (req, res) => {
+    console.log('WordPress plugin download - integration endpoint called');
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        return res.status(400).json({ error: 'No company ID found' });
+      }
+      
+      const company = await storage.getCompany(companyId);
+      let apiKey = 'b3e9eac681d470e6a925093552bc85f50b5b23541f0bdf82e4c838c9bc03cb51';
+      if (company?.wordpressConfig) {
+        try {
+          const config = JSON.parse(company.wordpressConfig);
+          if (config.apiKey) apiKey = config.apiKey;
+        } catch (e) {}
+      }
+      
+      const pluginCode = `<?php
+/*
+Plugin Name: Rank It Pro Integration
+Description: WordPress integration for Rank It Pro SaaS platform
+Version: 1.0.0
+Author: Rank It Pro
+*/
+
+// Prevent direct access
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class RankItProPlugin {
+    private $api_key = '${apiKey}';
+    private $api_endpoint = 'https://rankitpro.com/api';
+    
+    public function __construct() {
+        add_action('init', array($this, 'init'));
+        add_action('admin_menu', array($this, 'admin_menu'));
+    }
+    
+    public function init() {
+        // Plugin initialization
+    }
+    
+    public function admin_menu() {
+        add_options_page(
+            'Rank It Pro Settings',
+            'Rank It Pro',
+            'manage_options',
+            'rankitpro-settings',
+            array($this, 'settings_page')
+        );
+    }
+    
+    public function settings_page() {
+        echo '<div class="wrap">';
+        echo '<h1>Rank It Pro Integration</h1>';
+        echo '<p>API Key: ' . esc_html($this->api_key) . '</p>';
+        echo '<p>Endpoint: ' . esc_html($this->api_endpoint) . '</p>';
+        echo '</div>';
+    }
+}
+
+new RankItProPlugin();
+?>`;
+      
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
+      res.setHeader('Cache-Control', 'no-cache');
+      
+      const archiver = require('archiver');
+      const archive = archiver('zip');
+      
+      archive.on('error', (err) => {
+        console.error('Archive error:', err);
+        if (!res.headersSent) {
+          res.status(500).json({ error: 'Failed to create plugin archive' });
+        }
+      });
+      
+      archive.pipe(res);
+      archive.append(Buffer.from(pluginCode, 'utf8'), { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
+      
+      const readmeContent = `# Rank It Pro WordPress Plugin
+
+## Installation
+1. Upload this ZIP file to WordPress admin > Plugins > Add New > Upload Plugin
+2. Activate the plugin
+3. Go to Settings > Rank It Pro to view configuration
+
+## Configuration
+- API Key: ${apiKey}
+- Endpoint: https://rankitpro.com/api
+
+## Support
+For support, contact Rank It Pro team.
+`;
+      
+      archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/README.md' });
+      await archive.finalize();
+      
+    } catch (error) {
+      console.error('Plugin generation error:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Plugin generation failed' });
+      }
+    }
+  });
+  
+  app.get("/api/wordpress/plugin", isAuthenticated, isCompanyAdmin, async (req, res) => {
+    console.log('WordPress plugin download - wordpress endpoint called');
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        return res.status(400).json({ error: 'No company ID found' });
+      }
+      
+      const company = await storage.getCompany(companyId);
+      let apiKey = 'b3e9eac681d470e6a925093552bc85f50b5b23541f0bdf82e4c838c9bc03cb51';
+      if (company?.wordpressConfig) {
+        try {
+          const config = JSON.parse(company.wordpressConfig);
+          if (config.apiKey) apiKey = config.apiKey;
+        } catch (e) {}
+      }
+      
+      const pluginCode = `<?php
+/*
+Plugin Name: Rank It Pro Integration
+Description: WordPress integration for Rank It Pro SaaS platform
+Version: 1.0.0
+Author: Rank It Pro
+*/
+
+// Prevent direct access
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class RankItProPlugin {
+    private $api_key = '${apiKey}';
+    private $api_endpoint = 'https://rankitpro.com/api';
+    
+    public function __construct() {
+        add_action('init', array($this, 'init'));
+        add_action('admin_menu', array($this, 'admin_menu'));
+    }
+    
+    public function init() {
+        // Plugin initialization
+    }
+    
+    public function admin_menu() {
+        add_options_page(
+            'Rank It Pro Settings',
+            'Rank It Pro',
+            'manage_options',
+            'rankitpro-settings',
+            array($this, 'settings_page')
+        );
+    }
+    
+    public function settings_page() {
+        echo '<div class="wrap">';
+        echo '<h1>Rank It Pro Integration</h1>';
+        echo '<p>API Key: ' . esc_html($this->api_key) . '</p>';
+        echo '<p>Endpoint: ' . esc_html($this->api_endpoint) . '</p>';
+        echo '</div>';
+    }
+}
+
+new RankItProPlugin();
+?>`;
+      
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
+      res.setHeader('Cache-Control', 'no-cache');
+      
+      const archiver = require('archiver');
+      const archive = archiver('zip');
+      
+      archive.on('error', (err) => {
+        console.error('Archive error:', err);
+        if (!res.headersSent) {
+          res.status(500).json({ error: 'Failed to create plugin archive' });
+        }
+      });
+      
+      archive.pipe(res);
+      archive.append(Buffer.from(pluginCode, 'utf8'), { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
+      
+      const readmeContent = `# Rank It Pro WordPress Plugin
+
+## Installation
+1. Upload this ZIP file to WordPress admin > Plugins > Add New > Upload Plugin
+2. Activate the plugin
+3. Go to Settings > Rank It Pro to view configuration
+
+## Configuration
+- API Key: ${apiKey}
+- Endpoint: https://rankitpro.com/api
+
+## Support
+For support, contact Rank It Pro team.
+`;
+      
+      archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/README.md' });
+      await archive.finalize();
+      
+    } catch (error) {
+      console.error('Plugin generation error:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Plugin generation failed' });
+      }
+    }
+  });
+
   // Register all route modules (MOBILE ROUTES MOVED TO END TO AVOID CONFLICTS)
   app.use("/api/integrations", integrationsRoutes);
   app.use("/api/check-ins", checkInRoutes);
