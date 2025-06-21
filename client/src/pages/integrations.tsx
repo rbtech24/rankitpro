@@ -635,7 +635,7 @@ function IntegrationsPage() {
                     </div>
                   </div>
 
-                  {embedForm.width === "fixed" && (
+                  {embedForm?.width === "fixed" && (
                     <div className="space-y-2">
                       <Label htmlFor="fixedWidth">Fixed width (pixels)</Label>
                       <Input
@@ -643,7 +643,7 @@ function IntegrationsPage() {
                         type="number"
                         min="200"
                         max="1200"
-                        value={embedForm.fixedWidth}
+                        value={embedForm?.fixedWidth || 400}
                         onChange={(e) => setEmbedForm({ ...embedForm, fixedWidth: parseInt(e.target.value) || 400 })}
                       />
                     </div>
@@ -654,7 +654,7 @@ function IntegrationsPage() {
                     <Textarea
                       id="customCss"
                       placeholder="/* Add your custom CSS styles here */"
-                      value={embedForm.customCss}
+                      value={embedForm?.customCss || ''}
                       onChange={(e) => setEmbedForm({ ...embedForm, customCss: e.target.value })}
                       rows={4}
                     />
