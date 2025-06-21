@@ -177,6 +177,37 @@ export default function APICredentials() {
       <Sidebar />
       <div className="flex-1 p-8">
         <div className="max-w-6xl mx-auto">
+          {/* API Endpoint Information */}
+          <Card className="bg-blue-50 border-blue-200 mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center text-blue-900">
+                <Key className="w-5 h-5 mr-2" />
+                Your Rank It Pro API Endpoint URL
+              </CardTitle>
+              <CardDescription className="text-blue-700">
+                Use this base URL for all API requests with your credentials
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-2">
+                <code className="flex-1 p-3 bg-white border border-blue-300 rounded text-sm font-mono text-blue-900">
+                  {baseUrl}/api
+                </code>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => copyToClipboard(`${baseUrl}/api`, "API Base URL")}
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-blue-600 mt-2">
+                Example: GET {baseUrl}/api/check-ins with your API key in the Authorization header
+              </p>
+            </CardContent>
+          </Card>
+          
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">API Credentials</h1>
