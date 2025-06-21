@@ -3215,7 +3215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Setup WordPress routes from fixed module
-  setupWordPressRoutes(app);
+  // WordPress plugin route handled in main routes
 
   // WordPress plugin download routes - MUST BE FIRST to prevent frontend routing conflicts
   app.get("/api/integration/wordpress/download-plugin", isAuthenticated, isCompanyAdmin, async (req, res) => {
@@ -3297,4 +3297,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'new RankItProPlugin();\\n' +
         '?>';
 
-// Prevent direct access
+      
+      const readmeContent = `# Rank It Pro WordPress Plugin
+
+## Installation
+1. Upload this ZIP file to WordPress admin > Plugins > Add New > Upload Plugin
+2. Activate the plugin
+3. Go to Settings > Rank It Pro to view configuration
+
+## Usage
+Use the shortcode [rankitpro_checkins] to display check-ins on your pages.
+
+## Configuration
+- API Key: ` + apiKey + `
+- Endpoint: https://rankitpro.com/api
+
+## Support
+For support, contact Rank It Pro team.
+`;
+
+      const cssContent = `/* Rank It Pro WordPress Plugin Styles */
+.rank-it-pro-widget {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.rank-it-pro-checkin {
+    margin-bottom: 15px;
+    padding: 15px;
+    border-left: 4px solid #0073aa;
+    background: #f9f9f9;
+}
+
+.rank-it-pro-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #23282d;
+}`;
+
+      const jsContent = `/* Rank It Pro WordPress Plugin JavaScript */
+(function($) {
+    'use strict';
+    
+    function initRankItProWidgets() {
+        $('.rank-it-pro-widget').each(function() {
+            var widget = $(this);
+            var apiKey = widget.data('api-key') || '` + apiKey + `';
+            var endpoint = widget.data('endpoint') || 'https://rankitpro.com/api';
+            
+            loadCheckIns(widget, apiKey, endpoint);
+        });
+    }
+    
+    $(document).ready(function() {
+        initRankItProWidgets();
+    });
+    
+})(jQuery);`;
+
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
+      res.setHeader('Cache-Control', 'no-cache');
+
+      const archive = archiver('zip', { zlib: { level: 9 } });
+      
+      archive.pipe(res);
+      
+      archive.append(pluginCode, { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
+      archive.append(readmeContent, { name: 'rank-it-pro-plugin/readme.txt' });
+      archive.append(cssContent, { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
+      archive.append(jsContent, { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
+      
+      await archive.finalize();
+      
+    } catch (error) {
+      console.error('WordPress plugin generation error:', error);
+      res.status(500).json({ error: 'Failed to generate WordPress plugin' });
+    }
+  });
+
+
+  // Register admin routes for subscription management
+  app.use("/api/admin", adminRoutes);
+  
+  // Add embed routes for JavaScript widget
+  app.use("/", embedRoutes);
+  
+  const httpServer = createServer(app);
+  
+  return httpServer;
+}
