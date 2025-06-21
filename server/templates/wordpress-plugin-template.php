@@ -100,10 +100,7 @@ class RankItProIntegration {
         register_setting('rankitpro_settings', 'rankitpro_api_key', array(
             'sanitize_callback' => 'sanitize_text_field'
         ));
-        register_setting('rankitpro_settings', 'rankitpro_api_endpoint', array(
-            'sanitize_callback' => 'esc_url_raw',
-            'default' => 'https://rankitpro.com/api'
-        ));
+
         register_setting('rankitpro_settings', 'rankitpro_cache_duration', array(
             'sanitize_callback' => 'absint'
         ));
@@ -188,18 +185,7 @@ class RankItProIntegration {
                                 </p>
                             </td>
                         </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="rankitpro_api_endpoint"><?php _e('API Endpoint', 'rankitpro'); ?></label>
-                            </th>
-                            <td>
-                                <input type="url" id="rankitpro_api_endpoint" name="rankitpro_api_endpoint" 
-                                       value="https://rankitpro.com/api" class="regular-text" readonly />
-                                <p class="description">
-                                    <?php _e('This is the centralized Rank It Pro API endpoint (read-only).', 'rankitpro'); ?>
-                                </p>
-                            </td>
-                        </tr>
+
                     </table>
                     
                     <h2><?php _e('Display Options', 'rankitpro'); ?></h2>
@@ -640,9 +626,9 @@ class RankItProIntegration {
     // API and rendering methods
     private function get_api_data($endpoint, $params = array()) {
         $api_key = get_option('rankitpro_api_key', '');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '');
+        $api_endpoint = 'https://rankitpro.com/api';
         
-        if (empty($api_key) || empty($api_endpoint)) {
+        if (empty($api_key)) {
             return array();
         }
         
