@@ -284,11 +284,16 @@ Author: Rank It Pro
 
     console.log('Generating ZIP file for WordPress plugin...');
     
-    // Set proper headers for ZIP download BEFORE creating archive
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', 'attachment; filename=rank-it-pro-plugin.zip');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Content-Length', '0'); // Will be updated by archiver
+    // Remove conflicting headers
+    res.removeHeader('Content-Type');
+    res.removeHeader('Cache-Control');
+    
+    // Set proper headers for ZIP download
+    res.writeHead(200, {
+      'Content-Type': 'application/zip',
+      'Content-Disposition': 'attachment; filename=rank-it-pro-plugin.zip',
+      'Cache-Control': 'no-cache'
+    });
 
     // Create ZIP file for WordPress plugin
     const archive = archiver('zip', {
@@ -335,13 +340,12 @@ Author: Rank It Pro
     archive.append(Buffer.from(fallbackJS, 'utf8'), { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
 
     // Finalize the archive
-    await archive.finalize();
-  } catch (authError) {
-    console.error('Authentication error:', authError);
-    return res.status(401).json({ error: 'Authentication failed' });
+    archive.finalize();
   } catch (error) {
     console.error('Error generating WordPress plugin:', error);
-    return res.status(500).json({ error: 'Error generating WordPress plugin' });
+    if (!res.headersSent) {
+      return res.status(500).json({ error: 'Error generating WordPress plugin' });
+    }
   }
 });
 
