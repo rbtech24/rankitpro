@@ -101,7 +101,8 @@ class RankItProIntegration {
             'sanitize_callback' => 'sanitize_text_field'
         ));
         register_setting('rankitpro_settings', 'rankitpro_api_endpoint', array(
-            'sanitize_callback' => 'esc_url_raw'
+            'sanitize_callback' => 'esc_url_raw',
+            'default' => 'https://rankitpro.com/api'
         ));
         register_setting('rankitpro_settings', 'rankitpro_cache_duration', array(
             'sanitize_callback' => 'absint'
@@ -152,7 +153,7 @@ class RankItProIntegration {
         }
         
         $api_key = get_option('rankitpro_api_key', '');
-        $api_endpoint = get_option('rankitpro_api_endpoint', 'https://rankitpro.com/api');
+        $api_endpoint = 'https://rankitpro.com/api';
         $cache_duration = get_option('rankitpro_cache_duration', 3600);
         $show_photos = get_option('rankitpro_show_photos', 1);
         $auto_refresh = get_option('rankitpro_auto_refresh', 1);
@@ -193,9 +194,9 @@ class RankItProIntegration {
                             </th>
                             <td>
                                 <input type="url" id="rankitpro_api_endpoint" name="rankitpro_api_endpoint" 
-                                       value="<?php echo esc_attr($api_endpoint); ?>" class="regular-text" />
+                                       value="https://rankitpro.com/api" class="regular-text" readonly />
                                 <p class="description">
-                                    <?php _e('Your Rank It Pro API endpoint URL.', 'rankitpro'); ?>
+                                    <?php _e('This is the centralized Rank It Pro API endpoint (read-only).', 'rankitpro'); ?>
                                 </p>
                             </td>
                         </tr>
