@@ -3236,7 +3236,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
         } catch (e) {}
       }
       
-      const pluginCode = \`<?php
+      const pluginCode = `<?php
 /*
 Plugin Name: Rank It Pro Integration
 Description: WordPress integration for Rank It Pro SaaS platform
@@ -3282,7 +3282,7 @@ class RankItProPlugin {
 }
 
 new RankItProPlugin();
-?>\`;
+?>`;
       
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
@@ -3301,7 +3301,7 @@ new RankItProPlugin();
       archive.pipe(res);
       archive.append(Buffer.from(pluginCode, 'utf8'), { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
       
-      const readmeContent = \`# Rank It Pro WordPress Plugin
+      const readmeContent = `# Rank It Pro WordPress Plugin
 
 ## Installation
 1. Upload this ZIP file to WordPress admin > Plugins > Add New > Upload Plugin
@@ -3314,7 +3314,7 @@ new RankItProPlugin();
 
 ## Support
 For support, contact Rank It Pro team.
-\`;
+`;
 
       // Complete CSS with all original functionality
       const cssContent = `/* RankItPro WordPress Integration Styles - Complete Original Code */
@@ -3612,7 +3612,7 @@ For support, contact Rank It Pro team.
     .rankitpro-map-container {
         display: none;
     }
-}\`;
+}`;
 
       // Complete JavaScript with all original functionality
       const jsContent = `/* RankItPro WordPress Integration JavaScript - Complete Original Code */
@@ -3658,7 +3658,7 @@ For support, contact Rank It Pro team.
             const imgAlt = \$(this).attr('alt') || '';
             
             // Create lightbox overlay
-            const lightbox = \$(\\\`
+            const lightbox = \$(\\`
                 <div class="rankitpro-lightbox">
                     <div class="rankitpro-lightbox-overlay"></div>
                     <div class="rankitpro-lightbox-content">
@@ -3666,7 +3666,7 @@ For support, contact Rank It Pro team.
                         <button class="rankitpro-lightbox-close">&times;</button>
                     </div>
                 </div>
-            \\\`);
+            \\`);
             
             \$('body').append(lightbox);
             lightbox.fadeIn(300);
@@ -3696,7 +3696,7 @@ For support, contact Rank It Pro team.
             const location = \$(this).closest('.rankitpro-visit-card').find('.rankitpro-visit-location').text();
             if (location) {
                 const encodedLocation = encodeURIComponent(location.replace('📍', '').trim());
-                window.open(\\\`https://maps.google.com/maps?q=\\\${encodedLocation}\\\`, '_blank');
+                window.open(\\`https://maps.google.com/maps?q=\\\${encodedLocation}\\`, '_blank');
             }
         });
         
@@ -3844,7 +3844,7 @@ For support, contact Rank It Pro team.
 
 // CSS for lightbox (injected via JavaScript to avoid conflicts)
 (function() {
-    const lightboxCSS = \\\`
+    const lightboxCSS = \\`
         .rankitpro-lightbox {
             position: fixed;
             top: 0;
@@ -3909,13 +3909,13 @@ For support, contact Rank It Pro team.
         .rankitpro-map-container:hover .rankitpro-map-placeholder {
             opacity: 0.8;
         }
-    \\\`;
+    \\`;
     
     const style = document.createElement('style');
     style.type = 'text/css';
     style.innerHTML = lightboxCSS;
     document.getElementsByTagName('head')[0].appendChild(style);
-})();\`;
+})();`;
       
       archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/README.md' });
       archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
@@ -3947,7 +3947,7 @@ For support, contact Rank It Pro team.
         } catch (e) {}
       }
       
-      const pluginCode = \`<?php
+      const pluginCode = `<?php
 /*
 Plugin Name: Rank It Pro Integration
 Description: WordPress integration for Rank It Pro SaaS platform
@@ -3993,7 +3993,7 @@ class RankItProPlugin {
 }
 
 new RankItProPlugin();
-?>\`;
+?>`;
       
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
@@ -4012,7 +4012,7 @@ new RankItProPlugin();
       archive.pipe(res);
       archive.append(Buffer.from(pluginCode, 'utf8'), { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
       
-      const readmeContent = \`# Rank It Pro WordPress Plugin
+      const readmeContent = `# Rank It Pro WordPress Plugin
 
 ## Installation
 1. Upload this ZIP file to WordPress admin > Plugins > Add New > Upload Plugin
@@ -4025,7 +4025,7 @@ new RankItProPlugin();
 
 ## Support
 For support, contact Rank It Pro team.
-\`;
+`;
 
       // Complete CSS with all original functionality - SECOND ENDPOINT
       const cssContent = `/* RankItPro WordPress Integration Styles - Complete Original Code */
@@ -4323,7 +4323,7 @@ For support, contact Rank It Pro team.
     .rankitpro-map-container {
         display: none;
     }
-}\`;
+}`;
 
       // Complete JavaScript with all original functionality - SECOND ENDPOINT
       const jsContent = `/* RankItPro WordPress Integration JavaScript - Complete Original Code */
@@ -4369,7 +4369,7 @@ For support, contact Rank It Pro team.
             const imgAlt = \$(this).attr('alt') || '';
             
             // Create lightbox overlay
-            const lightbox = \$(\\\`
+            const lightbox = \$(\\`
                 <div class="rankitpro-lightbox">
                     <div class="rankitpro-lightbox-overlay"></div>
                     <div class="rankitpro-lightbox-content">
@@ -4377,7 +4377,7 @@ For support, contact Rank It Pro team.
                         <button class="rankitpro-lightbox-close">&times;</button>
                     </div>
                 </div>
-            \\\`);
+            \\`);
             
             \$('body').append(lightbox);
             lightbox.fadeIn(300);
@@ -4407,7 +4407,7 @@ For support, contact Rank It Pro team.
             const location = \$(this).closest('.rankitpro-visit-card').find('.rankitpro-visit-location').text();
             if (location) {
                 const encodedLocation = encodeURIComponent(location.replace('📍', '').trim());
-                window.open(\\\`https://maps.google.com/maps?q=\\\${encodedLocation}\\\`, '_blank');
+                window.open(\\`https://maps.google.com/maps?q=\\\${encodedLocation}\\`, '_blank');
             }
         });
         
@@ -4555,7 +4555,7 @@ For support, contact Rank It Pro team.
 
 // CSS for lightbox (injected via JavaScript to avoid conflicts)
 (function() {
-    const lightboxCSS = \\\`
+    const lightboxCSS = \\`
         .rankitpro-lightbox {
             position: fixed;
             top: 0;
@@ -4620,13 +4620,13 @@ For support, contact Rank It Pro team.
         .rankitpro-map-container:hover .rankitpro-map-placeholder {
             opacity: 0.8;
         }
-    \\\`;
+    \\`;
     
     const style = document.createElement('style');
     style.type = 'text/css';
     style.innerHTML = lightboxCSS;
     document.getElementsByTagName('head')[0].appendChild(style);
-})();\`;
+})();`;
       
       archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/README.md' });
       archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
