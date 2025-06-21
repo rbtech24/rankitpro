@@ -3324,8 +3324,6 @@ For support, contact Rank It Pro team.
       const cssContent = `/* RankItPro WordPress Integration - Complete Styles */
 .rankitpro-container * { margin: 0; padding: 0; box-sizing: border-box; }
 .rankitpro-container { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #333; line-height: 1.6; }
-.rankitpro-visit-card { max-width: 450px; margin: 20px auto; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; border: 1px solid #eee; }
-.rankitpro-visit-header { padding: 20px; background: white; border-bottom: 1px solid #eee; }
 .rankitpro-visit-title { font-size: 24px; font-weight: 600; color: #333; margin-bottom: 15px; }
 .rankitpro-visit-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .rankitpro-technician { font-size: 14px; color: #666; }
@@ -3368,11 +3366,6 @@ img.lazy.loaded { opacity: 1; }
 .rankitpro-map-container:hover .rankitpro-map-placeholder { opacity: 0.8; }
 @media (max-width: 768px) { .rankitpro-visit-card, .rankitpro-blog-card, .rankitpro-review-card, .rankitpro-testimonial-card { margin: 15px; max-width: none; } .rankitpro-photos-grid { grid-template-columns: 1fr; } }
 @media print { .rankitpro-container { box-shadow: none !important; border: 1px solid #ccc !important; } .rankitpro-map-container { display: none; } }`;
-.rankitpro-visit-card {
-    max-width: 450px;
-    margin: 20px auto;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid #eee;
@@ -3697,7 +3690,7 @@ img.lazy.loaded { opacity: 1; }
                 <div class="rankitpro-lightbox">
                     <div class="rankitpro-lightbox-overlay"></div>
                     <div class="rankitpro-lightbox-content">
-                        <img src="${imgSrc}" alt="${imgAlt}">
+                        <img src="" + imgSrc + "" alt="" + imgAlt + "">
                         <button class="rankitpro-lightbox-close">&times;</button>
                     </div>
                 </div>
@@ -4079,15 +4072,6 @@ For support, contact Rank It Pro team.
 }
 
 /* Service Visit/Check-in Card Styles */
-.rankitpro-visit-card {
-    max-width: 450px;
-    margin: 20px auto;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #eee;
-}
 
 .rankitpro-visit-header {
     padding: 20px;
@@ -4408,7 +4392,7 @@ For support, contact Rank It Pro team.
                 <div class="rankitpro-lightbox">
                     <div class="rankitpro-lightbox-overlay"></div>
                     <div class="rankitpro-lightbox-content">
-                        <img src="${imgSrc}" alt="${imgAlt}">
+                        <img src="" + imgSrc + "" alt="" + imgAlt + "">
                         <button class="rankitpro-lightbox-close">&times;</button>
                     </div>
                 </div>
