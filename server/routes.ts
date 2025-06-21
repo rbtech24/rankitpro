@@ -749,12 +749,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let aiPrompt = prompt;
       if (type === 'checkin' && context) {
-        aiPrompt = `Create a professional check-in summary for a ${context.jobType} job at ${context.location}.
+        aiPrompt = "Create a professional check-in summary for a ${context.jobType} job at ${context.location}.
         
 Work performed: ${context.workPerformed}
 Materials used: ${context.materialsUsed}
 
-Generate a concise, professional summary (2-3 sentences) that could be shared with the customer and used for business documentation. Focus on the value provided and technical details.`;
+Generate a concise, professional summary (2-3 sentences) that could be shared with the customer and used for business documentation. Focus on the value provided and technical details.";
       }
 
       // Simple OpenAI integration for content generation
@@ -3240,7 +3240,7 @@ Generate a concise, professional summary (2-3 sentences) that could be shared wi
         } catch (e) {}
       }
       
-      const pluginCode = `<?php
+      const pluginCode = "<?php
 /*
 Plugin Name: Rank It Pro Integration
 Description: WordPress integration for Rank It Pro SaaS platform
@@ -3286,7 +3286,7 @@ class RankItProPlugin {
 }
 
 new RankItProPlugin();
-?>`;
+?>";
       
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
@@ -3305,7 +3305,7 @@ new RankItProPlugin();
       archive.pipe(res);
       archive.append(Buffer.from(pluginCode, 'utf8'), { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
       
-      const readmeContent = `# Rank It Pro WordPress Plugin
+      const readmeContent = "# Rank It Pro WordPress Plugin
 
 ## Installation
 1. Upload this ZIP file to WordPress admin > Plugins > Add New > Upload Plugin
@@ -3318,10 +3318,10 @@ new RankItProPlugin();
 
 ## Support
 For support, contact Rank It Pro team.
-`;
+";
 
       // Complete CSS with all original functionality
-      const cssContent = `/* RankItPro WordPress Integration - Complete Styles */
+      const cssContent = "/* RankItPro WordPress Integration - Complete Styles */
 
 
 
@@ -3389,10 +3389,10 @@ For support, contact Rank It Pro team.
     .rankitpro-map-container {
         display: none;
     }
-}`;
+}";
 
       // Complete JavaScript with all original functionality
-      const jsContent = `/* RankItPro WordPress Integration JavaScript - Complete Original Code */
+      const jsContent = "/* RankItPro WordPress Integration JavaScript - Complete Original Code */
 
 (function($) {
     'use strict';
@@ -3613,7 +3613,7 @@ For support, contact Rank It Pro team.
 
 // CSS for lightbox (injected via JavaScript to avoid conflicts)
 (function() {
-    const lightboxCSS = `
+    const lightboxCSS = "
         .rankitpro-lightbox {
             position: fixed;
             top: 0;
@@ -3678,13 +3678,13 @@ For support, contact Rank It Pro team.
         .rankitpro-map-container:hover .rankitpro-map-placeholder {
             opacity: 0.8;
         }
-    `;
+    ";
     
     const style = document.createElement('style');
     style.type = 'text/css';
     style.innerHTML = lightboxCSS;
     document.getElementsByTagName('head')[0].appendChild(style);
-})();`;
+})();";
       
       archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/README.md' });
       archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
@@ -3716,7 +3716,7 @@ For support, contact Rank It Pro team.
         } catch (e) {}
       }
       
-      const pluginCode = `<?php
+      const pluginCode = "<?php
 /*
 Plugin Name: Rank It Pro Integration
 Description: WordPress integration for Rank It Pro SaaS platform
@@ -3762,7 +3762,7 @@ class RankItProPlugin {
 }
 
 new RankItProPlugin();
-?>`;
+?>";
       
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
@@ -3781,7 +3781,7 @@ new RankItProPlugin();
       archive.pipe(res);
       archive.append(Buffer.from(pluginCode, 'utf8'), { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
       
-      const readmeContent = `# Rank It Pro WordPress Plugin
+      const readmeContent = "# Rank It Pro WordPress Plugin
 
 ## Installation
 1. Upload this ZIP file to WordPress admin > Plugins > Add New > Upload Plugin
@@ -3794,10 +3794,10 @@ new RankItProPlugin();
 
 ## Support
 For support, contact Rank It Pro team.
-`;
+";
 
       // Complete CSS with all original functionality - SECOND ENDPOINT
-      const cssContent = `/* RankItPro WordPress Integration Styles - Complete Original Code */
+      const cssContent = "/* RankItPro WordPress Integration Styles - Complete Original Code */
 
 /* Reset and Base Styles */
 
@@ -3872,10 +3872,10 @@ For support, contact Rank It Pro team.
     .rankitpro-map-container {
         display: none;
     }
-}`;
+}";
 
       // Complete JavaScript with all original functionality - SECOND ENDPOINT
-      const jsContent = `/* RankItPro WordPress Integration JavaScript - Complete Original Code */
+      const jsContent = "/* RankItPro WordPress Integration JavaScript - Complete Original Code */
 
 (function($) {
     'use strict';
@@ -4096,7 +4096,7 @@ For support, contact Rank It Pro team.
 
 // CSS for lightbox (injected via JavaScript to avoid conflicts)
 (function() {
-    const lightboxCSS = `
+    const lightboxCSS = "
         .rankitpro-lightbox {
             position: fixed;
             top: 0;
@@ -4161,13 +4161,13 @@ For support, contact Rank It Pro team.
         .rankitpro-map-container:hover .rankitpro-map-placeholder {
             opacity: 0.8;
         }
-    `;
+    ";
     
     const style = document.createElement('style');
     style.type = 'text/css';
     style.innerHTML = lightboxCSS;
     document.getElementsByTagName('head')[0].appendChild(style);
-})();`;
+})();";
       
       archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/README.md' });
       archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
