@@ -645,6 +645,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Job Types API endpoint
+  app.get("/api/job-types", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || !user.companyId) {
+        return res.status(400).json({ message: "Company ID required" });
+      }
+
+      const jobTypes = await storage.getJobTypesByCompany(user.companyId);
+      res.json(jobTypes);
+    } catch (error) {
+      console.error("Error fetching job types:", error);
+      res.status(500).json({ message: "Failed to fetch job types" });
+    }
+  });
+
+  app.post("/api/job-types", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || !user.companyId) {
+        return res.status(400).json({ message: "Company ID required" });
+      }
+
+      const { name, description } = req.body;
+      if (!name) {
+        return res.status(400).json({ message: "Job type name is required" });
+      }
+
+      const jobType = await storage.createJobType({
+        name: name.trim(),
+        description: description || null,
+        companyId: user.companyId,
+        isActive: true
+      });
+
+      res.status(201).json(jobType);
+    } catch (error) {
+      console.error("Error creating job type:", error);
+      res.status(500).json({ message: "Failed to create job type" });
+    }
+  });
+
+  app.put("/api/job-types/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || !user.companyId) {
+        return res.status(400).json({ message: "Company ID required" });
+      }
+
+      const jobTypeId = parseInt(req.params.id);
+      const { name, description, isActive } = req.body;
+
+      const updatedJobType = await storage.updateJobType(jobTypeId, {
+        name: name?.trim(),
+        description,
+        isActive
+      });
+
+      if (!updatedJobType) {
+        return res.status(404).json({ message: "Job type not found" });
+      }
+
+      res.json(updatedJobType);
+    } catch (error) {
+      console.error("Error updating job type:", error);
+      res.status(500).json({ message: "Failed to update job type" });
+    }
+  });
+
+  app.delete("/api/job-types/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user || !user.companyId) {
+        return res.status(400).json({ message: "Company ID required" });
+      }
+
+      const jobTypeId = parseInt(req.params.id);
+      const success = await storage.deleteJobType(jobTypeId);
+
+      if (!success) {
+        return res.status(404).json({ message: "Job type not found" });
+      }
+
+      res.json({ message: "Job type deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting job type:", error);
+      res.status(500).json({ message: "Failed to delete job type" });
+    }
+  });
+
   // Cleaned up - removed duplicate middleware
 
   // Add isAuthenticated method to req

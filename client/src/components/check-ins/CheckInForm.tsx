@@ -108,6 +108,13 @@ export function CheckInForm({ technicianId, companyId, onSuccess, initialValues 
       return await res.json();
     }
   });
+      const res = await apiRequest('GET', '/api/job-types');
+      if (!res.ok) {
+        throw new Error('Failed to fetch job types');
+      }
+      return await res.json();
+    }
+  });
 
   // Create form with initial values
   const form = useForm<CheckInFormValues>({
