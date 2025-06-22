@@ -514,7 +514,7 @@ Version: 1.0.0`;
         }
     });
     console.log('Rank It Pro WordPress Plugin loaded successfully');
-});
+});`;
 
     console.log('Setting ZIP headers...');
     
