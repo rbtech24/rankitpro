@@ -41,9 +41,8 @@ const jsWidgetConfigSchema = z.object({
   autoRefresh: z.boolean().default(false)
 });
 
-// GET /api/integrations/wordpress/config
-// Get WordPress configuration for the company
-router.get('/wordpress/config', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+// GET /api/integration/wordpress - Updated route path to match client expectations
+router.get('/wordpress', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const companyId = req.user.companyId;
     if (!companyId) {

@@ -1218,6 +1218,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+  // Technicians routes
+  app.get("/api/technicians", isAuthenticated, async (req, res) => {
+    try {
+      const technicians = await storage.getTechnicians(req.user.companyId);
+      
+      if (!technicians || !Array.isArray(technicians)) {
+        return res.json([]);
+      }
+      
+      const cleanTechnicians = technicians.map(tech => ({
+        id: tech.id,
+        name: tech.name || '',
+        email: tech.email || '',
+        phone: tech.phone || '',
+        specialty: tech.specialty || '',
+        location: tech.location || '',
+        active: tech.active !== false,
+        companyId: tech.companyId,
+        createdAt: tech.createdAt
+      }));
+      
+      res.json(cleanTechnicians);
+    } catch (error) {
+      console.error("Error fetching technicians:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // CRM Integration routes
+  app.get("/api/crm/available", isAuthenticated, async (req, res) => {
+    try {
+      const availableCRMs = [
+        {
+          id: 'hubspot',
+          name: 'HubSpot',
+          description: 'Full-featured CRM with marketing automation',
+          isConnected: false,
+          features: ['Contact Management', 'Deal Tracking', 'Email Marketing']
+        },
+        {
+          id: 'salesforce',
+          name: 'Salesforce',
+          description: 'Enterprise-grade CRM solution',
+          isConnected: false,
+          features: ['Lead Management', 'Opportunity Tracking', 'Reporting']
+        },
+        {
+          id: 'pipedrive',
+          name: 'Pipedrive',
+          description: 'Sales-focused CRM for growing businesses',
+          isConnected: false,
+          features: ['Pipeline Management', 'Activity Tracking', 'Sales Reports']
+        }
+      ];
+      
+      res.json(availableCRMs);
+    } catch (error) {
+      console.error("Error fetching available CRMs:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/crm/configured", isAuthenticated, async (req, res) => {
+    try {
+      const company = await storage.getCompany(req.user.companyId);
+      
+      if (!company || !company.crmIntegrations) {
+        return res.json([]);
+      }
+      
+      let crmConfigs = [];
+      try {
+        crmConfigs = JSON.parse(company.crmIntegrations);
+      } catch (parseError) {
+        console.error("Error parsing CRM integrations:", parseError);
+        return res.json([]);
+      }
+      
+      res.json(crmConfigs || []);
+    } catch (error) {
+      console.error("Error fetching configured CRMs:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.get("/api/crm/sync-history", isAuthenticated, async (req, res) => {
+    try {
+      const company = await storage.getCompany(req.user.companyId);
+      
+      if (!company || !company.crmSyncHistory) {
+        return res.json([]);
+      }
+      
+      let syncHistory = [];
+      try {
+        syncHistory = JSON.parse(company.crmSyncHistory);
+      } catch (parseError) {
+        console.error("Error parsing CRM sync history:", parseError);
+        return res.json([]);
+      }
+      
+      res.json(syncHistory || []);
+    } catch (error) {
+      console.error("Error fetching CRM sync history:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Register WordPress routes for plugin functionality
   app.use("/api/wordpress", wordpressRoutes);
   
