@@ -106,16 +106,9 @@ export async function getCurrentLocation(): Promise<LocationData> {
               }
             );
           } catch (primaryError) {
-            // Fallback to alternative geocoding service
-            response = await fetch(
-              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
-              { 
-                signal: controller.signal,
-                headers: {
-                  'User-Agent': 'RankItPro/1.0'
-                }
-              }
-            );
+            // Skip external geocoding services to avoid CORS/network issues
+            console.log('External geocoding services unavailable, using coordinates');
+            return `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
           }
           
           clearTimeout(timeoutId);
