@@ -3,7 +3,7 @@
  * Plugin Name: RankItPro Service Integration
  * Plugin URI: https://rankitpro.com
  * Description: Display your RankItPro service reports, reviews, and blog posts on your WordPress site with seamless theme integration.
- * Version: 1.0.0
+ * Version: 1.2.0
  * Author: RankItPro
  * License: GPL v2 or later
  * Text Domain: rankitpro
@@ -66,7 +66,9 @@ class RankItProPlugin {
         $cache_time = get_option('rankitpro_cache_time', 300);
         ?>
         <div class="wrap">
-            <h1>RankItPro Settings</h1>
+            <h1>RankIt Pro Integration Settings</h1>
+            <p>Configure your RankIt Pro API connection for displaying service reports on your website.</p>
+            
             <form method="post">
                 <table class="form-table">
                     <tr>
