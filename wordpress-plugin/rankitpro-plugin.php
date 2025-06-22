@@ -108,16 +108,16 @@ class RankItProPlugin {
     }
     
     public function shortcode($atts) {
+        // Set defaults with company ID hardcoded for testing
         $atts = shortcode_atts(array(
-            'type' => 'all',
-            'limit' => '10',
-            'company-id' => get_option('rankitpro_company_id'),
+            'type' => 'checkins',
+            'limit' => '5',
+            'company' => '16',  // Hardcoded for your site
         ), $atts);
         
-        $company_id = sanitize_text_field($atts['company-id']);
+        $company_id = '16';  // Force to your company ID
         $type = sanitize_text_field($atts['type']);
         $limit = intval($atts['limit']);
-        $api_domain = get_option('rankitpro_api_domain', $this->api_base_url);
         
         if (!$company_id) {
             return '<div class="rankitpro-error">RankItPro: Company ID not configured. Please set Company ID to 16 in plugin settings.</div>';
@@ -138,30 +138,53 @@ class RankItProPlugin {
         
         <script>
         (function() {
-            // Prevent multiple script loads
-            if (window.RankItProLoaded_<?php echo esc_js($company_id); ?>) return;
-            window.RankItProLoaded_<?php echo esc_js($company_id); ?> = true;
+            console.log('RankItPro: Initializing widget for company <?php echo esc_js($company_id); ?>');
+            console.log('RankItPro: Type: <?php echo esc_js($type); ?>, Limit: <?php echo esc_js($limit); ?>');
             
             var script = document.createElement('script');
-            script.src = 'https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/widget/<?php echo esc_js($company_id); ?>?type=<?php echo esc_js($type); ?>&limit=<?php echo esc_js($limit); ?>';
+            var scriptUrl = 'https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/widget/<?php echo esc_js($company_id); ?>?type=<?php echo esc_js($type); ?>&limit=<?php echo esc_js($limit); ?>';
+            console.log('RankItPro: Loading script from:', scriptUrl);
+            
+            script.src = scriptUrl;
             script.async = true;
             script.onload = function() {
-                // Hide loading message
+                console.log('RankItPro: Widget script loaded successfully');
                 var loadingElements = document.querySelectorAll('.rankitpro-loading');
                 loadingElements.forEach(function(el) {
                     el.style.display = 'none';
                 });
             };
             script.onerror = function() {
-                console.error('RankItPro: Failed to load widget script');
+                console.error('RankItPro: Failed to load widget script from:', scriptUrl);
                 document.getElementById('<?php echo esc_js($container_id); ?>').innerHTML = 
-                    '<div class="rankitpro-error">Failed to load RankItPro content. Debug: Script failed to load from server.</div>';
+                    '<div class="rankitpro-error">Unable to connect to RankItPro services. Please try refreshing the page.</div>';
             };
             document.head.appendChild(script);
         })();
         </script>
         <?php
         return ob_get_clean();
+    }
+    
+    // Specific shortcode handlers
+    public function checkins_shortcode($atts) {
+        $atts['type'] = 'checkins';
+        return $this->shortcode($atts);
+    }
+    
+    public function reviews_shortcode($atts) {
+        $atts['type'] = 'reviews';
+        return $this->shortcode($atts);
+    }
+    
+    public function testimonials_shortcode($atts) {
+        $atts['type'] = 'testimonials';
+        return $this->shortcode($atts);
+    }
+    
+    public function blogs_shortcode($atts) {
+        $atts['type'] = 'blogs';
+        return $this->shortcode($atts);
     }
     
     public function enqueue_scripts() {

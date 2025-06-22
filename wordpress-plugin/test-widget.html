@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WordPress Widget Test</title>
+    <style>body{font-family:Arial,sans-serif;padding:20px;max-width:800px;margin:0 auto;}</style>
+</head>
+<body>
+    <h1>Direct Widget Test</h1>
+    <p>This simulates exactly what your WordPress shortcode should produce:</p>
+    
+    <div data-rankitpro-widget="checkins" class="rankitpro-container">
+        <div class="rankitpro-loading">Loading service reports...</div>
+    </div>
+    
+    <script>
+    console.log('RankItPro: Initializing widget for company 16');
+    console.log('RankItPro: Type: checkins, Limit: 5');
+    
+    var script = document.createElement('script');
+    var scriptUrl = 'https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/widget/16?type=checkins&limit=5';
+    console.log('RankItPro: Loading script from:', scriptUrl);
+    
+    script.src = scriptUrl;
+    script.async = true;
+    script.onload = function() {
+        console.log('RankItPro: Widget script loaded successfully');
+        var loadingElements = document.querySelectorAll('.rankitpro-loading');
+        loadingElements.forEach(function(el) {
+            el.style.display = 'none';
+        });
+    };
+    script.onerror = function() {
+        console.error('RankItPro: Failed to load widget script from:', scriptUrl);
+        document.querySelector('.rankitpro-container').innerHTML = 
+            '<div class="rankitpro-error">Unable to load service reports. Please contact support if this persists.</div>';
+    };
+    document.head.appendChild(script);
+    </script>
+</body>
+</html>

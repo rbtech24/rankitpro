@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordPress Widget Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; background: #f9f9f9; }
+        .success { color: green; } .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>WordPress Plugin Debug Test</h1>
+    
+    <div class="debug-section">
+        <h2>Widget Data Test</h2>
+        <p>Testing if widget endpoint returns data...</p>
+        <div id="endpoint-test">Loading...</div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Direct Widget Implementation</h2>
+        <div data-rankitpro-widget="checkins"></div>
+        <script src="https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/widget/16?type=checkins&limit=5"></script>
+    </div>
+
+    <script>
+        // Test API endpoint directly
+        fetch('https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/widget/16?type=checkins&limit=5')
+            .then(response => response.text())
+            .then(data => {
+                const testDiv = document.getElementById('endpoint-test');
+                if (data.includes('WIDGET_CONFIG') && data.includes('checkins')) {
+                    testDiv.innerHTML = '<span class="success">✓ Endpoint working - Found ' + 
+                        (data.match(/checkins.*?\[.*?\]/s) ? 'check-in data' : 'no data') + '</span>';
+                } else {
+                    testDiv.innerHTML = '<span class="error">✗ Endpoint issue</span>';
+                }
+                console.log('Widget script response:', data.substring(0, 500));
+            })
+            .catch(error => {
+                document.getElementById('endpoint-test').innerHTML = '<span class="error">✗ Connection failed: ' + error + '</span>';
+                console.error('Fetch error:', error);
+            });
+    </script>
+</body>
+</html>
