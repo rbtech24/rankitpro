@@ -228,7 +228,7 @@ If you experience issues:
 3. Verify the webhook URL is accessible
 4. Check plugin logs in WordPress admin
 
-Version: 1.0.0
+Version: 1.3.0
 Author: Rank It Pro
 `;
 
@@ -246,7 +246,7 @@ Author: Rank It Pro
     // Set proper headers for ZIP download
     res.writeHead(200, {
       'Content-Type': 'application/zip',
-      'Content-Disposition': 'attachment; filename=rank-it-pro-plugin.zip',
+      'Content-Disposition': 'attachment; filename=rank-it-pro-plugin-v1.3.0.zip',
       'Cache-Control': 'no-cache'
     });
 

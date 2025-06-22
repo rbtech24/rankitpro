@@ -54,7 +54,7 @@ export default function WordPressPlugin() {
 
       toast({
         title: "Complete Plugin Downloaded!",
-        description: "Rank It Pro Integration v1.2.1 with all assets ready for installation",
+        description: "Rank It Pro Integration v1.3.0 with all assets ready for installation",
       });
     } catch (error) {
       console.error('Error downloading plugin:', error);
@@ -95,7 +95,7 @@ export default function WordPressPlugin() {
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <div>
-                  <h3 className="font-semibold text-blue-900">Rank It Pro Integration v1.2.1</h3>
+                  <h3 className="font-semibold text-blue-900">Rank It Pro Integration v1.3.0</h3>
                   <p className="text-sm text-blue-700">Complete WordPress integration with automatic sync</p>
                   <div className="flex gap-2 mt-2">
                     <Badge variant="secondary">Latest</Badge>
