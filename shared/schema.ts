@@ -116,10 +116,21 @@ export const blogPosts = pgTable("blog_posts", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   content: text("content").notNull(),
+  excerpt: text("excerpt").default(""),
+  featuredImage: text("featured_image").default(""),
+  gallery: text("gallery").array().default([]),
+  status: text("status", { enum: ["draft", "published", "scheduled"] }).default("draft"),
+  publishDate: timestamp("publish_date").defaultNow(),
+  tags: text("tags").array().default([]),
+  seoTitle: text("seo_title").default(""),
+  seoDescription: text("seo_description").default(""),
+  publishToWordPress: boolean("publish_to_wordpress").default(false),
+  wordPressCategory: text("wordpress_category").default("blog"),
   photos: jsonb("photos").default([]),
   checkInId: integer("check_in_id").references(() => checkIns.id),
   companyId: integer("company_id").references(() => companies.id).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Review requests table
