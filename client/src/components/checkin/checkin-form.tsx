@@ -56,6 +56,8 @@ type CheckinFormValues = z.infer<typeof formSchema>;
 export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoPreviewUrls, setPhotoPreviewUrls] = useState<string[]>([]);
+  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
+  const [generatedContent, setGeneratedContent] = useState<string>("");
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   // Simple location display using coordinates
@@ -205,19 +207,77 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
         return;
       }
       
-      setPhotos([...photos, ...newPhotos]);
+      // Update photos state
+      const updatedPhotos = [...photos, ...newPhotos];
+      setPhotos(updatedPhotos);
       
-      // Create preview URLs
+      // Create preview URLs - only for new photos to avoid recreating existing ones
       const newPreviewUrls = newPhotos.map(photo => URL.createObjectURL(photo));
       setPhotoPreviewUrls([...photoPreviewUrls, ...newPreviewUrls]);
+      
+      console.log(`Added ${newPhotos.length} photos, total: ${updatedPhotos.length}`);
     }
   };
   
   // Remove a photo
   const removePhoto = (index: number) => {
-    setPhotos(photos.filter((_, i) => i !== index));
-    
     // Revoke the URL to avoid memory leaks
+    if (photoPreviewUrls[index]) {
+      URL.revokeObjectURL(photoPreviewUrls[index]);
+    }
+    
+    const newPhotos = photos.filter((_, i) => i !== index);
+    const newPreviewUrls = photoPreviewUrls.filter((_, i) => i !== index);
+    setPhotos(newPhotos);
+    setPhotoPreviewUrls(newPreviewUrls);
+  };
+  
+  // Generate AI content
+  const handleGenerateContent = async () => {
+    const jobType = form.watch("jobType");
+    const notes = form.watch("notes");
+    const location = form.watch("location");
+    
+    if (!jobType || !notes) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in job type and notes before generating content.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsGeneratingContent(true);
+    
+    try {
+      const response = await apiRequest("POST", "/api/generate-content", {
+        jobType,
+        notes,
+        location,
+        contentType: "blog"
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setGeneratedContent(data.content);
+        toast({
+          title: "Content Generated",
+          description: "AI blog content has been generated successfully!",
+        });
+      } else {
+        throw new Error("Failed to generate content");
+      }
+    } catch (error) {
+      console.error("Content generation error:", error);
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate AI content. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingContent(false);
+    }
+  };
     URL.revokeObjectURL(photoPreviewUrls[index]);
     setPhotoPreviewUrls(photoPreviewUrls.filter((_, i) => i !== index));
   };
@@ -433,7 +493,20 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                   <div className="mt-4 flex flex-wrap gap-2">
                     {photoPreviewUrls.map((url, index) => (
                       <div key={index} className="relative w-24 h-24 rounded-md border overflow-hidden group">
-                        <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                        <img 
+                          src={url} 
+                          alt={`Preview ${index + 1}`} 
+                          className="w-full h-full object-cover"
+                          onLoad={() => console.log(`Photo ${index + 1} loaded successfully`)}
+                          onError={(e) => {
+                            console.error(`Photo ${index + 1} failed to load:`, e);
+                            // Fallback: try to recreate the preview URL
+                            if (photos[index]) {
+                              const newUrl = URL.createObjectURL(photos[index]);
+                              e.currentTarget.src = newUrl;
+                            }
+                          }}
+                        />
                         <Button
                           type="button"
                           variant="destructive"
@@ -448,6 +521,15 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                         </Button>
                       </div>
                     ))}
+                  </div>
+                )}
+                
+                {generatedContent && (
+                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="font-medium text-blue-800 mb-2">Generated AI Content</h4>
+                    <div className="text-sm text-blue-700 max-h-32 overflow-y-auto">
+                      {generatedContent}
+                    </div>
                   </div>
                 )}
               </div>
@@ -465,6 +547,9 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>Create blog post from this check-in</FormLabel>
+                      <FormDescription>
+                        Generate AI-powered content for your website
+                      </FormDescription>
                     </div>
                   </FormItem>
                 )}

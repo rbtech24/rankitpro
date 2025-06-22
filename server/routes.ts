@@ -1632,6 +1632,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/reviews", reviewRoutes);
   app.use("/api/testimonials", testimonialsRoutes);
   
+  // Add AI content generation endpoint
+  app.post("/api/generate-content", isAuthenticated, async (req, res) => {
+    try {
+      const { jobType, notes, location, contentType = "blog" } = req.body;
+      
+      if (!jobType || !notes) {
+        return res.status(400).json({ error: "Job type and notes are required" });
+      }
+      
+      // Import AI service
+      const { generateBlogPost } = await import("./ai-service");
+      
+      // Generate content based on check-in data
+      const generatedContent = await generateBlogPost(
+        jobType,
+        notes,
+        location || "Customer location"
+      );
+      
+      res.json({ 
+        content: generatedContent,
+        type: contentType,
+        success: true
+      });
+      
+    } catch (error) {
+      console.error("AI content generation error:", error);
+      res.status(500).json({ error: "Failed to generate content" });
+    }
+  });
+  
   // Add reverse geocoding endpoint
   app.post("/api/reverse-geocode", async (req, res) => {
     try {
