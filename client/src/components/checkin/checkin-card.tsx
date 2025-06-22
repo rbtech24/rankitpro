@@ -55,15 +55,34 @@ export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, on
       
       {checkIn.photos && checkIn.photos.length > 0 && (
         <div className="mt-4 flex flex-wrap">
-          {checkIn.photos.map((photo, index) => (
-            <div key={index} className="mr-2 mb-2 w-24 h-24 rounded-md border overflow-hidden">
-              <img 
-                src={photo.url} 
-                alt={`Check-in photo ${index + 1}`} 
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))}
+          {(() => {
+            // Handle both string arrays and object arrays
+            let photoUrls = [];
+            if (typeof checkIn.photos === 'string') {
+              try {
+                photoUrls = JSON.parse(checkIn.photos);
+              } catch {
+                photoUrls = [checkIn.photos];
+              }
+            } else if (Array.isArray(checkIn.photos)) {
+              photoUrls = checkIn.photos.map(p => typeof p === 'string' ? p : p.url);
+            }
+            
+            return photoUrls.map((photoUrl, index) => (
+              <div key={index} className="mr-2 mb-2 w-24 h-24 rounded-md border overflow-hidden bg-gray-100">
+                <img 
+                  src={photoUrl} 
+                  alt={`Check-in photo ${index + 1}`} 
+                  className="w-full h-full object-cover"
+                  onLoad={() => console.log(`Photo ${index + 1} loaded from:`, photoUrl)}
+                  onError={(e) => {
+                    console.log('Photo failed to load:', photoUrl);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+            ));
+          })()}
         </div>
       )}
       

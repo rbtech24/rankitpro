@@ -202,6 +202,13 @@ export default function CheckIns() {
                       onRequestReview={() => {
                         handleRequestReview(checkIn.id, checkIn.technician?.id || 0);
                       }}
+                      onEdit={() => {
+                        toast({
+                          title: "Edit Feature",
+                          description: "Edit functionality will be available in the next update.",
+                          variant: "default",
+                        });
+                      }}
                     />
                     <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
