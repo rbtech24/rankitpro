@@ -89,16 +89,21 @@ router.post('/upload-photos', isAuthenticated, upload.array('photos', 10), async
 router.get('/', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const user = req.user;
-    if (!user.companyId) {
-      return res.status(400).json({ message: 'User is not associated with a company' });
+    
+    // Critical security check - ensure user is authenticated
+    if (!user || !user.companyId) {
+      return res.status(401).json({ message: 'Authentication required' });
     }
 
     const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
     const checkIns = await storage.getCheckInsByCompany(user.companyId, limit);
     
+    // Ensure JSON response
+    res.setHeader('Content-Type', 'application/json');
     return res.json(checkIns);
   } catch (error) {
     console.error('Error fetching check-ins:', error);
+    res.setHeader('Content-Type', 'application/json');
     return res.status(500).json({ message: 'Failed to fetch check-ins' });
   }
 });
