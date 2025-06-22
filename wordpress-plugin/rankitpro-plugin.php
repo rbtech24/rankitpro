@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
 
 class RankItProPlugin {
     
-    private $api_base_url = 'https://your-rankitpro-domain.com';
+    private $api_base_url = 'https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev';
     
     public function __construct() {
         add_action('init', array($this, 'init'));
@@ -55,7 +55,7 @@ class RankItProPlugin {
         }
         
         $company_id = get_option('rankitpro_company_id', '');
-        $api_domain = get_option('rankitpro_api_domain', 'https://your-rankitpro-domain.com');
+        $api_domain = get_option('rankitpro_api_domain', 'https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev');
         $cache_time = get_option('rankitpro_cache_time', 300);
         ?>
         <div class="wrap">

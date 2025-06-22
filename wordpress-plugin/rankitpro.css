@@ -1,0 +1,48 @@
+/* RankItPro WordPress Plugin Styles */
+.rankitpro-container {
+  margin: 20px 0;
+}
+
+.rankitpro-loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.rankitpro-error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 15px;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+/* Ensure widget inherits theme styles */
+.rankitpro-widget {
+  font-family: inherit;
+  color: inherit;
+  line-height: inherit;
+}
+
+.rankitpro-widget h1, 
+.rankitpro-widget h2, 
+.rankitpro-widget h3,
+.rankitpro-widget h4, 
+.rankitpro-widget h5, 
+.rankitpro-widget h6 {
+  font-family: inherit;
+  color: inherit;
+  margin: 0.5em 0;
+}
+
+.rankitpro-widget p {
+  margin: 1em 0;
+}
+
+.rankitpro-widget img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
