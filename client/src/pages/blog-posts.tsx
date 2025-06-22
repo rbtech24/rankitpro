@@ -83,7 +83,7 @@ export default function BlogPosts() {
 
   const handleNewPost = () => {
     setSelectedPost(null);
-    setEditModalOpen(true);
+    setAdvancedEditorOpen(true);
   };
 
   const handleEditPost = (postId: number) => {
@@ -285,14 +285,16 @@ export default function BlogPosts() {
         )}
       </div>
 
-      <BlogEditModal
-        isOpen={editModalOpen}
-        onClose={() => {
-          setEditModalOpen(false);
-          setSelectedPost(null);
-        }}
-        blogPost={selectedPost}
-      />
+      {editModalOpen && (
+        <BlogEditModal
+          isOpen={editModalOpen}
+          onClose={() => {
+            setEditModalOpen(false);
+            setSelectedPost(null);
+          }}
+          blogPost={selectedPost}
+        />
+      )}
     </DashboardLayout>
   );
 }
