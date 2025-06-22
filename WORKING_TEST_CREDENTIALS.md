@@ -4,39 +4,15 @@
 
 All test accounts have been reset with the password: `test123`
 
-### Test Company Admin Accounts
+### Test Company Admin Account
 
-1. **Carrollton Sprinkler Repair (Primary Test Account)**
-   - Email: `rodbartrufftech@gmail.com`
-   - Password: `test123`
-   - Username: `carrolltonsprinklerrepair`
-   - Role: `company_admin`
-   - Company ID: 16
-   - Status: ✅ Active
-
-2. **Test Company Account**
-   - Email: `company@test.com`
-   - Password: `test123`
-   - Username: `companytest`
-   - Role: `company_admin`
-   - Company ID: None (needs company setup)
-   - Status: ✅ Active
-
-3. **ACME Services Demo Account**
-   - Email: `demo@acmeservices.com`
-   - Password: `test123`
-   - Username: `acmeadmin`
-   - Role: `company_admin`
-   - Company ID: 14
-   - Status: ✅ Active
-
-4. **Test Company Admin**
-   - Email: `admin@testcompany.com`
-   - Password: `test123`
-   - Username: `acmeadmin2025`
-   - Role: `company_admin`
-   - Company ID: 14
-   - Status: ✅ Active
+**Carrollton Sprinkler Repair (Primary Test Account)**
+- Email: `rodbartrufftech@gmail.com`
+- Password: `test123`
+- Username: `carrolltonsprinklerrepair`
+- Role: `company_admin`
+- Company ID: 16
+- Status: ✅ Active
 
 ### Super Admin Account
 
