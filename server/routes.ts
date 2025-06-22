@@ -18,6 +18,7 @@ import { insertUserSchema, insertCompanySchema, insertTechnicianSchema, insertCh
 import { apiCredentialService } from "./services/api-credentials";
 import { isAuthenticated, isCompanyAdmin, isSuperAdmin, belongsToCompany } from "./middleware/auth";
 import { enforceTrialLimits } from "./middleware/trial-enforcement";
+import wordpressRoutes from "./routes/wordpress";
 import multer from "multer";
 import { z } from "zod";
 import integrationsRoutes from "./routes/integrations";
@@ -3413,6 +3414,9 @@ For support, contact Rank It Pro team.
   });
 
 
+  // Register WordPress routes for plugin functionality
+  app.use("/api/wordpress", wordpressRoutes);
+  
   // Register admin routes for subscription management
   app.use("/api/admin", adminRoutes);
   
