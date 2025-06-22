@@ -62,7 +62,7 @@ class RankItProPlugin {
         }
         
         $company_id = get_option('rankitpro_company_id', '');
-        $api_domain = get_option('rankitpro_api_domain', 'https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev');
+        $api_domain = get_option('rankitpro_api_domain', $this->api_base_url);
         $cache_time = get_option('rankitpro_cache_time', 300);
         ?>
         <div class="wrap">
@@ -80,7 +80,8 @@ class RankItProPlugin {
                         <th scope="row">API Domain</th>
                         <td>
                             <input type="url" name="api_domain" value="<?php echo esc_attr($api_domain); ?>" class="regular-text" required />
-                            <p class="description">Your RankItPro platform domain</p>
+                            <p class="description"><strong>For development/testing:</strong> Use your Replit URL<br>
+                            <strong>For production:</strong> Use https://rankitpro.com</p>
                         </td>
                     </tr>
                     <tr>
@@ -171,6 +172,19 @@ class RankItProPlugin {
         </script>
         <?php
         return ob_get_clean();
+    }
+    
+    // Test API connection
+    private function test_connection($company_id, $api_domain) {
+        if (!$company_id || !$api_domain) return false;
+        
+        $url = $api_domain . '/widget/' . $company_id . '?type=checkins&limit=1';
+        $response = wp_remote_get($url, array('timeout' => 10));
+        
+        if (is_wp_error($response)) return false;
+        
+        $body = wp_remote_retrieve_body($response);
+        return (strpos($body, 'WIDGET_CONFIG') !== false);
     }
     
     // Specific shortcode handlers
