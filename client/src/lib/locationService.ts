@@ -89,10 +89,21 @@ export async function getCurrentLocation(): Promise<LocationData> {
         }
 
         try {
-          // Use OpenStreetMap Nominatim for reverse geocoding
+          // Use OpenStreetMap Nominatim for reverse geocoding with timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+          
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&extratags=1`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&extratags=1`,
+            { 
+              signal: controller.signal,
+              headers: {
+                'User-Agent': 'RankItPro/1.0'
+              }
+            }
           );
+          
+          clearTimeout(timeoutId);
 
           if (response.ok) {
             const data = await response.json();
@@ -127,20 +138,18 @@ export async function getCurrentLocation(): Promise<LocationData> {
             throw new Error('Geocoding service unavailable');
           }
         } catch (geocodingError) {
-          console.error('Reverse geocoding failed:', geocodingError);
-          
-          // Fallback to coordinates
+          // Silently handle geocoding errors and provide coordinates as fallback
           const fallbackAddress = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
           const locationData: LocationData = {
             latitude: latitude,
             longitude: longitude,
             streetName: fallbackAddress,
-            city: '',
+            city: 'Location Services Unavailable',
             state: '',
             zipCode: '',
             fullAddress: fallbackAddress,
             accuracy,
-            source: sourceType,
+            source: sourceType + ' (Address lookup failed)',
             isReliable
           };
 
