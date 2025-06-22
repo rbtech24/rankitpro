@@ -1,3 +1,4 @@
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { HelpCircle, MessageSquare, Phone, Mail, Clock, CheckCircle, AlertCircle, Bug, Lightbulb } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SupportPage() {
+  const { user } = useAuth();
   const [ticketForm, setTicketForm] = useState({
     subject: '',
     category: '',
@@ -18,36 +21,24 @@ export default function SupportPage() {
 
   const faqs = [
     {
-      question: "How do I get started with Rank It Pro?",
-      answer: "Sign up for an account, create your company profile, add your technicians, and start using our mobile app for field service management. Our onboarding guide will walk you through each step."
+      question: "How do I access the WordPress plugin?",
+      answer: "Navigate to Website Integration in your dashboard and download the plugin. Install it on your WordPress site and configure your API key."
     },
     {
-      question: "Can I integrate with my existing WordPress website?",
-      answer: "Yes! We provide a WordPress plugin that displays your service check-ins, customer reviews, and blog posts directly on your website. Download it from the Integrations page."
+      question: "How do I add team members?",
+      answer: "Go to Technicians in your dashboard to add and manage your team members."
     },
     {
-      question: "How does the AI content generation work?",
-      answer: "Our AI analyzes your service data and generates professional blog posts, social media content, and review responses. You can customize the tone and style to match your brand."
+      question: "Where can I view my service data?",
+      answer: "Check-ins, reviews, and analytics are available in your main dashboard."
     },
     {
-      question: "What subscription plans are available?",
-      answer: "We offer Starter ($29/month), Professional ($79/month), and Enterprise ($149/month) plans. All plans include core features with varying limits on technicians, jobs, and AI generations."
+      question: "How do I configure integrations?",
+      answer: "Visit the Integrations section to set up WordPress, CRM, and other third-party connections."
     },
     {
-      question: "Is my data secure?",
-      answer: "Absolutely. We use enterprise-grade encryption, secure data centers, and comply with industry standards. Your data is backed up daily and never shared with third parties."
-    },
-    {
-      question: "Can I cancel my subscription anytime?",
-      answer: "Yes, you can cancel your subscription at any time from your account settings. You'll retain access until the end of your current billing period."
-    },
-    {
-      question: "Do you offer mobile apps?",
-      answer: "Yes, we have mobile apps for both iOS and Android that allow technicians to check in, upload photos, collect reviews, and manage jobs from the field."
-    },
-    {
-      question: "How do I add technicians to my account?",
-      answer: "Go to Team Management in your dashboard, click 'Add Technician', enter their details, and they'll receive an invitation email with login credentials."
+      question: "Where are my account settings?",
+      answer: "Access Settings from your dashboard to manage your account, billing, and preferences."
     }
   ];
 
@@ -393,6 +384,6 @@ export default function SupportPage() {
           </Card>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

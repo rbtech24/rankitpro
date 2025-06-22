@@ -1326,6 +1326,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public API routes for WordPress plugin (no authentication required)
+  app.get("/api/public/check-ins", async (req, res) => {
+    try {
+      const { company_id, limit = 10 } = req.query;
+      
+      if (!company_id) {
+        return res.status(400).json({ message: "Company ID is required" });
+      }
+      
+      const checkIns = await storage.getCheckInsByCompany(parseInt(company_id as string), parseInt(limit as string));
+      
+      // Format for WordPress display
+      const formattedCheckIns = checkIns.map(checkin => ({
+        id: checkin.id,
+        jobType: checkin.jobType || 'Service Call',
+        customerName: checkin.customerName || 'Customer',
+        location: checkin.location || checkin.city || 'Location',
+        notes: checkin.notes || checkin.workPerformed || 'Service completed',
+        createdAt: checkin.createdAt,
+        completed: true,
+        technicianName: 'Professional Technician'
+      }));
+      
+      res.json(formattedCheckIns);
+    } catch (error) {
+      console.error("Error fetching public check-ins:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Register WordPress routes for plugin functionality
   app.use("/api/wordpress", wordpressRoutes);
   

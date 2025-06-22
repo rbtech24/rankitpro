@@ -342,18 +342,11 @@ class RankItProPlugin {
             return '<div class="rankitpro-no-data">Please configure your API key in the plugin settings.</div>';
         }
         
-        $cache_key = 'rankitpro_checkins_' . md5(serialize($atts));
-        $cached_data = get_transient($cache_key);
-        
-        if ($cached_data !== false) {
-            return $cached_data;
-        }
-        
-        // Fetch real check-ins from API
-        $checkins_data = $this->fetch_api_data('/api/check-ins', array('limit' => $atts['limit']));
+        // Fetch real check-ins from API with proper authentication
+        $checkins_data = $this->fetch_api_data('/api/public/check-ins', array('limit' => $atts['limit'], 'company_id' => get_option('rankitpro_company_id', '')));
         
         if (empty($checkins_data)) {
-            return '<div class="rankitpro-no-data">No check-ins available or API connection failed.</div>';
+            return '<div class="rankitpro-no-data">No check-ins available. Please ensure your API key and company ID are properly configured in the plugin settings.</div>';
         }
         
         $output = '<div class="rankitpro-checkins">';
@@ -383,9 +376,6 @@ class RankItProPlugin {
             $output .= '</div>';
             $output .= '</div>';
         }
-        
-        $cache_duration = get_option('rankitpro_cache_duration', 900);
-        set_transient($cache_key, $output, $cache_duration);
         
         return $output;
     }
@@ -765,7 +755,8 @@ class RankItProPlugin {
             return false;
         }
         
-        $base_url = 'https://rankitpro.com';
+        // Use the configured site URL or fall back to rankitpro.com
+        $base_url = get_option('rankitpro_api_endpoint', 'https://rankitpro.com');
         $url = $base_url . $endpoint;
         
         if (!empty($params)) {
@@ -776,7 +767,8 @@ class RankItProPlugin {
             'headers' => array(
                 'Authorization' => 'Bearer ' . $api_key,
                 'Content-Type' => 'application/json',
-                'User-Agent' => 'RankItPro-WordPress-Plugin/1.1.0'
+                'User-Agent' => 'RankItPro-WordPress-Plugin/1.1.0',
+                'X-API-Key' => $api_key
             ),
             'timeout' => 15,
             'sslverify' => true
@@ -790,16 +782,17 @@ class RankItProPlugin {
         }
         
         $status_code = wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+        
         if ($status_code !== 200) {
-            error_log('RankItPro API Error: HTTP ' . $status_code);
+            error_log('RankItPro API Error: HTTP ' . $status_code . ' - ' . $body);
             return false;
         }
         
-        $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
-            error_log('RankItPro API Error: Invalid JSON response');
+            error_log('RankItPro API Error: Invalid JSON response - ' . json_last_error_msg());
             return false;
         }
         
