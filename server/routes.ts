@@ -1626,7 +1626,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Mount critical missing routes with proper paths - BEFORE catch-all
   app.use("/api/check-ins", checkInRoutes);
-  app.use("/api/blog", blogRoutes);  
+  app.use("/api/visits", checkInRoutes); // Add visits alias for dashboard
+  app.use("/api/blog", blogRoutes);
+  app.use("/api/blog-posts", blogRoutes); // Add blog-posts alias  
   app.use("/api/reviews", reviewRoutes);
   app.use("/api/testimonials", testimonialsRoutes);
   

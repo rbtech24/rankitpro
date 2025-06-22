@@ -153,13 +153,52 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
     setIsGettingLocation(true);
     
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords;
         form.setValue("latitude", latitude);
         form.setValue("longitude", longitude);
         
-        // Set location as coordinates
-        form.setValue("location", formatLocation(latitude, longitude));
+        // Try to get readable address from coordinates
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Extract clean address parts
+            const addressParts = [];
+            if (data.address) {
+              if (data.address.house_number && data.address.road) {
+                addressParts.push(`${data.address.house_number} ${data.address.road}`);
+              } else if (data.address.road) {
+                addressParts.push(data.address.road);
+              }
+              
+              if (data.address.city || data.address.town || data.address.village) {
+                addressParts.push(data.address.city || data.address.town || data.address.village);
+              }
+              
+              if (data.address.state) {
+                addressParts.push(data.address.state);
+              }
+              
+              if (data.address.postcode) {
+                addressParts.push(data.address.postcode);
+              }
+            }
+            
+            const formattedAddress = addressParts.length > 0 ? addressParts.join(', ') : data.display_name;
+            form.setValue("location", formattedAddress);
+          } else {
+            form.setValue("location", formatLocation(latitude, longitude));
+          }
+        } catch (error) {
+          console.warn('Reverse geocoding failed:', error);
+          form.setValue("location", formatLocation(latitude, longitude));
+        }
+        
         setIsGettingLocation(false);
       },
       (error) => {
