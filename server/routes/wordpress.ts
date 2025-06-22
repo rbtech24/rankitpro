@@ -213,21 +213,21 @@ class RankItProPlugin {
         );
         
         add_submenu_page(
-            'rank-it-pro',                    // Parent slug
-            'Settings',                       // Page title
-            'Settings',                       // Menu title
-            'manage_options',                 // Capability
-            'rank-it-pro-settings',           // Menu slug
-            array($this, 'settings_page')     // Function
+            'rank-it-pro',
+            'Settings',
+            'Settings',
+            'manage_options',
+            'rank-it-pro-settings',
+            array($this, 'settings_page')
         );
         
         add_submenu_page(
-            'rank-it-pro',                    // Parent slug
-            'Test & Troubleshoot',            // Page title
-            'Test & Troubleshoot',            // Menu title
-            'manage_options',                 // Capability
-            'rank-it-pro-test',               // Menu slug
-            array($this, 'test_page')         // Function
+            'rank-it-pro',
+            'Test & Troubleshoot',
+            'Test & Troubleshoot',
+            'manage_options',
+            'rank-it-pro-test',
+            array($this, 'test_page')
         );
     }
     
