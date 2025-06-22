@@ -26,10 +26,8 @@ export async function reverseGeocode(latitude: number, longitude: number): Promi
       // Build a formatted address
       const parts = [];
       
-      // House number and street
-      if (address.house_number && address.road) {
-        parts.push(`${address.house_number} ${address.road}`);
-      } else if (address.road) {
+      // Street only (without house number)
+      if (address.road) {
         parts.push(address.road);
       }
       

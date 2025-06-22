@@ -493,18 +493,8 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 {photos.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {photos.map((photo, index) => {
-                      // Use a more stable approach for creating preview URLs
-                      const [previewUrl, setPreviewUrl] = React.useState<string>('');
-                      
-                      React.useEffect(() => {
-                        const url = URL.createObjectURL(photo);
-                        setPreviewUrl(url);
-                        
-                        // Cleanup function to revoke the URL when component unmounts
-                        return () => {
-                          URL.revokeObjectURL(url);
-                        };
-                      }, [photo]);
+                      // Create preview URL directly without hooks
+                      const previewUrl = URL.createObjectURL(photo);
                       
                       return (
                         <div key={`photo-${index}-${photo.name}`} className="relative w-24 h-24 rounded-md border overflow-hidden group bg-gray-100">
