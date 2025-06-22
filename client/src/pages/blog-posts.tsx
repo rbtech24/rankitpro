@@ -4,15 +4,28 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import BlogEditModal from "@/components/modals/blog-edit-modal";
+import AdvancedBlogEditor from "@/components/blog/advanced-blog-editor";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { Plus, Edit, Trash2, Eye, Globe, Calendar } from "lucide-react";
 
 interface BlogPost {
   id: number;
   title: string;
   content: string;
+  excerpt: string;
+  featuredImage: string;
+  gallery: string[];
+  status: 'draft' | 'published' | 'scheduled';
+  publishDate: string;
+  tags: string[];
+  seoTitle: string;
+  seoDescription: string;
+  publishToWordPress: boolean;
+  wordPressCategory: string;
   photos: { url: string; filename: string }[];
   createdAt: string;
   checkInId?: number;
@@ -21,7 +34,9 @@ interface BlogPost {
 export default function BlogPosts() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [advancedEditorOpen, setAdvancedEditorOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -84,6 +99,34 @@ export default function BlogPosts() {
       deleteMutation.mutate(postId);
     }
   };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'published': return 'bg-green-100 text-green-800';
+      case 'draft': return 'bg-gray-100 text-gray-800';
+      case 'scheduled': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  if (advancedEditorOpen) {
+    return (
+      <DashboardLayout>
+        <AdvancedBlogEditor
+          blogPost={selectedPost}
+          onSave={(post) => {
+            setAdvancedEditorOpen(false);
+            setSelectedPost(null);
+            queryClient.invalidateQueries({ queryKey: ["/api/blog-posts"] });
+          }}
+          onCancel={() => {
+            setAdvancedEditorOpen(false);
+            setSelectedPost(null);
+          }}
+        />
+      </DashboardLayout>
+    );
+  }
   
   return (
     <DashboardLayout>
@@ -102,6 +145,7 @@ export default function BlogPosts() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <Button onClick={handleNewPost}>
+              <Plus className="w-4 h-4 mr-2" />
               New Blog Post
             </Button>
           </div>
@@ -134,37 +178,89 @@ export default function BlogPosts() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredBlogPosts.map((post) => (
               <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                {post.photos && post.photos.length > 0 && (
-                  <div className="h-48 overflow-hidden">
+                {(post.featuredImage || (post.photos && post.photos.length > 0)) && (
+                  <div className="h-48 overflow-hidden relative">
                     <img 
-                      src={post.photos[0].url} 
+                      src={post.featuredImage || post.photos[0]?.url} 
                       alt={post.title}
                       className="w-full h-full object-cover"
                     />
+                    <div className="absolute top-2 left-2">
+                      <Badge className={getStatusColor(post.status || 'draft')}>
+                        {post.status || 'draft'}
+                      </Badge>
+                    </div>
+                    {post.publishToWordPress && (
+                      <div className="absolute top-2 right-2">
+                        <Badge variant="outline" className="bg-white">
+                          <Globe className="w-3 h-3 mr-1" />
+                          WP
+                        </Badge>
+                      </div>
+                    )}
                   </div>
                 )}
                 <CardHeader>
-                  <CardTitle className="text-lg line-clamp-2">{post.title}</CardTitle>
-                  <CardDescription className="text-sm text-gray-500">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg line-clamp-2 flex-1">{post.title}</CardTitle>
+                    {!(post.featuredImage || (post.photos && post.photos.length > 0)) && (
+                      <div className="flex gap-1 ml-2">
+                        <Badge className={getStatusColor(post.status || 'draft')}>
+                          {post.status || 'draft'}
+                        </Badge>
+                        {post.publishToWordPress && (
+                          <Badge variant="outline">
+                            <Globe className="w-3 h-3 mr-1" />
+                            WP
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <CardDescription className="text-sm text-gray-500 flex items-center gap-2">
+                    <Calendar className="w-3 h-3" />
                     {format(new Date(post.createdAt), "MMM dd, yyyy")}
+                    {post.checkInId && (
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        From Check-in #{post.checkInId}
+                      </span>
+                    )}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-600 line-clamp-3 mb-4">
-                    {post.content ? post.content.substring(0, 150) + (post.content.length > 150 ? '...' : '') : 'No content available'}
+                    {post.excerpt || (post.content ? post.content.replace(/<[^>]*>/g, '').substring(0, 150) + (post.content.length > 150 ? '...' : '') : 'No content available')}
                   </p>
+                  
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {post.tags.slice(0, 3).map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {post.tags.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{post.tags.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                  
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-400">
-                      {post.checkInId ? `From Check-in #${post.checkInId}` : 'Manual Post'}
-                    </span>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm" onClick={() => handleEditPost(post.id)}>
+                        <Edit className="w-3 h-3 mr-1" />
                         Edit
                       </Button>
-                      <Button variant="destructive" size="sm" onClick={() => handleDeletePost(post.id)}>
-                        Delete
+                      <Button variant="outline" size="sm" onClick={() => handleQuickEdit(post.id)}>
+                        <Eye className="w-3 h-3 mr-1" />
+                        Quick
                       </Button>
                     </div>
+                    <Button variant="destructive" size="sm" onClick={() => handleDeletePost(post.id)}>
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
