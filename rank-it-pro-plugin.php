@@ -3,7 +3,7 @@
  * Plugin Name: Rank It Pro Integration
  * Plugin URI: https://rankitpro.com
  * Description: Automatically publish technician check-ins to your WordPress site for improved local SEO and customer transparency.
- * Version: 1.0.0
+ * Version: 1.3.0.0
  * Author: Rank It Pro
  * Author URI: https://rankitpro.com
  * Text Domain: rank-it-pro

@@ -328,7 +328,7 @@ export class WordPressService {
 /**
  * Plugin Name: Rank It Pro Integration
  * Description: Displays check-ins and reviews from Rank It Pro
- * Version: 1.0
+ * Version: 1.3.0
  * Author: Rank It Pro
  */
 
