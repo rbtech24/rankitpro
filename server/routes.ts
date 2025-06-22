@@ -1635,46 +1635,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add AI content generation endpoint
   app.post("/api/generate-content", isAuthenticated, async (req, res) => {
     try {
-      const { jobType, notes, location, contentType = "blog" } = req.body;
+      const { jobType, notes, location, companyName = "Your Company", contentType = 'blog' } = req.body;
       
       if (!jobType || !notes) {
-        return res.status(400).json({ error: "Job type and notes are required" });
+        return res.status(400).json({ message: 'Job type and notes are required' });
       }
-      
+
       // Import AI service using OpenAI directly
       const OpenAI = await import("openai");
       const openai = new OpenAI.default({
         apiKey: process.env.OPENAI_API_KEY,
       });
-      
-      // Generate content using OpenAI directly
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+
+      let prompt = '';
+      let systemMessage = '';
+
+      if (contentType === 'blog') {
+        systemMessage = "You are a professional content writer specializing in service industry blog posts. Write engaging, SEO-friendly content that showcases expertise and builds trust with potential customers.";
+        prompt = `Create a professional blog post for ${companyName} about a recent ${jobType} service. 
+
+Job Details:
+- Service Type: ${jobType}
+- Work Performed: ${notes}
+- Location: ${location || 'customer location'}
+
+Write an engaging blog post that:
+1. Has an attention-grabbing title
+2. Describes the service professionally
+3. Highlights the company's expertise
+4. Is SEO-friendly and customer-focused
+5. Includes a call-to-action at the end
+
+Keep it between 200-400 words and make it sound professional yet approachable.`;
+      } else if (contentType === 'service') {
+        systemMessage = "You are a professional customer service communications specialist. Write clear, professional service completion notifications that build trust and encourage future business.";
+        prompt = `Create a professional service completion notification for ${companyName} regarding a ${jobType} service.
+
+Service Details:
+- Service Type: ${jobType}
+- Work Completed: ${notes}
+- Service Location: ${location || 'your location'}
+
+Write a professional service update that:
+1. Confirms service completion
+2. Summarizes work performed
+3. Maintains professional tone
+4. Thanks the customer
+5. Invites future business or feedback
+
+Keep it concise (100-200 words) and customer-focused.`;
+      } else if (contentType === 'both') {
+        systemMessage = "You are a professional content writer specializing in service industry communications. Create both blog content and customer notifications that are professional, engaging, and build trust.";
+        prompt = `Create both a blog post AND a service completion notification for ${companyName} regarding a ${jobType} service.
+
+Service Details:
+- Service Type: ${jobType}
+- Work Completed: ${notes}
+- Service Location: ${location || 'customer location'}
+
+Please provide:
+
+1. BLOG POST: An engaging 200-400 word blog post with title, professional service description, company expertise highlights, SEO-friendly content, and call-to-action.
+
+2. SERVICE NOTIFICATION: A concise 100-200 word professional service completion notification that confirms completion, summarizes work, thanks the customer, and invites future business.
+
+Format clearly with headers "BLOG POST:" and "SERVICE NOTIFICATION:".`;
+      }
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           {
             role: "system",
-            content: "You are a professional content writer for a service company. Create engaging blog content based on completed service work."
+            content: systemMessage
           },
           {
             role: "user",
-            content: `Write a professional blog post about a ${jobType} service. Work performed: ${notes}. Location: ${location || "customer location"}. Make it engaging and informative for potential customers.`
+            content: prompt
           }
         ],
-        max_tokens: 500,
+        max_tokens: contentType === 'both' ? 1200 : 800,
         temperature: 0.7,
       });
+
+      const content = response.choices[0].message.content;
       
-      const generatedContent = completion.choices[0]?.message?.content || "Content generation failed";
-      
-      res.json({ 
-        content: generatedContent,
-        type: contentType,
-        success: true
-      });
-      
+      res.json({ content });
     } catch (error) {
-      console.error("AI content generation error:", error);
-      res.status(500).json({ error: "Failed to generate content" });
+      console.error('Error generating content:', error);
+      res.status(500).json({ message: 'Failed to generate content' });
+    }
+  });
+
+  // Enhance job description with AI
+  app.post('/api/enhance-job-description', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { jobType, notes, location } = req.body;
+      
+      if (!jobType || !notes) {
+        return res.status(400).json({ message: 'Job type and notes are required' });
+      }
+
+      // Import AI service using OpenAI directly
+      const OpenAI = await import("openai");
+      const openai = new OpenAI.default({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const prompt = `Enhance and expand this job description to be more professional and detailed:
+
+Service Type: ${jobType}
+Current Description: ${notes}
+Location Context: ${location || 'customer location'}
+
+Please provide an enhanced, professional job description that:
+1. Uses proper technical terminology
+2. Includes specific details about work performed
+3. Maintains accuracy to the original description
+4. Sounds professional and thorough
+5. Is suitable for service records and customer communication
+
+Return only the enhanced description, no additional text or formatting.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: "You are a professional service documentation specialist. Enhance job descriptions to be more detailed, professional, and technically accurate while maintaining the original meaning and facts."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 400,
+        temperature: 0.5,
+      });
+
+      const enhancedDescription = response.choices[0].message.content;
+      
+      res.json({ enhancedDescription });
+    } catch (error) {
+      console.error('Error enhancing job description:', error);
+      res.status(500).json({ message: 'Failed to enhance job description' });
     }
   });
   
