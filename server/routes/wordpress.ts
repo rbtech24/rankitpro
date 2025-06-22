@@ -29,96 +29,133 @@ router.get('/plugin', async (req: Request, res: Response) => {
     // Create ZIP with the plugin using original complete structure
     zip.file('rank-it-pro-plugin/rank-it-pro-plugin.php', pluginCode);
     
-    // Add complete CSS file
-    const cssContent = `/**
- * Rank It Pro Plugin Styles
- * Version: 1.2.1
- */
-.rankitpro-container {
+    // Add original CSS file
+    const cssContent = `/* Rank It Pro WordPress Plugin Styles */
+.rankitpro-container { 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.rankitpro-checkins, .rankitpro-reviews, .rankitpro-blog-posts {
+    display: grid;
+    gap: 20px;
     margin: 20px 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-.rankitpro-loading {
-    padding: 20px;
-    text-align: center;
-    color: #666;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.rankitpro-error {
-    background: #f8d7da;
-    color: #721c24;
-    padding: 15px;
-    border: 1px solid #f5c6cb;
-    border-radius: 4px;
-    margin: 10px 0;
-}
-
-.rankitpro-warning {
-    background: #fff3cd;
-    color: #856404;
-    padding: 15px;
-    border: 1px solid #ffeaa7;
-    border-radius: 4px;
-    margin: 10px 0;
-}
-
-.rankitpro-checkin {
+.rankitpro-checkin, .rankitpro-review, .rankitpro-blog-post {
     background: #fff;
-    border: 1px solid #ddd;
+    border: 1px solid #e1e5e9;
     border-radius: 8px;
-    margin: 15px 0;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.rankitpro-checkin h3 {
+.rankitpro-checkin h3, .rankitpro-blog-post h3 {
     margin: 0 0 10px 0;
-    color: #333;
+    color: #1d2327;
     font-size: 18px;
 }
 
-.rankitpro-meta {
-    color: #666;
+.checkin-date, .post-date {
+    color: #646970;
     font-size: 14px;
-    margin: 10px 0;
+    margin-bottom: 15px;
 }
 
-.rankitpro-content {
+.rankitpro-technician {
+    display: flex;
+    align-items: center;
     margin: 15px 0;
+}
+
+.technician-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #2271b1;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 12px;
+}
+
+.technician-info h4 {
+    margin: 0;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.technician-info .role {
+    font-size: 12px;
+    color: #646970;
+}
+
+.checkin-location, .checkin-notes {
+    margin: 10px 0;
+    color: #1d2327;
+}
+
+.review-rating {
+    margin-bottom: 10px;
+}
+
+.stars {
+    color: #ffb900;
+    font-size: 16px;
+}
+
+.rankitpro-review blockquote {
+    margin: 15px 0;
+    font-style: italic;
+    color: #1d2327;
+    border-left: 3px solid #2271b1;
+    padding-left: 15px;
+}
+
+.rankitpro-review cite {
+    color: #646970;
+    font-size: 14px;
+}
+
+.post-excerpt {
+    color: #1d2327;
+    margin-top: 10px;
     line-height: 1.6;
 }
 
-.rankitpro-photos img {
-    max-width: 100%;
-    height: auto;
-    margin: 10px 10px 10px 0;
-    border-radius: 4px;
+.rankitpro-no-data {
+    text-align: center;
+    padding: 40px;
+    color: #646970;
+    background: #f6f7f7;
+    border-radius: 8px;
+    margin: 20px 0;
 }
 
 @media (max-width: 768px) {
     .rankitpro-container {
-        margin: 10px 0;
+        padding: 0 15px;
     }
     
-    .rankitpro-checkin {
+    .rankitpro-checkin, .rankitpro-review, .rankitpro-blog-post {
         padding: 15px;
-        margin: 10px 0;
     }
 }`;
 
-    // Add complete JS file
+    // Add original JS file with enhanced debugging
     const jsContent = `/**
  * Rank It Pro Plugin JavaScript
- * Version: 1.2.1
+ * Enhanced with debugging for troubleshooting
  */
 (function() {
     'use strict';
     
-    // Initialize plugin when DOM is ready
+    console.log('Rank It Pro: JavaScript file loaded');
+    
+    // Initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initRankItPro);
     } else {
@@ -126,36 +163,51 @@ router.get('/plugin', async (req: Request, res: Response) => {
     }
     
     function initRankItPro() {
-        console.log('Rank It Pro: Plugin JavaScript initialized');
+        console.log('Rank It Pro: Initializing plugin');
         
-        // Find all widget containers
+        // Enhanced widget detection
         const containers = document.querySelectorAll('[data-rankitpro-widget]');
+        console.log('Rank It Pro: Found', containers.length, 'widget containers');
         
         if (containers.length > 0) {
-            console.log('Rank It Pro: Found', containers.length, 'widget containers');
-            
-            // Add loading animation
-            containers.forEach(function(container) {
+            containers.forEach(function(container, index) {
+                console.log('Rank It Pro: Processing container', index + 1, container);
+                
+                const widgetType = container.getAttribute('data-rankitpro-widget');
+                const companyId = container.getAttribute('data-company-id');
+                const limit = container.getAttribute('data-limit');
+                
+                console.log('Rank It Pro: Widget details -', {
+                    type: widgetType,
+                    companyId: companyId,
+                    limit: limit
+                });
+                
+                // Add enhanced loading state
                 if (!container.querySelector('.rankitpro-loading')) {
-                    container.innerHTML = '<div class="rankitpro-loading">Loading Rank It Pro content...</div>';
+                    container.innerHTML = '<div class="rankitpro-loading">Loading ' + widgetType + ' data...</div>';
                 }
             });
+        } else {
+            console.warn('Rank It Pro: No widget containers found on this page');
         }
     }
     
-    // Helper function for responsive images
-    function makeImagesResponsive() {
-        const images = document.querySelectorAll('.rankitpro-photos img');
-        images.forEach(function(img) {
-            img.style.maxWidth = '100%';
-            img.style.height = 'auto';
-        });
-    }
+    // Enhanced error handling
+    window.addEventListener('error', function(e) {
+        if (e.message && e.message.includes('rankitpro')) {
+            console.error('Rank It Pro: JavaScript error detected:', e.message);
+        }
+    });
     
-    // Auto-refresh functionality (if needed)
-    window.rankItProRefresh = function() {
-        console.log('Rank It Pro: Manual refresh triggered');
-        location.reload();
+    // Debugging helper
+    window.rankItProDebug = function() {
+        console.log('=== Rank It Pro Debug Info ===');
+        console.log('Containers found:', document.querySelectorAll('[data-rankitpro-widget]').length);
+        console.log('Loading elements:', document.querySelectorAll('.rankitpro-loading').length);
+        console.log('Error elements:', document.querySelectorAll('.rankitpro-error').length);
+        console.log('Content elements:', document.querySelectorAll('.rankitpro-checkin').length);
+        console.log('===============================');
     };
     
 })();`;
@@ -225,7 +277,7 @@ After activation, go to Settings > Rank It Pro to configure:
     zip.file('rank-it-pro-plugin/assets/js/rank-it-pro.js', jsContent);
     zip.file('rank-it-pro-plugin/readme.txt', readmeContent);
     
-    console.log('Added CSS, JS, and readme files to plugin package');
+    console.log('Added original CSS, enhanced JS, and readme files to plugin package');
 
     console.log('Generating WordPress plugin ZIP v1.2.1...');
     res.setHeader('Content-Type', 'application/zip');
