@@ -196,6 +196,11 @@ async function createSuperAdminIfNotExists() {
   // doesn't interfere with the other routes
   if (app.get("env") === "development") {
     await setupVite(app, server);
+    
+    // Add API catch-all for development AFTER Vite setup
+    app.use('/api/*', (req, res) => {
+      res.status(404).json({ message: 'API endpoint not found' });
+    });
   } else {
     serveStatic(app);
     
