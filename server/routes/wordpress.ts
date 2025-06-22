@@ -491,120 +491,28 @@ Version: 1.0.0`;
 }`;
 
     const jsContent = `jQuery(document).ready(function($) {
-    // Initialize containers
     $('.rankitpro-container').addClass('loaded');
-    
-    // Enhanced check-in interactions
-    $('.rankitpro-checkin').on('click', function(e) {
-        if (!$(e.target).hasClass('checkin-photo')) {
-            $(this).toggleClass('expanded');
-        }
-    });
-    
-    // Photo lightbox functionality
     $('.checkin-photo').on('click', function(e) {
         e.stopPropagation();
         var src = $(this).attr('src');
         var alt = $(this).attr('alt') || 'Service Photo';
-        
-        var lightbox = $('<div class="rankitpro-lightbox">' +
-            '<span class="close">&times;</span>' +
-            '<img src="' + src + '" alt="' + alt + '" />' +
-            '</div>');
-        
+        var lightbox = $('<div class="rankitpro-lightbox"><span class="close">&times;</span><img src="' + src + '" alt="' + alt + '" /></div>');
         $('body').append(lightbox);
-        
-        setTimeout(function() {
-            lightbox.addClass('show');
-        }, 10);
+        setTimeout(function() { lightbox.addClass('show'); }, 10);
     });
-    
-    // Close lightbox
     $(document).on('click', '.rankitpro-lightbox .close, .rankitpro-lightbox', function(e) {
         if (e.target === this) {
             var lightbox = $(this).closest('.rankitpro-lightbox');
             lightbox.removeClass('show');
-            setTimeout(function() {
-                lightbox.remove();
-            }, 300);
+            setTimeout(function() { lightbox.remove(); }, 300);
         }
     });
-    
-    // Escape key to close lightbox
     $(document).on('keydown', function(e) {
-        if (e.keyCode === 27) { // Escape key
+        if (e.keyCode === 27) {
             $('.rankitpro-lightbox').removeClass('show');
-            setTimeout(function() {
-                $('.rankitpro-lightbox').remove();
-            }, 300);
+            setTimeout(function() { $('.rankitpro-lightbox').remove(); }, 300);
         }
     });
-    
-    // Auto-refresh functionality (if enabled)
-    if (typeof rankitpro_ajax !== 'undefined' && rankitpro_ajax.auto_refresh) {
-        setInterval(function() {
-            $.post(rankitpro_ajax.ajax_url, {
-                action: 'rankitpro_sync',
-                nonce: rankitpro_ajax.nonce
-            }).done(function(response) {
-                if (response.success) {
-                    // Optionally reload content or show notification
-                    console.log('Rank It Pro: Data synced successfully');
-                }
-            });
-        }, 300000); // 5 minutes
-    }
-    
-    // Smooth scrolling for internal links
-    $('a[href^="#rankitpro"]').on('click', function(e) {
-        e.preventDefault();
-        var target = $($(this).attr('href'));
-        if (target.length) {
-            $('html, body').animate({
-                scrollTop: target.offset().top - 100
-            }, 500);
-        }
-    });
-    
-    // Loading animation for async content
-    $('.rankitpro-async-content').each(function() {
-        var container = $(this);
-        container.html('<div style="text-align: center; padding: 40px;"><div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></div></div>');
-        
-        // Add CSS for loading spinner
-        if (!$('#rankitpro-spinner-css').length) {
-            $('head').append('<style id="rankitpro-spinner-css">@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>');
-        }
-    });
-    
-    // Enhanced error handling
-    window.rankitproErrorHandler = function(message, element) {
-        if (element) {
-            $(element).html('<div style="padding: 20px; text-align: center; color: #e53e3e; background: #fed7d7; border-radius: 8px; border: 1px solid #feb2b2;">' +
-                '<strong>Unable to load content</strong><br>' +
-                '<span style="font-size: 14px; color: #c53030;">' + message + '</span>' +
-                '</div>');
-        }
-    };
-    
-    // Performance optimization - lazy load images
-    if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.classList.remove('lazy');
-                    imageObserver.unobserve(img);
-                }
-            });
-        });
-        
-        $('.checkin-photo[data-src]').each(function() {
-            imageObserver.observe(this);
-        });
-    }
-    
     console.log('Rank It Pro WordPress Plugin loaded successfully');
 });
 

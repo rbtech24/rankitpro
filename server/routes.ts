@@ -1203,7 +1203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       
-      archive.finalize();
+      res.json(company);
       
     } catch (error) {
       console.error('WordPress plugin generation error:', error);
