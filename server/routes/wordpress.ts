@@ -220,6 +220,15 @@ class RankItProPlugin {
             'rank-it-pro-settings',           // Menu slug
             array($this, 'settings_page')     // Function
         );
+        
+        add_submenu_page(
+            'rank-it-pro',                    // Parent slug
+            'Test & Troubleshoot',            // Page title
+            'Test & Troubleshoot',            // Menu title
+            'manage_options',                 // Capability
+            'rank-it-pro-test',               // Menu slug
+            array($this, 'test_page')         // Function
+        );
     }
     
     public function admin_page() {
@@ -276,54 +285,76 @@ class RankItProPlugin {
             <div class="card" style="max-width: 800px; margin-top: 20px;">
                 <h2>API Connection</h2>
                 <p><strong>Endpoint:</strong> <?php echo esc_html($this->api_endpoint); ?></p>
-                <p><strong>Status:</strong> <span style="color: green;">Connected</span></p>
-                <p><em>Data is automatically synced from your Rank It Pro account.</em></p>
+                <?php
+                $connection_status = $this->test_api_connection();
+                if ($connection_status['connected']) {
+                    echo '<p><strong>Status:</strong> <span style="color: green;">✓ Connected</span></p>';
+                    echo '<p><em>Data is automatically synced from your Rank It Pro account.</em></p>';
+                } else {
+                    echo '<p><strong>Status:</strong> <span style="color: red;">✗ Not Connected</span></p>';
+                    echo '<p><strong>Error:</strong> ' . esc_html($connection_status['error']) . '</p>';
+                    echo '<p><em>Please check your API configuration or contact support.</em></p>';
+                }
+                ?>
             </div>
         </div>
         <?php
     }
     
     public function settings_page() {
+        // Handle form submission
+        if (isset($_POST['submit']) && check_admin_referer('rankitpro_settings_nonce')) {
+            if (!empty($_POST['rankitpro_api_key'])) {
+                update_option('rankitpro_api_key', sanitize_text_field($_POST['rankitpro_api_key']));
+                echo '<div class="notice notice-success"><p>API Key updated successfully!</p></div>';
+            }
+            if (!empty($_POST['rankitpro_cache_duration'])) {
+                update_option('rankitpro_cache_duration', intval($_POST['rankitpro_cache_duration']));
+            }
+        }
+        
+        $saved_api_key = get_option('rankitpro_api_key', '');
+        $cache_duration = get_option('rankitpro_cache_duration', 900);
         ?>
         <div class="wrap">
             <h1>Rank It Pro Settings</h1>
             
-            <form method="post" action="options.php">
-                <?php
-                settings_fields('rankitpro_settings');
-                do_settings_sections('rankitpro_settings');
-                ?>
+            <form method="post" action="">
+                <?php wp_nonce_field('rankitpro_settings_nonce'); ?>
                 
                 <table class="form-table">
                     <tr>
                         <th scope="row">API Endpoint</th>
                         <td>
-                            <input type="text" name="rankitpro_endpoint" value="<?php echo esc_attr($this->api_endpoint); ?>" readonly class="regular-text" />
+                            <input type="text" value="<?php echo esc_attr($this->api_endpoint); ?>" readonly class="regular-text" style="background: #f1f1f1;" />
                             <p class="description">This is automatically configured.</p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row">API Key</th>
                         <td>
-                            <input type="text" name="rankitpro_api_key" value="<?php echo esc_attr(substr($this->api_key, 0, 20) . '...'); ?>" readonly class="regular-text" />
-                            <p class="description">Automatically generated unique key for your site.</p>
+                            <input type="text" name="rankitpro_api_key" value="<?php echo esc_attr($saved_api_key); ?>" class="regular-text" placeholder="Enter your Rank It Pro API key" />
+                            <p class="description">Get your API key from your Rank It Pro dashboard under Integrations > WordPress.</p>
+                            <?php if (empty($saved_api_key)): ?>
+                                <p class="description" style="color: #d63638;"><strong>Required:</strong> Please enter your API key to enable the plugin functionality.</p>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row">Cache Duration</th>
                         <td>
                             <select name="rankitpro_cache_duration">
-                                <option value="300">5 minutes</option>
-                                <option value="900" selected>15 minutes</option>
-                                <option value="1800">30 minutes</option>
-                                <option value="3600">1 hour</option>
+                                <option value="300" <?php selected($cache_duration, 300); ?>>5 minutes</option>
+                                <option value="900" <?php selected($cache_duration, 900); ?>>15 minutes</option>
+                                <option value="1800" <?php selected($cache_duration, 1800); ?>>30 minutes</option>
+                                <option value="3600" <?php selected($cache_duration, 3600); ?>>1 hour</option>
                             </select>
                             <p class="description">How long to cache API responses.</p>
                         </td>
                     </tr>
                 </table>
                 
-                <?php submit_button(); ?>
+                <?php submit_button('Save Settings'); ?>
             </form>
             
             <div class="card" style="margin-top: 20px;">
