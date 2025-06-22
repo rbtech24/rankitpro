@@ -236,10 +236,10 @@ function IntegrationsPage() {
           </p>
         </div>
 
-        <Tabs defaultValue="wordpress" className="w-full">
+        <Tabs defaultValue="embed" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="wordpress">WordPress Plugin</TabsTrigger>
-            <TabsTrigger value="embed">Website Integration</TabsTrigger>
+            <TabsTrigger value="wordpress">WordPress Integration</TabsTrigger>
+            <TabsTrigger value="embed">Website Widget</TabsTrigger>
           </TabsList>
           
           <TabsContent value="wordpress" className="space-y-6">
@@ -355,12 +355,6 @@ function IntegrationsPage() {
               </CardContent>
 
               <CardFooter className="flex flex-col items-start space-y-4">
-                <div className="w-full">
-                  <h4 className="font-medium mb-2">WordPress Plugin</h4>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Contact support for WordPress plugin installation assistance
-                  </p>
-                </div>
               </CardFooter>
             </Card>
           </TabsContent>
