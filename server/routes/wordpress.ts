@@ -16,30 +16,14 @@ router.get('/plugin', async (req: Request, res: Response) => {
     
     try {
       pluginCode = await fs.readFile(pluginPath, 'utf8');
-      // Ensure it's v1.2.1
+      // Ensure it's v1.2.1 with enhanced debugging
       if (!pluginCode.includes('Version: 1.2.1')) {
         pluginCode = pluginCode.replace(/Version: \d+\.\d+\.\d+/, 'Version: 1.2.1');
       }
+      console.log('Using enhanced plugin file with debugging features');
     } catch (error) {
-      // Fallback minimal plugin
-      pluginCode = `<?php
-/*
-Plugin Name: RankItPro Service Integration  
-Plugin URI: https://rankitpro.com
-Description: Display your RankItPro service reports with enhanced debugging
-Version: 1.2.1
-Author: RankItPro
-*/
-
-if (!defined('ABSPATH')) {
-    exit;
-}
-
-function rankitpro_checkins_shortcode() {
-    return '<div data-rankitpro-widget="checkins" class="rankitpro-container"><div class="rankitpro-loading">Loading service reports...</div></div>';
-}
-add_shortcode('rankitpro_checkins', 'rankitpro_checkins_shortcode');
-`;
+      console.error('Could not read plugin file, check if wordpress-plugin/rankitpro-plugin.php exists');
+      return res.status(500).json({ error: 'Plugin file not found' });
     }
 
     // Create ZIP with the plugin
