@@ -483,9 +483,34 @@ class RankItProPlugin {
 }
 
 // Initialize the plugin
-add_action('plugins_loaded', function() {
+function rankitpro_init() {
     new RankItProPlugin();
-});
+}
+add_action('plugins_loaded', 'rankitpro_init');
+
+// Plugin activation hook
+register_activation_hook(__FILE__, 'rankitpro_activate');
+function rankitpro_activate() {
+    // Clear any cached data
+    if (function_exists('wp_cache_flush')) {
+        wp_cache_flush();
+    }
+    
+    // Ensure admin notices are shown
+    add_option('rankitpro_activation_notice', true);
+}
+
+// Show activation notice
+add_action('admin_notices', 'rankitpro_activation_notice');
+function rankitpro_activation_notice() {
+    if (get_option('rankitpro_activation_notice')) {
+        echo '<div class="notice notice-success is-dismissible">';
+        echo '<p><strong>Rank It Pro plugin activated!</strong> You can now use shortcodes like [rankitpro_checkins] in your pages and posts. ';
+        echo '<a href="' . admin_url('admin.php?page=rank-it-pro') . '">Visit plugin settings</a> for more information.</p>';
+        echo '</div>';
+        delete_option('rankitpro_activation_notice');
+    }
+}
 ?>`;
 
     const readmeContent = `# Rank It Pro WordPress Plugin
