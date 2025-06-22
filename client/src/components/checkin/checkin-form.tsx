@@ -450,7 +450,7 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Notes</FormLabel>
+                    <FormLabel>Job Description</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Describe the work performed..."

@@ -85,6 +85,46 @@ router.post('/upload-photos', isAuthenticated, upload.array('photos', 10), async
   }
 });
 
+// PUT endpoint for updating check-ins
+router.put('/:id', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const checkInId = parseInt(req.params.id);
+    const { jobType, notes, location } = req.body;
+    const user = req.session.user;
+
+    if (!user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    // Validate required fields
+    if (!jobType || !notes) {
+      return res.status(400).json({ message: "Job type and job description are required" });
+    }
+
+    // Get existing check-in to verify ownership
+    const existingCheckIn = await storage.getCheckIn(checkInId);
+    if (!existingCheckIn || existingCheckIn.companyId !== user.companyId) {
+      return res.status(404).json({ message: "Check-in not found" });
+    }
+
+    // Update check-in
+    const updatedCheckIn = await storage.updateCheckIn(checkInId, {
+      jobType: jobType.trim(),
+      notes: notes.trim(),
+      location: location?.trim() || existingCheckIn.location
+    });
+
+    if (!updatedCheckIn) {
+      return res.status(500).json({ message: "Failed to update check-in" });
+    }
+
+    res.json(updatedCheckIn);
+  } catch (error) {
+    console.error('Error updating check-in:', error);
+    res.status(500).json({ message: 'Failed to update check-in' });
+  }
+});
+
 // Get check-ins for the current user's company
 router.get('/', isAuthenticated, async (req: Request, res: Response) => {
   try {
