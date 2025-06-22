@@ -415,6 +415,16 @@ router.delete('/:id', isAuthenticated, async (req: Request, res: Response) => {
       return res.status(403).json({ message: 'Access denied' });
     }
     
+    // First delete any related blog posts to avoid foreign key constraint
+    try {
+      const blogPosts = await storage.getBlogPostsByCheckIn(id);
+      for (const blogPost of blogPosts) {
+        await storage.deleteBlogPost(blogPost.id);
+      }
+    } catch (error) {
+      console.warn('Error deleting related blog posts:', error);
+    }
+    
     const success = await storage.deleteCheckIn(id);
     if (success) {
       return res.status(204).send();
