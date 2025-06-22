@@ -163,12 +163,21 @@ router.get('/plugin', async (req: Request, res: Response) => {
     const apiKey = 'rank_it_pro_api_key_' + Date.now();
     const apiEndpoint = 'https://rankitpro.com/api';
     
-    const pluginCode = `<?php
+    // Read the complete plugin file
+    const fs = require('fs');
+    const path = require('path');
+    const pluginTemplate = fs.readFileSync(path.join(__dirname, '../wordpress-plugin-complete.php'), 'utf8');
+    
+    const pluginCode = pluginTemplate
+      .replace(/rank_it_pro_default_key/g, apiKey)
+      .replace(/https:\/\/rankitpro\.com\/api/g, apiEndpoint);
+
+    const oldPluginCode = `<?php
 /*
 Plugin Name: Rank It Pro Integration
 Plugin URI: https://rankitpro.com
-Description: WordPress integration for Rank It Pro SaaS platform
-Version: 1.0.0
+Description: WordPress integration for Rank It Pro SaaS platform with test & troubleshoot features
+Version: 1.1.0
 Author: Rank It Pro
 Text Domain: rank-it-pro
 Domain Path: /languages
@@ -179,7 +188,7 @@ if (!defined('ABSPATH')) {
 }
 
 class RankItProPlugin {
-    private $api_key = '${apiKey}';
+    private $default_api_key = '${apiKey}';
     private $api_endpoint = '${apiEndpoint}';
     
     public function __construct() {
