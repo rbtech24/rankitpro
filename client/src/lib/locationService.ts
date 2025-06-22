@@ -95,21 +95,9 @@ export async function getCurrentLocation(): Promise<LocationData> {
           
           // Try multiple geocoding services as fallback
           let response;
-          try {
-            response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&extratags=1`,
-              { 
-                signal: controller.signal,
-                headers: {
-                  'User-Agent': 'RankItPro/1.0'
-                }
-              }
-            );
-          } catch (primaryError) {
-            // Skip external geocoding services to avoid CORS/network issues
-            console.log('External geocoding services unavailable, using coordinates');
-            return `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-          }
+          // Skip external geocoding services to avoid CORS/network issues
+          console.log('External geocoding services unavailable, using coordinates');
+          return `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
           
           clearTimeout(timeoutId);
 
