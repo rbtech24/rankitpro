@@ -605,7 +605,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTechniciansByCompany(companyId: number): Promise<Technician[]> {
-    return await db.select().from(technicians).where(eq(technicians.companyId, companyId));
+    const technicianData = await db.select().from(technicians).where(eq(technicians.companyId, companyId));
+    
+    // Add check-in counts for each technician
+    const techniciansWithStats = await Promise.all(
+      technicianData.map(async (tech) => {
+        const checkInCount = await db.select({ count: sql<number>`count(*)` })
+          .from(checkIns)
+          .where(eq(checkIns.technicianId, tech.id));
+        
+        const reviewCount = await db.select({ count: sql<number>`count(*)` })
+          .from(reviewResponses)
+          .where(eq(reviewResponses.technicianId, tech.id));
+        
+        return {
+          ...tech,
+          checkinsCount: checkInCount[0]?.count || 0,
+          reviewsCount: reviewCount[0]?.count || 0
+        };
+      })
+    );
+    
+    return techniciansWithStats;
   }
 
   async getTechnicianByUserId(userId: number): Promise<Technician | undefined> {
@@ -856,6 +877,10 @@ export class DatabaseStorage implements IStorage {
 
   async getBlogPostsByCompany(companyId: number): Promise<BlogPost[]> {
     return await db.select().from(blogPosts).where(eq(blogPosts.companyId, companyId));
+  }
+
+  async getBlogPostsByCheckIn(checkInId: number): Promise<BlogPost[]> {
+    return await db.select().from(blogPosts).where(eq(blogPosts.checkInId, checkInId));
   }
 
   async createBlogPost(blogPost: InsertBlogPost): Promise<BlogPost> {

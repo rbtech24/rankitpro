@@ -104,16 +104,24 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
         // Get technician info
         const technician = await storage.getTechnician(checkIn.technicianId);
         
-        // Parse photos from JSON string
+        // Parse photos from JSON string or URL
         let photos = [];
         if (checkIn.photos) {
           try {
+            // Try to parse as JSON first
             const photoUrls = JSON.parse(checkIn.photos);
             photos = Array.isArray(photoUrls) 
               ? photoUrls.map(url => ({ url, filename: url.split('/').pop() || 'image' }))
               : [];
           } catch (e) {
-            console.error('Error parsing photos:', e);
+            // If not JSON, treat as single URL or comma-separated URLs
+            if (checkIn.photos.startsWith('http')) {
+              photos = [{ url: checkIn.photos, filename: checkIn.photos.split('/').pop() || 'image' }];
+            } else if (checkIn.photos.includes('http')) {
+              // Handle comma-separated URLs or other formats
+              const urls = checkIn.photos.split(',').map(url => url.trim()).filter(url => url.startsWith('http'));
+              photos = urls.map(url => ({ url, filename: url.split('/').pop() || 'image' }));
+            }
           }
         }
 
@@ -121,7 +129,15 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
         let formattedLocation = checkIn.location;
         if (checkIn.latitude && checkIn.longitude && (!checkIn.location || checkIn.location.match(/^-?\d+\.?\d*,\s*-?\d+\.?\d*$/))) {
           try {
-            formattedLocation = await reverseGeocode(checkIn.latitude, checkIn.longitude);
+            const fullAddress = await reverseGeocode(checkIn.latitude, checkIn.longitude);
+            // Extract city, state, zip from full address for cleaner display
+            const addressParts = fullAddress.split(', ');
+            if (addressParts.length >= 3) {
+              // Keep last 3 parts: city, state, zip
+              formattedLocation = addressParts.slice(-3).join(', ');
+            } else {
+              formattedLocation = fullAddress;
+            }
           } catch (error) {
             console.warn('Reverse geocoding failed:', error);
             formattedLocation = `${checkIn.latitude}, ${checkIn.longitude}`;
