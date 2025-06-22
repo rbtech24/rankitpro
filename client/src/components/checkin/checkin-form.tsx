@@ -278,9 +278,6 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
       setIsGeneratingContent(false);
     }
   };
-    URL.revokeObjectURL(photoPreviewUrls[index]);
-    setPhotoPreviewUrls(photoPreviewUrls.filter((_, i) => i !== index));
-  };
   
   // Clean up preview URLs when component unmounts
   useEffect(() => {
@@ -542,11 +539,20 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                     <FormControl>
                       <Checkbox
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        disabled={isGeneratingContent}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          if (checked && form.watch("jobType") && form.watch("notes")) {
+                            handleGenerateContent();
+                          }
+                        }}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Create blog post from this check-in</FormLabel>
+                      <FormLabel>
+                        Create blog post from this check-in
+                        {isGeneratingContent && " (Generating...)"}
+                      </FormLabel>
                       <FormDescription>
                         Generate AI-powered content for your website
                       </FormDescription>
