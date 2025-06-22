@@ -18,6 +18,7 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
   
   if (!userId) {
     console.log("AUTH DEBUG: No session found - user not authenticated");
+    res.setHeader('Content-Type', 'application/json');
     return res.status(401).json({ message: "Not authenticated" });
   }
   
@@ -27,6 +28,7 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
     const user = await storage.getUser(userId);
     if (!user) {
       console.log("AUTH DEBUG: User not found in database for ID:", userId);
+      res.setHeader('Content-Type', 'application/json');
       return res.status(401).json({ message: "User not found" });
     }
     
@@ -35,6 +37,7 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
     next();
   } catch (error) {
     console.error("AUTH MIDDLEWARE: Database error:", error);
+    res.setHeader('Content-Type', 'application/json');
     return res.status(500).json({ message: "Server error" });
   }
 };
