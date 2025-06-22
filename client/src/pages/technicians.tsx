@@ -69,13 +69,19 @@ export default function Technicians() {
   React.useEffect(() => {
     if (isAddModalOpen) {
       if (editTechnician) {
+        // Split location into city and state for editing
+        const locationParts = editTechnician.location?.split(', ') || ['', ''];
+        const city = locationParts[0] || '';
+        const state = locationParts[1] || '';
+        
         form.reset({
           name: editTechnician.name,
           email: editTechnician.email,
           phone: editTechnician.phone || "",
           specialty: editTechnician.specialty || "",
           location: editTechnician.location || "",
-
+          city: city,
+          state: state,
         });
       } else {
         form.reset({
@@ -84,6 +90,9 @@ export default function Technicians() {
           phone: "",
           specialty: "",
           location: "",
+          city: "",
+          state: "",
+          password: "",
         });
       }
     }

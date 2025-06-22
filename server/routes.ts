@@ -1250,6 +1250,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create technician
+  app.post("/api/technicians", isAuthenticated, isCompanyAdmin, async (req, res) => {
+    try {
+      const { name, email, phone, specialty, location, city, state, password } = req.body;
+      
+      // Validate required fields
+      if (!name || !email || !phone || !city || !state) {
+        return res.status(400).json({ message: "Name, email, phone, city, and state are required" });
+      }
+      
+      // Check if email already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+      
+      // Combine city and state for location if location not provided
+      const techLocation = location || `${city}, ${state}`;
+      
+      // Create technician
+      const technicianData = {
+        name,
+        email,
+        phone,
+        specialty: specialty || null,
+        location: techLocation,
+        companyId: req.user.companyId,
+        active: true
+      };
+      
+      const technician = await storage.createTechnician(technicianData);
+      
+      // Create user account if password provided
+      if (password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const userData = {
+          email,
+          username: email,
+          password: hashedPassword,
+          role: 'technician' as const,
+          companyId: req.user.companyId
+        };
+        
+        const user = await storage.createUser(userData);
+        
+        // Update technician with user ID
+        await storage.updateTechnician(technician.id, { userId: user.id });
+      }
+      
+      res.status(201).json(technician);
+    } catch (error) {
+      console.error("Error creating technician:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Update technician
+  app.put("/api/technicians/:id", isAuthenticated, isCompanyAdmin, async (req, res) => {
+    try {
+      const technicianId = parseInt(req.params.id);
+      const { name, email, phone, specialty, location, city, state } = req.body;
+      
+      // Validate required fields
+      if (!name || !email || !phone || !city || !state) {
+        return res.status(400).json({ message: "Name, email, phone, city, and state are required" });
+      }
+      
+      // Check if technician exists and belongs to company
+      const existingTechnician = await storage.getTechnician(technicianId);
+      if (!existingTechnician || existingTechnician.companyId !== req.user.companyId) {
+        return res.status(404).json({ message: "Technician not found" });
+      }
+      
+      // Combine city and state for location if location not provided
+      const techLocation = location || `${city}, ${state}`;
+      
+      const updates = {
+        name,
+        email,
+        phone,
+        specialty: specialty || null,
+        location: techLocation
+      };
+      
+      const updatedTechnician = await storage.updateTechnician(technicianId, updates);
+      
+      if (!updatedTechnician) {
+        return res.status(404).json({ message: "Technician not found" });
+      }
+      
+      res.json(updatedTechnician);
+    } catch (error) {
+      console.error("Error updating technician:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Reset technician password
+  app.post("/api/technicians/:id/reset-password", isAuthenticated, isCompanyAdmin, async (req, res) => {
+    try {
+      const technicianId = parseInt(req.params.id);
+      
+      // Check if technician exists and belongs to company
+      const technician = await storage.getTechnician(technicianId);
+      if (!technician || technician.companyId !== req.user.companyId) {
+        return res.status(404).json({ message: "Technician not found" });
+      }
+      
+      // Generate new password
+      const newPassword = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update user password if technician has a user account
+      if (technician.userId) {
+        await storage.updateUser(technician.userId, { password: hashedPassword });
+      }
+      
+      res.json({ newPassword });
+    } catch (error) {
+      console.error("Error resetting technician password:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // CRM Integration routes
   app.get("/api/crm/available", isAuthenticated, async (req, res) => {
     try {
