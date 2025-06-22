@@ -349,19 +349,40 @@ class RankItProPlugin {
             return $cached_data;
         }
         
-        // For now, return placeholder content
+        // Fetch real check-ins from API
+        $checkins_data = $this->fetch_api_data('/api/check-ins', array('limit' => $atts['limit']));
+        
+        if (empty($checkins_data)) {
+            return '<div class="rankitpro-no-data">No check-ins available or API connection failed.</div>';
+        }
+        
         $output = '<div class="rankitpro-checkins">';
-        $output .= '<div class="rankitpro-checkin">';
-        $output .= '<h3>Recent Service Check-In</h3>';
-        $output .= '<div class="checkin-date">Today at 2:30 PM</div>';
-        $output .= '<div class="rankitpro-technician">';
-        $output .= '<div class="technician-avatar">JD</div>';
-        $output .= '<div class="technician-info"><h4>John Doe</h4><span class="role">Senior Technician</span></div>';
-        $output .= '</div>';
-        $output .= '<div class="checkin-location">📍 123 Main Street, City, State</div>';
-        $output .= '<div class="checkin-notes">Completed routine maintenance check. All systems operating normally.</div>';
-        $output .= '</div>';
-        $output .= '</div>';
+        
+        foreach ($checkins_data as $checkin) {
+            $output .= '<div class="rankitpro-checkin" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">';
+            $output .= '<div class="checkin-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">';
+            $output .= '<h3 style="margin: 0; color: #2271b1;">' . esc_html($checkin['jobType']) . '</h3>';
+            $output .= '<span class="checkin-date" style="color: #666; font-size: 14px;">' . date('M j, Y', strtotime($checkin['createdAt'])) . '</span>';
+            $output .= '</div>';
+            $output .= '<div class="checkin-content">';
+            if (!empty($checkin['technicianName'])) {
+                $output .= '<p style="margin: 5px 0;"><strong>Technician:</strong> ' . esc_html($checkin['technicianName']) . '</p>';
+            }
+            if (!empty($checkin['customerName'])) {
+                $output .= '<p style="margin: 5px 0;"><strong>Customer:</strong> ' . esc_html($checkin['customerName']) . '</p>';
+            }
+            if (!empty($checkin['location'])) {
+                $output .= '<p style="margin: 5px 0;"><strong>Location:</strong> ' . esc_html($checkin['location']) . '</p>';
+            }
+            if (!empty($checkin['notes'])) {
+                $output .= '<p style="margin: 5px 0;"><strong>Notes:</strong> ' . esc_html(substr($checkin['notes'], 0, 150)) . '...</p>';
+            }
+            $status_color = !empty($checkin['completed']) ? 'green' : 'orange';
+            $status_text = !empty($checkin['completed']) ? 'Completed' : 'In Progress';
+            $output .= '<p style="margin: 5px 0;"><strong>Status:</strong> <span style="color: ' . $status_color . ';">' . $status_text . '</span></p>';
+            $output .= '</div>';
+            $output .= '</div>';
+        }
         
         $cache_duration = get_option('rankitpro_cache_duration', 900);
         set_transient($cache_key, $output, $cache_duration);
@@ -380,13 +401,47 @@ class RankItProPlugin {
             return '<div class="rankitpro-no-data">Please configure your API key in the plugin settings.</div>';
         }
         
+        // Fetch real reviews from API
+        $params = array('limit' => $atts['limit']);
+        if (!empty($atts['rating'])) {
+            $params['rating'] = $atts['rating'];
+        }
+        $reviews_data = $this->fetch_api_data('/api/reviews', $params);
+        
+        if (empty($reviews_data)) {
+            return '<div class="rankitpro-no-data">No reviews available or API connection failed.</div>';
+        }
+        
         $output = '<div class="rankitpro-reviews">';
-        $output .= '<div class="rankitpro-review">';
-        $output .= '<div class="review-rating"><span class="stars">★★★★★</span> 5/5</div>';
-        $output .= '<blockquote>"Excellent service! The technician was professional and completed the work quickly."</blockquote>';
-        $output .= '<cite>— Sarah Johnson, Verified Customer</cite>';
-        $output .= '</div>';
-        $output .= '</div>';
+        
+        foreach ($reviews_data as $review) {
+            $output .= '<div class="rankitpro-review" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">';
+            
+            // Star rating
+            $rating = intval($review['rating']);
+            $stars = str_repeat('★', $rating) . str_repeat('☆', 5 - $rating);
+            $output .= '<div class="review-rating" style="margin-bottom: 10px;"><span class="stars" style="color: #ffa500; font-size: 18px;">' . $stars . '</span> (' . $rating . '/5)</div>';
+            
+            $output .= '<div class="review-content">';
+            if (!empty($review['content'])) {
+                $output .= '<p style="margin: 0 0 10px 0; font-style: italic;">"' . esc_html($review['content']) . '"</p>';
+            }
+            
+            $author_name = !empty($review['customerName']) ? $review['customerName'] : 'Anonymous';
+            $output .= '<div class="review-author" style="font-weight: bold; color: #666;"><strong>' . esc_html($author_name) . '</strong>';
+            
+            if (!empty($review['jobType'])) {
+                $output .= ' - ' . esc_html($review['jobType']);
+            }
+            
+            if (!empty($review['createdAt'])) {
+                $output .= ' (' . date('M Y', strtotime($review['createdAt'])) . ')';
+            }
+            
+            $output .= '</div>';
+            $output .= '</div>';
+            $output .= '</div>';
+        }
         
         return $output;
     }
@@ -397,13 +452,43 @@ class RankItProPlugin {
             'company' => ''
         ), $atts);
         
+        // Fetch real blog posts from API
+        $params = array('limit' => $atts['limit']);
+        if (!empty($atts['category'])) {
+            $params['category'] = $atts['category'];
+        }
+        $posts_data = $this->fetch_api_data('/api/blog-posts', $params);
+        
+        if (empty($posts_data)) {
+            return '<div class="rankitpro-no-data">No blog posts available or API connection failed.</div>';
+        }
+        
         $output = '<div class="rankitpro-blog-posts">';
-        $output .= '<div class="rankitpro-blog-post">';
-        $output .= '<h3>Latest Service Tips</h3>';
-        $output .= '<div class="post-date">Posted 2 days ago</div>';
-        $output .= '<div class="post-excerpt">Learn about the latest maintenance techniques and best practices for optimal system performance...</div>';
-        $output .= '</div>';
-        $output .= '</div>';
+        
+        foreach ($posts_data as $post) {
+            $output .= '<div class="rankitpro-post" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">';
+            $output .= '<div class="post-header">';
+            
+            $title = !empty($post['title']) ? $post['title'] : 'Untitled Post';
+            $output .= '<h3 style="margin: 0 0 10px 0;"><a href="#" style="text-decoration: none; color: #2271b1;">' . esc_html($title) . '</a></h3>';
+            
+            if (!empty($post['createdAt'])) {
+                $output .= '<div class="post-meta" style="color: #666; font-size: 14px; margin-bottom: 10px;">Published on ' . date('F j, Y', strtotime($post['createdAt'])) . '</div>';
+            }
+            
+            $output .= '</div>';
+            
+            if (!empty($post['content'])) {
+                $excerpt = substr(strip_tags($post['content']), 0, 200) . '...';
+                $output .= '<div class="post-excerpt" style="color: #333; line-height: 1.5;">' . esc_html($excerpt) . '</div>';
+            }
+            
+            if (!empty($post['category'])) {
+                $output .= '<div class="post-category" style="margin-top: 10px;"><span style="background: #2271b1; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px;">' . esc_html($post['category']) . '</span></div>';
+            }
+            
+            $output .= '</div>';
+        }
         
         return $output;
     }
