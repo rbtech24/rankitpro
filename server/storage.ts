@@ -817,6 +817,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(checkIns).where(eq(checkIns.technicianId, technicianId));
   }
 
+  async getReviewsByTechnician(technicianId: number): Promise<any[]> {
+    return await db.select().from(reviewResponses).where(eq(reviewResponses.technicianId, technicianId));
+  }
+
   async getCheckInsWithTechnician(companyId: number): Promise<CheckInWithTechnician[]> {
     const checkInData = await db.select().from(checkIns).where(eq(checkIns.companyId, companyId));
     return checkInData.map(checkIn => ({
