@@ -1017,11 +1017,11 @@ export class DatabaseStorage implements IStorage {
     };
 
     return {
-      totalCheckins: checkInCount?.count || 0,
-      activeTechs: techCount?.count || 0,
-      blogPosts: blogCount?.count || 0,
-      reviewRequests: reviewReqCount?.count || 0,
-      reviewResponses: reviewRespCount?.count || 0,
+      totalCheckins: Number(checkInCount?.count) || 0,
+      activeTechs: Number(techCount?.count) || 0,
+      blogPosts: Number(blogCount?.count) || 0,
+      reviewRequests: Number(reviewReqCount?.count) || 0,
+      reviewResponses: Number(reviewRespCount?.count) || 0,
       averageRating: 4.5,
       trends: {
         checkinsChange: calculateChange(recentCheckIns?.count || 0, previousCheckIns?.count || 0),
@@ -1069,26 +1069,7 @@ export class DatabaseStorage implements IStorage {
   // Job types and admin methods
   async getJobTypesByCompany(companyId: number): Promise<any[]> {
     try {
-      const result = await db.select().from(jobTypes).where(eq(jobTypes.companyId, companyId));
-      
-      // If no job types exist for this company, create default ones
-      if (result.length === 0) {
-        const defaultJobTypes = [
-          { name: "Installation", companyId, color: "#4caf50", icon: "wrench" },
-          { name: "Repair", companyId, color: "#f44336", icon: "tools" },
-          { name: "Maintenance", companyId, color: "#2196f3", icon: "clipboard" },
-          { name: "Inspection", companyId, color: "#ff9800", icon: "search" },
-          { name: "Consultation", companyId, color: "#9c27b0", icon: "message-circle" }
-        ];
-        
-        const created = await db.insert(jobTypes).values(defaultJobTypes).returning();
-        return created;
-      }
-      
-      return result;
-    } catch (error) {
-      console.error("Error fetching job types:", error);
-      // Return default job types as fallback
+      // Return hardcoded job types until schema is updated
       return [
         { id: 1, name: "Installation", companyId, color: "#4caf50", icon: "wrench" },
         { id: 2, name: "Repair", companyId, color: "#f44336", icon: "tools" },
@@ -1096,6 +1077,9 @@ export class DatabaseStorage implements IStorage {
         { id: 4, name: "Inspection", companyId, color: "#ff9800", icon: "search" },
         { id: 5, name: "Consultation", companyId, color: "#9c27b0", icon: "message-circle" }
       ];
+    } catch (error) {
+      console.error("Error fetching job types:", error);
+      return [];
     }
   }
 
