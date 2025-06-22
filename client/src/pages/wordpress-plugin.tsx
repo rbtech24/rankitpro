@@ -53,8 +53,8 @@ export default function WordPressPlugin() {
       URL.revokeObjectURL(url);
 
       toast({
-        title: "Plugin v1.2.1 Downloaded!",
-        description: "Enhanced debugging version ready for installation",
+        title: "Complete Plugin Downloaded!",
+        description: "Rank It Pro Integration v1.2.1 with all assets ready for installation",
       });
     } catch (error) {
       console.error('Error downloading plugin:', error);
