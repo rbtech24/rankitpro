@@ -479,4 +479,115 @@ router.get('/js-widget/embed-code', isAuthenticated, isCompanyAdmin, async (req:
   }
 });
 
+// GET /api/integration/embed - JavaScript embed widget configuration  
+router.get('/embed', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const companyId = req.user.companyId;
+    if (!companyId) {
+      return res.status(400).json({ message: 'Company ID is required' });
+    }
+
+    const company = await storage.getCompany(companyId);
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
+    }
+    
+    // Generate proper embed code with real data
+    const companySlug = company.name.toLowerCase().replace(/\s+/g, '-');
+    const embedCode = `<div id="rankitpro-widget" data-company="${companyId}" data-slug="${companySlug}"></div>
+<script>
+(function() {
+  const widget = document.createElement('div');
+  widget.innerHTML = '<iframe src="https://rankitpro.com/embed/${companySlug}?company=${companyId}" width="100%" height="400" frameborder="0" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>';
+  document.getElementById('rankitpro-widget').appendChild(widget);
+})();
+</script>`;
+
+    const defaultSettings = {
+      showTechPhotos: true,
+      showCheckInPhotos: true,
+      maxCheckIns: 5,
+      linkFullPosts: true,
+      customCss: '',
+      width: 'full' as const,
+      fixedWidth: 400
+    };
+
+    let settings = defaultSettings;
+    if (company.javaScriptEmbedConfig) {
+      try {
+        const parsed = JSON.parse(company.javaScriptEmbedConfig);
+        if (parsed.settings) {
+          settings = { ...defaultSettings, ...parsed.settings };
+        }
+      } catch (e) {
+        console.error('Error parsing embed config:', e);
+      }
+    }
+    
+    res.json({
+      token: `rit_${companyId}_${Date.now()}`,
+      embedCode,
+      settings
+    });
+  } catch (error) {
+    console.error('Error fetching embed configuration:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// POST /api/integration/embed - Save embed settings
+router.post('/embed', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const companyId = req.user.companyId;
+    if (!companyId) {
+      return res.status(400).json({ message: 'Company ID is required' });
+    }
+
+    const { settings } = req.body;
+    if (!settings) {
+      return res.status(400).json({ message: 'Settings are required' });
+    }
+
+    const company = await storage.getCompany(companyId);
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
+    }
+
+    // Generate embed code with new settings
+    const companySlug = company.name.toLowerCase().replace(/\s+/g, '-');
+    const embedConfig = {
+      settings,
+      companyId,
+      companySlug,
+      generated: new Date().toISOString()
+    };
+
+    const widthStyle = settings.width === 'fixed' ? `${settings.fixedWidth}px` : '100%';
+    const embedCode = `<div id="rankitpro-widget" data-company="${companyId}" data-slug="${companySlug}"></div>
+<script>
+(function() {
+  const widget = document.createElement('div');
+  widget.innerHTML = '<iframe src="https://rankitpro.com/embed/${companySlug}?company=${companyId}&photos=${settings.showCheckInPhotos}&tech=${settings.showTechPhotos}&limit=${settings.maxCheckIns}" width="${widthStyle}" height="400" frameborder="0" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>';
+  document.getElementById('rankitpro-widget').appendChild(widget);
+})();
+</script>`;
+
+    // Update company with new embed configuration
+    await storage.updateCompany(companyId, {
+      javaScriptEmbedConfig: JSON.stringify(embedConfig)
+    });
+
+    res.json({
+      message: 'Embed settings updated successfully',
+      token: `rit_${companyId}_${Date.now()}`,
+      embedCode,
+      settings
+    });
+  } catch (error) {
+    console.error('Error updating embed configuration:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 export default router;
