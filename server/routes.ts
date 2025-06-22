@@ -303,9 +303,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
   });
   
-  // Ensure API routes are processed before static file handling
+  // Critical Security Middleware: Force all API routes to return JSON only
   app.use('/api', (req, res, next) => {
-    res.header('Content-Type', 'application/json');
+    // Override the end method to ensure JSON responses only
+    const originalEnd = res.end;
+    const originalSend = res.send;
+    const originalJson = res.json;
+    
+    // Set JSON headers immediately
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    
+    // Override response methods to prevent HTML
+    res.end = function(chunk?: any, encoding?: any) {
+      if (chunk && typeof chunk === 'string' && chunk.includes('<!DOCTYPE html>')) {
+        // Prevent HTML responses on API routes
+        return originalJson.call(this, { 
+          error: 'API endpoint not found',
+          path: req.originalUrl,
+          method: req.method,
+          timestamp: new Date().toISOString()
+        });
+      }
+      return originalEnd.call(this, chunk, encoding);
+    };
+    
+    res.send = function(body?: any) {
+      if (typeof body === 'string' && body.includes('<!DOCTYPE html>')) {
+        // Prevent HTML responses on API routes
+        return originalJson.call(this, { 
+          error: 'API endpoint not found',
+          path: req.originalUrl,
+          method: req.method,
+          timestamp: new Date().toISOString()
+        });
+      }
+      return originalSend.call(this, body);
+    };
+    
     next();
   });
 
@@ -1632,6 +1667,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.join(process.cwd(), 'public', 'widget-preview.html'));
   });
   
+  // Critical Security Fix: API catch-all handler to prevent HTML responses
+  // This MUST be the last route handler to catch any unmatched API requests
+  app.use('/api/*', (req, res) => {
+    res.status(404).json({ 
+      message: 'API endpoint not found',
+      path: req.originalUrl,
+      method: req.method,
+      timestamp: new Date().toISOString()
+    });
+  });
+
   const httpServer = createServer(app);
   
   return httpServer;
