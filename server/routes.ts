@@ -1498,6 +1498,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register admin routes for subscription management
   app.use("/api/admin", adminRoutes);
   
+  // Company stats endpoint
+  app.get("/api/company-stats", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "Company ID is required" });
+      }
+      
+      const stats = await storage.getCompanyStats(companyId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Get company stats error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Job types endpoint
+  app.get("/api/job-types", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "Company ID is required" });
+      }
+      
+      const jobTypes = await storage.getJobTypesByCompany(companyId);
+      res.json(jobTypes);
+    } catch (error) {
+      console.error("Get job types error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Add embed routes for JavaScript widget
   app.use("/", embedRoutes);
   

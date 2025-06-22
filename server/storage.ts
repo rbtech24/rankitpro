@@ -1068,11 +1068,35 @@ export class DatabaseStorage implements IStorage {
 
   // Job types and admin methods
   async getJobTypesByCompany(companyId: number): Promise<any[]> {
-    return [
-      { id: 1, name: "HVAC Repair", companyId },
-      { id: 2, name: "Plumbing Service", companyId },
-      { id: 3, name: "Electrical Work", companyId }
-    ];
+    try {
+      const result = await db.select().from(jobTypes).where(eq(jobTypes.companyId, companyId));
+      
+      // If no job types exist for this company, create default ones
+      if (result.length === 0) {
+        const defaultJobTypes = [
+          { name: "Installation", companyId, color: "#4caf50", icon: "wrench" },
+          { name: "Repair", companyId, color: "#f44336", icon: "tools" },
+          { name: "Maintenance", companyId, color: "#2196f3", icon: "clipboard" },
+          { name: "Inspection", companyId, color: "#ff9800", icon: "search" },
+          { name: "Consultation", companyId, color: "#9c27b0", icon: "message-circle" }
+        ];
+        
+        const created = await db.insert(jobTypes).values(defaultJobTypes).returning();
+        return created;
+      }
+      
+      return result;
+    } catch (error) {
+      console.error("Error fetching job types:", error);
+      // Return default job types as fallback
+      return [
+        { id: 1, name: "Installation", companyId, color: "#4caf50", icon: "wrench" },
+        { id: 2, name: "Repair", companyId, color: "#f44336", icon: "tools" },
+        { id: 3, name: "Maintenance", companyId, color: "#2196f3", icon: "clipboard" },
+        { id: 4, name: "Inspection", companyId, color: "#ff9800", icon: "search" },
+        { id: 5, name: "Consultation", companyId, color: "#9c27b0", icon: "message-circle" }
+      ];
+    }
   }
 
   async getReviewCount(): Promise<number> {

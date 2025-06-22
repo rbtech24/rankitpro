@@ -93,27 +93,53 @@ export async function getCurrentLocation(): Promise<LocationData> {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
           
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&extratags=1`,
-            { 
-              signal: controller.signal,
-              headers: {
-                'User-Agent': 'RankItPro/1.0'
+          // Try multiple geocoding services as fallback
+          let response;
+          try {
+            response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&extratags=1`,
+              { 
+                signal: controller.signal,
+                headers: {
+                  'User-Agent': 'RankItPro/1.0'
+                }
               }
-            }
-          );
+            );
+          } catch (primaryError) {
+            // Fallback to alternative geocoding service
+            response = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+              { 
+                signal: controller.signal,
+                headers: {
+                  'User-Agent': 'RankItPro/1.0'
+                }
+              }
+            );
+          }
           
           clearTimeout(timeoutId);
 
           if (response.ok) {
             const data = await response.json();
-            const address = data.address || {};
-
-            // Extract address components (no street numbers for privacy)
-            const streetName = address.road || address.street || '';
-            const city = address.city || address.town || address.village || '';
-            const state = address.state || address.province || '';
-            const zipCode = address.postcode || '';
+            
+            // Handle different API response formats
+            let streetName = '', city = '', state = '', zipCode = '';
+            
+            if (data.address) {
+              // OpenStreetMap Nominatim format
+              const address = data.address;
+              streetName = address.road || address.street || '';
+              city = address.city || address.town || address.village || '';
+              state = address.state || address.province || '';
+              zipCode = address.postcode || '';
+            } else if (data.locality) {
+              // BigDataCloud format
+              streetName = data.locality || '';
+              city = data.city || data.localityInfo?.city || '';
+              state = data.principalSubdivision || '';
+              zipCode = data.postcode || '';
+            }
 
             const fullAddress = `${streetName}, ${city}, ${state} ${zipCode}`
               .replace(/,\s*,/g, ',')
@@ -123,10 +149,10 @@ export async function getCurrentLocation(): Promise<LocationData> {
             const locationData: LocationData = {
               latitude: latitude,
               longitude: longitude,
-              streetName: streetName || 'Street not found',
-              city: city || 'City not found',
-              state: state || 'State not found',
-              zipCode: zipCode || 'Zip not found',
+              streetName: streetName || 'Street not available',
+              city: city || 'City not available',
+              state: state || 'State not available',
+              zipCode: zipCode || 'Zip not available',
               fullAddress: fullAddress || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
               accuracy,
               source: sourceType,
