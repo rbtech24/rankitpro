@@ -493,24 +493,42 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 {photos.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {photos.map((photo, index) => {
-                      // Create a fresh preview URL each time to avoid stale blob URLs
-                      const previewUrl = URL.createObjectURL(photo);
+                      // Use a more stable approach for creating preview URLs
+                      const [previewUrl, setPreviewUrl] = React.useState<string>('');
+                      
+                      React.useEffect(() => {
+                        const url = URL.createObjectURL(photo);
+                        setPreviewUrl(url);
+                        
+                        // Cleanup function to revoke the URL when component unmounts
+                        return () => {
+                          URL.revokeObjectURL(url);
+                        };
+                      }, [photo]);
                       
                       return (
-                        <div key={`photo-${index}-${photo.name}-${Date.now()}`} className="relative w-24 h-24 rounded-md border overflow-hidden group bg-gray-100">
-                          <img 
-                            src={previewUrl}
-                            alt={`Preview: ${photo.name}`} 
-                            className="w-full h-full object-cover"
-                            onLoad={() => {
-                              console.log(`Photo preview loaded: ${photo.name}`);
-                            }}
-                            onError={(e) => {
-                              console.error(`Photo preview failed: ${photo.name}`);
-                              // Hide broken images
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
+                        <div key={`photo-${index}-${photo.name}`} className="relative w-24 h-24 rounded-md border overflow-hidden group bg-gray-100">
+                          {previewUrl ? (
+                            <img 
+                              src={previewUrl}
+                              alt={`Preview: ${photo.name}`} 
+                              className="w-full h-full object-cover"
+                              onLoad={() => {
+                                console.log(`Photo preview loaded: ${photo.name}`);
+                              }}
+                              onError={(e) => {
+                                console.error(`Photo preview failed: ${photo.name}`);
+                                // Show a placeholder instead of hiding
+                                e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik00OCA2OEMzNS44NDk3IDY4IDI2IDU4LjE1MDMgMjYgNDZDMjYgMzMuODQ5NyAzNS44NDk3IDI0IDQ4IDI0QzYwLjE1MDMgMjQgNzAgMzMuODQ5NyA3MCA0NkM3MCA1OC4xNTAzIDYwLjE1MDMgNjggNDggNjhaIiBmaWxsPSIjRDFENURCIi8+CjxwYXRoIGQ9Ik00OCA1NkMzOS43OTA5IDU2IDMzIDQ5LjIwOTEgMzMgNDFDMzMgMzIuNzkwOSAzOS43OTA5IDI2IDQ4IDI2QzU2LjIwOTEgMjYgNjMgMzIuNzkwOSA2MyA0MUM2MyA0OS4yMDkxIDU2LjIwOTEgNTYgNDggNTZaIiBmaWxsPSIjQTFBMUFBIi8+CjwvZz4K';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                          )}
                           <Button
                             type="button"
                             variant="destructive"
@@ -529,18 +547,23 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                   </div>
                 )}
                 
-                {isGeneratingContent && (
-                  <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <h4 className="font-medium text-yellow-800 mb-2">Generating AI Content...</h4>
-                    <div className="text-sm text-yellow-700">
-                      Please wait while we generate blog content from your check-in details.
-                    </div>
-                  </div>
-                )}
-                
                 {generatedContent && (
                   <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h4 className="font-medium text-blue-800 mb-2">Generated AI Content</h4>
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-medium text-blue-800">Generated AI Content</h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setGeneratedContent("")}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 6 6 18"/>
+                          <path d="m6 6 12 12"/>
+                        </svg>
+                      </Button>
+                    </div>
                     <div className="text-sm text-blue-700 max-h-32 overflow-y-auto whitespace-pre-wrap">
                       {generatedContent}
                     </div>
