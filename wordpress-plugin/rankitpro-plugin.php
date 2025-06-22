@@ -130,7 +130,11 @@ class RankItProPlugin {
         $api_domain = get_option('rankitpro_api_domain', $this->api_base_url);
         
         if (!$company_id) {
-            return '<div class="rankitpro-error">RankItPro: Company ID not configured. Please check plugin settings.</div>';
+            return '<div class="rankitpro-error">RankItPro: Company ID not configured. Please set Company ID to 16 in plugin settings.</div>';
+        }
+        
+        if (!$api_domain) {
+            return '<div class="rankitpro-error">RankItPro: API Domain not configured. Please set API Domain in plugin settings.</div>';
         }
         
         // Generate unique container ID
