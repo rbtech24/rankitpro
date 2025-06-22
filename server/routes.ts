@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
+import path from "path";
 
 // Extend session interface to include userId
 declare module "express-session" {
@@ -1371,6 +1372,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Add embed routes for JavaScript widget
   app.use("/", embedRoutes);
+  
+  // Serve widget demo and preview files
+  app.get("/widget-demo.html", (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'public', 'widget-demo.html'));
+  });
+  
+  app.get("/widget-preview", (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'public', 'widget-preview.html'));
+  });
   
   const httpServer = createServer(app);
   
