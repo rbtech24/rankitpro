@@ -3360,35 +3360,51 @@ For support, contact Rank It Pro team.
     
 })(jQuery);`;
 
-      // Set proper headers for ZIP download
-      res.setHeader('Content-Type', 'application/zip');
-      res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
-      res.setHeader('Cache-Control', 'no-cache');
+      // Import archiver at the start of the request
+      const archiver = require('archiver');
+      
+      // Remove any conflicting headers
+      res.removeHeader('Content-Type');
+      res.removeHeader('Cache-Control');
+      
+      // Set proper ZIP headers using writeHead
+      res.writeHead(200, {
+        'Content-Type': 'application/zip',
+        'Content-Disposition': 'attachment; filename=rank-it-pro-plugin.zip',
+        'Cache-Control': 'no-cache'
+      });
 
-      // Create archive and pipe to response
+      // Create archive with proper configuration
       const archive = archiver('zip', { zlib: { level: 9 } });
-      archive.pipe(res);
+      
+      let hasErrored = false;
       
       // Handle archiver events
       archive.on('error', function(err) {
-        console.error('Archive error:', err);
+        console.error('WordPress plugin archive error:', err);
+        hasErrored = true;
         if (!res.headersSent) {
           res.status(500).json({ error: 'Archive creation failed' });
         }
       });
 
       archive.on('end', function() {
-        console.log('WordPress plugin archive created successfully, size:', archive.pointer() + ' bytes');
+        if (!hasErrored) {
+          console.log('WordPress plugin archive created successfully, size:', archive.pointer() + ' bytes');
+        }
       });
+      
+      // Pipe archive to response
+      archive.pipe(res);
 
-      // Add files to archive
-      archive.append(pluginCode, { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
-      archive.append(readmeContent, { name: 'rank-it-pro-plugin/readme.txt' });
-      archive.append(cssContent, { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
-      archive.append(jsContent, { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
+      // Add files to archive with proper encoding
+      archive.append(Buffer.from(pluginCode, 'utf8'), { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
+      archive.append(Buffer.from(readmeContent, 'utf8'), { name: 'rank-it-pro-plugin/readme.txt' });
+      archive.append(Buffer.from(cssContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
+      archive.append(Buffer.from(jsContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
       
       // Finalize the archive
-      await archive.finalize();
+      archive.finalize();
       
     } catch (error) {
       console.error('WordPress plugin generation error:', error);
