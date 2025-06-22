@@ -687,16 +687,16 @@ if (!defined('ABSPATH')) {
 }
 
 class RankItProPlugin {
-    private $default_api_key = '${apiKey}';
-    private $api_endpoint = '${apiEndpoint}';
+    private \\$default_api_key = '${apiKey}';
+    private \\$api_endpoint = '${apiEndpoint}';
     
     public function __construct() {
-        add_action('init', array($this, 'plugin_init'));
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
-        add_action('admin_menu', array($this, 'add_admin_menu'));
-        add_shortcode('rankitpro_checkins', array($this, 'display_checkins'));
-        add_shortcode('rankitpro_reviews', array($this, 'display_reviews'));
-        add_shortcode('rankitpro_blog', array($this, 'display_blog_posts'));
+        add_action('init', array(\\$this, 'plugin_init'));
+        add_action('wp_enqueue_scripts', array(\\$this, 'enqueue_scripts'));
+        add_action('admin_menu', array(\\$this, 'add_admin_menu'));
+        add_shortcode('rankitpro_checkins', array(\\$this, 'display_checkins'));
+        add_shortcode('rankitpro_reviews', array(\\$this, 'display_reviews'));
+        add_shortcode('rankitpro_blog', array(\\$this, 'display_blog_posts'));
     }
     
     public function plugin_init() {
@@ -711,13 +711,13 @@ class RankItProPlugin {
     
     public function add_admin_menu() {
         add_menu_page(
-            'Rank It Pro',                    // Page title
-            'Rank It Pro',                    // Menu title
-            'manage_options',                 // Capability
-            'rank-it-pro',                    // Menu slug
-            array($this, 'admin_page'),       // Function
-            'dashicons-star-filled',          // Icon
-            30                                // Position
+            'Rank It Pro',
+            'Rank It Pro',
+            'manage_options',
+            'rank-it-pro',
+            array(\\$this, 'admin_page'),
+            'dashicons-star-filled',
+            30
         );
         
         add_submenu_page(
@@ -726,7 +726,7 @@ class RankItProPlugin {
             'Settings',
             'manage_options',
             'rank-it-pro-settings',
-            array($this, 'settings_page')
+            array(\\$this, 'settings_page')
         );
         
         add_submenu_page(
@@ -735,7 +735,7 @@ class RankItProPlugin {
             'Test & Troubleshoot',
             'manage_options',
             'rank-it-pro-test',
-            array($this, 'test_page')
+            array(\\$this, 'test_page')
         );
     }
     
