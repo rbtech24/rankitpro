@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RankItPro Widget Examples - Non-WordPress Sites</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 60px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid #eee;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #2563eb;
+            margin-bottom: 20px;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        .widget-demo {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RankItPro Widget Examples for Non-WordPress Sites</h1>
+        <p>These examples show how to embed RankItPro widgets on any website using simple HTML and JavaScript.</p>
+
+        <!-- Service Calls Widget -->
+        <div class="section">
+            <h2>1. Service Calls Widget</h2>
+            <p>Shows recent check-ins with photos, job details, and service documentation from your field team.</p>
+
+            <h3>Basic Implementation</h3>
+            <div class="code-block">
+                <pre>&lt;!-- Include the RankItPro widget script --&gt;
+&lt;script src="https://your-domain.com/widget.js"&gt;&lt;/script&gt;
+
+&lt;!-- Widget container with data attributes --&gt;
+&lt;div 
+    data-rankitpro-widget="checkIns"
+    data-company-id="YOUR_COMPANY_ID"
+    data-limit="6"
+    data-columns="3"
+    data-show-images="true"
+    data-title="Recent Service Calls"
+&gt;&lt;/div&gt;</pre>
+            </div>
+
+            <h3>Advanced Configuration</h3>
+            <div class="code-block">
+                <pre>&lt;script&gt;
+// Set global configuration
+window.RankItProConfig = {
+    apiKey: 'YOUR_API_KEY',
+    endpoint: 'https://your-rankitpro-domain.com',
+    companyId: 'YOUR_COMPANY_ID'
+};
+&lt;/script&gt;
+&lt;script src="https://your-domain.com/widget.js"&gt;&lt;/script&gt;
+
+&lt;!-- Multiple service call widgets with different settings --&gt;
+&lt;div 
+    data-rankitpro-widget="checkIns"
+    data-limit="4"
+    data-columns="2"
+    data-show-images="true"
+    data-title="Latest HVAC Services"
+&gt;&lt;/div&gt;
+
+&lt;div 
+    data-rankitpro-widget="checkIns"
+    data-limit="8"
+    data-columns="4"
+    data-show-images="false"
+    data-title="All Recent Services"
+&gt;&lt;/div&gt;</pre>
+            </div>
+
+            <h3>Manual JavaScript Integration</h3>
+            <div class="code-block">
+                <pre>&lt;div id="service-calls-widget"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+// Manual widget initialization
+window.RankItProConfig = {
+    apiKey: 'YOUR_API_KEY',
+    endpoint: 'https://your-rankitpro-domain.com'
+};
+
+// Load the widget script
+const script = document.createElement('script');
+script.src = 'https://your-domain.com/widget.js';
+script.onload = function() {
+    // Initialize service calls widget manually
+    const container = document.getElementById('service-calls-widget');
+    window.RankItPro.widgets.checkIns(container, {
+        companyId: 'YOUR_COMPANY_ID',
+        limit: 6,
+        columns: 3,
+        showImages: true,
+        title: 'Our Recent Professional Services'
+    });
+};
+document.head.appendChild(script);
+&lt;/script&gt;</pre>
+            </div>
+
+            <div class="widget-demo">
+                <strong>Widget Preview:</strong> Service calls would display here with photos, job types, customer names, and service notes in a responsive grid layout.
+            </div>
+        </div>
+
+        <!-- Blog Posts Widget -->
+        <div class="section">
+            <h2>2. Blog Posts Widget</h2>
+            <p>Displays your latest published blog content with featured images, excerpts, and publishing dates.</p>
+
+            <h3>Basic Implementation</h3>
+            <div class="code-block">
+                <pre>&lt;!-- Simple blog posts widget --&gt;
+&lt;script src="https://your-domain.com/widget.js"&gt;&lt;/script&gt;
+
+&lt;div 
+    data-rankitpro-widget="blog"
+    data-company-id="YOUR_COMPANY_ID"
+    data-limit="4"
+    data-columns="2"
+    data-show-images="true"
+    data-title="Latest News &amp; Updates"
+&gt;&lt;/div&gt;</pre>
+            </div>
+
+            <h3>Sidebar Blog Widget</h3>
+            <div class="code-block">
+                <pre>&lt;!-- Perfect for website sidebars --&gt;
+&lt;div 
+    data-rankitpro-widget="blog"
+    data-company-id="YOUR_COMPANY_ID"
+    data-limit="3"
+    data-columns="1"
+    data-show-images="true"
+    data-title="Recent Articles"
+&gt;&lt;/div&gt;</pre>
+            </div>
+
+            <h3>Custom Blog Integration</h3>
+            <div class="code-block">
+                <pre>&lt;div id="blog-section"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+window.RankItProConfig = {
+    apiKey: 'YOUR_API_KEY',
+    endpoint: 'https://your-rankitpro-domain.com'
+};
+
+const script = document.createElement('script');
+script.src = 'https://your-domain.com/widget.js';
+script.onload = function() {
+    const container = document.getElementById('blog-section');
+    window.RankItPro.widgets.blog(container, {
+        companyId: 'YOUR_COMPANY_ID',
+        limit: 6,
+        columns: 3,
+        showImages: true,
+        title: 'Industry Insights & Tips'
+    });
+};
+document.head.appendChild(script);
+&lt;/script&gt;</pre>
+            </div>
+
+            <div class="widget-demo">
+                <strong>Widget Preview:</strong> Blog posts would display here with featured images, titles, publication dates, and excerpts in a clean card layout.
+            </div>
+        </div>
+
+        <!-- Reviews Widget -->
+        <div class="section">
+            <h2>3. Reviews Widget</h2>
+            <p>Customer testimonials with star ratings to build trust and showcase your service quality.</p>
+
+            <h3>Basic Implementation</h3>
+            <div class="code-block">
+                <pre>&lt;!-- Customer reviews widget --&gt;
+&lt;script src="https://your-domain.com/widget.js"&gt;&lt;/script&gt;
+
+&lt;div 
+    data-rankitpro-widget="reviews"
+    data-company-id="YOUR_COMPANY_ID"
+    data-limit="6"
+    data-columns="3"
+    data-title="What Our Customers Say"
+&gt;&lt;/div&gt;</pre>
+            </div>
+
+            <h3>Homepage Testimonials</h3>
+            <div class="code-block">
+                <pre>&lt;!-- Perfect for homepage testimonial sections --&gt;
+&lt;div 
+    data-rankitpro-widget="reviews"
+    data-company-id="YOUR_COMPANY_ID"
+    data-limit="3"
+    data-columns="3"
+    data-title="Trusted by Hundreds of Customers"
+&gt;&lt;/div&gt;</pre>
+            </div>
+
+            <h3>Advanced Reviews Integration</h3>
+            <div class="code-block">
+                <pre>&lt;div id="testimonials-section"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+window.RankItProConfig = {
+    apiKey: 'YOUR_API_KEY',
+    endpoint: 'https://your-rankitpro-domain.com'
+};
+
+const script = document.createElement('script');
+script.src = 'https://your-domain.com/widget.js';
+script.onload = function() {
+    const container = document.getElementById('testimonials-section');
+    window.RankItPro.widgets.reviews(container, {
+        companyId: 'YOUR_COMPANY_ID',
+        limit: 9,
+        columns: 3,
+        title: 'Customer Success Stories'
+    });
+};
+document.head.appendChild(script);
+&lt;/script&gt;</pre>
+            </div>
+
+            <div class="widget-demo">
+                <strong>Widget Preview:</strong> Customer reviews would display here with star ratings, testimonial text, and customer names in an attractive grid layout.
+            </div>
+        </div>
+
+        <!-- Complete Example -->
+        <div class="section">
+            <h2>Complete Website Integration Example</h2>
+            <p>Here's how to integrate all three widgets on a single page:</p>
+
+            <div class="code-block">
+                <pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Your Home Service Company&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!-- Your website header and navigation --&gt;
+    &lt;header&gt;
+        &lt;h1&gt;Professional Home Services&lt;/h1&gt;
+        &lt;nav&gt;
+            &lt;!-- Your navigation menu --&gt;
+        &lt;/nav&gt;
+    &lt;/header&gt;
+
+    &lt;main&gt;
+        &lt;!-- Hero section --&gt;
+        &lt;section class="hero"&gt;
+            &lt;h2&gt;Expert HVAC, Plumbing &amp; Electrical Services&lt;/h2&gt;
+            &lt;p&gt;Trusted by homeowners across the region&lt;/p&gt;
+        &lt;/section&gt;
+
+        &lt;!-- Recent Service Calls Section --&gt;
+        &lt;section class="services-section"&gt;
+            &lt;div 
+                data-rankitpro-widget="checkIns"
+                data-company-id="YOUR_COMPANY_ID"
+                data-limit="6"
+                data-columns="3"
+                data-show-images="true"
+                data-title="Our Recent Professional Work"
+            &gt;&lt;/div&gt;
+        &lt;/section&gt;
+
+        &lt;!-- Customer Reviews Section --&gt;
+        &lt;section class="testimonials-section"&gt;
+            &lt;div 
+                data-rankitpro-widget="reviews"
+                data-company-id="YOUR_COMPANY_ID"
+                data-limit="6"
+                data-columns="3"
+                data-title="What Our Customers Are Saying"
+            &gt;&lt;/div&gt;
+        &lt;/section&gt;
+
+        &lt;!-- Blog Posts Section --&gt;
+        &lt;section class="blog-section"&gt;
+            &lt;div 
+                data-rankitpro-widget="blog"
+                data-company-id="YOUR_COMPANY_ID"
+                data-limit="4"
+                data-columns="2"
+                data-show-images="true"
+                data-title="Helpful Tips &amp; Industry News"
+            &gt;&lt;/div&gt;
+        &lt;/section&gt;
+    &lt;/main&gt;
+
+    &lt;!-- Footer --&gt;
+    &lt;footer&gt;
+        &lt;p&gt;&copy; 2025 Your Home Service Company&lt;/p&gt;
+    &lt;/footer&gt;
+
+    &lt;!-- RankItPro Widget Configuration --&gt;
+    &lt;script&gt;
+    window.RankItProConfig = {
+        apiKey: 'YOUR_API_KEY',
+        endpoint: 'https://your-rankitpro-domain.com',
+        companyId: 'YOUR_COMPANY_ID'
+    };
+    &lt;/script&gt;
+    
+    &lt;!-- Load RankItPro widgets --&gt;
+    &lt;script src="https://your-domain.com/widget.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+            </div>
+        </div>
+
+        <!-- Configuration Options -->
+        <div class="section">
+            <h2>Widget Configuration Options</h2>
+            
+            <h3>Service Calls Widget Options</h3>
+            <ul>
+                <li><strong>data-company-id</strong>: Your unique company identifier (required)</li>
+                <li><strong>data-limit</strong>: Number of service calls to display (default: 6)</li>
+                <li><strong>data-columns</strong>: Grid columns (1, 2, 3, or 4, default: 3)</li>
+                <li><strong>data-show-images</strong>: Show service photos (true/false, default: true)</li>
+                <li><strong>data-title</strong>: Custom widget title</li>
+            </ul>
+
+            <h3>Blog Posts Widget Options</h3>
+            <ul>
+                <li><strong>data-company-id</strong>: Your unique company identifier (required)</li>
+                <li><strong>data-limit</strong>: Number of blog posts to display (default: 6)</li>
+                <li><strong>data-columns</strong>: Grid columns (1, 2, 3, or 4, default: 2)</li>
+                <li><strong>data-show-images</strong>: Show featured images (true/false, default: true)</li>
+                <li><strong>data-title</strong>: Custom widget title</li>
+            </ul>
+
+            <h3>Reviews Widget Options</h3>
+            <ul>
+                <li><strong>data-company-id</strong>: Your unique company identifier (required)</li>
+                <li><strong>data-limit</strong>: Number of reviews to display (default: 6)</li>
+                <li><strong>data-columns</strong>: Grid columns (1, 2, 3, or 4, default: 3)</li>
+                <li><strong>data-title</strong>: Custom widget title</li>
+            </ul>
+        </div>
+
+        <!-- Setup Instructions -->
+        <div class="section">
+            <h2>Setup Instructions</h2>
+            
+            <div class="highlight">
+                <strong>Important:</strong> Replace the following placeholders with your actual values:
+                <ul>
+                    <li><code>YOUR_API_KEY</code>: Your RankItPro API key</li>
+                    <li><code>YOUR_COMPANY_ID</code>: Your unique company identifier</li>
+                    <li><code>https://your-domain.com</code>: Your RankItPro domain</li>
+                </ul>
+            </div>
+
+            <h3>Step-by-Step Setup</h3>
+            <ol>
+                <li><strong>Get Your Credentials:</strong> Log into your RankItPro dashboard to find your API key and company ID</li>
+                <li><strong>Choose Widget Types:</strong> Select which widgets you want to display on your site</li>
+                <li><strong>Copy the Code:</strong> Use the examples above and customize the options</li>
+                <li><strong>Add to Your Website:</strong> Paste the code where you want the widgets to appear</li>
+                <li><strong>Test the Integration:</strong> Verify the widgets load correctly and display your data</li>
+            </ol>
+
+            <h3>Responsive Design</h3>
+            <p>All widgets are fully responsive and will automatically adapt to different screen sizes:</p>
+            <ul>
+                <li><strong>Desktop:</strong> Full grid layout with specified columns</li>
+                <li><strong>Tablet:</strong> Automatically reduces columns for better fit</li>
+                <li><strong>Mobile:</strong> Single column layout for optimal mobile viewing</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
