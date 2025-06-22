@@ -278,45 +278,6 @@ Version: 1.0.0`;
 });
 
 export default router;
-Plugin URI: https://rankitpro.com
-Description: Seamlessly integrate Rank It Pro check-ins with your WordPress website. Display technician visits, generate SEO content, and showcase your service quality.
-Version: 1.0.0
-Author: Rank It Pro
-Author URI: https://rankitpro.com
-License: GPL v2 or later
-Text Domain: rank-it-pro
-*/
-
-// Prevent direct access
-if (!defined('ABSPATH')) {
-    exit;
-}
-
-// Define plugin constants
-define('RANKITPRO_VERSION', '1.0.0');
-define('RANKITPRO_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('RANKITPRO_PLUGIN_PATH', plugin_dir_path(__FILE__));
-
-class RankItProPlugin {
-    
-    private $api_key = '${apiKey}';
-    private $api_endpoint = '${apiEndpoint}';
-    
-    public function __construct() {
-        add_action('init', array($this, 'init'));
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
-        add_action('admin_menu', array($this, 'admin_menu'));
-        add_shortcode('rankitpro_checkins', array($this, 'display_checkins'));
-        add_shortcode('rankitpro_reviews', array($this, 'display_reviews'));
-        add_shortcode('rankitpro_blog', array($this, 'display_blog_posts'));
-        
-        // AJAX handlers
-        add_action('wp_ajax_rankitpro_sync', array($this, 'ajax_sync_data'));
-        add_action('wp_ajax_nopriv_rankitpro_sync', array($this, 'ajax_sync_data'));
-        
-        // Add schema.org markup
-        add_action('wp_head', array($this, 'add_schema_markup'));
-    }
     
     public function init() {
         // Initialize plugin
