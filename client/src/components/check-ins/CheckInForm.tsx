@@ -82,7 +82,6 @@ const checkInFormSchema = insertCheckInSchema
 type CheckInFormValues = z.infer<typeof checkInFormSchema>;
 
 // Job types will be fetched dynamically from API
-];
 
 interface CheckInFormProps {
   technicianId: number;
