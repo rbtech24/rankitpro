@@ -255,6 +255,12 @@ export interface IStorage {
   getBillingOverview(): Promise<any>;
   getRevenueMetrics(): Promise<any>;
   getSubscriptionMetrics(): Promise<any>;
+  
+  // Job Types operations
+  getJobTypesByCompany(companyId: number): Promise<any[]>;
+  createJobType(jobType: any): Promise<any>;
+  updateJobType(id: number, updates: any): Promise<any | undefined>;
+  deleteJobType(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2063,6 +2069,37 @@ export class DatabaseStorage implements IStorage {
       console.error('Error getting monthly revenue for plan:', error);
       return 0;
     }
+  }
+
+  // Job Types operations
+  async getJobTypesByCompany(companyId: number): Promise<any[]> {
+    return queryWithRetry(async () => {
+      return await db.select().from(jobTypes).where(eq(jobTypes.companyId, companyId));
+    });
+  }
+
+  async createJobType(jobType: any): Promise<any> {
+    return queryWithRetry(async () => {
+      const [newJobType] = await db.insert(jobTypes).values(jobType).returning();
+      return newJobType;
+    });
+  }
+
+  async updateJobType(id: number, updates: any): Promise<any | undefined> {
+    return queryWithRetry(async () => {
+      const [updatedJobType] = await db.update(jobTypes)
+        .set(updates)
+        .where(eq(jobTypes.id, id))
+        .returning();
+      return updatedJobType;
+    });
+  }
+
+  async deleteJobType(id: number): Promise<boolean> {
+    return queryWithRetry(async () => {
+      const result = await db.delete(jobTypes).where(eq(jobTypes.id, id));
+      return result.rowCount > 0;
+    });
   }
 }
 
