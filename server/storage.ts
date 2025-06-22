@@ -607,22 +607,31 @@ export class DatabaseStorage implements IStorage {
   async getTechniciansByCompany(companyId: number): Promise<Technician[]> {
     const technicianData = await db.select().from(technicians).where(eq(technicians.companyId, companyId));
     
-    // Add check-in counts for each technician
+    // Add check-in counts for each technician using proper SQL counting
     const techniciansWithStats = await Promise.all(
       technicianData.map(async (tech) => {
-        const checkInCount = await db.select({ count: sql<number>`count(*)` })
-          .from(checkIns)
-          .where(eq(checkIns.technicianId, tech.id));
-        
-        const reviewCount = await db.select({ count: sql<number>`count(*)` })
-          .from(reviewResponses)
-          .where(eq(reviewResponses.technicianId, tech.id));
-        
-        return {
-          ...tech,
-          checkinsCount: checkInCount[0]?.count || 0,
-          reviewsCount: reviewCount[0]?.count || 0
-        };
+        try {
+          const [checkInResult] = await db.select({ count: sql<number>`count(*)::int` })
+            .from(checkIns)
+            .where(eq(checkIns.technicianId, tech.id));
+          
+          const [reviewResult] = await db.select({ count: sql<number>`count(*)::int` })
+            .from(reviewResponses)
+            .where(eq(reviewResponses.technicianId, tech.id));
+          
+          return {
+            ...tech,
+            checkinsCount: Number(checkInResult?.count) || 0,
+            reviewsCount: Number(reviewResult?.count) || 0
+          };
+        } catch (error) {
+          console.warn(`Error getting stats for technician ${tech.id}:`, error);
+          return {
+            ...tech,
+            checkinsCount: 0,
+            reviewsCount: 0
+          };
+        }
       })
     );
     

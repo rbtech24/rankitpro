@@ -108,38 +108,46 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
         let photos = [];
         if (checkIn.photos) {
           try {
-            // Try to parse as JSON first
-            const photoUrls = JSON.parse(checkIn.photos);
-            photos = Array.isArray(photoUrls) 
-              ? photoUrls.map(url => ({ url, filename: url.split('/').pop() || 'image' }))
-              : [];
+            // Try to parse as JSON array first
+            const parsed = JSON.parse(checkIn.photos);
+            if (Array.isArray(parsed)) {
+              photos = parsed.map(url => ({ url, filename: url.split('/').pop() || 'image' }));
+            }
           } catch (e) {
-            // If not JSON, treat as single URL or comma-separated URLs
-            if (checkIn.photos.startsWith('http')) {
-              photos = [{ url: checkIn.photos, filename: checkIn.photos.split('/').pop() || 'image' }];
-            } else if (checkIn.photos.includes('http')) {
-              // Handle comma-separated URLs or other formats
-              const urls = checkIn.photos.split(',').map(url => url.trim()).filter(url => url.startsWith('http'));
-              photos = urls.map(url => ({ url, filename: url.split('/').pop() || 'image' }));
+            // If parsing fails, assume it's a single URL or comma-separated URLs
+            const photoStr = checkIn.photos.toString();
+            if (photoStr.startsWith('http')) {
+              photos = [{ url: photoStr, filename: photoStr.split('/').pop() || 'image' }];
+            } else if (photoStr.includes('http')) {
+              // Extract all URLs from the string
+              const urlMatches = photoStr.match(/https?:\/\/[^\s,\]"]+/g) || [];
+              photos = urlMatches.map(url => ({ url, filename: url.split('/').pop() || 'image' }));
             }
           }
         }
 
         // Format location with reverse geocoding if coordinates exist
         let formattedLocation = checkIn.location;
-        if (checkIn.latitude && checkIn.longitude && (!checkIn.location || checkIn.location.match(/^-?\d+\.?\d*,\s*-?\d+\.?\d*$/))) {
+        
+        // Check if location is just coordinates
+        const isCoordinatesOnly = !checkIn.location || 
+          checkIn.location.match(/^-?\d+\.?\d*,?\s*-?\d+\.?\d*$/) ||
+          checkIn.location === `${checkIn.latitude}, ${checkIn.longitude}`;
+        
+        if (checkIn.latitude && checkIn.longitude && isCoordinatesOnly) {
           try {
-            const fullAddress = await reverseGeocode(checkIn.latitude, checkIn.longitude);
-            // Extract city, state, zip from full address for cleaner display
-            const addressParts = fullAddress.split(', ');
-            if (addressParts.length >= 3) {
-              // Keep last 3 parts: city, state, zip
-              formattedLocation = addressParts.slice(-3).join(', ');
+            const fullAddress = await reverseGeocode(Number(checkIn.latitude), Number(checkIn.longitude));
+            
+            // Extract city, state, zip for cleaner display
+            const parts = fullAddress.split(', ');
+            if (parts.length >= 2) {
+              // Take the last 2-3 parts for city, state format
+              formattedLocation = parts.slice(-3).join(', ');
             } else {
               formattedLocation = fullAddress;
             }
           } catch (error) {
-            console.warn('Reverse geocoding failed:', error);
+            console.warn('Reverse geocoding failed for', checkIn.latitude, checkIn.longitude, ':', error);
             formattedLocation = `${checkIn.latitude}, ${checkIn.longitude}`;
           }
         }
