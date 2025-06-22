@@ -158,39 +158,16 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
         form.setValue("latitude", latitude);
         form.setValue("longitude", longitude);
         
-        // Try to get readable address from coordinates
+        // Use server-side reverse geocoding through our API
         try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
-          );
+          const response = await apiRequest("POST", "/api/reverse-geocode", {
+            latitude,
+            longitude
+          });
           
           if (response.ok) {
             const data = await response.json();
-            
-            // Extract clean address parts
-            const addressParts = [];
-            if (data.address) {
-              if (data.address.house_number && data.address.road) {
-                addressParts.push(`${data.address.house_number} ${data.address.road}`);
-              } else if (data.address.road) {
-                addressParts.push(data.address.road);
-              }
-              
-              if (data.address.city || data.address.town || data.address.village) {
-                addressParts.push(data.address.city || data.address.town || data.address.village);
-              }
-              
-              if (data.address.state) {
-                addressParts.push(data.address.state);
-              }
-              
-              if (data.address.postcode) {
-                addressParts.push(data.address.postcode);
-              }
-            }
-            
-            const formattedAddress = addressParts.length > 0 ? addressParts.join(', ') : data.display_name;
-            form.setValue("location", formattedAddress);
+            form.setValue("location", data.address || formatLocation(latitude, longitude));
           } else {
             form.setValue("location", formatLocation(latitude, longitude));
           }

@@ -1632,6 +1632,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/reviews", reviewRoutes);
   app.use("/api/testimonials", testimonialsRoutes);
   
+  // Add reverse geocoding endpoint
+  app.post("/api/reverse-geocode", async (req, res) => {
+    try {
+      const { latitude, longitude } = req.body;
+      
+      if (!latitude || !longitude) {
+        return res.status(400).json({ error: "Latitude and longitude required" });
+      }
+      
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
+          {
+            headers: {
+              'User-Agent': 'RankItPro/1.0'
+            }
+          }
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Extract clean address parts
+          const addressParts = [];
+          if (data.address) {
+            if (data.address.house_number && data.address.road) {
+              addressParts.push(`${data.address.house_number} ${data.address.road}`);
+            } else if (data.address.road) {
+              addressParts.push(data.address.road);
+            }
+            
+            if (data.address.city || data.address.town || data.address.village) {
+              addressParts.push(data.address.city || data.address.town || data.address.village);
+            }
+            
+            if (data.address.state) {
+              addressParts.push(data.address.state);
+            }
+            
+            if (data.address.postcode) {
+              addressParts.push(data.address.postcode);
+            }
+          }
+          
+          const formattedAddress = addressParts.length > 0 ? addressParts.join(', ') : data.display_name;
+          res.json({ address: formattedAddress });
+        } else {
+          res.json({ address: `${latitude}, ${longitude}` });
+        }
+      } catch (geoError) {
+        console.warn('Reverse geocoding service error:', geoError);
+        res.json({ address: `${latitude}, ${longitude}` });
+      }
+    } catch (error) {
+      console.error('Reverse geocoding endpoint error:', error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
   // Company stats endpoint
   app.get("/api/company-stats", isAuthenticated, async (req, res) => {
     try {
