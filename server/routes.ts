@@ -1645,7 +1645,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { companyId } = req.params;
       const { type = 'all', limit = 10 } = req.query;
 
-      const company = await storage.getCompany(parseInt(companyId));
+      // Validate companyId to prevent NaN database errors
+      const parsedCompanyId = parseInt(companyId);
+      if (isNaN(parsedCompanyId) || parsedCompanyId <= 0) {
+        console.error('Widget error: Invalid company ID:', companyId);
+        return res.status(400).json({ error: 'Invalid company ID' });
+      }
+
+      // Validate limit parameter
+      const parsedLimit = parseInt(String(limit));
+      const validLimit = isNaN(parsedLimit) ? 10 : Math.max(1, Math.min(50, parsedLimit));
+
+      const company = await storage.getCompany(parsedCompanyId);
       if (!company) {
         return res.status(404).json({ error: 'Company not found' });
       }
@@ -1653,18 +1664,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let content: any = {};
 
       if (type === 'checkins' || type === 'all') {
-        const checkins = await storage.getCheckInsByCompany(parseInt(companyId));
-        content.checkins = checkins.slice(0, Number(limit));
+        const checkins = await storage.getCheckInsByCompany(parsedCompanyId);
+        content.checkins = checkins.slice(0, validLimit);
       }
 
       if (type === 'blogs' || type === 'all') {
-        const blogs = await storage.getBlogPostsByCompany(parseInt(companyId));
-        content.blogs = blogs.slice(0, Number(limit));
+        const blogs = await storage.getBlogPostsByCompany(parsedCompanyId);
+        content.blogs = blogs.slice(0, validLimit);
       }
 
       if (type === 'reviews' || type === 'all') {
-        const reviews = await storage.getReviewsByCompany(parseInt(companyId));
-        content.reviews = reviews.slice(0, Number(limit));
+        const reviews = await storage.getReviewsByCompany(parsedCompanyId);
+        content.reviews = reviews.slice(0, validLimit);
       }
 
       const widgetScript = `
