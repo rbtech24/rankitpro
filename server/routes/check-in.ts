@@ -125,6 +125,8 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
       longitude: req.body.longitude ? parseFloat(req.body.longitude) : null,
     };
 
+    console.log('Creating check-in with data:', checkInData);
+
     // Create the check-in
     const checkIn = await storage.createCheckIn(checkInData);
     

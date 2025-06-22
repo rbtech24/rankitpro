@@ -260,27 +260,35 @@ export function CheckInForm({ technicianId, companyId, onSuccess, initialValues 
         form.setValue('longitude', longitude.toString());
         
         // Try to get address from coordinates using reverse geocoding
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`)
           .then(res => res.json())
           .then(data => {
-            if (data.address) {
+            if (data && data.address) {
               const addr = data.address;
               const addressParts = [addr.house_number, addr.road].filter(Boolean);
-              const fullAddress = addressParts.length > 0 ? addressParts.join(' ') : data.display_name;
+              const streetAddress = addressParts.length > 0 ? addressParts.join(' ') : '';
+              const city = addr.city || addr.town || addr.village || addr.county || '';
+              const state = addr.state || addr.province || '';
+              const zip = addr.postcode || '';
               
-              form.setValue('location', `${fullAddress}, ${addr.city || addr.town || addr.village || ''}, ${addr.state || ''} ${addr.postcode || ''}`.trim());
-              form.setValue('address', addressParts.join(' ') || '');
-              form.setValue('city', addr.city || addr.town || addr.village || '');
-              form.setValue('state', addr.state || '');
-              form.setValue('zip', addr.postcode || '');
+              // Create a readable address
+              const fullAddress = [streetAddress, city, state, zip].filter(Boolean).join(', ');
+              
+              form.setValue('location', fullAddress || data.display_name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+              form.setValue('address', streetAddress);
+              form.setValue('city', city);
+              form.setValue('state', state);
+              form.setValue('zip', zip);
             } else {
-              form.setValue('location', `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+              // Fallback to coordinates if no address found
+              form.setValue('location', `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
             }
             setLocationLoading(false);
           })
-          .catch(() => {
+          .catch((error) => {
+            console.warn('Geocoding failed:', error);
             // If reverse geocoding fails, just set the coordinates
-            form.setValue('location', `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+            form.setValue('location', `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
             setLocationLoading(false);
           });
       },
