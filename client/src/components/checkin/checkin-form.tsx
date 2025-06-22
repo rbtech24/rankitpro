@@ -493,30 +493,22 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 {photos.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {photos.map((photo, index) => {
-                      // Ensure we have a valid preview URL
-                      let previewUrl = photoPreviewUrls[index];
-                      if (!previewUrl) {
-                        previewUrl = URL.createObjectURL(photo);
-                        // Update the preview URLs array
-                        const newUrls = [...photoPreviewUrls];
-                        newUrls[index] = previewUrl;
-                        setPhotoPreviewUrls(newUrls);
-                      }
+                      // Create a fresh preview URL each time to avoid stale blob URLs
+                      const previewUrl = URL.createObjectURL(photo);
                       
                       return (
-                        <div key={`photo-${index}-${photo.name}`} className="relative w-24 h-24 rounded-md border overflow-hidden group bg-gray-100">
+                        <div key={`photo-${index}-${photo.name}-${Date.now()}`} className="relative w-24 h-24 rounded-md border overflow-hidden group bg-gray-100">
                           <img 
                             src={previewUrl}
-                            alt={`Photo ${index + 1}: ${photo.name}`} 
+                            alt={`Preview: ${photo.name}`} 
                             className="w-full h-full object-cover"
                             onLoad={() => {
-                              console.log(`Photo ${index + 1} (${photo.name}) loaded successfully`);
+                              console.log(`Photo preview loaded: ${photo.name}`);
                             }}
                             onError={(e) => {
-                              console.error(`Photo ${index + 1} (${photo.name}) failed to load, URL:`, previewUrl);
-                              // Try to recreate the URL one more time
-                              const fallbackUrl = URL.createObjectURL(photo);
-                              e.currentTarget.src = fallbackUrl;
+                              console.error(`Photo preview failed: ${photo.name}`);
+                              // Hide broken images
+                              e.currentTarget.style.display = 'none';
                             }}
                           />
                           <Button

@@ -31,6 +31,8 @@ interface CheckIn {
 
 export default function CheckIns() {
   const [checkInModalOpen, setCheckInModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedCheckIn, setSelectedCheckIn] = useState<CheckIn | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -203,11 +205,8 @@ export default function CheckIns() {
                         handleRequestReview(checkIn.id, checkIn.technician?.id || 0);
                       }}
                       onEdit={() => {
-                        toast({
-                          title: "Edit Feature",
-                          description: "Edit functionality will be available in the next update.",
-                          variant: "default",
-                        });
+                        setSelectedCheckIn(checkIn);
+                        setEditModalOpen(true);
                       }}
                     />
                     <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
