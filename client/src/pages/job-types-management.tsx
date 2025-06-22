@@ -70,17 +70,16 @@ export default function JobTypesManagement() {
 
   const updateJobTypeMutation = useMutation({
     mutationFn: async ({ id, name }: { id: number; name: string }) => {
-      const updatedJobTypes = jobTypes.map(jt => 
-        jt.id === id ? { ...jt, name: name.trim() } : jt
-      );
-      localStorage.setItem('company-job-types', JSON.stringify(updatedJobTypes));
-      return updatedJobTypes.find(jt => jt.id === id);
+      const res = await apiRequest('PUT', `/api/job-types/${id}`, {
+        name: name.trim()
+      });
+      if (!res.ok) {
+        throw new Error('Failed to update job type');
+      }
+      return await res.json();
     },
-    onSuccess: (_, variables) => {
-      const updatedJobTypes = jobTypes.map(jt => 
-        jt.id === variables.id ? { ...jt, name: variables.name.trim() } : jt
-      );
-      setJobTypes(updatedJobTypes);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/job-types'] });
       setEditingId(null);
       setEditingName("");
       toast({
@@ -88,10 +87,10 @@ export default function JobTypesManagement() {
         description: "Job type has been updated successfully.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Failed to update job type. Please try again.",
+        description: error.message || "Failed to update job type. Please try again.",
         variant: "destructive",
       });
     }
@@ -99,21 +98,23 @@ export default function JobTypesManagement() {
 
   const deleteJobTypeMutation = useMutation({
     mutationFn: async (id: number) => {
-      const updatedJobTypes = jobTypes.filter(jt => jt.id !== id);
-      localStorage.setItem('company-job-types', JSON.stringify(updatedJobTypes));
-      return { success: true };
+      const res = await apiRequest('DELETE', `/api/job-types/${id}`);
+      if (!res.ok) {
+        throw new Error('Failed to delete job type');
+      }
+      return await res.json();
     },
-    onSuccess: (_, deletedId) => {
-      setJobTypes(prev => prev.filter(jt => jt.id !== deletedId));
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/job-types'] });
       toast({
         title: "Job Type Deleted",
         description: "Job type has been deleted successfully.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Failed to delete job type. Please try again.",
+        description: error.message || "Failed to delete job type. Please try again.",
         variant: "destructive",
       });
     }
