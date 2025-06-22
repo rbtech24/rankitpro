@@ -240,7 +240,8 @@ class RankItProPlugin {
     }
     
     public function enqueue_scripts() {
-        wp_enqueue_style('rankitpro-style', plugin_dir_url(__FILE__) . 'rankitpro.css', array(), '1.0.0');
+        wp_enqueue_style('rankitpro-style', plugin_dir_url(__FILE__) . 'assets/css/rank-it-pro.css', array(), '1.2.1');
+        wp_enqueue_script('rankitpro-script', plugin_dir_url(__FILE__) . 'assets/js/rank-it-pro.js', array(), '1.2.1', true);
     }
 }
 
