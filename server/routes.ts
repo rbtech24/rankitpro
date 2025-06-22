@@ -43,6 +43,8 @@ import salesRoutes from "./routes/sales";
 import supportRoutes from "./routes/support";
 import embedRoutes from "./routes/embed";
 import publicBlogRoutes from "./routes/public-blog";
+import publicReviewsRoutes from "./routes/public-reviews";
+import publicCompanyRoutes from "./routes/public-company";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
 import { analyticsService } from "./services/analytics-service";
@@ -1327,7 +1329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Public API routes for WordPress plugin (no authentication required)
+  // Public API routes for website widgets (no authentication required)
   app.get("/api/public/check-ins", async (req, res) => {
     try {
       const { company_id, limit = 10 } = req.query;
@@ -1338,13 +1340,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const checkIns = await storage.getCheckInsByCompany(parseInt(company_id as string), parseInt(limit as string));
       
-      // Format for WordPress display
+      // Format for public widget display
       const formattedCheckIns = checkIns.map(checkin => ({
         id: checkin.id,
         jobType: checkin.jobType || 'Service Call',
-        customerName: checkin.customerName || 'Customer',
-        location: checkin.location || checkin.city || 'Location',
-        notes: checkin.notes || checkin.workPerformed || 'Service completed',
+        customerName: checkin.customerName || 'Professional Service',
+        location: checkin.location || checkin.city || 'Service Location',
+        notes: checkin.notes || checkin.workPerformed || 'Quality service completed by our professional team.',
+        photos: checkin.photos || [],
         createdAt: checkin.createdAt,
         completed: true,
         technicianName: 'Professional Technician'
