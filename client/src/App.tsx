@@ -198,6 +198,8 @@ function Router() {
         <Route path="/resources"><Resources /></Route>
         <Route path="/documentation"><Documentation /></Route>
         <Route path="/help-center"><HelpCenter /></Route>
+        <Route path="/support"><SupportPage /></Route>
+        <Route path="/docs"><DocsPage /></Route>
         <Route path="/blog"><Blog /></Route>
         <Route path="/api"><API /></Route>
         <Route path="/careers"><Careers /></Route>
