@@ -58,18 +58,26 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
+    <DashboardLayout>
+      <div className="space-y-6">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Support Center</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Get help with Rank It Pro. Find answers, submit tickets, and connect with our support team.
-          </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Support Center</h1>
+            <p className="text-gray-600 mt-1">Get help and find answers to your questions</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Badge variant="secondary" className="bg-green-100 text-green-800">
+              <CheckCircle className="w-3 h-3 mr-1" />
+              All Systems Operational
+            </Badge>
+          </div>
         </div>
 
-        {/* Quick Help Stats */}
-        <div className="grid md:grid-cols-4 gap-6 mb-12">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Support Options */}
+          <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardContent className="p-6 text-center">
               <Clock className="h-8 w-8 text-blue-600 mx-auto mb-2" />
@@ -382,6 +390,83 @@ export default function SupportPage() {
               <Button variant="outline" size="sm">View Docs</Button>
             </CardContent>
           </Card>
+          </div>
+
+          {/* Right Sidebar - Contact & Status */}
+          <div className="space-y-6">
+            {/* Contact Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Phone className="w-5 h-5 mr-2" />
+                  Contact Support
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <Mail className="w-4 h-4 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Email Support</p>
+                    <p className="text-sm text-gray-600">Available 24/7</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <MessageSquare className="w-4 h-4 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Live Chat</p>
+                    <p className="text-sm text-gray-600">Business hours only</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Clock className="w-4 h-4 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Response Time</p>
+                    <p className="text-sm text-gray-600">Within 24 hours</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* System Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <AlertCircle className="w-5 h-5 mr-2" />
+                  System Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">API Services</span>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    Operational
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">WordPress Plugin</span>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    Operational
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Dashboard</span>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    Operational
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Database</span>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    Operational
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </DashboardLayout>
