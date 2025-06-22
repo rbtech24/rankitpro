@@ -16,9 +16,9 @@ router.get('/plugin', async (req: Request, res: Response) => {
     
     try {
       pluginCode = await fs.readFile(pluginPath, 'utf8');
-      // Ensure it's v1.2.1 with enhanced debugging
-      if (!pluginCode.includes('Version: 1.2.1')) {
-        pluginCode = pluginCode.replace(/Version: \d+\.\d+\.\d+/, 'Version: 1.2.1');
+      // Ensure it's v1.3.0 with enhanced debugging
+      if (!pluginCode.includes('Version: 1.3.0')) {
+        pluginCode = pluginCode.replace(/Version: \d+\.\d+\.\d+/, 'Version: 1.3.0');
       }
       console.log('Using enhanced plugin file with debugging features');
     } catch (error) {
@@ -279,7 +279,7 @@ After activation, go to Settings > Rank It Pro to configure:
     
     console.log('Added original CSS, enhanced JS, and readme files to plugin package');
 
-    console.log('Generating WordPress plugin ZIP v1.2.1...');
+    console.log('Generating WordPress plugin ZIP v1.3.0...');
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

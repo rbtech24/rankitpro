@@ -1,0 +1,114 @@
+/* Rank It Pro WordPress Plugin Styles */
+.rankitpro-container { 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.rankitpro-checkins, .rankitpro-reviews, .rankitpro-blog-posts {
+    display: grid;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.rankitpro-checkin, .rankitpro-review, .rankitpro-blog-post {
+    background: #fff;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.rankitpro-checkin h3, .rankitpro-blog-post h3 {
+    margin: 0 0 10px 0;
+    color: #1d2327;
+    font-size: 18px;
+}
+
+.checkin-date, .post-date {
+    color: #646970;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.rankitpro-technician {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.technician-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #2271b1;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 12px;
+}
+
+.technician-info h4 {
+    margin: 0;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.technician-info .role {
+    font-size: 12px;
+    color: #646970;
+}
+
+.checkin-location, .checkin-notes {
+    margin: 10px 0;
+    color: #1d2327;
+}
+
+.review-rating {
+    margin-bottom: 10px;
+}
+
+.stars {
+    color: #ffb900;
+    font-size: 16px;
+}
+
+.rankitpro-review blockquote {
+    margin: 15px 0;
+    font-style: italic;
+    color: #1d2327;
+    border-left: 3px solid #2271b1;
+    padding-left: 15px;
+}
+
+.rankitpro-review cite {
+    color: #646970;
+    font-size: 14px;
+}
+
+.post-excerpt {
+    color: #1d2327;
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+.rankitpro-no-data {
+    text-align: center;
+    padding: 40px;
+    color: #646970;
+    background: #f6f7f7;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+@media (max-width: 768px) {
+    .rankitpro-container {
+        padding: 0 15px;
+    }
+    
+    .rankitpro-checkin, .rankitpro-review, .rankitpro-blog-post {
+        padding: 15px;
+    }
+}
