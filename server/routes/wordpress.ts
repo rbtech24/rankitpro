@@ -189,6 +189,17 @@ router.get('/plugin', async (req: Request, res: Response) => {
     
     req.user = user; // Set user for downstream code
     console.log('WordPress plugin generation starting for company:', user.companyId);
+    
+    // Remove any conflicting headers first
+    res.removeHeader('Content-Type');
+    res.removeHeader('Cache-Control');
+    
+    // Set proper ZIP headers using writeHead to prevent conflicts
+    res.writeHead(200, {
+      'Content-Type': 'application/zip',
+      'Content-Disposition': 'attachment; filename=rank-it-pro-plugin.zip',
+      'Cache-Control': 'no-cache'
+    });
   
     const companyId = req.user?.companyId;
   
