@@ -201,19 +201,9 @@ export function CheckInForm({ technicianId, companyId, onSuccess, initialValues 
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/check-ins'] });
       
-      // If blog post was created, invalidate blog posts queries too
-      if (form.getValues("createBlogPost")) {
-        queryClient.invalidateQueries({ queryKey: ['/api/blogs'] });
-      }
-      
-      // If review request was sent, invalidate review requests queries too
-      if (form.getValues("sendReviewRequest")) {
-        queryClient.invalidateQueries({ queryKey: ['/api/reviews'] });
-      }
-      
       // Call onSuccess callback if provided
       if (onSuccess) {
-        onSuccess();
+        onSuccess(data);
       }
     },
     onError: (error: Error) => {
