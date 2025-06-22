@@ -1651,7 +1651,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let systemMessage = '';
 
       if (contentType === 'blog') {
-        systemMessage = "You are a professional content writer specializing in service industry blog posts. Write engaging, SEO-friendly content that showcases expertise and builds trust with potential customers.";
+        systemMessage = "You are a professional content writer specializing in service industry blog posts. Write engaging, SEO-friendly content that showcases expertise and builds trust with potential customers. Always respond in English regardless of the input language.";
         prompt = `Create a professional blog post for ${companyName} about a recent ${jobType} service. 
 
 Job Details:
@@ -1666,26 +1666,28 @@ Write an engaging blog post that:
 4. Is SEO-friendly and customer-focused
 5. Includes a call-to-action at the end
 
-Keep it between 200-400 words and make it sound professional yet approachable.`;
+Keep it between 200-400 words and make it sound professional yet approachable.
+
+IMPORTANT: Respond in English only, regardless of the language used in the input.`;
       } else if (contentType === 'service') {
-        systemMessage = "You are a professional customer service communications specialist. Write clear, professional service completion notifications that build trust and encourage future business.";
-        prompt = `Create a professional service completion notification for ${companyName} regarding a ${jobType} service.
+        systemMessage = "You are a professional customer service specialist. Write brief, friendly service completion notifications. Keep responses to 2-3 sentences maximum. Always respond in English regardless of the input language.";
+        prompt = `Write a short, professional service completion message for ${companyName} about completing ${jobType} service.
 
-Service Details:
-- Service Type: ${jobType}
-- Work Completed: ${notes}
-- Service Location: ${location || 'your location'}
+Work completed: ${notes}
+Location: ${location || 'customer location'}
 
-Write a professional service update that:
-1. Confirms service completion
-2. Summarizes work performed
-3. Maintains professional tone
-4. Thanks the customer
-5. Invites future business or feedback
+Requirements:
+- Maximum 2-3 sentences
+- Confirm completion
+- Thank the customer
+- Professional but friendly tone
+- No headers or formatting
 
-Keep it concise (100-200 words) and customer-focused.`;
+Example format: "We've successfully completed your [service] at [location]. [Brief work summary]. Thank you for choosing ${companyName}!"
+
+IMPORTANT: Respond in English only, regardless of the language used in the input.`;
       } else if (contentType === 'both') {
-        systemMessage = "You are a professional content writer specializing in service industry communications. Create both blog content and customer notifications that are professional, engaging, and build trust.";
+        systemMessage = "You are a professional content writer specializing in service industry communications. Create both blog content and customer notifications that are professional, engaging, and build trust. Always respond in English regardless of the input language.";
         prompt = `Create both a blog post AND a service completion notification for ${companyName} regarding a ${jobType} service.
 
 Service Details:
@@ -1697,9 +1699,11 @@ Please provide:
 
 1. BLOG POST: An engaging 200-400 word blog post with title, professional service description, company expertise highlights, SEO-friendly content, and call-to-action.
 
-2. SERVICE NOTIFICATION: A concise 100-200 word professional service completion notification that confirms completion, summarizes work, thanks the customer, and invites future business.
+2. SERVICE NOTIFICATION: A brief 2-3 sentence service completion message that confirms completion, thanks the customer, and maintains a professional tone.
 
-Format clearly with headers "BLOG POST:" and "SERVICE NOTIFICATION:".`;
+Format clearly with headers "BLOG POST:" and "SERVICE NOTIFICATION:".
+
+IMPORTANT: Respond in English only, regardless of the language used in the input.`;
       }
 
       const response = await openai.chat.completions.create({
@@ -1714,7 +1718,7 @@ Format clearly with headers "BLOG POST:" and "SERVICE NOTIFICATION:".`;
             content: prompt
           }
         ],
-        max_tokens: contentType === 'both' ? 1200 : 800,
+        max_tokens: contentType === 'both' ? 1000 : contentType === 'service' ? 150 : 800,
         temperature: 0.7,
       });
 
@@ -1755,14 +1759,16 @@ Please provide an enhanced, professional job description that:
 4. Sounds professional and thorough
 5. Is suitable for service records and customer communication
 
-Return only the enhanced description, no additional text or formatting.`;
+Return only the enhanced description, no additional text or formatting.
+
+IMPORTANT: Respond in English only, regardless of the language used in the input.`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           {
             role: "system",
-            content: "You are a professional service documentation specialist. Enhance job descriptions to be more detailed, professional, and technically accurate while maintaining the original meaning and facts."
+            content: "You are a professional service documentation specialist. Enhance job descriptions to be more detailed, professional, and technically accurate while maintaining the original meaning and facts. Always respond in English regardless of the input language."
           },
           {
             role: "user",
