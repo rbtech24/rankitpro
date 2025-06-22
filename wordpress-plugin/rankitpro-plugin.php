@@ -120,7 +120,7 @@ class RankItProPlugin {
         $api_domain = get_option('rankitpro_api_domain', $this->api_base_url);
         
         if (!$company_id) {
-            return '<div class="rankitpro-error">RankItPro: Company ID not configured. Please check plugin settings.</div>';
+            return '<div class="rankitpro-error">RankItPro: Company ID not configured. Please set Company ID to 16 in plugin settings.</div>';
         }
         
         // Generate unique container ID
@@ -143,7 +143,7 @@ class RankItProPlugin {
             window.RankItProLoaded_<?php echo esc_js($company_id); ?> = true;
             
             var script = document.createElement('script');
-            script.src = '<?php echo esc_js($api_domain); ?>/widget/<?php echo esc_js($company_id); ?>?type=<?php echo esc_js($type); ?>&limit=<?php echo esc_js($limit); ?>';
+            script.src = 'https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/widget/<?php echo esc_js($company_id); ?>?type=<?php echo esc_js($type); ?>&limit=<?php echo esc_js($limit); ?>';
             script.async = true;
             script.onload = function() {
                 // Hide loading message
@@ -153,8 +153,9 @@ class RankItProPlugin {
                 });
             };
             script.onerror = function() {
+                console.error('RankItPro: Failed to load widget script');
                 document.getElementById('<?php echo esc_js($container_id); ?>').innerHTML = 
-                    '<div class="rankitpro-error">Failed to load RankItPro content. Please check your settings.</div>';
+                    '<div class="rankitpro-error">Failed to load RankItPro content. Debug: Script failed to load from server.</div>';
             };
             document.head.appendChild(script);
         })();

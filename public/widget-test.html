@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RankItPro Widget Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 40px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>RankItPro Widget Integration Test</h1>
+    
+    <div class="test-section">
+        <h2>Check-ins Widget</h2>
+        <div data-rankitpro-widget="checkins"></div>
+        <script src="https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/widget/16?type=checkins&limit=5"></script>
+    </div>
+
+    <div class="test-section">
+        <h2>All Content Widget</h2>
+        <div data-rankitpro-widget="all"></div>
+        <script src="https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/widget/16?type=all&limit=10"></script>
+    </div>
+
+    <script>
+        // Debug logging
+        window.addEventListener('load', function() {
+            console.log('Page loaded, checking for RankItPro widgets...');
+            const widgets = document.querySelectorAll('[data-rankitpro-widget]');
+            console.log('Found', widgets.length, 'widget containers');
+        });
+    </script>
+</body>
+</html>
