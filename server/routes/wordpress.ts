@@ -26,12 +26,12 @@ router.get('/plugin', async (req: Request, res: Response) => {
       return res.status(500).json({ error: 'Plugin file not found' });
     }
 
-    // Create ZIP with the plugin
-    zip.file('rankitpro-plugin.php', pluginCode);
+    // Create ZIP with the plugin using original structure
+    zip.file('rank-it-pro-plugin/rank-it-pro-plugin.php', pluginCode);
 
     console.log('Generating WordPress plugin ZIP v1.2.1...');
     res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', 'attachment; filename="rankitpro-plugin-v1.2.1.zip"');
+    res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 
     const zipBuffer = await zip.generateAsync({type: 'nodebuffer'});
