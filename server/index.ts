@@ -164,15 +164,31 @@ async function createSuperAdminIfNotExists() {
     process.exit(1);
   }
 
-  // Add database connection verification
-  try {
-    console.log("🔄 Verifying database connection...");
-    // Import storage to trigger connection initialization
-    const { storage } = await import("./storage");
-    console.log("✅ Database connection verified");
-  } catch (error) {
-    console.error("❌ Database connection verification failed:", error instanceof Error ? error.message : String(error));
-    console.error("The application will continue but database operations may fail");
+  // Add database connection verification with retry logic
+  let dbConnected = false;
+  let retryCount = 0;
+  const maxRetries = 3;
+  
+  while (!dbConnected && retryCount < maxRetries) {
+    try {
+      console.log(`🔄 Verifying database connection... (attempt ${retryCount + 1}/${maxRetries})`);
+      // Import storage to trigger connection initialization
+      const { storage } = await import("./storage");
+      // Test the connection with a simple query
+      await storage.getAllUsers();
+      console.log("✅ Database connection verified");
+      dbConnected = true;
+    } catch (error) {
+      retryCount++;
+      console.error(`❌ Database connection attempt ${retryCount} failed:`, error instanceof Error ? error.message : String(error));
+      
+      if (retryCount < maxRetries) {
+        console.log(`Retrying in ${retryCount * 2} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, retryCount * 2000));
+      } else {
+        console.error("Database connection failed after all retries. The application will continue but database operations may fail");
+      }
+    }
   }
   
   // Admin setup is now handled via one-time setup page

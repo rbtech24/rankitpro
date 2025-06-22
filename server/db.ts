@@ -8,8 +8,11 @@ neonConfig.webSocketConstructor = ws;
 neonConfig.pipelineConnect = false;
 neonConfig.useSecureWebSocket = true;
 neonConfig.fetchConnectionCache = true;
-neonConfig.fetchTimeout = 30000;
-neonConfig.fetchRetries = 3;
+neonConfig.fetchTimeout = 15000;
+neonConfig.fetchRetries = 2;
+
+// Add connection pooling configuration for better stability
+neonConfig.poolQueryViaFetch = true;
 
 function createDatabaseConnection() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -43,11 +46,13 @@ function createDatabaseConnection() {
     // Create connection pool with optimized settings for Neon
     const pool = new Pool({ 
       connectionString: databaseUrl,
-      max: 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 20000,
-      statement_timeout: 30000,
-      application_name: 'rankitpro_saas'
+      max: 5,
+      idleTimeoutMillis: 15000,
+      connectionTimeoutMillis: 10000,
+      statement_timeout: 15000,
+      application_name: 'rankitpro_saas',
+      maxUses: 100,
+      allowExitOnIdle: false
     });
     
     const db = drizzle({ client: pool, schema });
