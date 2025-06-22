@@ -46,15 +46,15 @@ export default function WordPressPlugin() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'rank-it-pro-plugin.zip';
+      a.download = 'rankitpro-plugin-v1.2.1.zip';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
       toast({
-        title: "Plugin Downloaded!",
-        description: "WordPress plugin ZIP file ready for installation",
+        title: "Plugin v1.2.1 Downloaded!",
+        description: "Enhanced debugging version ready for installation",
       });
     } catch (error) {
       console.error('Error downloading plugin:', error);
