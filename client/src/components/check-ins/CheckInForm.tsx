@@ -81,31 +81,7 @@ const checkInFormSchema = insertCheckInSchema
 
 type CheckInFormValues = z.infer<typeof checkInFormSchema>;
 
-const JOB_TYPES = [
-  'Plumbing Repair',
-  'Plumbing Installation',
-  'Drain Cleaning',
-  'Water Heater Service',
-  'Water Heater Installation',
-  'HVAC Maintenance',
-  'HVAC Repair',
-  'HVAC Installation',
-  'Electrical Repair',
-  'Electrical Installation',
-  'Appliance Repair',
-  'General Maintenance',
-  'Roofing Repair',
-  'Roofing Installation',
-  'Landscaping',
-  'Tree Service',
-  'Pest Control',
-  'Carpet Cleaning',
-  'Window Cleaning',
-  'Gutter Cleaning',
-  'Pressure Washing',
-  'Painting',
-  'Flooring Installation',
-  'Other'
+// Job types will be fetched dynamically from API
 ];
 
 interface CheckInFormProps {
@@ -121,6 +97,18 @@ export function CheckInForm({ technicianId, companyId, onSuccess, initialValues 
   const [locationLoading, setLocationLoading] = useState<boolean>(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Fetch job types from API
+  const { data: jobTypes = [], isLoading: jobTypesLoading } = useQuery({
+    queryKey: ['/api/job-types'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/job-types');
+      if (!res.ok) {
+        throw new Error('Failed to fetch job types');
+      }
+      return await res.json();
+    }
+  });
 
   // Create form with initial values
   const form = useForm<CheckInFormValues>({
@@ -346,11 +334,17 @@ export function CheckInForm({ technicianId, companyId, onSuccess, initialValues 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {JOB_TYPES.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
+                      {jobTypesLoading ? (
+                        <SelectItem value="loading" disabled>Loading job types...</SelectItem>
+                      ) : jobTypes && jobTypes.length > 0 ? (
+                        jobTypes.map((jobType: any) => (
+                          <SelectItem key={jobType.id} value={jobType.name}>
+                            {jobType.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="none" disabled>No job types found</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
