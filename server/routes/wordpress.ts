@@ -185,6 +185,7 @@ class RankItProPlugin {
     public function __construct() {
         add_action('init', array($this, 'plugin_init'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
+        add_action('admin_menu', array($this, 'add_admin_menu'));
         add_shortcode('rankitpro_checkins', array($this, 'display_checkins'));
         add_shortcode('rankitpro_reviews', array($this, 'display_reviews'));
         add_shortcode('rankitpro_blog', array($this, 'display_blog_posts'));
@@ -198,6 +199,143 @@ class RankItProPlugin {
     public function enqueue_scripts() {
         wp_enqueue_style('rankitpro-style', plugin_dir_url(__FILE__) . 'assets/css/rank-it-pro.css', array(), '1.0.0');
         wp_enqueue_script('rankitpro-script', plugin_dir_url(__FILE__) . 'assets/js/rank-it-pro.js', array('jquery'), '1.0.0', true);
+    }
+    
+    public function add_admin_menu() {
+        add_menu_page(
+            'Rank It Pro',                    // Page title
+            'Rank It Pro',                    // Menu title
+            'manage_options',                 // Capability
+            'rank-it-pro',                    // Menu slug
+            array($this, 'admin_page'),       // Function
+            'dashicons-star-filled',          // Icon
+            30                                // Position
+        );
+        
+        add_submenu_page(
+            'rank-it-pro',                    // Parent slug
+            'Settings',                       // Page title
+            'Settings',                       // Menu title
+            'manage_options',                 // Capability
+            'rank-it-pro-settings',           // Menu slug
+            array($this, 'settings_page')     // Function
+        );
+    }
+    
+    public function admin_page() {
+        ?>
+        <div class="wrap">
+            <h1>Rank It Pro Integration</h1>
+            <div class="notice notice-info">
+                <p><strong>Plugin Active!</strong> Use the following shortcodes to display content:</p>
+            </div>
+            
+            <div class="card" style="max-width: 800px;">
+                <h2>Available Shortcodes</h2>
+                <table class="wp-list-table widefat fixed striped">
+                    <thead>
+                        <tr>
+                            <th>Shortcode</th>
+                            <th>Description</th>
+                            <th>Attributes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>[rankitpro_checkins]</code></td>
+                            <td>Display service check-ins with photos and technician details</td>
+                            <td>limit, company</td>
+                        </tr>
+                        <tr>
+                            <td><code>[rankitpro_reviews]</code></td>
+                            <td>Show customer reviews with star ratings</td>
+                            <td>limit, company</td>
+                        </tr>
+                        <tr>
+                            <td><code>[rankitpro_blog]</code></td>
+                            <td>Display AI-generated blog posts</td>
+                            <td>limit, company</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="card" style="max-width: 800px; margin-top: 20px;">
+                <h2>Usage Examples</h2>
+                <p><strong>Basic usage:</strong></p>
+                <code>[rankitpro_checkins]</code><br><br>
+                
+                <p><strong>With attributes:</strong></p>
+                <code>[rankitpro_checkins limit="3" company="acme-home-services"]</code><br><br>
+                
+                <p><strong>Multiple shortcodes:</strong></p>
+                <code>[rankitpro_reviews limit="5"]</code><br>
+                <code>[rankitpro_blog limit="3"]</code>
+            </div>
+            
+            <div class="card" style="max-width: 800px; margin-top: 20px;">
+                <h2>API Connection</h2>
+                <p><strong>Endpoint:</strong> <?php echo esc_html($this->api_endpoint); ?></p>
+                <p><strong>Status:</strong> <span style="color: green;">Connected</span></p>
+                <p><em>Data is automatically synced from your Rank It Pro account.</em></p>
+            </div>
+        </div>
+        <?php
+    }
+    
+    public function settings_page() {
+        ?>
+        <div class="wrap">
+            <h1>Rank It Pro Settings</h1>
+            
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('rankitpro_settings');
+                do_settings_sections('rankitpro_settings');
+                ?>
+                
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">API Endpoint</th>
+                        <td>
+                            <input type="text" name="rankitpro_endpoint" value="<?php echo esc_attr($this->api_endpoint); ?>" readonly class="regular-text" />
+                            <p class="description">This is automatically configured.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">API Key</th>
+                        <td>
+                            <input type="text" name="rankitpro_api_key" value="<?php echo esc_attr(substr($this->api_key, 0, 20) . '...'); ?>" readonly class="regular-text" />
+                            <p class="description">Automatically generated unique key for your site.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Cache Duration</th>
+                        <td>
+                            <select name="rankitpro_cache_duration">
+                                <option value="300">5 minutes</option>
+                                <option value="900" selected>15 minutes</option>
+                                <option value="1800">30 minutes</option>
+                                <option value="3600">1 hour</option>
+                            </select>
+                            <p class="description">How long to cache API responses.</p>
+                        </td>
+                    </tr>
+                </table>
+                
+                <?php submit_button(); ?>
+            </form>
+            
+            <div class="card" style="margin-top: 20px;">
+                <h2>Support</h2>
+                <p>For support with the Rank It Pro WordPress plugin:</p>
+                <ul>
+                    <li>Visit: <a href="https://rankitpro.com/support" target="_blank">https://rankitpro.com/support</a></li>
+                    <li>Documentation: <a href="https://rankitpro.com/docs" target="_blank">https://rankitpro.com/docs</a></li>
+                </ul>
+            </div>
+        </div>
+        <?php
     }
     
     public function display_checkins($atts) {
