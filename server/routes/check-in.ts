@@ -98,9 +98,58 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
     const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
     const checkIns = await storage.getCheckInsByCompany(user.companyId, limit);
     
+    // Enrich check-ins with technician data and format photos
+    const enrichedCheckIns = await Promise.all(
+      checkIns.map(async (checkIn) => {
+        // Get technician info
+        const technician = await storage.getTechnician(checkIn.technicianId);
+        
+        // Parse photos from JSON string
+        let photos = [];
+        if (checkIn.photos) {
+          try {
+            const photoUrls = JSON.parse(checkIn.photos);
+            photos = Array.isArray(photoUrls) 
+              ? photoUrls.map(url => ({ url, filename: url.split('/').pop() || 'image' }))
+              : [];
+          } catch (e) {
+            console.error('Error parsing photos:', e);
+          }
+        }
+
+        // Format location with reverse geocoding if coordinates exist
+        let formattedLocation = checkIn.location;
+        if (checkIn.latitude && checkIn.longitude && (!checkIn.location || checkIn.location.match(/^-?\d+\.?\d*,\s*-?\d+\.?\d*$/))) {
+          try {
+            formattedLocation = await reverseGeocode(checkIn.latitude, checkIn.longitude);
+          } catch (error) {
+            console.warn('Reverse geocoding failed:', error);
+            formattedLocation = `${checkIn.latitude}, ${checkIn.longitude}`;
+          }
+        }
+
+        return {
+          ...checkIn,
+          technician: technician ? {
+            id: technician.id,
+            name: technician.name,
+            email: technician.email,
+            specialty: technician.specialty
+          } : {
+            id: 0,
+            name: 'Unknown Technician',
+            email: '',
+            specialty: ''
+          },
+          photos,
+          location: formattedLocation
+        };
+      })
+    );
+    
     // Ensure JSON response
     res.setHeader('Content-Type', 'application/json');
-    return res.json(checkIns);
+    return res.json(enrichedCheckIns);
   } catch (error) {
     console.error('Error fetching check-ins:', error);
     res.setHeader('Content-Type', 'application/json');
@@ -181,14 +230,24 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
     }
 
     // If this check-in should be published as a blog post
-    if (req.body.createBlogPost) {
+    if (req.body.createBlogPost === 'true' || req.body.createBlogPost === true) {
       try {
+        // Format location for AI
+        let aiLocation = checkIn.location;
+        if (checkIn.latitude && checkIn.longitude) {
+          try {
+            aiLocation = await reverseGeocode(checkIn.latitude, checkIn.longitude);
+          } catch (error) {
+            aiLocation = `${checkIn.latitude}, ${checkIn.longitude}`;
+          }
+        }
+
         // Generate blog post content using AI
         const aiProvider: AIProviderType = req.body.aiProvider || 'openai';
         const blogPostResult = await generateBlogPost({
           jobType: checkIn.jobType,
           notes: checkIn.notes || '',
-          location: checkIn.location || undefined,
+          location: aiLocation || 'Service Location',
           technicianName: technician.name
         }, aiProvider);
 
@@ -198,11 +257,18 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
           content: blogPostResult.content,
           companyId: user.companyId!,
           checkInId: checkIn.id,
-          photos: checkIn.photos
+          photos: checkIn.photos,
+          published: true
         });
 
+        console.log('Blog post created successfully:', blogPost.id);
+
         // Send blog post notification
-        await emailService.sendBlogPostNotification(blogPost, user.email);
+        try {
+          await emailService.sendBlogPostNotification(blogPost, user.email);
+        } catch (emailError) {
+          console.warn('Email notification failed:', emailError);
+        }
 
         // Mark the check-in as having been made into a blog post
         await storage.updateCheckIn(checkIn.id, { isBlog: true });
