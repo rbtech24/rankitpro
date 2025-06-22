@@ -211,11 +211,15 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
       const updatedPhotos = [...photos, ...newPhotos];
       setPhotos(updatedPhotos);
       
-      // Create preview URLs - only for new photos to avoid recreating existing ones
-      const newPreviewUrls = newPhotos.map(photo => URL.createObjectURL(photo));
-      setPhotoPreviewUrls([...photoPreviewUrls, ...newPreviewUrls]);
+      // Create preview URLs for ALL photos (existing + new)
+      const allPreviewUrls = updatedPhotos.map(photo => URL.createObjectURL(photo));
+      
+      // Clean up old preview URLs to prevent memory leaks
+      photoPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+      setPhotoPreviewUrls(allPreviewUrls);
       
       console.log(`Added ${newPhotos.length} photos, total: ${updatedPhotos.length}`);
+      console.log(`Preview URLs created:`, allPreviewUrls.length);
     }
   };
   
@@ -486,38 +490,50 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                   </div>
                 </div>
                 
-                {photoPreviewUrls.length > 0 && (
+                {photos.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {photoPreviewUrls.map((url, index) => (
-                      <div key={index} className="relative w-24 h-24 rounded-md border overflow-hidden group">
-                        <img 
-                          src={url} 
-                          alt={`Preview ${index + 1}`} 
-                          className="w-full h-full object-cover"
-                          onLoad={() => console.log(`Photo ${index + 1} loaded successfully`)}
-                          onError={(e) => {
-                            console.error(`Photo ${index + 1} failed to load:`, e);
-                            // Fallback: try to recreate the preview URL
-                            if (photos[index]) {
-                              const newUrl = URL.createObjectURL(photos[index]);
-                              e.currentTarget.src = newUrl;
-                            }
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-0 right-0 hidden group-hover:flex h-6 w-6 rounded-full m-1"
-                          onClick={() => removePhoto(index)}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M18 6 6 18"/>
-                            <path d="m6 6 12 12"/>
-                          </svg>
-                        </Button>
-                      </div>
-                    ))}
+                    {photos.map((photo, index) => {
+                      // Ensure we have a valid preview URL
+                      let previewUrl = photoPreviewUrls[index];
+                      if (!previewUrl) {
+                        previewUrl = URL.createObjectURL(photo);
+                        // Update the preview URLs array
+                        const newUrls = [...photoPreviewUrls];
+                        newUrls[index] = previewUrl;
+                        setPhotoPreviewUrls(newUrls);
+                      }
+                      
+                      return (
+                        <div key={`photo-${index}-${photo.name}`} className="relative w-24 h-24 rounded-md border overflow-hidden group bg-gray-100">
+                          <img 
+                            src={previewUrl}
+                            alt={`Photo ${index + 1}: ${photo.name}`} 
+                            className="w-full h-full object-cover"
+                            onLoad={() => {
+                              console.log(`Photo ${index + 1} (${photo.name}) loaded successfully`);
+                            }}
+                            onError={(e) => {
+                              console.error(`Photo ${index + 1} (${photo.name}) failed to load, URL:`, previewUrl);
+                              // Try to recreate the URL one more time
+                              const fallbackUrl = URL.createObjectURL(photo);
+                              e.currentTarget.src = fallbackUrl;
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-0 right-0 hidden group-hover:flex h-6 w-6 rounded-full m-1"
+                            onClick={() => removePhoto(index)}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M18 6 6 18"/>
+                              <path d="m6 6 12 12"/>
+                            </svg>
+                          </Button>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
                 

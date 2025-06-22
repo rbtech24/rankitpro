@@ -1641,15 +1641,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Job type and notes are required" });
       }
       
-      // Import AI service
-      const { generateBlogPost } = await import("./ai-service");
+      // Import AI service using OpenAI directly
+      const OpenAI = await import("openai");
+      const openai = new OpenAI.default({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
       
-      // Generate content based on check-in data
-      const generatedContent = await generateBlogPost(
-        jobType,
-        notes,
-        location || "Customer location"
-      );
+      // Generate content using OpenAI directly
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a professional content writer for a service company. Create engaging blog content based on completed service work."
+          },
+          {
+            role: "user",
+            content: `Write a professional blog post about a ${jobType} service. Work performed: ${notes}. Location: ${location || "customer location"}. Make it engaging and informative for potential customers.`
+          }
+        ],
+        max_tokens: 500,
+        temperature: 0.7,
+      });
+      
+      const generatedContent = completion.choices[0]?.message?.content || "Content generation failed";
       
       res.json({ 
         content: generatedContent,
