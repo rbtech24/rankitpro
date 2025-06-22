@@ -537,10 +537,19 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                   </div>
                 )}
                 
+                {isGeneratingContent && (
+                  <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <h4 className="font-medium text-yellow-800 mb-2">Generating AI Content...</h4>
+                    <div className="text-sm text-yellow-700">
+                      Please wait while we generate blog content from your check-in details.
+                    </div>
+                  </div>
+                )}
+                
                 {generatedContent && (
                   <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <h4 className="font-medium text-blue-800 mb-2">Generated AI Content</h4>
-                    <div className="text-sm text-blue-700 max-h-32 overflow-y-auto">
+                    <div className="text-sm text-blue-700 max-h-32 overflow-y-auto whitespace-pre-wrap">
                       {generatedContent}
                     </div>
                   </div>
