@@ -140,7 +140,6 @@ export default function BlogEditModal({ isOpen, onClose, blogPost }: BlogEditMod
             <Label htmlFor="content">Content</Label>
             <div className="border rounded-md">
               <Editor
-                apiKey="no-api-key"
                 value={content}
                 onEditorChange={(newContent: string) => setContent(newContent)}
                 init={{
@@ -154,12 +153,18 @@ export default function BlogEditModal({ isOpen, onClose, blogPost }: BlogEditMod
                   toolbar: 'undo redo | blocks | ' +
                     'bold italic forecolor | alignleft aligncenter ' +
                     'alignright alignjustify | bullist numlist outdent indent | ' +
-                    'removeformat | help',
-                  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                    'removeformat | link image | code preview fullscreen | help',
+                  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px; line-height: 1.6; }',
                   placeholder: 'Enter blog post content...',
                   branding: false,
                   statusbar: false,
                   resize: false,
+                  skin: 'oxide',
+                  setup: (editor) => {
+                    editor.on('init', () => {
+                      console.log('TinyMCE editor initialized successfully');
+                    });
+                  }
                 }}
               />
             </div>
