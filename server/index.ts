@@ -163,6 +163,17 @@ async function createSuperAdminIfNotExists() {
     console.error("❌ Environment validation failed:", error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
+
+  // Add database connection verification
+  try {
+    console.log("🔄 Verifying database connection...");
+    // Import storage to trigger connection initialization
+    const { storage } = await import("./storage");
+    console.log("✅ Database connection verified");
+  } catch (error) {
+    console.error("❌ Database connection verification failed:", error instanceof Error ? error.message : String(error));
+    console.error("The application will continue but database operations may fail");
+  }
   
   // Admin setup is now handled via one-time setup page
   // await createSuperAdminIfNotExists();

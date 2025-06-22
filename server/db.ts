@@ -1,14 +1,20 @@
 import { Pool, neonConfig, neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
+import { drizzle as drizzleNode } from 'drizzle-orm/node-postgres';
+import pkg from 'pg';
+const { Client } = pkg;
 import ws from "ws";
 import * as schema from "@shared/schema";
 
-// Configure Neon for optimal connection handling
+// Configure Neon for optimal connection handling with better error handling
 neonConfig.webSocketConstructor = ws;
 neonConfig.pipelineConnect = false;
 neonConfig.useSecureWebSocket = true;
+neonConfig.fetchConnectionCache = true;
+neonConfig.fetchTimeout = 15000; // Reduced timeout to fail faster
+neonConfig.fetchRetries = 2;
 
-function createDatabaseConnection() {
+async function createDatabaseConnection() {
   const databaseUrl = process.env.DATABASE_URL;
   
   if (!databaseUrl) {
@@ -36,38 +42,81 @@ function createDatabaseConnection() {
     throw new Error("DATABASE_URL must be configured in your deployment platform's environment variables");
   }
 
+  // Try Neon serverless first (preferred for production)
+  console.log("🔄 Attempting Neon serverless connection...");
   try {
-    // Create connection pool with optimized settings for Neon
     const pool = new Pool({ 
       connectionString: databaseUrl,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
-      statement_timeout: 30000
+      max: 5, // Conservative pool size
+      idleTimeoutMillis: 10000,
+      connectionTimeoutMillis: 8000, // Shorter timeout to fail fast
+      statement_timeout: 20000,
+      application_name: 'rankitpro_saas'
     });
     
-    const db = drizzle({ client: pool, schema });
+    // Quick connection test
+    const testClient = await pool.connect();
+    await testClient.query('SELECT 1');
+    testClient.release();
     
-    console.log("✅ Database connection initialized");
-    return { pool, db };
-  } catch (error) {
-    console.error("❌ Database connection failed:", error instanceof Error ? error.message : String(error));
-    throw error;
+    const db = drizzle({ client: pool, schema });
+    console.log("✅ Neon serverless connection established");
+    return { pool, db, connectionType: 'neon-serverless' };
+    
+  } catch (neonError) {
+    console.warn("⚠️ Neon serverless connection failed, trying fallback:", 
+      neonError instanceof Error ? neonError.message : String(neonError));
+    
+    // Fallback to standard PostgreSQL client
+    console.log("🔄 Attempting standard PostgreSQL connection...");
+    try {
+      const client = new Client({
+        connectionString: databaseUrl,
+        connectionTimeoutMillis: 10000,
+        query_timeout: 20000,
+        statement_timeout: 20000,
+        application_name: 'rankitpro_saas_fallback'
+      });
+      
+      await client.connect();
+      await client.query('SELECT 1');
+      
+      const db = drizzleNode(client, { schema });
+      console.log("✅ Standard PostgreSQL connection established");
+      return { pool: client, db, connectionType: 'standard-pg' };
+      
+    } catch (pgError) {
+      console.error("❌ All database connection attempts failed");
+      console.error("Neon error:", neonError instanceof Error ? neonError.message : String(neonError));
+      console.error("PostgreSQL error:", pgError instanceof Error ? pgError.message : String(pgError));
+      throw new Error("Failed to establish database connection with both Neon and standard PostgreSQL");
+    }
   }
 }
 
-// Create database connection with error handling
-let pool: Pool;
-let db: ReturnType<typeof drizzle>;
+// Create database connection with error handling - use async initialization
+let pool: Pool | Client;
+let db: ReturnType<typeof drizzle> | ReturnType<typeof drizzleNode>;
+let connectionType: string;
 
-try {
-  const connection = createDatabaseConnection();
-  pool = connection.pool;
-  db = connection.db;
-} catch (error) {
-  console.error("Critical database initialization error:", error);
-  throw error;
-}
+const initializeDatabase = async () => {
+  try {
+    const connection = await createDatabaseConnection();
+    pool = connection.pool;
+    db = connection.db;
+    connectionType = connection.connectionType;
+    return { pool, db, connectionType };
+  } catch (error) {
+    console.error("Critical database initialization error:", error);
+    throw error;
+  }
+};
+
+// Initialize connection immediately but handle it properly
+const dbPromise = initializeDatabase();
+
+// Export a promise-based db getter for initial startup
+export const getDatabase = () => dbPromise;
 
 // Create a query function with retry logic for critical operations
 export async function queryWithRetry<T>(
@@ -106,4 +155,13 @@ export async function queryWithRetry<T>(
   throw lastError!;
 }
 
-export { pool, db };
+// Export the initialized values after promise resolves
+dbPromise.then(({ pool: p, db: d, connectionType: ct }) => {
+  pool = p;
+  db = d;
+  connectionType = ct;
+}).catch(() => {
+  // Error already logged in initializeDatabase
+});
+
+export { pool, db, connectionType };
