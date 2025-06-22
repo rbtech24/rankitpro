@@ -38,6 +38,10 @@ class RankItProPlugin {
         add_shortcode('rankitpro_checkins', array($this, 'display_checkins'));
         add_shortcode('rankitpro_reviews', array($this, 'display_reviews'));
         add_shortcode('rankitpro_blog', array($this, 'display_blog_posts'));
+        add_shortcode('rankitpro_testimonials', array($this, 'display_testimonials'));
+        add_shortcode('rankitpro_services', array($this, 'display_services'));
+        add_shortcode('rankitpro_team', array($this, 'display_team'));
+        add_shortcode('rankitpro_schema', array($this, 'display_schema_markup'));
     }
     
     public function plugin_init() {
@@ -77,6 +81,15 @@ class RankItProPlugin {
             'rank-it-pro-test',
             array($this, 'test_page')
         );
+        
+        add_submenu_page(
+            'rank-it-pro',
+            'Schema Settings',
+            'Schema Settings',
+            'manage_options',
+            'rank-it-pro-schema',
+            array($this, 'schema_page')
+        );
     }
     
     public function admin_page() {
@@ -89,9 +102,37 @@ class RankItProPlugin {
         echo '<div class="notice notice-info"><p><strong>Plugin Status:</strong> <span style="color: ' . $status_color . ';">' . $status . '</span></p></div>';
         echo '<div class="card" style="max-width: 800px;">';
         echo '<h2>Available Shortcodes</h2>';
-        echo '<p><code>[rankitpro_checkins]</code> - Display service check-ins</p>';
-        echo '<p><code>[rankitpro_reviews]</code> - Show customer reviews</p>';
-        echo '<p><code>[rankitpro_blog]</code> - Display blog posts</p>';
+        echo '<div class="shortcode-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin: 20px 0;">';
+        
+        $shortcodes = array(
+            array('code' => '[rankitpro_checkins]', 'desc' => 'Display service check-ins', 'attrs' => 'limit, company'),
+            array('code' => '[rankitpro_reviews]', 'desc' => 'Show customer reviews', 'attrs' => 'limit, company, rating'),
+            array('code' => '[rankitpro_testimonials]', 'desc' => 'Display customer testimonials', 'attrs' => 'limit, company, featured'),
+            array('code' => '[rankitpro_blog]', 'desc' => 'Display blog posts', 'attrs' => 'limit, category'),
+            array('code' => '[rankitpro_services]', 'desc' => 'Show service offerings', 'attrs' => 'limit, category'),
+            array('code' => '[rankitpro_team]', 'desc' => 'Display team members', 'attrs' => 'limit, role'),
+            array('code' => '[rankitpro_schema]', 'desc' => 'Add structured data markup', 'attrs' => 'type, business_id')
+        );
+        
+        foreach ($shortcodes as $shortcode) {
+            echo '<div style="padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9;">';
+            echo '<h4 style="margin: 0 0 10px 0;"><code>' . esc_html($shortcode['code']) . '</code></h4>';
+            echo '<p style="margin: 0 0 10px 0; color: #666;">' . esc_html($shortcode['desc']) . '</p>';
+            echo '<p style="margin: 0; font-size: 12px; color: #999;"><strong>Attributes:</strong> ' . esc_html($shortcode['attrs']) . '</p>';
+            echo '</div>';
+        }
+        
+        echo '</div>';
+        echo '<h3>Shortcode Examples</h3>';
+        echo '<div style="background: #f1f1f1; padding: 15px; border-radius: 5px; font-family: monospace;">';
+        echo '<p><code>[rankitpro_checkins limit="5" company="your-company"]</code></p>';
+        echo '<p><code>[rankitpro_reviews limit="3" rating="5"]</code></p>';
+        echo '<p><code>[rankitpro_testimonials limit="4" featured="true"]</code></p>';
+        echo '<p><code>[rankitpro_blog limit="3" category="tips"]</code></p>';
+        echo '<p><code>[rankitpro_services limit="6"]</code></p>';
+        echo '<p><code>[rankitpro_team limit="4" role="technician"]</code></p>';
+        echo '<p><code>[rankitpro_schema type="LocalBusiness"]</code></p>';
+        echo '</div>';
         echo '<h3>Quick Setup</h3>';
         echo '<ol>';
         echo '<li>Get your API key from <a href="https://rankitpro.com" target="_blank">Rank It Pro dashboard</a></li>';
@@ -111,10 +152,22 @@ class RankItProPlugin {
             if (isset($_POST['rankitpro_cache_duration'])) {
                 update_option('rankitpro_cache_duration', intval($_POST['rankitpro_cache_duration']));
             }
+            if (isset($_POST['rankitpro_company_name'])) {
+                update_option('rankitpro_company_name', sanitize_text_field($_POST['rankitpro_company_name']));
+            }
+            if (isset($_POST['rankitpro_phone'])) {
+                update_option('rankitpro_phone', sanitize_text_field($_POST['rankitpro_phone']));
+            }
+            if (isset($_POST['rankitpro_address'])) {
+                update_option('rankitpro_address', sanitize_text_field($_POST['rankitpro_address']));
+            }
         }
         
         $saved_api_key = get_option('rankitpro_api_key', '');
         $cache_duration = get_option('rankitpro_cache_duration', 900);
+        $company_name = get_option('rankitpro_company_name', '');
+        $phone = get_option('rankitpro_phone', '');
+        $address = get_option('rankitpro_address', '');
         
         echo '<div class="wrap"><h1>Rank It Pro Settings</h1>';
         echo '<form method="post" action="">';
@@ -132,6 +185,18 @@ class RankItProPlugin {
         echo '<option value="3600" ' . selected($cache_duration, 3600, false) . '>1 hour</option>';
         echo '</select>';
         echo '<p class="description">How long to cache API responses for better performance.</p>';
+        echo '</td></tr>';
+        echo '<tr><th scope="row">Company Name</th><td>';
+        echo '<input type="text" name="rankitpro_company_name" value="' . esc_attr($company_name) . '" class="regular-text" placeholder="Your Company Name" />';
+        echo '<p class="description">Used for schema.org markup and display.</p>';
+        echo '</td></tr>';
+        echo '<tr><th scope="row">Phone Number</th><td>';
+        echo '<input type="text" name="rankitpro_phone" value="' . esc_attr($phone) . '" class="regular-text" placeholder="(555) 123-4567" />';
+        echo '<p class="description">Business phone number for schema.org markup.</p>';
+        echo '</td></tr>';
+        echo '<tr><th scope="row">Business Address</th><td>';
+        echo '<input type="text" name="rankitpro_address" value="' . esc_attr($address) . '" class="large-text" placeholder="123 Main St, City, State 12345" />';
+        echo '<p class="description">Full business address for local SEO and schema.org markup.</p>';
         echo '</td></tr></table>';
         submit_button('Save Settings');
         echo '</form></div>';
@@ -210,7 +275,7 @@ class RankItProPlugin {
         );
         
         // Test 4: Shortcode Registration
-        $shortcodes = array('rankitpro_checkins', 'rankitpro_reviews', 'rankitpro_blog');
+        $shortcodes = array('rankitpro_checkins', 'rankitpro_reviews', 'rankitpro_blog', 'rankitpro_testimonials', 'rankitpro_services', 'rankitpro_team', 'rankitpro_schema');
         $registered = 0;
         $shortcode_details = array();
         foreach ($shortcodes as $shortcode) {
@@ -341,6 +406,218 @@ class RankItProPlugin {
         $output .= '</div>';
         
         return $output;
+    }
+    
+    public function display_testimonials($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 3,
+            'company' => '',
+            'featured' => 'false'
+        ), $atts);
+        
+        $api_key = get_option('rankitpro_api_key', '');
+        if (empty($api_key)) {
+            return '<div class="rankitpro-no-data">Please configure your API key in the plugin settings.</div>';
+        }
+        
+        $output = '<div class="rankitpro-testimonials">';
+        $output .= '<div class="rankitpro-testimonial">';
+        $output .= '<div class="testimonial-rating"><span class="stars">★★★★★</span></div>';
+        $output .= '<blockquote>"Outstanding service! The team was professional, punctual, and completed the work perfectly. Highly recommend!"</blockquote>';
+        $output .= '<div class="testimonial-author">';
+        $output .= '<strong>Jennifer Martinez</strong><br>';
+        $output .= '<span class="author-title">Homeowner</span>';
+        $output .= '</div>';
+        $output .= '</div>';
+        $output .= '</div>';
+        
+        return $output;
+    }
+    
+    public function display_services($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 6,
+            'category' => ''
+        ), $atts);
+        
+        $output = '<div class="rankitpro-services">';
+        $output .= '<div class="service-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">';
+        
+        $services = array(
+            'System Installation' => 'Professional installation of new irrigation systems',
+            'Repair Services' => 'Quick and reliable repair for all irrigation issues',
+            'Maintenance Plans' => 'Regular maintenance to keep your system running smoothly',
+            'Winterization' => 'Seasonal preparation to protect your investment'
+        );
+        
+        foreach ($services as $title => $description) {
+            $output .= '<div class="service-item" style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">';
+            $output .= '<h3 style="margin: 0 0 10px 0; color: #2271b1;">' . $title . '</h3>';
+            $output .= '<p style="margin: 0; color: #666;">' . $description . '</p>';
+            $output .= '</div>';
+        }
+        
+        $output .= '</div>';
+        $output .= '</div>';
+        
+        return $output;
+    }
+    
+    public function display_team($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 4,
+            'role' => ''
+        ), $atts);
+        
+        $output = '<div class="rankitpro-team">';
+        $output .= '<div class="team-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">';
+        
+        $team_members = array(
+            array('name' => 'Mike Johnson', 'role' => 'Lead Technician', 'experience' => '8 years'),
+            array('name' => 'Sarah Davis', 'role' => 'Service Specialist', 'experience' => '5 years'),
+            array('name' => 'Tom Wilson', 'role' => 'Installation Expert', 'experience' => '6 years')
+        );
+        
+        foreach ($team_members as $member) {
+            $output .= '<div class="team-member" style="text-align: center; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">';
+            $output .= '<div class="member-avatar" style="width: 80px; height: 80px; border-radius: 50%; background: #2271b1; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto 15px auto; font-size: 24px;">';
+            $output .= substr($member['name'], 0, 2);
+            $output .= '</div>';
+            $output .= '<h4 style="margin: 0 0 5px 0;">' . $member['name'] . '</h4>';
+            $output .= '<p style="margin: 0 0 5px 0; color: #666; font-weight: 500;">' . $member['role'] . '</p>';
+            $output .= '<p style="margin: 0; color: #999; font-size: 14px;">' . $member['experience'] . ' experience</p>';
+            $output .= '</div>';
+        }
+        
+        $output .= '</div>';
+        $output .= '</div>';
+        
+        return $output;
+    }
+    
+    public function display_schema_markup($atts) {
+        $atts = shortcode_atts(array(
+            'type' => 'LocalBusiness',
+            'business_id' => ''
+        ), $atts);
+        
+        $company_name = get_option('rankitpro_company_name', get_bloginfo('name'));
+        $phone = get_option('rankitpro_phone', '');
+        $address = get_option('rankitpro_address', '');
+        
+        $schema = array(
+            '@context' => 'https://schema.org',
+            '@type' => $atts['type'],
+            'name' => $company_name,
+            'url' => home_url(),
+            'description' => get_bloginfo('description')
+        );
+        
+        if (!empty($phone)) {
+            $schema['telephone'] = $phone;
+        }
+        
+        if (!empty($address)) {
+            $schema['address'] = array(
+                '@type' => 'PostalAddress',
+                'streetAddress' => $address
+            );
+        }
+        
+        $schema['openingHours'] = array(
+            'Mo-Fr 08:00-18:00',
+            'Sa 09:00-17:00'
+        );
+        
+        $schema['priceRange'] = '$$';
+        $schema['serviceArea'] = array(
+            '@type' => 'City',
+            'name' => 'Local Service Area'
+        );
+        
+        return '<script type="application/ld+json">' . json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . '</script>';
+    }
+    
+    public function schema_page() {
+        if (isset($_POST['submit']) && check_admin_referer('rankitpro_schema_nonce')) {
+            if (isset($_POST['rankitpro_auto_schema'])) {
+                update_option('rankitpro_auto_schema', sanitize_text_field($_POST['rankitpro_auto_schema']));
+            }
+            if (isset($_POST['rankitpro_business_type'])) {
+                update_option('rankitpro_business_type', sanitize_text_field($_POST['rankitpro_business_type']));
+            }
+            if (isset($_POST['rankitpro_service_areas'])) {
+                update_option('rankitpro_service_areas', sanitize_textarea_field($_POST['rankitpro_service_areas']));
+            }
+            echo '<div class="notice notice-success"><p>Schema settings updated successfully!</p></div>';
+        }
+        
+        $auto_schema = get_option('rankitpro_auto_schema', 'enabled');
+        $business_type = get_option('rankitpro_business_type', 'LocalBusiness');
+        $service_areas = get_option('rankitpro_service_areas', '');
+        
+        echo '<div class="wrap"><h1>Schema.org Settings</h1>';
+        echo '<p>Configure structured data markup for better local SEO and search engine visibility.</p>';
+        
+        echo '<form method="post" action="">';
+        wp_nonce_field('rankitpro_schema_nonce');
+        echo '<table class="form-table">';
+        
+        echo '<tr><th scope="row">Auto Schema Markup</th><td>';
+        echo '<select name="rankitpro_auto_schema">';
+        echo '<option value="enabled" ' . selected($auto_schema, 'enabled', false) . '>Enabled</option>';
+        echo '<option value="disabled" ' . selected($auto_schema, 'disabled', false) . '>Disabled</option>';
+        echo '</select>';
+        echo '<p class="description">Automatically add schema markup to all pages.</p>';
+        echo '</td></tr>';
+        
+        echo '<tr><th scope="row">Business Type</th><td>';
+        echo '<select name="rankitpro_business_type">';
+        $business_types = array(
+            'LocalBusiness' => 'Local Business',
+            'HomeAndConstructionBusiness' => 'Home & Construction',
+            'ProfessionalService' => 'Professional Service',
+            'Electrician' => 'Electrician',
+            'Plumber' => 'Plumber',
+            'HousePainter' => 'House Painter',
+            'LocksmithBusiness' => 'Locksmith',
+            'MovingCompany' => 'Moving Company'
+        );
+        foreach ($business_types as $value => $label) {
+            echo '<option value="' . $value . '" ' . selected($business_type, $value, false) . '>' . $label . '</option>';
+        }
+        echo '</select>';
+        echo '<p class="description">Select the most specific business type for your company.</p>';
+        echo '</td></tr>';
+        
+        echo '<tr><th scope="row">Service Areas</th><td>';
+        echo '<textarea name="rankitpro_service_areas" rows="4" class="large-text" placeholder="City 1&#10;City 2&#10;City 3">' . esc_textarea($service_areas) . '</textarea>';
+        echo '<p class="description">Enter each service area on a new line for local SEO targeting.</p>';
+        echo '</td></tr>';
+        
+        echo '</table>';
+        submit_button('Save Schema Settings');
+        echo '</form>';
+        
+        echo '<div class="card" style="margin-top: 30px;"><h2>Schema.org Benefits</h2>';
+        echo '<ul>';
+        echo '<li><strong>Local SEO:</strong> Helps search engines understand your business location and services</li>';
+        echo '<li><strong>Rich Snippets:</strong> May display enhanced search results with ratings, hours, and contact info</li>';
+        echo '<li><strong>Voice Search:</strong> Improves visibility for voice search queries</li>';
+        echo '<li><strong>Google My Business:</strong> Supports integration with Google business listings</li>';
+        echo '</ul></div>';
+        
+        echo '</div>';
+    }
+}
+
+// Auto-add schema markup to pages if enabled
+add_action('wp_head', 'rankitpro_auto_schema');
+function rankitpro_auto_schema() {
+    $auto_schema = get_option('rankitpro_auto_schema', 'enabled');
+    if ($auto_schema === 'enabled' && is_front_page()) {
+        $plugin = new RankItProPlugin();
+        echo $plugin->display_schema_markup(array());
     }
 }
 
