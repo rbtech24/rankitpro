@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WordPress Console Check</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; }
+        .info { background: #e7f3ff; padding: 15px; border-radius: 4px; margin: 10px 0; }
+        .steps { background: #f9f9f9; padding: 15px; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>WordPress Plugin Console Debug Instructions</h1>
+    
+    <div class="info">
+        <h3>Network Tab Shows Success!</h3>
+        <p>Your browser network tab shows the widget script is loading successfully (53.8 KB, 200 status). This means the API connection is working.</p>
+    </div>
+
+    <div class="steps">
+        <h3>Next Steps - Check Browser Console</h3>
+        <ol>
+            <li>Go to your WordPress test page with the shortcode</li>
+            <li>Press F12 to open Developer Tools</li>
+            <li>Click the "Console" tab</li>
+            <li>Refresh the page</li>
+            <li>Look for these specific messages:</li>
+        </ol>
+        
+        <h4>Expected Console Messages:</h4>
+        <pre>
+RankItPro: Initializing widget for company 16
+RankItPro: Type: checkins, Limit: 5  
+RankItPro: Container ID: rankitpro-[unique-id]
+RankItPro: Loading script from: [your-replit-url]
+RankItPro: Widget script loaded successfully
+RankItPro: Found X widget containers
+        </pre>
+    </div>
+
+    <div class="info">
+        <h3>Download Updated Plugin v1.2.1</h3>
+        <p>I've added enhanced debugging to identify the exact issue. Download the latest version and install it, then check the console messages.</p>
+    </div>
+
+    <div class="steps">
+        <h3>If Console Shows Errors:</h3>
+        <ul>
+            <li><strong>"Container not found"</strong> - WordPress theme conflict</li>
+            <li><strong>"Widget script loaded but no content"</strong> - Container detection issue</li>
+            <li><strong>"Failed to load widget script"</strong> - Network/security blocking</li>
+        </ul>
+    </div>
+
+    <p>The enhanced debugging will pinpoint exactly what's preventing the service reports from displaying.</p>
+</body>
+</html>

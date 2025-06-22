@@ -3,7 +3,7 @@
  * Plugin Name: RankItPro Service Integration
  * Plugin URI: https://rankitpro.com
  * Description: Display your RankItPro service reports, reviews, and blog posts on your WordPress site with seamless theme integration.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: RankItPro
  * License: GPL v2 or later
  * Text Domain: rankitpro
@@ -154,6 +154,14 @@ class RankItProPlugin {
         (function() {
             console.log('RankItPro: Initializing widget for company <?php echo esc_js($company_id); ?>');
             console.log('RankItPro: Type: <?php echo esc_js($type); ?>, Limit: <?php echo esc_js($limit); ?>');
+            console.log('RankItPro: Container ID: <?php echo esc_js($container_id); ?>');
+            
+            // Ensure container exists
+            var container = document.getElementById('<?php echo esc_js($container_id); ?>');
+            if (!container) {
+                console.error('RankItPro: Container not found:', '<?php echo esc_js($container_id); ?>');
+                return;
+            }
             
             var script = document.createElement('script');
             var scriptUrl = '<?php echo esc_js($api_domain); ?>/widget/<?php echo esc_js($company_id); ?>?type=<?php echo esc_js($type); ?>&limit=<?php echo esc_js($limit); ?>';
@@ -163,15 +171,31 @@ class RankItProPlugin {
             script.async = true;
             script.onload = function() {
                 console.log('RankItPro: Widget script loaded successfully');
-                var loadingElements = document.querySelectorAll('.rankitpro-loading');
-                loadingElements.forEach(function(el) {
-                    el.style.display = 'none';
-                });
+                
+                // Wait a moment for the widget to initialize
+                setTimeout(function() {
+                    var widgets = document.querySelectorAll('[data-rankitpro-widget]');
+                    console.log('RankItPro: Found', widgets.length, 'widget containers');
+                    
+                    var loadingElements = document.querySelectorAll('.rankitpro-loading');
+                    loadingElements.forEach(function(el) {
+                        console.log('RankItPro: Hiding loading element');
+                        el.style.display = 'none';
+                    });
+                    
+                    // Check if content was actually loaded
+                    var hasContent = container.innerHTML && !container.innerHTML.includes('Loading');
+                    console.log('RankItPro: Container has content:', hasContent);
+                    
+                    if (!hasContent) {
+                        console.warn('RankItPro: Widget script loaded but no content found');
+                        container.innerHTML = '<div class="rankitpro-warning" style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 4px; color: #856404;">Widget loaded but no content available. Please check your API configuration.</div>';
+                    }
+                }, 1000);
             };
             script.onerror = function() {
                 console.error('RankItPro: Failed to load widget script from:', scriptUrl);
-                document.getElementById('<?php echo esc_js($container_id); ?>').innerHTML = 
-                    '<div class="rankitpro-error">Unable to connect to RankItPro services. Please try refreshing the page.</div>';
+                container.innerHTML = '<div class="rankitpro-error" style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; color: #721c24;">Unable to connect to RankItPro services. Please check your settings or try refreshing the page.</div>';
             };
             document.head.appendChild(script);
         })();
@@ -195,6 +219,7 @@ class RankItProPlugin {
     
     // Specific shortcode handlers
     public function checkins_shortcode($atts) {
+        $atts = $atts ?: array();
         $atts['type'] = 'checkins';
         return $this->shortcode($atts);
     }
