@@ -93,8 +93,11 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
       jobType: "",
       notes: "",
       location: "",
-      createBlogPost: false,
-      sendReviewRequest: false,
+      latitude: 0,
+      longitude: 0,
+      isBlog: "false",
+      isServiceVisit: "false",
+      isReviewRequest: "false",
     },
   });
   
@@ -561,66 +564,193 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 )}
               </div>
               
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <FormField
-                    control={form.control}
-                    name="isBlog"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value === "true"}
-                            onCheckedChange={(checked) => field.onChange(checked ? "true" : "false")}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Create blog post from this check-in</FormLabel>
-                          <FormDescription>
-                            Generate AI-powered content for your website
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
+              <div className="space-y-6">
+                {/* AI Enhancement Section */}
+                <div className="border-t pt-4">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">AI Enhancement Options</h3>
                   
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const currentData = form.getValues();
-                      if (currentData.jobType && currentData.notes) {
-                        handleGenerateContent(currentData);
-                      } else {
-                        toast({
-                          title: "Missing Information",
-                          description: "Please fill in job type and job description before generating AI content.",
-                          variant: "destructive",
-                        });
-                      }
-                    }}
-                    disabled={isGeneratingContent}
-                  >
-                    {isGeneratingContent ? (
-                      <>
-                        <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                          <path d="M13 8H7"/>
-                          <path d="M17 12H7"/>
-                        </svg>
-                        Generate AI Content
-                      </>
-                    )}
-                  </Button>
+                  {/* Job Description AI Generator */}
+                  <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h4 className="font-medium text-gray-800">Enhance Job Description with AI</h4>
+                        <p className="text-sm text-gray-600">Let AI improve and expand your job description</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const currentData = form.getValues();
+                          if (currentData.jobType && currentData.notes && currentData.location) {
+                            handleGenerateJobDescription(currentData);
+                          } else {
+                            toast({
+                              title: "Missing Information",
+                              description: "Please fill in job type, job description, and location before enhancing.",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                        disabled={isGeneratingContent}
+                      >
+                        {isGeneratingContent ? (
+                          <>
+                            <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Enhancing...
+                          </>
+                        ) : (
+                          <>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            Enhance Description
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Content Generation Options */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Blog Post Option */}
+                    <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+                      <FormField
+                        control={form.control}
+                        name="isBlog"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0 mb-3">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value === "true"}
+                                onCheckedChange={(checked) => field.onChange(checked ? "true" : "false")}
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel className="font-medium">Create Blog Post</FormLabel>
+                              <FormDescription className="text-xs">
+                                Generate AI blog content for your website
+                              </FormDescription>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => {
+                          const currentData = form.getValues();
+                          if (currentData.jobType && currentData.notes) {
+                            handleGenerateContent(currentData, 'blog');
+                          } else {
+                            toast({
+                              title: "Missing Information",
+                              description: "Please fill in job type and description first.",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                        disabled={isGeneratingContent}
+                      >
+                        Generate Blog Content
+                      </Button>
+                    </div>
+
+                    {/* Service Visit Option */}
+                    <div className="p-4 border border-green-200 rounded-lg bg-green-50">
+                      <FormField
+                        control={form.control}
+                        name="isServiceVisit"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0 mb-3">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value === "true"}
+                                onCheckedChange={(checked) => field.onChange(checked ? "true" : "false")}
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel className="font-medium">Send Service Visit Update</FormLabel>
+                              <FormDescription className="text-xs">
+                                Generate professional service completion notification
+                              </FormDescription>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => {
+                          const currentData = form.getValues();
+                          if (currentData.jobType && currentData.notes) {
+                            handleGenerateContent(currentData, 'service');
+                          } else {
+                            toast({
+                              title: "Missing Information",
+                              description: "Please fill in job type and description first.",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                        disabled={isGeneratingContent}
+                      >
+                        Generate Service Update
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Generate Both Option */}
+                  <div className="mt-4">
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="sm"
+                      className="w-full bg-purple-600 hover:bg-purple-700"
+                      onClick={() => {
+                        const currentData = form.getValues();
+                        if (currentData.jobType && currentData.notes) {
+                          // Set both checkboxes and generate both
+                          form.setValue("isBlog", "true");
+                          form.setValue("isServiceVisit", "true");
+                          handleGenerateContent(currentData, 'both');
+                        } else {
+                          toast({
+                            title: "Missing Information",
+                            description: "Please fill in job type and description first.",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                      disabled={isGeneratingContent}
+                    >
+                      {isGeneratingContent ? (
+                        <>
+                          <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Generating Both...
+                        </>
+                      ) : (
+                        <>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                            <path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/>
+                            <rect width="4" height="10" x="10" y="3"/>
+                          </svg>
+                          Generate Blog Post + Service Update
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 
                 <FormField
