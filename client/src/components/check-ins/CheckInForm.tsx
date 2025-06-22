@@ -108,13 +108,6 @@ export function CheckInForm({ technicianId, companyId, onSuccess, initialValues 
       return await res.json();
     }
   });
-      const res = await apiRequest('GET', '/api/job-types');
-      if (!res.ok) {
-        throw new Error('Failed to fetch job types');
-      }
-      return await res.json();
-    }
-  });
 
   // Create form with initial values
   const form = useForm<CheckInFormValues>({
@@ -150,27 +143,6 @@ export function CheckInForm({ technicianId, companyId, onSuccess, initialValues 
   // Handle form submission
   const checkInMutation = useMutation({
     mutationFn: async (values: CheckInFormValues) => {
-      // First, handle photo uploads if any
-      let photoData = [];
-      
-      if (photos.length > 0) {
-        // Create a FormData object for file uploads
-        const formData = new FormData();
-        photos.forEach((photo) => {
-          formData.append('photos', photo);
-        });
-        formData.append('technicianId', technicianId.toString());
-        
-        // Upload photos first
-        const uploadResponse = await apiRequest('POST', '/api/uploads/photos', formData, true);
-        if (!uploadResponse.ok) {
-          throw new Error('Failed to upload photos');
-        }
-        
-        const uploadResult = await uploadResponse.json();
-        photoData = uploadResult.photoUrls || [];
-      }
-      
       // Convert latitude/longitude from string to number if they exist
       const latitude = values.latitude ? parseFloat(values.latitude) : null;
       const longitude = values.longitude ? parseFloat(values.longitude) : null;
