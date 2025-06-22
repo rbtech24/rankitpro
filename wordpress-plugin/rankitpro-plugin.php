@@ -22,7 +22,14 @@ class RankItProPlugin {
         add_action('init', array($this, 'init'));
         add_action('admin_menu', array($this, 'admin_menu'));
         add_action('admin_init', array($this, 'admin_init'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
+        
+        // Register all shortcodes
         add_shortcode('rankitpro', array($this, 'shortcode'));
+        add_shortcode('rankitpro_checkins', array($this, 'checkins_shortcode'));
+        add_shortcode('rankitpro_reviews', array($this, 'reviews_shortcode'));
+        add_shortcode('rankitpro_testimonials', array($this, 'testimonials_shortcode'));
+        add_shortcode('rankitpro_blogs', array($this, 'blogs_shortcode'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
     }
     
