@@ -285,6 +285,38 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
       setIsGeneratingContent(false);
     }
   };
+
+  const handleGenerateJobDescription = async (formData: any) => {
+    setIsGeneratingContent(true);
+    try {
+      const response = await apiRequest("POST", "/api/enhance-job-description", {
+        jobType: formData.jobType,
+        notes: formData.notes,
+        location: formData.location,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        form.setValue("notes", data.enhancedDescription);
+        toast({
+          title: "Job Description Enhanced",
+          description: "Your job description has been improved with AI.",
+          variant: "default",
+        });
+      } else {
+        throw new Error("Failed to enhance description");
+      }
+    } catch (error) {
+      console.error("Error enhancing description:", error);
+      toast({
+        title: "Enhancement Failed",
+        description: "Unable to enhance job description. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingContent(false);
+    }
+  };
   
   // Clean up preview URLs when component unmounts
   useEffect(() => {
