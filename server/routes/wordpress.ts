@@ -206,8 +206,407 @@ new RankItProPlugin();
 
 Version: 1.0.0`;
 
-    const cssContent = `.rankitpro-checkins { padding: 20px; border: 1px solid #ddd; border-radius: 8px; }`;
-    const jsContent = `jQuery(document).ready(function($) { $('.rankitpro-checkins').addClass('loaded'); });`;
+    const cssContent = `/* Rank It Pro WordPress Plugin Styles */
+.rankitpro-container { 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.rankitpro-checkins {
+    display: grid;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.rankitpro-checkin {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    border: 1px solid #f0f0f0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rankitpro-checkin:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.rankitpro-checkin h3 {
+    margin: 0 0 15px 0;
+    color: #1a202c;
+    font-size: 1.3em;
+    font-weight: 600;
+    border-bottom: 2px solid #3182ce;
+    padding-bottom: 8px;
+}
+
+.checkin-date {
+    color: #718096;
+    font-size: 0.9em;
+    margin: 8px 0;
+    font-weight: 500;
+}
+
+.checkin-location {
+    color: #4a5568;
+    font-size: 1em;
+    margin: 10px 0;
+    padding: 8px 12px;
+    background: #f7fafc;
+    border-radius: 6px;
+    border-left: 4px solid #3182ce;
+}
+
+.checkin-notes {
+    margin: 15px 0;
+    line-height: 1.7;
+    color: #2d3748;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.checkin-photos {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.checkin-photo {
+    max-width: 200px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.checkin-photo:hover {
+    transform: scale(1.05);
+}
+
+.rankitpro-reviews {
+    display: grid;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.rankitpro-review {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 25px;
+    border-left: 5px solid #38a169;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.review-rating {
+    margin-bottom: 15px;
+}
+
+.review-rating .stars {
+    color: #f6ad55;
+    font-size: 1.4em;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.rankitpro-review blockquote {
+    margin: 15px 0;
+    font-style: italic;
+    border: none;
+    padding: 0;
+    font-size: 1.1em;
+    line-height: 1.6;
+    color: #2d3748;
+}
+
+.rankitpro-review cite {
+    font-weight: 600;
+    color: #1a202c;
+    font-size: 1em;
+}
+
+.rankitpro-blog-posts {
+    display: grid;
+    gap: 25px;
+    margin: 20px 0;
+}
+
+.rankitpro-blog-post {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-left: 5px solid #e53e3e;
+    transition: transform 0.2s ease;
+}
+
+.rankitpro-blog-post:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.rankitpro-blog-post h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.4em;
+    font-weight: 600;
+}
+
+.rankitpro-blog-post h3 a {
+    text-decoration: none;
+    color: #3182ce;
+    transition: color 0.2s ease;
+}
+
+.rankitpro-blog-post h3 a:hover {
+    color: #2c5282;
+    text-decoration: underline;
+}
+
+.post-excerpt {
+    margin: 15px 0;
+    line-height: 1.7;
+    color: #4a5568;
+}
+
+.post-date {
+    color: #718096;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.rankitpro-no-data {
+    text-align: center;
+    color: #a0aec0;
+    font-style: italic;
+    padding: 40px 20px;
+    background: #f7fafc;
+    border-radius: 12px;
+    border: 2px dashed #cbd5e0;
+}
+
+.rankitpro-lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.rankitpro-lightbox.show {
+    opacity: 1;
+}
+
+.rankitpro-lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+}
+
+.rankitpro-lightbox .close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    z-index: 10000;
+}
+
+.rankitpro-technician {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 12px;
+    background: #edf2f7;
+    border-radius: 8px;
+}
+
+.technician-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.technician-info h4 {
+    margin: 0;
+    color: #1a202c;
+    font-size: 1.1em;
+}
+
+.technician-info .role {
+    color: #718096;
+    font-size: 0.9em;
+    margin: 2px 0 0 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .rankitpro-container {
+        padding: 0 15px;
+    }
+    
+    .rankitpro-checkin {
+        padding: 20px;
+    }
+    
+    .checkin-photos {
+        justify-content: center;
+    }
+    
+    .checkin-photo {
+        max-width: 150px;
+    }
+    
+    .rankitpro-blog-post h3 {
+        font-size: 1.2em;
+    }
+}
+
+@media (max-width: 480px) {
+    .rankitpro-checkin h3 {
+        font-size: 1.1em;
+    }
+    
+    .checkin-photo {
+        max-width: 120px;
+    }
+}`;
+
+    const jsContent = `jQuery(document).ready(function($) {
+    // Initialize containers
+    $('.rankitpro-container').addClass('loaded');
+    
+    // Enhanced check-in interactions
+    $('.rankitpro-checkin').on('click', function(e) {
+        if (!$(e.target).hasClass('checkin-photo')) {
+            $(this).toggleClass('expanded');
+        }
+    });
+    
+    // Photo lightbox functionality
+    $('.checkin-photo').on('click', function(e) {
+        e.stopPropagation();
+        var src = $(this).attr('src');
+        var alt = $(this).attr('alt') || 'Service Photo';
+        
+        var lightbox = $('<div class="rankitpro-lightbox">' +
+            '<span class="close">&times;</span>' +
+            '<img src="' + src + '" alt="' + alt + '" />' +
+            '</div>');
+        
+        $('body').append(lightbox);
+        
+        setTimeout(function() {
+            lightbox.addClass('show');
+        }, 10);
+    });
+    
+    // Close lightbox
+    $(document).on('click', '.rankitpro-lightbox .close, .rankitpro-lightbox', function(e) {
+        if (e.target === this) {
+            var lightbox = $(this).closest('.rankitpro-lightbox');
+            lightbox.removeClass('show');
+            setTimeout(function() {
+                lightbox.remove();
+            }, 300);
+        }
+    });
+    
+    // Escape key to close lightbox
+    $(document).on('keydown', function(e) {
+        if (e.keyCode === 27) { // Escape key
+            $('.rankitpro-lightbox').removeClass('show');
+            setTimeout(function() {
+                $('.rankitpro-lightbox').remove();
+            }, 300);
+        }
+    });
+    
+    // Auto-refresh functionality (if enabled)
+    if (typeof rankitpro_ajax !== 'undefined' && rankitpro_ajax.auto_refresh) {
+        setInterval(function() {
+            $.post(rankitpro_ajax.ajax_url, {
+                action: 'rankitpro_sync',
+                nonce: rankitpro_ajax.nonce
+            }).done(function(response) {
+                if (response.success) {
+                    // Optionally reload content or show notification
+                    console.log('Rank It Pro: Data synced successfully');
+                }
+            });
+        }, 300000); // 5 minutes
+    }
+    
+    // Smooth scrolling for internal links
+    $('a[href^="#rankitpro"]').on('click', function(e) {
+        e.preventDefault();
+        var target = $($(this).attr('href'));
+        if (target.length) {
+            $('html, body').animate({
+                scrollTop: target.offset().top - 100
+            }, 500);
+        }
+    });
+    
+    // Loading animation for async content
+    $('.rankitpro-async-content').each(function() {
+        var container = $(this);
+        container.html('<div style="text-align: center; padding: 40px;"><div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></div></div>');
+        
+        // Add CSS for loading spinner
+        if (!$('#rankitpro-spinner-css').length) {
+            $('head').append('<style id="rankitpro-spinner-css">@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>');
+        }
+    });
+    
+    // Enhanced error handling
+    window.rankitproErrorHandler = function(message, element) {
+        if (element) {
+            $(element).html('<div style="padding: 20px; text-align: center; color: #e53e3e; background: #fed7d7; border-radius: 8px; border: 1px solid #feb2b2;">' +
+                '<strong>Unable to load content</strong><br>' +
+                '<span style="font-size: 14px; color: #c53030;">' + message + '</span>' +
+                '</div>');
+        }
+    };
+    
+    // Performance optimization - lazy load images
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.classList.remove('lazy');
+                    imageObserver.unobserve(img);
+                }
+            });
+        });
+        
+        $('.checkin-photo[data-src]').each(function() {
+            imageObserver.observe(this);
+        });
+    }
+    
+    console.log('Rank It Pro WordPress Plugin loaded successfully');
+});
 
     console.log('Setting ZIP headers...');
     
