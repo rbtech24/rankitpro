@@ -516,12 +516,19 @@ router.get('/embed', isAuthenticated, async (req: Request, res: Response) => {
     let settings = defaultSettings;
     if (company.javaScriptEmbedConfig) {
       try {
-        const parsed = JSON.parse(company.javaScriptEmbedConfig);
-        if (parsed.settings) {
-          settings = { ...defaultSettings, ...parsed.settings };
+        // Check if it's already a valid JSON object or old script format
+        if (company.javaScriptEmbedConfig.startsWith('<script>')) {
+          // Old format - use default settings
+          console.log('Legacy embed config detected, using defaults');
+        } else {
+          const parsed = JSON.parse(company.javaScriptEmbedConfig);
+          if (parsed.settings) {
+            settings = { ...defaultSettings, ...parsed.settings };
+          }
         }
       } catch (e) {
         console.error('Error parsing embed config:', e);
+        // Use default settings on error
       }
     }
     

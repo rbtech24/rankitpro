@@ -20,6 +20,9 @@ export default function TechnicianPerformance() {
     queryKey: ["/api/technicians"],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/technicians");
+      if (!res.ok) {
+        throw new Error('Failed to fetch technicians');
+      }
       return res.json();
     }
   });
@@ -167,8 +170,8 @@ export default function TechnicianPerformance() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <span className="text-sm text-gray-900 mr-1">{technician.rating.toFixed(1)}</span>
-                        {renderStars(technician.rating)}
+                        <span className="text-sm text-gray-900 mr-1">{(technician.rating || 0).toFixed(1)}</span>
+                        {renderStars(technician.rating || 0)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
