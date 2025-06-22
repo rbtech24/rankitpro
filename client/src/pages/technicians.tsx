@@ -378,7 +378,7 @@ export default function Technicians() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              <span className="text-sm text-gray-900 mr-1">{technician.rating.toFixed(1)}</span>
+                              <span className="text-sm text-gray-900 mr-1">{(technician.rating || 0).toFixed(1)}</span>
                               {renderStars(technician.rating)}
                             </div>
                           </td>
