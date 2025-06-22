@@ -276,53 +276,8 @@ Version: 1.0.0`;
     }
   }
 });
-  
-    if (!companyId) {
-      return res.status(400).json({ error: 'No company associated with this account' });
-    }
-    
-    const company = await storage.getCompany(companyId);
-    
-    if (!company) {
-      return res.status(404).json({ error: 'Company not found' });
-    }
-    
-    // Generate a unique API key for the company if not already present
-    let apiKey = '';
-    
-    if (company.wordpressConfig) {
-      try {
-        const config = JSON.parse(company.wordpressConfig);
-        if (config.apiKey) {
-          apiKey = config.apiKey;
-        }
-      } catch (error) {
-        console.error('Error parsing WordPress configuration:', error);
-      }
-    }
-    
-    if (!apiKey) {
-      apiKey = crypto.randomBytes(32).toString('hex');
-      
-      // Save the new API key
-      const updatedConfig = {
-        apiKey: apiKey,
-        autoSync: false,
-        siteUrl: '',
-        status: 'pending'
-      };
-      
-      await storage.updateCompany(companyId, {
-        wordpressConfig: JSON.stringify(updatedConfig)
-      });
-    }
-    
-    const apiEndpoint = 'https://rankitpro.com/api';
-    
-    // Generate comprehensive WordPress plugin code
-    const pluginCode = `<?php
-/*
-Plugin Name: Rank It Pro Integration
+
+export default router;
 Plugin URI: https://rankitpro.com
 Description: Seamlessly integrate Rank It Pro check-ins with your WordPress website. Display technician visits, generate SEO content, and showcase your service quality.
 Version: 1.0.0
