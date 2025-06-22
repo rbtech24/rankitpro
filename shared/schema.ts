@@ -111,6 +111,16 @@ export const checkIns = pgTable("check_ins", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Job types table
+export const jobTypes = pgTable("job_types", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Blog posts table
 export const blogPosts = pgTable("blog_posts", {
   id: serial("id").primaryKey(),
@@ -195,9 +205,11 @@ export const insertReviewRequestSchema = createInsertSchema(reviewRequests).omit
   companyId: z.number()
 });
 export const insertReviewResponseSchema = createInsertSchema(reviewResponses).omit({ id: true, respondedAt: true });
+export const insertJobTypeSchema = createInsertSchema(jobTypes).omit({ id: true, createdAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
+export type JobType = typeof jobTypes.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export type Company = typeof companies.$inferSelect;

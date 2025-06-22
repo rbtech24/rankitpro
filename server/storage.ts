@@ -20,7 +20,7 @@ const {
   wordpressIntegrations, monthlyAiUsage, salesPeople, salesCommissions, 
   companyAssignments, testimonials, testimonialApprovals, wordpressCustomFields,
   supportTickets, supportTicketResponses, subscriptionStatus, paymentTransactions,
-  subscriptionPlans
+  subscriptionPlans, jobTypes
 } = schema;
 
 export interface IStorage {
@@ -1069,21 +1069,18 @@ export class DatabaseStorage implements IStorage {
   // Job types and admin methods
   async getJobTypesByCompany(companyId: number): Promise<any[]> {
     try {
-      const result = await queryWithRetry(() => 
-        db.select()
-          .from(schema.jobTypes)
-          .where(and(
-            eq(schema.jobTypes.companyId, companyId),
-            eq(schema.jobTypes.isActive, true)
-          ))
-          .orderBy(asc(schema.jobTypes.name))
-      );
+      const result = await db.execute(sql`
+        SELECT id, name, description, company_id as "companyId"
+        FROM job_types 
+        WHERE company_id = ${companyId} AND is_active = true
+        ORDER BY name ASC
+      `);
       
-      return result.map(jobType => ({
-        id: jobType.id,
-        name: jobType.name,
-        description: jobType.description,
-        companyId: jobType.companyId
+      return result.rows.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        companyId: row.companyId
       }));
     } catch (error) {
       console.error("Error fetching job types:", error);
