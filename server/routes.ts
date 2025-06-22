@@ -1632,6 +1632,206 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/reviews", reviewRoutes);
   app.use("/api/testimonials", testimonialsRoutes);
   
+  // Widget endpoint for WordPress integration
+  app.get('/widget/:companyId', async (req: Request, res: Response) => {
+    try {
+      const { companyId } = req.params;
+      const { type = 'all', limit = 10 } = req.query;
+
+      const company = await storage.getCompany(parseInt(companyId));
+      if (!company) {
+        return res.status(404).json({ error: 'Company not found' });
+      }
+
+      let content: any = {};
+
+      if (type === 'checkins' || type === 'all') {
+        const checkins = await storage.getCheckInsByCompany(parseInt(companyId));
+        content.checkins = checkins.slice(0, Number(limit));
+      }
+
+      if (type === 'blogs' || type === 'all') {
+        const blogs = await storage.getBlogPostsByCompany(parseInt(companyId));
+        content.blogs = blogs.slice(0, Number(limit));
+      }
+
+      if (type === 'reviews' || type === 'all') {
+        const reviews = await storage.getReviewsByCompany(parseInt(companyId));
+        content.reviews = reviews.slice(0, Number(limit));
+      }
+
+      const widgetScript = `
+(function() {
+  'use strict';
+  
+  const WIDGET_CONFIG = ${JSON.stringify({
+    companyId: parseInt(companyId),
+    companyName: company.name,
+    content,
+    type: type as string
+  })};
+  
+  function injectCSS() {
+    if (document.getElementById('rankitpro-widget-css')) return;
+    
+    const css = \`
+.rankitpro-widget {
+  font-family: inherit;
+  color: inherit;
+  line-height: inherit;
+  margin: 1em 0;
+}
+
+.rankitpro-widget h1, .rankitpro-widget h2, .rankitpro-widget h3,
+.rankitpro-widget h4, .rankitpro-widget h5, .rankitpro-widget h6 {
+  font-family: inherit;
+  color: inherit;
+  margin: 0.5em 0;
+}
+
+.rankitpro-widget p {
+  margin: 1em 0;
+}
+
+.rankitpro-widget img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.rankitpro-checkin, .rankitpro-blog, .rankitpro-review {
+  margin-bottom: 2em;
+  padding: 1em;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.rankitpro-meta {
+  font-size: 0.9em;
+  opacity: 0.8;
+  margin: 0.5em 0;
+}
+
+.rankitpro-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1em;
+  margin: 1em 0;
+}
+
+.rankitpro-stars {
+  color: #ffd700;
+  margin: 0.5em 0;
+}
+
+@media (max-width: 768px) {
+  .rankitpro-photos {
+    grid-template-columns: 1fr;
+  }
+}
+\`;
+    
+    const style = document.createElement('style');
+    style.id = 'rankitpro-widget-css';
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+  
+  function renderCheckIn(checkIn) {
+    return \`
+      <div class="rankitpro-checkin">
+        <h3>\${checkIn.jobType} Service Report</h3>
+        <div class="rankitpro-meta">
+          <span>\${checkIn.technician || 'Service Technician'}</span> • 
+          <span>\${new Date(checkIn.createdAt).toLocaleDateString()}</span>
+        </div>
+        <div class="rankitpro-location">📍 \${checkIn.location}</div>
+        <div class="rankitpro-description">\${checkIn.notes}</div>
+        \${checkIn.photos && checkIn.photos.length > 0 ? \`
+          <div class="rankitpro-photos">
+            \${checkIn.photos.map(photo => \`<img src="\${photo}" alt="Service photo" />\`).join('')}
+          </div>
+        \` : ''}
+      </div>
+    \`;
+  }
+  
+  function renderBlog(blog) {
+    return \`
+      <article class="rankitpro-blog">
+        <h2>\${blog.title}</h2>
+        <div class="rankitpro-meta">
+          <time>\${new Date(blog.createdAt).toLocaleDateString()}</time>
+        </div>
+        <div class="rankitpro-content">\${blog.content}</div>
+      </article>
+    \`;
+  }
+  
+  function renderReview(review) {
+    const stars = Array.from({length: 5}, (_, i) => 
+      i < review.rating ? '★' : '☆'
+    ).join('');
+    
+    return \`
+      <div class="rankitpro-review">
+        <div class="rankitpro-stars">\${stars}</div>
+        <div class="rankitpro-meta">
+          <strong>\${review.customerName}</strong> • 
+          <time>\${new Date(review.createdAt).toLocaleDateString()}</time>
+        </div>
+        <div class="rankitpro-content">"\${review.content}"</div>
+      </div>
+    \`;
+  }
+  
+  function renderWidget() {
+    const { content, type } = WIDGET_CONFIG;
+    let html = '';
+    
+    if ((type === 'checkins' || type === 'all') && content.checkins) {
+      html += content.checkins.map(renderCheckIn).join('');
+    }
+    
+    if ((type === 'blogs' || type === 'all') && content.blogs) {
+      html += content.blogs.map(renderBlog).join('');
+    }
+    
+    if ((type === 'reviews' || type === 'all') && content.reviews) {
+      html += content.reviews.map(renderReview).join('');
+    }
+    
+    return html;
+  }
+  
+  function init() {
+    injectCSS();
+    const containers = document.querySelectorAll('[data-rankitpro-widget]');
+    containers.forEach(container => {
+      container.className = 'rankitpro-widget';
+      container.innerHTML = renderWidget();
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  
+})();`;
+
+      res.setHeader('Content-Type', 'application/javascript');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'public, max-age=300');
+      res.send(widgetScript);
+
+    } catch (error) {
+      console.error('Widget error:', error);
+      res.status(500).json({ error: 'Failed to load widget' });
+    }
+  });
+  
   // Add AI content generation endpoint
   app.post("/api/generate-content", isAuthenticated, async (req, res) => {
     try {
