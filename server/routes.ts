@@ -1231,7 +1231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
-      const cleanTechnicians = technicians.map(tech => ({
+      const techniciansWithStats = technicians.map(tech => ({
         id: tech.id,
         name: tech.name || '',
         email: tech.email || '',
@@ -1240,10 +1240,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         location: tech.location || '',
         active: tech.active !== false,
         companyId: tech.companyId,
-        createdAt: tech.createdAt
+        userId: tech.userId || null,
+        createdAt: tech.createdAt,
+        checkinsCount: 0,
+        reviewsCount: 0,
+        rating: 0
       }));
       
-      res.json(cleanTechnicians);
+      res.json(techniciansWithStats);
     } catch (error) {
       console.error("Error fetching technicians:", error);
       res.status(500).json({ message: "Server error" });
