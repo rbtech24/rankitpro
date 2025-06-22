@@ -571,53 +571,86 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 )}
               </div>
               
-              <FormField
-                control={form.control}
-                name="createBlogPost"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-2">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        disabled={isGeneratingContent}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked);
-                          if (checked && form.watch("jobType") && form.watch("notes")) {
-                            handleGenerateContent();
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Create blog post from this check-in
-                        {isGeneratingContent && " (Generating...)"}
-                      </FormLabel>
-                      <FormDescription>
-                        Generate AI-powered content for your website
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="sendReviewRequest"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-2">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Send review request to customer</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <FormField
+                    control={form.control}
+                    name="isBlog"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value === "true"}
+                            onCheckedChange={(checked) => field.onChange(checked ? "true" : "false")}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Create blog post from this check-in</FormLabel>
+                          <FormDescription>
+                            Generate AI-powered content for your website
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const currentData = form.getValues();
+                      if (currentData.jobType && currentData.notes) {
+                        handleGenerateContent(currentData);
+                      } else {
+                        toast({
+                          title: "Missing Information",
+                          description: "Please fill in job type and job description before generating AI content.",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    disabled={isGeneratingContent}
+                  >
+                    {isGeneratingContent ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                          <path d="M13 8H7"/>
+                          <path d="M17 12H7"/>
+                        </svg>
+                        Generate AI Content
+                      </>
+                    )}
+                  </Button>
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="isReviewRequest"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value === "true"}
+                          onCheckedChange={(checked) => field.onChange(checked ? "true" : "false")}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Send review request to customer</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
