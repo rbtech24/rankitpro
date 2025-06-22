@@ -103,17 +103,27 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
   }
 });
 
-// Create a new check-in
-router.post('/', isAuthenticated, async (req: Request, res: Response) => {
+// Create a new check-in with photo upload support
+router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Request, res: Response) => {
   try {
     const user = req.user;
     
-    // Validation
-    const checkInData = insertCheckInSchema.parse({
+    // Process uploaded photos
+    let photoUrls: string[] = [];
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
+      photoUrls = req.files.map(file => `${baseUrl}${file.filename}`);
+    }
+    
+    // Prepare check-in data with photos
+    const checkInData = {
       ...req.body,
       companyId: user.companyId,
-      technicianId: req.body.technicianId || user.id, // Default to the current user if not specified
-    });
+      technicianId: req.body.technicianId || user.id,
+      photos: photoUrls.length > 0 ? JSON.stringify(photoUrls) : null,
+      latitude: req.body.latitude ? parseFloat(req.body.latitude) : null,
+      longitude: req.body.longitude ? parseFloat(req.body.longitude) : null,
+    };
 
     // Create the check-in
     const checkIn = await storage.createCheckIn(checkInData);

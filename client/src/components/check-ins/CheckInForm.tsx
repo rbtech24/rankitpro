@@ -175,15 +175,34 @@ export function CheckInForm({ technicianId, companyId, onSuccess, initialValues 
       const latitude = values.latitude ? parseFloat(values.latitude) : null;
       const longitude = values.longitude ? parseFloat(values.longitude) : null;
       
-      // Then submit the check-in with photo URLs
-      const checkInData = {
-        ...values,
-        latitude,
-        longitude,
-        photos: photoData.length > 0 ? JSON.stringify(photoData) : null,
-      };
+      // Create FormData for multipart form submission
+      const formData = new FormData();
       
-      const response = await apiRequest('POST', '/api/check-ins', checkInData);
+      // Add all form fields
+      Object.keys(values).forEach(key => {
+        const value = values[key as keyof CheckInFormValues];
+        if (value !== null && value !== undefined && value !== '') {
+          if (key === 'latitude' || key === 'longitude') {
+            const numValue = key === 'latitude' ? latitude : longitude;
+            if (numValue !== null) {
+              formData.append(key, numValue.toString());
+            }
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+      
+      // Add photos directly to FormData
+      photos.forEach((photo, index) => {
+        formData.append('photos', photo);
+      });
+      
+      const response = await fetch('/api/check-ins', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -284,11 +303,16 @@ export function CheckInForm({ technicianId, companyId, onSuccess, initialValues 
           .then(data => {
             if (data.address) {
               const addr = data.address;
-              form.setValue('location', data.display_name || '');
-              form.setValue('address', [addr.house_number, addr.road].filter(Boolean).join(' ') || '');
+              const addressParts = [addr.house_number, addr.road].filter(Boolean);
+              const fullAddress = addressParts.length > 0 ? addressParts.join(' ') : data.display_name;
+              
+              form.setValue('location', `${fullAddress}, ${addr.city || addr.town || addr.village || ''}, ${addr.state || ''} ${addr.postcode || ''}`.trim());
+              form.setValue('address', addressParts.join(' ') || '');
               form.setValue('city', addr.city || addr.town || addr.village || '');
               form.setValue('state', addr.state || '');
               form.setValue('zip', addr.postcode || '');
+            } else {
+              form.setValue('location', `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
             }
             setLocationLoading(false);
           })
