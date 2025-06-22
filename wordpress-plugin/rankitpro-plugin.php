@@ -9,41 +9,60 @@
  * Text Domain: rankitpro
  */
 
-// Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class RankItProPlugin {
-    
-    private $api_base_url = 'https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev';
+class RankItProIntegration {
+    private $api_base_url = 'https://rankitpro.com';
     
     public function __construct() {
-        add_action('init', array($this, 'init'));
         add_action('admin_menu', array($this, 'admin_menu'));
         add_action('admin_init', array($this, 'admin_init'));
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
-        
-        // Register all shortcodes
-        add_shortcode('rankitpro', array($this, 'shortcode'));
-        add_shortcode('rankitpro_checkins', array($this, 'checkins_shortcode'));
-        add_shortcode('rankitpro_reviews', array($this, 'reviews_shortcode'));
-        add_shortcode('rankitpro_testimonials', array($this, 'testimonials_shortcode'));
-        add_shortcode('rankitpro_blogs', array($this, 'blogs_shortcode'));
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
-    }
-    
-    public function init() {
-        // Plugin initialization
+        add_shortcode('rankitpro', array($this, 'rankitpro_shortcode'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'));
     }
     
     public function admin_menu() {
-        add_options_page(
-            'RankItPro Settings',
-            'RankItPro',
+        // Add main menu page
+        add_menu_page(
+            'Rank It Pro Integration',
+            'Rank It Pro',
             'manage_options',
-            'rankitpro-settings',
+            'rank-it-pro',
+            array($this, 'admin_page'),
+            'dashicons-star-filled',
+            30
+        );
+        
+        // Add Settings submenu
+        add_submenu_page(
+            'rank-it-pro',
+            'Settings',
+            'Settings',
+            'manage_options',
+            'rank-it-pro-settings',
             array($this, 'settings_page')
+        );
+        
+        // Add Test & Troubleshoot submenu
+        add_submenu_page(
+            'rank-it-pro',
+            'Test & Troubleshoot',
+            'Test & Troubleshoot',
+            'manage_options',
+            'rank-it-pro-test',
+            array($this, 'test_page')
+        );
+        
+        // Add Shortcodes submenu
+        add_submenu_page(
+            'rank-it-pro',
+            'Shortcodes',
+            'Shortcodes',
+            'manage_options',
+            'rank-it-pro-shortcodes',
+            array($this, 'shortcodes_page')
         );
     }
     
@@ -51,6 +70,53 @@ class RankItProPlugin {
         register_setting('rankitpro_settings', 'rankitpro_company_id');
         register_setting('rankitpro_settings', 'rankitpro_api_domain');
         register_setting('rankitpro_settings', 'rankitpro_cache_time');
+    }
+    
+    public function admin_page() {
+        $company_id = get_option('rankitpro_company_id', '');
+        $api_domain = get_option('rankitpro_api_domain', $this->api_base_url);
+        $status = !empty($company_id) && !empty($api_domain) ? 'Connected' : 'Not Connected';
+        $status_color = !empty($company_id) && !empty($api_domain) ? '#00a32a' : '#d63638';
+        
+        ?>
+        <div class="wrap">
+            <h1>Rank It Pro Integration</h1>
+            <div class="notice notice-info">
+                <p><strong>Plugin Status:</strong> <span style="color: <?php echo $status_color; ?>;"><?php echo $status; ?></span></p>
+            </div>
+            
+            <div class="card" style="max-width: 800px;">
+                <h2>Available Shortcodes</h2>
+                <p>Use these shortcodes to display your service content on any page or post:</p>
+                
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <h3>Service Check-ins</h3>
+                    <code>[rankitpro type="checkins" limit="5" company="<?php echo esc_attr($company_id); ?>"]</code>
+                    <p>Display recent service visits and technician reports</p>
+                </div>
+                
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <h3>Customer Reviews</h3>
+                    <code>[rankitpro type="reviews" limit="3" company="<?php echo esc_attr($company_id); ?>"]</code>
+                    <p>Show customer testimonials and ratings</p>
+                </div>
+                
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <h3>Blog Posts</h3>
+                    <code>[rankitpro type="blogs" limit="5" company="<?php echo esc_attr($company_id); ?>"]</code>
+                    <p>Display AI-generated blog content from service visits</p>
+                </div>
+            </div>
+            
+            <h3>Quick Setup</h3>
+            <ol>
+                <li>Go to <a href="<?php echo admin_url('admin.php?page=rank-it-pro-settings'); ?>">Settings</a> and enter your Company ID</li>
+                <li>Use <a href="<?php echo admin_url('admin.php?page=rank-it-pro-test'); ?>">Test & Troubleshoot</a> to verify connection</li>
+                <li>Add shortcodes to your pages and posts using the examples above</li>
+                <li>Visit <a href="<?php echo admin_url('admin.php?page=rank-it-pro-shortcodes'); ?>">Shortcodes</a> for more options</li>
+            </ol>
+        </div>
+        <?php
     }
     
     public function settings_page() {
@@ -96,232 +162,249 @@ class RankItProPlugin {
                 </table>
                 <?php submit_button(); ?>
             </form>
-            
-            <h2>Usage</h2>
-            <p>Use these shortcodes to display RankItPro content:</p>
-            <ul>
-                <li><code>[rankitpro]</code> - Show all content types</li>
-                <li><code>[rankitpro type="checkins"]</code> - Show only service check-ins</li>
-                <li><code>[rankitpro type="blogs"]</code> - Show only blog posts</li>
-                <li><code>[rankitpro type="reviews"]</code> - Show only customer reviews</li>
-                <li><code>[rankitpro limit="5"]</code> - Limit number of items displayed</li>
-                <li><code>[rankitpro type="checkins" limit="3"]</code> - Show 3 recent check-ins</li>
-            </ul>
-            
-            <?php if ($company_id): ?>
-            <h3>Test Your Integration</h3>
-            <p>Company ID: <strong><?php echo esc_html($company_id); ?></strong></p>
-            <p>Widget URL: <code><?php echo esc_html($api_domain); ?>/widget/<?php echo esc_html($company_id); ?></code></p>
-            <?php endif; ?>
         </div>
         <?php
     }
     
-    public function shortcode($atts) {
-        $atts = shortcode_atts(array(
-            'type' => 'checkins',
-            'limit' => '5',
-            'company' => get_option('rankitpro_company_id'),
-        ), $atts);
-        
-        $company_id = $atts['company'] ? $atts['company'] : get_option('rankitpro_company_id');
-        $type = sanitize_text_field($atts['type']);
-        $limit = intval($atts['limit']);
+    public function test_page() {
+        $company_id = get_option('rankitpro_company_id', '');
         $api_domain = get_option('rankitpro_api_domain', $this->api_base_url);
         
-        if (!$company_id) {
-            return '<div class="rankitpro-error">RankItPro: Company ID not configured. Please set Company ID to 16 in plugin settings.</div>';
-        }
-        
-        if (!$api_domain) {
-            return '<div class="rankitpro-error">RankItPro: API Domain not configured. Please set API Domain in plugin settings.</div>';
-        }
-        
-        // Generate unique container ID
-        $container_id = 'rankitpro-' . uniqid();
-        
-        ob_start();
         ?>
-        <div id="<?php echo esc_attr($container_id); ?>" 
-             data-rankitpro-widget="<?php echo esc_attr($type); ?>" 
-             data-limit="<?php echo esc_attr($limit); ?>"
-             data-company-id="<?php echo esc_attr($company_id); ?>"
-             class="rankitpro-container">
-            <div class="rankitpro-loading">Loading RankItPro content...</div>
+        <div class="wrap">
+            <h1>Test & Troubleshoot</h1>
+            
+            <div class="card" style="max-width: 800px;">
+                <h2>Connection Test</h2>
+                <p>Test your API connection and troubleshoot issues.</p>
+                
+                <table class="form-table">
+                    <tr>
+                        <th>Company ID:</th>
+                        <td><?php echo esc_html($company_id ? $company_id : 'Not set'); ?></td>
+                    </tr>
+                    <tr>
+                        <th>API Domain:</th>
+                        <td><?php echo esc_html($api_domain ? $api_domain : 'Not set'); ?></td>
+                    </tr>
+                    <tr>
+                        <th>Test URL:</th>
+                        <td><code><?php echo esc_html($api_domain . '/widget/' . $company_id . '?type=checkins&limit=5'); ?></code></td>
+                    </tr>
+                </table>
+                
+                <p>
+                    <button type="button" class="button button-primary" onclick="testConnection()">Test Connection</button>
+                    <span id="test-result" style="margin-left: 10px;"></span>
+                </p>
+                
+                <div id="test-output" style="background: #f1f1f1; padding: 15px; border-radius: 5px; display: none; margin-top: 15px;">
+                    <h4>Test Results:</h4>
+                    <pre id="test-details"></pre>
+                </div>
+                
+                <h3>Troubleshooting Steps</h3>
+                <ol>
+                    <li>Verify your Company ID is correct (found in your Rank It Pro dashboard)</li>
+                    <li>Check that your WordPress site can make external HTTP requests</li>
+                    <li>Disable caching plugins temporarily</li>
+                    <li>Check browser console for JavaScript errors</li>
+                    <li>Ensure your API domain is accessible from your WordPress site</li>
+                </ol>
+            </div>
         </div>
         
         <script>
-        (function() {
-            console.log('RankItPro: Initializing widget for company <?php echo esc_js($company_id); ?>');
-            console.log('RankItPro: Type: <?php echo esc_js($type); ?>, Limit: <?php echo esc_js($limit); ?>');
-            console.log('RankItPro: Container ID: <?php echo esc_js($container_id); ?>');
+        function testConnection() {
+            const result = document.getElementById('test-result');
+            const output = document.getElementById('test-output');
+            const details = document.getElementById('test-details');
             
-            // Ensure container exists
-            var container = document.getElementById('<?php echo esc_js($container_id); ?>');
-            if (!container) {
-                console.error('RankItPro: Container not found:', '<?php echo esc_js($container_id); ?>');
+            result.innerHTML = 'Testing...';
+            result.style.color = '#666';
+            
+            const companyId = '<?php echo esc_js($company_id); ?>';
+            const apiDomain = '<?php echo esc_js($api_domain); ?>';
+            
+            if (!companyId || !apiDomain) {
+                result.innerHTML = 'Failed - Missing configuration';
+                result.style.color = '#d63638';
+                details.textContent = 'Please configure Company ID and API Domain in Settings first.';
+                output.style.display = 'block';
                 return;
             }
             
-            var script = document.createElement('script');
-            var scriptUrl = '<?php echo esc_js($api_domain); ?>/widget/<?php echo esc_js($company_id); ?>?type=<?php echo esc_js($type); ?>&limit=<?php echo esc_js($limit); ?>';
-            console.log('RankItPro: Loading script from:', scriptUrl);
+            const testUrl = apiDomain + '/widget/' + companyId + '?type=checkins&limit=5';
             
-            script.src = scriptUrl;
-            script.async = true;
-            script.onload = function() {
-                console.log('RankItPro: Widget script loaded successfully');
-                
-                // Wait a moment for the widget to initialize
-                setTimeout(function() {
-                    var widgets = document.querySelectorAll('[data-rankitpro-widget]');
-                    console.log('RankItPro: Found', widgets.length, 'widget containers');
-                    
-                    var loadingElements = document.querySelectorAll('.rankitpro-loading');
-                    loadingElements.forEach(function(el) {
-                        console.log('RankItPro: Hiding loading element');
-                        el.style.display = 'none';
-                    });
-                    
-                    // Check if content was actually loaded
-                    var hasContent = container.innerHTML && !container.innerHTML.includes('Loading');
-                    console.log('RankItPro: Container has content:', hasContent);
-                    
-                    if (!hasContent) {
-                        console.warn('RankItPro: Widget script loaded but no content found');
-                        container.innerHTML = '<div class="rankitpro-warning" style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 4px; color: #856404;">Widget loaded but no content available. Please check your API configuration.</div>';
+            fetch(testUrl)
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
                     }
-                }, 1000);
-            };
-            script.onerror = function() {
-                console.error('RankItPro: Failed to load widget script from:', scriptUrl);
-                container.innerHTML = '<div class="rankitpro-error" style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; color: #721c24;">Unable to connect to RankItPro services. Please check your settings or try refreshing the page.</div>';
-            };
-            document.head.appendChild(script);
-        })();
+                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                })
+                .then(data => {
+                    result.innerHTML = 'Success ✓';
+                    result.style.color = '#00a32a';
+                    details.textContent = 'Connection successful! Data received:\n' + data.substring(0, 500) + '...';
+                    output.style.display = 'block';
+                })
+                .catch(error => {
+                    result.innerHTML = 'Failed ✗';
+                    result.style.color = '#d63638';
+                    details.textContent = 'Error: ' + error.message + '\n\nTroubleshooting:\n1. Check if the API domain is correct\n2. Verify your Company ID\n3. Ensure your server can make external requests';
+                    output.style.display = 'block';
+                });
+        }
         </script>
         <?php
-        return ob_get_clean();
     }
     
-    // Test API connection
-    private function test_connection($company_id, $api_domain) {
-        if (!$company_id || !$api_domain) return false;
+    public function shortcodes_page() {
+        $company_id = get_option('rankitpro_company_id', '');
         
-        $url = $api_domain . '/widget/' . $company_id . '?type=checkins&limit=1';
-        $response = wp_remote_get($url, array('timeout' => 10));
-        
-        if (is_wp_error($response)) return false;
-        
-        $body = wp_remote_retrieve_body($response);
-        return (strpos($body, 'WIDGET_CONFIG') !== false);
-    }
-    
-    // Specific shortcode handlers
-    public function checkins_shortcode($atts) {
-        $atts = $atts ?: array();
-        $atts['type'] = 'checkins';
-        return $this->shortcode($atts);
-    }
-    
-    public function reviews_shortcode($atts) {
-        $atts['type'] = 'reviews';
-        return $this->shortcode($atts);
-    }
-    
-    public function testimonials_shortcode($atts) {
-        $atts['type'] = 'testimonials';
-        return $this->shortcode($atts);
-    }
-    
-    public function blogs_shortcode($atts) {
-        $atts['type'] = 'blogs';
-        return $this->shortcode($atts);
-    }
-    
-    public function enqueue_scripts() {
-        wp_enqueue_style('rankitpro-style', plugin_dir_url(__FILE__) . 'assets/css/rank-it-pro.css', array(), '1.2.1');
-        wp_enqueue_script('rankitpro-script', plugin_dir_url(__FILE__) . 'assets/js/rank-it-pro.js', array(), '1.2.1', true);
-    }
-}
-
-// Initialize the plugin
-new RankItProPlugin();
-
-// Widget for WordPress admin
-class RankItPro_Widget extends WP_Widget {
-    
-    public function __construct() {
-        parent::__construct(
-            'rankitpro_widget',
-            'RankItPro Content',
-            array('description' => 'Display your RankItPro service content')
-        );
-    }
-    
-    public function widget($args, $instance) {
-        echo $args['before_widget'];
-        
-        if (!empty($instance['title'])) {
-            echo $args['before_title'] . apply_filters('widget_title', $instance['title']) . $args['after_title'];
-        }
-        
-        $shortcode = '[rankitpro';
-        if (!empty($instance['type'])) {
-            $shortcode .= ' type="' . esc_attr($instance['type']) . '"';
-        }
-        if (!empty($instance['limit'])) {
-            $shortcode .= ' limit="' . esc_attr($instance['limit']) . '"';
-        }
-        $shortcode .= ']';
-        
-        echo do_shortcode($shortcode);
-        
-        echo $args['after_widget'];
-    }
-    
-    public function form($instance) {
-        $title = !empty($instance['title']) ? $instance['title'] : '';
-        $type = !empty($instance['type']) ? $instance['type'] : 'all';
-        $limit = !empty($instance['limit']) ? $instance['limit'] : '5';
         ?>
-        <p>
-            <label for="<?php echo $this->get_field_id('title'); ?>">Title:</label>
-            <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" 
-                   name="<?php echo $this->get_field_name('title'); ?>" type="text" 
-                   value="<?php echo esc_attr($title); ?>">
-        </p>
-        <p>
-            <label for="<?php echo $this->get_field_id('type'); ?>">Content Type:</label>
-            <select class="widefat" id="<?php echo $this->get_field_id('type'); ?>" 
-                    name="<?php echo $this->get_field_name('type'); ?>">
-                <option value="all" <?php selected($type, 'all'); ?>>All Content</option>
-                <option value="checkins" <?php selected($type, 'checkins'); ?>>Service Check-ins</option>
-                <option value="blogs" <?php selected($type, 'blogs'); ?>>Blog Posts</option>
-                <option value="reviews" <?php selected($type, 'reviews'); ?>>Customer Reviews</option>
-            </select>
-        </p>
-        <p>
-            <label for="<?php echo $this->get_field_id('limit'); ?>">Number of Items:</label>
-            <input class="tiny-text" id="<?php echo $this->get_field_id('limit'); ?>" 
-                   name="<?php echo $this->get_field_name('limit'); ?>" type="number" 
-                   value="<?php echo esc_attr($limit); ?>" min="1" max="20">
-        </p>
+        <div class="wrap">
+            <h1>Shortcode Reference</h1>
+            
+            <div class="card" style="max-width: 900px;">
+                <h2>Available Shortcodes</h2>
+                <p>Copy and paste these shortcodes into your pages, posts, or widgets.</p>
+                
+                <div class="shortcode-section" style="border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                    <h3>Service Check-ins</h3>
+                    <p>Display recent service visits and technician reports:</p>
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 3px; font-family: monospace;">
+                        [rankitpro type="checkins" limit="5" company="<?php echo esc_attr($company_id); ?>"]
+                    </div>
+                    <p><strong>Parameters:</strong></p>
+                    <ul>
+                        <li><code>type</code>: "checkins" (required)</li>
+                        <li><code>limit</code>: Number of items to show (default: 5)</li>
+                        <li><code>company</code>: Your company ID (<?php echo esc_html($company_id); ?>)</li>
+                    </ul>
+                </div>
+                
+                <div class="shortcode-section" style="border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                    <h3>Customer Reviews</h3>
+                    <p>Show customer testimonials and ratings:</p>
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 3px; font-family: monospace;">
+                        [rankitpro type="reviews" limit="3" company="<?php echo esc_attr($company_id); ?>"]
+                    </div>
+                    <p><strong>Parameters:</strong></p>
+                    <ul>
+                        <li><code>type</code>: "reviews" (required)</li>
+                        <li><code>limit</code>: Number of reviews to show (default: 3)</li>
+                        <li><code>rating</code>: Minimum star rating to display (optional)</li>
+                    </ul>
+                </div>
+                
+                <div class="shortcode-section" style="border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                    <h3>Blog Posts</h3>
+                    <p>Display AI-generated blog content from service visits:</p>
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 3px; font-family: monospace;">
+                        [rankitpro type="blogs" limit="3" company="<?php echo esc_attr($company_id); ?>"]
+                    </div>
+                    <p><strong>Parameters:</strong></p>
+                    <ul>
+                        <li><code>type</code>: "blogs" (required)</li>
+                        <li><code>limit</code>: Number of blog posts to show (default: 3)</li>
+                        <li><code>category</code>: Filter by job type category (optional)</li>
+                    </ul>
+                </div>
+                
+                <div class="shortcode-section" style="border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                    <h3>Advanced Examples</h3>
+                    <p>More complex shortcode examples:</p>
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 3px; font-family: monospace;">
+                        [rankitpro type="checkins" limit="10" company="<?php echo esc_attr($company_id); ?>" display="grid"]<br>
+                        [rankitpro type="reviews" limit="5" rating="4" company="<?php echo esc_attr($company_id); ?>"]<br>
+                        [rankitpro type="blogs" limit="6" category="maintenance" company="<?php echo esc_attr($company_id); ?>"]
+                    </div>
+                </div>
+                
+                <h3>Need Help?</h3>
+                <p>If shortcodes aren't working:</p>
+                <ol>
+                    <li>Go to <a href="<?php echo admin_url('admin.php?page=rank-it-pro-test'); ?>">Test & Troubleshoot</a> to verify your connection</li>
+                    <li>Check that you've entered the correct Company ID in <a href="<?php echo admin_url('admin.php?page=rank-it-pro-settings'); ?>">Settings</a></li>
+                    <li>Make sure your shortcode syntax matches the examples above exactly</li>
+                    <li>Try temporarily disabling caching plugins</li>
+                </ol>
+            </div>
+        </div>
         <?php
     }
     
-    public function update($new_instance, $old_instance) {
-        $instance = array();
-        $instance['title'] = (!empty($new_instance['title'])) ? strip_tags($new_instance['title']) : '';
-        $instance['type'] = (!empty($new_instance['type'])) ? strip_tags($new_instance['type']) : 'all';
-        $instance['limit'] = (!empty($new_instance['limit'])) ? intval($new_instance['limit']) : 5;
-        return $instance;
+    public function rankitpro_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'type' => 'checkins',
+            'limit' => '5',
+            'company' => get_option('rankitpro_company_id', ''),
+            'rating' => '',
+            'category' => '',
+            'display' => 'list'
+        ), $atts);
+
+        if (empty($atts['company'])) {
+            return '<div class="rankitpro-error">Error: Company ID not configured. Please check your plugin settings.</div>';
+        }
+
+        // Validate and sanitize inputs to prevent NaN errors
+        $company_id = !empty($atts['company']) && is_numeric($atts['company']) ? intval($atts['company']) : 0;
+        $limit = !empty($atts['limit']) && is_numeric($atts['limit']) ? intval($atts['limit']) : 5;
+        
+        if ($company_id === 0) {
+            return '<div class="rankitpro-error">Error: Invalid Company ID. Please check your plugin settings.</div>';
+        }
+        
+        $api_domain = get_option('rankitpro_api_domain', $this->api_base_url);
+        
+        $cache_key = 'rankitpro_' . $atts['type'] . '_' . $company_id . '_' . $limit;
+        $cached_data = get_transient($cache_key);
+        
+        if ($cached_data !== false) {
+            return $cached_data;
+        }
+
+        $widget_id = 'rankitpro-' . uniqid();
+        $script_url = $api_domain . '/widget/' . $company_id . '?type=' . urlencode($atts['type']) . '&limit=' . $limit;
+        
+        if (!empty($atts['rating']) && is_numeric($atts['rating'])) {
+            $script_url .= '&rating=' . intval($atts['rating']);
+        }
+        
+        if (!empty($atts['category'])) {
+            $script_url .= '&category=' . urlencode($atts['category']);
+        }
+
+        $output = '<div id="' . $widget_id . '" data-rankitpro-widget="' . esc_attr($atts['type']) . '" data-company-id="' . esc_attr($company_id) . '" data-limit="' . esc_attr($limit) . '" class="rankitpro-container">';
+        $output .= '<p>Loading ' . esc_html($atts['type']) . '...</p>';
+        $output .= '</div>';
+        $output .= '<script>
+            (function() {
+                var script = document.createElement("script");
+                script.src = "' . esc_url($script_url) . '";
+                script.onload = function() {
+                    console.log("RankItPro: Widget script loaded for ' . esc_js($atts['type']) . '");
+                };
+                script.onerror = function() {
+                    document.getElementById("' . $widget_id . '").innerHTML = "<div class=\"rankitpro-error\">Unable to connect to RankItPro services. Please check your settings or try refreshing the page.</div>";
+                };
+                document.head.appendChild(script);
+            })();
+        </script>';
+
+        $cache_time = get_option('rankitpro_cache_time', 300);
+        set_transient($cache_key, $output, $cache_time);
+        
+        return $output;
+    }
+    
+    public function enqueue_styles() {
+        wp_enqueue_style('rankitpro-styles', plugin_dir_url(__FILE__) . 'rankitpro-styles.css', array(), '1.3.0');
     }
 }
 
-// Register widget
-function register_rankitpro_widget() {
-    register_widget('RankItPro_Widget');
-}
-add_action('widgets_init', 'register_rankitpro_widget');
+new RankItProIntegration();
 ?>
