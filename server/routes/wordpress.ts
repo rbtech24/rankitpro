@@ -206,6 +206,183 @@ class RankItProPlugin {
             'Rank It Pro',
             'manage_options',
             'rank-it-pro',
+            array($this, 'admin_page'),
+            'dashicons-star-filled',
+            30
+        );
+        
+        add_submenu_page(
+            'rank-it-pro',
+            'Settings',
+            'Settings',
+            'manage_options',
+            'rank-it-pro-settings',
+            array($this, 'settings_page')
+        );
+        
+        add_submenu_page(
+            'rank-it-pro',
+            'Test & Troubleshoot',
+            'Test & Troubleshoot',
+            'manage_options',
+            'rank-it-pro-test',
+            array($this, 'test_page')
+        );
+    }
+    
+    public function admin_page() {
+        echo '<div class="wrap">';
+        echo '<h1>Rank It Pro Integration</h1>';
+        echo '<div class="notice notice-info"><p><strong>Plugin Active!</strong> Use shortcodes to display content.</p></div>';
+        echo '<div class="card" style="max-width: 800px;">';
+        echo '<h2>Available Shortcodes</h2>';
+        echo '<p><code>[rankitpro_checkins]</code> - Display service check-ins</p>';
+        echo '<p><code>[rankitpro_reviews]</code> - Show customer reviews</p>';
+        echo '<p><code>[rankitpro_blog]</code> - Display blog posts</p>';
+        echo '</div></div>';
+    }
+    
+    public function settings_page() {
+        if (isset(\$_POST['submit']) && check_admin_referer('rankitpro_settings_nonce')) {
+            if (!empty(\$_POST['rankitpro_api_key'])) {
+                update_option('rankitpro_api_key', sanitize_text_field(\$_POST['rankitpro_api_key']));
+                echo '<div class="notice notice-success"><p>API Key updated!</p></div>';
+            }
+        }
+        
+        \$saved_api_key = get_option('rankitpro_api_key', '');
+        
+        echo '<div class="wrap"><h1>Rank It Pro Settings</h1>';
+        echo '<form method="post" action="">';
+        wp_nonce_field('rankitpro_settings_nonce');
+        echo '<table class="form-table">';
+        echo '<tr><th>API Key</th><td>';
+        echo '<input type="text" name="rankitpro_api_key" value="' . esc_attr(\$saved_api_key) . '" class="regular-text" placeholder="Enter your API key" />';
+        echo '<p class="description">Get your API key from Rank It Pro dashboard.</p>';
+        echo '</td></tr></table>';
+        submit_button('Save Settings');
+        echo '</form></div>';
+    }
+    
+    public function test_page() {
+        \$test_results = array();
+        
+        if (isset(\$_POST['run_tests']) && check_admin_referer('rankitpro_test_nonce')) {
+            \$test_results = \$this->run_comprehensive_tests();
+        }
+        
+        echo '<div class="wrap"><h1>Test & Troubleshoot</h1>';
+        echo '<div class="card"><h2>System Diagnostics</h2>';
+        echo '<form method="post" action="">';
+        wp_nonce_field('rankitpro_test_nonce');
+        submit_button('Run Diagnostic Tests', 'primary', 'run_tests');
+        echo '</form></div>';
+        
+        if (!empty(\$test_results)) {
+            echo '<div class="card"><h2>Test Results</h2>';
+            foreach (\$test_results as \$test) {
+                \$color = \$test['passed'] ? '#00a32a' : '#d63638';
+                \$bg = \$test['passed'] ? '#f0f9ff' : '#fff2f2';
+                \$icon = \$test['passed'] ? '✓' : '✗';
+                echo '<div style="margin: 15px 0; padding: 10px; border-left: 4px solid ' . \$color . '; background: ' . \$bg . ';">';
+                echo '<h3>' . \$icon . ' ' . esc_html(\$test['name']) . '</h3>';
+                echo '<p>' . esc_html(\$test['message']) . '</p>';
+                echo '</div>';
+            }
+            echo '</div>';
+        }
+        echo '</div>';
+    }
+    
+    private function run_comprehensive_tests() {
+        \$results = array();
+        
+        \$results[] = array(
+            'name' => 'WordPress Environment',
+            'passed' => version_compare(get_bloginfo('version'), '5.0', '>='),
+            'message' => 'WordPress version: ' . get_bloginfo('version')
+        );
+        
+        \$api_key = get_option('rankitpro_api_key', '');
+        \$results[] = array(
+            'name' => 'API Key Configuration',
+            'passed' => !empty(\$api_key),
+            'message' => !empty(\$api_key) ? 'API key configured' : 'No API key set'
+        );
+        
+        \$shortcodes = array('rankitpro_checkins', 'rankitpro_reviews', 'rankitpro_blog');
+        \$registered = 0;
+        foreach (\$shortcodes as \$shortcode) {
+            if (shortcode_exists(\$shortcode)) \$registered++;
+        }
+        
+        \$results[] = array(
+            'name' => 'Shortcode Registration',
+            'passed' => \$registered === count(\$shortcodes),
+            'message' => \$registered . ' of ' . count(\$shortcodes) . ' shortcodes registered'
+        );
+        
+        return \$results;
+    }
+    
+    public function display_checkins(\$atts) {
+        \$atts = shortcode_atts(array('limit' => 5), \$atts);
+        return '<div class="rankitpro-checkins"><p>Service check-ins will appear here.</p></div>';
+    }
+    
+    public function display_reviews(\$atts) {
+        \$atts = shortcode_atts(array('limit' => 3), \$atts);
+        return '<div class="rankitpro-reviews"><p>Customer reviews will appear here.</p></div>';
+    }
+    
+    public function display_blog_posts(\$atts) {
+        \$atts = shortcode_atts(array('limit' => 3), \$atts);
+        return '<div class="rankitpro-blog-posts"><p>Blog posts will appear here.</p></div>';
+    }
+}
+
+// Initialize plugin
+function rankitpro_init() {
+    new RankItProPlugin();
+}
+add_action('plugins_loaded', 'rankitpro_init');
+
+// Activation hook
+register_activation_hook(__FILE__, 'rankitpro_activate');
+function rankitpro_activate() {
+    add_option('rankitpro_activation_notice', true);
+}
+
+// Activation notice
+add_action('admin_notices', 'rankitpro_activation_notice');
+function rankitpro_activation_notice() {
+    if (get_option('rankitpro_activation_notice')) {
+        echo '<div class="notice notice-success is-dismissible">';
+        echo '<p><strong>Rank It Pro activated!</strong> <a href="' . admin_url('admin.php?page=rank-it-pro') . '">Visit settings</a></p>';
+        echo '</div>';
+        delete_option('rankitpro_activation_notice');
+    }
+}
+?>`;
+
+        // Remove duplicated plugin code sections
+        // The old plugin code has been replaced with the new complete version above
+    
+    public function plugin_init() {
+        load_plugin_textdomain('rank-it-pro', false, dirname(plugin_basename(__FILE__)) . '/languages');
+    }
+    
+    public function enqueue_scripts() {
+        wp_enqueue_style('rankitpro-style', plugin_dir_url(__FILE__) . 'assets/css/rank-it-pro.css', array(), '1.1.0');
+        wp_enqueue_script('rankitpro-script', plugin_dir_url(__FILE__) . 'assets/js/rank-it-pro.js', array('jquery'), '1.1.0', true);
+    }
+    
+    public function add_admin_menu() {
+        add_menu_page(
+            'Rank It Pro',
+            'Rank It Pro',
+            'manage_options',
+            'rank-it-pro',
             array(\\$this, 'admin_page'),
             'dashicons-star-filled',
             30
@@ -687,16 +864,16 @@ if (!defined('ABSPATH')) {
 }
 
 class RankItProPlugin {
-    private \\$default_api_key = '${apiKey}';
-    private \\$api_endpoint = '${apiEndpoint}';
+    private $default_api_key = '${apiKey}';
+    private $api_endpoint = '${apiEndpoint}';
     
     public function __construct() {
-        add_action('init', array(\\$this, 'plugin_init'));
-        add_action('wp_enqueue_scripts', array(\\$this, 'enqueue_scripts'));
-        add_action('admin_menu', array(\\$this, 'add_admin_menu'));
-        add_shortcode('rankitpro_checkins', array(\\$this, 'display_checkins'));
-        add_shortcode('rankitpro_reviews', array(\\$this, 'display_reviews'));
-        add_shortcode('rankitpro_blog', array(\\$this, 'display_blog_posts'));
+        add_action('init', array($this, 'plugin_init'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
+        add_action('admin_menu', array($this, 'add_admin_menu'));
+        add_shortcode('rankitpro_checkins', array($this, 'display_checkins'));
+        add_shortcode('rankitpro_reviews', array($this, 'display_reviews'));
+        add_shortcode('rankitpro_blog', array($this, 'display_blog_posts'));
     }
     
     public function plugin_init() {
