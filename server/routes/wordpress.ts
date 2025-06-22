@@ -170,6 +170,8 @@ Plugin URI: https://rankitpro.com
 Description: WordPress integration for Rank It Pro SaaS platform
 Version: 1.0.0
 Author: Rank It Pro
+Text Domain: rank-it-pro
+Domain Path: /languages
 */
 
 if (!defined('ABSPATH')) {
@@ -181,20 +183,171 @@ class RankItProPlugin {
     private $api_endpoint = '${apiEndpoint}';
     
     public function __construct() {
-        add_action('init', array($this, 'init'));
+        add_action('init', array($this, 'plugin_init'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_shortcode('rankitpro_checkins', array($this, 'display_checkins'));
+        add_shortcode('rankitpro_reviews', array($this, 'display_reviews'));
+        add_shortcode('rankitpro_blog', array($this, 'display_blog_posts'));
+    }
+    
+    public function plugin_init() {
+        // Plugin initialization code
+        load_plugin_textdomain('rank-it-pro', false, dirname(plugin_basename(__FILE__)) . '/languages');
+    }
+    
+    public function enqueue_scripts() {
+        wp_enqueue_style('rankitpro-style', plugin_dir_url(__FILE__) . 'assets/css/rank-it-pro.css', array(), '1.0.0');
+        wp_enqueue_script('rankitpro-script', plugin_dir_url(__FILE__) . 'assets/js/rank-it-pro.js', array('jquery'), '1.0.0', true);
     }
     
     public function display_checkins($atts) {
-        $response = wp_remote_get($this->api_endpoint . '/public/checkins?api_key=' . $this->api_key);
-        if (is_wp_error($response)) {
-            return '<p>Unable to load check-ins</p>';
+        $atts = shortcode_atts(array(
+            'limit' => 5,
+            'company' => ''
+        ), $atts);
+        
+        $url = $this->api_endpoint . '/public/checkins?limit=' . intval($atts['limit']);
+        if (!empty($atts['company'])) {
+            $url .= '&company=' . urlencode($atts['company']);
         }
-        return '<div class="rankitpro-checkins">Check-ins loaded</div>';
+        
+        $response = wp_remote_get($url, array(
+            'timeout' => 15,
+            'headers' => array('User-Agent' => 'RankItPro-WordPress-Plugin/1.0.0')
+        ));
+        
+        if (is_wp_error($response)) {
+            return '<div class="rankitpro-no-data">Unable to load service check-ins at this time.</div>';
+        }
+        
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+        
+        if (empty($data)) {
+            return '<div class="rankitpro-no-data">No service check-ins available.</div>';
+        }
+        
+        $output = '<div class="rankitpro-container"><div class="rankitpro-checkins">';
+        
+        foreach ($data as $checkin) {
+            $output .= '<div class="rankitpro-checkin">';
+            $output .= '<h3>' . esc_html($checkin['jobType'] ?? 'Service Visit') . '</h3>';
+            $output .= '<div class="checkin-date">' . esc_html(date('F j, Y', strtotime($checkin['createdAt'] ?? ''))) . '</div>';
+            
+            if (!empty($checkin['technicianName'])) {
+                $output .= '<div class="rankitpro-technician">';
+                $output .= '<div class="technician-avatar">' . esc_html(substr($checkin['technicianName'], 0, 1)) . '</div>';
+                $output .= '<div class="technician-info"><h4>' . esc_html($checkin['technicianName']) . '</h4><div class="role">Service Technician</div></div>';
+                $output .= '</div>';
+            }
+            
+            if (!empty($checkin['location'])) {
+                $output .= '<div class="checkin-location">' . esc_html($checkin['location']) . '</div>';
+            }
+            
+            if (!empty($checkin['notes'])) {
+                $output .= '<div class="checkin-notes">' . esc_html($checkin['notes']) . '</div>';
+            }
+            
+            if (!empty($checkin['photos'])) {
+                $output .= '<div class="checkin-photos">';
+                foreach ($checkin['photos'] as $photo) {
+                    $output .= '<img src="' . esc_url($photo) . '" alt="Service photo" class="checkin-photo" />';
+                }
+                $output .= '</div>';
+            }
+            
+            $output .= '</div>';
+        }
+        
+        $output .= '</div></div>';
+        return $output;
+    }
+    
+    public function display_reviews($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 3,
+            'company' => ''
+        ), $atts);
+        
+        $url = $this->api_endpoint . '/public/reviews?limit=' . intval($atts['limit']);
+        if (!empty($atts['company'])) {
+            $url .= '&company=' . urlencode($atts['company']);
+        }
+        
+        $response = wp_remote_get($url, array('timeout' => 15));
+        
+        if (is_wp_error($response)) {
+            return '<div class="rankitpro-no-data">Unable to load reviews at this time.</div>';
+        }
+        
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+        
+        if (empty($data)) {
+            return '<div class="rankitpro-no-data">No reviews available.</div>';
+        }
+        
+        $output = '<div class="rankitpro-container"><div class="rankitpro-reviews">';
+        
+        foreach ($data as $review) {
+            $output .= '<div class="rankitpro-review">';
+            $rating = intval($review['rating'] ?? 5);
+            $output .= '<div class="review-rating"><span class="stars">' . str_repeat('★', $rating) . str_repeat('☆', 5 - $rating) . '</span></div>';
+            $output .= '<blockquote>' . esc_html($review['comment'] ?? '') . '</blockquote>';
+            $output .= '<cite>— ' . esc_html($review['customerName'] ?? 'Anonymous Customer') . '</cite>';
+            $output .= '</div>';
+        }
+        
+        $output .= '</div></div>';
+        return $output;
+    }
+    
+    public function display_blog_posts($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 3,
+            'company' => ''
+        ), $atts);
+        
+        $url = $this->api_endpoint . '/public/blog-posts?limit=' . intval($atts['limit']);
+        if (!empty($atts['company'])) {
+            $url .= '&company=' . urlencode($atts['company']);
+        }
+        
+        $response = wp_remote_get($url, array('timeout' => 15));
+        
+        if (is_wp_error($response)) {
+            return '<div class="rankitpro-no-data">Unable to load blog posts at this time.</div>';
+        }
+        
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+        
+        if (empty($data)) {
+            return '<div class="rankitpro-no-data">No blog posts available.</div>';
+        }
+        
+        $output = '<div class="rankitpro-container"><div class="rankitpro-blog-posts">';
+        
+        foreach ($data as $post) {
+            $output .= '<div class="rankitpro-blog-post">';
+            $output .= '<h3><a href="' . esc_url($post['url'] ?? '#') . '" target="_blank">' . esc_html($post['title'] ?? 'Blog Post') . '</a></h3>';
+            $output .= '<div class="post-date">' . esc_html(date('F j, Y', strtotime($post['createdAt'] ?? ''))) . '</div>';
+            if (!empty($post['excerpt'])) {
+                $output .= '<div class="post-excerpt">' . esc_html($post['excerpt']) . '</div>';
+            }
+            $output .= '</div>';
+        }
+        
+        $output .= '</div></div>';
+        return $output;
     }
 }
 
-new RankItProPlugin();
+// Initialize the plugin
+add_action('plugins_loaded', function() {
+    new RankItProPlugin();
+});
 ?>`;
 
     const readmeContent = `# Rank It Pro WordPress Plugin
