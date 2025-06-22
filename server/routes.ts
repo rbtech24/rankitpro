@@ -1622,6 +1622,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register admin routes for subscription management
   app.use("/api/admin", adminRoutes);
+
+  // Mount critical missing routes with proper paths - BEFORE catch-all
+  app.use("/api/check-ins", checkInRoutes);
+  app.use("/api/blog", blogRoutes);  
+  app.use("/api/reviews", reviewRoutes);
   
   // Company stats endpoint
   app.get("/api/company-stats", isAuthenticated, async (req, res) => {
@@ -1654,11 +1659,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
-
-  // Mount critical missing routes with proper paths
-  app.use("/api/check-ins", checkInRoutes);
-  app.use("/api/blog", blogRoutes);  
-  app.use("/api/reviews", reviewRoutes);
 
   // Add embed routes for JavaScript widget
   app.use("/", embedRoutes);
