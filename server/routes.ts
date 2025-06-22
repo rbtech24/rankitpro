@@ -1215,6 +1215,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register WordPress routes for plugin functionality
   app.use("/api/wordpress", wordpressRoutes);
   
+  // Register integrations routes
+  app.use("/api/integration", integrationsRoutes);
+  
   // Register admin routes for subscription management
   app.use("/api/admin", adminRoutes);
   
