@@ -163,7 +163,7 @@ router.get('/plugin', async (req: Request, res: Response) => {
     const apiKey = 'rank_it_pro_api_key_' + Date.now();
     const apiEndpoint = 'https://rankitpro.com/api';
     
-    const pluginCode = `<?php
+    const pluginCode = \`<?php
 /*
 Plugin Name: Rank It Pro Integration
 Plugin URI: https://rankitpro.com
@@ -179,17 +179,17 @@ if (!defined('ABSPATH')) {
 }
 
 class RankItProPlugin {
-    private \\$default_api_key = '${apiKey}';
-    private \\$api_endpoint = '${apiEndpoint}';
+    private \$default_api_key = '\${apiKey}';
+    private \$api_endpoint = '\${apiEndpoint}';
     
     public function __construct() {
-        add_action('init', array(\\$this, 'plugin_init'));
-        add_action('wp_enqueue_scripts', array(\\$this, 'enqueue_scripts'));
-        add_action('admin_menu', array(\\$this, 'add_admin_menu'));
-        add_shortcode('rankitpro_checkins', array(\\$this, 'display_checkins'));
-        add_shortcode('rankitpro_reviews', array(\\$this, 'display_reviews'));
-        add_shortcode('rankitpro_blog', array(\\$this, 'display_blog_posts'));
-    }
+        add_action('init', array(\$this, 'plugin_init'));
+        add_action('wp_enqueue_scripts', array(\$this, 'enqueue_scripts'));
+        add_action('admin_menu', array(\$this, 'add_admin_menu'));
+        add_shortcode('rankitpro_checkins', array(\$this, 'display_checkins'));
+        add_shortcode('rankitpro_reviews', array(\$this, 'display_reviews'));
+        add_shortcode('rankitpro_blog', array(\$this, 'display_blog_posts'));
+    }\`
     
     public function plugin_init() {
         load_plugin_textdomain('rank-it-pro', false, dirname(plugin_basename(__FILE__)) . '/languages');
@@ -271,13 +271,13 @@ class RankItProPlugin {
             <div class="card" style="max-width: 800px; margin-top: 20px;">
                 <h2>API Connection Status</h2>
                 <?php
-                \\$connection_status = \\$this->test_api_connection();
-                if (\\$connection_status['connected']) {
+                $connection_status = $this->test_api_connection();
+                if (\$connection_status['connected']) {
                     echo '<p><strong>Status:</strong> <span style="color: green;">✓ Connected</span></p>';
                     echo '<p><em>Data is automatically synced from your Rank It Pro account.</em></p>';
                 } else {
                     echo '<p><strong>Status:</strong> <span style="color: red;">✗ Not Connected</span></p>';
-                    echo '<p><strong>Error:</strong> ' . esc_html(\\$connection_status['error']) . '</p>';
+                    echo '<p><strong>Error:</strong> ' . esc_html($connection_status['error']) . '</p>';
                     echo '<p><em>Please configure your API key in <a href="' . admin_url('admin.php?page=rank-it-pro-settings') . '">Settings</a>.</em></p>';
                 }
                 ?>
@@ -287,18 +287,18 @@ class RankItProPlugin {
     }
     
     public function settings_page() {
-        if (isset(\\$_POST['submit']) && check_admin_referer('rankitpro_settings_nonce')) {
-            if (!empty(\\$_POST['rankitpro_api_key'])) {
-                update_option('rankitpro_api_key', sanitize_text_field(\\$_POST['rankitpro_api_key']));
+        if (isset(\$_POST['submit']) && check_admin_referer('rankitpro_settings_nonce')) {
+            if (!empty(\$_POST['rankitpro_api_key'])) {
+                update_option('rankitpro_api_key', sanitize_text_field(\$_POST['rankitpro_api_key']));
                 echo '<div class="notice notice-success"><p>API Key updated successfully!</p></div>';
             }
-            if (!empty(\\$_POST['rankitpro_cache_duration'])) {
-                update_option('rankitpro_cache_duration', intval(\\$_POST['rankitpro_cache_duration']));
+            if (!empty(\$_POST['rankitpro_cache_duration'])) {
+                update_option('rankitpro_cache_duration', intval(\$_POST['rankitpro_cache_duration']));
             }
         }
         
-        \\$saved_api_key = get_option('rankitpro_api_key', '');
-        \\$cache_duration = get_option('rankitpro_cache_duration', 900);
+        \$saved_api_key = get_option('rankitpro_api_key', '');
+        \$cache_duration = get_option('rankitpro_cache_duration', 900);
         ?>
         <div class="wrap">
             <h1>Rank It Pro Settings</h1>
