@@ -31,7 +31,6 @@ import reviewRequestRoutes from "./routes/review-request";
 import reviewResponseRoutes from "./routes/review-response";
 import reviewAutomationRoutes from "./routes/review-automation";
 import adminRoutes from "./routes/admin";
-import wordpressRoutes from "./routes/wordpress-integration";
 import wordpressCustomFieldsRoutes from "./routes/wordpress-custom-fields";
 import jsWidgetRoutes from "./routes/js-widget";
 import billingRoutes from "./routes/billing";
@@ -43,7 +42,6 @@ import crmIntegrationRoutes from "./routes/crm-integration";
 import salesRoutes from "./routes/sales";
 import supportRoutes from "./routes/support";
 import embedRoutes from "./routes/embed";
-import wordpressPluginRoutes from "./routes/wordpress-plugin";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
 import { analyticsService } from "./services/analytics-service";
@@ -3217,13 +3215,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup WordPress routes from fixed module
   // WordPress plugin route handled in main routes
-
-  // WordPress plugin download routes - MUST BE FIRST to prevent frontend routing conflicts
-  app.get("/api/integration/wordpress/download-plugin", isAuthenticated, isCompanyAdmin, async (req, res) => {
-    console.log('WordPress plugin download - integration endpoint called');
-    try {
-      const companyId = req.user?.companyId;
-      if (!companyId) {
         return res.status(400).json({ error: 'No company ID found' });
       }
       
