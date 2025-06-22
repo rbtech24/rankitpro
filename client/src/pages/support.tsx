@@ -1,440 +1,398 @@
-import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Plus, MessageSquare, Clock, CheckCircle, AlertCircle, User } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-
-const ticketFormSchema = z.object({
-  subject: z.string().min(1, "Subject is required"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  category: z.enum(["technical", "billing", "feature_request", "bug_report", "account", "integration", "other"]),
-  priority: z.enum(["low", "medium", "high", "urgent"]).default("medium")
-});
-
-const responseFormSchema = z.object({
-  message: z.string().min(1, "Message is required")
-});
-
-interface SupportTicket {
-  id: number;
-  ticketNumber: string;
-  subject: string;
-  description: string;
-  category: string;
-  priority: string;
-  status: string;
-  submitterName: string;
-  submitterEmail: string;
-  createdAt: string;
-  updatedAt: string;
-  responses?: TicketResponse[];
-}
-
-interface TicketResponse {
-  id: number;
-  ticketId: number;
-  responderName: string;
-  responderType: string;
-  message: string;
-  createdAt: string;
-}
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { HelpCircle, MessageSquare, Phone, Mail, Clock, CheckCircle, AlertCircle, Bug, Lightbulb } from "lucide-react";
+import { useState } from "react";
 
 export default function SupportPage() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
-  const [isCreatingTicket, setIsCreatingTicket] = useState(false);
-  const [isRespondingToTicket, setIsRespondingToTicket] = useState(false);
-
-  // Fetch support tickets
-  const { data: tickets, isLoading: ticketsLoading } = useQuery<SupportTicket[]>({
-    queryKey: ['/api/support/tickets'],
-    queryFn: async () => {
-      const res = await apiRequest('GET', '/api/support/tickets');
-      return res.json();
-    }
+  const [ticketForm, setTicketForm] = useState({
+    subject: '',
+    category: '',
+    priority: '',
+    description: ''
   });
 
-  // Create ticket form
-  const ticketForm = useForm<z.infer<typeof ticketFormSchema>>({
-    resolver: zodResolver(ticketFormSchema),
-    defaultValues: {
-      subject: "",
-      description: "",
-      category: "technical",
-      priority: "medium"
-    }
-  });
-
-  // Response form
-  const responseForm = useForm<z.infer<typeof responseFormSchema>>({
-    resolver: zodResolver(responseFormSchema),
-    defaultValues: {
-      message: ""
-    }
-  });
-
-  // Create ticket mutation
-  const createTicketMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof ticketFormSchema>) => {
-      const res = await apiRequest('POST', '/api/support/tickets', data);
-      return res.json();
+  const faqs = [
+    {
+      question: "How do I get started with Rank It Pro?",
+      answer: "Sign up for an account, create your company profile, add your technicians, and start using our mobile app for field service management. Our onboarding guide will walk you through each step."
     },
-    onSuccess: () => {
-      toast({
-        title: "Support Ticket Created",
-        description: "Your support ticket has been created successfully."
-      });
-      ticketForm.reset();
-      setIsCreatingTicket(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/support/tickets'] });
+    {
+      question: "Can I integrate with my existing WordPress website?",
+      answer: "Yes! We provide a WordPress plugin that displays your service check-ins, customer reviews, and blog posts directly on your website. Download it from the Integrations page."
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to create support ticket. Please try again.",
-        variant: "destructive"
-      });
-    }
-  });
-
-  // Add response mutation
-  const addResponseMutation = useMutation({
-    mutationFn: async ({ ticketId, message }: { ticketId: number; message: string }) => {
-      const res = await apiRequest('POST', `/api/support/tickets/${ticketId}/responses`, { message });
-      return res.json();
+    {
+      question: "How does the AI content generation work?",
+      answer: "Our AI analyzes your service data and generates professional blog posts, social media content, and review responses. You can customize the tone and style to match your brand."
     },
-    onSuccess: () => {
-      toast({
-        title: "Response Added",
-        description: "Your response has been added to the ticket."
-      });
-      responseForm.reset();
-      setIsRespondingToTicket(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/support/tickets'] });
+    {
+      question: "What subscription plans are available?",
+      answer: "We offer Starter ($29/month), Professional ($79/month), and Enterprise ($149/month) plans. All plans include core features with varying limits on technicians, jobs, and AI generations."
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to add response. Please try again.",
-        variant: "destructive"
-      });
+    {
+      question: "Is my data secure?",
+      answer: "Absolutely. We use enterprise-grade encryption, secure data centers, and comply with industry standards. Your data is backed up daily and never shared with third parties."
+    },
+    {
+      question: "Can I cancel my subscription anytime?",
+      answer: "Yes, you can cancel your subscription at any time from your account settings. You'll retain access until the end of your current billing period."
+    },
+    {
+      question: "Do you offer mobile apps?",
+      answer: "Yes, we have mobile apps for both iOS and Android that allow technicians to check in, upload photos, collect reviews, and manage jobs from the field."
+    },
+    {
+      question: "How do I add technicians to my account?",
+      answer: "Go to Team Management in your dashboard, click 'Add Technician', enter their details, and they'll receive an invitation email with login credentials."
     }
-  });
+  ];
 
-  const onCreateTicket = (data: z.infer<typeof ticketFormSchema>) => {
-    createTicketMutation.mutate(data);
-  };
+  const supportCategories = [
+    { name: "Account & Billing", icon: "💳", description: "Subscription, payments, and account management" },
+    { name: "Technical Issues", icon: "🔧", description: "App problems, bugs, and technical difficulties" },
+    { name: "Feature Requests", icon: "💡", description: "Suggest new features or improvements" },
+    { name: "WordPress Plugin", icon: "🔌", description: "Plugin installation and configuration help" },
+    { name: "Mobile App", icon: "📱", description: "iOS and Android app support" },
+    { name: "API Integration", icon: "🔗", description: "Developer support and API questions" }
+  ];
 
-  const onAddResponse = (data: z.infer<typeof responseFormSchema>) => {
-    if (selectedTicket) {
-      addResponseMutation.mutate({
-        ticketId: selectedTicket.id,
-        message: data.message
-      });
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'bg-red-100 text-red-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open': return 'bg-blue-100 text-blue-800';
-      case 'in_progress': return 'bg-purple-100 text-purple-800';
-      case 'waiting_response': return 'bg-yellow-100 text-yellow-800';
-      case 'resolved': return 'bg-green-100 text-green-800';
-      case 'closed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const formatStatus = (status: string) => {
-    return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const handleTicketSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle ticket submission
+    console.log('Support ticket submitted:', ticketForm);
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Support Tickets</h1>
-            <p className="text-muted-foreground mt-2">
-              Get help from our support team or track existing tickets
-            </p>
-          </div>
-          <Dialog open={isCreatingTicket} onOpenChange={setIsCreatingTicket}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                New Ticket
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Create Support Ticket</DialogTitle>
-                <DialogDescription>
-                  Describe your issue and we'll get back to you as soon as possible.
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...ticketForm}>
-                <form onSubmit={ticketForm.handleSubmit(onCreateTicket)} className="space-y-4">
-                  <FormField
-                    control={ticketForm.control}
-                    name="subject"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Subject</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Brief description of your issue" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={ticketForm.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Category</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="technical">Technical Issue</SelectItem>
-                              <SelectItem value="billing">Billing Question</SelectItem>
-                              <SelectItem value="feature_request">Feature Request</SelectItem>
-                              <SelectItem value="bug_report">Bug Report</SelectItem>
-                              <SelectItem value="account">Account Issue</SelectItem>
-                              <SelectItem value="integration">Integration Help</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={ticketForm.control}
-                      name="priority"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Priority</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select priority" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="low">Low</SelectItem>
-                              <SelectItem value="medium">Medium</SelectItem>
-                              <SelectItem value="high">High</SelectItem>
-                              <SelectItem value="urgent">Urgent</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={ticketForm.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Please provide detailed information about your issue..."
-                            rows={4}
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <DialogFooter>
-                    <Button type="submit" disabled={createTicketMutation.isPending}>
-                      {createTicketMutation.isPending ? "Creating..." : "Create Ticket"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Support Center</h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Get help with Rank It Pro. Find answers, submit tickets, and connect with our support team.
+          </p>
         </div>
 
-        <div className="grid gap-6">
-          {ticketsLoading ? (
-            <div className="text-center py-8">Loading support tickets...</div>
-          ) : tickets && tickets.length > 0 ? (
-            tickets.map((ticket) => (
-              <Card key={ticket.id} className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => setSelectedTicket(ticket)}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{ticket.subject}</CardTitle>
-                      <CardDescription className="mt-1">
-                        #{ticket.ticketNumber} • Created {formatDistanceToNow(new Date(ticket.createdAt))} ago
-                      </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Badge className={getPriorityColor(ticket.priority)}>
-                        {ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1)}
-                      </Badge>
-                      <Badge className={getStatusColor(ticket.status)}>
-                        {formatStatus(ticket.status)}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {ticket.description}
-                  </p>
-                  <div className="flex items-center mt-4 text-sm text-muted-foreground">
-                    <User className="h-4 w-4 mr-1" />
-                    {ticket.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
+        {/* Quick Help Stats */}
+        <div className="grid md:grid-cols-4 gap-6 mb-12">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <Clock className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">&lt; 2 hrs</div>
+              <div className="text-sm text-gray-600">Avg Response Time</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6 text-center">
+              <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">98%</div>
+              <div className="text-sm text-gray-600">Issue Resolution</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6 text-center">
+              <MessageSquare className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">24/7</div>
+              <div className="text-sm text-gray-600">Support Available</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6 text-center">
+              <HelpCircle className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">500+</div>
+              <div className="text-sm text-gray-600">Help Articles</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="faq" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="faq">FAQ</TabsTrigger>
+            <TabsTrigger value="contact">Contact Support</TabsTrigger>
+            <TabsTrigger value="ticket">Submit Ticket</TabsTrigger>
+            <TabsTrigger value="status">System Status</TabsTrigger>
+          </TabsList>
+
+          {/* FAQ Tab */}
+          <TabsContent value="faq" className="space-y-6">
             <Card>
-              <CardContent className="text-center py-8">
-                <MessageSquare className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-medium mb-2">No Support Tickets</h3>
-                <p className="text-muted-foreground mb-4">
-                  You haven't created any support tickets yet.
-                </p>
-                <Button onClick={() => setIsCreatingTicket(true)}>
-                  Create Your First Ticket
-                </Button>
+              <CardHeader>
+                <CardTitle>Frequently Asked Questions</CardTitle>
+                <CardDescription>
+                  Find quick answers to common questions about Rank It Pro
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {faqs.map((faq, index) => (
+                    <AccordionItem key={index} value={`item-${index}`}>
+                      <AccordionTrigger className="text-left">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-600">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
               </CardContent>
             </Card>
-          )}
-        </div>
+          </TabsContent>
 
-        {/* Ticket Detail Modal */}
-        {selectedTicket && (
-          <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <div className="flex justify-between items-start">
+          {/* Contact Support Tab */}
+          <TabsContent value="contact" className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Mail className="h-5 w-5" />
+                    Email Support
+                  </CardTitle>
+                  <CardDescription>
+                    Get help via email - we typically respond within 2 hours
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">support@rankitpro.com</p>
+                  <Button className="w-full">
+                    <Mail className="h-4 w-4 mr-2" />
+                    Send Email
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
+                    Phone Support
+                  </CardTitle>
+                  <CardDescription>
+                    Speak with our support team directly
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-2">1-800-RANK-PRO</p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Mon-Fri: 8AM-8PM EST<br />
+                    Sat-Sun: 9AM-5PM EST
+                  </p>
+                  <Button className="w-full">
+                    <Phone className="h-4 w-4 mr-2" />
+                    Call Now
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Support Categories */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Support Categories</CardTitle>
+                <CardDescription>
+                  Choose the category that best describes your issue
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {supportCategories.map((category, index) => (
+                    <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                      <div className="text-2xl mb-2">{category.icon}</div>
+                      <h3 className="font-semibold text-gray-900 mb-1">{category.name}</h3>
+                      <p className="text-sm text-gray-600">{category.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Submit Ticket Tab */}
+          <TabsContent value="ticket" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Submit Support Ticket</CardTitle>
+                <CardDescription>
+                  Describe your issue in detail and we'll get back to you soon
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleTicketSubmit} className="space-y-4">
                   <div>
-                    <DialogTitle>{selectedTicket.subject}</DialogTitle>
-                    <DialogDescription>
-                      #{selectedTicket.ticketNumber} • Created {formatDistanceToNow(new Date(selectedTicket.createdAt))} ago
-                    </DialogDescription>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Subject
+                    </label>
+                    <Input
+                      value={ticketForm.subject}
+                      onChange={(e) => setTicketForm({...ticketForm, subject: e.target.value})}
+                      placeholder="Brief description of your issue"
+                      required
+                    />
                   </div>
-                  <div className="flex gap-2">
-                    <Badge className={getPriorityColor(selectedTicket.priority)}>
-                      {selectedTicket.priority.charAt(0).toUpperCase() + selectedTicket.priority.slice(1)}
-                    </Badge>
-                    <Badge className={getStatusColor(selectedTicket.status)}>
-                      {formatStatus(selectedTicket.status)}
-                    </Badge>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Category
+                      </label>
+                      <select
+                        value={ticketForm.category}
+                        onChange={(e) => setTicketForm({...ticketForm, category: e.target.value})}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      >
+                        <option value="">Select Category</option>
+                        <option value="technical">Technical Issues</option>
+                        <option value="billing">Account & Billing</option>
+                        <option value="feature">Feature Requests</option>
+                        <option value="plugin">WordPress Plugin</option>
+                        <option value="mobile">Mobile App</option>
+                        <option value="api">API Integration</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Priority
+                      </label>
+                      <select
+                        value={ticketForm.priority}
+                        onChange={(e) => setTicketForm({...ticketForm, priority: e.target.value})}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      >
+                        <option value="">Select Priority</option>
+                        <option value="low">Low - General question</option>
+                        <option value="medium">Medium - Issue affecting work</option>
+                        <option value="high">High - Urgent business impact</option>
+                        <option value="critical">Critical - System down</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description
+                    </label>
+                    <Textarea
+                      value={ticketForm.description}
+                      onChange={(e) => setTicketForm({...ticketForm, description: e.target.value})}
+                      placeholder="Please provide detailed information about your issue, including steps to reproduce if applicable"
+                      rows={6}
+                      required
+                    />
+                  </div>
+
+                  <Button type="submit" className="w-full">
+                    Submit Support Ticket
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* System Status Tab */}
+          <TabsContent value="status" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  System Status - All Systems Operational
+                </CardTitle>
+                <CardDescription>
+                  Current status of Rank It Pro services and infrastructure
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="font-medium">Web Application</span>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">Operational</Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="font-medium">Mobile Apps</span>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">Operational</Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="font-medium">API Services</span>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">Operational</Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="font-medium">AI Content Generation</span>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">Operational</Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="font-medium">WordPress Plugin</span>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">Operational</Badge>
                   </div>
                 </div>
-              </DialogHeader>
-              
-              <div className="space-y-4">
-                <div className="p-4 bg-muted rounded-lg">
-                  <div className="flex items-center mb-2">
-                    <User className="h-4 w-4 mr-2" />
-                    <span className="font-medium">{selectedTicket.submitterName}</span>
-                    <span className="text-sm text-muted-foreground ml-2">
-                      {formatDistanceToNow(new Date(selectedTicket.createdAt))} ago
-                    </span>
+
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h3 className="font-semibold text-blue-900 mb-2">Recent Updates</h3>
+                  <div className="space-y-2 text-sm text-blue-800">
+                    <p>• Enhanced WordPress plugin with test & troubleshoot features</p>
+                    <p>• Improved mobile app performance and reliability</p>
+                    <p>• Added new AI content generation capabilities</p>
                   </div>
-                  <p className="text-sm">{selectedTicket.description}</p>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
-                {selectedTicket.responses && selectedTicket.responses.length > 0 && (
-                  <div className="space-y-3">
-                    <h4 className="font-medium">Responses</h4>
-                    {selectedTicket.responses.map((response) => (
-                      <div key={response.id} className={`p-4 rounded-lg ${
-                        response.responderType === 'admin' ? 'bg-blue-50' : 'bg-muted'
-                      }`}>
-                        <div className="flex items-center mb-2">
-                          <User className="h-4 w-4 mr-2" />
-                          <span className="font-medium">{response.responderName}</span>
-                          {response.responderType === 'admin' && (
-                            <Badge variant="secondary" className="ml-2">Support Team</Badge>
-                          )}
-                          <span className="text-sm text-muted-foreground ml-auto">
-                            {formatDistanceToNow(new Date(response.createdAt))} ago
-                          </span>
-                        </div>
-                        <p className="text-sm">{response.message}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+        {/* Quick Links */}
+        <div className="mt-12 grid md:grid-cols-3 gap-6">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <Bug className="h-12 w-12 text-red-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">Report Bug</h3>
+              <p className="text-sm text-gray-600 mb-4">Found a bug? Let us know and we'll fix it quickly.</p>
+              <Button variant="outline" size="sm">Report Issue</Button>
+            </CardContent>
+          </Card>
 
-                {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
-                  <div className="border-t pt-4">
-                    <Form {...responseForm}>
-                      <form onSubmit={responseForm.handleSubmit(onAddResponse)} className="space-y-4">
-                        <FormField
-                          control={responseForm.control}
-                          name="message"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Add Response</FormLabel>
-                              <FormControl>
-                                <Textarea 
-                                  placeholder="Type your response..."
-                                  rows={3}
-                                  {...field} 
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button type="submit" disabled={addResponseMutation.isPending}>
-                          {addResponseMutation.isPending ? "Sending..." : "Send Response"}
-                        </Button>
-                      </form>
-                    </Form>
-                  </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
+          <Card>
+            <CardContent className="p-6 text-center">
+              <Lightbulb className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">Feature Request</h3>
+              <p className="text-sm text-gray-600 mb-4">Suggest new features to improve Rank It Pro.</p>
+              <Button variant="outline" size="sm">Suggest Feature</Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6 text-center">
+              <HelpCircle className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">Documentation</h3>
+              <p className="text-sm text-gray-600 mb-4">Detailed guides and API documentation.</p>
+              <Button variant="outline" size="sm">View Docs</Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }

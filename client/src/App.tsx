@@ -58,6 +58,8 @@ import SalesDashboard from "@/pages/sales-dashboard";
 import SetupGuide from "@/pages/setup-guide";
 import AIContentGenerator from "@/pages/ai-content-generator";
 import AdminUserManagement from "@/pages/admin-user-management";
+import SupportPage from "@/pages/support";
+import DocsPage from "@/pages/docs";
 import AdminFeatures from "@/pages/admin-features";
 import AdminBilling from "@/pages/admin-billing";
 import AdminAnalytics from "@/pages/admin-analytics";
@@ -201,6 +203,8 @@ function Router() {
         <Route path="/careers"><Careers /></Route>
         <Route path="/privacy-policy"><PrivacyPolicy /></Route>
         <Route path="/terms-of-service"><TermsOfService /></Route>
+        <Route path="/support"><SupportPage /></Route>
+        <Route path="/docs"><DocsPage /></Route>
         <Route path="/wordpress-integration"><WordPressIntegration /></Route>
         <Route path="/emergency-login"><EmergencyLogin /></Route>
         <Route path="/review/:token"><Review /></Route>
