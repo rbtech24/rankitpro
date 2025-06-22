@@ -163,7 +163,7 @@ router.get('/plugin', async (req: Request, res: Response) => {
     const apiKey = 'rank_it_pro_api_key_' + Date.now();
     const apiEndpoint = 'https://rankitpro.com/api';
     
-    const pluginCode = \`<?php
+    const pluginCode = `<?php
 /*
 Plugin Name: Rank It Pro Integration
 Plugin URI: https://rankitpro.com
@@ -179,17 +179,17 @@ if (!defined('ABSPATH')) {
 }
 
 class RankItProPlugin {
-    private \$default_api_key = '\${apiKey}';
-    private \$api_endpoint = '\${apiEndpoint}';
+    private $default_api_key = '${apiKey}';
+    private $api_endpoint = '${apiEndpoint}';
     
     public function __construct() {
-        add_action('init', array(\$this, 'plugin_init'));
-        add_action('wp_enqueue_scripts', array(\$this, 'enqueue_scripts'));
-        add_action('admin_menu', array(\$this, 'add_admin_menu'));
-        add_shortcode('rankitpro_checkins', array(\$this, 'display_checkins'));
-        add_shortcode('rankitpro_reviews', array(\$this, 'display_reviews'));
-        add_shortcode('rankitpro_blog', array(\$this, 'display_blog_posts'));
-    }\`
+        add_action('init', array($this, 'plugin_init'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
+        add_action('admin_menu', array($this, 'add_admin_menu'));
+        add_shortcode('rankitpro_checkins', array($this, 'display_checkins'));
+        add_shortcode('rankitpro_reviews', array($this, 'display_reviews'));
+        add_shortcode('rankitpro_blog', array($this, 'display_blog_posts'));
+    }
     
     public function plugin_init() {
         load_plugin_textdomain('rank-it-pro', false, dirname(plugin_basename(__FILE__)) . '/languages');
@@ -272,7 +272,7 @@ class RankItProPlugin {
                 <h2>API Connection Status</h2>
                 <?php
                 $connection_status = $this->test_api_connection();
-                if (\$connection_status['connected']) {
+                if ($connection_status['connected']) {
                     echo '<p><strong>Status:</strong> <span style="color: green;">✓ Connected</span></p>';
                     echo '<p><em>Data is automatically synced from your Rank It Pro account.</em></p>';
                 } else {
@@ -287,18 +287,18 @@ class RankItProPlugin {
     }
     
     public function settings_page() {
-        if (isset(\$_POST['submit']) && check_admin_referer('rankitpro_settings_nonce')) {
-            if (!empty(\$_POST['rankitpro_api_key'])) {
-                update_option('rankitpro_api_key', sanitize_text_field(\$_POST['rankitpro_api_key']));
+        if (isset($_POST['submit']) && check_admin_referer('rankitpro_settings_nonce')) {
+            if (!empty($_POST['rankitpro_api_key'])) {
+                update_option('rankitpro_api_key', sanitize_text_field($_POST['rankitpro_api_key']));
                 echo '<div class="notice notice-success"><p>API Key updated successfully!</p></div>';
             }
-            if (!empty(\$_POST['rankitpro_cache_duration'])) {
-                update_option('rankitpro_cache_duration', intval(\$_POST['rankitpro_cache_duration']));
+            if (!empty($_POST['rankitpro_cache_duration'])) {
+                update_option('rankitpro_cache_duration', intval($_POST['rankitpro_cache_duration']));
             }
         }
         
-        \$saved_api_key = get_option('rankitpro_api_key', '');
-        \$cache_duration = get_option('rankitpro_cache_duration', 900);
+        $saved_api_key = get_option('rankitpro_api_key', '');
+        $cache_duration = get_option('rankitpro_cache_duration', 900);
         ?>
         <div class="wrap">
             <h1>Rank It Pro Settings</h1>
@@ -317,9 +317,9 @@ class RankItProPlugin {
                     <tr>
                         <th scope="row">API Key</th>
                         <td>
-                            <input type="text" name="rankitpro_api_key" value="<?php echo esc_attr(\\$saved_api_key); ?>" class="regular-text" placeholder="Enter your Rank It Pro API key" />
+                            <input type="text" name="rankitpro_api_key" value="<?php echo esc_attr($saved_api_key); ?>" class="regular-text" placeholder="Enter your Rank It Pro API key" />
                             <p class="description">Get your API key from your Rank It Pro dashboard under Integrations > WordPress.</p>
-                            <?php if (empty(\\$saved_api_key)): ?>
+                            <?php if (empty($saved_api_key)): ?>
                                 <p class="description" style="color: #d63638;"><strong>Required:</strong> Please enter your API key to enable the plugin functionality.</p>
                             <?php endif; ?>
                         </td>
@@ -328,10 +328,10 @@ class RankItProPlugin {
                         <th scope="row">Cache Duration</th>
                         <td>
                             <select name="rankitpro_cache_duration">
-                                <option value="300" <?php selected(\\$cache_duration, 300); ?>>5 minutes</option>
-                                <option value="900" <?php selected(\\$cache_duration, 900); ?>>15 minutes</option>
-                                <option value="1800" <?php selected(\\$cache_duration, 1800); ?>>30 minutes</option>
-                                <option value="3600" <?php selected(\\$cache_duration, 3600); ?>>1 hour</option>
+                                <option value="300" <?php selected($cache_duration, 300); ?>>5 minutes</option>
+                                <option value="900" <?php selected($cache_duration, 900); ?>>15 minutes</option>
+                                <option value="1800" <?php selected($cache_duration, 1800); ?>>30 minutes</option>
+                                <option value="3600" <?php selected($cache_duration, 3600); ?>>1 hour</option>
                             </select>
                             <p class="description">How long to cache API responses.</p>
                         </td>
@@ -345,10 +345,10 @@ class RankItProPlugin {
     }
     
     public function test_page() {
-        \\$test_results = array();
+        $test_results = array();
         
-        if (isset(\\$_POST['run_tests']) && check_admin_referer('rankitpro_test_nonce')) {
-            \\$test_results = \\$this->run_comprehensive_tests();
+        if (isset($_POST['run_tests']) && check_admin_referer('rankitpro_test_nonce')) {
+            $test_results = $this->run_comprehensive_tests();
         }
         ?>
         <div class="wrap">
@@ -364,20 +364,20 @@ class RankItProPlugin {
                 </form>
             </div>
             
-            <?php if (!empty(\\$test_results)): ?>
+            <?php if (!empty($test_results)): ?>
                 <div class="card">
                     <h2>Test Results</h2>
                     
-                    <?php foreach (\\$test_results as \\$test): ?>
-                        <div style="margin: 15px 0; padding: 10px; border-left: 4px solid <?php echo \\$test['passed'] ? '#00a32a' : '#d63638'; ?>; background: <?php echo \\$test['passed'] ? '#f0f9ff' : '#fff2f2'; ?>;">
+                    <?php foreach ($test_results as $test): ?>
+                        <div style="margin: 15px 0; padding: 10px; border-left: 4px solid <?php echo $test['passed'] ? '#00a32a' : '#d63638'; ?>; background: <?php echo $test['passed'] ? '#f0f9ff' : '#fff2f2'; ?>;">
                             <h3 style="margin: 0 0 5px 0;">
-                                <?php echo \\$test['passed'] ? '✓' : '✗'; ?> <?php echo esc_html(\\$test['name']); ?>
+                                <?php echo $test['passed'] ? '✓' : '✗'; ?> <?php echo esc_html($test['name']); ?>
                             </h3>
-                            <p style="margin: 0;"><?php echo esc_html(\\$test['message']); ?></p>
-                            <?php if (!empty(\\$test['details'])): ?>
+                            <p style="margin: 0;"><?php echo esc_html($test['message']); ?></p>
+                            <?php if (!empty($test['details'])): ?>
                                 <details style="margin-top: 5px;">
                                     <summary>View Details</summary>
-                                    <pre style="background: #f1f1f1; padding: 10px; margin: 5px 0; overflow-x: auto;"><?php echo esc_html(\\$test['details']); ?></pre>
+                                    <pre style="background: #f1f1f1; padding: 10px; margin: 5px 0; overflow-x: auto;"><?php echo esc_html($test['details']); ?></pre>
                                 </details>
                             <?php endif; ?>
                         </div>
