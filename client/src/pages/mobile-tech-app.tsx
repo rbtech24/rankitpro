@@ -26,42 +26,12 @@ export default function MobileTechApp() {
   const { data: jobTypes = [], isLoading: isLoadingJobTypes } = useQuery({
     queryKey: ['/api/job-types'],
     queryFn: async () => {
-      try {
-        const res = await apiRequest('GET', '/api/job-types');
-        if (!res.ok) {
-          // If API isn't implemented yet, return default job types
-          return [
-            "Plumbing Repair",
-            "Water Heater Installation",
-            "Drain Cleaning",
-            "Sewer Line Repair",
-            "AC Maintenance",
-            "HVAC Repair",
-            "Electrical Repair",
-            "Remodeling",
-            "Flooring Installation",
-            "Roof Repair",
-            "General Maintenance"
-          ];
-        }
-        return await res.json();
-      } catch (error) {
-        console.error("Error fetching job types:", error);
-        // Return default job types as fallback
-        return [
-          "Plumbing Repair",
-          "Water Heater Installation",
-          "Drain Cleaning",
-          "Sewer Line Repair",
-          "AC Maintenance",
-          "HVAC Repair",
-          "Electrical Repair",
-          "Remodeling",
-          "Flooring Installation",
-          "Roof Repair",
-          "General Maintenance"
-        ];
+      const res = await apiRequest('GET', '/api/job-types');
+      if (!res.ok) {
+        throw new Error('Failed to fetch job types');
       }
+      const data = await res.json();
+      return data.map((jt: any) => jt.name);
     }
   });
 

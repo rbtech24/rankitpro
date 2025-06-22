@@ -23,43 +23,35 @@ export default function JobTypesManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Temporary localStorage solution while API routing is resolved
-  const getStoredJobTypes = (): JobType[] => {
-    try {
-      const stored = localStorage.getItem('company-job-types');
-      return stored ? JSON.parse(stored) : [
-        { id: 1, name: "Plumbing Repair", isActive: true },
-        { id: 2, name: "HVAC Maintenance", isActive: true },
-        { id: 3, name: "Electrical Work", isActive: true }
-      ];
-    } catch {
-      return [
-        { id: 1, name: "Plumbing Repair", isActive: true },
-        { id: 2, name: "HVAC Maintenance", isActive: true },
-        { id: 3, name: "Electrical Work", isActive: true }
-      ];
+  // Fetch job types from API
+  const { data: jobTypes = [], isLoading, refetch } = useQuery<JobType[]>({
+    queryKey: ['/api/job-types'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/job-types');
+      if (!res.ok) {
+        throw new Error('Failed to fetch job types');
+      }
+      const data = await res.json();
+      return data.map((jt: any) => ({
+        id: jt.id,
+        name: jt.name,
+        isActive: jt.isActive !== false
+      }));
     }
-  };
-
-  const [jobTypes, setJobTypes] = useState<JobType[]>(getStoredJobTypes);
-  const isLoading = false;
+  });
 
   const createJobTypeMutation = useMutation({
     mutationFn: async (name: string) => {
-      // Create new job type locally
-      const maxId = Math.max(0, ...jobTypes.map(jt => jt.id));
-      const newJobType = {
-        id: maxId + 1,
-        name: name.trim(),
-        isActive: true
-      };
-      
-      const updatedJobTypes = [...jobTypes, newJobType];
-      localStorage.setItem('company-job-types', JSON.stringify(updatedJobTypes));
-      return newJobType;
+      const res = await apiRequest('POST', '/api/job-types', {
+        name: name.trim()
+      });
+      if (!res.ok) {
+        throw new Error('Failed to create job type');
+      }
+      return await res.json();
     },
-    onSuccess: (newJobType) => {
-      setJobTypes(prev => [...prev, newJobType]);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/job-types'] });
       setNewJobType("");
       toast({
         title: "Job Type Added",

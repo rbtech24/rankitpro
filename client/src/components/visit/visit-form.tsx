@@ -133,45 +133,22 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
     }
   });
 
-  // Get job types from localStorage with reactive updates
-  const getStoredJobTypes = (): JobType[] => {
-    try {
-      const stored = localStorage.getItem('company-job-types');
-      return stored ? JSON.parse(stored) : [
-        { id: 1, name: "Plumbing Repair", isActive: true },
-        { id: 2, name: "HVAC Maintenance", isActive: true },
-        { id: 3, name: "Electrical Work", isActive: true }
-      ];
-    } catch {
-      return [
-        { id: 1, name: "Plumbing Repair", isActive: true },
-        { id: 2, name: "HVAC Maintenance", isActive: true },
-        { id: 3, name: "Electrical Work", isActive: true }
-      ];
+  // Get job types from API
+  const { data: jobTypes = [], isLoading: jobTypesLoading } = useQuery<JobType[]>({
+    queryKey: ['/api/job-types'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/job-types');
+      if (!res.ok) {
+        throw new Error('Failed to fetch job types');
+      }
+      const data = await res.json();
+      return data.map((jt: any) => ({
+        id: jt.id,
+        name: jt.name,
+        isActive: jt.isActive !== false
+      }));
     }
-  };
-
-  const [jobTypes, setJobTypes] = useState<JobType[]>(getStoredJobTypes);
-  
-  // Update job types when component mounts or localStorage changes
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setJobTypes(getStoredJobTypes());
-    };
-    
-    // Listen for storage changes
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also check for updates when the component becomes visible
-    const interval = setInterval(() => {
-      setJobTypes(getStoredJobTypes());
-    }, 1000);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
+  });
   
   // Form definition
   const form = useForm<VisitFormValues>({
