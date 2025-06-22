@@ -179,6 +179,17 @@ function Router() {
     </div>;
   }
   
+  // Always show support and docs pages regardless of auth status
+  const currentPath = window.location.pathname;
+  if (currentPath === '/support' || currentPath === '/docs') {
+    return (
+      <Switch>
+        <Route path="/support"><SupportPage /></Route>
+        <Route path="/docs"><DocsPage /></Route>
+      </Switch>
+    );
+  }
+
   // If logged out or no user, show public pages and login
   if (isLoggedOut || !auth?.user) {
     return (
