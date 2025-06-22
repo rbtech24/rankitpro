@@ -94,9 +94,12 @@ function IntegrationsPage() {
     queryKey: ['/api/integration/embed'],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/integration/embed");
+      if (!res.ok) {
+        throw new Error('Failed to fetch embed data');
+      }
       return res.json() as Promise<EmbedIntegration>;
     },
-    retry: false,
+    retry: 1,
     staleTime: 30000,
     gcTime: 60000
   });

@@ -1221,7 +1221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Technicians routes
   app.get("/api/technicians", isAuthenticated, async (req, res) => {
     try {
-      const technicians = await storage.getTechnicians(req.user.companyId);
+      const technicians = await storage.getTechniciansByCompany(req.user.companyId);
       
       if (!technicians || !Array.isArray(technicians)) {
         return res.json([]);
