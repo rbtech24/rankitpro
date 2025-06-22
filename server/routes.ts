@@ -3364,16 +3364,27 @@ For support, contact Rank It Pro team.
       res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
       res.setHeader('Cache-Control', 'no-cache');
 
+      const archiver = require('archiver');
       const archive = archiver('zip', { zlib: { level: 9 } });
       
       archive.pipe(res);
       
+      // Handle archiver events
+      archive.on('error', function(err) {
+        console.error('Archive error:', err);
+        res.status(500).json({ error: 'Archive creation failed' });
+      });
+
+      archive.on('end', function() {
+        console.log('Archive created successfully, size:', archive.pointer() + ' bytes');
+      });
+
       archive.append(pluginCode, { name: 'rank-it-pro-plugin/rank-it-pro-plugin.php' });
       archive.append(readmeContent, { name: 'rank-it-pro-plugin/readme.txt' });
       archive.append(cssContent, { name: 'rank-it-pro-plugin/assets/css/rank-it-pro.css' });
       archive.append(jsContent, { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
       
-      await archive.finalize();
+      archive.finalize();
       
     } catch (error) {
       console.error('WordPress plugin generation error:', error);
