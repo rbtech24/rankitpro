@@ -191,6 +191,49 @@ async function createSuperAdminIfNotExists() {
   
   const server = await registerRoutes(app);
 
+  // Critical Fix: Add API route exclusion middleware BEFORE Vite setup
+  // This prevents Vite from intercepting API calls
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+      // Skip Vite middleware for API routes
+      const originalUrl = req.originalUrl;
+      console.log(`API route bypassing Vite: ${req.method} ${originalUrl}`);
+      
+      // If no route matched, send 404 JSON response
+      const timer = setTimeout(() => {
+        if (!res.headersSent) {
+          res.status(404).json({
+            error: 'API endpoint not found',
+            path: originalUrl,
+            method: req.method,
+            timestamp: new Date().toISOString()
+          });
+        }
+      }, 100);
+      
+      // Clear timeout if response is sent
+      const originalSend = res.send;
+      const originalJson = res.json;
+      const originalEnd = res.end;
+      
+      res.send = function(...args) {
+        clearTimeout(timer);
+        return originalSend.apply(this, args);
+      };
+      
+      res.json = function(...args) {
+        clearTimeout(timer);
+        return originalJson.apply(this, args);
+      };
+      
+      res.end = function(...args) {
+        clearTimeout(timer);
+        return originalEnd.apply(this, args);
+      };
+    }
+    next();
+  });
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
