@@ -11,13 +11,13 @@ router.get('/plugin', async (req: Request, res: Response) => {
     
     const zip = new JSZip();
     
-    // Main plugin file
+    // Main plugin file - force v1.2.1 with enhanced debugging
     const pluginCode = `<?php
 /*
 Plugin Name: Rank It Pro Integration
 Plugin URI: https://rankitpro.com
-Description: WordPress integration for Rank It Pro SaaS platform with test & troubleshoot features
-Version: 1.2.0
+Description: WordPress integration for Rank It Pro SaaS platform with enhanced debugging
+Version: 1.2.1
 Author: Rank It Pro
 Text Domain: rank-it-pro
 Domain Path: /languages
@@ -1049,9 +1049,10 @@ Make sure you've configured your API key in the plugin settings and run the diag
     zip.file('rank-it-pro-plugin/assets/css/rank-it-pro.css', cssContent);
     zip.file('rank-it-pro-plugin/assets/js/rank-it-pro.js', jsContent);
 
-    console.log('Generating WordPress plugin ZIP...');
+    console.log('Generating WordPress plugin ZIP v1.2.1...');
     res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
+    res.setHeader('Content-Disposition', 'attachment; filename="rankitpro-plugin-v1.2.1.zip"');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 
     const zipBuffer = await zip.generateAsync({type: 'nodebuffer'});
     console.log('WordPress plugin generated successfully, size:', zipBuffer.length, 'bytes');
