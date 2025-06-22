@@ -17,7 +17,7 @@ router.get('/plugin', async (req: Request, res: Response) => {
 Plugin Name: Rank It Pro Integration
 Plugin URI: https://rankitpro.com
 Description: WordPress integration for Rank It Pro SaaS platform with test & troubleshoot features
-Version: 1.1.0
+Version: 1.2.0
 Author: Rank It Pro
 Text Domain: rank-it-pro
 Domain Path: /languages
