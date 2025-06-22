@@ -205,8 +205,6 @@ function Router() {
         <Route path="/careers"><Careers /></Route>
         <Route path="/privacy-policy"><PrivacyPolicy /></Route>
         <Route path="/terms-of-service"><TermsOfService /></Route>
-        <Route path="/support"><SupportPage /></Route>
-        <Route path="/docs"><DocsPage /></Route>
         <Route path="/wordpress-integration"><WordPressIntegration /></Route>
         <Route path="/emergency-login"><EmergencyLogin /></Route>
         <Route path="/review/:token"><Review /></Route>
@@ -217,7 +215,7 @@ function Router() {
         <Route path="/downloads/technician-training-slides"><TechnicianTrainingSlides /></Route>
         
         {/* For any other route that requires authentication, redirect to login */}
-        <Route><Redirect to="/login" /></Route>
+        <Route><NotFound /></Route>
       </Switch>
     );
   }
