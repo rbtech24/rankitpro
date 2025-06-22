@@ -1655,6 +1655,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mount critical missing routes with proper paths
+  app.use("/api/check-ins", checkInRoutes);
+  app.use("/api/blog", blogRoutes);  
+  app.use("/api/reviews", reviewRoutes);
+
   // Add embed routes for JavaScript widget
   app.use("/", embedRoutes);
   
