@@ -420,15 +420,51 @@ class RankItProPlugin {
             return '<div class="rankitpro-no-data">Please configure your API key in the plugin settings.</div>';
         }
         
+        // Fetch real testimonials from API
+        $params = array('limit' => $atts['limit']);
+        if ($atts['featured'] === 'true') {
+            $params['featured'] = true;
+        }
+        $testimonials_data = $this->fetch_api_data('/api/testimonials', $params);
+        
+        if (empty($testimonials_data)) {
+            return '<div class="rankitpro-no-data">No testimonials available or API connection failed.</div>';
+        }
+        
         $output = '<div class="rankitpro-testimonials">';
-        $output .= '<div class="rankitpro-testimonial">';
-        $output .= '<div class="testimonial-rating"><span class="stars">★★★★★</span></div>';
-        $output .= '<blockquote>"Outstanding service! The team was professional, punctual, and completed the work perfectly. Highly recommend!"</blockquote>';
-        $output .= '<div class="testimonial-author">';
-        $output .= '<strong>Jennifer Martinez</strong><br>';
-        $output .= '<span class="author-title">Homeowner</span>';
-        $output .= '</div>';
-        $output .= '</div>';
+        
+        foreach ($testimonials_data as $testimonial) {
+            $output .= '<div class="rankitpro-testimonial" style="margin-bottom: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">';
+            
+            // Rating stars
+            if (!empty($testimonial['rating'])) {
+                $rating = intval($testimonial['rating']);
+                $stars = str_repeat('★', $rating) . str_repeat('☆', 5 - $rating);
+                $output .= '<div class="testimonial-rating" style="margin-bottom: 15px;"><span class="stars" style="color: #ffa500; font-size: 20px;">' . $stars . '</span></div>';
+            }
+            
+            // Testimonial content
+            if (!empty($testimonial['content'])) {
+                $output .= '<blockquote style="font-style: italic; font-size: 16px; line-height: 1.6; margin: 0 0 15px 0; color: #333;">"' . esc_html($testimonial['content']) . '"</blockquote>';
+            }
+            
+            // Author information
+            $output .= '<div class="testimonial-author">';
+            $author_name = !empty($testimonial['customerName']) ? $testimonial['customerName'] : 'Anonymous Customer';
+            $output .= '<strong style="color: #2271b1;">' . esc_html($author_name) . '</strong>';
+            
+            if (!empty($testimonial['jobType'])) {
+                $output .= '<br><span class="author-title" style="color: #666; font-size: 14px;">' . esc_html($testimonial['jobType']) . ' Customer</span>';
+            }
+            
+            if (!empty($testimonial['location'])) {
+                $output .= '<br><span class="author-location" style="color: #999; font-size: 12px;">' . esc_html($testimonial['location']) . '</span>';
+            }
+            
+            $output .= '</div>';
+            $output .= '</div>';
+        }
+        
         $output .= '</div>';
         
         return $output;
@@ -469,23 +505,51 @@ class RankItProPlugin {
             'role' => ''
         ), $atts);
         
+        $api_key = get_option('rankitpro_api_key', '');
+        if (empty($api_key)) {
+            return '<div class="rankitpro-no-data">Please configure your API key in the plugin settings.</div>';
+        }
+        
+        // Fetch real team members from API
+        $params = array('limit' => $atts['limit']);
+        if (!empty($atts['role'])) {
+            $params['role'] = $atts['role'];
+        }
+        $team_data = $this->fetch_api_data('/api/technicians', $params);
+        
+        if (empty($team_data)) {
+            return '<div class="rankitpro-no-data">No team members available or API connection failed.</div>';
+        }
+        
         $output = '<div class="rankitpro-team">';
         $output .= '<div class="team-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">';
         
-        $team_members = array(
-            array('name' => 'Mike Johnson', 'role' => 'Lead Technician', 'experience' => '8 years'),
-            array('name' => 'Sarah Davis', 'role' => 'Service Specialist', 'experience' => '5 years'),
-            array('name' => 'Tom Wilson', 'role' => 'Installation Expert', 'experience' => '6 years')
-        );
-        
-        foreach ($team_members as $member) {
+        foreach ($team_data as $member) {
             $output .= '<div class="team-member" style="text-align: center; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">';
+            
+            // Avatar with initials
+            $name = !empty($member['name']) ? $member['name'] : 'Team Member';
+            $initials = strtoupper(substr($name, 0, 1) . (strpos($name, ' ') ? substr($name, strpos($name, ' ') + 1, 1) : ''));
             $output .= '<div class="member-avatar" style="width: 80px; height: 80px; border-radius: 50%; background: #2271b1; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto 15px auto; font-size: 24px;">';
-            $output .= substr($member['name'], 0, 2);
+            $output .= $initials;
             $output .= '</div>';
-            $output .= '<h4 style="margin: 0 0 5px 0;">' . $member['name'] . '</h4>';
-            $output .= '<p style="margin: 0 0 5px 0; color: #666; font-weight: 500;">' . $member['role'] . '</p>';
-            $output .= '<p style="margin: 0; color: #999; font-size: 14px;">' . $member['experience'] . ' experience</p>';
+            
+            $output .= '<h4 style="margin: 0 0 5px 0;">' . esc_html($name) . '</h4>';
+            
+            if (!empty($member['role'])) {
+                $output .= '<p style="margin: 0 0 5px 0; color: #666; font-weight: 500;">' . esc_html($member['role']) . '</p>';
+            } else {
+                $output .= '<p style="margin: 0 0 5px 0; color: #666; font-weight: 500;">Technician</p>';
+            }
+            
+            if (!empty($member['phone'])) {
+                $output .= '<p style="margin: 0 0 5px 0; color: #999; font-size: 14px;">' . esc_html($member['phone']) . '</p>';
+            }
+            
+            if (!empty($member['email'])) {
+                $output .= '<p style="margin: 0; color: #999; font-size: 12px;">' . esc_html($member['email']) . '</p>';
+            }
+            
             $output .= '</div>';
         }
         
@@ -608,6 +672,53 @@ class RankItProPlugin {
         echo '</ul></div>';
         
         echo '</div>';
+    }
+    
+    private function fetch_api_data($endpoint, $params = array()) {
+        $api_key = get_option('rankitpro_api_key', '');
+        if (empty($api_key)) {
+            return false;
+        }
+        
+        $base_url = 'https://rankitpro.com';
+        $url = $base_url . $endpoint;
+        
+        if (!empty($params)) {
+            $url .= '?' . http_build_query($params);
+        }
+        
+        $args = array(
+            'headers' => array(
+                'Authorization' => 'Bearer ' . $api_key,
+                'Content-Type' => 'application/json',
+                'User-Agent' => 'RankItPro-WordPress-Plugin/1.1.0'
+            ),
+            'timeout' => 15,
+            'sslverify' => true
+        );
+        
+        $response = wp_remote_get($url, $args);
+        
+        if (is_wp_error($response)) {
+            error_log('RankItPro API Error: ' . $response->get_error_message());
+            return false;
+        }
+        
+        $status_code = wp_remote_retrieve_response_code($response);
+        if ($status_code !== 200) {
+            error_log('RankItPro API Error: HTTP ' . $status_code);
+            return false;
+        }
+        
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log('RankItPro API Error: Invalid JSON response');
+            return false;
+        }
+        
+        return $data;
     }
 }
 
