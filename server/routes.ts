@@ -46,6 +46,7 @@ import embedRoutes from "./routes/embed";
 import publicBlogRoutes from "./routes/public-blog";
 import publicReviewsRoutes from "./routes/public-reviews";
 import publicCompanyRoutes from "./routes/public-company";
+import testimonialsRoutes from "./routes/testimonials";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
 import { analyticsService } from "./services/analytics-service";
@@ -1627,6 +1628,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/check-ins", checkInRoutes);
   app.use("/api/blog", blogRoutes);  
   app.use("/api/reviews", reviewRoutes);
+  app.use("/api/testimonials", testimonialsRoutes);
   
   // Company stats endpoint
   app.get("/api/company-stats", isAuthenticated, async (req, res) => {
