@@ -18,7 +18,7 @@ const router = express.Router();
 // Configure multer storage for file uploads
 const storage_config = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(process.cwd(), 'server', 'public', 'uploads');
+    const uploadDir = path.join(process.cwd(), 'uploads');
     
     // Ensure upload directory exists
     if (!fs.existsSync(uploadDir)) {
@@ -232,8 +232,10 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
     // Process uploaded photos
     let photoUrls: string[] = [];
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      // Use correct upload path that matches the server setup
       const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
       photoUrls = req.files.map(file => `${baseUrl}${file.filename}`);
+      console.log('Photo URLs generated:', photoUrls);
     }
     
     // Prepare check-in data with photos

@@ -2707,7 +2707,7 @@ This project exemplifies our belief that the best irrigation systems combine cut
       let systemMessage = '';
 
       if (contentType === 'blog') {
-        systemMessage = "You are a professional content writer specializing in service industry blog posts. Write engaging, SEO-friendly content that showcases expertise and builds trust with potential customers. Always respond in English regardless of the input language.";
+        systemMessage = "You are a professional content writer specializing in service industry blog posts. Write engaging, SEO-friendly content that showcases expertise and builds trust with potential customers. Always respond in plain text with NO markdown, HTML, or special formatting. Always respond in English regardless of the input language.";
         prompt = `Create a professional blog post for ${companyName} about a recent ${jobType} service. 
 
 Job Details:
@@ -2722,11 +2722,18 @@ Write an engaging blog post that:
 4. Is SEO-friendly and customer-focused
 5. Includes a call-to-action at the end
 
-Keep it between 200-400 words and make it sound professional yet approachable.
+Keep it between 300-600 words and make it sound professional yet approachable.
+
+CRITICAL FORMATTING REQUIREMENTS:
+- Use ONLY plain text
+- NO markdown symbols like **, ##, ###, *, -, etc.
+- NO HTML tags
+- Use simple line breaks for paragraphs
+- Write naturally without any special formatting
 
 IMPORTANT: Respond in English only, regardless of the language used in the input.`;
       } else if (contentType === 'service') {
-        systemMessage = "You are a professional customer service specialist. Write brief, friendly service completion notifications. Keep responses to 2-3 sentences maximum. Always respond in English regardless of the input language.";
+        systemMessage = "You are a professional customer service specialist. Write brief, friendly service completion notifications. Keep responses to 2-3 sentences maximum. Use ONLY plain text with NO markdown, HTML, or special formatting. Always respond in English regardless of the input language.";
         prompt = `Write a short, professional service completion message for ${companyName} about completing ${jobType} service.
 
 Work completed: ${notes}
@@ -2737,7 +2744,8 @@ Requirements:
 - Confirm completion
 - Thank the customer
 - Professional but friendly tone
-- No headers or formatting
+- ONLY plain text, no markdown symbols like **, ##, *, etc.
+- No HTML tags or special formatting
 
 Example format: "We've successfully completed your [service] at [location]. [Brief work summary]. Thank you for choosing ${companyName}!"
 
@@ -2778,7 +2786,23 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
         temperature: 0.7,
       });
 
-      const content = response.choices[0].message.content;
+      let content = response.choices[0].message.content;
+      
+      if (!content) {
+        return res.status(500).json({ message: 'Failed to generate content' });
+      }
+
+      // Clean up any remaining markdown or HTML formatting
+      content = content
+        .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove **bold**
+        .replace(/\*(.*?)\*/g, '$1')      // Remove *italic*
+        .replace(/#{1,6}\s*/g, '')        // Remove ### headers
+        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove [text](links)
+        .replace(/<[^>]*>/g, '')          // Remove HTML tags
+        .replace(/`(.*?)`/g, '$1')        // Remove `code`
+        .replace(/^\s*[-*+]\s*/gm, '')    // Remove bullet points
+        .replace(/^\s*\d+\.\s*/gm, '')    // Remove numbered lists
+        .trim();
       
       res.json({ content });
     } catch (error) {
