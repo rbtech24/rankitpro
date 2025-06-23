@@ -250,6 +250,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
       city: req.body.city?.trim() || null,
       state: req.body.state?.trim() || null,
       zip: req.body.zip?.trim() || null,
+      generatedContent: req.body.generatedContent || null,
     };
 
     console.log('Creating check-in with data:', checkInData);

@@ -2708,21 +2708,25 @@ This project exemplifies our belief that the best irrigation systems combine cut
 
       if (contentType === 'blog') {
         systemMessage = "You are a professional content writer specializing in service industry blog posts. Write engaging, SEO-friendly content that showcases expertise and builds trust with potential customers. Always respond in plain text with NO markdown, HTML, or special formatting. Always respond in English regardless of the input language.";
-        prompt = `Create a professional blog post for ${companyName} about a recent ${jobType} service. 
+        prompt = `Create a professional blog post for ${companyName} about a recent ${jobType} service completed by our expert technicians.
 
-Job Details:
+Service Details:
 - Service Type: ${jobType}
-- Work Performed: ${notes}
-- Location: ${location || 'customer location'}
+- Work Completed: ${notes}
+- Service Location: ${location || 'customer location'}
+- Company: ${companyName}
 
-Write an engaging blog post that:
-1. Has an attention-grabbing title
-2. Describes the service professionally
-3. Highlights the company's expertise
-4. Is SEO-friendly and customer-focused
-5. Includes a call-to-action at the end
+Write a detailed, engaging blog post that:
+1. Creates an attention-grabbing title related to the specific service
+2. Explains what our technicians accomplished during this ${jobType} job
+3. Describes the technical work performed: ${notes}
+4. Highlights the professional expertise and quality workmanship
+5. Mentions the service area: ${location || 'customer location'}
+6. Emphasizes customer satisfaction and professional results
+7. Includes a strong call-to-action for similar services
+8. Uses relevant keywords for ${jobType} services and the local area
 
-Keep it between 300-600 words and make it sound professional yet approachable.
+Make it 400-700 words, professional yet personable, and focus on the value delivered to the customer.
 
 CRITICAL FORMATTING REQUIREMENTS:
 - Use ONLY plain text
@@ -2734,18 +2738,25 @@ CRITICAL FORMATTING REQUIREMENTS:
 IMPORTANT: Respond in English only, regardless of the language used in the input.`;
       } else if (contentType === 'service') {
         systemMessage = "You are a professional customer service specialist. Write brief, friendly service completion notifications. Keep responses to 2-3 sentences maximum. Use ONLY plain text with NO markdown, HTML, or special formatting. Always respond in English regardless of the input language.";
-        prompt = `Write a short, professional service completion message for ${companyName} about completing ${jobType} service.
+        prompt = `Write a professional service completion message for ${companyName} about the ${jobType} work completed by our technician.
 
-Work completed: ${notes}
-Location: ${location || 'customer location'}
+Service Details:
+- Service Type: ${jobType} 
+- Work Completed: ${notes}
+- Service Location: ${location || 'customer location'}
+- Company: ${companyName}
 
-Requirements:
-- Maximum 2-3 sentences
-- Confirm completion
-- Thank the customer
-- Professional but friendly tone
+Create a 2-3 sentence message that:
+- Confirms the specific ${jobType} work was completed successfully
+- Briefly mentions what was accomplished: ${notes}
+- References the service location: ${location || 'customer location'}
+- Thanks the customer for choosing ${companyName}
+- Maintains a professional yet friendly tone
+
+FORMATTING REQUIREMENTS:
 - ONLY plain text, no markdown symbols like **, ##, *, etc.
 - No HTML tags or special formatting
+- Keep it concise but informative
 
 Example format: "We've successfully completed your [service] at [location]. [Brief work summary]. Thank you for choosing ${companyName}!"
 
