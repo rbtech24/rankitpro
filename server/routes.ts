@@ -2902,16 +2902,33 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
             }
             
             // Try multiple city-level fields for better coverage
+            // Use county only if no actual city/town exists, but try to find real city first
             const cityName = data.address.city || 
                             data.address.town || 
                             data.address.village || 
                             data.address.suburb || 
                             data.address.neighbourhood || 
-                            data.address.hamlet ||
-                            data.address.county; // Use county as fallback if no city
+                            data.address.hamlet;
             
-            if (cityName) {
-              addressParts.push(cityName);
+            // If no city found, try to get nearby city from display_name or use county as last resort
+            let finalCityName = cityName;
+            if (!cityName && data.address.county) {
+              // For locations like this where only county exists, let's keep just the county
+              // or try to extract city from display_name if available
+              const displayParts = data.display_name?.split(', ') || [];
+              // Look for a part that's not the street, county, state, or postal code
+              const possibleCity = displayParts.find(part => 
+                part !== data.address.road &&
+                part !== data.address.county &&
+                part !== data.address.state &&
+                part !== data.address.postcode &&
+                !/^\d+$/.test(part) // not just numbers
+              );
+              finalCityName = possibleCity || data.address.county;
+            }
+            
+            if (finalCityName) {
+              addressParts.push(finalCityName);
             }
             
             if (data.address.state) {

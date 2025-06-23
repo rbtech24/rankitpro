@@ -301,7 +301,7 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
       const response = await apiRequest("POST", "/api/enhance-job-description", {
         jobType: formData.jobType,
         notes: formData.notes,
-        location: formData.location,
+        location: formData.address || formData.location || "customer location",
       });
 
       if (response.ok) {
@@ -313,7 +313,8 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
           variant: "default",
         });
       } else {
-        throw new Error("Failed to enhance description");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to enhance description");
       }
     } catch (error) {
       console.error("Error enhancing description:", error);
@@ -693,7 +694,7 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                         onClick={() => {
                           const currentData = form.getValues();
                           if (currentData.jobType && currentData.notes) {
-                            handleGenerateContent(currentData, 'blog');
+                            handleGenerateContent('blog');
                           } else {
                             toast({
                               title: "Missing Information",
@@ -738,7 +739,7 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                         onClick={() => {
                           const currentData = form.getValues();
                           if (currentData.jobType && currentData.notes) {
-                            handleGenerateContent(currentData, 'service');
+                            handleGenerateContent('service');
                           } else {
                             toast({
                               title: "Missing Information",
