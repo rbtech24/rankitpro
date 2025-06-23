@@ -2083,13 +2083,39 @@ This project exemplifies our belief that the best irrigation systems combine cut
             .replace(/'/g, '&#39;');
         }
         
-        // Return template-matching HTML content for WordPress shortcodes with Leaflet and grid CSS
+        // Return template-matching HTML content for WordPress shortcodes with theme-friendly CSS
         let html = `<style>
-.rankitpro-grid { display: grid !important; gap: 20px !important; margin: 20px 0 !important; width: 100% !important; box-sizing: border-box !important; }
+.rankitpro-widget * { box-sizing: border-box; }
+.rankitpro-grid { display: grid !important; gap: 20px !important; margin: 20px 0 !important; width: 100% !important; }
 .rankitpro-grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important; }
 .rankitpro-checkin-grid { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)) !important; }
 .rankitpro-testimonial, .rankitpro-review, .rankitpro-checkin, .rankitpro-blog { margin: 0 !important; }
-@media (max-width: 768px) { .rankitpro-grid, .rankitpro-grid-2, .rankitpro-checkin-grid { grid-template-columns: 1fr !important; } }
+
+/* Theme-friendly styling that inherits WordPress colors */
+.rankitpro-widget h1, .rankitpro-widget h2, .rankitpro-widget h3, .rankitpro-widget h4, .rankitpro-widget h5, .rankitpro-widget h6 {
+  color: inherit !important;
+  font-family: inherit !important;
+}
+
+.rankitpro-blog, .rankitpro-review {
+  background: var(--wp--preset--color--background, #ffffff) !important;
+  color: var(--wp--preset--color--foreground, inherit) !important;
+  border: 1px solid var(--wp--preset--color--tertiary, #e0e0e0) !important;
+}
+
+.rankitpro-blog .blog-header {
+  background: var(--wp--preset--color--primary, #0073aa) !important;
+  color: var(--wp--preset--color--background, #ffffff) !important;
+}
+
+.rankitpro-review.positive {
+  background: var(--wp--preset--color--success, #46d160) !important;
+  color: white !important;
+}
+
+@media (max-width: 768px) { 
+  .rankitpro-grid, .rankitpro-grid-2, .rankitpro-checkin-grid { grid-template-columns: 1fr !important; } 
+}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -2418,7 +2444,7 @@ This project exemplifies our belief that the best irrigation systems combine cut
         if (type === 'blogs' || type === 'all') {
           if (content.blogs && content.blogs.length > 0) {
             html += '<div class="rankitpro-blogs">';
-            html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #667eea; display: inline-block;">Recent Blog Posts</h3>';
+            html += '<h3 style="color: var(--wp--preset--color--foreground, inherit); font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid var(--wp--preset--color--primary, #0073aa); display: inline-block;">Recent Blog Posts</h3>';
             html += '<div class="rankitpro-grid rankitpro-grid-2">';
             content.blogs.forEach((blog: any) => {
               html += `<article class="rankitpro-blog" style="
