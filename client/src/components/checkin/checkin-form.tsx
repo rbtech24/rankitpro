@@ -249,10 +249,9 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
   };
   
   // Generate AI content
-  const handleGenerateContent = async () => {
-    const jobType = form.watch("jobType");
-    const notes = form.watch("notes");
-    const location = form.watch("location");
+  const handleGenerateContent = async (contentType: 'blog' | 'service' = 'blog') => {
+    const formData = form.getValues();
+    const { jobType, notes, address } = formData;
     
     if (!jobType || !notes) {
       toast({
@@ -269,8 +268,9 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
       const response = await apiRequest("POST", "/api/generate-content", {
         jobType,
         notes,
-        location,
-        contentType: "blog"
+        location: address || "customer location",
+        contentType,
+        companyName: "Carrollton Sprinkler Repair"
       });
       
       if (response.ok) {
@@ -278,7 +278,7 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
         setGeneratedContent(data.content);
         toast({
           title: "Content Generated",
-          description: "AI blog content has been generated successfully!",
+          description: `AI ${contentType === 'blog' ? 'blog post' : 'service update'} has been generated successfully!`,
         });
       } else {
         throw new Error("Failed to generate content");

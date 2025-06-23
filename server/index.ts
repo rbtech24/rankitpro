@@ -206,7 +206,7 @@ async function createSuperAdminIfNotExists() {
   memoryOptimizer.initialize();
   
   // Serve static uploaded files
-  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+  app.use('/uploads', express.static(path.join(process.cwd(), 'server', 'public', 'uploads')));
   
   const server = await registerRoutes(app);
 
