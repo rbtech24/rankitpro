@@ -406,7 +406,7 @@ class RankItProIntegration {
         $response = wp_remote_get($api_url, array(
             'timeout' => 15,
             'headers' => array(
-                'User-Agent' => 'WordPress/RankItPro Plugin v1.3.0'
+                'User-Agent' => 'WordPress/RankItPro Plugin v1.4.0'
             )
         ));
         

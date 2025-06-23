@@ -1855,76 +1855,229 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .replace(/'/g, '&#39;');
         }
         
-        // Return HTML content directly for WordPress shortcodes
-        let html = `<div class="rankitpro-widget" data-company="${escapeHtml(company.name)}">`;
+        // Return professional HTML content for WordPress shortcodes
+        let html = `<div class="rankitpro-widget" data-company="${escapeHtml(company.name)}" style="font-family: inherit; margin: 2em 0; max-width: 100%;">`;
         
         if (type === 'checkins' || type === 'all') {
           if (content.checkins && content.checkins.length > 0) {
             html += '<div class="rankitpro-checkins">';
-            html += '<h3>Recent Service Visits</h3>';
+            html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #0073aa; display: inline-block;">Recent Service Visits</h3>';
             content.checkins.forEach((checkin: any) => {
-              html += `<div class="rankitpro-checkin" style="margin-bottom: 1.5em; padding: 1em; border: 1px solid #ddd; border-radius: 4px;">`;
-              html += `<h4>${escapeHtml(checkin.jobType || 'Service Visit')}</h4>`;
-              html += `<p><strong>Technician:</strong> ${escapeHtml(checkin.technician?.name || 'Service Technician')}</p>`;
-              if (checkin.notes) {
-                html += `<p>${escapeHtml(checkin.notes)}</p>`;
-              }
-              if (checkin.location) {
-                html += `<p><small><strong>Location:</strong> ${escapeHtml(checkin.location)}</small></p>`;
-              }
+              html += `<div class="rankitpro-checkin" style="
+                background: #fff; 
+                margin-bottom: 2em; 
+                padding: 1.5em; 
+                border: 1px solid #e1e5e9; 
+                border-radius: 8px; 
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: box-shadow 0.3s ease;
+                position: relative;
+              ">`;
+              
+              html += `<h4 style="color: #333; font-size: 1.3em; margin-bottom: 0.8em; font-weight: 600;">${escapeHtml(checkin.jobType || 'Service Visit')}</h4>`;
+              
+              // Tech info and date in a flex container
+              html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em; flex-wrap: wrap; gap: 1em;">`;
+              html += `<div style="color: #666; font-size: 0.9em;"><strong>Technician:</strong> ${escapeHtml(checkin.technician?.name || 'Service Technician')}</div>`;
               if (checkin.createdAt) {
-                html += `<p><small><strong>Date:</strong> ${new Date(checkin.createdAt).toLocaleDateString()}</small></p>`;
+                html += `<div style="color: #666; font-size: 0.9em; background: #f8f9fa; padding: 0.3em 0.8em; border-radius: 12px;">${new Date(checkin.createdAt).toLocaleDateString()}</div>`;
               }
+              html += `</div>`;
+              
+              // Location with icon
+              if (checkin.location) {
+                html += `<div style="color: #e91e63; font-weight: 500; margin-bottom: 1em; display: flex; align-items: center;">
+                  <span style="margin-right: 0.5em;">📍</span>${escapeHtml(checkin.location)}
+                </div>`;
+              }
+              
+              // Description
+              if (checkin.notes) {
+                html += `<div style="line-height: 1.6; color: #444; background: #f8f9fa; padding: 1em; border-radius: 6px; border-left: 4px solid #0073aa;">
+                  ${escapeHtml(checkin.notes)}
+                </div>`;
+              }
+              
+              // Photos if available
+              if (checkin.photos && checkin.photos.length > 0) {
+                html += `<div style="margin-top: 1em;">
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1em;">`;
+                checkin.photos.forEach((photo: string) => {
+                  html += `<img src="${escapeHtml(photo)}" alt="Service photo" style="
+                    width: 100%; 
+                    height: 150px; 
+                    object-fit: cover; 
+                    border-radius: 6px; 
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                  " />`;
+                });
+                html += `</div></div>`;
+              }
+              
               html += '</div>';
             });
             html += '</div>';
           } else {
-            html += '<p>No check-ins available.</p>';
+            html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">No recent service visits available.</p>';
           }
         }
         
         if (type === 'reviews' || type === 'all') {
           if (content.reviews && content.reviews.length > 0) {
             html += '<div class="rankitpro-reviews">';
-            html += '<h3>Customer Reviews</h3>';
+            html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #4CAF50; display: inline-block;">Customer Reviews</h3>';
             content.reviews.forEach((review: any) => {
-              html += `<div class="rankitpro-review" style="margin-bottom: 1.5em; padding: 1em; border: 1px solid #ddd; border-radius: 4px;">`;
+              html += `<div class="rankitpro-review" style="
+                background: #fff; 
+                margin-bottom: 2em; 
+                padding: 1.5em; 
+                border: 1px solid #e1e5e9; 
+                border-radius: 8px; 
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                position: relative;
+              ">`;
+              
+              // Rating stars
               if (review.rating) {
-                html += `<div class="rankitpro-stars" style="color: #ffd700; margin-bottom: 0.5em;">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>`;
+                html += `<div style="margin-bottom: 1em;">
+                  <div style="color: #ffd700; font-size: 1.5em; text-shadow: 0 1px 3px rgba(0,0,0,0.3); margin-bottom: 0.5em;">
+                    ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+                  </div>
+                  <div style="color: #4CAF50; font-weight: 600; font-size: 1.1em;">
+                    ${review.rating === 5 ? 'Excellent' : review.rating === 4 ? 'Very Good' : review.rating === 3 ? 'Good' : 'Fair'} - ${review.rating} Stars
+                  </div>
+                </div>`;
               }
+              
+              // Review content
               if (review.comment) {
-                html += `<p>${escapeHtml(review.comment)}</p>`;
+                html += `<div style="
+                  background: #f8f9fa; 
+                  padding: 1.2em; 
+                  border-radius: 6px; 
+                  border-left: 4px solid #4CAF50; 
+                  font-style: italic; 
+                  line-height: 1.6; 
+                  color: #444; 
+                  margin-bottom: 1em;
+                  position: relative;
+                ">
+                  <div style="position: absolute; top: -5px; left: 1em; color: #4CAF50; font-size: 2em; line-height: 1;">"</div>
+                  ${escapeHtml(review.comment)}
+                </div>`;
               }
+              
+              // Customer info
               if (review.customerName) {
-                html += `<p><small><strong>- ${escapeHtml(review.customerName)}</strong></small></p>`;
+                html += `<div style="text-align: right; color: #666; font-weight: 600; font-size: 0.9em;">
+                  — ${escapeHtml(review.customerName)}
+                </div>`;
               }
+              
+              // Verification badge
+              html += `<div style="
+                position: absolute; 
+                top: 1em; 
+                right: 1em; 
+                background: #4CAF50; 
+                color: white; 
+                padding: 0.3em 0.8em; 
+                border-radius: 12px; 
+                font-size: 0.75em; 
+                font-weight: 600;
+              ">✓ Verified</div>`;
+              
               html += '</div>';
             });
             html += '</div>';
           } else {
-            html += '<p>No reviews available.</p>';
+            html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">No customer reviews available yet.</p>';
           }
         }
         
         if (type === 'blogs' || type === 'all') {
           if (content.blogs && content.blogs.length > 0) {
             html += '<div class="rankitpro-blogs">';
-            html += '<h3>Recent Blog Posts</h3>';
+            html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #667eea; display: inline-block;">Recent Blog Posts</h3>';
             content.blogs.forEach((blog: any) => {
-              html += `<div class="rankitpro-blog" style="margin-bottom: 1.5em; padding: 1em; border: 1px solid #ddd; border-radius: 4px;">`;
-              html += `<h4>${escapeHtml(blog.title || 'Blog Post')}</h4>`;
+              html += `<article class="rankitpro-blog" style="
+                background: #fff; 
+                margin-bottom: 2em; 
+                padding: 0; 
+                border: 1px solid #e1e5e9; 
+                border-radius: 12px; 
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+                overflow: hidden;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+              ">`;
+              
+              // Blog header with gradient
+              html += `<div style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                color: white; 
+                padding: 1.5em; 
+                position: relative;
+              ">`;
+              html += `<h4 style="color: white; font-size: 1.4em; margin: 0; font-weight: 600; line-height: 1.3;">
+                ${escapeHtml(blog.title || 'Professional Service Blog Post')}
+              </h4>`;
+              html += `</div>`;
+              
+              // Blog content
+              html += `<div style="padding: 1.5em;">`;
               if (blog.content) {
-                const excerpt = blog.content.length > 200 ? blog.content.substring(0, 200) + '...' : blog.content;
-                html += `<p>${escapeHtml(excerpt)}</p>`;
+                const excerpt = blog.content.length > 300 ? blog.content.substring(0, 300) + '...' : blog.content;
+                html += `<div style="
+                  line-height: 1.7; 
+                  color: #444; 
+                  font-size: 1em; 
+                  margin-bottom: 1.5em;
+                  text-align: justify;
+                ">${escapeHtml(excerpt)}</div>`;
               }
+              
+              // Meta information
+              html += `<div style="
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                padding-top: 1em; 
+                border-top: 1px solid #eee; 
+                flex-wrap: wrap; 
+                gap: 1em;
+              ">`;
+              
               if (blog.createdAt) {
-                html += `<p><small><strong>Published:</strong> ${new Date(blog.createdAt).toLocaleDateString()}</small></p>`;
+                html += `<div style="
+                  color: #666; 
+                  font-size: 0.9em; 
+                  background: #f8f9fa; 
+                  padding: 0.5em 1em; 
+                  border-radius: 20px; 
+                  display: flex; 
+                  align-items: center; 
+                  gap: 0.5em;
+                ">
+                  <span>📅</span>Published: ${new Date(blog.createdAt).toLocaleDateString()}
+                </div>`;
               }
-              html += '</div>';
+              
+              html += `<div style="
+                background: linear-gradient(45deg, #667eea, #764ba2); 
+                color: white; 
+                padding: 0.4em 1em; 
+                border-radius: 20px; 
+                font-size: 0.8em; 
+                font-weight: 600;
+              ">Case Study</div>`;
+              
+              html += `</div>`;
+              html += `</div>`;
+              html += '</article>';
             });
             html += '</div>';
           } else {
-            html += '<p>No blog posts available.</p>';
+            html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">No blog posts available yet.</p>';
           }
         }
         
