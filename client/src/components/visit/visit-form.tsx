@@ -10,10 +10,14 @@ import UsageLimitModal from "@/components/usage-limit-modal";
 // Reverse geocoding function to convert coordinates to address
 async function reverseGeocode(latitude: number, longitude: number): Promise<string> {
   try {
-    // Using OpenStreetMap Nominatim API (free, no API key required)
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
-    );
+    // Use our internal reverse geocoding API instead of external service
+    const response = await fetch('/api/reverse-geocode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ latitude, longitude })
+    });
     
     if (!response.ok) {
       throw new Error('Geocoding service unavailable');
@@ -22,36 +26,13 @@ async function reverseGeocode(latitude: number, longitude: number): Promise<stri
     const data = await response.json();
     
     if (data && data.address) {
-      const address = data.address;
-      
-      // Build a formatted address string
-      const parts = [];
-      
-      if (address.house_number && address.road) {
-        parts.push(`${address.house_number} ${address.road}`);
-      } else if (address.road) {
-        parts.push(address.road);
-      }
-      
-      if (address.city || address.town || address.village) {
-        parts.push(address.city || address.town || address.village);
-      }
-      
-      if (address.state) {
-        parts.push(address.state);
-      }
-      
-      if (address.postcode) {
-        parts.push(address.postcode);
-      }
-      
-      return parts.join(', ') || data.display_name;
+      return data.address;
+    } else {
+      throw new Error('No address found');
     }
-    
-    throw new Error('No address found');
   } catch (error) {
-    console.error('Reverse geocoding error:', error);
-    throw error;
+    console.error('Reverse geocoding failed:', error);
+    return `${latitude}, ${longitude}`;
   }
 }
 

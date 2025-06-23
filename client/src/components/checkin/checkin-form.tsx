@@ -187,8 +187,10 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
               console.log("Address parts:", addressParts);
               
               if (addressParts.length >= 3) {
-                // Extract street address (first part)
-                form.setValue("street", addressParts[0]);
+                // Extract street address (first part) - remove house number
+                const streetWithNumber = addressParts[0];
+                const streetOnly = streetWithNumber.replace(/^\d+\s*/, ''); // Remove leading numbers and spaces
+                form.setValue("street", streetOnly);
                 
                 // Extract city (second part) 
                 form.setValue("city", addressParts[1]);
