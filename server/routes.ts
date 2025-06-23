@@ -2250,7 +2250,8 @@ Contact us for more information about our professional services and to schedule 
               
                 html += '</div>'; // End container
               });
-              html += '</div>';
+              html += '</div>'; // Close grid
+              html += '</div>'; // Close testimonials container
             } else {
               html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">No customer testimonials available.</p>';
             }
@@ -2287,11 +2288,11 @@ Contact us for more information about our professional services and to schedule 
             if (reviews && reviews.length > 0) {
               html += '<div class="rankitpro-reviews">';
               html += '<h3 style="color: var(--wp--preset--color--foreground, inherit); font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid var(--wp--preset--color--primary, #4CAF50); display: inline-block;">Customer Reviews</h3>';
+              html += '<div class="rankitpro-grid rankitpro-grid-2">';
               reviews.slice(0, validLimit).forEach((review: any) => {
               // Template-style review container
-              html += `<div style="
-                max-width: 450px;
-                margin: 2em auto;
+              html += `<div class="rankitpro-review" style="
+                margin: 0;
                 background: var(--wp--preset--color--background, white);
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                 border-radius: 8px;
@@ -2392,10 +2393,11 @@ Contact us for more information about our professional services and to schedule 
           if (content.blogs && content.blogs.length > 0) {
             html += '<div class="rankitpro-blogs">';
             html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #667eea; display: inline-block;">Recent Blog Posts</h3>';
+            html += '<div class="rankitpro-grid rankitpro-grid-2">';
             content.blogs.forEach((blog: any) => {
               html += `<article class="rankitpro-blog" style="
                 background: #fff; 
-                margin-bottom: 2em; 
+                margin-bottom: 0; 
                 padding: 0; 
                 border: 1px solid #e1e5e9; 
                 border-radius: 12px; 
