@@ -2124,16 +2124,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   "${escapeHtml(testimonial.content)}"
                 </div>`;
               
-              // Media player placeholder for audio/video
-              if (testimonial.type === 'audio') {
-                html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px dashed #ddd;">
-                  <span style="font-size: 48px; margin-bottom: 10px; display: block;">🎵</span>
-                  <div style="font-size: 14px; color: #666;">Audio testimonial available</div>
+              // Media player for audio/video
+              if (testimonial.type === 'audio' && testimonial.media_url) {
+                html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #2563eb;">
+                    <span style="font-size: 16px;">🎤</span>
+                    <span style="font-size: 14px; font-weight: 600;">Audio Testimonial</span>
+                  </div>
+                  <audio controls style="width: 100%; height: 40px;">
+                    <source src="${escapeHtml(testimonial.media_url)}" type="audio/mpeg">
+                    <source src="${escapeHtml(testimonial.media_url)}" type="audio/wav">
+                    Your browser does not support the audio element.
+                  </audio>
                 </div>`;
-              } else if (testimonial.type === 'video') {
+              } else if (testimonial.type === 'video' && testimonial.media_url) {
+                html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #7c3aed;">
+                    <span style="font-size: 16px;">🎥</span>
+                    <span style="font-size: 14px; font-weight: 600;">Video Testimonial</span>
+                  </div>
+                  <video controls style="width: 100%; max-height: 300px; border-radius: 4px;">
+                    <source src="${escapeHtml(testimonial.media_url)}" type="video/mp4">
+                    <source src="${escapeHtml(testimonial.media_url)}" type="video/webm">
+                    Your browser does not support the video element.
+                  </video>
+                </div>`;
+              } else if (testimonial.type === 'audio' || testimonial.type === 'video') {
                 html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px dashed #ddd;">
-                  <span style="font-size: 48px; margin-bottom: 10px; display: block;">🎬</span>
-                  <div style="font-size: 14px; color: #666;">Video testimonial available</div>
+                  <span style="font-size: 48px; margin-bottom: 10px; display: block;">${testimonial.type === 'audio' ? '🎵' : '🎬'}</span>
+                  <div style="font-size: 14px; color: #666;">${testimonial.type === 'audio' ? 'Audio' : 'Video'} testimonial available</div>
                 </div>`;
               }
               
