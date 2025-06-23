@@ -44,10 +44,7 @@ const formSchema = z.object({
   technicianId: z.string().min(1, "Please select a technician"),
   jobType: z.string().min(1, "Please select a job type"),
   notes: z.string().min(5, "Please add detailed notes about the work performed"),
-  street: z.string().min(1, "Street address is required"),
-  city: z.string().min(1, "City is required"),
-  state: z.string().min(1, "State is required"),
-  zip: z.string().min(1, "ZIP code is required"),
+  address: z.string().min(1, "Full address is required"),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   createBlogPost: z.boolean().default(false),
@@ -95,15 +92,9 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
       technicianId: "",
       jobType: "",
       notes: "",
-      street: "",
-      city: "",
-      state: "",
-      zip: "",
-      latitude: 0,
-      longitude: 0,
-      isBlog: "false",
-      isServiceVisit: "false",
-      isReviewRequest: "false",
+      address: "",
+      createBlogPost: false,
+      sendReviewRequest: false,
     },
   });
   
@@ -425,15 +416,9 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
     formData.append("jobType", values.jobType);
     formData.append("notes", values.notes);
     
-    // Combine address fields into location string
-    const location = `${values.street}, ${values.city}, ${values.state} ${values.zip}`;
-    formData.append("location", location);
-    
-    // Add individual address fields
-    formData.append("street", values.street);
-    formData.append("city", values.city);
-    formData.append("state", values.state);
-    formData.append("zip", values.zip);
+    // Use the full address field
+    formData.append("location", values.address);
+    formData.append("address", values.address);
     
     if (values.latitude !== undefined) formData.append("latitude", String(values.latitude));
     if (values.longitude !== undefined) formData.append("longitude", String(values.longitude));
