@@ -1999,44 +1999,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
               html += `</div>`;
               
-              // Interactive Map with real location coordinates
+              // Leaflet Map Integration
               const lat = Number(checkin.latitude) || 32.9537;  // Default to Carrollton, TX coordinates
               const lng = Number(checkin.longitude) || -96.8903;
+              const mapId = `map_${checkin.id}_${Date.now()}`;
               
-              html += `<div style="height: 200px; position: relative; background: #e8f5e8; border: 1px solid #ddd; margin: 0 20px; border-radius: 8px; overflow: hidden;">
-                <div style="width: 100%; height: 100%; background: #f0f8f0; position: relative; display: flex; align-items: center; justify-content: center;">
-                  <!-- Street grid pattern -->
-                  <svg style="position: absolute; width: 100%; height: 100%; opacity: 0.3;" viewBox="0 0 200 200">
-                    <defs>
-                      <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#c0c0c0" stroke-width="1"/>
-                      </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#grid)" />
-                    <!-- Street lines -->
-                    <line x1="0" y1="60" x2="200" y2="60" stroke="#888" stroke-width="2"/>
-                    <line x1="0" y1="140" x2="200" y2="140" stroke="#888" stroke-width="2"/>
-                    <line x1="60" y1="0" x2="60" y2="200" stroke="#888" stroke-width="2"/>
-                    <line x1="140" y1="0" x2="140" y2="200" stroke="#888" stroke-width="2"/>
-                  </svg>
-                  
-                  <!-- Location marker -->
-                  <div style="width: 24px; height: 32px; background: #2196f3; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); position: relative; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); z-index: 10;">
-                    <div style="width: 8px; height: 8px; background: white; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg);"></div>
-                  </div>
-                  
-                  <!-- Map controls -->
-                  <div style="position: absolute; right: 8px; top: 8px; display: flex; flex-direction: column; gap: 2px;">
-                    <button style="width: 24px; height: 24px; background: white; border: 1px solid #ccc; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">+</button>
-                    <button style="width: 24px; height: 24px; background: white; border: 1px solid #ccc; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">−</button>
-                  </div>
-                  
-                  <!-- Location coordinates display -->
-                  <div style="position: absolute; bottom: 5px; left: 5px; background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; font-size: 10px; color: #666; font-family: monospace;">
-                    ${lat.toFixed(4)}, ${lng.toFixed(4)}
-                  </div>
-                </div>
-              </div>`;
+              html += `<div id="${mapId}" style="height: 200px; margin: 0 20px; border-radius: 8px; overflow: hidden; border: 1px solid #ddd;"></div>
+              <script>
+                if (typeof L !== 'undefined') {
+                  try {
+                    var map_${checkin.id} = L.map('${mapId}').setView([${lat}, ${lng}], 15);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                      attribution: '© OpenStreetMap contributors'
+                    }).addTo(map_${checkin.id});
+                    L.marker([${lat}, ${lng}]).addTo(map_${checkin.id})
+                      .bindPopup('<b>Service Location</b><br>${escapeHtml(checkin.location || 'Service performed here')}')
+                      .openPopup();
+                  } catch(e) {
+                    document.getElementById('${mapId}').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 ${escapeHtml(checkin.location || 'Service Location')}</span></div>';
+                  }
+                } else {
+                  document.getElementById('${mapId}').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 ${escapeHtml(checkin.location || 'Service Location')}</span></div>';
+                }
+              </script>`;
               
               // Description section
               if (checkin.notes) {
@@ -2203,20 +2188,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (type === 'reviews' || type === 'all') {
           try {
-            // Use hardcoded reviews with location data for company 16
+            // Use hardcoded reviews with complete address format matching check-ins
             const reviews = parsedCompanyId === 16 ? [
               {
                 id: 1,
                 customer_name: 'Sarah Johnson',
                 rating: 5,
-                feedback: 'Excellent sprinkler repair service! Rod was punctual, professional, and fixed our system quickly at our home on Maple Street in Carrollton. Great communication throughout the process.',
+                feedback: 'Excellent sprinkler repair service! Rod was punctual, professional, and fixed our system quickly. Great communication throughout the process.',
+                service_location: '123 Maple Street, Carrollton, TX 75006',
                 created_at: new Date('2025-06-20')
               },
               {
                 id: 2,
                 customer_name: 'Mike Davis', 
                 rating: 5,
-                feedback: 'Outstanding work on our irrigation system at our property on Oak Drive in Dallas. The technician explained everything clearly and the pricing was very fair. Highly recommend!',
+                feedback: 'Outstanding work on our irrigation system. The technician explained everything clearly and the pricing was very fair. Highly recommend!',
+                service_location: '456 Oak Drive, Dallas, TX 75001',
                 created_at: new Date('2025-06-18')
               }
             ] : await storage.getReviewResponsesByCompany(parsedCompanyId);
@@ -2247,7 +2234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">${new Date(review.created_at).toLocaleDateString()}</span>
                 </div>
                 <div style="display: flex; align-items: center; color: var(--wp--preset--color--primary, #0073aa); font-size: 14px; font-weight: 500;">
-                  <span style="margin-right: 8px;">📍</span>Carrollton/Dallas Service Area
+                  <span style="margin-right: 8px;">📍</span>${escapeHtml(review.service_location || 'Service Location')}
                 </div>
               </div>`;
               
@@ -2274,19 +2261,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 </div>`;
               }
               
-              // Review content with location extraction
+              // Review content with service location
               if (review.feedback) {
-                const feedback = review.feedback;
-                // Extract location mentions from feedback
-                const locationMatch = feedback.match(/(on|at)\s+([^.]+(?:Street|Drive|Avenue|Road|Lane|Boulevard|Court|Place|Way)[^.]*)/i);
-                const location = locationMatch ? locationMatch[2].trim() : null;
-                
                 html += `<div style="padding: 20px; border-bottom: 1px solid var(--wp--preset--color--border, #eee);">
-                  ${location ? `<div style="background: var(--wp--preset--color--primary, #0073aa); color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; display: inline-block;">
-                    📍 Service Location: ${escapeHtml(location)}
+                  ${review.service_location ? `<div style="background: var(--wp--preset--color--primary, #0073aa); color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; display: inline-block;">
+                    📍 Service Location: ${escapeHtml(review.service_location)}
                   </div>` : ''}
                   <div style="font-size: 14px; line-height: 1.7; color: var(--wp--preset--color--foreground, #444); background: var(--wp--preset--color--tertiary, #f8f9fa); padding: 15px; border-radius: 8px; border-left: 4px solid var(--wp--preset--color--primary, #4CAF50); font-style: italic;">
-                    "${escapeHtml(feedback)}"
+                    "${escapeHtml(review.feedback)}"
                   </div>
                 </div>`;
               }
