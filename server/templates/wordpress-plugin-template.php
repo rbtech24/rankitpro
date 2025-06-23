@@ -60,8 +60,8 @@ class RankItProIntegration {
     
     public function activate() {
         // Set default options
-        add_option('rankitpro_api_key', '{{API_KEY}}');
-        add_option('rankitpro_api_endpoint', '{{API_ENDPOINT}}');
+        add_option('rankitpro_company_id', '');
+        add_option('rankitpro_api_domain', 'https://rankitpro.com');
         add_option('rankitpro_cache_duration', 3600);
         add_option('rankitpro_show_photos', 1);
         add_option('rankitpro_auto_refresh', 1);

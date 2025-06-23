@@ -121,10 +121,15 @@ class RankItProIntegration {
     
     public function settings_page() {
         if (isset($_POST['submit'])) {
-            update_option('rankitpro_company_id', sanitize_text_field($_POST['company_id']));
-            update_option('rankitpro_api_domain', sanitize_url($_POST['api_domain']));
-            update_option('rankitpro_cache_time', intval($_POST['cache_time']));
-            echo '<div class="notice notice-success"><p>Settings saved!</p></div>';
+            $company_id = intval($_POST['company_id']);
+            if ($company_id > 0) {
+                update_option('rankitpro_company_id', $company_id);
+                update_option('rankitpro_api_domain', sanitize_url($_POST['api_domain']));
+                update_option('rankitpro_cache_time', intval($_POST['cache_time']));
+                echo '<div class="notice notice-success"><p>Settings saved! Company ID: ' . $company_id . '</p></div>';
+            } else {
+                echo '<div class="notice notice-error"><p>Error: Company ID must be a positive number (like 16), not an API key.</p></div>';
+            }
         }
         
         $company_id = get_option('rankitpro_company_id', '');
@@ -135,13 +140,22 @@ class RankItProIntegration {
             <h1>RankIt Pro Integration Settings</h1>
             <p>Configure your RankIt Pro API connection for displaying service reports on your website.</p>
             
+            <div class="notice notice-info">
+                <p><strong>Quick Setup for Your Account:</strong></p>
+                <ul>
+                    <li><strong>Company ID:</strong> 16</li>
+                    <li><strong>API Domain:</strong> https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev</li>
+                </ul>
+            </div>
+            
             <form method="post">
                 <table class="form-table">
                     <tr>
                         <th scope="row">Company ID</th>
                         <td>
-                            <input type="text" name="company_id" value="<?php echo esc_attr($company_id); ?>" class="regular-text" required />
-                            <p class="description">Your RankItPro Company ID (found in your dashboard settings)</p>
+                            <input type="number" name="company_id" value="<?php echo esc_attr($company_id); ?>" class="regular-text" required min="1" />
+                            <p class="description">Your RankItPro Company ID - this should be a number like <strong>16</strong>, not an API key.<br>
+                            <strong>For your account, use: 16</strong></p>
                         </td>
                     </tr>
                     <tr>
@@ -204,8 +218,11 @@ class RankItProIntegration {
                 </div>
                 
                 <h3>Troubleshooting Steps</h3>
+                <div class="notice notice-warning">
+                    <p><strong>Common Issue:</strong> If you're seeing "Invalid company ID" errors, make sure you're using the numeric Company ID (<strong>16</strong>) and not an API key string.</p>
+                </div>
                 <ol>
-                    <li>Verify your Company ID is correct (found in your Rank It Pro dashboard)</li>
+                    <li><strong>Verify Company ID:</strong> Should be a number like <code>16</code>, not a string like <code>rip_live_...</code></li>
                     <li>Check that your WordPress site can make external HTTP requests</li>
                     <li>Disable caching plugins temporarily</li>
                     <li>Check browser console for JavaScript errors</li>
@@ -324,10 +341,13 @@ class RankItProIntegration {
                 </div>
                 
                 <h3>Need Help?</h3>
+                <div class="notice notice-info">
+                    <p><strong>Quick Fix:</strong> Make sure your Company ID is set to <strong>16</strong> in Settings, not an API key string.</p>
+                </div>
                 <p>If shortcodes aren't working:</p>
                 <ol>
                     <li>Go to <a href="<?php echo admin_url('admin.php?page=rank-it-pro-test'); ?>">Test & Troubleshoot</a> to verify your connection</li>
-                    <li>Check that you've entered the correct Company ID in <a href="<?php echo admin_url('admin.php?page=rank-it-pro-settings'); ?>">Settings</a></li>
+                    <li>Check that you've entered <strong>16</strong> as Company ID in <a href="<?php echo admin_url('admin.php?page=rank-it-pro-settings'); ?>">Settings</a></li>
                     <li>Make sure your shortcode syntax matches the examples above exactly</li>
                     <li>Try temporarily disabling caching plugins</li>
                 </ol>
