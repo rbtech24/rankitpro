@@ -2938,6 +2938,10 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
             if (data.address.postcode) {
               addressParts.push(data.address.postcode);
             }
+            
+            // Don't include "United States" in the address since it's redundant for US addresses
+            // Filter out "United States" if it exists
+            addressParts = addressParts.filter(part => part !== "United States");
           }
           
           const formattedAddress = addressParts.length > 0 ? addressParts.join(', ') : data.display_name;
