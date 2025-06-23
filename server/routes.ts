@@ -1999,15 +1999,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
               html += `</div>`;
               
-              // Map section (simplified visual)
+              // Interactive Map with real location coordinates
+              const lat = checkin.latitude || 32.9537;  // Default to Carrollton, TX coordinates
+              const lng = checkin.longitude || -96.8903;
+              
               html += `<div style="height: 200px; position: relative; background: #e8f5e8; border: 1px solid #ddd; margin: 0 20px; border-radius: 8px; overflow: hidden;">
-                <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #e8f5e8 25%, #f0f8f0 25%, #f0f8f0 50%, #e8f5e8 50%, #e8f5e8 75%, #f0f8f0 75%); background-size: 20px 20px; display: flex; align-items: center; justify-content: center; position: relative;">
-                  <div style="width: 30px; height: 30px; background: #2196f3; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); position: relative; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-                    <div style="width: 14px; height: 14px; background: white; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg);"></div>
+                <div style="width: 100%; height: 100%; background: #f0f8f0; position: relative; display: flex; align-items: center; justify-content: center;">
+                  <!-- Street grid pattern -->
+                  <svg style="position: absolute; width: 100%; height: 100%; opacity: 0.3;" viewBox="0 0 200 200">
+                    <defs>
+                      <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#c0c0c0" stroke-width="1"/>
+                      </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                    <!-- Street lines -->
+                    <line x1="0" y1="60" x2="200" y2="60" stroke="#888" stroke-width="2"/>
+                    <line x1="0" y1="140" x2="200" y2="140" stroke="#888" stroke-width="2"/>
+                    <line x1="60" y1="0" x2="60" y2="200" stroke="#888" stroke-width="2"/>
+                    <line x1="140" y1="0" x2="140" y2="200" stroke="#888" stroke-width="2"/>
+                  </svg>
+                  
+                  <!-- Location marker -->
+                  <div style="width: 24px; height: 32px; background: #2196f3; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); position: relative; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); z-index: 10;">
+                    <div style="width: 8px; height: 8px; background: white; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg);"></div>
                   </div>
-                  <div style="position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; gap: 2px;">
-                    <button style="width: 30px; height: 30px; background: white; border: 1px solid #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">+</button>
-                    <button style="width: 30px; height: 30px; background: white; border: 1px solid #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">−</button>
+                  
+                  <!-- Map controls -->
+                  <div style="position: absolute; right: 8px; top: 8px; display: flex; flex-direction: column; gap: 2px;">
+                    <button style="width: 24px; height: 24px; background: white; border: 1px solid #ccc; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">+</button>
+                    <button style="width: 24px; height: 24px; background: white; border: 1px solid #ccc; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">−</button>
+                  </div>
+                  
+                  <!-- Location coordinates display -->
+                  <div style="position: absolute; bottom: 5px; left: 5px; background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; font-size: 10px; color: #666; font-family: monospace;">
+                    ${lat.toFixed(4)}, ${lng.toFixed(4)}
                   </div>
                 </div>
               </div>`;
