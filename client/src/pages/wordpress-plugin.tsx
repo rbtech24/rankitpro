@@ -66,10 +66,10 @@ export default function WordPressPlugin() {
     }
   };
 
-  const apiCredentials = {
-    apiUrl: `https://rankitpro.com`,
-    apiKey: `rip_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`,
-    secretKey: `rip_secret_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
+  const pluginConfig = {
+    companyId: 16,
+    apiDomain: window.location.origin,
+    productionDomain: 'https://rankitpro.com'
   };
 
   return (
@@ -131,7 +131,7 @@ export default function WordPressPlugin() {
                     <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">3</div>
                     <div>
                       <p className="font-medium">Activate and configure</p>
-                      <p className="text-sm text-gray-600">Activate the plugin and configure your API credentials</p>
+                      <p className="text-sm text-gray-600">Activate the plugin and enter Company ID 16</p>
                     </div>
                   </div>
                 </div>
@@ -187,61 +187,69 @@ export default function WordPressPlugin() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <h4 className="font-medium text-blue-900 text-sm mb-2">Plugin Configuration Values</h4>
+                <p className="text-xs text-blue-800">Use these exact values in your WordPress plugin settings:</p>
+              </div>
+
               <div className="space-y-2">
-                <label className="text-sm font-medium">API URL</label>
+                <label className="text-sm font-medium text-green-700">Company ID</label>
                 <div className="flex items-center gap-2">
                   <input 
                     type="text" 
-                    value={apiCredentials.apiUrl}
+                    value={pluginConfig.companyId}
                     readOnly
-                    className="flex-1 px-3 py-2 text-xs border rounded-md bg-gray-50"
+                    className="flex-1 px-3 py-2 text-sm border rounded-md bg-green-50 font-bold text-green-800"
                   />
                   <Button 
                     size="sm" 
                     variant="outline"
-                    onClick={() => copyToClipboard(apiCredentials.apiUrl, 'apiUrl')}
+                    onClick={() => copyToClipboard(pluginConfig.companyId.toString(), 'companyId')}
                   >
-                    {copiedItems.has('apiUrl') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copiedItems.has('companyId') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>
+                <p className="text-xs text-gray-600">Enter this number (not an API key string)</p>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">API Key</label>
+                <label className="text-sm font-medium">API Domain (Testing)</label>
                 <div className="flex items-center gap-2">
                   <input 
                     type="text" 
-                    value={apiCredentials.apiKey}
+                    value={pluginConfig.apiDomain}
                     readOnly
                     className="flex-1 px-3 py-2 text-xs border rounded-md bg-gray-50 font-mono"
                   />
                   <Button 
                     size="sm" 
                     variant="outline"
-                    onClick={() => copyToClipboard(apiCredentials.apiKey, 'apiKey')}
+                    onClick={() => copyToClipboard(pluginConfig.apiDomain, 'apiDomain')}
                   >
-                    {copiedItems.has('apiKey') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copiedItems.has('apiDomain') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>
+                <p className="text-xs text-gray-600">Use this Replit URL for testing</p>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Secret Key</label>
+                <label className="text-sm font-medium">API Domain (Production)</label>
                 <div className="flex items-center gap-2">
                   <input 
-                    type="password" 
-                    value={apiCredentials.secretKey}
+                    type="text" 
+                    value={pluginConfig.productionDomain}
                     readOnly
                     className="flex-1 px-3 py-2 text-xs border rounded-md bg-gray-50 font-mono"
                   />
                   <Button 
                     size="sm" 
                     variant="outline"
-                    onClick={() => copyToClipboard(apiCredentials.secretKey, 'secretKey')}
+                    onClick={() => copyToClipboard(pluginConfig.productionDomain, 'productionDomain')}
                   >
-                    {copiedItems.has('secretKey') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copiedItems.has('productionDomain') ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>
+                <p className="text-xs text-gray-600">Use this when your site goes live</p>
               </div>
 
               <Separator />
@@ -252,11 +260,11 @@ export default function WordPressPlugin() {
                 <div className="space-y-3">
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_checkins]</code>
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rankitpro type="checkins" company="16"]</code>
                       <Button 
                         size="sm" 
                         variant="ghost"
-                        onClick={() => copyToClipboard('[rank_it_pro_checkins]', 'shortcode1')}
+                        onClick={() => copyToClipboard('[rankitpro type="checkins" company="16"]', 'shortcode1')}
                       >
                         {copiedItems.has('shortcode1') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                       </Button>
@@ -266,72 +274,30 @@ export default function WordPressPlugin() {
 
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_recent limit="3"]</code>
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rankitpro type="reviews" company="16" limit="3"]</code>
                       <Button 
                         size="sm" 
                         variant="ghost"
-                        onClick={() => copyToClipboard('[rank_it_pro_recent limit="3"]', 'shortcode2')}
+                        onClick={() => copyToClipboard('[rankitpro type="reviews" company="16" limit="3"]', 'shortcode2')}
                       >
                         {copiedItems.has('shortcode2') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                       </Button>
                     </div>
-                    <p className="text-xs text-gray-600">Show latest 3 check-ins</p>
+                    <p className="text-xs text-gray-600">Show latest 3 customer reviews</p>
                   </div>
 
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_checkins type="Plumbing"]</code>
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rankitpro type="blogs" company="16" limit="5"]</code>
                       <Button 
                         size="sm" 
                         variant="ghost"
-                        onClick={() => copyToClipboard('[rank_it_pro_checkins type="Plumbing"]', 'shortcode3')}
+                        onClick={() => copyToClipboard('[rankitpro type="blogs" company="16" limit="5"]', 'shortcode3')}
                       >
                         {copiedItems.has('shortcode3') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                       </Button>
                     </div>
-                    <p className="text-xs text-gray-600">Show only plumbing service check-ins</p>
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_checkins limit="5" type="HVAC"]</code>
-                      <Button 
-                        size="sm" 
-                        variant="ghost"
-                        onClick={() => copyToClipboard('[rank_it_pro_checkins limit="5" type="HVAC"]', 'shortcode4')}
-                      >
-                        {copiedItems.has('shortcode4') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                      </Button>
-                    </div>
-                    <p className="text-xs text-gray-600">Show 5 latest HVAC check-ins</p>
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_gallery limit="6"]</code>
-                      <Button 
-                        size="sm" 
-                        variant="ghost"
-                        onClick={() => copyToClipboard('[rank_it_pro_gallery limit="6"]', 'shortcode5')}
-                      >
-                        {copiedItems.has('shortcode5') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                      </Button>
-                    </div>
-                    <p className="text-xs text-gray-600">Photo gallery of recent work</p>
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">[rank_it_pro_testimonials]</code>
-                      <Button 
-                        size="sm" 
-                        variant="ghost"
-                        onClick={() => copyToClipboard('[rank_it_pro_testimonials]', 'shortcode6')}
-                      >
-                        {copiedItems.has('shortcode6') ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                      </Button>
-                    </div>
-                    <p className="text-xs text-gray-600">Display customer testimonials</p>
+                    <p className="text-xs text-gray-600">Display AI-generated blog posts</p>
                   </div>
                 </div>
               </div>
