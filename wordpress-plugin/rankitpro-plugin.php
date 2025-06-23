@@ -399,8 +399,8 @@ class RankItProIntegration {
             delete_transient($cache_key);
         }
 
-        // Use HTML format for direct content embedding
-        $api_url = $api_domain . '/widget/' . $company_id . '?type=' . urlencode($atts['type']) . '&limit=' . $limit . '&format=html';
+        // Use HTML format for direct content embedding with cache busting
+        $api_url = $api_domain . '/widget/' . $company_id . '?type=' . urlencode($atts['type']) . '&limit=' . $limit . '&format=html&v=' . time();
         
         if (!empty($atts['rating']) && is_numeric($atts['rating'])) {
             $api_url .= '&rating=' . intval($atts['rating']);
