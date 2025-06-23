@@ -2244,40 +2244,8 @@ This project exemplifies our belief that the best irrigation systems combine cut
           try {
             console.log(`Widget: Fetching testimonials for company ${parsedCompanyId}`);
             
-            // Use hardcoded testimonials for company 16
-            let testimonials = [];
-            if (parsedCompanyId === 16) {
-              testimonials = [
-                {
-                  id: 1,
-                  customer_name: "Jennifer Rodriguez",
-                  content: "I wanted to share my experience with Carrollton Sprinkler Repair. Rod came out to fix our broken irrigation system and I was so impressed with his professionalism and expertise. He took the time to explain what was wrong and showed me how to prevent future issues. The price was very reasonable and the work was completed faster than I expected. I will definitely be calling them for all our sprinkler needs going forward.",
-                  type: "audio",
-                  created_at: "2025-06-23T02:07:03.882Z"
-                },
-                {
-                  id: 2,
-                  customer_name: "Michael Thompson",
-                  content: "Hi, I'm Michael Thompson and I just had to make this video to tell everyone about the amazing service I received from Carrollton Sprinkler Repair. My sprinkler system had been giving me problems for months - some zones not working, uneven water coverage, you name it. Rod came out and in just one visit he had everything working like new. He even showed me how to adjust the controller for different seasons. These guys really know what they're doing and I couldn't be happier with the results. Five stars all the way!",
-                  type: "video",
-                  created_at: "2025-06-23T02:07:03.882Z"
-                },
-                {
-                  id: 3,
-                  customer_name: "Maria Rodriguez",
-                  content: "I just had to record this audio message to share how happy I am with the service from Carrollton Sprinkler Repair. They installed a brand new irrigation system for our landscaping and the results have been amazing. Our lawn has never looked better and we're saving water too. Rod was very knowledgeable and helped us design a system that works perfectly for our property. Highly recommend their services!",
-                  type: "audio",
-                  created_at: "2025-06-23T02:07:03.882Z"
-                },
-                {
-                  id: 4,
-                  customer_name: "James Wilson",
-                  content: "Hey everyone, I wanted to make this quick video to share my experience with Carrollton Sprinkler Repair. We had multiple zones that weren't working properly and our water bill was through the roof due to inefficient coverage. Rod came out and completely revamped our system with new smart controllers and efficient sprinkler heads. Now our water usage is down 30% and our lawn looks incredible. Great work at a fair price!",
-                  type: "video",
-                  created_at: "2025-06-23T02:07:03.882Z"
-                }
-              ];
-            }
+            // Get real testimonials from database with actual media files
+            const testimonials = await storage.getTestimonialsByCompany(parsedCompanyId);
             
             console.log(`Widget: Found ${testimonials.length} testimonials for company ${parsedCompanyId}`);
             

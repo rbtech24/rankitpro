@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Real Video Testimonials</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-container { max-width: 1200px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Video/Audio Testimonial Test Results</h1>
+        <p><strong>Testing Complete Workflow:</strong> Tech App Upload → Dashboard Management → WordPress Display</p>
+        <div id="widget-container"></div>
+    </div>
+    
+    <script>
+        fetch('http://localhost:5000/widget/16?type=testimonials&limit=4&format=html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('widget-container').innerHTML = html;
+                console.log('Real testimonials loaded with actual media files');
+                
+                // Check for video elements
+                const videos = document.querySelectorAll('video');
+                const audios = document.querySelectorAll('audio');
+                console.log(`Found ${videos.length} video players and ${audios.length} audio players`);
+                
+                videos.forEach((video, index) => {
+                    console.log(`Video ${index + 1} source:`, video.querySelector('source')?.src);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('widget-container').innerHTML = '<p>Error loading testimonial widget</p>';
+            });
+    </script>
+</body>
+</html>
