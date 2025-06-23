@@ -181,10 +181,10 @@ export function TestimonialRecorder({ technicianId, checkInId, onSubmit, onCance
   };
 
   const handleSubmit = async () => {
-    if (!recordedBlob || !customerName || !title) {
+    if (!recordedBlob || !customerName || !title || !jobType || !technicianName) {
       toast({
         title: "Missing Information",
-        description: "Please complete recording and fill in required fields.",
+        description: "Please complete recording and fill in all required fields (Customer Name, Title, Job Type, Technician Name).",
         variant: "destructive"
       });
       return;
@@ -192,12 +192,12 @@ export function TestimonialRecorder({ technicianId, checkInId, onSubmit, onCance
 
     const formData = new FormData();
     formData.append('file', recordedBlob, `testimonial-${Date.now()}.webm`);
-    formData.append('technicianId', technicianId.toString());
     formData.append('customerName', customerName);
     formData.append('customerEmail', customerEmail);
     formData.append('customerPhone', customerPhone);
     formData.append('title', title);
     formData.append('jobType', jobType);
+    formData.append('technicianName', technicianName);
     formData.append('location', location);
     formData.append('rating', rating.toString());
     formData.append('type', recordingType);
@@ -400,14 +400,13 @@ export function TestimonialRecorder({ technicianId, checkInId, onSubmit, onCance
               placeholder="e.g., Miami, FL"
             />
           </div>
-          </div>
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-4 pt-6">
             <Button variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={!recordedBlob || !customerName || !title}>
+            <Button onClick={handleSubmit} disabled={!recordedBlob || !customerName || !title || !jobType || !technicianName}>
               <Upload className="w-4 h-4 mr-2" />
               Submit Testimonial
             </Button>
