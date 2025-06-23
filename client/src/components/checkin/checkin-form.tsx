@@ -172,90 +172,17 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
             console.log("Reverse geocode response:", data);
             
             if (data.address) {
-              // Parse the full address into components
-              // Example: "6798 Statice Lane, Florida, 34652"
-              const addressParts = data.address.split(',').map(part => part.trim());
-              console.log("Address parts:", addressParts);
-              
-              if (addressParts.length >= 3) {
-                // Extract street address (first part) - remove house number
-                const streetWithNumber = addressParts[0];
-                const streetOnly = streetWithNumber.replace(/^\d+\s*/, ''); // Remove leading numbers and spaces
-                form.setValue("street", streetOnly);
-                
-                // Extract city (second part) 
-                form.setValue("city", addressParts[1]);
-                
-                // Handle different address formats
-                if (addressParts.length >= 4) {
-                  // Format: "Street, City, State, ZIP"
-                  form.setValue("state", addressParts[2]);
-                  form.setValue("zipCode", addressParts[3]);
-                } else if (addressParts.length === 3) {
-                  // Format: "Street, City/State, ZIP" - parse the last part as ZIP
-                  const lastPart = addressParts[2].trim();
-                  const middlePart = addressParts[1].trim();
-                  
-                  // Check if last part is a ZIP code
-                  if (/^\d{5}(-\d{4})?$/.test(lastPart)) {
-                    form.setValue("zipCode", lastPart);
-                    
-                    // Try to extract state from middle part (city)
-                    // Common state abbreviations or full names
-                    const statePattern = /\b(Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming|AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)\b/i;
-                    
-                    const stateMatch = middlePart.match(statePattern);
-                    if (stateMatch) {
-                      // Found state in middle part, extract it
-                      const stateName = stateMatch[1];
-                      const cityName = middlePart.replace(statePattern, '').trim().replace(/,$/, '');
-                      
-                      form.setValue("state", stateName);
-                      // Only set city if there's actual city text left after removing state
-                      if (cityName && cityName.length > 0) {
-                        form.setValue("city", cityName);
-                      } else {
-                        // No city found, leave city field empty
-                        form.setValue("city", "");
-                      }
-                    } else {
-                      // No state found in middle part, treat middle as city
-                      form.setValue("city", middlePart);
-                      form.setValue("state", "");
-                    }
-                  } else {
-                    // Last part is not ZIP code, handle differently
-                    form.setValue("city", middlePart);
-                    form.setValue("state", lastPart);
-                  }
-                }
-              } else if (addressParts.length === 2) {
-                // Handle case with just street and city/state
-                form.setValue("street", addressParts[0]);
-                form.setValue("city", addressParts[1]);
-                form.setValue("state", "");
-                form.setValue("zip", "");
-              } else {
-                // Single address string - put it all in street
-                form.setValue("street", data.address);
-                form.setValue("city", "");
-                form.setValue("state", "");
-                form.setValue("zip", "");
-              }
-              
-              toast({
-                title: "Location Found",
-                description: "Address fields populated from your current location.",
-              });
+              // Simply populate the full address field
+              form.setValue("address", data.address);
             }
-          } else {
-            toast({
-              title: "Location Detected",
-              description: "Coordinates captured, but address lookup failed.",
-            });
           }
+          
+          toast({
+            title: "Location Found",
+            description: "Address populated from your current location.",
+          });
         } catch (error) {
-          console.warn('Reverse geocoding failed:', error);
+          console.error('Reverse geocoding failed:', error);
           toast({
             title: "Location Detected", 
             description: "Coordinates captured, but address lookup failed.",
@@ -521,97 +448,50 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 )}
               />
               
-              {/* Address Fields */}
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="street"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Street Address</FormLabel>
-                      <div className="flex gap-2">
-                        <FormControl>
-                          <Input
-                            placeholder="123 Main Street"
-                            {...field}
-                            className="flex-1"
-                          />
-                        </FormControl>
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="icon"
-                          onClick={getCurrentLocation}
-                          disabled={isGettingLocation}
-                        >
-                          {isGettingLocation ? (
-                            <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                          ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-                              <circle cx="12" cy="10" r="3"/>
-                            </svg>
-                          )}
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>City</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Carrollton" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="state"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>State</FormLabel>
-                        <FormControl>
-                          <Input placeholder="TX" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="zip"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ZIP Code</FormLabel>
+              {/* Full Address Field */}
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Address</FormLabel>
+                    <div className="flex gap-2">
                       <FormControl>
-                        <Input placeholder="75006" {...field} className="w-32" />
+                        <Input
+                          placeholder="123 Main Street, City, State ZIP"
+                          {...field}
+                          className="flex-1"
+                        />
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {form.watch("latitude") && form.watch("longitude") && (
-                  <FormDescription className="text-sm text-muted-foreground">
-                    Coordinates: {form.watch("latitude")?.toFixed(4)}° N, {form.watch("longitude")?.toFixed(4)}° W
-                  </FormDescription>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="icon"
+                        onClick={getCurrentLocation}
+                        disabled={isGettingLocation}
+                      >
+                        {isGettingLocation ? (
+                          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                          </svg>
+                        )}
+                      </Button>
+                    </div>
+                    <FormMessage />
+                    {form.watch("latitude") && form.watch("longitude") && (
+                      <FormDescription className="text-sm text-muted-foreground">
+                        Coordinates: {form.watch("latitude")?.toFixed(4)}° N, {form.watch("longitude")?.toFixed(4)}° W
+                      </FormDescription>
+                    )}
+                  </FormItem>
                 )}
-              </div>
+              />
               
               <FormField
                 control={form.control}
