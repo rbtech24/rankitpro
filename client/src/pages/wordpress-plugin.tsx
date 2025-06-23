@@ -6,10 +6,12 @@ import { Separator } from "@/components/ui/separator";
 import { Download, FileText, Settings, Check, Copy, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function WordPressPlugin() {
   const [copiedItems, setCopiedItems] = useState(new Set<string>());
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const copyToClipboard = (text: string, itemId: string) => {
     navigator.clipboard.writeText(text);
@@ -66,8 +68,9 @@ export default function WordPressPlugin() {
     }
   };
 
+  const companyId = user?.companyId || 0;
   const pluginConfig = {
-    companyId: 16,
+    companyId: companyId,
     apiDomain: window.location.origin,
     productionDomain: 'https://rankitpro.com'
   };

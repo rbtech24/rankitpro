@@ -367,7 +367,9 @@ class RankItProIntegration {
         ), $atts);
 
         if (empty($atts['company'])) {
-            return '<div class="rankitpro-error">Error: Company ID not configured. Please check your plugin settings.</div>';
+            return '<div class="rankitpro-error" style="padding: 15px; background: #f9f9f9; border-left: 4px solid #dc3545; margin: 10px 0;">
+                <strong>RankItPro Error:</strong> Company ID not configured. Please go to WordPress Admin → Rank It Pro → Settings and enter your Company ID.
+            </div>';
         }
 
         // Validate and sanitize inputs to prevent NaN errors
@@ -375,7 +377,9 @@ class RankItProIntegration {
         $limit = !empty($atts['limit']) && is_numeric($atts['limit']) ? intval($atts['limit']) : 5;
         
         if ($company_id === 0) {
-            return '<div class="rankitpro-error">Error: Invalid Company ID. Please check your plugin settings.</div>';
+            return '<div class="rankitpro-error" style="padding: 15px; background: #f9f9f9; border-left: 4px solid #dc3545; margin: 10px 0;">
+                <strong>RankItPro Error:</strong> Invalid Company ID (' . esc_html($atts['company']) . '). Please enter a numeric Company ID like 16.
+            </div>';
         }
         
         $api_domain = get_option('rankitpro_api_domain', $this->api_base_url);
@@ -387,33 +391,45 @@ class RankItProIntegration {
             return $cached_data;
         }
 
-        $widget_id = 'rankitpro-' . uniqid();
-        $script_url = $api_domain . '/widget/' . $company_id . '?type=' . urlencode($atts['type']) . '&limit=' . $limit;
+        // Use HTML format for direct content embedding
+        $api_url = $api_domain . '/widget/' . $company_id . '?type=' . urlencode($atts['type']) . '&limit=' . $limit . '&format=html';
         
         if (!empty($atts['rating']) && is_numeric($atts['rating'])) {
-            $script_url .= '&rating=' . intval($atts['rating']);
+            $api_url .= '&rating=' . intval($atts['rating']);
         }
         
         if (!empty($atts['category'])) {
-            $script_url .= '&category=' . urlencode($atts['category']);
+            $api_url .= '&category=' . urlencode($atts['category']);
         }
 
-        $output = '<div id="' . $widget_id . '" data-rankitpro-widget="' . esc_attr($atts['type']) . '" data-company-id="' . esc_attr($company_id) . '" data-limit="' . esc_attr($limit) . '" class="rankitpro-container">';
-        $output .= '<p>Loading ' . esc_html($atts['type']) . '...</p>';
-        $output .= '</div>';
-        $output .= '<script>
-            (function() {
-                var script = document.createElement("script");
-                script.src = "' . esc_url($script_url) . '";
-                script.onload = function() {
-                    console.log("RankItPro: Widget script loaded for ' . esc_js($atts['type']) . '");
-                };
-                script.onerror = function() {
-                    document.getElementById("' . $widget_id . '").innerHTML = "<div class=\"rankitpro-error\">Unable to connect to RankItPro services. Please check your settings or try refreshing the page.</div>";
-                };
-                document.head.appendChild(script);
-            })();
-        </script>';
+        // Fetch HTML content directly
+        $response = wp_remote_get($api_url, array(
+            'timeout' => 15,
+            'headers' => array(
+                'User-Agent' => 'WordPress/RankItPro Plugin v1.3.0'
+            )
+        ));
+        
+        if (is_wp_error($response)) {
+            $output = '<div class="rankitpro-error" style="padding: 15px; background: #f9f9f9; border-left: 4px solid #dc3545; margin: 10px 0;">
+                <strong>RankItPro Connection Error:</strong> Unable to connect to API at ' . esc_html($api_domain) . '<br>
+                Error: ' . esc_html($response->get_error_message()) . '<br>
+                Please check your API Domain setting in WordPress Admin → Rank It Pro → Settings.
+            </div>';
+        } else {
+            $response_code = wp_remote_retrieve_response_code($response);
+            if ($response_code === 200) {
+                $output = wp_remote_retrieve_body($response);
+                // Add some basic styling
+                $output = '<div class="rankitpro-widget-container" style="margin: 20px 0;">' . $output . '</div>';
+            } else {
+                $output = '<div class="rankitpro-error" style="padding: 15px; background: #f9f9f9; border-left: 4px solid #dc3545; margin: 10px 0;">
+                    <strong>RankItPro API Error:</strong> Server returned HTTP ' . esc_html($response_code) . '<br>
+                    URL: ' . esc_html($api_url) . '<br>
+                    Please verify your Company ID (' . esc_html($company_id) . ') and API Domain settings.
+                </div>';
+            }
+        }
 
         $cache_time = get_option('rankitpro_cache_time', 300);
         set_transient($cache_key, $output, $cache_time);
