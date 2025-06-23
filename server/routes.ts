@@ -1675,13 +1675,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   app.use("/api/testimonials", testimonialsRoutes);
   
-  // Add testimonials API routes
-  app.get("/api/testimonials/company/:companyId", isAuthenticated, async (req: Request, res: Response) => {
+  // Add testimonials API routes (remove authentication for widget use)
+  app.get("/api/testimonials/company/:companyId", async (req: Request, res: Response) => {
     try {
       const { companyId } = req.params;
       const testimonials = await storage.getTestimonialsByCompany(parseInt(companyId));
       res.json(testimonials);
     } catch (error) {
+      console.error('Error in testimonials API:', error);
       res.status(500).json({ message: 'Failed to fetch testimonials' });
     }
   });
@@ -2056,6 +2057,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               html += '</div>'; // End container
             });
             html += '</div>';
+            } else {
+              console.log('No testimonials found for widget display');
+              html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">No customer testimonials available.</p>';
+            }
+          } catch (error) {
+            console.error('Error in testimonials widget:', error);
+            html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">Error loading testimonials.</p>';
           }
         }
         
