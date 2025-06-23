@@ -45,6 +45,11 @@ const upload = multer({
 // Create a new testimonial
 router.post('/', isAuthenticated, upload.single('file'), async (req, res) => {
   try {
+    // Ensure user object exists and has companyId
+    if (!req.user || !req.user.companyId) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    
     const { companyId } = req.user;
     
     if (!companyId) {
