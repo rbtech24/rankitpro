@@ -2099,7 +2099,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             if (testimonials && testimonials.length > 0) {
               html += '<div class="rankitpro-testimonials">';
-              html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #9C27B0; display: inline-block;">Customer Testimonials</h3>';
+              html += '<h3 style="color: var(--wp--preset--color--foreground, inherit); font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid var(--wp--preset--color--primary, #0073aa); display: inline-block;">Customer Testimonials</h3>';
               testimonials.slice(0, validLimit).forEach((testimonial: any) => {
               html += `<div style="
                 max-width: 450px;
@@ -2111,23 +2111,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 font-family: inherit;
               ">`;
               
-              // Header
-              html += `<div style="padding: 20px; background: linear-gradient(135deg, #9C27B0, #E91E63); color: white;">
-                <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 15px;">${testimonial.type === 'audio' ? '🎤 Audio' : testimonial.type === 'video' ? '🎥 Video' : '💬 Text'} Testimonial</h1>
-                <div style="font-size: 16px; font-weight: 600;">${escapeHtml(testimonial.customer_name)}</div>
-                <div style="font-size: 14px; opacity: 0.9;">${new Date(testimonial.created_at).toLocaleDateString()}</div>
+              // Header - inherit theme colors
+              html += `<div style="padding: 20px; background: var(--wp--preset--color--primary, #0073aa); color: white;">
+                <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 15px; color: inherit;">${testimonial.type === 'audio' ? '🎤 Audio' : testimonial.type === 'video' ? '🎥 Video' : '💬 Text'} Testimonial</h1>
+                <div style="font-size: 16px; font-weight: 600; color: inherit;">${escapeHtml(testimonial.customer_name)}</div>
+                <div style="font-size: 14px; opacity: 0.9; color: inherit;">${new Date(testimonial.created_at).toLocaleDateString()}</div>
               </div>`;
               
               // Content
               html += `<div style="padding: 20px;">
-                <div style="font-size: 14px; line-height: 1.7; color: #444; font-style: italic; margin-bottom: 15px;">
+                <div style="font-size: 14px; line-height: 1.7; color: var(--wp--preset--color--foreground, #444); font-style: italic; margin-bottom: 15px;">
                   "${escapeHtml(testimonial.content)}"
                 </div>`;
               
               // Media player for audio/video
               if (testimonial.type === 'audio' && testimonial.media_url) {
-                html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #2563eb;">
+                html += `<div style="background: var(--wp--preset--color--tertiary, #f8f9fa); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--wp--preset--color--border, #e0e0e0);">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: var(--wp--preset--color--primary, #0073aa);">
                     <span style="font-size: 16px;">🎤</span>
                     <span style="font-size: 14px; font-weight: 600;">Audio Testimonial</span>
                   </div>
@@ -2138,8 +2138,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   </audio>
                 </div>`;
               } else if (testimonial.type === 'video' && testimonial.media_url) {
-                html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #7c3aed;">
+                html += `<div style="background: var(--wp--preset--color--tertiary, #f8f9fa); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--wp--preset--color--border, #e0e0e0);">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: var(--wp--preset--color--primary, #0073aa);">
                     <span style="font-size: 16px;">🎥</span>
                     <span style="font-size: 14px; font-weight: 600;">Video Testimonial</span>
                   </div>
@@ -2150,16 +2150,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   </video>
                 </div>`;
               } else if (testimonial.type === 'audio' || testimonial.type === 'video') {
-                html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px dashed #ddd;">
+                html += `<div style="background: var(--wp--preset--color--tertiary, #f8f9fa); padding: 15px; border-radius: 8px; text-align: center; border: 2px dashed var(--wp--preset--color--border, #ddd);">
                   <span style="font-size: 48px; margin-bottom: 10px; display: block;">${testimonial.type === 'audio' ? '🎵' : '🎬'}</span>
-                  <div style="font-size: 14px; color: #666;">${testimonial.type === 'audio' ? 'Audio' : 'Video'} testimonial available</div>
+                  <div style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">${testimonial.type === 'audio' ? 'Audio' : 'Video'} testimonial available</div>
                 </div>`;
               }
               
               html += `</div>`;
               
-              // Verification
-              html += `<div style="padding: 15px 20px; background: #e8f5e8; border-top: 3px solid #4CAF50; text-align: center; font-size: 12px; color: #2e7d2e;">
+              // Verification - use theme accent color
+              html += `<div style="padding: 15px 20px; background: var(--wp--preset--color--background, #f8f9fa); border-top: 3px solid var(--wp--preset--color--primary, #0073aa); text-align: center; font-size: 12px; color: var(--wp--preset--color--foreground, #333);">
                 <span style="font-weight: bold; margin-right: 5px;">✓</span>Verified Customer Testimonial
               </div>`;
               
