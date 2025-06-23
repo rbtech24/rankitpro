@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Plus, Edit, Trash2, Eye, Globe, Calendar } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface BlogPost {
   id: number;
@@ -39,6 +40,7 @@ export default function BlogPosts() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   
   const { data: blogPosts, isLoading } = useQuery<BlogPost[]>({
     queryKey: ["/api/blog-posts"],
@@ -82,8 +84,7 @@ export default function BlogPosts() {
   });
 
   const handleNewPost = () => {
-    setSelectedPost(null);
-    setAdvancedEditorOpen(true);
+    setLocation('/create-blog-post');
   };
 
   const handleEditPost = (postId: number) => {

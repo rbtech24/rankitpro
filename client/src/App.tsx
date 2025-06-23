@@ -16,6 +16,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import TechnicianDashboard from "@/pages/technician-dashboard";
 import CheckIns from "@/pages/check-ins";
 import BlogPosts from "@/pages/blog-posts";
+import CreateBlogPost from "@/pages/create-blog-post";
 import Reviews from "@/pages/reviews";
 import ReviewAnalytics from "@/pages/review-analytics-clean";
 import AnalyticsDashboard from "@/pages/analytics-dashboard-simple";
