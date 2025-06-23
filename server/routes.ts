@@ -2556,14 +2556,18 @@ This project exemplifies our belief that the best irrigation systems combine cut
                 </div>`;
               }
               
-              html += `<div style="
+              html += `<a href="javascript:void(0)" onclick="openBlogModal(${blog.id}, ${JSON.stringify(blog.title)}, ${JSON.stringify(blog.content)}, ${JSON.stringify(blog.location || '')}, ${JSON.stringify(blog.jobType || '')}, ${JSON.stringify(blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : '')})" style="
                 background: linear-gradient(45deg, #667eea, #764ba2); 
                 color: white; 
                 padding: 0.4em 1em; 
                 border-radius: 20px; 
                 font-size: 0.8em; 
                 font-weight: 600;
-              ">Case Study</div>`;
+                text-decoration: none;
+                display: inline-block;
+                cursor: pointer;
+                transition: transform 0.2s ease;
+              " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Read Full Case Study</a>`;
               
               html += `</div>`;
               html += `</div>`;
@@ -2575,6 +2579,112 @@ This project exemplifies our belief that the best irrigation systems combine cut
             html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">No blog posts available yet.</p>';
           }
         }
+        
+        // Add blog modal for full content viewing
+        html += `
+        <!-- Blog Modal -->
+        <div id="rankitpro-blog-modal" style="
+          display: none;
+          position: fixed;
+          z-index: 10000;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0,0,0,0.8);
+          backdrop-filter: blur(5px);
+        ">
+          <div style="
+            position: relative;
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: modalSlideIn 0.3s ease-out;
+          ">
+            <div style="
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 2em;
+              position: relative;
+            ">
+              <button onclick="closeBlogModal()" style="
+                position: absolute;
+                top: 1em;
+                right: 1em;
+                background: rgba(255,255,255,0.2);
+                border: none;
+                color: white;
+                font-size: 1.5em;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                cursor: pointer;
+                transition: background 0.2s ease;
+              " onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">×</button>
+              <h2 id="modal-title" style="margin: 0; font-size: 1.8em; line-height: 1.2;"></h2>
+              <div id="modal-meta" style="margin-top: 1em; opacity: 0.9; font-size: 0.9em;"></div>
+            </div>
+            <div style="
+              padding: 2em;
+              max-height: 60vh;
+              overflow-y: auto;
+              line-height: 1.8;
+              font-size: 1.1em;
+              color: #333;
+            ">
+              <div id="modal-content"></div>
+            </div>
+          </div>
+        </div>
+
+        <style>
+        @keyframes modalSlideIn {
+          from { transform: translateY(-50px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        </style>
+
+        <script>
+        function openBlogModal(id, title, content, location, jobType, publishDate) {
+          document.getElementById('modal-title').innerHTML = title;
+          document.getElementById('modal-content').innerHTML = content.replace(/\n/g, '<br><br>');
+          
+          let metaInfo = '';
+          if (publishDate) metaInfo += '<span>📅 Published: ' + publishDate + '</span>';
+          if (location) metaInfo += ' • <span>📍 ' + location + '</span>';
+          if (jobType) metaInfo += ' • <span>🔧 ' + jobType + '</span>';
+          
+          document.getElementById('modal-meta').innerHTML = metaInfo;
+          document.getElementById('rankitpro-blog-modal').style.display = 'block';
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeBlogModal() {
+          document.getElementById('rankitpro-blog-modal').style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('rankitpro-blog-modal').onclick = function(event) {
+          if (event.target === this) {
+            closeBlogModal();
+          }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+          if (event.key === 'Escape') {
+            closeBlogModal();
+          }
+        });
+        </script>
+        `;
         
         html += '</div>';
         
