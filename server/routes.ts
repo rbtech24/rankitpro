@@ -2894,7 +2894,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
           console.log('Full geocoding response:', JSON.stringify(data, null, 2));
           
           // Extract clean address parts
-          const addressParts = [];
+          let addressParts = [];
           if (data.address) {
             // Street name only (no house number)
             if (data.address.road) {
