@@ -195,26 +195,26 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 // Extract city (second part) 
                 form.setValue("city", addressParts[1]);
                 
-                // Extract state and ZIP from the last part
-                const stateZipPart = addressParts[addressParts.length - 1];
-                console.log("State/ZIP part:", stateZipPart);
-                
-                // Try to match state and ZIP pattern
-                const stateZipMatch = stateZipPart.match(/([A-Za-z\s]+?)\s*(\d{5}(?:-\d{4})?)\s*$/);
-                
-                if (stateZipMatch) {
-                  form.setValue("state", stateZipMatch[1].trim());
-                  form.setValue("zip", stateZipMatch[2]);
-                  console.log("Parsed state:", stateZipMatch[1].trim(), "ZIP:", stateZipMatch[2]);
-                } else {
-                  // If no ZIP found, check if it's just a number (ZIP only)
-                  if (/^\d{5}(-\d{4})?$/.test(stateZipPart)) {
-                    form.setValue("zip", stateZipPart);
-                    form.setValue("state", "");
+                // Handle different address formats
+                if (addressParts.length >= 4) {
+                  // Format: "Street, City, State, ZIP"
+                  form.setValue("state", addressParts[2]);
+                  form.setValue("zipCode", addressParts[3]);
+                } else if (addressParts.length === 3) {
+                  // Format: "Street, City, State/ZIP" - need to parse the last part
+                  const lastPart = addressParts[2];
+                  const zipMatch = lastPart.match(/\b(\d{5})\b/);
+                  
+                  if (zipMatch) {
+                    form.setValue("zipCode", zipMatch[1]);
+                    // Extract state (everything before the ZIP)
+                    const stateText = lastPart.replace(/\b\d{5}\b/, '').trim().replace(/,$/, '');
+                    if (stateText) {
+                      form.setValue("state", stateText);
+                    }
                   } else {
-                    // Treat the whole last part as state
-                    form.setValue("state", stateZipPart);
-                    form.setValue("zip", "");
+                    // No ZIP found, treat as state
+                    form.setValue("state", lastPart);
                   }
                 }
               } else if (addressParts.length === 2) {
