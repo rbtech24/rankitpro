@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Editor } from '@tinymce/tinymce-react';
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -138,36 +138,84 @@ export default function BlogEditModal({ isOpen, onClose, blogPost }: BlogEditMod
           
           <div className="space-y-2">
             <Label htmlFor="content">Content</Label>
-            <div className="border rounded-md">
-              <Editor
-                value={content}
-                onEditorChange={(newContent: string) => setContent(newContent)}
-                apiKey='no-api-key'
-                init={{
-                  height: 400,
-                  menubar: false,
-                  plugins: [
-                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                    'insertdatetime', 'media', 'table', 'help', 'wordcount'
-                  ],
-                  toolbar: 'undo redo | blocks | ' +
-                    'bold italic forecolor | alignleft aligncenter ' +
-                    'alignright alignjustify | bullist numlist outdent indent | ' +
-                    'removeformat | link image | code preview fullscreen | help',
-                  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px; line-height: 1.6; }',
-                  placeholder: 'Enter blog post content...',
-                  branding: false,
-                  statusbar: false,
-                  resize: false,
-                  skin: 'oxide',
-                  setup: (editor) => {
-                    editor.on('init', () => {
-                      console.log('TinyMCE editor initialized successfully');
-                    });
-                  }
-                }}
-              />
+            <div className="border rounded-md min-h-[400px] relative">
+              <div className="absolute inset-0 bg-white">
+                <div className="border-b border-gray-200 px-3 py-2 bg-gray-50 flex items-center gap-2 text-sm">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2"
+                    onClick={() => {
+                      const textarea = document.getElementById('content-editor-modal') as HTMLTextAreaElement;
+                      if (textarea) {
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const text = textarea.value;
+                        const before = text.substring(0, start);
+                        const after = text.substring(end);
+                        const newText = before + '**' + text.substring(start, end) + '**' + after;
+                        setContent(newText);
+                      }
+                    }}
+                  >
+                    <strong>B</strong>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2"
+                    onClick={() => {
+                      const textarea = document.getElementById('content-editor-modal') as HTMLTextAreaElement;
+                      if (textarea) {
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const text = textarea.value;
+                        const before = text.substring(0, start);
+                        const after = text.substring(end);
+                        const newText = before + '*' + text.substring(start, end) + '*' + after;
+                        setContent(newText);
+                      }
+                    }}
+                  >
+                    <em>I</em>
+                  </Button>
+                  <div className="h-4 w-px bg-gray-300"></div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2"
+                    onClick={() => {
+                      setContent(content + '\n\n## ');
+                    }}
+                  >
+                    H2
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2"
+                    onClick={() => {
+                      setContent(content + '\n\n- ');
+                    }}
+                  >
+                    List
+                  </Button>
+                </div>
+                <Textarea
+                  id="content-editor-modal"
+                  placeholder="Write your blog post content here... You can use Markdown formatting."
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="border-0 resize-none h-[350px] focus:ring-0 focus:border-0 rounded-none"
+                />
+              </div>
+            </div>
+            <div className="text-xs text-gray-500">
+              Supports Markdown formatting: **bold**, *italic*, ## headings, - lists
             </div>
           </div>
 
