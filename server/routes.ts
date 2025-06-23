@@ -1679,7 +1679,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/testimonials/company/:companyId", async (req: Request, res: Response) => {
     try {
       const { companyId } = req.params;
-      const testimonials = await storage.getTestimonialsByCompany(parseInt(companyId));
+      console.log(`API: Fetching testimonials for company ${companyId}`);
+      
+      // Direct database query for troubleshooting
+      const result = await db.execute(sql`
+        SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
+        FROM testimonials 
+        WHERE company_id = ${parseInt(companyId)}
+        ORDER BY created_at DESC
+      `);
+      
+      const testimonials = result.rows.map((row: any) => ({
+        id: parseInt(row.id),
+        customer_name: row.customer_name,
+        customer_email: row.customer_email,
+        content: row.content,
+        type: row.type,
+        media_url: row.media_url,
+        status: row.status,
+        created_at: row.created_at
+      }));
+      
+      console.log(`API: Found ${testimonials.length} testimonials`);
       res.json(testimonials);
     } catch (error) {
       console.error('Error in testimonials API:', error);
