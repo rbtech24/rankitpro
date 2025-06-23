@@ -385,10 +385,18 @@ class RankItProIntegration {
         $api_domain = get_option('rankitpro_api_domain', $this->api_base_url);
         
         $cache_key = 'rankitpro_' . $atts['type'] . '_' . $company_id . '_' . $limit;
-        $cached_data = get_transient($cache_key);
         
-        if ($cached_data !== false) {
-            return $cached_data;
+        // Check for cache bypass parameters
+        $bypass_cache = isset($_GET['nocache']) || isset($_GET['refresh']) || (defined('WP_DEBUG') && WP_DEBUG);
+        
+        if (!$bypass_cache) {
+            $cached_data = get_transient($cache_key);
+            if ($cached_data !== false) {
+                return $cached_data;
+            }
+        } else {
+            // Clear existing cache when bypassing
+            delete_transient($cache_key);
         }
 
         // Use HTML format for direct content embedding

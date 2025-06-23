@@ -2000,8 +2000,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               html += `</div>`;
               
               // Interactive Map with real location coordinates
-              const lat = checkin.latitude || 32.9537;  // Default to Carrollton, TX coordinates
-              const lng = checkin.longitude || -96.8903;
+              const lat = Number(checkin.latitude) || 32.9537;  // Default to Carrollton, TX coordinates
+              const lng = Number(checkin.longitude) || -96.8903;
               
               html += `<div style="height: 200px; position: relative; background: #e8f5e8; border: 1px solid #ddd; margin: 0 20px; border-radius: 8px; overflow: hidden;">
                 <div style="width: 100%; height: 100%; background: #f0f8f0; position: relative; display: flex; align-items: center; justify-content: center;">
