@@ -2002,12 +2002,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Add testimonials section
+        // Add testimonials section  
         if (type === 'testimonials' || type === 'all') {
-          if (content.testimonials && content.testimonials.length > 0) {
+          // Fetch testimonials directly for widget display
+          const testimonials = await storage.getTestimonialsByCompany(parsedCompanyId);
+          if (testimonials && testimonials.length > 0) {
             html += '<div class="rankitpro-testimonials">';
             html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #9C27B0; display: inline-block;">Customer Testimonials</h3>';
-            content.testimonials.forEach((testimonial: any) => {
+            testimonials.slice(0, validLimit).forEach((testimonial: any) => {
               html += `<div style="
                 max-width: 450px;
                 margin: 2em auto;
