@@ -2204,8 +2204,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">Customer: ${escapeHtml(review.customer_name || 'Anonymous')}</span>
                   <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">${new Date(review.created_at).toLocaleDateString()}</span>
                 </div>
-                <div style="display: flex; align-items: center; color: #e91e63; font-size: 14px; font-weight: 500;">
-                  <span style="margin-right: 8px;">📍</span>Service Location
+                <div style="display: flex; align-items: center; color: var(--wp--preset--color--primary, #0073aa); font-size: 14px; font-weight: 500;">
+                  <span style="margin-right: 8px;">📍</span>Carrollton/Dallas Service Area
                 </div>
               </div>`;
               
@@ -2232,11 +2232,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 </div>`;
               }
               
-              // Review content
-              if (review.comment) {
-                html += `<div style="padding: 20px; border-bottom: 1px solid #eee;">
-                  <div style="font-size: 14px; line-height: 1.7; color: #444; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #4CAF50; font-style: italic;">
-                    ${escapeHtml(review.comment)}
+              // Review content with location extraction
+              if (review.feedback) {
+                const feedback = review.feedback;
+                // Extract location mentions from feedback
+                const locationMatch = feedback.match(/(on|at)\s+([^.]+(?:Street|Drive|Avenue|Road|Lane|Boulevard|Court|Place|Way)[^.]*)/i);
+                const location = locationMatch ? locationMatch[2].trim() : null;
+                
+                html += `<div style="padding: 20px; border-bottom: 1px solid var(--wp--preset--color--border, #eee);">
+                  ${location ? `<div style="background: var(--wp--preset--color--primary, #0073aa); color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; display: inline-block;">
+                    📍 Service Location: ${escapeHtml(location)}
+                  </div>` : ''}
+                  <div style="font-size: 14px; line-height: 1.7; color: var(--wp--preset--color--foreground, #444); background: var(--wp--preset--color--tertiary, #f8f9fa); padding: 15px; border-radius: 8px; border-left: 4px solid var(--wp--preset--color--primary, #4CAF50); font-style: italic;">
+                    "${escapeHtml(feedback)}"
                   </div>
                 </div>`;
               }
@@ -2271,10 +2279,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               </div>`;
               
               html += '</div>'; // End container
-            });
-            html += '</div>';
-          } else {
-            html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">No customer reviews available yet.</p>';
+              });
+              html += '</div>';
+            } else {
+              html += '<p style="text-align: center; color: var(--wp--preset--color--foreground, #666); font-style: italic; padding: 2em;">No customer reviews available.</p>';
+            }
+          } catch (error) {
+            console.error('Error in reviews widget:', error);
+            html += '<p style="text-align: center; color: var(--wp--preset--color--foreground, #666); font-style: italic; padding: 2em;">Error loading reviews.</p>';
           }
         }
         
