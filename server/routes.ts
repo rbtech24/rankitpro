@@ -1880,7 +1880,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Tech info and date
               html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">`;
-              html += `<span style="font-size: 14px; color: #666;">Technician: ${escapeHtml(checkin.technician?.name || 'Service Technician')}</span>`;
+              html += `<span style="font-size: 14px; color: #666;">Technician: ${escapeHtml(checkin.technician?.name || 'Rod Bartruff')}</span>`;
               if (checkin.createdAt) {
                 html += `<span style="font-size: 14px; color: #666;">${new Date(checkin.createdAt).toLocaleDateString()}</span>`;
               }
@@ -1970,7 +1970,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               html += `<div style="padding: 20px; background: white; border-bottom: 1px solid #eee;">
                 <h1 style="font-size: 24px; font-weight: 600; color: #333; margin-bottom: 15px;">Service Review</h1>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                  <span style="font-size: 14px; color: #666;">Technician: Service Technician</span>
+                  <span style="font-size: 14px; color: #666;">Technician: Rod Bartruff</span>
                   <span style="font-size: 14px; color: #666;">${new Date().toLocaleDateString()}</span>
                 </div>
                 <div style="display: flex; align-items: center; color: #e91e63; font-size: 14px; font-weight: 500;">
