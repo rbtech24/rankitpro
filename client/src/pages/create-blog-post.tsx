@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +12,6 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Editor } from "@tinymce/tinymce-react";
 import { Upload, X, Plus, Wand2 } from "lucide-react";
 
 interface CreateBlogPostForm {
@@ -193,12 +193,12 @@ export default function CreateBlogPost() {
     createBlogPostMutation.mutate({
       ...formData,
       status,
-      content: editorRef.current?.getContent() || formData.content
+      content: formData.content
     });
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -261,27 +261,80 @@ export default function CreateBlogPost() {
                       {isGeneratingContent ? 'Generating...' : 'Auto Generate'}
                     </Button>
                   </div>
-                  <div className="border rounded-md">
-                    <Editor
-                      onInit={(evt, editor) => editorRef.current = editor}
-                      apiKey="your-tinymce-api-key-here"
-                      init={{
-                        height: 400,
-                        menubar: false,
-                        plugins: [
-                          'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                          'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                          'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                        ],
-                        toolbar: 'undo redo | blocks | ' +
-                          'bold italic forecolor | alignleft aligncenter ' +
-                          'alignright alignjustify | bullist numlist outdent indent | ' +
-                          'removeformat | help',
-                        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-                      }}
-                      value={formData.content}
-                      onEditorChange={(content) => setFormData(prev => ({ ...prev, content }))}
-                    />
+                  <div className="border rounded-md min-h-[400px] relative">
+                    <div className="absolute inset-0 bg-white">
+                      <div className="border-b border-gray-200 px-3 py-2 bg-gray-50 flex items-center gap-2 text-sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2"
+                          onClick={() => {
+                            const textarea = document.getElementById('content-editor') as HTMLTextAreaElement;
+                            if (textarea) {
+                              const start = textarea.selectionStart;
+                              const end = textarea.selectionEnd;
+                              const text = textarea.value;
+                              const before = text.substring(0, start);
+                              const after = text.substring(end);
+                              const newText = before + '**' + text.substring(start, end) + '**' + after;
+                              setFormData(prev => ({ ...prev, content: newText }));
+                            }
+                          }}
+                        >
+                          <strong>B</strong>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2"
+                          onClick={() => {
+                            const textarea = document.getElementById('content-editor') as HTMLTextAreaElement;
+                            if (textarea) {
+                              const start = textarea.selectionStart;
+                              const end = textarea.selectionEnd;
+                              const text = textarea.value;
+                              const before = text.substring(0, start);
+                              const after = text.substring(end);
+                              const newText = before + '*' + text.substring(start, end) + '*' + after;
+                              setFormData(prev => ({ ...prev, content: newText }));
+                            }
+                          }}
+                        >
+                          <em>I</em>
+                        </Button>
+                        <div className="h-4 w-px bg-gray-300"></div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2"
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, content: prev.content + '\n\n## ' }));
+                          }}
+                        >
+                          H2
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2"
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, content: prev.content + '\n\n- ' }));
+                          }}
+                        >
+                          List
+                        </Button>
+                      </div>
+                      <Textarea
+                        id="content-editor"
+                        placeholder="Write your blog post content here... You can use Markdown formatting."
+                        value={formData.content}
+                        onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                        className="border-0 resize-none h-[350px] focus:ring-0 focus:border-0 rounded-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500">
+                    Supports Markdown formatting: **bold**, *italic*, ## headings, - lists
                   </div>
                 </div>
 
@@ -431,6 +484,6 @@ export default function CreateBlogPost() {
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
