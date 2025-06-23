@@ -1960,8 +1960,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .replace(/'/g, '&#39;');
         }
         
-        // Return template-matching HTML content for WordPress shortcodes
-        let html = `<div class="rankitpro-widget" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 2em 0;">`;
+        // Return template-matching HTML content for WordPress shortcodes with Leaflet
+        let html = `<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+        <div class="rankitpro-widget" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 2em 0;">`;
         
         if (type === 'checkins' || type === 'all') {
           if (content.checkins && content.checkins.length > 0) {
