@@ -80,8 +80,11 @@ router.post('/', isAuthenticated, upload.single('file'), async (req, res) => {
       customerName,
       customerEmail,
       customerPhone,
+      title,
       jobType,
+      technicianName,
       location,
+      rating,
       duration,
       checkInId
     } = req.body;
@@ -93,14 +96,15 @@ router.post('/', isAuthenticated, upload.single('file'), async (req, res) => {
     // Create testimonial record
     const testimonial = await storage.createTestimonial({
       companyId,
-      technicianId: req.user.id,
+      technicianName: technicianName || null,
       type: type as 'audio' | 'video',
       customerName,
       customerEmail: customerEmail || null,
       customerPhone: customerPhone || null,
       jobType: jobType || null,
       location: location || null,
-      title: `${type} Testimonial from ${customerName}`,
+      title: title || `${type} Testimonial from ${customerName}`,
+      rating: rating ? parseInt(rating) : null,
       originalFileName: req.file.originalname,
       fileSize: req.file.size,
       mimeType: req.file.mimetype,

@@ -30,6 +30,7 @@ export function TestimonialRecorder({ technicianId, checkInId, onSubmit, onCance
   const [customerPhone, setCustomerPhone] = useState('');
   const [title, setTitle] = useState('');
   const [jobType, setJobType] = useState('');
+  const [technicianName, setTechnicianName] = useState('');
   const [location, setLocation] = useState('');
   const [rating, setRating] = useState<number>(5);
   
@@ -361,23 +362,44 @@ export function TestimonialRecorder({ technicianId, checkInId, onSubmit, onCance
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="jobType">Service Type</Label>
-              <Input
-                id="jobType"
-                value={jobType}
-                onChange={(e) => setJobType(e.target.value)}
-                placeholder="e.g., HVAC Repair, Plumbing"
-              />
+              <Label htmlFor="jobType">Job Type *</Label>
+              <Select value={jobType} onValueChange={setJobType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select job type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Sprinkler Repair">Sprinkler Repair</SelectItem>
+                  <SelectItem value="Irrigation Installation">Irrigation Installation</SelectItem>
+                  <SelectItem value="System Maintenance">System Maintenance</SelectItem>
+                  <SelectItem value="Leak Detection">Leak Detection</SelectItem>
+                  <SelectItem value="Controller Programming">Controller Programming</SelectItem>
+                  <SelectItem value="Winterization">Winterization</SelectItem>
+                  <SelectItem value="Spring Start-up">Spring Start-up</SelectItem>
+                  <SelectItem value="Landscape Lighting">Landscape Lighting</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="technicianName">Technician Name *</Label>
               <Input
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g., Miami, FL"
+                id="technicianName"
+                value={technicianName}
+                onChange={(e) => setTechnicianName(e.target.value)}
+                placeholder="e.g., Rod Bartruff"
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g., Miami, FL"
+            />
+          </div>
           </div>
 
           {/* Action Buttons */}
