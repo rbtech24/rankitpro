@@ -1622,6 +1622,7 @@ export class DatabaseStorage implements IStorage {
         WHERE company_id = ${companyId} AND status = 'approved'
         ORDER BY created_at DESC
       `);
+      console.log(`Found ${result.rows.length} testimonials for company ${companyId}`);
       return result.rows;
     } catch (error) {
       console.error('Error fetching testimonials:', error);
