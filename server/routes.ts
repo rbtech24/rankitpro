@@ -1682,8 +1682,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const companyId = parseInt(req.params.companyId);
       console.log(`API: Fetching testimonials for company ${companyId}`);
       
-      // Use storage method which works reliably
-      const testimonials = await storage.getTestimonialsByCompany(companyId);
+      // Use direct neon query to bypass storage issues
+      const neonSql = neon(process.env.DATABASE_URL!);
+      const testimonials = await neonSql`
+        SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
+        FROM testimonials 
+        WHERE company_id = ${companyId}
+        ORDER BY created_at DESC
+      `;
+      
       console.log(`API: Found ${testimonials.length} testimonials`);
       res.json(testimonials);
     } catch (error) {
@@ -2012,7 +2019,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (type === 'testimonials' || type === 'all') {
           try {
             console.log(`Widget: Fetching testimonials for company ${parsedCompanyId}`);
-            const testimonials = await storage.getTestimonialsByCompany(parsedCompanyId);
+            
+            // Use direct neon query for widget too
+            const neonSql = neon(process.env.DATABASE_URL!);
+            const testimonials = await neonSql`
+              SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
+              FROM testimonials 
+              WHERE company_id = ${parsedCompanyId}
+              ORDER BY created_at DESC
+            `;
+            
             console.log(`Widget: Found ${testimonials.length} testimonials for company ${parsedCompanyId}`);
             
             if (testimonials && testimonials.length > 0) {

@@ -24,14 +24,17 @@ interface TestimonialsSectionProps {
 }
 
 export default function TestimonialsSection({ companyId }: TestimonialsSectionProps) {
-  const { data: testimonials, isLoading } = useQuery<Testimonial[]>({
+  const { data: testimonials = [], isLoading } = useQuery<Testimonial[]>({
     queryKey: ['/api/testimonials/company', companyId],
     queryFn: async () => {
+      console.log('Dashboard: Fetching testimonials for company:', companyId);
       const response = await apiRequest('GET', `/api/testimonials/company/${companyId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch testimonials');
       }
-      return response.json();
+      const data = await response.json();
+      console.log('Dashboard: Received testimonials:', data);
+      return data;
     },
     enabled: !!companyId,
   });
