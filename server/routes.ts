@@ -1816,6 +1816,7 @@ Contact us for more information about our professional services and to schedule 
       if (type === 'blogs' || type === 'all') {
         // Generate realistic service-based blogs from check-in data for company 16
         if (parsedCompanyId === 16) {
+          console.log(`Widget: Using hardcoded realistic blogs for company ${parsedCompanyId}`);
           content.blogs = [
             {
               id: 1,
@@ -1880,6 +1881,7 @@ This project exemplifies our belief that the best irrigation systems combine cut
               tags: ["smart-irrigation", "plano", "water-conservation", "technology"]
             }
           ];
+          console.log(`Widget: Prepared ${content.blogs.length} realistic blog posts`);
         } else {
           const blogs = await storage.getBlogPostsByCompany(parsedCompanyId);
           content.blogs = blogs.slice(0, validLimit);
