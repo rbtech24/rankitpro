@@ -1617,25 +1617,16 @@ export class DatabaseStorage implements IStorage {
   // Testimonials operations (new table)
   async getTestimonialsByCompany(companyId: number): Promise<any[]> {
     try {
-      const result = await db.execute(sql`
+      // Use direct neon connection
+      const neonSql = neon(process.env.DATABASE_URL);
+      const testimonials = await neonSql`
         SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
         FROM testimonials 
         WHERE company_id = ${companyId}
         ORDER BY created_at DESC
-      `);
+      `;
       
-      const testimonials = result.rows.map((row: any) => ({
-        id: parseInt(row.id),
-        customer_name: row.customer_name,
-        customer_email: row.customer_email,
-        content: row.content,
-        type: row.type,
-        media_url: row.media_url,
-        status: row.status,
-        created_at: row.created_at
-      }));
-      
-      console.log(`Successfully fetched ${testimonials.length} testimonials for company ${companyId}`);
+      console.log(`Storage: fetched ${testimonials.length} testimonials for company ${companyId}`);
       return testimonials;
     } catch (error) {
       console.error('Error fetching testimonials:', error);

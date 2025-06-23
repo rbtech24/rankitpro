@@ -28,6 +28,7 @@ import checkInRoutes from "./routes/check-in";
 import reviewRoutes from "./routes/review";
 import blogRoutes from "./routes/blog";
 import demoRoutes from "./routes/demo";
+import { neon } from "@neondatabase/serverless";
 import reviewRequestRoutes from "./routes/review-request";
 import reviewResponseRoutes from "./routes/review-response";
 import reviewAutomationRoutes from "./routes/review-automation";
@@ -1681,28 +1682,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const companyId = parseInt(req.params.companyId);
       console.log(`API: Fetching testimonials for company ${companyId}`);
       
-      // Use neon client directly
-      const neonSql = neon(process.env.DATABASE_URL);
-      const testimonials = await neonSql`
-        SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
-        FROM testimonials 
-        WHERE company_id = ${companyId}
-        ORDER BY created_at DESC
-      `;
-      
-      const result = testimonials.map(row => ({
-        id: row.id,
-        customer_name: row.customer_name,
-        customer_email: row.customer_email,
-        content: row.content,
-        type: row.type,
-        media_url: row.media_url,
-        status: row.status,
-        created_at: row.created_at
-      }));
-      
-      console.log(`API: Found ${result.length} testimonials`);
-      res.json(result);
+      // Use storage method which works reliably
+      const testimonials = await storage.getTestimonialsByCompany(companyId);
+      console.log(`API: Found ${testimonials.length} testimonials`);
+      res.json(testimonials);
     } catch (error) {
       console.error('Error in testimonials API:', error);
       res.status(500).json({ message: 'Failed to fetch testimonials', error: error.message });
@@ -2029,16 +2012,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (type === 'testimonials' || type === 'all') {
           try {
             console.log(`Widget: Fetching testimonials for company ${parsedCompanyId}`);
-            
-            // Use neon client directly for widget
-            const neonSql = neon(process.env.DATABASE_URL);
-            const testimonials = await neonSql`
-              SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
-              FROM testimonials 
-              WHERE company_id = ${parsedCompanyId}
-              ORDER BY created_at DESC
-            `;
-            
+            const testimonials = await storage.getTestimonialsByCompany(parsedCompanyId);
             console.log(`Widget: Found ${testimonials.length} testimonials for company ${parsedCompanyId}`);
             
             if (testimonials && testimonials.length > 0) {
