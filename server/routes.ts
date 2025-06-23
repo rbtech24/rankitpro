@@ -2063,7 +2063,7 @@ Contact us for more information about our professional services and to schedule 
           if (content.checkins && content.checkins.length > 0) {
             html += '<div class="rankitpro-checkins">';
             html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #0073aa; display: inline-block;">Recent Service Visits</h3>';
-            html += '<div class="rankitpro-grid rankitpro-grid-2">';
+            html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin: 20px 0;">';
             content.checkins.forEach((checkin: any) => {
               // Template-style container matching the design
               html += `<div class="rankitpro-checkin" style="
@@ -2207,7 +2207,7 @@ Contact us for more information about our professional services and to schedule 
             if (testimonials && testimonials.length > 0) {
               html += '<div class="rankitpro-testimonials">';
               html += '<h3 style="color: var(--wp--preset--color--foreground, inherit); font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid var(--wp--preset--color--primary, #0073aa); display: inline-block;">Customer Testimonials</h3>';
-              html += '<div class="rankitpro-grid rankitpro-grid-2">';
+              html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">';
               testimonials.slice(0, validLimit).forEach((testimonial: any) => {
               html += `<div class="rankitpro-testimonial" style="
                 margin: 0;
@@ -2310,7 +2310,7 @@ Contact us for more information about our professional services and to schedule 
             if (reviews && reviews.length > 0) {
               html += '<div class="rankitpro-reviews">';
               html += '<h3 style="color: var(--wp--preset--color--foreground, inherit); font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid var(--wp--preset--color--primary, #4CAF50); display: inline-block;">Customer Reviews</h3>';
-              html += '<div class="rankitpro-grid rankitpro-grid-2">';
+              html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">';
               reviews.slice(0, validLimit).forEach((review: any) => {
               // Template-style review container
               html += `<div class="rankitpro-review" style="
@@ -2415,7 +2415,7 @@ Contact us for more information about our professional services and to schedule 
           if (content.blogs && content.blogs.length > 0) {
             html += '<div class="rankitpro-blogs">';
             html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #667eea; display: inline-block;">Recent Blog Posts</h3>';
-            html += '<div class="rankitpro-grid rankitpro-grid-2">';
+            html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">';
             content.blogs.forEach((blog: any) => {
               html += `<article class="rankitpro-blog" style="
                 background: #fff; 
