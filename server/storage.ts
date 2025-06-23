@@ -94,6 +94,12 @@ export interface IStorage {
     ratingDistribution: { [key: number]: number };
   }>;
   
+  // Reviews operations (new table)
+  getReviewsByCompany(companyId: number): Promise<any[]>;
+  
+  // Testimonials operations (new table)
+  getTestimonialsByCompany(companyId: number): Promise<any[]>;
+  
   // WordPress Custom Fields operations
   getWordpressCustomFields(id: number): Promise<WordpressCustomFields | undefined>;
   getWordpressCustomFieldsByCompany(companyId: number): Promise<WordpressCustomFields | undefined>;
@@ -1592,6 +1598,36 @@ export class DatabaseStorage implements IStorage {
     return newCredentials;
   }
   async updateAPICredentials(companyId: number, updates: Partial<APICredentials>): Promise<APICredentials | undefined> { return undefined; }
+
+  // Reviews operations (new table)
+  async getReviewsByCompany(companyId: number): Promise<any[]> {
+    try {
+      const result = await db.execute(sql`
+        SELECT * FROM reviews 
+        WHERE company_id = ${companyId} AND status = 'approved'
+        ORDER BY created_at DESC
+      `);
+      return result.rows;
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      return [];
+    }
+  }
+  
+  // Testimonials operations (new table)
+  async getTestimonialsByCompany(companyId: number): Promise<any[]> {
+    try {
+      const result = await db.execute(sql`
+        SELECT * FROM testimonials 
+        WHERE company_id = ${companyId} AND status = 'approved'
+        ORDER BY created_at DESC
+      `);
+      return result.rows;
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+      return [];
+    }
+  }
 
   async createAIUsageLog(log: InsertAiUsageLogs): Promise<AiUsageLogs> {
     const [newLog] = await db.insert(aiUsageLogs).values(log).returning();

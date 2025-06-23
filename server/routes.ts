@@ -1678,6 +1678,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content.reviews = reviews.slice(0, validLimit);
       }
 
+      if (type === 'testimonials' || type === 'all') {
+        const testimonials = await storage.getTestimonialsByCompany(parsedCompanyId);
+        content.testimonials = testimonials.slice(0, validLimit);
+      }
+
       const widgetScript = `
 (function() {
   'use strict';
@@ -1947,6 +1952,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
             html += '</div>';
           } else {
             html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">No recent service visits available.</p>';
+          }
+        }
+
+        // Add testimonials section
+        if (type === 'testimonials' || type === 'all') {
+          if (content.testimonials && content.testimonials.length > 0) {
+            html += '<div class="rankitpro-testimonials">';
+            html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #9C27B0; display: inline-block;">Customer Testimonials</h3>';
+            content.testimonials.forEach((testimonial: any) => {
+              html += `<div style="
+                max-width: 450px;
+                margin: 2em auto;
+                background: white;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+                font-family: inherit;
+              ">`;
+              
+              // Header
+              html += `<div style="padding: 20px; background: linear-gradient(135deg, #9C27B0, #E91E63); color: white;">
+                <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 15px;">${testimonial.type === 'audio' ? '🎤 Audio' : testimonial.type === 'video' ? '🎥 Video' : '💬 Text'} Testimonial</h1>
+                <div style="font-size: 16px; font-weight: 600;">${escapeHtml(testimonial.customer_name)}</div>
+                <div style="font-size: 14px; opacity: 0.9;">${new Date(testimonial.created_at).toLocaleDateString()}</div>
+              </div>`;
+              
+              // Content
+              html += `<div style="padding: 20px;">
+                <div style="font-size: 14px; line-height: 1.7; color: #444; font-style: italic; margin-bottom: 15px;">
+                  "${escapeHtml(testimonial.content)}"
+                </div>`;
+              
+              // Media player placeholder for audio/video
+              if (testimonial.type === 'audio') {
+                html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px dashed #ddd;">
+                  <span style="font-size: 48px; margin-bottom: 10px; display: block;">🎵</span>
+                  <div style="font-size: 14px; color: #666;">Audio testimonial available</div>
+                </div>`;
+              } else if (testimonial.type === 'video') {
+                html += `<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px dashed #ddd;">
+                  <span style="font-size: 48px; margin-bottom: 10px; display: block;">🎬</span>
+                  <div style="font-size: 14px; color: #666;">Video testimonial available</div>
+                </div>`;
+              }
+              
+              html += `</div>`;
+              
+              // Verification
+              html += `<div style="padding: 15px 20px; background: #e8f5e8; border-top: 3px solid #4CAF50; text-align: center; font-size: 12px; color: #2e7d2e;">
+                <span style="font-weight: bold; margin-right: 5px;">✓</span>Verified Customer Testimonial
+              </div>`;
+              
+              html += '</div>'; // End container
+            });
+            html += '</div>';
           }
         }
         
