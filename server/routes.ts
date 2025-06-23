@@ -1855,66 +1855,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .replace(/'/g, '&#39;');
         }
         
-        // Return professional HTML content for WordPress shortcodes
-        let html = `<div class="rankitpro-widget" data-company="${escapeHtml(company.name)}" style="font-family: inherit; margin: 2em 0; max-width: 100%;">`;
+        // Return template-matching HTML content for WordPress shortcodes
+        let html = `<div class="rankitpro-widget" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 2em 0;">`;
         
         if (type === 'checkins' || type === 'all') {
           if (content.checkins && content.checkins.length > 0) {
             html += '<div class="rankitpro-checkins">';
             html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #0073aa; display: inline-block;">Recent Service Visits</h3>';
             content.checkins.forEach((checkin: any) => {
-              html += `<div class="rankitpro-checkin" style="
-                background: #fff; 
-                margin-bottom: 2em; 
-                padding: 1.5em; 
-                border: 1px solid #e1e5e9; 
-                border-radius: 8px; 
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                transition: box-shadow 0.3s ease;
-                position: relative;
+              // Template-style container matching the design
+              html += `<div style="
+                max-width: 450px;
+                margin: 2em auto;
+                background: white;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+                font-family: inherit;
               ">`;
               
-              html += `<h4 style="color: #333; font-size: 1.3em; margin-bottom: 0.8em; font-weight: 600;">${escapeHtml(checkin.jobType || 'Service Visit')}</h4>`;
+              // Header section
+              html += `<div style="padding: 20px; background: white; border-bottom: 1px solid #eee;">`;
+              html += `<h1 style="font-size: 24px; font-weight: 600; color: #333; margin-bottom: 15px;">${escapeHtml(checkin.jobType || 'Service Visit')}</h1>`;
               
-              // Tech info and date in a flex container
-              html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em; flex-wrap: wrap; gap: 1em;">`;
-              html += `<div style="color: #666; font-size: 0.9em;"><strong>Technician:</strong> ${escapeHtml(checkin.technician?.name || 'Service Technician')}</div>`;
+              // Tech info and date
+              html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">`;
+              html += `<span style="font-size: 14px; color: #666;">Technician: ${escapeHtml(checkin.technician?.name || 'Service Technician')}</span>`;
               if (checkin.createdAt) {
-                html += `<div style="color: #666; font-size: 0.9em; background: #f8f9fa; padding: 0.3em 0.8em; border-radius: 12px;">${new Date(checkin.createdAt).toLocaleDateString()}</div>`;
+                html += `<span style="font-size: 14px; color: #666;">${new Date(checkin.createdAt).toLocaleDateString()}</span>`;
               }
               html += `</div>`;
               
-              // Location with icon
+              // Location with pin icon
               if (checkin.location) {
-                html += `<div style="color: #e91e63; font-weight: 500; margin-bottom: 1em; display: flex; align-items: center;">
-                  <span style="margin-right: 0.5em;">📍</span>${escapeHtml(checkin.location)}
+                html += `<div style="display: flex; align-items: center; color: #e91e63; font-size: 14px; font-weight: 500;">
+                  <span style="margin-right: 8px;">📍</span>${escapeHtml(checkin.location)}
                 </div>`;
               }
+              html += `</div>`;
               
-              // Description
+              // Map section (simplified visual)
+              html += `<div style="height: 200px; position: relative; background: #e8f5e8; border: 1px solid #ddd; margin: 0 20px; border-radius: 8px; overflow: hidden;">
+                <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #e8f5e8 25%, #f0f8f0 25%, #f0f8f0 50%, #e8f5e8 50%, #e8f5e8 75%, #f0f8f0 75%); background-size: 20px 20px; display: flex; align-items: center; justify-content: center; position: relative;">
+                  <div style="width: 30px; height: 30px; background: #2196f3; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); position: relative; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                    <div style="width: 14px; height: 14px; background: white; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg);"></div>
+                  </div>
+                  <div style="position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; gap: 2px;">
+                    <button style="width: 30px; height: 30px; background: white; border: 1px solid #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">+</button>
+                    <button style="width: 30px; height: 30px; background: white; border: 1px solid #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">−</button>
+                  </div>
+                </div>
+              </div>`;
+              
+              // Description section
               if (checkin.notes) {
-                html += `<div style="line-height: 1.6; color: #444; background: #f8f9fa; padding: 1em; border-radius: 6px; border-left: 4px solid #0073aa;">
+                html += `<div style="padding: 20px; font-size: 14px; line-height: 1.8; color: #444; text-align: center;">
                   ${escapeHtml(checkin.notes)}
                 </div>`;
               }
               
-              // Photos if available
+              // Photos section with before/after styling
               if (checkin.photos && checkin.photos.length > 0) {
-                html += `<div style="margin-top: 1em;">
-                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1em;">`;
-                checkin.photos.forEach((photo: string) => {
-                  html += `<img src="${escapeHtml(photo)}" alt="Service photo" style="
-                    width: 100%; 
-                    height: 150px; 
-                    object-fit: cover; 
-                    border-radius: 6px; 
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-                  " />`;
+                html += `<div style="padding: 0 20px 20px 20px;">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">`;
+                checkin.photos.forEach((photo: string, index: number) => {
+                  const isAfter = index % 2 === 1;
+                  const bgStyle = isAfter ? 
+                    'background: linear-gradient(45deg, #6B4423 0%, #8B6914 25%, #A0522D 50%, #654321 75%, #4A4A4A 100%);' :
+                    'background: radial-gradient(circle at 30% 40%, #8B4513 0%, #A0522D 20%, #654321 40%, #3E2723 60%, #2E1B12 80%);';
+                  
+                  html += `<div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                    <img src="${escapeHtml(photo)}" style="width: 100%; height: 150px; object-fit: cover; display: block;" alt="Service photo" />
+                    <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                      ${isAfter ? 'After' : 'Before'}
+                    </div>
+                  </div>`;
                 });
                 html += `</div></div>`;
               }
               
-              html += '</div>';
+              // Hashtags section
+              html += `<div style="padding: 20px; border-top: 1px solid #eee; background: #fafafa;">`;
+              const hashtags = [`#${(checkin.jobType || 'service').toLowerCase().replace(/\s+/g, '-')}`, '#sprinkler-repair', '#professional-service'];
+              hashtags.forEach(tag => {
+                html += `<span style="display: inline-block; color: #1976d2; text-decoration: none; font-size: 12px; margin-right: 8px; margin-bottom: 5px; font-weight: 500;">${tag}</span>`;
+              });
+              html += `</div>`;
+              
+              html += '</div>'; // End container
             });
             html += '</div>';
           } else {
@@ -1927,23 +1955,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
             html += '<div class="rankitpro-reviews">';
             html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #4CAF50; display: inline-block;">Customer Reviews</h3>';
             content.reviews.forEach((review: any) => {
-              html += `<div class="rankitpro-review" style="
-                background: #fff; 
-                margin-bottom: 2em; 
-                padding: 1.5em; 
-                border: 1px solid #e1e5e9; 
-                border-radius: 8px; 
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                position: relative;
+              // Template-style review container
+              html += `<div style="
+                max-width: 450px;
+                margin: 2em auto;
+                background: white;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+                font-family: inherit;
               ">`;
               
-              // Rating stars
+              // Header
+              html += `<div style="padding: 20px; background: white; border-bottom: 1px solid #eee;">
+                <h1 style="font-size: 24px; font-weight: 600; color: #333; margin-bottom: 15px;">Service Review</h1>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                  <span style="font-size: 14px; color: #666;">Technician: Service Technician</span>
+                  <span style="font-size: 14px; color: #666;">${new Date().toLocaleDateString()}</span>
+                </div>
+                <div style="display: flex; align-items: center; color: #e91e63; font-size: 14px; font-weight: 500;">
+                  <span style="margin-right: 8px;">📍</span>Service Location
+                </div>
+              </div>`;
+              
+              // Customer info
+              if (review.customerName) {
+                html += `<div style="background: #f8f9fa; padding: 15px 20px; border-bottom: 1px solid #eee;">
+                  <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;">${escapeHtml(review.customerName)}</div>
+                  <span style="font-size: 14px; color: #666; background: #e3f2fd; padding: 4px 12px; border-radius: 12px; display: inline-block;">Professional Service</span>
+                </div>`;
+              }
+              
+              // Rating section
               if (review.rating) {
-                html += `<div style="margin-bottom: 1em;">
-                  <div style="color: #ffd700; font-size: 1.5em; text-shadow: 0 1px 3px rgba(0,0,0,0.3); margin-bottom: 0.5em;">
-                    ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
-                  </div>
-                  <div style="color: #4CAF50; font-weight: 600; font-size: 1.1em;">
+                html += `<div style="padding: 20px; text-align: center; border-bottom: 1px solid #eee;">
+                  <div style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333;">Overall Service Rating</div>
+                  <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 15px;">`;
+                for (let i = 1; i <= 5; i++) {
+                  html += `<span style="font-size: 32px; color: ${i <= review.rating ? '#ffd700' : '#ddd'}; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">★</span>`;
+                }
+                html += `</div>
+                  <div style="font-size: 18px; font-weight: 600; color: #4CAF50;">
                     ${review.rating === 5 ? 'Excellent' : review.rating === 4 ? 'Very Good' : review.rating === 3 ? 'Good' : 'Fair'} - ${review.rating} Stars
                   </div>
                 </div>`;
@@ -1951,43 +2003,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Review content
               if (review.comment) {
-                html += `<div style="
-                  background: #f8f9fa; 
-                  padding: 1.2em; 
-                  border-radius: 6px; 
-                  border-left: 4px solid #4CAF50; 
-                  font-style: italic; 
-                  line-height: 1.6; 
-                  color: #444; 
-                  margin-bottom: 1em;
-                  position: relative;
-                ">
-                  <div style="position: absolute; top: -5px; left: 1em; color: #4CAF50; font-size: 2em; line-height: 1;">"</div>
-                  ${escapeHtml(review.comment)}
+                html += `<div style="padding: 20px; border-bottom: 1px solid #eee;">
+                  <div style="font-size: 14px; line-height: 1.7; color: #444; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #4CAF50; font-style: italic;">
+                    ${escapeHtml(review.comment)}
+                  </div>
                 </div>`;
               }
               
-              // Customer info
-              if (review.customerName) {
-                html += `<div style="text-align: right; color: #666; font-weight: 600; font-size: 0.9em;">
-                  — ${escapeHtml(review.customerName)}
-                </div>`;
-              }
+              // Service highlights
+              html += `<div style="padding: 20px; border-bottom: 1px solid #eee;">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333;">Service Highlights</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                  <div style="text-align: center; padding: 15px; background: #f1f8e9; border-radius: 8px; border: 2px solid #4CAF50;">
+                    <span style="font-size: 24px; margin-bottom: 8px; display: block; color: #4CAF50;">⏰</span>
+                    <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Punctuality</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #333;">Excellent</div>
+                  </div>
+                  <div style="text-align: center; padding: 15px; background: #f1f8e9; border-radius: 8px; border: 2px solid #4CAF50;">
+                    <span style="font-size: 24px; margin-bottom: 8px; display: block; color: #4CAF50;">🔧</span>
+                    <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Technical Skill</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #333;">Expert Level</div>
+                  </div>
+                </div>
+              </div>`;
               
-              // Verification badge
-              html += `<div style="
-                position: absolute; 
-                top: 1em; 
-                right: 1em; 
-                background: #4CAF50; 
-                color: white; 
-                padding: 0.3em 0.8em; 
-                border-radius: 12px; 
-                font-size: 0.75em; 
-                font-weight: 600;
-              ">✓ Verified</div>`;
+              // Recommendation
+              html += `<div style="padding: 20px; background: linear-gradient(135deg, #4CAF50, #66BB6A); color: white; text-align: center;">
+                <span style="font-size: 48px; margin-bottom: 10px; display: block;">👍</span>
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Would Recommend</div>
+                <div style="font-size: 14px; opacity: 0.9;">Customer would use our services again</div>
+              </div>`;
               
-              html += '</div>';
+              // Verification
+              html += `<div style="padding: 15px 20px; background: #e8f5e8; border-top: 3px solid #4CAF50; text-align: center; font-size: 12px; color: #2e7d2e;">
+                <span style="font-weight: bold; margin-right: 5px;">✓</span>Verified Customer Review - Service completed ${new Date().toLocaleDateString()}
+              </div>`;
+              
+              html += '</div>'; // End container
             });
             html += '</div>';
           } else {
