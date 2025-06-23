@@ -220,11 +220,16 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                       const cityName = middlePart.replace(statePattern, '').trim().replace(/,$/, '');
                       
                       form.setValue("state", stateName);
-                      form.setValue("city", cityName || middlePart);
+                      // Only set city if there's actual city text left after removing state
+                      if (cityName && cityName.length > 0) {
+                        form.setValue("city", cityName);
+                      } else {
+                        // No city found, leave city field empty
+                        form.setValue("city", "");
+                      }
                     } else {
                       // No state found in middle part, treat middle as city
                       form.setValue("city", middlePart);
-                      // Try to infer state from context or leave empty
                       form.setValue("state", "");
                     }
                   } else {
