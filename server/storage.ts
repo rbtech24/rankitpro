@@ -1617,16 +1617,26 @@ export class DatabaseStorage implements IStorage {
   // Testimonials operations (new table)
   async getTestimonialsByCompany(companyId: number): Promise<any[]> {
     try {
-      const result = await db.execute(sql`
-        SELECT * FROM testimonials 
-        WHERE company_id = ${companyId} AND status = 'approved'
-        ORDER BY created_at DESC
-      `);
-      console.log(`Found ${result.rows.length} testimonials for company ${companyId}`);
-      return result.rows;
+      // Use direct database query
+      const testimonials = await db.select().from(testimonials as any).where(eq(testimonials.companyId, companyId));
+      console.log(`Direct query found ${testimonials.length} testimonials for company ${companyId}`);
+      return testimonials;
     } catch (error) {
       console.error('Error fetching testimonials:', error);
-      return [];
+      // Fallback to raw SQL
+      try {
+        const result = await db.execute(sql`
+          SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
+          FROM testimonials 
+          WHERE company_id = ${companyId}
+          ORDER BY created_at DESC
+        `);
+        console.log(`Raw SQL found ${result.rows.length} testimonials`);
+        return Array.from(result.rows);
+      } catch (sqlError) {
+        console.error('SQL fallback error:', sqlError);
+        return [];
+      }
     }
   }
 
