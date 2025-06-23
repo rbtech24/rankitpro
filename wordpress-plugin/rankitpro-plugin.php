@@ -438,7 +438,7 @@ class RankItProIntegration {
     }
     
     public function enqueue_styles() {
-        wp_enqueue_style('rankitpro-styles', plugin_dir_url(__FILE__) . 'rankitpro-styles.css', array(), '1.3.0');
+        wp_enqueue_style('rankitpro-styles', plugin_dir_url(__FILE__) . 'rankitpro-styles.css', array(), '1.4.0');
     }
 }
 
