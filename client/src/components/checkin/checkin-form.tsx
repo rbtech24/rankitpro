@@ -201,19 +201,35 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                   form.setValue("state", addressParts[2]);
                   form.setValue("zipCode", addressParts[3]);
                 } else if (addressParts.length === 3) {
-                  // Format: "Street, City, State/ZIP" - need to parse the last part
-                  const lastPart = addressParts[2];
-                  const zipMatch = lastPart.match(/\b(\d{5})\b/);
+                  // Format: "Street, City/State, ZIP" - parse the last part as ZIP
+                  const lastPart = addressParts[2].trim();
+                  const middlePart = addressParts[1].trim();
                   
-                  if (zipMatch) {
-                    form.setValue("zipCode", zipMatch[1]);
-                    // Extract state (everything before the ZIP)
-                    const stateText = lastPart.replace(/\b\d{5}\b/, '').trim().replace(/,$/, '');
-                    if (stateText) {
-                      form.setValue("state", stateText);
+                  // Check if last part is a ZIP code
+                  if (/^\d{5}(-\d{4})?$/.test(lastPart)) {
+                    form.setValue("zipCode", lastPart);
+                    
+                    // Try to extract state from middle part (city)
+                    // Common state abbreviations or full names
+                    const statePattern = /\b(Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming|AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)\b/i;
+                    
+                    const stateMatch = middlePart.match(statePattern);
+                    if (stateMatch) {
+                      // Found state in middle part, extract it
+                      const stateName = stateMatch[1];
+                      const cityName = middlePart.replace(statePattern, '').trim().replace(/,$/, '');
+                      
+                      form.setValue("state", stateName);
+                      form.setValue("city", cityName || middlePart);
+                    } else {
+                      // No state found in middle part, treat middle as city
+                      form.setValue("city", middlePart);
+                      // Try to infer state from context or leave empty
+                      form.setValue("state", "");
                     }
                   } else {
-                    // No ZIP found, treat as state
+                    // Last part is not ZIP code, handle differently
+                    form.setValue("city", middlePart);
                     form.setValue("state", lastPart);
                   }
                 }
