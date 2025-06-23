@@ -2059,7 +2059,8 @@ Contact us for more information about our professional services and to schedule 
 .rankitpro-grid { display: grid !important; gap: 20px !important; margin: 20px 0 !important; width: 100% !important; box-sizing: border-box !important; }
 .rankitpro-grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important; }
 .rankitpro-checkin-grid { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)) !important; }
-@media (max-width: 768px) { .rankitpro-grid { grid-template-columns: 1fr !important; } }
+.rankitpro-testimonial, .rankitpro-review, .rankitpro-checkin, .rankitpro-blog { margin: 0 !important; }
+@media (max-width: 768px) { .rankitpro-grid, .rankitpro-grid-2, .rankitpro-checkin-grid { grid-template-columns: 1fr !important; } }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>

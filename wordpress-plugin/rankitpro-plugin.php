@@ -386,8 +386,8 @@ class RankItProIntegration {
         
         $cache_key = 'rankitpro_' . $atts['type'] . '_' . $company_id . '_' . $limit;
         
-        // Check for cache bypass parameters
-        $bypass_cache = isset($_GET['nocache']) || isset($_GET['refresh']) || (defined('WP_DEBUG') && WP_DEBUG);
+        // Force cache bypass to ensure new grid layouts are fetched
+        $bypass_cache = true;
         
         if (!$bypass_cache) {
             $cached_data = get_transient($cache_key);
