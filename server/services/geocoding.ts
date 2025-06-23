@@ -31,9 +31,9 @@ export async function reverseGeocode(latitude: number, longitude: number): Promi
         parts.push(address.road);
       }
       
-      // City
-      if (address.city || address.town || address.village) {
-        parts.push(address.city || address.town || address.village);
+      // City - try multiple location types
+      if (address.city || address.town || address.village || address.suburb || address.neighbourhood || address.hamlet) {
+        parts.push(address.city || address.town || address.village || address.suburb || address.neighbourhood || address.hamlet);
       }
       
       // State

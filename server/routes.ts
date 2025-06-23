@@ -2866,17 +2866,28 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
         if (response.ok) {
           const data = await response.json();
           
+          // Log full response to see available address components
+          console.log('Full geocoding response:', JSON.stringify(data, null, 2));
+          
           // Extract clean address parts
           const addressParts = [];
           if (data.address) {
-            if (data.address.house_number && data.address.road) {
-              addressParts.push(`${data.address.house_number} ${data.address.road}`);
-            } else if (data.address.road) {
+            // Street name only (no house number)
+            if (data.address.road) {
               addressParts.push(data.address.road);
             }
             
-            if (data.address.city || data.address.town || data.address.village) {
-              addressParts.push(data.address.city || data.address.town || data.address.village);
+            // Try multiple city-level fields for better coverage
+            const cityName = data.address.city || 
+                            data.address.town || 
+                            data.address.village || 
+                            data.address.suburb || 
+                            data.address.neighbourhood || 
+                            data.address.hamlet ||
+                            data.address.county; // Use county as fallback if no city
+            
+            if (cityName) {
+              addressParts.push(cityName);
             }
             
             if (data.address.state) {
