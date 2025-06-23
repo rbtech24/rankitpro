@@ -13,6 +13,7 @@ import {
 import { db, queryWithRetry } from "./db";
 import { eq, and, desc, asc, gte, lt, lte, sql, not, like } from "drizzle-orm";
 import * as schema from "@shared/schema";
+import { neon } from "@neondatabase/serverless";
 
 const {
   users, companies, technicians, checkIns, blogPosts, reviewRequests, reviewResponses,
