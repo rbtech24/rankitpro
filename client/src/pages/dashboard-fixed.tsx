@@ -9,6 +9,7 @@ import TechnicianPerformance from "@/components/dashboard/technician-performance
 import WebsiteIntegration from "@/components/dashboard/website-integration";
 import SuperAdminDashboard from "@/components/dashboard/super-admin-dashboard";
 import TestimonialsSection from "@/components/dashboard/testimonials-section";
+import CustomerReviewsSection from "@/components/dashboard/customer-reviews-section";
 import VisitModal from "@/components/modals/visit-modal";
 import MobileVisitModal from "@/components/technician/mobile-visit-modal";
 import TechDashboard from "@/components/technician/tech-dashboard";
@@ -77,7 +78,22 @@ export default function Dashboard() {
               </div>
             </div>
             
-            <TechnicianPerformance />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <div className="lg:col-span-1">
+                <TechnicianPerformance />
+              </div>
+              <div className="lg:col-span-1">
+                {auth?.user?.companyId && (
+                  <CustomerReviewsSection companyId={auth.user.companyId} />
+                )}
+              </div>
+              <div className="lg:col-span-1">
+                {auth?.user?.companyId && (
+                  <TestimonialsSection companyId={auth.user.companyId} />
+                )}
+              </div>
+            </div>
+            
             <WebsiteIntegration />
           </>
         ) : (

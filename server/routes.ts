@@ -1637,9 +1637,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/blog", blogRoutes);
   app.use("/api/blog-posts", blogRoutes); // Add blog-posts alias  
   
-  // Import and register reviews routes
-  const reviewsRouterModule = await import("./routes/reviews");
-  const reviewsRouter = reviewsRouterModule.default;
+  // Register reviews routes
+  const { default: reviewsRouter } = await import("./routes/reviews");
   app.use("/api/reviews", reviewsRouter);
   
   // Add review-response routes for compatibility
