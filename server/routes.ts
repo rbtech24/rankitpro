@@ -1727,8 +1727,14 @@ Contact us for more information about our professional services and to schedule 
       const companyId = parseInt(req.params.companyId);
       console.log(`API: Fetching testimonials for company ${companyId}`);
       
-      // Get real testimonials from database
-      const testimonials = await storage.getTestimonialsByCompany(companyId);
+      // Direct database query to bypass storage issues
+      const neonSql = neon(process.env.DATABASE_URL!);
+      const testimonials = await neonSql`
+        SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
+        FROM testimonials 
+        WHERE company_id = ${companyId}
+        ORDER BY created_at DESC
+      `;
       console.log(`API: Returning ${testimonials.length} real testimonials for company ${companyId}`);
       res.json(testimonials);
     } catch (error) {

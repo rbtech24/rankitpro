@@ -1617,31 +1617,29 @@ export class DatabaseStorage implements IStorage {
   
   // Testimonials operations (new table)
   async getTestimonialsByCompany(companyId: number): Promise<any[]> {
-    return queryWithRetry(async () => {
-      try {
-        // Direct SQL query since table structure doesn't match schema
-        const neonSql = neon(process.env.DATABASE_URL!);
-        const testimonialsData = await neonSql`
-          SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
-          FROM testimonials 
-          WHERE company_id = ${companyId}
-          ORDER BY created_at DESC
-        `;
-        
-        console.log(`Storage: fetched ${testimonialsData.length} testimonials for company ${companyId}`);
-        
-        // Return data as-is since it's already formatted correctly
-        const formattedData = testimonialsData;
-        
-        if (formattedData.length > 0) {
-          console.log('First testimonial media_url:', formattedData[0].media_url);
-        }
-        return formattedData;
-      } catch (error) {
-        console.error('Error fetching testimonials:', error);
-        return [];
+    try {
+      console.log(`Storage: Attempting to fetch testimonials for company ${companyId}`);
+      
+      // Use direct SQL query since table structure doesn't match drizzle schema
+      const neonSql = neon(process.env.DATABASE_URL!);
+      const result = await neonSql`
+        SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
+        FROM testimonials 
+        WHERE company_id = ${companyId}
+        ORDER BY created_at DESC
+      `;
+      
+      console.log(`Storage: SQL query executed, found ${result.length} testimonials`);
+      
+      if (result.length > 0) {
+        console.log('First testimonial:', result[0]);
       }
-    });
+      
+      return result;
+    } catch (error) {
+      console.error('Storage: Error fetching testimonials:', error);
+      return [];
+    }
   }
 
   async createAIUsageLog(log: InsertAiUsageLogs): Promise<AiUsageLogs> {
@@ -1685,7 +1683,7 @@ export class DatabaseStorage implements IStorage {
 
   // Testimonial operations
   async getTestimonial(id: number): Promise<Testimonial | undefined> { return undefined; }
-  async getTestimonialsByCompany(companyId: number): Promise<Testimonial[]> { return []; }
+  // Removed - implemented above
   async createTestimonial(testimonial: InsertTestimonial): Promise<Testimonial> {
     const [newTestimonial] = await db.insert(testimonials).values(testimonial).returning();
     return newTestimonial;
