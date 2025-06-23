@@ -3,7 +3,7 @@
  * Plugin Name: Rank It Pro Integration
  * Plugin URI: https://rankitpro.com
  * Description: Display your RankItPro service reports, reviews, and blog posts on your WordPress site with seamless theme integration.
- * Version: 1.4.1
+ * Version: 1.5.0
  * Author: RankItPro
  * License: GPL v2 or later
  * Text Domain: rankitpro

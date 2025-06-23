@@ -636,15 +636,8 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 <div className="border-t pt-4">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">AI Enhancement Options</h3>
                   
-                  {/* Job Description AI Generator */}
-                  <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <h4 className="font-medium text-gray-800">Enhance Job Description with AI</h4>
-                        <p className="text-sm text-gray-600">Let AI improve and expand your job description</p>
-                      </div>
-                      <Button
-                        type="button"
+                  {/* Content Generation Options */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         variant="outline"
                         size="sm"
                         onClick={() => {

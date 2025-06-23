@@ -60,7 +60,12 @@ export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, on
             let photoUrls = [];
             if (typeof checkIn.photos === 'string') {
               try {
-                photoUrls = JSON.parse(checkIn.photos);
+                // Handle comma-separated URLs
+                if (checkIn.photos.includes(',')) {
+                  photoUrls = checkIn.photos.split(',').map(url => url.trim());
+                } else {
+                  photoUrls = JSON.parse(checkIn.photos);
+                }
               } catch {
                 photoUrls = [checkIn.photos];
               }

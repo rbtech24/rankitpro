@@ -205,8 +205,13 @@ async function createSuperAdminIfNotExists() {
   const memoryOptimizer = MemoryOptimizer.getInstance();
   memoryOptimizer.initialize();
   
-  // Serve static uploaded files
-  app.use('/uploads', express.static(path.join(process.cwd(), 'server', 'public', 'uploads')));
+  // Serve static uploaded files with proper headers
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
+    setHeaders: (res, path) => {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+    }
+  }));
   
   const server = await registerRoutes(app);
 
