@@ -244,6 +244,10 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
       photos: photoUrls.length > 0 ? JSON.stringify(photoUrls) : null,
       latitude: req.body.latitude ? parseFloat(req.body.latitude) : null,
       longitude: req.body.longitude ? parseFloat(req.body.longitude) : null,
+      street: req.body.street?.trim() || null,
+      city: req.body.city?.trim() || null,
+      state: req.body.state?.trim() || null,
+      zip: req.body.zip?.trim() || null,
     };
 
     console.log('Creating check-in with data:', checkInData);

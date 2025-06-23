@@ -341,10 +341,20 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
     formData.append("jobType", values.jobType);
     formData.append("notes", values.notes);
     
-    if (values.location) formData.append("location", values.location);
+    // Combine address fields into location string
+    const location = `${values.street}, ${values.city}, ${values.state} ${values.zip}`;
+    formData.append("location", location);
+    
+    // Add individual address fields
+    formData.append("street", values.street);
+    formData.append("city", values.city);
+    formData.append("state", values.state);
+    formData.append("zip", values.zip);
+    
     if (values.latitude !== undefined) formData.append("latitude", String(values.latitude));
     if (values.longitude !== undefined) formData.append("longitude", String(values.longitude));
     formData.append("isBlog", String(values.createBlogPost));
+    formData.append("sendReviewRequest", String(values.sendReviewRequest));
     
     // Add photos
     photos.forEach(photo => {
