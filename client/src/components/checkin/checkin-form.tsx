@@ -633,13 +633,11 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
               
               <div className="space-y-6">
                 {/* AI Enhancement Section */}
-                <div className="border-t pt-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">AI Enhancement Options</h3>
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">AI Enhancement Options</h3>
                   
                   {/* Content Generation Options */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Blog Post Option */}
                     <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
                       <FormField
                         control={form.control}
@@ -793,9 +791,15 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                       )}
                     </Button>
                   </div>
+                  </div>
                 </div>
               </div>
-                
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
                 <FormField
                   control={form.control}
                   name="isReviewRequest"
