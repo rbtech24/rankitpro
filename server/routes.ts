@@ -2448,24 +2448,24 @@ This project exemplifies our belief that the best irrigation systems combine cut
             html += '<div class="rankitpro-grid rankitpro-grid-2">';
             content.blogs.forEach((blog: any) => {
               html += `<article class="rankitpro-blog" style="
-                background: #fff; 
+                background: var(--wp--preset--color--background, #fff); 
                 margin-bottom: 0; 
                 padding: 0; 
-                border: 1px solid #e1e5e9; 
-                border-radius: 12px; 
-                box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+                border: 1px solid var(--wp--preset--color--tertiary, #e1e5e9); 
+                border-radius: 8px; 
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
                 overflow: hidden;
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
               ">`;
               
-              // Blog header with gradient
-              html += `<div style="
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                color: white; 
+              // Blog header with theme colors
+              html += `<div class="blog-header" style="
+                background: var(--wp--preset--color--primary, #0073aa); 
+                color: var(--wp--preset--color--background, white); 
                 padding: 1.5em; 
                 position: relative;
               ">`;
-              html += `<h4 style="color: white; font-size: 1.4em; margin: 0; font-weight: 600; line-height: 1.3;">
+              html += `<h4 style="color: var(--wp--preset--color--background, white); font-size: 1.4em; margin: 0; font-weight: 600; line-height: 1.3;">
                 ${escapeHtml(blog.title || 'Professional Service Blog Post')}
               </h4>`;
               html += `</div>`;
@@ -2476,7 +2476,7 @@ This project exemplifies our belief that the best irrigation systems combine cut
                 const excerpt = blog.content.length > 300 ? blog.content.substring(0, 300) + '...' : blog.content;
                 html += `<div style="
                   line-height: 1.7; 
-                  color: #444; 
+                  color: var(--wp--preset--color--foreground, #444); 
                   font-size: 1em; 
                   margin-bottom: 1.5em;
                   text-align: justify;
@@ -2510,12 +2510,12 @@ This project exemplifies our belief that the best irrigation systems combine cut
               }
               
               html += `<a href="javascript:void(0)" onclick="openBlogModal(${blog.id}, ${JSON.stringify(blog.title)}, ${JSON.stringify(blog.content)}, ${JSON.stringify(blog.location || '')}, ${JSON.stringify(blog.jobType || '')}, ${JSON.stringify(blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : '')})" style="
-                background: linear-gradient(45deg, #667eea, #764ba2); 
-                color: white; 
+                background: var(--wp--preset--color--primary, #0073aa); 
+                color: var(--wp--preset--color--background, white); 
                 padding: 0.4em 1em; 
-                border-radius: 20px; 
+                border-radius: 4px; 
                 font-size: 0.8em; 
-                font-weight: 600;
+                font-weight: 500;
                 text-decoration: none;
                 display: inline-block;
                 cursor: pointer;
