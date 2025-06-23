@@ -205,6 +205,9 @@ async function createSuperAdminIfNotExists() {
   const memoryOptimizer = MemoryOptimizer.getInstance();
   memoryOptimizer.initialize();
   
+  // Serve static uploaded files
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+  
   const server = await registerRoutes(app);
 
   // Critical Fix: Add API route exclusion middleware BEFORE Vite setup
