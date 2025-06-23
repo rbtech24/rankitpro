@@ -1923,10 +1923,6 @@ Contact us for more information about our professional services and to schedule 
   .rankitpro-photos {
     grid-template-columns: 1fr;
   }
-  
-  .rankitpro-grid-2, .rankitpro-grid-3, .rankitpro-grid-4 {
-    grid-template-columns: 1fr;
-  }
 }
 \`;
     
@@ -2383,8 +2379,7 @@ Contact us for more information about our professional services and to schedule 
               
               html += '</div>'; // End container
               });
-              html += '</div>'; // Close grid
-              html += '</div>'; // Close reviews container
+              html += '</div>';
             } else {
               html += '<p style="text-align: center; color: var(--wp--preset--color--foreground, #666); font-style: italic; padding: 2em;">No customer reviews available.</p>';
             }
@@ -2475,8 +2470,7 @@ Contact us for more information about our professional services and to schedule 
               html += `</div>`;
               html += '</article>';
             });
-            html += '</div>'; // Close grid
-            html += '</div>'; // Close blogs container
+            html += '</div>';
           } else {
             html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">No blog posts available yet.</p>';
           }
