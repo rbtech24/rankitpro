@@ -44,7 +44,10 @@ const formSchema = z.object({
   technicianId: z.string().min(1, "Please select a technician"),
   jobType: z.string().min(1, "Please select a job type"),
   notes: z.string().min(5, "Please add detailed notes about the work performed"),
-  address: z.string().min(1, "Full address is required"),
+  street: z.string().min(1, "Street address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  zipCode: z.string().min(1, "ZIP code is required"),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   createBlogPost: z.boolean().default(false),
@@ -92,7 +95,10 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
       technicianId: "",
       jobType: "",
       notes: "",
-      address: "",
+      street: "",
+      city: "",
+      state: "",
+      zipCode: "",
       createBlogPost: false,
       sendReviewRequest: false,
     },
@@ -172,8 +178,41 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
             console.log("Reverse geocode response:", data);
             
             if (data.address) {
-              // Simply populate the full address field
-              form.setValue("address", data.address);
+              // Parse address: "6798 Statice Lane, Florida, 34652"
+              const parts = data.address.split(',').map(s => s.trim());
+              
+              if (parts.length >= 3) {
+                // Remove house number from street
+                const street = parts[0].replace(/^\d+\s*/, '');
+                form.setValue("street", street);
+                
+                // Florida could be city or state - check if it's a state
+                const isState = /^(Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming|AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)$/i.test(parts[1]);
+                
+                if (isState) {
+                  // Format: Street, State, ZIP
+                  form.setValue("city", "");
+                  form.setValue("state", parts[1]);
+                  form.setValue("zipCode", parts[2]);
+                } else {
+                  // Format: Street, City, State ZIP or Street, City, ZIP
+                  form.setValue("city", parts[1]);
+                  if (parts.length >= 4) {
+                    form.setValue("state", parts[2]);
+                    form.setValue("zipCode", parts[3]);
+                  } else {
+                    // Try to extract state and ZIP from last part
+                    const lastPart = parts[2];
+                    const zipMatch = lastPart.match(/(\d{5})/);
+                    if (zipMatch) {
+                      form.setValue("zipCode", zipMatch[1]);
+                      form.setValue("state", lastPart.replace(/\d{5}/, '').trim());
+                    } else {
+                      form.setValue("state", lastPart);
+                    }
+                  }
+                }
+              }
             }
           }
           
@@ -343,9 +382,15 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
     formData.append("jobType", values.jobType);
     formData.append("notes", values.notes);
     
-    // Use the full address field
-    formData.append("location", values.address);
-    formData.append("address", values.address);
+    // Combine address fields into location string
+    const location = `${values.street}, ${values.city}, ${values.state} ${values.zipCode}`.replace(/,\s*,/g, ',').replace(/^,\s*/, '').replace(/\s*,$/, '');
+    formData.append("location", location);
+    
+    // Add individual address fields
+    formData.append("street", values.street);
+    formData.append("city", values.city);
+    formData.append("state", values.state);
+    formData.append("zipCode", values.zipCode);
     
     if (values.latitude !== undefined) formData.append("latitude", String(values.latitude));
     if (values.longitude !== undefined) formData.append("longitude", String(values.longitude));
@@ -448,50 +493,97 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 )}
               />
               
-              {/* Full Address Field */}
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Address</FormLabel>
-                    <div className="flex gap-2">
-                      <FormControl>
-                        <Input
-                          placeholder="123 Main Street, City, State ZIP"
-                          {...field}
-                          className="flex-1"
-                        />
-                      </FormControl>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="icon"
-                        onClick={getCurrentLocation}
-                        disabled={isGettingLocation}
-                      >
-                        {isGettingLocation ? (
-                          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-                            <circle cx="12" cy="10" r="3"/>
-                          </svg>
-                        )}
-                      </Button>
-                    </div>
-                    <FormMessage />
-                    {form.watch("latitude") && form.watch("longitude") && (
-                      <FormDescription className="text-sm text-muted-foreground">
-                        Coordinates: {form.watch("latitude")?.toFixed(4)}° N, {form.watch("longitude")?.toFixed(4)}° W
-                      </FormDescription>
+              {/* Address Fields */}
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="street"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Street Address</FormLabel>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input
+                            placeholder="123 Main Street"
+                            {...field}
+                            className="flex-1"
+                          />
+                        </FormControl>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="icon"
+                          onClick={getCurrentLocation}
+                          disabled={isGettingLocation}
+                        >
+                          {isGettingLocation ? (
+                            <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                              <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                          )}
+                        </Button>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City</FormLabel>
+                        <FormControl>
+                          <Input placeholder="City name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                  </FormItem>
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>State</FormLabel>
+                        <FormControl>
+                          <Input placeholder="State" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="zipCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>ZIP Code</FormLabel>
+                      <FormControl>
+                        <Input placeholder="ZIP Code" {...field} className="w-32" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {form.watch("latitude") && form.watch("longitude") && (
+                  <FormDescription className="text-sm text-muted-foreground">
+                    Coordinates: {form.watch("latitude")?.toFixed(4)}° N, {form.watch("longitude")?.toFixed(4)}° W
+                  </FormDescription>
                 )}
-              />
+              </div>
               
               <FormField
                 control={form.control}
