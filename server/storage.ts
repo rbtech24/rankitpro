@@ -1624,7 +1624,7 @@ export class DatabaseStorage implements IStorage {
       const testimonialsData = await neonSql`
         SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
         FROM testimonials 
-        WHERE company_id = ${companyId} AND status = 'approved'
+        WHERE company_id = ${companyId}
         ORDER BY created_at DESC
       `;
       
