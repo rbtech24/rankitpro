@@ -2567,7 +2567,7 @@ This project exemplifies our belief that the best irrigation systems combine cut
                 display: inline-block;
                 cursor: pointer;
                 transition: transform 0.2s ease;
-              " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Read Full Case Study</a>`;
+              " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Read More</a>`;
               
               html += `</div>`;
               html += `</div>`;
@@ -2637,8 +2637,21 @@ This project exemplifies our belief that the best irrigation systems combine cut
               line-height: 1.8;
               font-size: 1.1em;
               color: #333;
+              text-align: justify;
             ">
-              <div id="modal-content"></div>
+              <div id="modal-content" style="
+                font-family: Georgia, 'Times New Roman', serif;
+                line-height: 1.7;
+                color: #2c3e50;
+              "></div>
+              
+              <div id="modal-service-details" style="
+                margin-top: 2em;
+                padding: 1.5em;
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                border-radius: 12px;
+                border-left: 4px solid #667eea;
+              "></div>
             </div>
           </div>
         </div>
@@ -2653,14 +2666,31 @@ This project exemplifies our belief that the best irrigation systems combine cut
         <script>
         function openBlogModal(id, title, content, location, jobType, publishDate) {
           document.getElementById('modal-title').innerHTML = title;
-          document.getElementById('modal-content').innerHTML = content.replace(/\n/g, '<br><br>');
+          
+          // Format content with proper paragraphs
+          const formattedContent = content.split('\n\n').map(paragraph => 
+            '<p style="margin-bottom: 1.5em; text-indent: 1.5em; font-size: 1.05em;">' + paragraph.trim() + '</p>'
+          ).join('');
+          
+          document.getElementById('modal-content').innerHTML = formattedContent;
           
           let metaInfo = '';
-          if (publishDate) metaInfo += '<span>📅 Published: ' + publishDate + '</span>';
-          if (location) metaInfo += ' • <span>📍 ' + location + '</span>';
-          if (jobType) metaInfo += ' • <span>🔧 ' + jobType + '</span>';
+          if (publishDate) metaInfo += '<span style="display: inline-flex; align-items: center; margin-right: 1em;"><span style="margin-right: 0.5em;">📅</span>Published: ' + publishDate + '</span>';
+          if (location) metaInfo += '<span style="display: inline-flex; align-items: center; margin-right: 1em;"><span style="margin-right: 0.5em;">📍</span>' + location + '</span>';
+          if (jobType) metaInfo += '<span style="display: inline-flex; align-items: center;"><span style="margin-right: 0.5em;">🔧</span>' + jobType + '</span>';
           
           document.getElementById('modal-meta').innerHTML = metaInfo;
+          
+          // Add service details section
+          let serviceDetails = '';
+          if (location || jobType) {
+            serviceDetails += '<h4 style="margin: 0 0 1em 0; color: #667eea; font-size: 1.2em;">Service Details</h4>';
+            if (jobType) serviceDetails += '<p style="margin: 0.5em 0;"><strong>Service Type:</strong> ' + jobType + '</p>';
+            if (location) serviceDetails += '<p style="margin: 0.5em 0;"><strong>Service Location:</strong> ' + location + '</p>';
+            serviceDetails += '<p style="margin: 0.5em 0;"><strong>Service Quality:</strong> Professional installation and repair services</p>';
+          }
+          
+          document.getElementById('modal-service-details').innerHTML = serviceDetails;
           document.getElementById('rankitpro-blog-modal').style.display = 'block';
           document.body.style.overflow = 'hidden';
         }
