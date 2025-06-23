@@ -2176,27 +2176,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         if (type === 'reviews' || type === 'all') {
-          if (content.reviews && content.reviews.length > 0) {
-            html += '<div class="rankitpro-reviews">';
-            html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #4CAF50; display: inline-block;">Customer Reviews</h3>';
-            content.reviews.forEach((review: any) => {
+          try {
+            // Fetch actual reviews from database
+            const reviews = await storage.getReviewResponsesByCompany(parsedCompanyId);
+            console.log(`Widget: Found ${reviews.length} reviews for company ${parsedCompanyId}`);
+            
+            if (reviews && reviews.length > 0) {
+              html += '<div class="rankitpro-reviews">';
+              html += '<h3 style="color: var(--wp--preset--color--foreground, inherit); font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid var(--wp--preset--color--primary, #4CAF50); display: inline-block;">Customer Reviews</h3>';
+              reviews.slice(0, validLimit).forEach((review: any) => {
               // Template-style review container
               html += `<div style="
                 max-width: 450px;
                 margin: 2em auto;
-                background: white;
+                background: var(--wp--preset--color--background, white);
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                 border-radius: 8px;
                 overflow: hidden;
                 font-family: inherit;
+                color: var(--wp--preset--color--foreground, #333);
               ">`;
               
-              // Header
-              html += `<div style="padding: 20px; background: white; border-bottom: 1px solid #eee;">
-                <h1 style="font-size: 24px; font-weight: 600; color: #333; margin-bottom: 15px;">Service Review</h1>
+              // Header with actual review data
+              html += `<div style="padding: 20px; background: var(--wp--preset--color--background, white); border-bottom: 1px solid var(--wp--preset--color--border, #eee);">
+                <h1 style="font-size: 24px; font-weight: 600; color: var(--wp--preset--color--foreground, #333); margin-bottom: 15px;">Service Review</h1>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                  <span style="font-size: 14px; color: #666;">Technician: Rod Bartruff</span>
-                  <span style="font-size: 14px; color: #666;">${new Date().toLocaleDateString()}</span>
+                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">Customer: ${escapeHtml(review.customer_name || 'Anonymous')}</span>
+                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">${new Date(review.created_at).toLocaleDateString()}</span>
                 </div>
                 <div style="display: flex; align-items: center; color: #e91e63; font-size: 14px; font-weight: 500;">
                   <span style="margin-right: 8px;">📍</span>Service Location
