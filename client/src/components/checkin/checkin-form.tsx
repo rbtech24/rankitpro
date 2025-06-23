@@ -638,7 +638,6 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                   
                   {/* Content Generation Options */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        variant="outline"
                         size="sm"
                         onClick={() => {
                           const currentData = form.getValues();

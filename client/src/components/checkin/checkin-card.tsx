@@ -60,14 +60,20 @@ export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, on
             let photoUrls = [];
             if (typeof checkIn.photos === 'string') {
               try {
-                // Handle comma-separated URLs
+                // Handle JSON array format first
+                const parsed = JSON.parse(checkIn.photos);
+                if (Array.isArray(parsed)) {
+                  photoUrls = parsed;
+                } else {
+                  photoUrls = [parsed];
+                }
+              } catch {
+                // Handle comma-separated URLs or single URL
                 if (checkIn.photos.includes(',')) {
                   photoUrls = checkIn.photos.split(',').map(url => url.trim());
                 } else {
-                  photoUrls = JSON.parse(checkIn.photos);
+                  photoUrls = [checkIn.photos];
                 }
-              } catch {
-                photoUrls = [checkIn.photos];
               }
             } else if (Array.isArray(checkIn.photos)) {
               photoUrls = checkIn.photos.map(p => typeof p === 'string' ? p : p.url);
@@ -79,10 +85,19 @@ export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, on
                   src={photoUrl} 
                   alt={`Check-in photo ${index + 1}`} 
                   className="w-full h-full object-cover"
-                  onLoad={() => console.log(`Photo ${index + 1} loaded from:`, photoUrl)}
+                  onLoad={() => console.log(`Photo ${index + 1} loaded successfully from:`, photoUrl)}
                   onError={(e) => {
-                    console.log('Photo failed to load:', photoUrl);
-                    e.currentTarget.src = '/placeholder-image.png';
+                    console.error('Photo failed to load:', photoUrl);
+                    // Try alternative URL format
+                    const originalUrl = photoUrl;
+                    if (originalUrl.includes('3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev')) {
+                      // Replace with current domain
+                      const newUrl = originalUrl.replace('https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev', window.location.origin);
+                      console.log('Trying alternative URL:', newUrl);
+                      e.currentTarget.src = newUrl;
+                    } else {
+                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMiA5VjEzTTEyIDE3SDE2VjEzSDhWMTdIMTJaIiBzdHJva2U9IiM5Q0E0QUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
+                    }
                   }}
                 />
               </div>
