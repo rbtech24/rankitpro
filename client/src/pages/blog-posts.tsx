@@ -100,6 +100,14 @@ export default function BlogPosts() {
     }
   };
 
+  const handleQuickEdit = (postId: number) => {
+    const post = filteredBlogPosts?.find(p => p.id === postId);
+    if (post) {
+      setSelectedPost(post);
+      setAdvancedEditorOpen(true);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'bg-green-100 text-green-800';
@@ -253,7 +261,13 @@ export default function BlogPosts() {
                         <Edit className="w-3 h-3 mr-1" />
                         Edit
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleQuickEdit(post.id)}>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        const selectedPost = filteredBlogPosts?.find(p => p.id === post.id);
+                        if (selectedPost) {
+                          setSelectedPost(selectedPost);
+                          setAdvancedEditorOpen(true);
+                        }
+                      }}>
                         <Eye className="w-3 h-3 mr-1" />
                         Quick
                       </Button>

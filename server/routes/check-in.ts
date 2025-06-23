@@ -178,11 +178,14 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
           try {
             const fullAddress = await reverseGeocode(Number(checkIn.latitude), Number(checkIn.longitude));
             
-            // Extract city, state, zip for cleaner display
+            // Extract city, state, zip for cleaner display (exclude street number)
             const parts = fullAddress.split(', ');
-            if (parts.length >= 2) {
-              // Take the last 2-3 parts for city, state format
-              formattedLocation = parts.slice(-3).join(', ');
+            if (parts.length >= 3) {
+              // Skip the first part (street number + street name) and take city, state
+              formattedLocation = parts.slice(1, -1).join(', ') + ', ' + parts[parts.length - 1];
+            } else if (parts.length >= 2) {
+              // Take the last 2 parts for city, state format
+              formattedLocation = parts.slice(-2).join(', ');
             } else {
               formattedLocation = fullAddress;
             }
