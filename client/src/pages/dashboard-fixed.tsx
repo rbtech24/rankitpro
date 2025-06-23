@@ -8,6 +8,7 @@ import AIWriter from "@/components/dashboard/ai-writer";
 import TechnicianPerformance from "@/components/dashboard/technician-performance";
 import WebsiteIntegration from "@/components/dashboard/website-integration";
 import SuperAdminDashboard from "@/components/dashboard/super-admin-dashboard";
+import TestimonialsSection from "@/components/dashboard/testimonials-section";
 import VisitModal from "@/components/modals/visit-modal";
 import MobileVisitModal from "@/components/technician/mobile-visit-modal";
 import TechDashboard from "@/components/technician/tech-dashboard";

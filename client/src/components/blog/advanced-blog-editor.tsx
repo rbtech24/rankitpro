@@ -261,6 +261,7 @@ export default function AdvancedBlogEditor({ blogPost, onSave, onCancel }: Advan
                   <Editor
                     onInit={(evt, editor) => editorRef.current = editor}
                     initialValue={post.content}
+                    apiKey='no-api-key'
                     init={{
                       height: 500,
                       menubar: false,

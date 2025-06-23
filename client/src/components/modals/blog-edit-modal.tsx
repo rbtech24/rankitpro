@@ -142,6 +142,7 @@ export default function BlogEditModal({ isOpen, onClose, blogPost }: BlogEditMod
               <Editor
                 value={content}
                 onEditorChange={(newContent: string) => setContent(newContent)}
+                apiKey='no-api-key'
                 init={{
                   height: 400,
                   menubar: false,

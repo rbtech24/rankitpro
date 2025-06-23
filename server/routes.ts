@@ -1636,8 +1636,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/visits", checkInRoutes); // Add visits alias for dashboard
   app.use("/api/blog", blogRoutes);
   app.use("/api/blog-posts", blogRoutes); // Add blog-posts alias  
-  app.use("/api/reviews", reviewRoutes);
+  
+  // Import and register reviews routes
+  const reviewsRouterModule = await import("./routes/reviews");
+  const reviewsRouter = reviewsRouterModule.default;
+  app.use("/api/reviews", reviewsRouter);
+  
+  // Add review-response routes for compatibility
+  app.get("/api/review-response/company/:companyId", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { companyId } = req.params;
+      const reviews = await storage.getReviewsByCompany(parseInt(companyId));
+      res.json(reviews);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch reviews' });
+    }
+  });
+
+  app.get("/api/review-response/stats/:companyId", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { companyId } = req.params;
+      const reviews = await storage.getReviewsByCompany(parseInt(companyId));
+      
+      const totalReviews = reviews.length;
+      const totalRating = reviews.reduce((sum: number, review: any) => sum + (review.rating || 0), 0);
+      const averageRating = totalReviews > 0 ? totalRating / totalReviews : 0;
+      
+      res.json({
+        totalReviews,
+        averageRating,
+        ratingDistribution: [1, 2, 3, 4, 5].reduce((acc, rating) => {
+          acc[rating] = reviews.filter((review: any) => review.rating === rating).length;
+          return acc;
+        }, {} as Record<number, number>)
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch review stats' });
+    }
+  });
   app.use("/api/testimonials", testimonialsRoutes);
+  
+  // Add testimonials API routes
+  app.get("/api/testimonials/company/:companyId", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { companyId } = req.params;
+      const testimonials = await storage.getTestimonialsByCompany(parseInt(companyId));
+      res.json(testimonials);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch testimonials' });
+    }
+  });
   
   // Widget endpoint for WordPress integration
   app.get('/widget/:companyId', async (req: Request, res: Response) => {
