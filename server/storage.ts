@@ -1618,18 +1618,25 @@ export class DatabaseStorage implements IStorage {
   // Testimonials operations (new table)
   async getTestimonialsByCompany(companyId: number): Promise<any[]> {
     try {
-      // Use direct neon connection
-      const neonSql = neon(process.env.DATABASE_URL!);
-      const testimonials = await neonSql`
-        SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
-        FROM testimonials 
-        WHERE company_id = ${companyId}
-        ORDER BY created_at DESC
-      `;
+      // Use drizzle query with proper table structure
+      const testimonialsData = await db.select({
+        id: testimonials.id,
+        customer_name: testimonials.customer_name,
+        customer_email: testimonials.customer_email,
+        content: testimonials.content,
+        type: testimonials.type,
+        media_url: testimonials.media_url,
+        status: testimonials.status,
+        created_at: testimonials.created_at
+      }).from(testimonials)
+        .where(eq(testimonials.company_id, companyId))
+        .orderBy(desc(testimonials.created_at));
       
-      console.log(`Storage: fetched ${testimonials.length} testimonials for company ${companyId}`);
-      console.log('First testimonial:', testimonials[0]);
-      return testimonials;
+      console.log(`Storage: fetched ${testimonialsData.length} testimonials for company ${companyId}`);
+      if (testimonialsData.length > 0) {
+        console.log('First testimonial media_url:', testimonialsData[0].media_url);
+      }
+      return testimonialsData;
     } catch (error) {
       console.error('Error fetching testimonials:', error);
       return [];

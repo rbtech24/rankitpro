@@ -1727,57 +1727,10 @@ Contact us for more information about our professional services and to schedule 
       const companyId = parseInt(req.params.companyId);
       console.log(`API: Fetching testimonials for company ${companyId}`);
       
-      // Return hardcoded testimonials until DB issue is resolved
-      if (companyId === 16) {
-        const testimonials = [
-          {
-            id: 1,
-            customer_name: "Jennifer Rodriguez",
-            customer_email: "jennifer.rodriguez@email.com",
-            content: "I wanted to share my experience with Carrollton Sprinkler Repair. Rod came out to fix our broken irrigation system and I was so impressed with his professionalism and expertise. He took the time to explain what was wrong and showed me how to prevent future issues. The price was very reasonable and the work was completed faster than I expected. I will definitely be calling them for all our sprinkler needs going forward.",
-            type: "audio",
-            media_url: "https://example.com/audio/jennifer-testimonial.mp3",
-            status: "approved",
-            created_at: "2025-06-23T02:07:03.882Z"
-          },
-          {
-            id: 2,
-            customer_name: "Michael Thompson",
-            customer_email: "michael.thompson@email.com",
-            content: "Hi, I'm Michael Thompson and I just had to make this video to tell everyone about the amazing service I received from Carrollton Sprinkler Repair. My sprinkler system had been giving me problems for months - some zones not working, uneven water coverage, you name it. Rod came out and in just one visit he had everything working like new. He even showed me how to adjust the controller for different seasons. These guys really know what they're doing and I couldn't be happier with the results. Five stars all the way!",
-            type: "video",
-            media_url: "https://example.com/video/michael-testimonial.mp4",
-            status: "approved",
-            created_at: "2025-06-23T02:07:03.882Z"
-          },
-          {
-            id: 3,
-            customer_name: "Maria Rodriguez",
-            customer_email: "maria.rodriguez@email.com",
-            content: "I just had to record this audio message to share how happy I am with the service from Carrollton Sprinkler Repair. They installed a brand new irrigation system for our landscaping and the results have been amazing. Our lawn has never looked better and we're saving water too. Rod was very knowledgeable and helped us design a system that works perfectly for our property. Highly recommend their services!",
-            type: "audio",
-            media_url: "https://example.com/audio/maria-testimonial.mp3",
-            status: "approved",
-            created_at: "2025-06-23T02:07:03.882Z"
-          },
-          {
-            id: 4,
-            customer_name: "James Wilson",
-            customer_email: "james.wilson@email.com",
-            content: "Hey everyone, I wanted to make this quick video to share my experience with Carrollton Sprinkler Repair. We had multiple zones that weren't working properly and our water bill was through the roof due to inefficient coverage. Rod came out and completely revamped our system with new smart controllers and efficient sprinkler heads. Now our water usage is down 30% and our lawn looks incredible. Great work at a fair price!",
-            type: "video",
-            media_url: "https://example.com/video/james-testimonial.mp4",
-            status: "approved",
-            created_at: "2025-06-23T02:07:03.882Z"
-          }
-        ];
-        
-        console.log(`API: Returning ${testimonials.length} hardcoded testimonials for company ${companyId}`);
-        res.json(testimonials);
-        return;
-      }
-      
-      res.json([]);
+      // Get real testimonials from database
+      const testimonials = await storage.getTestimonialsByCompany(companyId);
+      console.log(`API: Returning ${testimonials.length} real testimonials for company ${companyId}`);
+      res.json(testimonials);
     } catch (error) {
       console.error('Error in testimonials API:', error);
       res.status(500).json({ message: 'Failed to fetch testimonials', error: error.message });
