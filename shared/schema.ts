@@ -106,6 +106,7 @@ export const checkIns = pgTable("check_ins", {
   followUpRequired: boolean("follow_up_required").default(false),
   followUpNotes: text("follow_up_notes"),
   isBlog: boolean("is_blog").default(false),
+  generatedContent: text("generated_content"), // AI-generated content
   technicianId: integer("technician_id").references(() => technicians.id).notNull(),
   companyId: integer("company_id").references(() => companies.id).notNull(),
   createdAt: timestamp("created_at").defaultNow(),

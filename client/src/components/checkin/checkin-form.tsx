@@ -100,10 +100,30 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
   
   // Create checkin mutation
   const createCheckinMutation = useMutation({
-    mutationFn: async (data: FormData) => {
+    mutationFn: async (formValues: CheckinFormValues) => {
+      const formData = new FormData();
+      
+      // Add form values
+      Object.keys(formValues).forEach(key => {
+        const value = formValues[key as keyof CheckinFormValues];
+        if (value !== null && value !== undefined && value !== '') {
+          formData.append(key, value.toString());
+        }
+      });
+      
+      // Add generated AI content if available
+      if (generatedContent) {
+        formData.append('generatedContent', generatedContent);
+      }
+      
+      // Add photos
+      photos.forEach(photo => {
+        formData.append('photos', photo);
+      });
+      
       const res = await fetch("/api/check-ins", {
         method: "POST",
-        body: data,
+        body: formData,
         credentials: "include"
       });
       

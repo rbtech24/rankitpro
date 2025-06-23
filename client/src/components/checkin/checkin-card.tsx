@@ -77,7 +77,7 @@ export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, on
                   onLoad={() => console.log(`Photo ${index + 1} loaded from:`, photoUrl)}
                   onError={(e) => {
                     console.log('Photo failed to load:', photoUrl);
-                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.src = '/placeholder-image.png';
                   }}
                 />
               </div>
