@@ -794,12 +794,7 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                   </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
+                
                 <FormField
                   control={form.control}
                   name="isReviewRequest"
