@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Rank It Pro Integration
  * Description: Display technician visits and customer reviews from Rank It Pro on your WordPress site
- * Version: 1.3.0
+ * Version: 1.4.0
  * Author: Rank It Pro
  * Text Domain: rankitpro
  * Domain Path: /languages

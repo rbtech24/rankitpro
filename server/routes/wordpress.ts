@@ -279,7 +279,7 @@ After activation, go to Settings > Rank It Pro to configure:
     
     console.log('Added original CSS, enhanced JS, and readme files to plugin package');
 
-    console.log('Generating WordPress plugin ZIP v1.3.0...');
+    console.log('Generating WordPress plugin ZIP v1.4.0...');
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
