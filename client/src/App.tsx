@@ -1164,6 +1164,9 @@ function Router() {
       <Route path="/blog-posts">
         <PrivateRoute component={BlogPosts} path="/blog-posts" />
       </Route>
+      <Route path="/create-blog-post">
+        <PrivateRoute component={CreateBlogPost} path="/create-blog-post" />
+      </Route>
       <Route path="/reviews">
         <PrivateRoute component={Reviews} path="/reviews" />
       </Route>
