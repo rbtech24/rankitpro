@@ -1841,6 +1841,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if request wants HTML content instead of JavaScript
       const format = req.query.format as string;
+      console.log(`Widget request: format=${format}, type=${type}, companyId=${companyId}`);
       
       if (format === 'html') {
         // Helper function to escape HTML
