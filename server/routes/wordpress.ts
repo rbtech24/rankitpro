@@ -16,11 +16,9 @@ router.get('/plugin', async (req: Request, res: Response) => {
     
     try {
       pluginCode = await fs.readFile(pluginPath, 'utf8');
-      // Ensure it's v1.3.0 with enhanced debugging
-      if (!pluginCode.includes('Version: 1.3.0')) {
-        pluginCode = pluginCode.replace(/Version: \d+\.\d+\.\d+/, 'Version: 1.3.0');
-      }
-      console.log('Using enhanced plugin file with debugging features');
+      // Ensure it's v1.4.0 with enhanced debugging and HTML format support
+      pluginCode = pluginCode.replace(/Version: \d+\.\d+\.\d+/, 'Version: 1.4.0');
+      console.log('Using enhanced plugin file v1.4.0 with debugging features and HTML format support');
     } catch (error) {
       console.error('Could not read plugin file, check if wordpress-plugin/rankitpro-plugin.php exists');
       return res.status(500).json({ error: 'Plugin file not found' });
