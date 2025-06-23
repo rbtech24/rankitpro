@@ -178,13 +178,74 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
           
           if (response.ok) {
             const data = await response.json();
-            form.setValue("location", data.address || formatLocation(latitude, longitude));
+            console.log("Reverse geocode response:", data);
+            
+            if (data.address) {
+              // Parse the full address into components
+              // Example: "6798 Statice Lane, Florida, 34652"
+              const addressParts = data.address.split(',').map(part => part.trim());
+              console.log("Address parts:", addressParts);
+              
+              if (addressParts.length >= 3) {
+                // Extract street address (first part)
+                form.setValue("street", addressParts[0]);
+                
+                // Extract city (second part) 
+                form.setValue("city", addressParts[1]);
+                
+                // Extract state and ZIP from the last part
+                const stateZipPart = addressParts[addressParts.length - 1];
+                console.log("State/ZIP part:", stateZipPart);
+                
+                // Try to match state and ZIP pattern
+                const stateZipMatch = stateZipPart.match(/([A-Za-z\s]+?)\s*(\d{5}(?:-\d{4})?)\s*$/);
+                
+                if (stateZipMatch) {
+                  form.setValue("state", stateZipMatch[1].trim());
+                  form.setValue("zip", stateZipMatch[2]);
+                  console.log("Parsed state:", stateZipMatch[1].trim(), "ZIP:", stateZipMatch[2]);
+                } else {
+                  // If no ZIP found, check if it's just a number (ZIP only)
+                  if (/^\d{5}(-\d{4})?$/.test(stateZipPart)) {
+                    form.setValue("zip", stateZipPart);
+                    form.setValue("state", "");
+                  } else {
+                    // Treat the whole last part as state
+                    form.setValue("state", stateZipPart);
+                    form.setValue("zip", "");
+                  }
+                }
+              } else if (addressParts.length === 2) {
+                // Handle case with just street and city/state
+                form.setValue("street", addressParts[0]);
+                form.setValue("city", addressParts[1]);
+                form.setValue("state", "");
+                form.setValue("zip", "");
+              } else {
+                // Single address string - put it all in street
+                form.setValue("street", data.address);
+                form.setValue("city", "");
+                form.setValue("state", "");
+                form.setValue("zip", "");
+              }
+              
+              toast({
+                title: "Location Found",
+                description: "Address fields populated from your current location.",
+              });
+            }
           } else {
-            form.setValue("location", formatLocation(latitude, longitude));
+            toast({
+              title: "Location Detected",
+              description: "Coordinates captured, but address lookup failed.",
+            });
           }
         } catch (error) {
           console.warn('Reverse geocoding failed:', error);
-          form.setValue("location", formatLocation(latitude, longitude));
+          toast({
+            title: "Location Detected", 
+            description: "Coordinates captured, but address lookup failed.",
+          });
         }
         
         setIsGettingLocation(false);
