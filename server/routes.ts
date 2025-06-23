@@ -1867,11 +1867,38 @@ Contact us for more information about our professional services and to schedule 
   border-radius: 4px;
 }
 
-.rankitpro-checkin, .rankitpro-blog, .rankitpro-review {
-  margin-bottom: 2em;
-  padding: 1em;
+/* Grid layouts for side-by-side display */
+.rankitpro-grid {
+  display: grid;
+  gap: 1.5em;
+  margin: 1em 0;
+}
+
+.rankitpro-grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.rankitpro-grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.rankitpro-grid-4 {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.rankitpro-checkin, .rankitpro-blog, .rankitpro-review, .rankitpro-testimonial {
+  margin-bottom: 1.5em;
+  padding: 1.2em;
   border: 1px solid #eee;
-  border-radius: 4px;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rankitpro-checkin:hover, .rankitpro-blog:hover, .rankitpro-review:hover, .rankitpro-testimonial:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
 .rankitpro-meta {
@@ -2014,11 +2041,11 @@ Contact us for more information about our professional services and to schedule 
           if (content.checkins && content.checkins.length > 0) {
             html += '<div class="rankitpro-checkins">';
             html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #0073aa; display: inline-block;">Recent Service Visits</h3>';
+            html += '<div class="rankitpro-grid rankitpro-grid-2">';
             content.checkins.forEach((checkin: any) => {
               // Template-style container matching the design
-              html += `<div style="
-                max-width: 450px;
-                margin: 2em auto;
+              html += `<div class="rankitpro-checkin" style="
+                margin: 0;
                 background: white;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                 border-radius: 8px;
@@ -2158,10 +2185,10 @@ Contact us for more information about our professional services and to schedule 
             if (testimonials && testimonials.length > 0) {
               html += '<div class="rankitpro-testimonials">';
               html += '<h3 style="color: var(--wp--preset--color--foreground, inherit); font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid var(--wp--preset--color--primary, #0073aa); display: inline-block;">Customer Testimonials</h3>';
+              html += '<div class="rankitpro-grid rankitpro-grid-2">';
               testimonials.slice(0, validLimit).forEach((testimonial: any) => {
-              html += `<div style="
-                max-width: 450px;
-                margin: 2em auto;
+              html += `<div class="rankitpro-testimonial" style="
+                margin: 0;
                 background: white;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                 border-radius: 8px;
