@@ -883,7 +883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Simple OpenAI integration for content generation
-      const OpenAI = require('openai');
+      const { OpenAI } = await import('openai');
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       const response = await openai.chat.completions.create({
