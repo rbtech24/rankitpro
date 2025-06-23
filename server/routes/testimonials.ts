@@ -6,12 +6,27 @@ import { storage } from "../storage";
 
 const router = Router();
 
-// Authentication middleware
-const isAuthenticated = (req: any, res: any, next: any) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ message: 'Unauthorized' });
+// Authentication middleware using session
+const isAuthenticated = async (req: any, res: any, next: any) => {
+  const userId = req.session?.userId;
+  
+  if (!userId) {
+    return res.status(401).json({ message: 'Authentication required' });
   }
-  next();
+  
+  try {
+    const { storage } = await import('../storage');
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+    
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('Auth error:', error);
+    return res.status(500).json({ message: 'Authentication error' });
+  }
 };
 
 // Configure multer for file uploads

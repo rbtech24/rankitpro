@@ -1919,9 +1919,31 @@ Contact us for more information about our professional services and to schedule 
   margin: 0.5em 0;
 }
 
+/* Responsive design for mobile */
 @media (max-width: 768px) {
   .rankitpro-photos {
     grid-template-columns: 1fr;
+  }
+  
+  .rankitpro-grid-2,
+  .rankitpro-grid-3,
+  .rankitpro-grid-4 {
+    grid-template-columns: 1fr;
+    gap: 1em;
+  }
+  
+  .rankitpro-checkin,
+  .rankitpro-blog,
+  .rankitpro-review,
+  .rankitpro-testimonial {
+    margin-bottom: 1em;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .rankitpro-grid-3,
+  .rankitpro-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 \`;
@@ -2470,7 +2492,8 @@ Contact us for more information about our professional services and to schedule 
               html += `</div>`;
               html += '</article>';
             });
-            html += '</div>';
+            html += '</div>'; // Close grid
+            html += '</div>'; // Close blogs container
           } else {
             html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">No blog posts available yet.</p>';
           }
