@@ -56,7 +56,7 @@ export default function WordPressPlugin() {
 
       toast({
         title: "Complete Plugin Downloaded!",
-        description: "Rank It Pro Integration v1.3.0 with all assets ready for installation",
+        description: "Rank It Pro Integration v1.5.0 with side-by-side grid layouts ready for installation",
       });
     } catch (error) {
       console.error('Error downloading plugin:', error);
