@@ -1839,10 +1839,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
 })();`;
 
-      res.setHeader('Content-Type', 'application/javascript');
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Cache-Control', 'public, max-age=300');
-      res.send(widgetScript);
+      // Check if request wants HTML content instead of JavaScript
+      const format = req.query.format as string;
+      
+      if (format === 'html') {
+        // Helper function to escape HTML
+        function escapeHtml(text: string): string {
+          if (!text) return '';
+          return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+        
+        // Return HTML content directly for WordPress shortcodes
+        let html = `<div class="rankitpro-widget" data-company="${escapeHtml(company.name)}">`;
+        
+        if (type === 'checkins' || type === 'all') {
+          if (content.checkins && content.checkins.length > 0) {
+            html += '<div class="rankitpro-checkins">';
+            html += '<h3>Recent Service Visits</h3>';
+            content.checkins.forEach((checkin: any) => {
+              html += `<div class="rankitpro-checkin" style="margin-bottom: 1.5em; padding: 1em; border: 1px solid #ddd; border-radius: 4px;">`;
+              html += `<h4>${escapeHtml(checkin.jobType || 'Service Visit')}</h4>`;
+              html += `<p><strong>Technician:</strong> ${escapeHtml(checkin.technician?.name || 'Service Technician')}</p>`;
+              if (checkin.notes) {
+                html += `<p>${escapeHtml(checkin.notes)}</p>`;
+              }
+              if (checkin.location) {
+                html += `<p><small><strong>Location:</strong> ${escapeHtml(checkin.location)}</small></p>`;
+              }
+              if (checkin.createdAt) {
+                html += `<p><small><strong>Date:</strong> ${new Date(checkin.createdAt).toLocaleDateString()}</small></p>`;
+              }
+              html += '</div>';
+            });
+            html += '</div>';
+          } else {
+            html += '<p>No check-ins available.</p>';
+          }
+        }
+        
+        if (type === 'reviews' || type === 'all') {
+          if (content.reviews && content.reviews.length > 0) {
+            html += '<div class="rankitpro-reviews">';
+            html += '<h3>Customer Reviews</h3>';
+            content.reviews.forEach((review: any) => {
+              html += `<div class="rankitpro-review" style="margin-bottom: 1.5em; padding: 1em; border: 1px solid #ddd; border-radius: 4px;">`;
+              if (review.rating) {
+                html += `<div class="rankitpro-stars" style="color: #ffd700; margin-bottom: 0.5em;">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>`;
+              }
+              if (review.comment) {
+                html += `<p>${escapeHtml(review.comment)}</p>`;
+              }
+              if (review.customerName) {
+                html += `<p><small><strong>- ${escapeHtml(review.customerName)}</strong></small></p>`;
+              }
+              html += '</div>';
+            });
+            html += '</div>';
+          } else {
+            html += '<p>No reviews available.</p>';
+          }
+        }
+        
+        if (type === 'blogs' || type === 'all') {
+          if (content.blogs && content.blogs.length > 0) {
+            html += '<div class="rankitpro-blogs">';
+            html += '<h3>Recent Blog Posts</h3>';
+            content.blogs.forEach((blog: any) => {
+              html += `<div class="rankitpro-blog" style="margin-bottom: 1.5em; padding: 1em; border: 1px solid #ddd; border-radius: 4px;">`;
+              html += `<h4>${escapeHtml(blog.title || 'Blog Post')}</h4>`;
+              if (blog.content) {
+                const excerpt = blog.content.length > 200 ? blog.content.substring(0, 200) + '...' : blog.content;
+                html += `<p>${escapeHtml(excerpt)}</p>`;
+              }
+              if (blog.createdAt) {
+                html += `<p><small><strong>Published:</strong> ${new Date(blog.createdAt).toLocaleDateString()}</small></p>`;
+              }
+              html += '</div>';
+            });
+            html += '</div>';
+          } else {
+            html += '<p>No blog posts available.</p>';
+          }
+        }
+        
+        html += '</div>';
+        
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Cache-Control', 'public, max-age=300');
+        return res.send(html);
+      } else {
+        res.setHeader('Content-Type', 'application/javascript');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Cache-Control', 'public, max-age=300');
+        res.send(widgetScript);
+      }
 
     } catch (error) {
       console.error('Widget error:', error);
