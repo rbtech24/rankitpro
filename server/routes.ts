@@ -1678,33 +1678,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add testimonials API routes (remove authentication for widget use)
   app.get("/api/testimonials/company/:companyId", async (req: Request, res: Response) => {
     try {
-      const { companyId } = req.params;
+      const companyId = parseInt(req.params.companyId);
       console.log(`API: Fetching testimonials for company ${companyId}`);
       
-      // Direct database query for troubleshooting
-      const result = await db.execute(sql`
-        SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
-        FROM testimonials 
-        WHERE company_id = ${parseInt(companyId)}
-        ORDER BY created_at DESC
-      `);
-      
-      const testimonials = result.rows.map((row: any) => ({
-        id: parseInt(row.id),
-        customer_name: row.customer_name,
-        customer_email: row.customer_email,
-        content: row.content,
-        type: row.type,
-        media_url: row.media_url,
-        status: row.status,
-        created_at: row.created_at
-      }));
-      
+      // Use storage method instead of direct query
+      const testimonials = await storage.getTestimonialsByCompany(companyId);
       console.log(`API: Found ${testimonials.length} testimonials`);
       res.json(testimonials);
     } catch (error) {
       console.error('Error in testimonials API:', error);
-      res.status(500).json({ message: 'Failed to fetch testimonials' });
+      res.status(500).json({ message: 'Failed to fetch testimonials', error: error.message });
     }
   });
   
@@ -2027,8 +2010,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Add testimonials section  
         if (type === 'testimonials' || type === 'all') {
           try {
-            // Fetch testimonials directly for widget display
+            console.log(`Widget: Fetching testimonials for company ${parsedCompanyId}`);
             const testimonials = await storage.getTestimonialsByCompany(parsedCompanyId);
+            console.log(`Widget: Found ${testimonials.length} testimonials for company ${parsedCompanyId}`);
+            
             if (testimonials && testimonials.length > 0) {
               html += '<div class="rankitpro-testimonials">';
               html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #9C27B0; display: inline-block;">Customer Testimonials</h3>';
