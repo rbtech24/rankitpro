@@ -2005,12 +2005,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Add testimonials section  
         if (type === 'testimonials' || type === 'all') {
-          // Fetch testimonials directly for widget display
-          const testimonials = await storage.getTestimonialsByCompany(parsedCompanyId);
-          if (testimonials && testimonials.length > 0) {
-            html += '<div class="rankitpro-testimonials">';
-            html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #9C27B0; display: inline-block;">Customer Testimonials</h3>';
-            testimonials.slice(0, validLimit).forEach((testimonial: any) => {
+          try {
+            // Fetch testimonials directly for widget display
+            const testimonials = await storage.getTestimonialsByCompany(parsedCompanyId);
+            if (testimonials && testimonials.length > 0) {
+              html += '<div class="rankitpro-testimonials">';
+              html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #9C27B0; display: inline-block;">Customer Testimonials</h3>';
+              testimonials.slice(0, validLimit).forEach((testimonial: any) => {
               html += `<div style="
                 max-width: 450px;
                 margin: 2em auto;
@@ -2054,11 +2055,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 <span style="font-weight: bold; margin-right: 5px;">✓</span>Verified Customer Testimonial
               </div>`;
               
-              html += '</div>'; // End container
-            });
-            html += '</div>';
+                html += '</div>'; // End container
+              });
+              html += '</div>';
             } else {
-              console.log('No testimonials found for widget display');
               html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">No customer testimonials available.</p>';
             }
           } catch (error) {
