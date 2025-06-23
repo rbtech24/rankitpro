@@ -1617,26 +1617,31 @@ export class DatabaseStorage implements IStorage {
   
   // Testimonials operations (new table)
   async getTestimonialsByCompany(companyId: number): Promise<any[]> {
-    try {
-      // Use drizzle query with proper table structure
-      // Use direct SQL query to match actual table structure
-      const neonSql = neon(process.env.DATABASE_URL!);
-      const testimonialsData = await neonSql`
-        SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
-        FROM testimonials 
-        WHERE company_id = ${companyId}
-        ORDER BY created_at DESC
-      `;
-      
-      console.log(`Storage: fetched ${testimonialsData.length} testimonials for company ${companyId}`);
-      if (testimonialsData.length > 0) {
-        console.log('First testimonial media_url:', testimonialsData[0].media_url);
+    return queryWithRetry(async () => {
+      try {
+        // Direct SQL query since table structure doesn't match schema
+        const neonSql = neon(process.env.DATABASE_URL!);
+        const testimonialsData = await neonSql`
+          SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
+          FROM testimonials 
+          WHERE company_id = ${companyId}
+          ORDER BY created_at DESC
+        `;
+        
+        console.log(`Storage: fetched ${testimonialsData.length} testimonials for company ${companyId}`);
+        
+        // Return data as-is since it's already formatted correctly
+        const formattedData = testimonialsData;
+        
+        if (formattedData.length > 0) {
+          console.log('First testimonial media_url:', formattedData[0].media_url);
+        }
+        return formattedData;
+      } catch (error) {
+        console.error('Error fetching testimonials:', error);
+        return [];
       }
-      return testimonialsData;
-    } catch (error) {
-      console.error('Error fetching testimonials:', error);
-      return [];
-    }
+    });
   }
 
   async createAIUsageLog(log: InsertAiUsageLogs): Promise<AiUsageLogs> {
