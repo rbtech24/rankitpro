@@ -793,7 +793,6 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                   </div>
                   </div>
                 </div>
-              </div>
                 
                 <FormField
                   control={form.control}
@@ -814,6 +813,7 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 />
               </div>
             </div>
+          </div>
           </CardContent>
         </Card>
         
