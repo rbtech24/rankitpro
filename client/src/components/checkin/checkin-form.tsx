@@ -828,8 +828,6 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                     </FormItem>
                   )}
                 />
-              </div>
-            </div>
           </CardContent>
         </Card>
         
