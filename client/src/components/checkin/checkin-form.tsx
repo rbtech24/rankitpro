@@ -631,13 +631,12 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 )}
               </div>
               
-              <div className="space-y-6">
-                {/* AI Enhancement Section */}
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">AI Enhancement Options</h3>
-                  
-                  {/* Content Generation Options */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* AI Enhancement Section */}
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">AI Enhancement Options</h3>
+                
+                {/* Content Generation Options */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
                       <FormField
                         control={form.control}
@@ -791,7 +790,6 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                       )}
                     </Button>
                   </div>
-                  </div>
                 </div>
                 
                 <FormField
@@ -812,8 +810,26 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                   )}
                 />
               </div>
+                
+                <FormField
+                  control={form.control}
+                  name="isReviewRequest"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value === "true"}
+                          onCheckedChange={(checked) => field.onChange(checked ? "true" : "false")}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Send review request to customer</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-          </div>
           </CardContent>
         </Card>
         
