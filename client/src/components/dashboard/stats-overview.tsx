@@ -93,7 +93,7 @@ export default function StatsOverview() {
               <Users className="w-6 h-6 text-green-600" />
             </div>
             <div>
-              <div className="text-3xl font-bold text-gray-900">{stats?.activeTechs || 1}</div>
+              <div className="text-3xl font-bold text-gray-900">{stats?.activeTechs || 0}</div>
             </div>
           </div>
         </CardContent>
@@ -105,7 +105,7 @@ export default function StatsOverview() {
             >
               Manage
             </span>
-            <span className="text-gray-500">1 tech</span>
+            <span className="text-gray-500">{stats?.activeTechs || 0} tech{(stats?.activeTechs || 0) !== 1 ? 's' : ''}</span>
           </div>
         </div>
       </Card>
@@ -118,7 +118,7 @@ export default function StatsOverview() {
               <FileText className="w-6 h-6 text-orange-600" />
             </div>
             <div>
-              <div className="text-3xl font-bold text-gray-900">{stats?.blogPosts || 3}</div>
+              <div className="text-3xl font-bold text-gray-900">{stats?.blogPosts || 0}</div>
             </div>
           </div>
         </CardContent>
@@ -146,7 +146,7 @@ export default function StatsOverview() {
               <Star className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-              <div className="text-3xl font-bold text-gray-900">{stats?.reviewRequests || 1}</div>
+              <div className="text-3xl font-bold text-gray-900">{stats?.reviewRequests || 0}</div>
             </div>
           </div>
         </CardContent>
