@@ -361,7 +361,7 @@ export default function MobileSimple() {
       // Reset form
       setReviewForm({
         customerName: '',
-        jobTypeId: '',
+        jobType: '',
         reviewType: 'audio',
         recordingBlob: null
       });
@@ -612,8 +612,8 @@ export default function MobileSimple() {
                 <div>
                   <label className="text-sm font-medium">Job Type</label>
                   <Select 
-                    value={reviewForm.jobTypeId} 
-                    onValueChange={(value) => setReviewForm(prev => ({ ...prev, jobTypeId: value }))}
+                    value={reviewForm.jobType} 
+                    onValueChange={(value) => setReviewForm(prev => ({ ...prev, jobType: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select job type" />

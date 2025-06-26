@@ -196,7 +196,7 @@ export interface IStorage {
   getAPICredentialsByCompany(companyId: number): Promise<APICredentials[]>;
   createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials>;
   updateAPICredentials(id: number, updates: Partial<APICredentials>): Promise<APICredentials | undefined>;
-  deleteAPICredentials(id: number): Promise<boolean>;
+  deleteAPICredentials(id: number): Promise<void>;
   createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials>;
   updateAPICredentials(companyId: number, updates: Partial<APICredentials>): Promise<APICredentials | undefined>;
   
