@@ -435,7 +435,7 @@ export default function MobileSimple() {
               <CardContent className="space-y-4">
                 <div className="text-center">
                   <p className="text-lg font-medium">
-                    Welcome, {currentUser?.firstName || currentUser?.email || 'Technician'}!
+                    Welcome, {(currentUser as any)?.name || currentUser?.email || 'Technician'}!
                   </p>
                   <p className="text-muted-foreground">Ready for field work</p>
                 </div>
@@ -492,8 +492,8 @@ export default function MobileSimple() {
                 <div>
                   <label className="text-sm font-medium">Job Type</label>
                   <Select 
-                    value={checkInForm.jobTypeId} 
-                    onValueChange={(value) => setCheckInForm(prev => ({ ...prev, jobTypeId: value }))}
+                    value={checkInForm.jobType} 
+                    onValueChange={(value) => setCheckInForm(prev => ({ ...prev, jobType: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select job type" />
@@ -511,8 +511,8 @@ export default function MobileSimple() {
                 <div>
                   <label className="text-sm font-medium">Address</label>
                   <Input
-                    value={checkInForm.address || currentAddress}
-                    onChange={(e) => setCheckInForm(prev => ({ ...prev, address: e.target.value }))}
+                    value={checkInForm.location || currentAddress}
+                    onChange={(e) => setCheckInForm(prev => ({ ...prev, location: e.target.value }))}
                     placeholder="Job address"
                   />
                 </div>
