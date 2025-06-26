@@ -1448,7 +1448,7 @@ export class DatabaseStorage implements IStorage {
       .from(companies)
       .where(gte(companies.createdAt, sixMonthsAgo))
       .groupBy(sql`TO_CHAR(${companies.createdAt}, 'Mon')`, companies.plan)
-      .orderBy(sql`TO_CHAR(${companies.createdAt}, 'YYYY-MM')`);
+      .orderBy(sql`TO_CHAR(${companies.createdAt}, 'Mon')`);
       
       // Calculate revenue by month
       const monthlyRevenue: { [key: string]: number } = {};
