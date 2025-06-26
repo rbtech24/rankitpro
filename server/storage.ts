@@ -1277,6 +1277,121 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Financial Dashboard methods
+  // Admin analytics methods
+  async getSystemReviewStats(): Promise<{ totalReviews: number; averageRating: number }> {
+    try {
+      const result = await db.select({
+        totalReviews: sql<number>`COUNT(*)`,
+        averageRating: sql<number>`COALESCE(AVG(${reviews.rating}), 0)`
+      }).from(reviews);
+      
+      return {
+        totalReviews: result[0]?.totalReviews || 0,
+        averageRating: Number(result[0]?.averageRating || 0)
+      };
+    } catch (error) {
+      console.error('Error fetching system review stats:', error);
+      return { totalReviews: 0, averageRating: 0 };
+    }
+  }
+
+  async getCheckInChartData(): Promise<Array<{ date: string; count: number }>> {
+    try {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const result = await db.select({
+        date: sql<string>`TO_CHAR(${checkIns.createdAt}, 'YYYY-MM')`,
+        count: sql<number>`COUNT(*)`
+      })
+      .from(checkIns)
+      .where(gte(checkIns.createdAt, sixMonthsAgo))
+      .groupBy(sql`TO_CHAR(${checkIns.createdAt}, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(${checkIns.createdAt}, 'YYYY-MM')`);
+      
+      return result;
+    } catch (error) {
+      console.error('Error fetching check-in chart data:', error);
+      return [];
+    }
+  }
+
+  async getReviewChartData(): Promise<Array<{ month: string; reviews: number }>> {
+    try {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const result = await db.select({
+        month: sql<string>`TO_CHAR(${reviews.createdAt}, 'Mon')`,
+        reviews: sql<number>`COUNT(*)`
+      })
+      .from(reviews)
+      .where(gte(reviews.createdAt, sixMonthsAgo))
+      .groupBy(sql`TO_CHAR(${reviews.createdAt}, 'Mon')`)
+      .orderBy(sql`TO_CHAR(${reviews.createdAt}, 'YYYY-MM')`);
+      
+      return result;
+    } catch (error) {
+      console.error('Error fetching review chart data:', error);
+      return [];
+    }
+  }
+
+  async getCompanyGrowthData(): Promise<Array<{ date: string; companies: number }>> {
+    try {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const result = await db.select({
+        date: sql<string>`TO_CHAR(${companies.createdAt}, 'YYYY-MM')`,
+        companies: sql<number>`COUNT(*)`
+      })
+      .from(companies)
+      .where(gte(companies.createdAt, sixMonthsAgo))
+      .groupBy(sql`TO_CHAR(${companies.createdAt}, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(${companies.createdAt}, 'YYYY-MM')`);
+      
+      return result;
+    } catch (error) {
+      console.error('Error fetching company growth data:', error);
+      return [];
+    }
+  }
+
+  async getRevenueChartData(): Promise<Array<{ month: string; revenue: number }>> {
+    try {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const planPrices = { starter: 29, pro: 79, agency: 149 };
+      
+      const result = await db.select({
+        month: sql<string>`TO_CHAR(${companies.createdAt}, 'Mon')`,
+        plan: companies.plan,
+        count: sql<number>`COUNT(*)`
+      })
+      .from(companies)
+      .where(gte(companies.createdAt, sixMonthsAgo))
+      .groupBy(sql`TO_CHAR(${companies.createdAt}, 'Mon')`, companies.plan)
+      .orderBy(sql`TO_CHAR(${companies.createdAt}, 'YYYY-MM')`);
+      
+      // Calculate revenue by month
+      const monthlyRevenue: { [key: string]: number } = {};
+      result.forEach(row => {
+        const revenue = planPrices[row.plan as keyof typeof planPrices] || 0;
+        monthlyRevenue[row.month] = (monthlyRevenue[row.month] || 0) + (revenue * row.count);
+      });
+      
+      return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
+        month,
+        revenue
+      }));
+    } catch (error) {
+      console.error('Error fetching revenue chart data:', error);
+      return [];
+    }
+  }
+
   async getFinancialMetrics(): Promise<any> {
     try {
       const totalCompanies = await this.getCompanyCount();

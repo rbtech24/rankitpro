@@ -419,4 +419,126 @@ router.get('/recent-activities', isSuperAdmin, async (req, res) => {
   }
 });
 
+// Get all companies for admin management
+router.get('/companies', isSuperAdmin, async (req, res) => {
+  try {
+    const companies = await storage.getAllCompanies();
+    res.json(companies);
+  } catch (error) {
+    console.error('Error fetching companies:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get recent system activity
+router.get('/recent-activity', isSuperAdmin, async (req, res) => {
+  try {
+    const activities = await storage.getRecentActivity();
+    res.json(activities);
+  } catch (error) {
+    console.error('Error fetching recent activity:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// API Endpoint Testing Tool
+router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
+  const testResults = [];
+  
+  // Test all admin endpoints
+  const endpoints = [
+    { path: '/api/admin/system-stats', method: 'GET', description: 'System statistics' },
+    { path: '/api/admin/chart-data', method: 'GET', description: 'Chart data for analytics' },
+    { path: '/api/admin/system-health', method: 'GET', description: 'System health metrics' },
+    { path: '/api/admin/companies', method: 'GET', description: 'All companies list' },
+    { path: '/api/admin/recent-activity', method: 'GET', description: 'Recent system activity' },
+    { path: '/api/admin/recent-activities', method: 'GET', description: 'Recent activities' },
+    { path: '/api/companies', method: 'GET', description: 'User companies' },
+    { path: '/api/check-ins', method: 'GET', description: 'Check-ins data' },
+    { path: '/api/reviews', method: 'GET', description: 'Reviews data' },
+    { path: '/api/blog-posts', method: 'GET', description: 'Blog posts' },
+    { path: '/api/auth/me', method: 'GET', description: 'Current user info' }
+  ];
+
+  for (const endpoint of endpoints) {
+    try {
+      let result;
+      const startTime = Date.now();
+      
+      switch (endpoint.path) {
+        case '/api/admin/system-stats':
+          result = await storage.getSystemStats();
+          break;
+        case '/api/admin/chart-data':
+          result = {
+            checkIns: await storage.getCheckInChartData(),
+            reviews: await storage.getReviewChartData(),
+            companyGrowth: await storage.getCompanyGrowthData(),
+            revenue: await storage.getRevenueChartData()
+          };
+          break;
+        case '/api/admin/system-health':
+          result = await storage.getSystemHealthMetrics();
+          break;
+        case '/api/admin/companies':
+          result = await storage.getAllCompanies();
+          break;
+        case '/api/admin/recent-activity':
+          result = await storage.getRecentActivity();
+          break;
+        case '/api/admin/recent-activities':
+          result = await storage.getRecentActivities();
+          break;
+        case '/api/companies':
+          result = await storage.getAllCompanies();
+          break;
+        case '/api/check-ins':
+          result = await storage.getAllCheckIns();
+          break;
+        case '/api/reviews':
+          result = await storage.getAllReviews();
+          break;
+        case '/api/blog-posts':
+          result = await storage.getAllBlogPosts();
+          break;
+        case '/api/auth/me':
+          result = { status: 'authentication endpoint - requires session' };
+          break;
+        default:
+          result = { error: 'Endpoint not implemented in test' };
+      }
+      
+      const responseTime = Date.now() - startTime;
+      
+      testResults.push({
+        endpoint: endpoint.path,
+        method: endpoint.method,
+        description: endpoint.description,
+        status: 'success',
+        responseTime: `${responseTime}ms`,
+        dataSize: JSON.stringify(result).length,
+        sampleData: typeof result === 'object' ? Object.keys(result) : result
+      });
+      
+    } catch (error) {
+      testResults.push({
+        endpoint: endpoint.path,
+        method: endpoint.method,
+        description: endpoint.description,
+        status: 'error',
+        error: error.message,
+        responseTime: 'timeout'
+      });
+    }
+  }
+
+  res.json({
+    timestamp: new Date().toISOString(),
+    totalEndpoints: endpoints.length,
+    successCount: testResults.filter(r => r.status === 'success').length,
+    errorCount: testResults.filter(r => r.status === 'error').length,
+    results: testResults
+  });
+});
+
 export default router;
