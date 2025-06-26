@@ -1591,6 +1591,52 @@ Contact us for more information about our professional services and to schedule 
     }
   });
 
+  // Get all technicians across all companies (super admin only)
+  app.get("/api/technicians/all", isSuperAdmin, async (req, res) => {
+    try {
+      // Get all technicians from all companies
+      const sql = neon(process.env.DATABASE_URL!);
+      const technicians = await sql`
+        SELECT 
+          t.*,
+          c.name as company_name,
+          c.plan as company_plan
+        FROM technicians t
+        LEFT JOIN companies c ON t.company_id = c.id
+        ORDER BY t.created_at DESC
+      `;
+      
+      // Get stats for each technician
+      const techniciansWithStats = await Promise.all(technicians.map(async (tech: any) => {
+        const checkIns = await storage.getCheckInsByTechnician(tech.id);
+        const reviews = await storage.getReviewsByTechnician(tech.id);
+        
+        return {
+          id: tech.id,
+          name: tech.name || '',
+          email: tech.email || '',
+          phone: tech.phone || '',
+          specialty: tech.specialty || '',
+          location: tech.location || '',
+          active: tech.active !== false,
+          companyId: tech.company_id,
+          companyName: tech.company_name || 'No Company',
+          companyPlan: tech.company_plan || 'starter',
+          userId: tech.user_id || null,
+          createdAt: tech.created_at,
+          checkinsCount: checkIns.length,
+          reviewsCount: reviews.length,
+          rating: reviews.length > 0 ? 4.8 : 0
+        };
+      }));
+      
+      res.json(techniciansWithStats);
+    } catch (error) {
+      console.error("Get all technicians error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   // Create technician
   app.post("/api/technicians", isAuthenticated, isCompanyAdmin, async (req, res) => {
     try {
