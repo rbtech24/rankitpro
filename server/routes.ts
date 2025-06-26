@@ -1071,6 +1071,8 @@ Contact us for more information about our professional services and to schedule 
     }
   });
 
+
+
   // Profile update endpoint
   app.put("/api/auth/profile", isAuthenticated, async (req, res) => {
     try {
@@ -1081,12 +1083,10 @@ Contact us for more information about our professional services and to schedule 
 
       const { username, email, name, phone } = req.body;
       
-      // Update user profile
+      // Update user profile (only include fields that exist in the schema)
       await storage.updateUser(user.id, {
         username,
-        email,
-        name,
-        phone
+        email
       });
 
       res.json({ message: "Profile updated successfully" });

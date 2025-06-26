@@ -1516,10 +1516,10 @@ export class DatabaseStorage implements IStorage {
         monthlyRecurringRevenue: totalMRR,
         annualRecurringRevenue: totalARR,
         totalCompanies: realCompanyCount,
-        activeSubscriptions: realCompanyCount,
+        activeSubscriptions: companiesWithActiveSubscriptions.length, // Only count actual paying customers
         monthlySignups,
         churnRate: 0,
-        averageRevenuePerUser: realCompanyCount > 0 ? totalMRR / realCompanyCount : 0
+        averageRevenuePerUser: companiesWithActiveSubscriptions.length > 0 ? totalMRR / companiesWithActiveSubscriptions.length : 0
       };
     } catch (error) {
       console.error('Error calculating financial metrics:', error);
