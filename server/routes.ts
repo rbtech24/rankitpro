@@ -1083,7 +1083,7 @@ Contact us for more information about our professional services and to schedule 
       }
       
       // Get current user
-      const user = await storage.getUserByEmail(req.user.email);
+      const user = await storage.getUser(req.user.id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
