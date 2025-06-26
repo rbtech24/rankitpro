@@ -1282,8 +1282,8 @@ export class DatabaseStorage implements IStorage {
     try {
       const result = await db.select({
         totalReviews: sql<number>`COUNT(*)`,
-        averageRating: sql<number>`COALESCE(AVG(${reviews.rating}), 0)`
-      }).from(reviews);
+        averageRating: sql<number>`COALESCE(AVG(CASE WHEN status = 'completed' THEN 5 ELSE 0 END), 0)`
+      }).from(reviewRequests);
       
       return {
         totalReviews: result[0]?.totalReviews || 0,
@@ -1322,13 +1322,13 @@ export class DatabaseStorage implements IStorage {
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
       
       const result = await db.select({
-        month: sql<string>`TO_CHAR(${reviews.createdAt}, 'Mon')`,
+        month: sql<string>`TO_CHAR(${reviewRequests.createdAt}, 'Mon')`,
         reviews: sql<number>`COUNT(*)`
       })
-      .from(reviews)
-      .where(gte(reviews.createdAt, sixMonthsAgo))
-      .groupBy(sql`TO_CHAR(${reviews.createdAt}, 'Mon')`)
-      .orderBy(sql`TO_CHAR(${reviews.createdAt}, 'YYYY-MM')`);
+      .from(reviewRequests)
+      .where(gte(reviewRequests.createdAt, sixMonthsAgo))
+      .groupBy(sql`TO_CHAR(${reviewRequests.createdAt}, 'Mon')`)
+      .orderBy(sql`TO_CHAR(${reviewRequests.createdAt}, 'YYYY-MM')`);
       
       return result;
     } catch (error) {
@@ -1355,6 +1355,81 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error fetching company growth data:', error);
       return [];
+    }
+  }
+
+  async getRecentActivity(): Promise<Array<{ type: string; description: string; timestamp: Date }>> {
+    try {
+      const recentCompanies = await db.select({
+        id: companies.id,
+        name: companies.name,
+        createdAt: companies.createdAt
+      })
+      .from(companies)
+      .orderBy(desc(companies.createdAt))
+      .limit(5);
+
+      const recentCheckIns = await db.select({
+        id: checkIns.id,
+        createdAt: checkIns.createdAt
+      })
+      .from(checkIns)
+      .orderBy(desc(checkIns.createdAt))
+      .limit(5);
+
+      const activities = [
+        ...recentCompanies.map(company => ({
+          type: 'company_created',
+          description: `New company registered: ${company.name}`,
+          timestamp: company.createdAt || new Date()
+        })),
+        ...recentCheckIns.map(checkIn => ({
+          type: 'check_in_created',
+          description: `New check-in created (ID: ${checkIn.id})`,
+          timestamp: checkIn.createdAt || new Date()
+        }))
+      ];
+
+      return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 10);
+    } catch (error) {
+      console.error('Error fetching recent activity:', error);
+      return [];
+    }
+  }
+
+  async getRecentActivities(): Promise<Array<{ type: string; description: string; timestamp: Date }>> {
+    return this.getRecentActivity();
+  }
+
+  async getSystemStats(): Promise<any> {
+    try {
+      const totalCompanies = await this.getCompanyCount();
+      const activeCompanies = await this.getActiveCompaniesCount();
+      const totalUsers = await this.getUserCount();
+      const totalTechnicians = await this.getTechnicianCount();
+      const totalCheckIns = await this.getCheckInCount();
+      const reviewStats = await this.getSystemReviewStats();
+
+      return {
+        totalCompanies,
+        activeCompanies,
+        totalUsers,
+        totalTechnicians,
+        totalCheckIns,
+        avgRating: reviewStats.averageRating || 0,
+        totalReviews: reviewStats.totalReviews || 0
+      };
+    } catch (error) {
+      console.error('Error fetching system stats:', error);
+      return {
+        totalCompanies: 0,
+        activeCompanies: 0,
+        totalUsers: 0,
+        totalTechnicians: 0,
+        totalCheckIns: 0,
+        avgRating: 0,
+        totalReviews: 0
+      };
     }
   }
 

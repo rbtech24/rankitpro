@@ -467,7 +467,14 @@ router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
       
       switch (endpoint.path) {
         case '/api/admin/system-stats':
-          result = await storage.getSystemStats();
+          result = {
+            totalCompanies: await storage.getCompanyCount(),
+            activeCompanies: await storage.getActiveCompaniesCount(),
+            totalUsers: await storage.getUserCount(),
+            totalTechnicians: await storage.getTechnicianCount(),
+            totalCheckIns: await storage.getCheckInCount(),
+            reviewStats: await storage.getSystemReviewStats()
+          };
           break;
         case '/api/admin/chart-data':
           result = {
@@ -493,13 +500,13 @@ router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
           result = await storage.getAllCompanies();
           break;
         case '/api/check-ins':
-          result = await storage.getAllCheckIns();
+          result = await storage.getCheckInsForCompany(1);
           break;
         case '/api/reviews':
-          result = await storage.getAllReviews();
+          result = await storage.getReviewsForCompany(1);
           break;
         case '/api/blog-posts':
-          result = await storage.getAllBlogPosts();
+          result = await storage.getBlogPostsForCompany(1);
           break;
         case '/api/auth/me':
           result = { status: 'authentication endpoint - requires session' };
