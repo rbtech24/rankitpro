@@ -37,8 +37,10 @@ export interface AuthState {
 
 export async function login(credentials: LoginCredentials): Promise<AuthState> {
   try {
+    console.log("Attempting login for:", credentials.email);
     const response = await apiRequest("POST", "/api/auth/login", credentials);
     const user = await response.json();
+    console.log("Login response received:", user);
     
     let company: Company | null = null;
     
