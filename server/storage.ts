@@ -2381,7 +2381,14 @@ export class DatabaseStorage implements IStorage {
   async deleteJobType(id: number): Promise<boolean> {
     return queryWithRetry(async () => {
       const result = await db.delete(jobTypes).where(eq(jobTypes.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount || 0) > 0;
+    });
+  }
+
+  // Add missing deleteAPICredentials method to satisfy IStorage interface
+  async deleteAPICredentials(id: number): Promise<void> {
+    return queryWithRetry(async () => {
+      await db.delete(apiCredentials).where(eq(apiCredentials.id, id));
     });
   }
 }

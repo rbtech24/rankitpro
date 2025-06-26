@@ -2013,7 +2013,7 @@ Contact us for more information about our professional services and to schedule 
             content: post.content.substring(0, 500) + (post.content.length > 500 ? '...' : ''),
             excerpt: post.excerpt || '',
             date: post.createdAt,
-            author: post.authorName || 'Technician'
+            author: (post as any).authorName || 'Technician'
           }));
         } else {
           content.blogs = [];
