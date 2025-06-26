@@ -1071,6 +1071,31 @@ Contact us for more information about our professional services and to schedule 
     }
   });
 
+  // Profile update endpoint
+  app.put("/api/auth/profile", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { username, email, name, phone } = req.body;
+      
+      // Update user profile
+      await storage.updateUser(user.id, {
+        username,
+        email,
+        name,
+        phone
+      });
+
+      res.json({ message: "Profile updated successfully" });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // Change password for authenticated user
   app.post("/api/auth/change-password", isAuthenticated, async (req, res) => {
     try {

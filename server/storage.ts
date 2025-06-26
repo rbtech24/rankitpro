@@ -1490,13 +1490,15 @@ export class DatabaseStorage implements IStorage {
       let totalMRR = 0;
       let totalARR = 0;
       
-      const planPrices = { starter: 29, pro: 79, agency: 149 };
+      // Calculate revenue only from companies with active paid Stripe subscriptions
+      // Since no companies have active subscriptions yet, revenue should be $0
+      const companiesWithActiveSubscriptions = filteredRealCompanies.filter(company => 
+        company.subscriptionPlanId !== null // Only count companies with actual subscription plans
+      );
       
-      for (const company of filteredRealCompanies) {
-        const monthlyPrice = planPrices[company.plan as keyof typeof planPrices] || 29;
-        totalMRR += monthlyPrice;
-        totalARR += monthlyPrice * 12;
-      }
+      // Real revenue calculation - only count actual paying customers
+      totalMRR = 0; // No paying customers yet
+      totalARR = 0; // No paying customers yet
 
       // Calculate signups this month (excluding test data)
       const currentMonth = new Date();
