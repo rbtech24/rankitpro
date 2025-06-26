@@ -154,12 +154,23 @@ export default function Settings() {
     }
   }, [auth, isLoading, profileForm]);
   
-  const onSaveProfile = (values: ProfileFormValues) => {
-    toast({
-      title: "Profile Updated",
-      description: "Your profile information has been updated.",
-      variant: "default",
-    });
+  const onSaveProfile = async (values: ProfileFormValues) => {
+    try {
+      await apiRequest('PUT', '/api/auth/profile', values);
+      toast({
+        title: "Profile Updated",
+        description: "Your profile information has been updated.",
+        variant: "default",
+      });
+      // Refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+    } catch (error: any) {
+      toast({
+        title: "Profile Update Failed",
+        description: error.message || "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   const onChangePassword = async (values: PasswordFormValues) => {
