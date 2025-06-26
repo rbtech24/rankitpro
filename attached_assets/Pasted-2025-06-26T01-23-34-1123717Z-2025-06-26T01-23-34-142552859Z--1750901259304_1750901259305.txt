@@ -1,0 +1,50 @@
+2025-06-26T01:23:34.1123717Z ==> 
+2025-06-26T01:23:34.142552859Z ==> ///////////////////////////////////////////////////////////
+2025-06-26T01:23:34.170831949Z ==> 
+2025-06-26T01:23:34.199490479Z ==> Available at your primary URL https://rankitpro.com + 2 more domains
+2025-06-26T01:23:34.228483459Z ==> 
+2025-06-26T01:23:34.257677248Z ==> ///////////////////////////////////////////////////////////
+2025-06-26T01:24:19.102221893Z ValidationError: The Express 'trust proxy' setting is true, which allows anyone to trivially bypass IP-based rate limiting. See https://express-rate-limit.github.io/ERR_ERL_PERMISSIVE_TRUST_PROXY/ for more information.
+2025-06-26T01:24:19.102241293Z     at Object.trustProxy (file:///opt/render/project/src/node_modules/express-rate-limit/dist/index.mjs:141:13)
+2025-06-26T01:24:19.102245773Z     at wrappedValidations.<computed> [as trustProxy] (file:///opt/render/project/src/node_modules/express-rate-limit/dist/index.mjs:370:22)
+2025-06-26T01:24:19.102249224Z     at Object.keyGenerator (file:///opt/render/project/src/node_modules/express-rate-limit/dist/index.mjs:642:20)
+2025-06-26T01:24:19.102252993Z     at file:///opt/render/project/src/node_modules/express-rate-limit/dist/index.mjs:696:32
+2025-06-26T01:24:19.102255834Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-26T01:24:19.102258724Z     at async file:///opt/render/project/src/node_modules/express-rate-limit/dist/index.mjs:676:5 {
+2025-06-26T01:24:19.102262774Z   code: 'ERR_ERL_PERMISSIVE_TRUST_PROXY',
+2025-06-26T01:24:19.102273774Z   help: 'https://express-rate-limit.github.io/ERR_ERL_PERMISSIVE_TRUST_PROXY/'
+2025-06-26T01:24:19.102275624Z }
+2025-06-26T01:24:19.104797768Z 1:24:19 AM [express] GET /api/auth/me 401 in 2ms :: {"message":"Not authenticated"}
+2025-06-26T01:24:19.355393725Z 1:24:19 AM [express] GET /api/auth/me 401 in 1ms :: {"message":"Not authenticated"}
+2025-06-26T01:24:33.748670241Z Login error: NeonDbError: Error connecting to database: fetch failed
+2025-06-26T01:24:33.748692762Z     at execute (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1549:24)
+2025-06-26T01:24:33.748696342Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+2025-06-26T01:24:33.748699652Z   severity: undefined,
+2025-06-26T01:24:33.748701832Z   code: undefined,
+2025-06-26T01:24:33.748704342Z   detail: undefined,
+2025-06-26T01:24:33.748706452Z   hint: undefined,
+2025-06-26T01:24:33.748708562Z   position: undefined,
+2025-06-26T01:24:33.748711242Z   internalPosition: undefined,
+2025-06-26T01:24:33.748713352Z   internalQuery: undefined,
+2025-06-26T01:24:33.748715512Z   where: undefined,
+2025-06-26T01:24:33.748717742Z   schema: undefined,
+2025-06-26T01:24:33.748719802Z   table: undefined,
+2025-06-26T01:24:33.748721893Z   column: undefined,
+2025-06-26T01:24:33.748723953Z   dataType: undefined,
+2025-06-26T01:24:33.748726053Z   constraint: undefined,
+2025-06-26T01:24:33.748728193Z   file: undefined,
+2025-06-26T01:24:33.748730303Z   line: undefined,
+2025-06-26T01:24:33.748732373Z   routine: undefined,
+2025-06-26T01:24:33.748735563Z   sourceError: TypeError: fetch failed
+2025-06-26T01:24:33.748738413Z       at node:internal/deps/undici/undici:13502:13
+2025-06-26T01:24:33.748740563Z       at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-26T01:24:33.748743303Z       at async execute (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1548:15) {
+2025-06-26T01:24:33.748746053Z     [cause]: ConnectTimeoutError: Connect Timeout Error (attempted addresses: 18.205.164.157:443, 54.87.193.254:443, 35.174.144.149:443, timeout: 10000ms)
+2025-06-26T01:24:33.748748523Z         at onConnectTimeout (node:internal/deps/undici/undici:2602:28)
+2025-06-26T01:24:33.748750674Z         at Immediate._onImmediate (node:internal/deps/undici/undici:2583:11)
+2025-06-26T01:24:33.748752783Z         at process.processImmediate (node:internal/timers:491:21) {
+2025-06-26T01:24:33.748754994Z       code: 'UND_ERR_CONNECT_TIMEOUT'
+2025-06-26T01:24:33.748757134Z     }
+2025-06-26T01:24:33.748759364Z   }
+2025-06-26T01:24:33.748761504Z }
+2025-06-26T01:24:33.749430083Z 1:24:33 AM [express] POST /api/auth/login 500 in 10493ms :: {"message":"Server error during login"}

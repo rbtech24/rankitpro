@@ -15,7 +15,12 @@ import MemoryOptimizer from "./services/memory-optimizer";
 const app = express();
 
 // Trust proxy for production deployments (required for rate limiting)
-app.set('trust proxy', true);
+// Configure trust proxy properly for production
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1); // Trust first proxy (Render)
+} else {
+  app.set('trust proxy', false);
+}
 
 // Security middleware - helmet for security headers
 app.use(helmet({
@@ -34,12 +39,15 @@ app.use(helmet({
 // Rate limiting with proper proxy configuration
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 100 : 1000, // More restrictive in production
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip rate limiting in development to avoid proxy header issues
-  skip: (req) => process.env.NODE_ENV !== 'production',
+  trustProxy: process.env.NODE_ENV === 'production' ? 1 : false,
+  skip: (req) => {
+    // Skip rate limiting for health checks
+    return req.path === '/health' || req.path === '/api/health';
+  }
 });
 
 app.use('/api/', limiter);
