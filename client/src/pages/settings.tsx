@@ -66,11 +66,13 @@ export default function Settings() {
 
   // Update state when preferences load
   useEffect(() => {
-    if (preferences) {
+    if (preferences && preferences.notificationPreferences) {
       setNotificationSettings({
         ...notificationSettings,
         ...preferences.notificationPreferences
       });
+    }
+    if (preferences && preferences.appearancePreferences) {
       setAppearanceSettings({
         ...appearanceSettings,
         ...preferences.appearancePreferences
@@ -497,7 +499,14 @@ export default function Settings() {
                           <div className="mt-2 h-4 w-3/4 bg-gray-200 rounded-sm"></div>
                         </div>
                         <Label className="flex items-center space-x-2">
-                          <input type="radio" name="theme" defaultChecked className="h-4 w-4 text-primary" />
+                          <input 
+                            type="radio" 
+                            name="theme" 
+                            value="light"
+                            checked={appearanceSettings.theme === "light"}
+                            onChange={(e) => setAppearanceSettings({...appearanceSettings, theme: e.target.value as "light" | "dark"})}
+                            className="h-4 w-4 text-primary" 
+                          />
                           <span>Light</span>
                         </Label>
                       </div>
@@ -509,20 +518,15 @@ export default function Settings() {
                           <div className="mt-2 h-4 w-3/4 bg-gray-600 rounded-sm"></div>
                         </div>
                         <Label className="flex items-center space-x-2">
-                          <input type="radio" name="theme" className="h-4 w-4 text-primary" />
+                          <input 
+                            type="radio" 
+                            name="theme" 
+                            value="dark"
+                            checked={appearanceSettings.theme === "dark"}
+                            onChange={(e) => setAppearanceSettings({...appearanceSettings, theme: e.target.value as "light" | "dark"})}
+                            className="h-4 w-4 text-primary" 
+                          />
                           <span>Dark</span>
-                        </Label>
-                      </div>
-                      
-                      <div className="flex flex-col items-center space-y-2">
-                        <div className="h-24 w-full rounded-md border-2 border-gray-300 bg-white p-1 cursor-pointer">
-                          <div className="h-4 w-full bg-blue-600 rounded-sm"></div>
-                          <div className="mt-2 h-4 w-1/2 bg-gray-200 rounded-sm"></div>
-                          <div className="mt-2 h-4 w-3/4 bg-gray-200 rounded-sm"></div>
-                        </div>
-                        <Label className="flex items-center space-x-2">
-                          <input type="radio" name="theme" className="h-4 w-4 text-primary" />
-                          <span>System</span>
                         </Label>
                       </div>
                     </div>
