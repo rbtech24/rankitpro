@@ -131,10 +131,18 @@ const CompaniesManagement = () => {
               </TableHeader>
               <TableBody>
                 {filteredCompanies.map((company) => {
-                  // For demo, assign random subscription status
-                  const statuses = Object.keys(SUBSCRIPTION_STATUS);
-                  const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-                  const status = SUBSCRIPTION_STATUS[randomStatus as keyof typeof SUBSCRIPTION_STATUS];
+                  // Get actual subscription status based on company data
+                  const getSubscriptionStatus = (company: any) => {
+                    if (company.stripeSubscriptionId) {
+                      return SUBSCRIPTION_STATUS.active;
+                    } else if (company.isTrialActive) {
+                      return SUBSCRIPTION_STATUS.trial;
+                    } else {
+                      return SUBSCRIPTION_STATUS.inactive;
+                    }
+                  };
+                  
+                  const status = getSubscriptionStatus(company);
                   
                   return (
                     <TableRow key={company.id}>
@@ -144,7 +152,7 @@ const CompaniesManagement = () => {
                           {company.plan || "starter"}
                         </Badge>
                       </TableCell>
-                      <TableCell>{company.userCount || Math.floor(Math.random() * 10) + 1}</TableCell>
+                      <TableCell>{company.userCount || 0}</TableCell>
                       <TableCell>
                         <Badge className={status.color}>{status.label}</Badge>
                       </TableCell>

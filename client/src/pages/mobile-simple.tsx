@@ -119,8 +119,15 @@ export default function MobileSimple() {
           const { latitude, longitude } = position.coords;
           setCurrentLocation({ latitude, longitude });
           
-          // Reverse geocoding (mock implementation)
-          setCurrentAddress(`${Math.floor(Math.random() * 9999)} Main St, Anytown, ST 12345`);
+          // Reverse geocoding using browser geolocation API
+          try {
+            const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+            const data = await response.json();
+            setCurrentAddress(data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+          } catch (error) {
+            console.error('Reverse geocoding failed:', error);
+            setCurrentAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+          }
           
           toast({
             title: "Location Found",

@@ -101,13 +101,21 @@ export class AnalyticsService {
         value: count
       }));
 
-      // Monthly revenue data (last 6 months)
+      // Monthly revenue data (last 6 months) - based on actual subscription data
       const monthlyRevenue = Array.from({ length: 6 }, (_, i) => {
         const date = new Date();
         date.setMonth(date.getMonth() - (5 - i));
+        const monthlyCompanies = companies.filter((company: any) => {
+          const companyDate = new Date(company.createdAt || Date.now());
+          return companyDate.getMonth() === date.getMonth() && companyDate.getFullYear() === date.getFullYear();
+        });
+        const monthlyRevenue = monthlyCompanies.reduce((sum: number, company: any) => {
+          const planValues: Record<string, number> = { starter: 29, pro: 99, agency: 299 };
+          return sum + (planValues[company.plan] || 0);
+        }, 0);
         return {
           month: date.toLocaleDateString('en-US', { month: 'short' }),
-          revenue: totalRevenue * (0.7 + Math.random() * 0.6)
+          revenue: monthlyRevenue
         };
       });
 
@@ -120,27 +128,46 @@ export class AnalyticsService {
           plan: company.plan
         }));
 
-      // Recent activity
-      const recentActivity = [
-        {
+      // Recent activity - based on actual database records
+      const recentActivity: Array<{
+        type: string;
+        description: string;
+        timestamp: Date;
+        user?: string;
+        company?: string;
+      }> = [];
+
+      // Get recent companies
+      const recentCompanies = companies
+        .sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+        .slice(0, 3);
+      
+      recentCompanies.forEach((company: any) => {
+        recentActivity.push({
           type: "company_created",
           description: "New company registered",
-          timestamp: new Date(Date.now() - 1000 * 60 * 30),
-          company: companies[0]?.name || "Demo Company"
-        },
-        {
-          type: "user_login",
-          description: "Super admin logged in",
-          timestamp: new Date(Date.now() - 1000 * 60 * 45),
-          user: "Administrator"
-        },
-        {
-          type: "check_in",
-          description: "New check-in completed",
-          timestamp: new Date(Date.now() - 1000 * 60 * 60),
-          company: companies[0]?.name || "Demo Company"
-        }
-      ].slice(0, 10);
+          timestamp: new Date(company.createdAt || Date.now()),
+          company: company.name
+        });
+      });
+
+      // Get recent users
+      const recentUsers = users
+        .sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+        .slice(0, 3);
+      
+      recentUsers.forEach((user: any) => {
+        recentActivity.push({
+          type: "user_created",
+          description: `New ${user.role} account created`,
+          timestamp: new Date(user.createdAt || Date.now()),
+          user: user.username || user.email
+        });
+      });
+
+      // Sort by timestamp and limit to 10
+      recentActivity.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      const limitedActivity = recentActivity.slice(0, 10);
 
       return {
         revenue: {
@@ -163,7 +190,7 @@ export class AnalyticsService {
           conversionRate: 2.4,
           conversionGrowth: 0.3
         },
-        recentActivity
+        recentActivity: limitedActivity
       };
     } catch (error) {
       console.error("Error generating platform analytics:", error);
