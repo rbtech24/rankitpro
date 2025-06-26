@@ -682,6 +682,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
   // Job Types API endpoint
   app.get("/api/job-types", isAuthenticated, async (req, res) => {
     try {
