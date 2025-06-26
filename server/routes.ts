@@ -1504,6 +1504,53 @@ Contact us for more information about our professional services and to schedule 
     }
   });
 
+  // Delete company endpoint
+  app.delete("/api/companies/:id", isSuperAdmin, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      
+      if (isNaN(companyId)) {
+        return res.status(400).json({ message: "Invalid company ID" });
+      }
+      
+      // Check if company exists
+      const company = await storage.getCompany(companyId);
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      
+      // Check if company has any users or data that would prevent deletion
+      const users = await storage.getUsersByCompany(companyId);
+      const technicians = await storage.getTechniciansByCompany(companyId);
+      const checkIns = await storage.getCheckInsByCompany(companyId);
+      
+      if (users.length > 0 || technicians.length > 0 || checkIns.length > 0) {
+        return res.status(400).json({ 
+          message: "Cannot delete company with existing users, technicians, or check-ins. Please remove all associated data first.",
+          details: {
+            users: users.length,
+            technicians: technicians.length,
+            checkIns: checkIns.length
+          }
+        });
+      }
+      
+      // Delete the company
+      const success = await storage.deleteCompany(companyId);
+      
+      if (success) {
+        res.json({ 
+          message: "Company deleted successfully",
+          deletedCompany: company.name
+        });
+      } else {
+        res.status(500).json({ message: "Failed to delete company" });
+      }
+    } catch (error) {
+      console.error("Delete company error:", error);
+      res.status(500).json({ message: "Server error during company deletion" });
+    }
+  });
 
   // Technicians routes
   app.get("/api/technicians", isAuthenticated, async (req, res) => {
