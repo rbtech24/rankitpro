@@ -103,13 +103,26 @@ export default function Settings() {
     });
   };
   
-  const onChangePassword = (values: PasswordFormValues) => {
-    toast({
-      title: "Password Changed",
-      description: "Your password has been updated successfully.",
-      variant: "default",
-    });
-    passwordForm.reset();
+  const onChangePassword = async (values: PasswordFormValues) => {
+    try {
+      await apiRequest('POST', '/api/auth/change-password', {
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword
+      });
+      
+      toast({
+        title: "Password Changed",
+        description: "Your password has been updated successfully.",
+        variant: "default",
+      });
+      passwordForm.reset();
+    } catch (error: any) {
+      toast({
+        title: "Password Change Failed",
+        description: error.message || "Failed to update password. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   const onSaveNotifications = () => {

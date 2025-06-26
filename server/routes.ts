@@ -1069,6 +1069,44 @@ Contact us for more information about our professional services and to schedule 
     }
   });
 
+  // Change password for authenticated user
+  app.post("/api/auth/change-password", isAuthenticated, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current password and new password are required" });
+      }
+      
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "New password must be at least 8 characters long" });
+      }
+      
+      // Get current user
+      const user = await storage.getUserByEmail(req.user.email);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Verify current password
+      const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+      
+      // Hash new password
+      const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+      
+      // Update user password
+      await storage.updateUser(user.id, { password: hashedNewPassword });
+      
+      res.json({ message: "Password changed successfully" });
+    } catch (error) {
+      console.error("Password change error:", error);
+      res.status(500).json({ message: "Server error during password change" });
+    }
+  });
+
   // Password reset
   app.post("/api/auth/reset-password", async (req, res) => {
     try {
