@@ -423,7 +423,27 @@ router.get('/recent-activities', isSuperAdmin, async (req, res) => {
 router.get('/companies', isSuperAdmin, async (req, res) => {
   try {
     const companies = await storage.getAllCompanies();
-    res.json(companies);
+    
+    // Add status calculation based on trial period and subscription
+    const companiesWithStatus = companies.map(company => {
+      let status = 'Inactive';
+      
+      // Check if company has active trial period
+      if (company.trialEndDate && new Date(company.trialEndDate) > new Date()) {
+        status = 'Active';
+      }
+      // Check if company has active Stripe subscription
+      else if (company.stripeSubscriptionId) {
+        status = 'Active';
+      }
+      
+      return {
+        ...company,
+        status
+      };
+    });
+    
+    res.json(companiesWithStatus);
   } catch (error) {
     console.error('Error fetching companies:', error);
     res.status(500).json({ message: 'Server error' });
