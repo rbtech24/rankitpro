@@ -8,8 +8,8 @@ neonConfig.webSocketConstructor = ws;
 neonConfig.pipelineConnect = false;
 neonConfig.useSecureWebSocket = true;
 neonConfig.fetchConnectionCache = true;
-neonConfig.fetchTimeout = 15000;
-neonConfig.fetchRetries = 2;
+// Note: Some neonConfig properties may not be available in current version
+// Focus on Pool configuration for timeout handling
 
 // Add connection pooling configuration for better stability
 neonConfig.poolQueryViaFetch = true;
@@ -43,15 +43,15 @@ function createDatabaseConnection() {
   }
 
   try {
-    // Create connection pool with optimized settings for Neon
+    // Create connection pool with optimized settings for Neon production
     const pool = new Pool({ 
       connectionString: databaseUrl,
-      max: 5,
-      idleTimeoutMillis: 15000,
-      connectionTimeoutMillis: 10000,
-      statement_timeout: 15000,
+      max: 3, // Reduced for better connection management
+      idleTimeoutMillis: 30000, // Increased idle timeout
+      connectionTimeoutMillis: 30000, // Increased connection timeout to 30s
+      statement_timeout: 30000, // Increased statement timeout
       application_name: 'rankitpro_saas',
-      maxUses: 100,
+      maxUses: 50, // Reduced max uses per connection
       allowExitOnIdle: false
     });
     
@@ -81,29 +81,37 @@ try {
 // Create a query function with retry logic for critical operations
 export async function queryWithRetry<T>(
   queryFn: () => Promise<T>, 
-  maxRetries: number = 3
+  maxRetries: number = 5
 ): Promise<T> {
   let lastError: Error;
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await queryFn();
-    } catch (error) {
+    } catch (error: any) {
       lastError = error as Error;
       
-      // Check if it's a connection-related error
-      if (error instanceof Error && (
+      // Check if it's a connection-related error or timeout
+      const isConnectionError = error instanceof Error && (
         error.message.includes('Control plane request failed') ||
         error.message.includes('connection') ||
-        error.message.includes('timeout')
-      )) {
+        error.message.includes('timeout') ||
+        error.message.includes('Connect Timeout') ||
+        error.message.includes('fetch failed') ||
+        (error as any).code === 'UND_ERR_CONNECT_TIMEOUT'
+      );
+      
+      if (isConnectionError) {
         console.warn(`Database query attempt ${attempt}/${maxRetries} failed:`, error.message);
         
         if (attempt < maxRetries) {
-          // Exponential backoff: 1s, 2s, 4s
-          const delay = Math.pow(2, attempt - 1) * 1000;
+          // Longer backoff for connection errors: 2s, 5s, 10s, 20s, 30s
+          const delay = Math.min(2000 * Math.pow(2, attempt - 1), 30000);
+          console.log(`Retrying in ${delay/1000} seconds...`);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
+        } else {
+          throw new Error(`Database connection failed after ${maxRetries} attempts. Connection timeout errors detected.`);
         }
       }
       
