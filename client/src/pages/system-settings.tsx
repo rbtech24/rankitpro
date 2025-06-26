@@ -122,21 +122,21 @@ const integrationSettingsSchema = z.object({
   enableMultiLanguage: z.boolean(),
 });
 
-// Mock data for current system settings
-const mockEmailSettings = {
-  senderName: "Rank It Pro",
-  senderEmail: "notifications@rankitpro.com",
-  replyToEmail: "support@rankitpro.com",
-  adminNotificationEmail: "admin@rankitpro.com",
-  footerText: "© 2025 Rank It Pro - All rights reserved",
-  logoUrl: "https://rankitpro.com/logo.png",
-  sendWelcomeEmail: true,
-  sendCheckInNotifications: true,
-  sendReviewRequestNotifications: true,
-  sendBillingNotifications: true,
+// Default email settings structure
+const defaultEmailSettings = {
+  senderName: "",
+  senderEmail: "",
+  replyToEmail: "",
+  adminNotificationEmail: "",
+  footerText: "",
+  logoUrl: "",
+  sendWelcomeEmail: false,
+  sendCheckInNotifications: false,
+  sendReviewRequestNotifications: false,
+  sendBillingNotifications: false,
 };
 
-const mockAISettings = {
+const defaultAISettings = {
   defaultProvider: "openai" as const,
   openaiModel: "gpt-4o",
   anthropicModel: "claude-3-7-sonnet-20250219",
@@ -144,29 +144,29 @@ const mockAISettings = {
   maxTokensPerRequest: 2000,
   temperatureSummary: 0.3,
   temperatureBlog: 0.7,
-  customInstructionsSummary: "Create a concise summary of the home service check-in that highlights the key problems, solutions, and outcomes in a professional tone.",
-  customInstructionsBlog: "Create an engaging blog post for a home service business that explains the service in a way that demonstrates expertise and builds trust with potential customers.",
-  enableAIImageGeneration: true,
+  customInstructionsSummary: "",
+  customInstructionsBlog: "",
+  enableAIImageGeneration: false,
 };
 
-const mockSystemSettings = {
+const defaultSystemSettings = {
   maxUploadSizeMB: 10,
   allowedFileTypes: ["jpg", "jpeg", "png", "heic", "pdf"],
   maxImagesPerCheckIn: 6,
   maxCheckInsPerDay: 50,
   sessionTimeoutMinutes: 60,
   maintenanceMode: false,
-  maintenanceMessage: "Rank It Pro is currently undergoing scheduled maintenance. We'll be back shortly.",
+  maintenanceMessage: "",
   debugMode: false,
   enableRateLimiting: true,
   maxRequestsPerMinute: 100,
 };
 
-const mockIntegrationSettings = {
+const defaultIntegrationSettings = {
   defaultWordPressFieldPrefix: "rp_",
-  defaultEmbedTitle: "Recent Service Visits",
-  defaultEmbedSubtitle: "See what our technicians have been working on",
-  enableCustomBranding: true,
+  defaultEmbedTitle: "",
+  defaultEmbedSubtitle: "",
+  enableCustomBranding: false,
   disableRankItProBranding: false,
   enableCustomCSS: true,
   customCSS: ".rank-it-pro-embed { border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }",
@@ -214,25 +214,25 @@ export default function SystemSettings() {
   // Email settings form
   const emailForm = useForm<z.infer<typeof emailSettingsSchema>>({
     resolver: zodResolver(emailSettingsSchema),
-    defaultValues: mockEmailSettings
+    defaultValues: defaultEmailSettings
   });
   
   // AI settings form
   const aiForm = useForm<z.infer<typeof aiSettingsSchema>>({
     resolver: zodResolver(aiSettingsSchema),
-    defaultValues: mockAISettings
+    defaultValues: defaultAISettings
   });
   
   // System settings form
   const systemForm = useForm<z.infer<typeof systemSettingsSchema>>({
     resolver: zodResolver(systemSettingsSchema),
-    defaultValues: mockSystemSettings
+    defaultValues: defaultSystemSettings
   });
   
   // Integration settings form
   const integrationForm = useForm<z.infer<typeof integrationSettingsSchema>>({
     resolver: zodResolver(integrationSettingsSchema),
-    defaultValues: mockIntegrationSettings
+    defaultValues: defaultIntegrationSettings
   });
   
   // Submit handlers

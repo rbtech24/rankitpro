@@ -138,7 +138,7 @@ const CompaniesManagement = () => {
                     } else if (company.isTrialActive) {
                       return SUBSCRIPTION_STATUS.trial;
                     } else {
-                      return SUBSCRIPTION_STATUS.inactive;
+                      return SUBSCRIPTION_STATUS.cancelled;
                     }
                   };
                   
