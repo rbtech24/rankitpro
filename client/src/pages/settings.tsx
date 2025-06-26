@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -33,10 +33,64 @@ import {
 
 export default function Settings() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: auth, isLoading } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
     queryFn: getCurrentUser
+  });
+
+  // Get user preferences
+  const { data: preferences } = useQuery({
+    queryKey: ["/api/auth/preferences"],
+    enabled: !!auth?.user,
+  });
+
+  // State for notifications and appearance
+  const [notificationSettings, setNotificationSettings] = useState({
+    emailNotifications: true,
+    newCheckIns: true,
+    newBlogPosts: true,
+    reviewRequests: true,
+    billingUpdates: true,
+    pushNotifications: true,
+    notificationSound: true
+  });
+
+  const [appearanceSettings, setAppearanceSettings] = useState({
+    theme: "light" as "light" | "dark",
+    language: "en",
+    timezone: "UTC",
+    defaultView: "dashboard"
+  });
+
+  // Update state when preferences load
+  useEffect(() => {
+    if (preferences) {
+      setNotificationSettings({
+        ...notificationSettings,
+        ...preferences.notificationPreferences
+      });
+      setAppearanceSettings({
+        ...appearanceSettings,
+        ...preferences.appearancePreferences
+      });
+    }
+  }, [preferences]);
+
+  // Mutations for saving preferences
+  const notificationMutation = useMutation({
+    mutationFn: (prefs: any) => apiRequest('POST', '/api/auth/notification-preferences', { preferences: prefs }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/preferences"] });
+    }
+  });
+
+  const appearanceMutation = useMutation({
+    mutationFn: (prefs: any) => apiRequest('POST', '/api/auth/appearance-preferences', { preferences: prefs }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/preferences"] });
+    }
   });
   
   // Profile form schema
@@ -125,20 +179,38 @@ export default function Settings() {
     }
   };
   
-  const onSaveNotifications = () => {
-    toast({
-      title: "Notification Settings Saved",
-      description: "Your notification preferences have been updated.",
-      variant: "default",
-    });
+  const onSaveNotifications = async () => {
+    try {
+      await notificationMutation.mutateAsync(notificationSettings);
+      toast({
+        title: "Notification Settings Saved",
+        description: "Your notification preferences have been updated.",
+        variant: "default",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Save Failed",
+        description: error.message || "Failed to save notification preferences.",
+        variant: "destructive",
+      });
+    }
   };
   
-  const onSaveAppearance = () => {
-    toast({
-      title: "Appearance Settings Saved",
-      description: "Your appearance preferences have been updated.",
-      variant: "default",
-    });
+  const onSaveAppearance = async () => {
+    try {
+      await appearanceMutation.mutateAsync(appearanceSettings);
+      toast({
+        title: "Appearance Settings Saved",
+        description: "Your appearance preferences have been updated.",
+        variant: "default",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Save Failed",
+        description: error.message || "Failed to save appearance preferences.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -330,7 +402,10 @@ export default function Settings() {
                         <h4 className="text-sm">New Check-ins</h4>
                         <p className="text-xs text-gray-500">Receive notifications when technicians create new check-ins</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.newCheckIns}
+                        onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, newCheckIns: checked})}
+                      />
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -338,7 +413,10 @@ export default function Settings() {
                         <h4 className="text-sm">New Blog Posts</h4>
                         <p className="text-xs text-gray-500">Receive notifications when blog posts are created</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.newBlogPosts}
+                        onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, newBlogPosts: checked})}
+                      />
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -346,7 +424,10 @@ export default function Settings() {
                         <h4 className="text-sm">Review Requests</h4>
                         <p className="text-xs text-gray-500">Receive notifications about review requests</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.reviewRequests}
+                        onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, reviewRequests: checked})}
+                      />
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -354,7 +435,10 @@ export default function Settings() {
                         <h4 className="text-sm">Billing Updates</h4>
                         <p className="text-xs text-gray-500">Receive notifications about billing and subscription changes</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.billingUpdates}
+                        onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, billingUpdates: checked})}
+                      />
                     </div>
                   </div>
                   
@@ -366,7 +450,10 @@ export default function Settings() {
                         <h4 className="text-sm">Enable Push Notifications</h4>
                         <p className="text-xs text-gray-500">Receive browser or mobile push notifications</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.pushNotifications}
+                        onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, pushNotifications: checked})}
+                      />
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -374,12 +461,20 @@ export default function Settings() {
                         <h4 className="text-sm">Notification Sound</h4>
                         <p className="text-xs text-gray-500">Play a sound when notifications arrive</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.notificationSound}
+                        onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, notificationSound: checked})}
+                      />
                     </div>
                   </div>
                   
                   <div className="pt-4">
-                    <Button onClick={onSaveNotifications}>Save Notification Preferences</Button>
+                    <Button 
+                      onClick={onSaveNotifications}
+                      disabled={notificationMutation.isPending}
+                    >
+                      {notificationMutation.isPending ? "Saving..." : "Save Notification Preferences"}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

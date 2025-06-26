@@ -14,6 +14,22 @@ export const users = pgTable("users", {
   stripeSubscriptionId: text("stripe_subscription_id"),
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
+  // User preferences
+  notificationPreferences: jsonb("notification_preferences").default({
+    emailNotifications: true,
+    newCheckIns: true,
+    newBlogPosts: true,
+    reviewRequests: true,
+    billingUpdates: true,
+    pushNotifications: true,
+    notificationSound: true
+  }),
+  appearancePreferences: jsonb("appearance_preferences").default({
+    theme: "light",
+    language: "en",
+    timezone: "UTC",
+    defaultView: "dashboard"
+  }),
 });
 
 // Subscription plans table

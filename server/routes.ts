@@ -1107,6 +1107,79 @@ Contact us for more information about our professional services and to schedule 
     }
   });
 
+  // Update notification preferences
+  app.post("/api/auth/notification-preferences", isAuthenticated, async (req, res) => {
+    try {
+      const { preferences } = req.body;
+      
+      if (!preferences) {
+        return res.status(400).json({ message: "Preferences are required" });
+      }
+      
+      // Update user notification preferences
+      await storage.updateUser(req.user.id, { 
+        notificationPreferences: preferences 
+      });
+      
+      res.json({ message: "Notification preferences updated successfully" });
+    } catch (error) {
+      console.error("Notification preferences update error:", error);
+      res.status(500).json({ message: "Server error during preferences update" });
+    }
+  });
+
+  // Update appearance preferences
+  app.post("/api/auth/appearance-preferences", isAuthenticated, async (req, res) => {
+    try {
+      const { preferences } = req.body;
+      
+      if (!preferences) {
+        return res.status(400).json({ message: "Preferences are required" });
+      }
+      
+      // Update user appearance preferences
+      await storage.updateUser(req.user.id, { 
+        appearancePreferences: preferences 
+      });
+      
+      res.json({ message: "Appearance preferences updated successfully" });
+    } catch (error) {
+      console.error("Appearance preferences update error:", error);
+      res.status(500).json({ message: "Server error during preferences update" });
+    }
+  });
+
+  // Get user preferences
+  app.get("/api/auth/preferences", isAuthenticated, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        notificationPreferences: user.notificationPreferences || {
+          emailNotifications: true,
+          newCheckIns: true,
+          newBlogPosts: true,
+          reviewRequests: true,
+          billingUpdates: true,
+          pushNotifications: true,
+          notificationSound: true
+        },
+        appearancePreferences: user.appearancePreferences || {
+          theme: "light",
+          language: "en",
+          timezone: "UTC",
+          defaultView: "dashboard"
+        }
+      });
+    } catch (error) {
+      console.error("Get preferences error:", error);
+      res.status(500).json({ message: "Server error during preferences retrieval" });
+    }
+  });
+
   // Password reset
   app.post("/api/auth/reset-password", async (req, res) => {
     try {
