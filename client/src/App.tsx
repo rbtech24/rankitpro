@@ -95,6 +95,7 @@ import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import WordPressIntegration from "@/pages/wordpress-integration";
 import WordPressCustomFields from "@/pages/wordpress-custom-fields";
+import EmbedGenerator from "@/pages/embed-generator";
 import EmergencyLogin from "@/pages/emergency-login";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
@@ -1266,6 +1267,9 @@ function Router() {
       </Route>
       <Route path="/integrations">
         <PrivateRoute component={Integrations} path="/integrations" role="company_admin" />
+      </Route>
+      <Route path="/embed-generator">
+        <PrivateRoute component={EmbedGenerator} path="/embed-generator" role="company_admin" />
       </Route>
       <Route path="/wordpress-custom-fields">
         <PrivateRoute component={WordPressCustomFields} path="/wordpress-custom-fields" role="company_admin" />
