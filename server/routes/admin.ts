@@ -500,13 +500,13 @@ router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
           result = await storage.getAllCompanies();
           break;
         case '/api/check-ins':
-          result = await storage.getCheckInsForCompany(1);
+          result = await storage.getCheckInsByCompany(1);
           break;
         case '/api/reviews':
-          result = await storage.getReviewsForCompany(1);
+          result = await storage.getReviewsByCompany(1);
           break;
         case '/api/blog-posts':
-          result = await storage.getBlogPostsForCompany(1);
+          result = await storage.getBlogPostsByCompany(1);
           break;
         case '/api/auth/me':
           result = { status: 'authentication endpoint - requires session' };

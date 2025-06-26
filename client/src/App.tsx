@@ -72,6 +72,7 @@ import JobTypesManagement from "@/pages/job-types-management";
 import LogoutHandler from "@/components/LogoutHandler";
 import ForceLogout from "@/pages/force-logout";
 import Documentation from "@/pages/documentation";
+import APITesting from "@/pages/api-testing";
 import InstallationGuide from "@/pages/installation-guide";
 import APIDocumentation from "@/pages/api-documentation";
 import Troubleshooting from "@/pages/troubleshooting";
@@ -1241,6 +1242,9 @@ function Router() {
       </Route>
       <Route path="/system-settings">
         <PrivateRoute component={SystemSettings} path="/system-settings" role="super_admin" />
+      </Route>
+      <Route path="/api-testing">
+        <PrivateRoute component={APITesting} path="/api-testing" role="super_admin" />
       </Route>
       <Route path="/system-overview">
         <PrivateRoute component={SystemOverview} path="/system-overview" role="super_admin" />
