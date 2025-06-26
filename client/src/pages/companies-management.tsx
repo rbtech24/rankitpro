@@ -563,7 +563,7 @@ export default function CompaniesManagement() {
                           <TableCell>
                             <div>
                               <div className="font-medium">{company.name}</div>
-                              <div className="text-sm text-gray-500">Not provided</div>
+                              <div className="text-sm text-gray-500">No industry specified</div>
                             </div>
                           </TableCell>
                           <TableCell>Not specified</TableCell>
