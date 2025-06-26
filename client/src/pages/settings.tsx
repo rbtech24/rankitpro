@@ -41,7 +41,10 @@ export default function Settings() {
   });
 
   // Get user preferences
-  const { data: preferences } = useQuery({
+  const { data: preferences } = useQuery<{
+    notificationPreferences: any;
+    appearancePreferences: any;
+  }>({
     queryKey: ["/api/auth/preferences"],
     enabled: !!auth?.user,
   });
