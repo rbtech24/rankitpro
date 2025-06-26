@@ -806,7 +806,7 @@ export default function CompaniesManagement() {
                     <CardContent className="space-y-4">
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Total Check-ins</h3>
-                        <p className="text-2xl font-bold">{selectedCompany.stats.totalCheckIns}</p>
+                        <p className="text-2xl font-bold">{selectedCompany.stats?.totalCheckIns || 0}</p>
                         <p className="text-sm text-gray-500">{selectedCompany.stats.activeCheckInsLast30Days} in the last 30 days</p>
                       </div>
                       <div>
@@ -1424,7 +1424,7 @@ export default function CompaniesManagement() {
                       <div className="text-center">
                         <FileText className="h-8 w-8 mx-auto text-primary" />
                         <h3 className="mt-2 font-medium text-sm">Check-ins</h3>
-                        <p className="text-2xl font-bold">{viewCompanyStats.stats.totalCheckIns}</p>
+                        <p className="text-2xl font-bold">{viewCompanyStats.stats?.totalCheckIns || 0}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -1465,7 +1465,7 @@ export default function CompaniesManagement() {
                           <div className="w-full h-2 bg-gray-200 rounded-full">
                             <div 
                               className="h-full bg-primary rounded-full" 
-                              style={{ width: `${(viewCompanyStats.stats.activeCheckInsLast30Days / (viewCompanyStats.stats.totalCheckIns * 0.25)) * 100}%` }}
+                              style={{ width: `${(viewCompanyStats.stats?.activeCheckInsLast30Days || 0) / Math.max((viewCompanyStats.stats?.totalCheckIns || 1) * 0.25, 1) * 100}%` }}
                             ></div>
                           </div>
                         </div>
@@ -1473,12 +1473,12 @@ export default function CompaniesManagement() {
                         <div>
                           <div className="flex justify-between items-center mb-1">
                             <span className="text-sm font-medium">Blog Post Conversion Rate</span>
-                            <span className="text-sm">{Math.round((viewCompanyStats.stats.totalBlogPosts / viewCompanyStats.stats.totalCheckIns) * 100)}%</span>
+                            <span className="text-sm">{Math.round(((viewCompanyStats.stats?.totalBlogPosts || 0) / Math.max(viewCompanyStats.stats?.totalCheckIns || 1, 1)) * 100)}%</span>
                           </div>
                           <div className="w-full h-2 bg-gray-200 rounded-full">
                             <div 
                               className="h-full bg-primary rounded-full" 
-                              style={{ width: `${(viewCompanyStats.stats.totalBlogPosts / viewCompanyStats.stats.totalCheckIns) * 100}%` }}
+                              style={{ width: `${((viewCompanyStats.stats?.totalBlogPosts || 0) / Math.max(viewCompanyStats.stats?.totalCheckIns || 1, 1)) * 100}%` }}
                             ></div>
                           </div>
                         </div>
@@ -1486,12 +1486,12 @@ export default function CompaniesManagement() {
                         <div>
                           <div className="flex justify-between items-center mb-1">
                             <span className="text-sm font-medium">Review Conversion Rate</span>
-                            <span className="text-sm">{Math.round((viewCompanyStats.stats.totalReviews / viewCompanyStats.stats.totalCheckIns) * 100)}%</span>
+                            <span className="text-sm">{Math.round(((viewCompanyStats.stats?.totalReviews || 0) / Math.max(viewCompanyStats.stats?.totalCheckIns || 1, 1)) * 100)}%</span>
                           </div>
                           <div className="w-full h-2 bg-gray-200 rounded-full">
                             <div 
                               className="h-full bg-primary rounded-full" 
-                              style={{ width: `${(viewCompanyStats.stats.totalReviews / viewCompanyStats.stats.totalCheckIns) * 100}%` }}
+                              style={{ width: `${((viewCompanyStats.stats?.totalReviews || 0) / Math.max(viewCompanyStats.stats?.totalCheckIns || 1, 1)) * 100}%` }}
                             ></div>
                           </div>
                         </div>
@@ -1499,12 +1499,12 @@ export default function CompaniesManagement() {
                         <div>
                           <div className="flex justify-between items-center mb-1">
                             <span className="text-sm font-medium">Check-ins Per Technician</span>
-                            <span className="text-sm">{Math.round(viewCompanyStats.stats.totalCheckIns / viewCompanyStats.currentTechnicians)}</span>
+                            <span className="text-sm">{Math.round((viewCompanyStats.stats?.totalCheckIns || 0) / Math.max(viewCompanyStats.currentTechnicians || 1, 1))}</span>
                           </div>
                           <div className="w-full h-2 bg-gray-200 rounded-full">
                             <div 
                               className="h-full bg-primary rounded-full" 
-                              style={{ width: `${Math.min((viewCompanyStats.stats.totalCheckIns / viewCompanyStats.currentTechnicians) / 50 * 100, 100)}%` }}
+                              style={{ width: `${Math.min(((viewCompanyStats.stats?.totalCheckIns || 0) / Math.max(viewCompanyStats.currentTechnicians || 1, 1)) / 50 * 100, 100)}%` }}
                             ></div>
                           </div>
                         </div>
@@ -1524,7 +1524,7 @@ export default function CompaniesManagement() {
                           
                           // Calculate real usage percentage based on company activity
                           let usagePercentage = 0;
-                          const totalCheckIns = viewCompanyStats.stats.totalCheckIns;
+                          const totalCheckIns = viewCompanyStats.stats?.totalCheckIns || 0;
                           
                           switch (featureId) {
                             case 'ai_blog_generation':
