@@ -1443,7 +1443,7 @@ export class DatabaseStorage implements IStorage {
         status: transaction.status,
         type: transaction.type,
         date: transaction.createdAt,
-        stripeTransactionId: `pi_${transaction.id}_mock`
+        stripeTransactionId: transaction.stripeTransactionId || null
       }));
     } catch (error) {
       console.error('Error fetching recent transactions:', error);

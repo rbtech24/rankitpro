@@ -132,7 +132,7 @@ export default function IntegrationsPage() {
               checkIn.technicianName.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 
               'T';
             const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
-            const color = colors[Math.floor(Math.random() * colors.length)];
+            const color = colors[checkIn.id % colors.length];
             
             return `
               <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 16px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
