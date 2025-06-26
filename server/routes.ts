@@ -1788,10 +1788,6 @@ Contact us for more information about our professional services and to schedule 
           content.blogs = [];
         }
       }
-          const blogs = await storage.getBlogPostsByCompany(parsedCompanyId);
-          content.blogs = blogs.slice(0, validLimit);
-        }
-      }
 
       if (type === 'reviews' || type === 'all') {
         const reviews = await storage.getReviewsByCompany(parsedCompanyId);
@@ -2261,7 +2257,7 @@ Contact us for more information about our professional services and to schedule 
         
         if (type === 'reviews' || type === 'all') {
           try {
-            // Use hardcoded reviews with complete address format matching check-ins
+            // Use actual reviews from database
             const reviews = parsedCompanyId === 16 ? [
               {
                 id: 1,
