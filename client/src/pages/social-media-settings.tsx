@@ -235,7 +235,7 @@ export default function SocialMediaSettings() {
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6 rounded-lg max-w-lg mx-auto">
               <h3 className="text-xl font-semibold mb-2">Upgrade to Pro</h3>
               <p className="mb-4">Get access to social media automation and more premium features</p>
-              <Button variant="secondary" size="lg">
+              <Button variant="secondary" size="lg" onClick={() => window.location.href = '/billing'}>
                 Upgrade Now
               </Button>
             </div>
