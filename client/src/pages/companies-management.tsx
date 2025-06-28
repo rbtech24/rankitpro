@@ -221,10 +221,14 @@ export default function CompaniesManagement() {
   // Update company mutation
   const updateCompanyMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: z.infer<typeof companySchema> }) => {
+      console.log('Mutation starting - ID:', id, 'Data:', data);
       const res = await apiRequest('PUT', `/api/companies/${id}`, data);
-      return res.json();
+      const result = await res.json();
+      console.log('Mutation response:', result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mutation success:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/companies'] });
       toast({
         title: "Company Updated",
@@ -234,6 +238,7 @@ export default function CompaniesManagement() {
       form.reset();
     },
     onError: (error: any) => {
+      console.error('Mutation error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to update company",
@@ -331,9 +336,14 @@ export default function CompaniesManagement() {
   
   // Submit handler for company form
   const onSubmit = (data: z.infer<typeof companySchema>) => {
+    console.log('Form submitted with data:', data);
+    console.log('Selected company:', selectedCompany);
+    console.log('Is adding company:', isAddingCompany);
+    
     if (isAddingCompany) {
       createCompanyMutation.mutate(data);
-    } else {
+    } else if (selectedCompany) {
+      console.log('Updating company with ID:', selectedCompany.id);
       updateCompanyMutation.mutate({ id: selectedCompany.id, data });
     }
   };
