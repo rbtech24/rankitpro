@@ -3187,6 +3187,87 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     res.sendFile(path.join(process.cwd(), 'public', 'widget-preview.html'));
   });
   
+  // Social Media Integration Routes
+  app.get("/api/companies/social-media-config", requireAuth, requireRole(['company_admin']), async (req: Request, res: Response) => {
+    try {
+      const company = await db
+        .select()
+        .from(schemas.companies)
+        .where(eq(schemas.companies.id, req.user!.companyId!))
+        .limit(1);
+
+      if (!company[0]) {
+        return res.status(404).json({ message: 'Company not found' });
+      }
+
+      const config = company[0].socialMediaConfig 
+        ? (typeof company[0].socialMediaConfig === 'string' 
+           ? JSON.parse(company[0].socialMediaConfig) 
+           : company[0].socialMediaConfig)
+        : { accounts: [], autoPost: { checkIns: true, reviews: true, testimonials: true, blogPosts: true } };
+
+      res.json(config);
+    } catch (error) {
+      console.error('Failed to get social media config:', error);
+      res.status(500).json({ message: 'Failed to get social media configuration' });
+    }
+  });
+
+  app.put("/api/companies/social-media-config", requireAuth, requireRole(['company_admin']), async (req: Request, res: Response) => {
+    try {
+      const { accounts, autoPost } = req.body;
+
+      await db
+        .update(schemas.companies)
+        .set({
+          socialMediaConfig: JSON.stringify({
+            accounts: accounts || [],
+            autoPost: autoPost || { checkIns: true, reviews: true, testimonials: true, blogPosts: true },
+            updatedAt: new Date().toISOString()
+          })
+        })
+        .where(eq(schemas.companies.id, req.user!.companyId!));
+
+      res.json({ message: 'Social media configuration updated successfully' });
+    } catch (error) {
+      console.error('Failed to update social media config:', error);
+      res.status(500).json({ message: 'Failed to update social media configuration' });
+    }
+  });
+
+  app.post("/api/companies/test-social-connection", requireAuth, requireRole(['company_admin']), async (req: Request, res: Response) => {
+    try {
+      const { account } = req.body;
+      
+      // Import social media service
+      const { socialMediaService } = await import('./services/social-media-service.js');
+      const result = await socialMediaService.testConnection(account);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Failed to test social media connection:', error);
+      res.status(500).json({ message: 'Failed to test connection' });
+    }
+  });
+
+  app.get("/api/companies/social-media-posts", requireAuth, requireRole(['company_admin']), async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      
+      const posts = await db
+        .select()
+        .from(schemas.socialMediaPosts)
+        .where(eq(schemas.socialMediaPosts.companyId, req.user!.companyId!))
+        .orderBy(desc(schemas.socialMediaPosts.createdAt))
+        .limit(limit);
+
+      res.json(posts);
+    } catch (error) {
+      console.error('Failed to get social media posts:', error);
+      res.status(500).json({ message: 'Failed to get social media posts' });
+    }
+  });
+
   // Critical Security Fix: API catch-all handler to prevent HTML responses
   // This MUST be the last route handler to catch any unmatched API requests
   app.use('/api/*', (req, res) => {

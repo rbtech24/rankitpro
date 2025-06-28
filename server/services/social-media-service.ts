@@ -354,11 +354,11 @@ class SocialMediaService {
           postType: type as any,
           relatedId: data.id,
           postContent: postContent.text,
-          mediaUrls: postContent.mediaUrls || [],
-          platformPostId: result.platformPostId,
+          mediaUrls: JSON.stringify(postContent.mediaUrls || []),
+          platformPostId: result.platformPostId || null,
           status: result.success ? 'posted' : 'failed',
           postedAt: result.success ? new Date() : null,
-          errorMessage: result.error
+          errorMessage: result.error || null
         });
 
         if (result.success) {
