@@ -271,13 +271,13 @@ function Router() {
         <LogoutHandler />
       </Route>
       
+      <Route path="/roi-calculator">
+        <TestROI />
+      </Route>
       <Route path="/onboarding">
         {auth?.user ? 
           (auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : <Redirect to="/dashboard" />) 
           : <Onboarding />}
-      </Route>
-      <Route path="/roi-calculator">
-        <TestROI />
       </Route>
       <Route path="/">
         <Home />
