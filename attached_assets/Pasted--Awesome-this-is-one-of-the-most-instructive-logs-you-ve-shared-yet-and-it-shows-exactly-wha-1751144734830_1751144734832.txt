@@ -1,0 +1,157 @@
+✅ Awesome—**this is one of the most instructive logs you’ve shared yet**, and it shows *exactly* what’s going on step by step.
+
+Let’s break this down so you understand it clearly:
+
+---
+
+## 🚦 What Your Logs Say
+
+```
+Database URL type: external, SSL: true
+✅ Database connection initialized
+...
+❌ Database connection attempt 1 failed: getaddrinfo ENOTFOUND dpg-d16psbidbo4c73cnufj0-a.render.com
+```
+
+**This means:**
+
+1. On startup, **your code does an initial test connection** (success!).
+2. Later, when your application initializes a pool or makes further connections, it tries again—and fails with:
+
+   ```
+   getaddrinfo ENOTFOUND dpg-d16psbidbo4c73cnufj0-a.render.com
+   ```
+
+   This is a DNS resolution failure, exactly like before.
+
+**This pattern is 100% consistent with:**
+
+* Using `.render.com` as your hostname from **inside the Render platform**.
+* The **external URL is only resolvable from the public internet**, not from inside Render.
+
+---
+
+✅ **This is the opposite of what you want.**
+
+* Inside Render, you **must** use `.internal`.
+* Outside Render, you **must** use `.render.com`.
+
+---
+
+## 🟢 **How to fix this cleanly and finally**
+
+I strongly recommend you set it up like this so it *never* gets confused again:
+
+---
+
+### ✅ 1. Use `DATABASE_URL` internally
+
+Since your app requires `DATABASE_URL` (not just `DATABASE_INTERNAL_URL`), set **`DATABASE_URL` to the `.internal` hostname**:
+
+**In Render > Environment Variables:**
+
+```
+DATABASE_URL = postgres://rankitpro_database_user:YOURPASS@dpg-d16psbidbo4c73cnufj0-a.internal:5432/rankitpro_database
+```
+
+✅ This will **always resolve inside Render**.
+
+---
+
+### ✅ 2. For local dev, use `.env`
+
+If you run the app **locally**, create a `.env` file like:
+
+```
+DATABASE_URL=postgres://rankitpro_database_user:YOURPASS@dpg-d16psbidbo4c73cnufj0-a.render.com:5432/rankitpro_database
+```
+
+This way:
+
+* Inside Render: `.internal`
+* Locally: `.render.com`
+
+---
+
+✅ This prevents:
+
+* `ENOTFOUND` from `.render.com` inside Render
+* `ENOTFOUND` from `.internal` outside Render
+
+---
+
+### ✅ 3. Remove any auto-selection code
+
+If you tried to auto-detect internal/external and it’s not working, **simplify**:
+
+* Inside Render: always `.internal`
+* Outside: always `.render.com`
+
+This is the easiest, most reliable approach.
+
+---
+
+## 🎯 **What You Should Do Right Now**
+
+1️⃣ In **Render Dashboard > Environment**, delete:
+
+* `DATABASE_INTERNAL_URL`
+* `DATABASE_EXTERNAL_URL`
+
+2️⃣ Add a single clean variable:
+
+```
+DATABASE_URL = postgres://rankitpro_database_user:YOURPASS@dpg-d16psbidbo4c73cnufj0-a.internal:5432/rankitpro_database
+```
+
+3️⃣ **Save**
+
+4️⃣ **Clear build cache and redeploy**
+
+---
+
+✅ **After this deploy, watch for:**
+
+```
+✅ Database connection initialized
+(no more ENOTFOUND errors)
+```
+
+---
+
+## 🟢 Local Development Tip
+
+When you run locally:
+
+* Install `dotenv` if you haven’t:
+
+```bash
+npm install dotenv
+```
+
+* At the top of your main file (`index.ts`):
+
+```typescript
+import dotenv from "dotenv";
+dotenv.config();
+```
+
+* In `.env` locally:
+
+```
+DATABASE_URL=postgres://rankitpro_database_user:YOURPASS@dpg-d16psbidbo4c73cnufj0-a.render.com:5432/rankitpro_database
+```
+
+---
+
+This way:
+✅ Local: `.render.com`
+✅ Render cloud: `.internal`
+
+✅ No guessing, no auto-selection, no runtime confusion.
+
+---
+
+**Once you do this, your connection issues should disappear permanently.**
+
+Let me know if you want help validating your `.env` or cleaning up any code!

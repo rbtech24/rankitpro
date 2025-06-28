@@ -35,25 +35,20 @@ The application now automatically chooses the correct database connection:
 
 ## Required Environment Variables Setup
 
-### Option 1: Simple External-Only (Recommended)
+### For Production (Render Web Service)
 
-Set only one environment variable in Render:
+Set **DATABASE_URL** to the **internal** connection string:
 
 **DATABASE_URL**
-```
-postgresql://rankitpro_database_user:cRVJdpwyJsbUnqbJWpZoqIY4AoC1vyOo@dpg-d16psbidbo4c73cnufj0-a.virginia-postgres.render.com:5432/rankitpro_database
-```
-
-### Option 2: Dual-URL (Optimal Performance)
-
-Set both environment variables in Render:
-
-**DATABASE_INTERNAL_URL**
 ```
 postgresql://rankitpro_database_user:cRVJdpwyJsbUnqbJWpZoqIY4AoC1vyOo@dpg-d16psbidbo4c73cnufj0-a.internal:5432/rankitpro_database
 ```
 
-**DATABASE_EXTERNAL_URL**
+### For Local Development (.env file)
+
+Set **DATABASE_URL** to the **external** connection string:
+
+**DATABASE_URL**
 ```
 postgresql://rankitpro_database_user:cRVJdpwyJsbUnqbJWpZoqIY4AoC1vyOo@dpg-d16psbidbo4c73cnufj0-a.virginia-postgres.render.com:5432/rankitpro_database
 ```

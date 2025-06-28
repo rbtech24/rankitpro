@@ -3,12 +3,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
 function createDatabaseConnection() {
-  // Automatically choose the correct database URL based on environment
-  const internalUrl = process.env.DATABASE_INTERNAL_URL;
-  const externalUrl = process.env.DATABASE_EXTERNAL_URL || process.env.DATABASE_URL;
-  
-  // Use internal URL if available (within Render network), otherwise use external
-  const databaseUrl = internalUrl || externalUrl;
+  const databaseUrl = process.env.DATABASE_URL;
   
   if (!databaseUrl) {
     console.error("\n❌ DATABASE CONFIGURATION ERROR");
@@ -36,19 +31,21 @@ function createDatabaseConnection() {
   }
 
   try {
-    // Automatically determine SSL configuration based on database URL
-    const isExternalConnection = databaseUrl.includes('.render.com') || databaseUrl.includes('.amazonaws.com') || databaseUrl.includes('.digitalocean.com');
-    const isInternalConnection = databaseUrl.includes('.internal');
+    // Simple SSL configuration: use SSL for external URLs (.render.com, .amazonaws.com, etc)
+    // Disable SSL for internal Render URLs (.internal) and local development
+    const requiresSSL = databaseUrl.includes('.render.com') || 
+                       databaseUrl.includes('.amazonaws.com') || 
+                       databaseUrl.includes('.digitalocean.com');
     
-    // Use SSL for external connections, disable for internal connections
-    const sslConfig = isExternalConnection && !isInternalConnection;
+    const connectionType = databaseUrl.includes('.internal') ? 'internal' : 
+                          requiresSSL ? 'external' : 'local';
     
-    console.log(`Database URL type: ${isInternalConnection ? 'internal' : isExternalConnection ? 'external' : 'unknown'}, SSL: ${sslConfig}`);
+    console.log(`Database connection: ${connectionType}, SSL: ${requiresSSL}`);
     
     // Create connection pool with optimized settings
     const pool = new Pool({ 
       connectionString: databaseUrl,
-      ssl: sslConfig ? { rejectUnauthorized: false } : false,
+      ssl: requiresSSL ? { rejectUnauthorized: false } : false,
       max: 5, // Reasonable pool size for Render starter plan
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 2000, // Standard timeout
