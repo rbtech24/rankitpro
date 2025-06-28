@@ -360,9 +360,11 @@ const Home = () => {
                   <span className="font-bold text-2xl text-blue-600">$30,000</span>
                 </div>
               </div>
-              <Button className="w-full mt-6 bg-blue-600 hover:bg-blue-700" size="lg">
-                Calculate Your ROI
-              </Button>
+              <Link to="/roi-calculator">
+                <Button className="w-full mt-6 bg-blue-600 hover:bg-blue-700" size="lg">
+                  Calculate Your ROI
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

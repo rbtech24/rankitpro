@@ -32,6 +32,7 @@ import Billing from "@/pages/billing";
 import TechApp from "@/pages/tech-app";
 import AISettings from "@/pages/ai-settings";
 import Home from "@/pages/home";
+import ROICalculator from "@/pages/roi-calculator";
 import TechnicianMobileField from "@/pages/technician-mobile-field";
 import MobileSimple from "@/pages/mobile-simple";
 import MobileTechApp from "@/pages/mobile-tech-app";
@@ -276,6 +277,9 @@ function Router() {
       </Route>
       <Route path="/">
         <Home />
+      </Route>
+      <Route path="/roi-calculator">
+        <ROICalculator />
       </Route>
       
       {/* Informational Pages */}
