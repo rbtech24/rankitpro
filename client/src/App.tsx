@@ -101,6 +101,7 @@ import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import AdminSetup from "@/pages/AdminSetup";
 import Landing from "@/pages/landing";
+import SocialMediaSettings from "@/pages/social-media-settings";
 
 
 
@@ -1309,6 +1310,9 @@ function Router() {
       </Route>
       <Route path="/crm-integrations">
         <PrivateRoute component={CRMIntegrations} path="/crm-integrations" role="company_admin" />
+      </Route>
+      <Route path="/social-media-settings">
+        <PrivateRoute component={SocialMediaSettings} path="/social-media-settings" role="company_admin" />
       </Route>
       
       {/* Technician Apps */}
