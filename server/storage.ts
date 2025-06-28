@@ -828,9 +828,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(reviewResponses).where(eq(reviewResponses.technicianId, technicianId));
   }
 
-  async getReviewsByCompany(companyId: number): Promise<any[]> {
-    return await db.select().from(reviewResponses).where(eq(reviewResponses.companyId, companyId));
-  }
+
 
   async getCheckInsWithTechnician(companyId: number): Promise<CheckInWithTechnician[]> {
     const checkInData = await db.select().from(checkIns).where(eq(checkIns.companyId, companyId));
@@ -1122,26 +1120,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Job types and admin methods
-  async getJobTypesByCompany(companyId: number): Promise<any[]> {
-    try {
-      const result = await db.execute(sql`
-        SELECT id, name, description, company_id as "companyId"
-        FROM job_types 
-        WHERE company_id = ${companyId} AND is_active = true
-        ORDER BY name ASC
-      `);
-      
-      return result.rows.map((row: any) => ({
-        id: row.id,
-        name: row.name,
-        description: row.description,
-        companyId: row.companyId
-      }));
-    } catch (error) {
-      console.error("Error fetching job types:", error);
-      return [];
-    }
-  }
 
   async getReviewCount(): Promise<number> {
     const result = await db.select({ count: sql<number>`count(*)` }).from(reviewResponses);
@@ -1316,47 +1294,9 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getReviewChartData(): Promise<Array<{ month: string; reviews: number }>> {
-    try {
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-      
-      const result = await db.select({
-        month: sql<string>`TO_CHAR(${reviewRequests.createdAt}, 'Mon')`,
-        reviews: sql<number>`COUNT(*)`
-      })
-      .from(reviewRequests)
-      .where(gte(reviewRequests.createdAt, sixMonthsAgo))
-      .groupBy(sql`TO_CHAR(${reviewRequests.createdAt}, 'Mon')`)
-      .orderBy(sql`TO_CHAR(${reviewRequests.createdAt}, 'YYYY-MM')`);
-      
-      return result;
-    } catch (error) {
-      console.error('Error fetching review chart data:', error);
-      return [];
-    }
-  }
 
-  async getCompanyGrowthData(): Promise<Array<{ date: string; companies: number }>> {
-    try {
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-      
-      const result = await db.select({
-        date: sql<string>`TO_CHAR(${companies.createdAt}, 'YYYY-MM')`,
-        companies: sql<number>`COUNT(*)`
-      })
-      .from(companies)
-      .where(gte(companies.createdAt, sixMonthsAgo))
-      .groupBy(sql`TO_CHAR(${companies.createdAt}, 'YYYY-MM')`)
-      .orderBy(sql`TO_CHAR(${companies.createdAt}, 'YYYY-MM')`);
-      
-      return result;
-    } catch (error) {
-      console.error('Error fetching company growth data:', error);
-      return [];
-    }
-  }
+
+
 
   async getRecentActivity(): Promise<Array<{ type: string; description: string; timestamp: Date }>> {
     try {
