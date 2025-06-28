@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { schemas } from "../../shared/schema.js";
+import * as schemas from "../../shared/schema.js";
 import { eq, and } from "drizzle-orm";
 
 interface SocialMediaAccount {
@@ -183,7 +183,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: `Facebook posting failed: ${error.message}`
+        error: `Facebook posting failed: ${(error as Error).message}`
       };
     }
   }
@@ -253,7 +253,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: `Instagram posting failed: ${error.message}`
+        error: `Instagram posting failed: ${(error as Error).message}`
       };
     }
   }
@@ -273,7 +273,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: `Twitter posting failed: ${error.message}`
+        error: `Twitter posting failed: ${(error as Error).message}`
       };
     }
   }
@@ -293,7 +293,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: `LinkedIn posting failed: ${error.message}`
+        error: `LinkedIn posting failed: ${(error as Error).message}`
       };
     }
   }
@@ -415,7 +415,7 @@ class SocialMediaService {
           return { success: false, error: `Connection test not implemented for ${account.platform}` };
       }
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: (error as Error).message };
     }
   }
 }

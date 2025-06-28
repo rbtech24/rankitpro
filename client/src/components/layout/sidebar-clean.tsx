@@ -210,6 +210,18 @@ export default function Sidebar({ className }: SidebarProps) {
               </div>
             </Link>
 
+            <Link href="/social-media-settings">
+              <div className={cn(
+                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
+                isActive("/social-media-settings") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
+              )}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                </svg>
+                Social Media
+              </div>
+            </Link>
+
 
             </div>
           )}

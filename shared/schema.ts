@@ -61,6 +61,7 @@ export const companies = pgTable("companies", {
   reviewSettings: text("review_settings"),
   crmIntegrations: text("crm_integrations"),
   crmSyncHistory: text("crm_sync_history"),
+  socialMediaConfig: jsonb("social_media_config"),
   featuresEnabled: jsonb("features_enabled").default({
     audioTestimonials: false,
     videoTestimonials: false,
@@ -792,8 +793,31 @@ export type InsertPaymentTransaction = z.infer<typeof insertPaymentTransactionSc
 export type SubscriptionStatus = typeof subscriptionStatus.$inferSelect;
 export type InsertSubscriptionStatus = z.infer<typeof insertSubscriptionStatusSchema>;
 
+// Social Media Posts Schema
+export const socialMediaPosts = pgTable("social_media_posts", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
+  platform: text("platform", { enum: ["facebook", "instagram", "twitter", "linkedin", "tiktok"] }).notNull(),
+  postType: text("post_type", { enum: ["check_in", "review", "testimonial", "blog_post"] }).notNull(),
+  relatedId: integer("related_id").notNull(),
+  postContent: text("post_content").notNull(),
+  mediaUrls: jsonb("media_urls"),
+  platformPostId: text("platform_post_id"),
+  status: text("status", { enum: ["pending", "posted", "failed", "scheduled"] }).default("pending").notNull(),
+  scheduledAt: timestamp("scheduled_at"),
+  postedAt: timestamp("posted_at"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
 // Types for support system
 export type SupportTicket = typeof supportTickets.$inferSelect;
 export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
 export type SupportTicketResponse = typeof supportTicketResponses.$inferSelect;
 export type InsertSupportTicketResponse = z.infer<typeof insertSupportTicketResponseSchema>;
+
+// Social Media Posts types
+export const insertSocialMediaPostSchema = createInsertSchema(socialMediaPosts).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertSocialMediaPost = z.infer<typeof insertSocialMediaPostSchema>;
+export type SocialMediaPost = typeof socialMediaPosts.$inferSelect;
