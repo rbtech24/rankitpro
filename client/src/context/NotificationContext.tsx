@@ -124,23 +124,58 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
   useEffect(() => {
     if (!userData?.user) return;
     
-    // Create WebSocket connection
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
-    const ws = new WebSocket(wsUrl);
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 3;
+    const reconnectInterval = 5000; // 5 seconds
     
-    ws.onopen = () => {
-      console.log('WebSocket connection established');
-      setConnected(true);
-      
-      // Send authentication message
-      const authMessage = {
-        type: 'auth',
-        userId: userData.user?.id,
-        companyId: userData.user?.companyId,
-      };
-      ws.send(JSON.stringify(authMessage));
+    const connectWebSocket = () => {
+      try {
+        // Create WebSocket connection
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws`;
+        const ws = new WebSocket(wsUrl);
+        
+        ws.onopen = () => {
+          console.log('WebSocket connection established');
+          setConnected(true);
+          reconnectAttempts = 0; // Reset attempts on successful connection
+          
+          // Send authentication message
+          const authMessage = {
+            type: 'auth',
+            userId: userData.user?.id,
+            companyId: userData.user?.companyId,
+          };
+          ws.send(JSON.stringify(authMessage));
+        };
+        
+        ws.onerror = (error) => {
+          // Suppress excessive error logging
+          if (reconnectAttempts === 0) {
+            console.log('WebSocket connection unavailable - notifications will be disabled');
+          }
+        };
+        
+        ws.onclose = () => {
+          setConnected(false);
+          
+          // Only attempt reconnection if we haven't exceeded max attempts
+          if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            setTimeout(connectWebSocket, reconnectInterval);
+          }
+        };
+        
+        setSocket(ws);
+        return ws;
+      } catch (error) {
+        console.log('WebSocket not available - running without real-time notifications');
+        setConnected(false);
+        return null;
+      }
     };
+    
+    const ws = connectWebSocket();
     
     ws.onmessage = (event) => {
       try {

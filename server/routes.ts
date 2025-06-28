@@ -148,72 +148,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create HTTP server to be returned
   const server = createServer(app);
   
-  // Initialize WebSocket server on /ws path
-  const wss = new WebSocketServer({ 
-    server: server, 
-    path: '/ws'
-  });
-  
-  // Handle WebSocket connections
-  wss.on('connection', (ws, req) => {
-    console.log('WebSocket connection established');
+  // Initialize WebSocket server with enhanced error handling
+  try {
+    const wss = new WebSocketServer({ 
+      server: server, 
+      path: '/ws',
+      perMessageDeflate: false,
+      maxPayload: 16 * 1024 // 16KB max payload
+    });
     
-    // Handle messages from clients (for authentication and subscribing to company updates)
-    ws.on('message', (message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        
-        // Handle authentication message
-        if (data.type === 'auth') {
-          const { userId, companyId } = data;
+    // WebSocket server error handling
+    wss.on('error', (error) => {
+      console.error('WebSocket Server Error:', error);
+    });
+    
+    // Handle WebSocket connections
+    wss.on('connection', (ws, req) => {
+      console.log('✅ WebSocket connection established from:', req.socket.remoteAddress);
+      
+      // Send initial connection confirmation
+      ws.send(JSON.stringify({ 
+        type: 'connection_confirmed', 
+        timestamp: new Date().toISOString() 
+      }));
+      
+      // Handle messages from clients
+      ws.on('message', (message) => {
+        try {
+          const data = JSON.parse(message.toString());
           
-          if (userId) {
-            // Store connection by user ID
-            userConnections.set(parseInt(userId), ws);
-            console.log("User ${userId} connected via WebSocket");
-          }
-          
-          if (companyId) {
-            // Store connection by company ID
-            const companyId = parseInt(data.companyId);
-            if (!companyConnections.has(companyId)) {
-              companyConnections.set(companyId, new Set());
+          // Handle authentication message
+          if (data.type === 'auth' || data.type === 'authenticate') {
+            const { userId, companyId } = data;
+            
+            if (userId) {
+              userConnections.set(parseInt(userId), ws);
+              console.log(`🔗 User ${userId} connected via WebSocket`);
+              
+              // Send authentication confirmation
+              ws.send(JSON.stringify({ 
+                type: 'auth_confirmed', 
+                userId: userId,
+                timestamp: new Date().toISOString()
+              }));
             }
-            companyConnections.get(companyId)?.add(ws);
-            console.log("Client subscribed to company ${companyId} updates");
+            
+            if (companyId) {
+              const cId = parseInt(companyId);
+              if (!companyConnections.has(cId)) {
+                companyConnections.set(cId, new Set());
+              }
+              companyConnections.get(cId)?.add(ws);
+              console.log(`🏢 Client subscribed to company ${cId} updates`);
+            }
           }
+        } catch (error) {
+          console.error('WebSocket message processing error:', error);
+          ws.send(JSON.stringify({ 
+            type: 'error', 
+            message: 'Invalid message format' 
+          }));
         }
-      } catch (error) {
-        console.error('Error processing WebSocket message:', error);
-      }
+      });
+      
+      // Handle connection errors
+      ws.on('error', (error) => {
+        console.error('WebSocket connection error:', error);
+      });
+      
+      // Handle connection close
+      ws.on('close', () => {
+        console.log('🔌 WebSocket connection closed');
+        
+        // Remove from user connections
+        Array.from(userConnections.entries()).forEach(([userId, connection]) => {
+          if (connection === ws) {
+            userConnections.delete(userId);
+            console.log(`👋 User ${userId} disconnected`);
+          }
+        });
+        
+        // Remove from company connections
+        Array.from(companyConnections.entries()).forEach(([companyId, connections]) => {
+          if (connections.has(ws)) {
+            connections.delete(ws);
+            console.log(`🏢 Client unsubscribed from company ${companyId} updates`);
+            
+            // Clean up empty sets
+            if (connections.size === 0) {
+              companyConnections.delete(companyId);
+            }
+          }
+        });
+      });
     });
     
-    // Handle connection close
-    ws.on('close', () => {
-      console.log('WebSocket connection closed');
-      
-      // Remove from user connections
-      Array.from(userConnections.entries()).forEach(([userId, connection]) => {
-        if (connection === ws) {
-          userConnections.delete(userId);
-          console.log("User ${userId} disconnected");
-        }
-      });
-      
-      // Remove from company connections
-      Array.from(companyConnections.entries()).forEach(([companyId, connections]) => {
-        if (connections.has(ws)) {
-          connections.delete(ws);
-          console.log("Client unsubscribed from company ${companyId} updates");
-          
-          // Clean up empty sets
-          if (connections.size === 0) {
-            companyConnections.delete(companyId);
-          }
-        }
-      });
-    });
-  });
+    console.log('🚀 WebSocket server initialized successfully');
+  } catch (wsError) {
+    console.error('❌ WebSocket server initialization failed:', wsError);
+    console.log('📱 Application will continue without real-time features');
+  }
   
   // Simplified session configuration to avoid production errors
   try {

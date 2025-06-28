@@ -35,21 +35,51 @@ export default function NotificationBadge({ auth }: NotificationBadgeProps) {
     // Only connect if user is logged in
     if (!auth?.user) return;
     
-    // Create WebSocket connection
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
-    const ws = new WebSocket(wsUrl);
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 2;
     
-    ws.onopen = () => {
-      setIsConnected(true);
-      
-      // Send authentication message with user ID
-      ws.send(JSON.stringify({ 
-        type: 'authenticate', 
-        userId: auth.user?.id,
-        companyId: auth.user?.companyId || null
-      }));
+    const connectWebSocket = () => {
+      try {
+        // Create WebSocket connection
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws`;
+        const ws = new WebSocket(wsUrl);
+        
+        ws.onopen = () => {
+          setIsConnected(true);
+          reconnectAttempts = 0;
+          
+          // Send authentication message with user ID
+          ws.send(JSON.stringify({ 
+            type: 'authenticate', 
+            userId: auth.user?.id,
+            companyId: auth.user?.companyId || null
+          }));
+        };
+        
+        ws.onerror = () => {
+          // Silent handling of connection errors
+          setIsConnected(false);
+        };
+        
+        ws.onclose = () => {
+          setIsConnected(false);
+          // Limited reconnection attempts
+          if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            setTimeout(connectWebSocket, 3000);
+          }
+        };
+        
+        setSocket(ws);
+        return ws;
+      } catch (error) {
+        setIsConnected(false);
+        return null;
+      }
     };
+    
+    const ws = connectWebSocket();
     
     ws.onmessage = (event) => {
       try {
