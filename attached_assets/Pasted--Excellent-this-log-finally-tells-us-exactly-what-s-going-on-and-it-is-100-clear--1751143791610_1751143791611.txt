@@ -1,0 +1,122 @@
+✅ Excellent—this log finally tells us exactly what’s going on, and it is 100% clear:
+
+---
+
+## 🚨 The Problem (Confirmed)
+
+```
+getaddrinfo ENOTFOUND dpg-d16psbidbo4c73cnufj0-a.internal
+```
+
+This means your app **literally cannot resolve this `.internal` hostname**, which means **it is trying to resolve it from *outside* the Render private network**.
+
+In other words:
+
+* If you deploy on Render, `.internal` names work.
+* If you run the code **anywhere else** (like locally or in another cloud), `.internal` **does NOT resolve**.
+
+---
+
+## 🟢 Why Did It Sometimes Work Earlier?
+
+* Earlier, you probably had the *non-internal* hostname (without `.internal`).
+* That was publicly resolvable, though slower and sometimes unreliable.
+* Then you switched to `.internal` to fix `fetch failed`.
+* Now, **if you run the app in a place that doesn’t have Render’s internal DNS**, you get `ENOTFOUND`.
+
+**This is very common when:**
+
+* Your *database* is on Render
+* Your *app* is **NOT** on Render (e.g., local dev, DigitalOcean, or another Render account)
+* Or your environment variable still has `.internal` even in dev
+
+---
+
+## 🟢 How to Fix This Consistently
+
+**Solution: Use Internal URL only inside Render, and External URL for dev or other hosts.**
+
+---
+
+### ✅ Recommended Approach
+
+Set **TWO environment variables:**
+
+* `DATABASE_INTERNAL_URL`:
+
+  ```
+  postgres://rankitpro_database_user:YOURPASS@dpg-d16psbidbo4c73cnufj0-a.internal:5432/rankitpro_database
+  ```
+* `DATABASE_EXTERNAL_URL`:
+
+  ```
+  postgres://rankitpro_database_user:YOURPASS@dpg-d16psbidbo4c73cnufj0-a.render.com:5432/rankitpro_database
+  ```
+
+Then in your Node code (e.g., `db.ts` or `index.ts`), **dynamically pick the right one**:
+
+```javascript
+const connectionString = process.env.DATABASE_INTERNAL_URL || process.env.DATABASE_EXTERNAL_URL;
+
+const pool = new Pool({
+  connectionString,
+  ssl: connectionString.includes("render.com")
+});
+```
+
+This will:
+
+* Use the internal URL in Render (fast and secure)
+* Use the external URL in local dev or elsewhere
+* Automatically set `ssl: true` when needed (external) and `ssl: false` internally
+
+---
+
+### ✅ If you don’t want dual URLs
+
+**Alternative: Just use the external URL everywhere.**
+This is simpler but less performant inside Render:
+
+```
+postgres://rankitpro_database_user:YOURPASS@dpg-d16psbidbo4c73cnufj0-a.render.com:5432/rankitpro_database
+```
+
+✅ **No `.internal` in this one, so it’s always resolvable**
+
+---
+
+## 🟢 Next Steps for You
+
+1️⃣ Go to **Render Dashboard > Your Database > Connection Info**
+2️⃣ **Copy the External Database URL**
+
+* It will look like:
+
+  ```
+  postgres://rankitpro_database_user:...@dpg-xxxx.render.com:5432/rankitpro_database
+  ```
+
+3️⃣ **Edit your app’s Environment Variables:**
+
+* Either:
+
+  * Replace `DATABASE_URL` with the External URL (simplest)
+    **OR**
+  * Add `DATABASE_INTERNAL_URL` and `DATABASE_EXTERNAL_URL` as described above
+    4️⃣ **Clear Cache and Redeploy**
+    5️⃣ **Watch logs:**
+    ✅ You should see:
+
+```
+✅ Database connection initialized
+```
+
+and **no ENOTFOUND errors**
+
+---
+
+✅ **Important**: If you do the dual-URL method, make sure to update your connection code to pick the right one as shown.
+
+---
+
+**If you paste your `db.js` or `db.ts` config here, I’ll help you make the exact edits.**

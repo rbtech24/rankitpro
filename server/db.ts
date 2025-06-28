@@ -3,7 +3,12 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
 function createDatabaseConnection() {
-  const databaseUrl = process.env.DATABASE_URL;
+  // Automatically choose the correct database URL based on environment
+  const internalUrl = process.env.DATABASE_INTERNAL_URL;
+  const externalUrl = process.env.DATABASE_EXTERNAL_URL || process.env.DATABASE_URL;
+  
+  // Use internal URL if available (within Render network), otherwise use external
+  const databaseUrl = internalUrl || externalUrl;
   
   if (!databaseUrl) {
     console.error("\n❌ DATABASE CONFIGURATION ERROR");
@@ -31,14 +36,14 @@ function createDatabaseConnection() {
   }
 
   try {
-    // Determine SSL configuration based on environment and database URL
-    const isProduction = process.env.NODE_ENV === 'production';
-    const isInternalConnection = databaseUrl.includes('-a:5432') || databaseUrl.includes('.internal');
+    // Automatically determine SSL configuration based on database URL
+    const isExternalConnection = databaseUrl.includes('.render.com') || databaseUrl.includes('.amazonaws.com') || databaseUrl.includes('.digitalocean.com');
+    const isInternalConnection = databaseUrl.includes('.internal');
     
-    // Use SSL for external connections in production, disable for internal/development
-    const sslConfig = isProduction && !isInternalConnection;
+    // Use SSL for external connections, disable for internal connections
+    const sslConfig = isExternalConnection && !isInternalConnection;
     
-    console.log(`Database connection mode: ${isProduction ? 'production' : 'development'}, SSL: ${sslConfig}`);
+    console.log(`Database URL type: ${isInternalConnection ? 'internal' : isExternalConnection ? 'external' : 'unknown'}, SSL: ${sslConfig}`);
     
     // Create connection pool with optimized settings
     const pool = new Pool({ 
