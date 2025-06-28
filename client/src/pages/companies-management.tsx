@@ -320,7 +320,7 @@ export default function CompaniesManagement() {
         state: selectedCompany.state,
         zipCode: selectedCompany.zipCode,
         industry: selectedCompany.industry,
-        planId: selectedCompany.planId,
+        planId: selectedCompany.plan === 'starter' ? '1' : selectedCompany.plan === 'pro' ? '2' : '3',
         isActive: selectedCompany.isActive,
         notes: selectedCompany.notes || "",
         maxTechnicians: selectedCompany.maxTechnicians,

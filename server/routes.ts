@@ -1531,6 +1531,57 @@ Contact us for more information about our professional services and to schedule 
     }
   });
 
+  // Update company endpoint
+  app.put("/api/companies/:id", isSuperAdmin, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      
+      if (isNaN(companyId)) {
+        return res.status(400).json({ message: "Invalid company ID" });
+      }
+      
+      // Check if company exists
+      const existingCompany = await storage.getCompany(companyId);
+      if (!existingCompany) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      
+      // Extract allowed update fields from request
+      const updateData: any = {};
+      
+      // Only allow specific fields to be updated
+      const allowedFields = ['name', 'email', 'plan', 'phoneNumber', 'website', 'address', 'city', 'state', 'zipCode', 'industry', 'isActive', 'notes', 'maxTechnicians', 'featuresEnabled'];
+      
+      for (const field of allowedFields) {
+        if (req.body[field] !== undefined) {
+          updateData[field] = req.body[field];
+        }
+      }
+      
+      // Handle planId to plan conversion
+      if (req.body.planId) {
+        const planMapping = { "1": "starter", "2": "pro", "3": "agency" };
+        updateData.plan = planMapping[req.body.planId] || req.body.planId;
+      }
+      
+      // Update the company
+      const updatedCompany = await storage.updateCompany(companyId, updateData);
+      
+      if (!updatedCompany) {
+        return res.status(500).json({ message: "Failed to update company" });
+      }
+      
+      res.json({
+        message: "Company updated successfully",
+        company: updatedCompany
+      });
+      
+    } catch (error) {
+      console.error('Error updating company:', error);
+      res.status(500).json({ message: "Failed to update company" });
+    }
+  });
+
   // Delete company endpoint
   app.delete("/api/companies/:id", isSuperAdmin, async (req, res) => {
     try {
