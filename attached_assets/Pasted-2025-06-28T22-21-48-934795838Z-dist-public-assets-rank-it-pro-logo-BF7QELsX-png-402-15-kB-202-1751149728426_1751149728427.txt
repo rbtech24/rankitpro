@@ -1,0 +1,351 @@
+2025-06-28T22:21:48.934795838Z ../dist/public/assets/rank it pro logo-BF7QELsX.png    402.15 kB
+2025-06-28T22:21:48.934886813Z ../dist/public/assets/index-cjaPGO9w.css               119.29 kB │ gzip:  18.49 kB
+2025-06-28T22:21:48.935080035Z ../dist/public/assets/logout-DlSmA8v6.js                 1.19 kB │ gzip:   0.54 kB
+2025-06-28T22:21:48.935249555Z ../dist/public/assets/index-BdkmBgc_.js              2,144.04 kB │ gzip: 512.28 kB
+2025-06-28T22:21:48.935328789Z 
+2025-06-28T22:21:48.93533624Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-06-28T22:21:48.93534003Z - Using dynamic import() to code-split the application
+2025-06-28T22:21:48.93534401Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-06-28T22:21:48.935346951Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-06-28T22:21:48.935647228Z ✓ built in 11.33s
+2025-06-28T22:21:49.098599687Z 
+2025-06-28T22:21:49.098617358Z   dist/index.js  409.2kb
+2025-06-28T22:21:49.098622128Z 
+2025-06-28T22:21:49.098626048Z ⚡ Done in 27ms
+2025-06-28T22:21:56.34723191Z ==> Uploading build...
+2025-06-28T22:22:18.471094959Z ==> Uploaded in 7.0s. Compression took 15.1s
+2025-06-28T22:22:18.53360114Z ==> Build successful 🎉
+2025-06-28T22:22:22.418736806Z ==> Deploying...
+2025-06-28T22:22:51.406638518Z ==> Running 'npm run start'
+2025-06-28T22:22:51.700258772Z 
+2025-06-28T22:22:51.700291533Z > rest-express@1.0.0 start
+2025-06-28T22:22:51.700295443Z > NODE_ENV=production node dist/index.js
+2025-06-28T22:22:51.700297133Z 
+2025-06-28T22:22:54.711735941Z Database connection mode: production, SSL: true
+2025-06-28T22:22:54.713951429Z ✅ Database connection initialized
+2025-06-28T22:22:54.721253728Z Resend API key not configured. Email functionality will be disabled.
+2025-06-28T22:22:54.727439962Z 
+2025-06-28T22:22:54.727452282Z ⚠️  ENVIRONMENT CONFIGURATION WARNINGS:
+2025-06-28T22:22:54.727486813Z   ⚠️  RESEND_API_KEY not set - email notifications will be disabled
+2025-06-28T22:22:54.727546985Z   ⚠️  Stripe configuration incomplete - subscription billing will be disabled
+2025-06-28T22:22:54.727550565Z   ⚠️  No AI service API keys found - content generation will be disabled
+2025-06-28T22:22:54.727661727Z 
+2025-06-28T22:22:54.727667257Z Application will start with limited functionality.
+2025-06-28T22:22:54.727669987Z 
+2025-06-28T22:22:54.727718358Z ✅ Environment validation completed
+2025-06-28T22:22:54.728106297Z 🚀 Starting Rank It Pro SaaS Platform
+2025-06-28T22:22:54.728239749Z 📊 Features enabled: none
+2025-06-28T22:22:54.72824898Z 🔄 Verifying database connection... (attempt 1/3)
+2025-06-28T22:22:57.424441794Z ✅ Database connection verified
+2025-06-28T22:22:57.437334303Z 10:22:57 PM [warn] Email service initialization failed - notifications will be disabled
+2025-06-28T22:22:57.437693581Z 🧹 Memory optimization service initialized
+2025-06-28T22:22:57.441616576Z [SESSION] Memory session store initialized successfully
+2025-06-28T22:22:57.444749624Z 10:22:57 PM [express] serving on port 10000
+2025-06-28T22:23:03.461863005Z ==> Your service is live 🎉
+2025-06-28T22:23:03.553058653Z ==> 
+2025-06-28T22:23:03.583366139Z ==> ///////////////////////////////////////////////////////////
+2025-06-28T22:23:03.612445205Z ==> 
+2025-06-28T22:23:03.638708562Z ==> Available at your primary URL https://rankitpro.com + 2 more domains
+2025-06-28T22:23:03.666295408Z ==> 
+2025-06-28T22:23:03.694314934Z ==> ///////////////////////////////////////////////////////////
+2025-06-28T22:26:52.422409579Z 10:26:52 PM [express] GET /api/auth/me 401 in 3ms :: {"message":"Not authenticated"}
+2025-06-28T22:26:52.726075876Z 10:26:52 PM [express] GET /api/auth/me 401 in 1ms :: {"message":"Not authenticated"}
+2025-06-28T22:27:01.029336658Z 10:27:01 PM [express] POST /api/auth/login 401 in 3437ms :: {"message":"Invalid credentials"}
+2025-06-28T22:27:57.44281718Z 🧹 Cleanup completed. Memory usage: 31MB
+2025-06-28T22:28:00.276003911Z 10:28:00 PM [express] GET /api/auth/me 401 in 1ms :: {"message":"Not authenticated"}
+2025-06-28T22:28:02.689508009Z ==> Detected service running on port 10000
+2025-06-28T22:28:02.770798644Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-06-28T22:28:05.677243254Z Login session save error: error: relation "session_pkey" already exists
+2025-06-28T22:28:05.677279095Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-06-28T22:28:05.677284385Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-28T22:28:05.677288925Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-06-28T22:28:05.677295805Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:186:9)
+2025-06-28T22:28:05.677300465Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7) {
+2025-06-28T22:28:05.677304815Z   length: 94,
+2025-06-28T22:28:05.677309465Z   severity: 'ERROR',
+2025-06-28T22:28:05.677313855Z   code: '42P07',
+2025-06-28T22:28:05.677317705Z   detail: undefined,
+2025-06-28T22:28:05.677321445Z   hint: undefined,
+2025-06-28T22:28:05.677325846Z   position: undefined,
+2025-06-28T22:28:05.677331236Z   internalPosition: undefined,
+2025-06-28T22:28:05.677335776Z   internalQuery: undefined,
+2025-06-28T22:28:05.677344166Z   where: undefined,
+2025-06-28T22:28:05.677348386Z   schema: undefined,
+2025-06-28T22:28:05.677352406Z   table: undefined,
+2025-06-28T22:28:05.677356266Z   column: undefined,
+2025-06-28T22:28:05.677392547Z   dataType: undefined,
+2025-06-28T22:28:05.677395967Z   constraint: undefined,
+2025-06-28T22:28:05.677398257Z   file: 'index.c',
+2025-06-28T22:28:05.677400847Z   line: '885',
+2025-06-28T22:28:05.677403797Z   routine: 'index_create'
+2025-06-28T22:28:05.677406457Z }
+2025-06-28T22:28:05.677425598Z Login error: Error: Session save failed
+2025-06-28T22:28:05.677430158Z     at file:///opt/render/project/src/dist/index.js:7390:20
+2025-06-28T22:28:05.677432718Z     at /opt/render/project/src/node_modules/connect-pg-simple/index.js:394:24
+2025-06-28T22:28:05.677435608Z     at process.processTicksAndRejections (node:internal/process/task_queues:89:21)
+2025-06-28T22:28:05.678822448Z 10:28:05 PM [express] POST /api/auth/login 500 in 567ms :: {"message":"Server error during login"}
+2025-06-28T22:28:32.574115449Z Server error: error: relation "session_pkey" already exists
+2025-06-28T22:28:32.574193041Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-06-28T22:28:32.574202931Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-28T22:28:32.574208261Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-06-28T22:28:32.574213251Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:186:9)
+2025-06-28T22:28:32.574217421Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7) {
+2025-06-28T22:28:32.574221701Z   length: 94,
+2025-06-28T22:28:32.574226652Z   severity: 'ERROR',
+2025-06-28T22:28:32.574230601Z   code: '42P07',
+2025-06-28T22:28:32.574234192Z   detail: undefined,
+2025-06-28T22:28:32.574237632Z   hint: undefined,
+2025-06-28T22:28:32.574241522Z   position: undefined,
+2025-06-28T22:28:32.574246032Z   internalPosition: undefined,
+2025-06-28T22:28:32.574250482Z   internalQuery: undefined,
+2025-06-28T22:28:32.574255052Z   where: undefined,
+2025-06-28T22:28:32.574259072Z   schema: undefined,
+2025-06-28T22:28:32.574263062Z   table: undefined,
+2025-06-28T22:28:32.574267162Z   column: undefined,
+2025-06-28T22:28:32.574271092Z   dataType: undefined,
+2025-06-28T22:28:32.574274953Z   constraint: undefined,
+2025-06-28T22:28:32.574279073Z   file: 'index.c',
+2025-06-28T22:28:32.574283193Z   line: '885',
+2025-06-28T22:28:32.574287593Z   routine: 'index_create'
+2025-06-28T22:28:32.574291823Z }
+2025-06-28T22:28:32.575924628Z Server error: error: relation "session_pkey" already exists
+2025-06-28T22:28:32.575944028Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-06-28T22:28:32.575950389Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-28T22:28:32.575955939Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-06-28T22:28:32.575961079Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:186:9)
+2025-06-28T22:28:32.575965399Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7) {
+2025-06-28T22:28:32.575969719Z   length: 94,
+2025-06-28T22:28:32.575975119Z   severity: 'ERROR',
+2025-06-28T22:28:32.575979449Z   code: '42P07',
+2025-06-28T22:28:32.575984269Z   detail: undefined,
+2025-06-28T22:28:32.575989169Z   hint: undefined,
+2025-06-28T22:28:32.57599349Z   position: undefined,
+2025-06-28T22:28:32.57599849Z   internalPosition: undefined,
+2025-06-28T22:28:32.57600283Z   internalQuery: undefined,
+2025-06-28T22:28:32.57603821Z   where: undefined,
+2025-06-28T22:28:32.5760417Z   schema: undefined,
+2025-06-28T22:28:32.576044171Z   table: undefined,
+2025-06-28T22:28:32.576046711Z   column: undefined,
+2025-06-28T22:28:32.576049081Z   dataType: undefined,
+2025-06-28T22:28:32.576051321Z   constraint: undefined,
+2025-06-28T22:28:32.576053981Z   file: 'index.c',
+2025-06-28T22:28:32.576056711Z   line: '885',
+2025-06-28T22:28:32.576059171Z   routine: 'index_create'
+2025-06-28T22:28:32.576061821Z }
+2025-06-28T22:28:33.046489753Z Server error: error: relation "session_pkey" already exists
+2025-06-28T22:28:33.046518394Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-06-28T22:28:33.046522644Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-28T22:28:33.046525944Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-06-28T22:28:33.046529624Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:186:9)
+2025-06-28T22:28:33.046532204Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7) {
+2025-06-28T22:28:33.046534964Z   length: 94,
+2025-06-28T22:28:33.046538454Z   severity: 'ERROR',
+2025-06-28T22:28:33.046541034Z   code: '42P07',
+2025-06-28T22:28:33.046543774Z   detail: undefined,
+2025-06-28T22:28:33.046546185Z   hint: undefined,
+2025-06-28T22:28:33.046548314Z   position: undefined,
+2025-06-28T22:28:33.046551515Z   internalPosition: undefined,
+2025-06-28T22:28:33.046553605Z   internalQuery: undefined,
+2025-06-28T22:28:33.046559625Z   where: undefined,
+2025-06-28T22:28:33.046562535Z   schema: undefined,
+2025-06-28T22:28:33.046565075Z   table: undefined,
+2025-06-28T22:28:33.046567805Z   column: undefined,
+2025-06-28T22:28:33.046570345Z   dataType: undefined,
+2025-06-28T22:28:33.046573075Z   constraint: undefined,
+2025-06-28T22:28:33.046575605Z   file: 'index.c',
+2025-06-28T22:28:33.046578375Z   line: '885',
+2025-06-28T22:28:33.046581035Z   routine: 'index_create'
+2025-06-28T22:28:33.046583545Z }
+2025-06-28T22:28:33.192260597Z Server error: error: relation "session_pkey" already exists
+2025-06-28T22:28:33.192339819Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-06-28T22:28:33.192344329Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-28T22:28:33.192347929Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-06-28T22:28:33.192351569Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:186:9)
+2025-06-28T22:28:33.192383209Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7) {
+2025-06-28T22:28:33.192386689Z   length: 94,
+2025-06-28T22:28:33.19238994Z   severity: 'ERROR',
+2025-06-28T22:28:33.19239285Z   code: '42P07',
+2025-06-28T22:28:33.19239531Z   detail: undefined,
+2025-06-28T22:28:33.19239791Z   hint: undefined,
+2025-06-28T22:28:33.19240104Z   position: undefined,
+2025-06-28T22:28:33.19240463Z   internalPosition: undefined,
+2025-06-28T22:28:33.19240739Z   internalQuery: undefined,
+2025-06-28T22:28:33.19240995Z   where: undefined,
+2025-06-28T22:28:33.19241246Z   schema: undefined,
+2025-06-28T22:28:33.19241516Z   table: undefined,
+2025-06-28T22:28:33.19241794Z   column: undefined,
+2025-06-28T22:28:33.19242074Z   dataType: undefined,
+2025-06-28T22:28:33.19242332Z   constraint: undefined,
+2025-06-28T22:28:33.192486762Z   file: 'index.c',
+2025-06-28T22:28:33.192491132Z   line: '885',
+2025-06-28T22:28:33.192493992Z   routine: 'index_create'
+2025-06-28T22:28:33.192496742Z }
+2025-06-28T22:28:33.271450319Z Server error: error: relation "session_pkey" already exists
+2025-06-28T22:28:33.2714862Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-06-28T22:28:33.27149038Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-28T22:28:33.27149432Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-06-28T22:28:33.27149788Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:186:9)
+2025-06-28T22:28:33.27150058Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7) {
+2025-06-28T22:28:33.27150301Z   length: 94,
+2025-06-28T22:28:33.2715065Z   severity: 'ERROR',
+2025-06-28T22:28:33.27150907Z   code: '42P07',
+2025-06-28T22:28:33.27151187Z   detail: undefined,
+2025-06-28T22:28:33.271514261Z   hint: undefined,
+2025-06-28T22:28:33.27151663Z   position: undefined,
+2025-06-28T22:28:33.27152027Z   internalPosition: undefined,
+2025-06-28T22:28:33.271522311Z   internalQuery: undefined,
+2025-06-28T22:28:33.271524391Z   where: undefined,
+2025-06-28T22:28:33.271526431Z   schema: undefined,
+2025-06-28T22:28:33.271528451Z   table: undefined,
+2025-06-28T22:28:33.271530471Z   column: undefined,
+2025-06-28T22:28:33.271532711Z   dataType: undefined,
+2025-06-28T22:28:33.271535021Z   constraint: undefined,
+2025-06-28T22:28:33.271537991Z   file: 'index.c',
+2025-06-28T22:28:33.271540621Z   line: '885',
+2025-06-28T22:28:33.271543261Z   routine: 'index_create'
+2025-06-28T22:28:33.271545771Z }
+2025-06-28T22:28:34.152845406Z Server error: error: relation "session_pkey" already exists
+2025-06-28T22:28:34.152873747Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-06-28T22:28:34.152878127Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-28T22:28:34.152883267Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-06-28T22:28:34.152887237Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:186:9)
+2025-06-28T22:28:34.152889757Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7) {
+2025-06-28T22:28:34.152893177Z   length: 94,
+2025-06-28T22:28:34.152897937Z   severity: 'ERROR',
+2025-06-28T22:28:34.152900737Z   code: '42P07',
+2025-06-28T22:28:34.152903167Z   detail: undefined,
+2025-06-28T22:28:34.152905747Z   hint: undefined,
+2025-06-28T22:28:34.152908397Z   position: undefined,
+2025-06-28T22:28:34.152911977Z   internalPosition: undefined,
+2025-06-28T22:28:34.152914267Z   internalQuery: undefined,
+2025-06-28T22:28:34.152916517Z   where: undefined,
+2025-06-28T22:28:34.152918957Z   schema: undefined,
+2025-06-28T22:28:34.152921628Z   table: undefined,
+2025-06-28T22:28:34.152924268Z   column: undefined,
+2025-06-28T22:28:34.152926517Z   dataType: undefined,
+2025-06-28T22:28:34.152928958Z   constraint: undefined,
+2025-06-28T22:28:34.152931298Z   file: 'index.c',
+2025-06-28T22:28:34.152934018Z   line: '885',
+2025-06-28T22:28:34.152936748Z   routine: 'index_create'
+2025-06-28T22:28:34.152939318Z }
+2025-06-28T22:28:34.153687164Z 10:28:34 PM [express] GET /api/auth/me 500 in 1ms :: {"message":"relation \"session_pkey\" already ex…
+2025-06-28T22:28:37.47545998Z Server error: error: relation "session_pkey" already exists
+2025-06-28T22:28:37.475491871Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-06-28T22:28:37.475497661Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-28T22:28:37.475502081Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-06-28T22:28:37.475506381Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:186:9)
+2025-06-28T22:28:37.475509911Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7) {
+2025-06-28T22:28:37.475514911Z   length: 94,
+2025-06-28T22:28:37.475521431Z   severity: 'ERROR',
+2025-06-28T22:28:37.475527101Z   code: '42P07',
+2025-06-28T22:28:37.475532461Z   detail: undefined,
+2025-06-28T22:28:37.475537722Z   hint: undefined,
+2025-06-28T22:28:37.475543462Z   position: undefined,
+2025-06-28T22:28:37.475549672Z   internalPosition: undefined,
+2025-06-28T22:28:37.475554512Z   internalQuery: undefined,
+2025-06-28T22:28:37.475558222Z   where: undefined,
+2025-06-28T22:28:37.475561632Z   schema: undefined,
+2025-06-28T22:28:37.475565072Z   table: undefined,
+2025-06-28T22:28:37.475568552Z   column: undefined,
+2025-06-28T22:28:37.475571962Z   dataType: undefined,
+2025-06-28T22:28:37.475575413Z   constraint: undefined,
+2025-06-28T22:28:37.475578813Z   file: 'index.c',
+2025-06-28T22:28:37.475582243Z   line: '885',
+2025-06-28T22:28:37.475585673Z   routine: 'index_create'
+2025-06-28T22:28:37.475589083Z }
+2025-06-28T22:28:37.478197109Z Server error: error: relation "session_pkey" already exists
+2025-06-28T22:28:37.478223089Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-06-28T22:28:37.478229599Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-28T22:28:37.4782343Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-06-28T22:28:37.47823951Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:186:9)
+2025-06-28T22:28:37.47824385Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7) {
+2025-06-28T22:28:37.47824779Z   length: 94,
+2025-06-28T22:28:37.47825192Z   severity: 'ERROR',
+2025-06-28T22:28:37.47826056Z   code: '42P07',
+2025-06-28T22:28:37.4782644Z   detail: undefined,
+2025-06-28T22:28:37.47826799Z   hint: undefined,
+2025-06-28T22:28:37.478272Z   position: undefined,
+2025-06-28T22:28:37.478276371Z   internalPosition: undefined,
+2025-06-28T22:28:37.478280051Z   internalQuery: undefined,
+2025-06-28T22:28:37.478283801Z   where: undefined,
+2025-06-28T22:28:37.478287551Z   schema: undefined,
+2025-06-28T22:28:37.478291471Z   table: undefined,
+2025-06-28T22:28:37.478295491Z   column: undefined,
+2025-06-28T22:28:37.478299431Z   dataType: undefined,
+2025-06-28T22:28:37.478303291Z   constraint: undefined,
+2025-06-28T22:28:37.478307201Z   file: 'index.c',
+2025-06-28T22:28:37.478311141Z   line: '885',
+2025-06-28T22:28:37.478315121Z   routine: 'index_create'
+2025-06-28T22:28:37.478319401Z }
+2025-06-28T22:28:37.655930979Z Server error: error: relation "session_pkey" already exists
+2025-06-28T22:28:37.65596832Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-06-28T22:28:37.65597532Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-28T22:28:37.6559812Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-06-28T22:28:37.656001811Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:186:9)
+2025-06-28T22:28:37.656004201Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7) {
+2025-06-28T22:28:37.656006351Z   length: 94,
+2025-06-28T22:28:37.656009191Z   severity: 'ERROR',
+2025-06-28T22:28:37.656011431Z   code: '42P07',
+2025-06-28T22:28:37.656013571Z   detail: undefined,
+2025-06-28T22:28:37.656015601Z   hint: undefined,
+2025-06-28T22:28:37.656017681Z   position: undefined,
+2025-06-28T22:28:37.656020731Z   internalPosition: undefined,
+2025-06-28T22:28:37.656022991Z   internalQuery: undefined,
+2025-06-28T22:28:37.656025072Z   where: undefined,
+2025-06-28T22:28:37.656027092Z   schema: undefined,
+2025-06-28T22:28:37.656029572Z   table: undefined,
+2025-06-28T22:28:37.656031581Z   column: undefined,
+2025-06-28T22:28:37.656033602Z   dataType: undefined,
+2025-06-28T22:28:37.656035902Z   constraint: undefined,
+2025-06-28T22:28:37.656038012Z   file: 'index.c',
+2025-06-28T22:28:37.656040082Z   line: '885',
+2025-06-28T22:28:37.656042182Z   routine: 'index_create'
+2025-06-28T22:28:37.656044232Z }
+2025-06-28T22:28:37.796588133Z Server error: error: relation "session_pkey" already exists
+2025-06-28T22:28:37.796610384Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-06-28T22:28:37.796614154Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-28T22:28:37.796617904Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-06-28T22:28:37.796621454Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:186:9)
+2025-06-28T22:28:37.796624654Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7) {
+2025-06-28T22:28:37.796627314Z   length: 94,
+2025-06-28T22:28:37.796634074Z   severity: 'ERROR',
+2025-06-28T22:28:37.796636834Z   code: '42P07',
+2025-06-28T22:28:37.796639794Z   detail: undefined,
+2025-06-28T22:28:37.796642304Z   hint: undefined,
+2025-06-28T22:28:37.796644924Z   position: undefined,
+2025-06-28T22:28:37.796648724Z   internalPosition: undefined,
+2025-06-28T22:28:37.796651624Z   internalQuery: undefined,
+2025-06-28T22:28:37.796654135Z   where: undefined,
+2025-06-28T22:28:37.796656825Z   schema: undefined,
+2025-06-28T22:28:37.796659175Z   table: undefined,
+2025-06-28T22:28:37.796661725Z   column: undefined,
+2025-06-28T22:28:37.796664315Z   dataType: undefined,
+2025-06-28T22:28:37.796666745Z   constraint: undefined,
+2025-06-28T22:28:37.796669095Z   file: 'index.c',
+2025-06-28T22:28:37.796671685Z   line: '885',
+2025-06-28T22:28:37.796674305Z   routine: 'index_create'
+2025-06-28T22:28:37.796677335Z }
+2025-06-28T22:28:37.812866643Z Server error: error: relation "session_pkey" already exists
+2025-06-28T22:28:37.812893084Z     at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+2025-06-28T22:28:37.812896894Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-06-28T22:28:37.812899984Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-06-28T22:28:37.812902894Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:186:9)
+2025-06-28T22:28:37.812924744Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7) {
+2025-06-28T22:28:37.812943225Z   length: 94,
+2025-06-28T22:28:37.812946255Z   severity: 'ERROR',
+2025-06-28T22:28:37.812948395Z   code: '42P07',
+2025-06-28T22:28:37.812950515Z   detail: undefined,
+2025-06-28T22:28:37.812952675Z   hint: undefined,
+2025-06-28T22:28:37.812954805Z   position: undefined,
+2025-06-28T22:28:37.812957785Z   internalPosition: undefined,
+2025-06-28T22:28:37.812960005Z   internalQuery: undefined,
+2025-06-28T22:28:37.812962155Z   where: undefined,
+2025-06-28T22:28:37.812964465Z   schema: undefined,
+2025-06-28T22:28:37.812966605Z   table: undefined,
+2025-06-28T22:28:37.812968785Z   column: undefined,
+2025-06-28T22:28:37.812970825Z   dataType: undefined,
+2025-06-28T22:28:37.812995536Z   constraint: undefined,
+2025-06-28T22:28:37.812998826Z   file: 'index.c',
+2025-06-28T22:28:37.813001066Z   line: '885',
+2025-06-28T22:28:37.813003336Z   routine: 'index_create'
+2025-06-28T22:28:37.813005516Z }

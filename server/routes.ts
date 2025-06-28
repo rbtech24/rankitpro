@@ -69,8 +69,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const sessionStore = isProduction ? 
     new (connectPg(session))({
       conString: process.env.DATABASE_URL,
-      tableName: 'sessions',
-      createTableIfMissing: true
+      tableName: 'session',
+      createTableIfMissing: false
     }) : 
     new SessionStore({});
 
