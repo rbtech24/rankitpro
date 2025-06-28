@@ -1,18 +1,6 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
-
-// Configure Neon for optimal connection handling with better error handling
-neonConfig.webSocketConstructor = ws;
-neonConfig.pipelineConnect = false;
-neonConfig.useSecureWebSocket = true;
-neonConfig.fetchConnectionCache = true;
-// Note: Some neonConfig properties may not be available in current version
-// Focus on Pool configuration for timeout handling
-
-// Add connection pooling configuration for better stability
-neonConfig.poolQueryViaFetch = true;
 
 function createDatabaseConnection() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -43,19 +31,17 @@ function createDatabaseConnection() {
   }
 
   try {
-    // Create connection pool with optimized settings for Neon production
+    // Create connection pool with optimized settings for Render PostgreSQL
     const pool = new Pool({ 
       connectionString: databaseUrl,
-      max: 3, // Reduced for better connection management
-      idleTimeoutMillis: 30000, // Increased idle timeout
-      connectionTimeoutMillis: 30000, // Increased connection timeout to 30s
-      statement_timeout: 30000, // Increased statement timeout
-      application_name: 'rankitpro_saas',
-      maxUses: 50, // Reduced max uses per connection
-      allowExitOnIdle: false
+      ssl: false, // Disable SSL for internal Render PostgreSQL connection
+      max: 5, // Reasonable pool size for Render starter plan
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000, // Standard timeout
+      application_name: 'rankitpro_saas'
     });
     
-    const db = drizzle({ client: pool, schema });
+    const db = drizzle(pool, { schema });
     
     console.log("✅ Database connection initialized");
     return { pool, db };
