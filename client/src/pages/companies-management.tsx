@@ -75,23 +75,10 @@ import { formatDistanceToNow } from 'date-fns';
 import { Loader2, Users, Briefcase, UserPlus, FileText, Star, BarChart2, Settings2, Mail, AlertTriangle, Check, X, Edit2, Trash2, Settings } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// Company creation/edit schema
+// Simplified company edit schema (only fields that exist in database)
 const companySchema = z.object({
-  name: z.string().min(3, { message: "Company name must be at least 3 characters." }),
-  email: z.string().email({ message: "Must be a valid email address." }),
-  subscriptionPlan: z.enum(["starter", "pro", "agency"], { message: "Please select a subscription plan." }),
-  phoneNumber: z.string().min(10, { message: "Phone number must be at least 10 digits." }),
-  website: z.string().url({ message: "Must be a valid URL." }).optional().or(z.literal('')),
-  address: z.string().min(5, { message: "Address must be at least 5 characters." }),
-  city: z.string().min(2, { message: "City must be at least 2 characters." }),
-  state: z.string().min(2, { message: "State must be at least 2 characters." }),
-  zipCode: z.string().min(5, { message: "Zip code must be at least 5 characters." }),
-  industry: z.string().min(3, { message: "Industry must be at least 3 characters." }),
-  planId: z.string(),
-  isActive: z.boolean(),
-  notes: z.string().optional(),
-  maxTechnicians: z.number().min(1, { message: "Must allow at least 1 technician." }),
-  featuresEnabled: z.array(z.string()),
+  name: z.string().min(1, { message: "Company name is required." }),
+  plan: z.enum(["starter", "pro", "agency"], { message: "Please select a subscription plan." }),
 });
 
 // Define types for dynamic data
@@ -296,19 +283,7 @@ export default function CompaniesManagement() {
     resolver: zodResolver(companySchema),
     defaultValues: {
       name: "",
-      email: "",
-      phoneNumber: "",
-      website: "",
-      address: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      industry: "",
-      planId: "1",
-      isActive: true,
-      notes: "",
-      maxTechnicians: 5,
-      featuresEnabled: ["ai_content", "review_requests"]
+      plan: "starter"
     }
   });
   
@@ -316,20 +291,8 @@ export default function CompaniesManagement() {
   React.useEffect(() => {
     if (selectedCompany) {
       form.reset({
-        name: selectedCompany.name,
-        email: selectedCompany.email,
-        phoneNumber: selectedCompany.phoneNumber,
-        website: selectedCompany.website || "",
-        address: selectedCompany.address,
-        city: selectedCompany.city,
-        state: selectedCompany.state,
-        zipCode: selectedCompany.zipCode,
-        industry: selectedCompany.industry,
-        planId: selectedCompany.plan === 'starter' ? '1' : selectedCompany.plan === 'pro' ? '2' : '3',
-        isActive: selectedCompany.isActive,
-        notes: selectedCompany.notes || "",
-        maxTechnicians: selectedCompany.maxTechnicians,
-        featuresEnabled: selectedCompany.featuresEnabled
+        name: selectedCompany.name || "",
+        plan: selectedCompany.plan || "starter"
       });
     }
   }, [selectedCompany, form]);
@@ -604,28 +567,13 @@ export default function CompaniesManagement() {
                                     <DialogTitle>Edit Company</DialogTitle>
                                   </DialogHeader>
                                   <Form {...form}>
-                                    <form onSubmit={form.handleSubmit((data) => {
-                                      updateCompanyMutation.mutate({ id: company.id, data });
-                                    })} className="space-y-4">
+                                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                                       <FormField
                                         control={form.control}
                                         name="name"
                                         render={({ field }) => (
                                           <FormItem>
                                             <FormLabel>Company Name</FormLabel>
-                                            <FormControl>
-                                              <Input {...field} defaultValue={company.name} />
-                                            </FormControl>
-                                            <FormMessage />
-                                          </FormItem>
-                                        )}
-                                      />
-                                      <FormField
-                                        control={form.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                          <FormItem>
-                                            <FormLabel>Email</FormLabel>
                                             <FormControl>
                                               <Input {...field} />
                                             </FormControl>
@@ -635,7 +583,7 @@ export default function CompaniesManagement() {
                                       />
                                       <FormField
                                         control={form.control}
-                                        name="subscriptionPlan"
+                                        name="plan"
                                         render={({ field }) => (
                                           <FormItem>
                                             <FormLabel>Subscription Plan</FormLabel>
