@@ -100,6 +100,7 @@ import EmergencyLogin from "@/pages/emergency-login";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import AdminSetup from "@/pages/AdminSetup";
+import Landing from "@/pages/landing";
 
 
 
