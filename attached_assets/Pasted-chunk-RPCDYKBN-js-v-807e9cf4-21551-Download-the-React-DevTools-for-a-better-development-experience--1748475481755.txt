@@ -1,0 +1,78 @@
+chunk-RPCDYKBN.js?v=807e9cf4:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+api/auth/me:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+stripe.js:1 Uncaught (in promise) IntegrationError: You should not use your secret key with Stripe.js.
+          Please pass a publishable key instead.
+    at l (stripe.js:1:164300)
+    at new e (stripe.js:1:539936)
+    at e_ (stripe.js:1:592961)
+    at initStripe2 (@stripe_stripe-js.js?v=807e9cf4:121:28)
+    at @stripe_stripe-js.js?v=807e9cf4:151:12
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
+NotificationContext.tsx:325 Attempting to reconnect WebSocket...
+technician-sidebar-new.tsx:84 Uncaught TypeError: event.stopImmediatePropagation is not a function
+    at handleItemClick (technician-sidebar-new.tsx:84:13)
+    at onClick (technician-sidebar-new.tsx:141:31)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js?v=807e9cf4:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js?v=807e9cf4:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js?v=807e9cf4:3733:39)
+    at invokeGuardedCallbackAndCatchFirstError (chunk-RPCDYKBN.js?v=807e9cf4:3736:33)
+    at executeDispatch (chunk-RPCDYKBN.js?v=807e9cf4:7014:11)
+    at processDispatchQueueItemsInOrder (chunk-RPCDYKBN.js?v=807e9cf4:7034:15)
+    at processDispatchQueue (chunk-RPCDYKBN.js?v=807e9cf4:7043:13)
+    at dispatchEventsForPlugins (chunk-RPCDYKBN.js?v=807e9cf4:7051:11)
+handleItemClick @ technician-sidebar-new.tsx:84
+onClick @ technician-sidebar-new.tsx:141
+callCallback2 @ chunk-RPCDYKBN.js?v=807e9cf4:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=807e9cf4:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=807e9cf4:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=807e9cf4:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=807e9cf4:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=807e9cf4:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=807e9cf4:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=807e9cf4:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=807e9cf4:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=807e9cf4:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=807e9cf4:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=807e9cf4:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=807e9cf4:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=807e9cf4:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=807e9cf4:5449
+chunk-RPCDYKBN.js?v=807e9cf4:3750 Uncaught TypeError: event.stopImmediatePropagation is not a function
+    at handleItemClick (technician-sidebar-new.tsx:84:13)
+    at onClick (technician-sidebar-new.tsx:141:31)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js?v=807e9cf4:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js?v=807e9cf4:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js?v=807e9cf4:3733:39)
+    at invokeGuardedCallbackAndCatchFirstError (chunk-RPCDYKBN.js?v=807e9cf4:3736:33)
+    at executeDispatch (chunk-RPCDYKBN.js?v=807e9cf4:7014:11)
+    at processDispatchQueueItemsInOrder (chunk-RPCDYKBN.js?v=807e9cf4:7034:15)
+    at processDispatchQueue (chunk-RPCDYKBN.js?v=807e9cf4:7043:13)
+    at dispatchEventsForPlugins (chunk-RPCDYKBN.js?v=807e9cf4:7051:11)
+handleItemClick @ technician-sidebar-new.tsx:84
+onClick @ technician-sidebar-new.tsx:141
+callCallback2 @ chunk-RPCDYKBN.js?v=807e9cf4:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=807e9cf4:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=807e9cf4:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=807e9cf4:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=807e9cf4:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=807e9cf4:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=807e9cf4:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=807e9cf4:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=807e9cf4:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=807e9cf4:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=807e9cf4:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=807e9cf4:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=807e9cf4:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=807e9cf4:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=807e9cf4:5449
+NotificationContext.tsx:325 Attempting to reconnect WebSocket...
+NotificationContext.tsx:325 Attempting to reconnect WebSocket...
+NotificationContext.tsx:325 Attempting to reconnect WebSocket...
