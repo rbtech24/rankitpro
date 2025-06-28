@@ -31,10 +31,19 @@ function createDatabaseConnection() {
   }
 
   try {
-    // Create connection pool with optimized settings for Render PostgreSQL
+    // Determine SSL configuration based on environment and database URL
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isInternalConnection = databaseUrl.includes('-a:5432') || databaseUrl.includes('.internal');
+    
+    // Use SSL for external connections in production, disable for internal/development
+    const sslConfig = isProduction && !isInternalConnection;
+    
+    console.log(`Database connection mode: ${isProduction ? 'production' : 'development'}, SSL: ${sslConfig}`);
+    
+    // Create connection pool with optimized settings
     const pool = new Pool({ 
       connectionString: databaseUrl,
-      ssl: false, // Disable SSL for internal Render PostgreSQL connection
+      ssl: sslConfig ? { rejectUnauthorized: false } : false,
       max: 5, // Reasonable pool size for Render starter plan
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 2000, // Standard timeout

@@ -1133,19 +1133,7 @@ export class DatabaseStorage implements IStorage {
     return result[0]?.avg || 0;
   }
 
-  async getCheckInChartData(): Promise<any[]> {
-    const result = await db.select({
-      date: sql<string>`to_char(created_at, 'YYYY-MM')`,
-      count: sql<number>`count(*)`
-    })
-    .from(checkIns)
-    .groupBy(sql`to_char(created_at, 'YYYY-MM')`)
-    .orderBy(sql`to_char(created_at, 'YYYY-MM')`);
-    
-    return result.length > 0 ? result : [
-      { date: "2025-06", count: 45 }
-    ];
-  }
+
 
   async getAdminReviewChartData(): Promise<any[]> {
     try {
