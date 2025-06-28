@@ -210,6 +210,7 @@ function Router() {
         
         {/* Public informational pages */}
         <Route path="/"><Home /></Route>
+        <Route path="/roi-calculator"><TestROI /></Route>
         <Route path="/about"><About /></Route>
         <Route path="/case-studies"><CaseStudies /></Route>
         <Route path="/testimonials"><Testimonials /></Route>
@@ -271,9 +272,7 @@ function Router() {
         <LogoutHandler />
       </Route>
       
-      <Route path="/roi-calculator">
-        <TestROI />
-      </Route>
+
       <Route path="/onboarding">
         {auth?.user ? 
           (auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : <Redirect to="/dashboard" />) 
