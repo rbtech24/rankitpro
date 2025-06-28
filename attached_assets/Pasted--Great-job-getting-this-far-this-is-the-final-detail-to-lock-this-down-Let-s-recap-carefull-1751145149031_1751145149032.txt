@@ -1,0 +1,147 @@
+✅ **Great job getting this far—this is the final detail to lock this down.**
+
+Let’s recap carefully because your logs now clearly show *two conflicting behaviors*:
+
+---
+
+## 🚦 What your logs say right now:
+
+✅ **Startup succeeds:**
+
+```
+Database URL type: internal, SSL: false
+✅ Database connection initialized
+```
+
+**but then:**
+
+```
+❌ getaddrinfo ENOTFOUND dpg-d16psbidbo4c73cnufj0-a.internal
+```
+
+when your app makes additional queries or initializes the pool.
+
+---
+
+## 🎯 **Why is this happening?**
+
+This is a super classic scenario:
+
+1️⃣ At the *very beginning* your app is connecting to Postgres **using the environment variable you configured (`DATABASE_URL`)**, which points to `.internal`.
+
+2️⃣ Later, **your ORM / query logic** (Drizzle ORM and the `pg` library) **is trying to create additional connections**.
+
+But **somewhere in your code, or inside a library**, you are re-creating the connection string yourself, likely defaulting to:
+
+```
+postgres://rankitpro_database_user@dpg-d16psbidbo4c73cnufj0-a.internal/...
+```
+
+…and that `.internal` hostname **does not resolve** for that code context.
+
+✅ This is why you see:
+
+```
+getaddrinfo ENOTFOUND dpg-d16psbidbo4c73cnufj0-a.internal
+```
+
+**even though initial startup succeeds**.
+
+---
+
+## 🟢 How to Fix It Cleanly
+
+There are **two solid ways** to stop this from happening:
+
+---
+
+### ✅ Option 1: Use the External URL everywhere
+
+**Fastest and most reliable:**
+
+1️⃣ **Set `DATABASE_URL` to your `.render.com` URL:**
+
+```
+postgres://rankitpro_database_user:YOURPASS@dpg-d16psbidbo4c73cnufj0-a.render.com:5432/rankitpro_database
+```
+
+2️⃣ **Set `ssl: true` in your pool config**, e.g.:
+
+```typescript
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+```
+
+(or whatever your ORM requires to enable SSL)
+
+✅ **This will work inside Render and in local dev.**
+
+---
+
+### ✅ Option 2: Fix the way your ORM gets the URL
+
+If you *must* use `.internal` inside Render (for lower latency), **you must make absolutely sure** *everywhere* in your app uses the same connection string consistently:
+
+* `DATABASE_URL` environment variable **must be set and referenced everywhere.**
+* **No code should create its own connection string** (e.g., by interpolating host/user manually).
+
+Example with Drizzle ORM:
+
+```typescript
+import { drizzle } from "drizzle-orm/node-postgres";
+import pkg from "pg";
+const { Pool } = pkg;
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: false,
+});
+
+export const db = drizzle(pool);
+```
+
+✅ This guarantees that **every connection** uses `.internal`.
+
+---
+
+## 🎯 Recommended Immediate Action
+
+Given how much inconsistency you’ve seen, **I strongly recommend using the External URL everywhere** to finally get stable:
+
+---
+
+✅ **In Render > Environment:**
+
+* Delete `DATABASE_INTERNAL_URL`
+* Delete `DATABASE_EXTERNAL_URL`
+* Set only:
+
+```
+DATABASE_URL = postgres://rankitpro_database_user:YOURPASS@dpg-d16psbidbo4c73cnufj0-a.render.com:5432/rankitpro_database
+```
+
+✅ Ensure your DB config explicitly enables SSL:
+
+```javascript
+ssl: { rejectUnauthorized: false }
+```
+
+**(or simply `ssl: true` if your library supports it)**
+
+✅ Redeploy.
+
+---
+
+**This way:**
+
+* No `.internal` confusion.
+* All parts of your app always resolve the hostname.
+* Consistent SSL encryption.
+
+---
+
+✅ **If you prefer to keep `.internal`**, I can help you audit your code for places that are creating the connection string differently—just paste your `db.ts` or wherever you create your DB pool.
+
+Let me know which approach you prefer!

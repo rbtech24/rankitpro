@@ -31,24 +31,25 @@ function createDatabaseConnection() {
   }
 
   try {
-    // Simple SSL configuration: use SSL for external URLs (.render.com, .amazonaws.com, etc)
-    // Disable SSL for internal Render URLs (.internal) and local development
-    const requiresSSL = databaseUrl.includes('.render.com') || 
-                       databaseUrl.includes('.amazonaws.com') || 
-                       databaseUrl.includes('.digitalocean.com');
+    // Always use SSL for production deployments to ensure reliable connections
+    // This works consistently for both Render external URLs and other cloud providers
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isCloudDatabase = databaseUrl.includes('.render.com') || 
+                           databaseUrl.includes('.amazonaws.com') || 
+                           databaseUrl.includes('.digitalocean.com') ||
+                           databaseUrl.includes('.internal');
     
-    const connectionType = databaseUrl.includes('.internal') ? 'internal' : 
-                          requiresSSL ? 'external' : 'local';
+    const useSSL = isProduction || isCloudDatabase;
     
-    console.log(`Database connection: ${connectionType}, SSL: ${requiresSSL}`);
+    console.log(`Database connection mode: ${isProduction ? 'production' : 'development'}, SSL: ${useSSL}`);
     
-    // Create connection pool with optimized settings
+    // Create connection pool with reliable settings
     const pool = new Pool({ 
       connectionString: databaseUrl,
-      ssl: requiresSSL ? { rejectUnauthorized: false } : false,
-      max: 5, // Reasonable pool size for Render starter plan
+      ssl: useSSL ? { rejectUnauthorized: false } : false,
+      max: 5, // Reasonable pool size
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000, // Standard timeout
+      connectionTimeoutMillis: 5000, // Longer timeout for cloud connections
       application_name: 'rankitpro_saas'
     });
     

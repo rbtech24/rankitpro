@@ -37,12 +37,14 @@ The application now automatically chooses the correct database connection:
 
 ### For Production (Render Web Service)
 
-Set **DATABASE_URL** to the **internal** connection string:
+Set **DATABASE_URL** to the **external** connection string for reliable DNS resolution:
 
 **DATABASE_URL**
 ```
-postgresql://rankitpro_database_user:cRVJdpwyJsbUnqbJWpZoqIY4AoC1vyOo@dpg-d16psbidbo4c73cnufj0-a.internal:5432/rankitpro_database
+postgresql://rankitpro_database_user:cRVJdpwyJsbUnqbJWpZoqIY4AoC1vyOo@dpg-d16psbidbo4c73cnufj0-a.virginia-postgres.render.com:5432/rankitpro_database
 ```
+
+**Why external URL:** Eliminates DNS resolution issues that cause `ENOTFOUND` errors
 
 ### For Local Development (.env file)
 
