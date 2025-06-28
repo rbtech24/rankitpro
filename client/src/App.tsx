@@ -276,7 +276,7 @@ function Router() {
           : <Onboarding />}
       </Route>
       <Route path="/roi-calculator">
-        <ROICalculatorSimple />
+        <ROICalculator />
       </Route>
       <Route path="/">
         <Home />

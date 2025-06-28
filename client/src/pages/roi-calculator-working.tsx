@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-// import { Input type="range" } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { 
   Calculator,
@@ -15,14 +14,12 @@ import {
   Star,
   Users,
   Clock,
-  Target,
   BarChart2,
-  Zap,
   ArrowLeft
 } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 
-const ROICalculator = () => {
+const ROICalculatorWorking = () => {
   const [monthlyLeads, setMonthlyLeads] = useState(50);
   const [averageJobValue, setAverageJobValue] = useState(300);
   const [currentReviews, setCurrentReviews] = useState(10);
@@ -156,18 +153,18 @@ const ROICalculator = () => {
                     <div className="flex-1">
                       <Input
                         type="range"
-                        value={monthlyLeads}
+                        value={monthlyLeads.toString()}
                         onChange={(e) => setMonthlyLeads(Number(e.target.value))}
-                        max={500}
-                        min={10}
-                        step={5}
+                        max="500"
+                        min="10"
+                        step="5"
                         className="w-full"
                       />
                     </div>
                     <div className="min-w-[80px]">
                       <Input
                         type="number"
-                        value={monthlyLeads}
+                        value={monthlyLeads.toString()}
                         onChange={(e) => setMonthlyLeads(Number(e.target.value))}
                         className="text-center"
                       />
@@ -183,18 +180,18 @@ const ROICalculator = () => {
                     <div className="flex-1">
                       <Input
                         type="range"
-                        value={averageJobValue}
+                        value={averageJobValue.toString()}
                         onChange={(e) => setAverageJobValue(Number(e.target.value))}
-                        max={2000}
-                        min={50}
-                        step={25}
+                        max="2000"
+                        min="50"
+                        step="25"
                         className="w-full"
                       />
                     </div>
                     <div className="min-w-[80px]">
                       <Input
                         type="number"
-                        value={averageJobValue}
+                        value={averageJobValue.toString()}
                         onChange={(e) => setAverageJobValue(Number(e.target.value))}
                         className="text-center"
                       />
@@ -210,18 +207,18 @@ const ROICalculator = () => {
                     <div className="flex-1">
                       <Input
                         type="range"
-                        value={currentReviews}
+                        value={currentReviews.toString()}
                         onChange={(e) => setCurrentReviews(Number(e.target.value))}
-                        max={100}
-                        min={0}
-                        step={1}
+                        max="100"
+                        min="0"
+                        step="1"
                         className="w-full"
                       />
                     </div>
                     <div className="min-w-[80px]">
                       <Input
                         type="number"
-                        value={currentReviews}
+                        value={currentReviews.toString()}
                         onChange={(e) => setCurrentReviews(Number(e.target.value))}
                         className="text-center"
                       />
@@ -230,46 +227,25 @@ const ROICalculator = () => {
                   <p className="text-sm text-gray-500">How many online reviews do you receive monthly?</p>
                 </div>
 
-                {/* Marketing Spend */}
-                <div className="space-y-3">
-                  <Label className="text-lg font-medium">Monthly Marketing Spend ($)</Label>
-                  <div className="flex items-center space-x-4">
-                    <Input type="range"
-                      value={[monthlyMarketing]}
-                      onValueChange={(value) => setMonthlyMarketing(value[0])}
-                      max={10000}
-                      min={100}
-                      step={100}
-                      className="flex-1"
-                    />
-                    <div className="min-w-[80px]">
-                      <Input
-                        type="number"
-                        value={monthlyMarketing}
-                        onChange={(e) => setMonthlyMarketing(Number(e.target.value))}
-                        className="text-center"
-                      />
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-500">How much do you spend on marketing monthly?</p>
-                </div>
-
                 {/* Time Spent on Marketing */}
                 <div className="space-y-3">
                   <Label className="text-lg font-medium">Weekly Marketing Hours</Label>
                   <div className="flex items-center space-x-4">
-                    <Input type="range"
-                      value={[timeSpentMarketing]}
-                      onValueChange={(value) => setTimeSpentMarketing(value[0])}
-                      max={40}
-                      min={2}
-                      step={1}
-                      className="flex-1"
-                    />
+                    <div className="flex-1">
+                      <Input
+                        type="range"
+                        value={timeSpentMarketing.toString()}
+                        onChange={(e) => setTimeSpentMarketing(Number(e.target.value))}
+                        max="40"
+                        min="2"
+                        step="1"
+                        className="w-full"
+                      />
+                    </div>
                     <div className="min-w-[80px]">
                       <Input
                         type="number"
-                        value={timeSpentMarketing}
+                        value={timeSpentMarketing.toString()}
                         onChange={(e) => setTimeSpentMarketing(Number(e.target.value))}
                         className="text-center"
                       />
@@ -366,94 +342,6 @@ const ROICalculator = () => {
         </div>
       </section>
 
-      {/* Plan Comparison */}
-      <section className="py-16 px-6 bg-white">
-        <div className="container mx-auto max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
-            <p className="text-xl text-gray-600">Select the plan that matches your business size and goals</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Starter",
-                price: planPricing.starter,
-                description: "Perfect for small teams",
-                features: [
-                  "Up to 50 check-ins/month",
-                  "AI blog post generation",
-                  "Review automation",
-                  "WordPress integration",
-                  "Email support"
-                ],
-                roi: ((results.additionalRevenue - planPricing.starter) / planPricing.starter * 100).toFixed(0),
-                popular: false
-              },
-              {
-                name: "Pro",
-                price: planPricing.pro,
-                description: "For growing businesses",
-                features: [
-                  "Up to 200 check-ins/month",
-                  "Social media automation",
-                  "Audio/video testimonials",
-                  "Advanced analytics",
-                  "Priority support"
-                ],
-                roi: ((results.additionalRevenue - planPricing.pro) / planPricing.pro * 100).toFixed(0),
-                popular: true
-              },
-              {
-                name: "Agency",
-                price: planPricing.agency,
-                description: "For large operations",
-                features: [
-                  "Unlimited check-ins",
-                  "White-label solution",
-                  "API access",
-                  "Custom integrations",
-                  "Dedicated support"
-                ],
-                roi: ((results.additionalRevenue - planPricing.agency) / planPricing.agency * 100).toFixed(0),
-                popular: false
-              }
-            ].map((plan, index) => (
-              <Card key={index} className={`hover:shadow-lg transition-all border-2 ${plan.popular ? 'border-blue-500 relative' : ''}`}>
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-blue-600 text-white px-4 py-1">Recommended</Badge>
-                  </div>
-                )}
-                <CardHeader className="text-center pb-8">
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <div className="text-4xl font-bold mt-4">${plan.price}<span className="text-lg text-gray-500">/month</span></div>
-                  <p className="text-gray-600 mt-2">{plan.description}</p>
-                  <Badge className="bg-green-100 text-green-800 mx-auto">
-                    {plan.roi}% ROI for your business
-                  </Badge>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center">
-                        <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link to="/register">
-                    <Button className={`w-full ${plan.popular ? 'bg-blue-600 hover:bg-blue-700' : ''}`} variant={plan.popular ? 'default' : 'outline'}>
-                      Start Free Trial
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-16 px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="container mx-auto text-center max-w-4xl">
@@ -504,4 +392,4 @@ const ROICalculator = () => {
   );
 };
 
-export default ROICalculator;
+export default ROICalculatorWorking;
