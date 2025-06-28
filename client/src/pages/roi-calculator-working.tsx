@@ -49,17 +49,17 @@ const ROICalculatorWorking = () => {
     // ROI Calculation Logic
     const currentRevenue = monthlyLeads * averageJobValue;
     
-    // With Rank It Pro improvements
-    const leadMultiplier = 3; // 3x more leads
+    // With Rank It Pro improvements (realistic industry standard increases)
+    const leadMultiplier = 1.35; // 35% increase in leads (industry realistic)
     const newLeadsWithRankItPro = monthlyLeads * leadMultiplier;
     const newRevenue = newLeadsWithRankItPro * averageJobValue;
     const additionalRevenue = newRevenue - currentRevenue;
     
-    // Review improvements (85% increase)
-    const newReviews = Math.round(currentReviews * 1.85);
+    // Review improvements (50% increase - realistic and sustainable)
+    const newReviews = Math.round(currentReviews * 1.5);
     
-    // Time savings (10+ hours weekly = 40+ hours monthly)
-    const timeSaved = timeSpentMarketing * 0.7; // 70% time reduction
+    // Time savings (realistic 40% reduction in marketing admin time)
+    const timeSaved = timeSpentMarketing * 0.4; // 40% time reduction
     const timeSavedValue = timeSaved * 50; // $50/hour value
     
     // ROI calculation (using Pro plan as default)
@@ -301,7 +301,7 @@ const ROICalculatorWorking = () => {
                   <div className="flex justify-between items-center p-4 bg-white rounded-lg border">
                     <div className="flex items-center">
                       <Star className="w-5 h-5 text-yellow-600 mr-3" />
-                      <span className="font-medium">Monthly Reviews (85% increase)</span>
+                      <span className="font-medium">Monthly Reviews (50% increase)</span>
                     </div>
                     <span className="text-xl font-bold text-yellow-600">{results.newReviews}</span>
                   </div>
