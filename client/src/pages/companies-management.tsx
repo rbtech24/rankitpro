@@ -287,28 +287,30 @@ export default function CompaniesManagement() {
     }
   });
   
-  // Initialize form with company data when editing
-  React.useEffect(() => {
-    if (selectedCompany) {
+  // Initialize form with company data when editing - using a proper effect per dialog
+  const initializeFormForCompany = (company: any) => {
+    if (company) {
       form.reset({
-        name: selectedCompany.name || "",
-        plan: selectedCompany.plan || "starter"
+        name: company.name || "",
+        plan: company.plan || "starter"
       });
     }
-  }, [selectedCompany, form]);
+  };
   
   // Submit handler for company form
   const onSubmit = (data: z.infer<typeof companySchema>) => {
     console.log('Form submitted with data:', data);
-    console.log('Selected company:', selectedCompany);
-    console.log('Is adding company:', isAddingCompany);
     
     if (isAddingCompany) {
       createCompanyMutation.mutate(data);
-    } else if (selectedCompany) {
-      console.log('Updating company with ID:', selectedCompany.id);
-      updateCompanyMutation.mutate({ id: selectedCompany.id, data });
     }
+  };
+
+  // Submit handler for company edit form (called from within the dialog)
+  const handleCompanyUpdate = (company: any, data: z.infer<typeof companySchema>) => {
+    console.log('Form submitted with data:', data);
+    console.log('Updating company with ID:', company.id);
+    updateCompanyMutation.mutate({ id: company.id, data });
   };
   
   // Toggle company status
@@ -558,7 +560,7 @@ export default function CompaniesManagement() {
                             <div className="flex space-x-2">
                               <Dialog>
                                 <DialogTrigger asChild>
-                                  <Button variant="ghost" size="sm">
+                                  <Button variant="ghost" size="sm" onClick={() => initializeFormForCompany(company)}>
                                     <Edit2 className="h-4 w-4" />
                                   </Button>
                                 </DialogTrigger>
@@ -567,7 +569,7 @@ export default function CompaniesManagement() {
                                     <DialogTitle>Edit Company</DialogTitle>
                                   </DialogHeader>
                                   <Form {...form}>
-                                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                    <form onSubmit={form.handleSubmit((data) => handleCompanyUpdate(company, data))} className="space-y-4">
                                       <FormField
                                         control={form.control}
                                         name="name"
