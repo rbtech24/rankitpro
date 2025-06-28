@@ -627,7 +627,7 @@ export default function CompaniesManagement() {
                                           <FormItem>
                                             <FormLabel>Email</FormLabel>
                                             <FormControl>
-                                              <Input {...field} defaultValue={company.email} />
+                                              <Input {...field} />
                                             </FormControl>
                                             <FormMessage />
                                           </FormItem>
@@ -639,7 +639,7 @@ export default function CompaniesManagement() {
                                         render={({ field }) => (
                                           <FormItem>
                                             <FormLabel>Subscription Plan</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={company.subscriptionPlan}>
+                                            <Select onValueChange={field.onChange} value={field.value}>
                                               <FormControl>
                                                 <SelectTrigger>
                                                   <SelectValue placeholder="Select plan" />
@@ -817,18 +817,18 @@ export default function CompaniesManagement() {
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Total Check-ins</h3>
                         <p className="text-2xl font-bold">{selectedCompany.stats?.totalCheckIns || 0}</p>
-                        <p className="text-sm text-gray-500">{selectedCompany.stats.activeCheckInsLast30Days} in the last 30 days</p>
+                        <p className="text-sm text-gray-500">{selectedCompany.stats?.activeCheckInsLast30Days || 0} in the last 30 days</p>
                       </div>
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Blog Posts Generated</h3>
-                        <p className="text-2xl font-bold">{selectedCompany.stats.totalBlogPosts}</p>
+                        <p className="text-2xl font-bold">{selectedCompany.stats?.totalBlogPosts || 0}</p>
                       </div>
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Reviews Collected</h3>
                         <div className="flex items-center">
-                          <span className="text-2xl font-bold mr-2">{selectedCompany.stats.totalReviews}</span>
+                          <span className="text-2xl font-bold mr-2">{selectedCompany.stats?.totalReviews || 0}</span>
                           <div className="flex items-center">
-                            <span className="mr-1">Avg {selectedCompany.stats.avgRating}</span>
+                            <span className="mr-1">Avg {selectedCompany.stats?.avgRating || 0}</span>
                             <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                           </div>
                         </div>
