@@ -350,8 +350,8 @@ class SocialMediaService {
         // Record the post attempt
         await db.insert(schemas.socialMediaPosts).values({
           companyId,
-          platform: account.platform,
-          postType: type,
+          platform: account.platform as any,
+          postType: type as any,
           relatedId: data.id,
           postContent: postContent.text,
           mediaUrls: postContent.mediaUrls || [],

@@ -105,18 +105,16 @@ export default function SocialMediaSettings() {
 
   const { data: socialConfig, isLoading } = useQuery({
     queryKey: ["/api/companies/social-media-config"],
-    queryFn: () => apiRequest("/api/companies/social-media-config")
   });
 
   const { data: postHistory } = useQuery({
     queryKey: ["/api/companies/social-media-posts"],
-    queryFn: () => apiRequest("/api/companies/social-media-posts")
   });
 
   useEffect(() => {
     if (socialConfig) {
-      setAccounts(socialConfig.accounts || []);
-      setAutoPostSettings(socialConfig.autoPost || {
+      setAccounts((socialConfig as any)?.accounts || []);
+      setAutoPostSettings((socialConfig as any)?.autoPost || {
         checkIns: true,
         reviews: true,
         testimonials: true,
@@ -126,10 +124,7 @@ export default function SocialMediaSettings() {
   }, [socialConfig]);
 
   const updateConfigMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/companies/social-media-config", {
-      method: "PUT",
-      body: JSON.stringify(data)
-    }),
+    mutationFn: (data: any) => apiRequest("/api/companies/social-media-config", "PUT", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/companies/social-media-config"] });
       toast({
@@ -147,12 +142,9 @@ export default function SocialMediaSettings() {
   });
 
   const testConnectionMutation = useMutation({
-    mutationFn: (account: SocialMediaAccount) => apiRequest("/api/companies/test-social-connection", {
-      method: "POST",
-      body: JSON.stringify({ account })
-    }),
-    onSuccess: (data, account) => {
-      if (data.success) {
+    mutationFn: (account: SocialMediaAccount) => apiRequest("/api/companies/test-social-connection", "POST", { account }),
+    onSuccess: (data: any, account) => {
+      if (data?.success) {
         toast({
           title: "Connection Test Successful",
           description: `${account.platform} account is properly connected`
@@ -160,7 +152,7 @@ export default function SocialMediaSettings() {
       } else {
         toast({
           title: "Connection Test Failed",
-          description: data.error || "Unable to connect to account",
+          description: data?.error || "Unable to connect to account",
           variant: "destructive"
         });
       }
@@ -227,7 +219,7 @@ export default function SocialMediaSettings() {
     });
   };
 
-  const isPremiumPlan = user?.company?.plan === 'pro' || user?.company?.plan === 'agency';
+  const isPremiumPlan = (user as any)?.company?.plan === 'pro' || (user as any)?.company?.plan === 'agency';
 
   if (!isPremiumPlan) {
     return (
@@ -493,7 +485,7 @@ export default function SocialMediaSettings() {
                 </p>
               </CardHeader>
               <CardContent>
-                {!postHistory || postHistory.length === 0 ? (
+                {!postHistory || (postHistory as any[])?.length === 0 ? (
                   <div className="text-center py-8">
                     <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold mb-2">No Posts Yet</h3>
@@ -513,7 +505,7 @@ export default function SocialMediaSettings() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {postHistory.map((post: SocialMediaPost) => {
+                      {(postHistory as SocialMediaPost[])?.map((post: SocialMediaPost) => {
                         const Icon = platformIcons[post.platform as keyof typeof platformIcons];
                         return (
                           <TableRow key={post.id}>
