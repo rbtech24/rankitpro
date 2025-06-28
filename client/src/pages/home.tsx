@@ -466,9 +466,11 @@ const Home = () => {
                     Email support
                   </li>
                 </ul>
-                <Button className="w-full mt-8" variant="outline">
-                  Start Free Trial
-                </Button>
+                <Link to="/register">
+                  <Button className="w-full mt-8" variant="outline">
+                    Start Free Trial
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -504,9 +506,11 @@ const Home = () => {
                     Priority support
                   </li>
                 </ul>
-                <Button className="w-full mt-8 bg-blue-600 hover:bg-blue-700">
-                  Start Free Trial
-                </Button>
+                <Link to="/register">
+                  <Button className="w-full mt-8 bg-blue-600 hover:bg-blue-700">
+                    Start Free Trial
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -539,9 +543,11 @@ const Home = () => {
                     Dedicated support
                   </li>
                 </ul>
-                <Button className="w-full mt-8" variant="outline">
-                  Contact Sales
-                </Button>
+                <Link to="/register">
+                  <Button className="w-full mt-8" variant="outline">
+                    Start Free Trial
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>

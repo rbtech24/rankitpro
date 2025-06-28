@@ -275,11 +275,11 @@ function Router() {
           (auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : <Redirect to="/dashboard" />) 
           : <Onboarding />}
       </Route>
-      <Route path="/">
-        <Home />
-      </Route>
       <Route path="/roi-calculator">
         <ROICalculator />
+      </Route>
+      <Route path="/">
+        <Home />
       </Route>
       
       {/* Informational Pages */}
