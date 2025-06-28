@@ -554,16 +554,13 @@ const Home = () => {
             Join hundreds of successful service companies using Rank It Pro to dominate local search and grow revenue.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+          <div className="flex justify-center mb-8">
             <Link to="/register">
               <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-4 h-auto">
                 Start Your Free 14-Day Trial
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-4 h-auto">
-              Schedule Demo Call
-            </Button>
           </div>
 
           <div className="flex items-center justify-center space-x-6 text-sm opacity-75">
