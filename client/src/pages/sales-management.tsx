@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 interface CreateSalesPersonForm {
   name: string;
@@ -216,7 +217,8 @@ export default function SalesManagement() {
   }, 0) || 0;
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
+    <DashboardLayout>
+      <div className="container mx-auto py-8 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -835,6 +837,7 @@ export default function SalesManagement() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
