@@ -445,8 +445,9 @@ export default function SalesDashboard() {
                               const discountPercent = monthlyPrice > 0 ? 
                                 Math.round(((monthlyPrice * 12 - yearlyPrice) / (monthlyPrice * 12)) * 100) : 0;
                               
+                              // Always show monthly price like main system, but indicate billing period
                               const displayPrice = companyData.billingPeriod === 'yearly'
-                                ? `$${yearlyPrice}/year • Save $${annualSavings.toFixed(0)} (${discountPercent}% off)`
+                                ? `$${monthlyPrice}/month (billed annually • Save ${discountPercent}%)`
                                 : `$${monthlyPrice}/month`;
                               
                               return (
