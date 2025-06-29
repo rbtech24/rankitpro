@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
+import { fixImageUrl } from "@/lib/url-utils";
 
 interface Technician {
   id: number;
@@ -14,7 +15,7 @@ interface CheckIn {
   jobType: string;
   notes?: string;
   location?: string;
-  photos: { url: string; filename: string }[];
+  photos: string | string[] | { url: string; filename: string }[];
   technician: Technician;
   createdAt: string;
   latitude?: number;
@@ -79,25 +80,19 @@ export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, on
               photoUrls = checkIn.photos.map(p => typeof p === 'string' ? p : p.url);
             }
             
-            return photoUrls.map((photoUrl, index) => (
+            // Fix photo URLs before rendering
+            const fixedPhotoUrls = photoUrls.map((url: string) => fixImageUrl(url));
+
+            return fixedPhotoUrls.map((photoUrl: string, index: number) => (
               <div key={index} className="mr-2 mb-2 w-24 h-24 rounded-md border overflow-hidden bg-gray-100">
                 <img 
                   src={photoUrl} 
                   alt={`Check-in photo ${index + 1}`} 
                   className="w-full h-full object-cover"
-                  onLoad={() => console.log(`Photo ${index + 1} loaded successfully from:`, photoUrl)}
                   onError={(e) => {
                     console.error('Photo failed to load:', photoUrl);
-                    // Try alternative URL format
-                    const originalUrl = photoUrl;
-                    if (originalUrl.includes('3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev')) {
-                      // Replace with current domain
-                      const newUrl = originalUrl.replace('https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev', window.location.origin);
-                      console.log('Trying alternative URL:', newUrl);
-                      e.currentTarget.src = newUrl;
-                    } else {
-                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMiA5VjEzTTEyIDE3SDE2VjEzSDhWMTdIMTJaIiBzdHJva2U9IiM5Q0E0QUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
-                    }
+                    // Show placeholder if image fails
+                    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMiA5VjEzTTEyIDE3SDE2VjEzSDhWMTdIMTJaIiBzdHJva2U9IiM5Q0E0QUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
                   }}
                 />
               </div>
