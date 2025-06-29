@@ -454,6 +454,25 @@ router.get('/payouts', isAuthenticated, async (req: Request, res: Response) => {
   }
 });
 
+// ==================== SUBSCRIPTION PLANS ====================
+
+// Get available subscription plans for company signup
+router.get('/subscription-plans', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    
+    if (user.role !== 'sales_staff') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const plans = await storage.getActiveSubscriptionPlans();
+    res.json(plans);
+  } catch (error: any) {
+    console.error('Error fetching subscription plans:', error);
+    res.status(500).json({ error: 'Failed to fetch subscription plans' });
+  }
+});
+
 // ==================== ANALYTICS AND REPORTING ====================
 
 // Get sales analytics (super admin only)

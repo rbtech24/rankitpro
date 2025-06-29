@@ -54,7 +54,7 @@ export default function SalesDashboard() {
     billingPeriod: 'monthly'
   });
 
-  const { data: subscriptionPlans = [] } = useQuery({
+  const { data: subscriptionPlans = [] } = useQuery<any[]>({
     queryKey: ['/api/sales/subscription-plans'],
     enabled: user?.role === 'sales_staff'
   });
