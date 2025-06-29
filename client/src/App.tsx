@@ -151,6 +151,9 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
     if (auth.user.role === "technician") {
       return <Redirect to="/mobile-field-app" />;
     }
+    if (auth.user.role === "sales_staff") {
+      return <Redirect to="/sales-dashboard" />;
+    }
     return <Redirect to="/dashboard" />;
   }
   
