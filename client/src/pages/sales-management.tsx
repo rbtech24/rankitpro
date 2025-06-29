@@ -51,6 +51,8 @@ export default function SalesManagement() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSalesPerson, setEditingSalesPerson] = useState<any>(null);
+  const [financialDialogOpen, setFinancialDialogOpen] = useState(false);
+  const [selectedSalesPersonForFinancials, setSelectedSalesPersonForFinancials] = useState<any>(null);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [selectedCommissions, setSelectedCommissions] = useState<number[]>([]);
 
@@ -95,6 +97,17 @@ export default function SalesManagement() {
   const { data: companies } = useQuery({
     queryKey: ['/api/companies'],
     enabled: user?.role === 'super_admin'
+  });
+
+  // Financial details query for selected sales person
+  const { data: financialDetails, refetch: refetchFinancialDetails } = useQuery({
+    queryKey: ['/api/sales/people', selectedSalesPersonForFinancials?.id, 'financials'],
+    queryFn: async () => {
+      if (!selectedSalesPersonForFinancials?.id) return null;
+      const response = await apiRequest('GET', `/api/sales/people/${selectedSalesPersonForFinancials.id}/financials`);
+      return response.json();
+    },
+    enabled: !!selectedSalesPersonForFinancials?.id
   });
 
   // Mutations
@@ -761,8 +774,8 @@ export default function SalesManagement() {
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onClick={() => {
-                                  // View financial details
-                                  // TODO: Open financial management modal
+                                  setSelectedSalesPersonForFinancials(person);
+                                  setFinancialDialogOpen(true);
                                 }}
                               >
                                 <DollarSignIcon className="mr-2 h-4 w-4" />
@@ -1049,6 +1062,262 @@ export default function SalesManagement() {
               </DialogFooter>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Financial Management Dialog */}
+      <Dialog open={financialDialogOpen} onOpenChange={setFinancialDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSignIcon className="h-5 w-5" />
+              Financial Details: {selectedSalesPersonForFinancials?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Complete financial overview including commission history, earnings breakdown, and payout status
+            </DialogDescription>
+          </DialogHeader>
+
+          {financialDetails ? (
+            <div className="space-y-6">
+              {/* Financial Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <DollarSignIcon className="h-4 w-4 text-green-600" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Total Earnings</p>
+                        <p className="text-lg font-semibold">{formatCurrency(parseFloat(financialDetails.totalEarnings || '0'))}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-yellow-600" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Pending Commissions</p>
+                        <p className="text-lg font-semibold">{formatCurrency(parseFloat(financialDetails.pendingCommissions || '0'))}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-blue-600" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">This Month</p>
+                        <p className="text-lg font-semibold">{formatCurrency(parseFloat(financialDetails.monthlyEarnings || '0'))}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-purple-600" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Active Customers</p>
+                        <p className="text-lg font-semibold">{financialDetails.totalCustomers || 0}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Commission History */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Commission History</h3>
+                <Card>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Company</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Base Amount</TableHead>
+                          <TableHead>Rate</TableHead>
+                          <TableHead>Commission</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {financialDetails.commissions && financialDetails.commissions.length > 0 ? (
+                          financialDetails.commissions.map((commission: any) => (
+                            <TableRow key={commission.id}>
+                              <TableCell>
+                                {new Date(commission.paymentDate).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell className="font-medium">
+                                {commission.companyName}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={commission.type === 'signup' ? 'default' : 'secondary'}>
+                                  {commission.type}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{formatCurrency(parseFloat(commission.baseAmount))}</TableCell>
+                              <TableCell>{(parseFloat(commission.commissionRate) * 100).toFixed(1)}%</TableCell>
+                              <TableCell className="font-semibold">
+                                {formatCurrency(parseFloat(commission.amount))}
+                              </TableCell>
+                              <TableCell>
+                                <Badge 
+                                  variant={
+                                    commission.status === 'paid' ? 'default' : 
+                                    commission.status === 'approved' ? 'secondary' : 
+                                    'outline'
+                                  }
+                                >
+                                  {commission.status}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                              No commission history available
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Customer Assignments */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Customer Assignments</h3>
+                <Card>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Company</TableHead>
+                          <TableHead>Plan</TableHead>
+                          <TableHead>Monthly Value</TableHead>
+                          <TableHead>Commission Rate</TableHead>
+                          <TableHead>Monthly Commission</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {financialDetails.customers && financialDetails.customers.length > 0 ? (
+                          financialDetails.customers.map((customer: any) => (
+                            <TableRow key={customer.id}>
+                              <TableCell className="font-medium">
+                                {customer.companyName}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline">{customer.subscriptionPlan}</Badge>
+                              </TableCell>
+                              <TableCell>{formatCurrency(parseFloat(customer.currentPlanPrice))}</TableCell>
+                              <TableCell>{(parseFloat(customer.commissionRate || selectedSalesPersonForFinancials.commissionRate) * 100).toFixed(1)}%</TableCell>
+                              <TableCell className="font-semibold text-green-600">
+                                {formatCurrency(parseFloat(customer.currentPlanPrice) * parseFloat(customer.commissionRate || selectedSalesPersonForFinancials.commissionRate))}
+                              </TableCell>
+                              <TableCell>
+                                <Badge 
+                                  variant={customer.status === 'active' ? 'default' : 'secondary'}
+                                >
+                                  {customer.status}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                              No customer assignments available
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Payout History */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Payout History</h3>
+                <Card>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Method</TableHead>
+                          <TableHead>Transaction ID</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {financialDetails.payouts && financialDetails.payouts.length > 0 ? (
+                          financialDetails.payouts.map((payout: any) => (
+                            <TableRow key={payout.id}>
+                              <TableCell>
+                                {new Date(payout.payoutDate).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell className="font-semibold">
+                                {formatCurrency(parseFloat(payout.amount))}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline">{payout.paymentMethod}</Badge>
+                              </TableCell>
+                              <TableCell className="font-mono text-sm">
+                                {payout.stripeTransferId || 'N/A'}
+                              </TableCell>
+                              <TableCell>
+                                <Badge 
+                                  variant={
+                                    payout.status === 'completed' ? 'default' : 
+                                    payout.status === 'processing' ? 'secondary' : 
+                                    'destructive'
+                                  }
+                                >
+                                  {payout.status}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                              No payout history available
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+                <p className="text-muted-foreground">Loading financial details...</p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFinancialDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </DashboardLayout>
