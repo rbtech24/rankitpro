@@ -597,20 +597,15 @@ router.post('/companies', isAuthenticated, async (req: Request, res: Response) =
     // Create company with subscription plan
     const company = await storage.createCompany({
       name,
-      email: contactEmail,
-      phone,
-      address,
       subscriptionPlanId: selectedPlan.id,
-      domain: '', // To be filled later
-      isActive: true,
-      subscriptionStatus: 'trial',
+      salesPersonId: salesPerson.id,
       trialStartDate: new Date(),
       trialEndDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days trial
       isTrialActive: true
     });
 
     // Create sales assignment
-    await storage.createSalesAssignment({
+    await storage.createCompanyAssignment({
       salesPersonId: salesPerson.id,
       companyId: company.id,
       subscriptionPlan: selectedPlan.name,
