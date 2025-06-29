@@ -216,23 +216,48 @@ export interface IStorage {
   deleteSubscriptionPlan(id: number): Promise<boolean>;
   getSubscriberCountForPlan(planId: number): Promise<number>;
 
-  // Sales operations
+  // Enhanced Sales operations
   getSalesPerson(id: number): Promise<SalesPerson | undefined>;
   getSalesPersonByUserId(userId: number): Promise<SalesPerson | undefined>;
-  getAllSalesPeople(): Promise<SalesPerson[]>;
+  getSalesPersonByEmail(email: string): Promise<SalesPerson | undefined>;
+  getAllSalesPeople(): Promise<any[]>; // Returns with stats
+  getActiveSalesPeople(): Promise<SalesPerson[]>;
   createSalesPerson(salesPerson: InsertSalesPerson): Promise<SalesPerson>;
   updateSalesPerson(id: number, updates: Partial<SalesPerson>): Promise<SalesPerson | undefined>;
   
+  // Commission operations
   getSalesCommission(id: number): Promise<SalesCommission | undefined>;
-  getSalesCommissionsBySalesPerson(salesPersonId: number): Promise<SalesCommission[]>;
+  getSalesCommissionsBySalesPerson(salesPersonId: number, status?: string): Promise<any[]>; // Returns with details
   getSalesCommissionsByCompany(companyId: number): Promise<SalesCommission[]>;
+  getPendingCommissions(): Promise<any[]>; // For admin dashboard
+  getPendingCommissionsBySalesPerson(salesPersonId: number): Promise<SalesCommission[]>;
   createSalesCommission(commission: InsertSalesCommission): Promise<SalesCommission>;
   updateSalesCommission(id: number, updates: Partial<SalesCommission>): Promise<SalesCommission | undefined>;
+  approvePendingCommissions(commissionIds: number[]): Promise<void>;
   
+  // Company assignment operations
   getCompanyAssignment(id: number): Promise<CompanyAssignment | undefined>;
-  getCompanyAssignmentsBySalesPerson(salesPersonId: number): Promise<CompanyAssignment[]>;
+  getCompanyAssignmentsBySalesPerson(salesPersonId: number): Promise<any[]>; // Returns with company details
+  getCompanyAssignmentByCompanyId(companyId: number): Promise<CompanyAssignment | undefined>;
   createCompanyAssignment(assignment: InsertCompanyAssignment): Promise<CompanyAssignment>;
   updateCompanyAssignment(id: number, updates: Partial<CompanyAssignment>): Promise<CompanyAssignment | undefined>;
+  
+  // Commission payout operations
+  createCommissionPayout(payout: any): Promise<any>;
+  getCommissionPayoutsBySalesPerson(salesPersonId: number): Promise<any[]>;
+  getAllCommissionPayouts(): Promise<any[]>;
+  updateCommissionPayout(id: number, updates: any): Promise<any>;
+  
+  // Sales analytics
+  getSalesPersonStats(salesPersonId: number): Promise<{
+    totalCustomers: number;
+    monthlyEarnings: number;
+    pendingPayouts: number;
+    conversionRate: number;
+    lastSale: Date | null;
+  }>;
+  getTotalSalesRevenue(): Promise<number>;
+  getMonthlyCommissionsSummary(): Promise<{ month: string; total: number; paid: number }[]>;
   
   // Testimonial operations
   getTestimonial(id: number): Promise<Testimonial | undefined>;
@@ -1774,32 +1799,312 @@ export class DatabaseStorage implements IStorage {
   }
   async updateMonthlyAIUsage(companyId: number, year: number, month: number, updates: Partial<MonthlyAiUsage>): Promise<MonthlyAiUsage | undefined> { return undefined; }
 
-  // Sales operations
-  async getSalesPerson(id: number): Promise<SalesPerson | undefined> { return undefined; }
-  async getSalesPersonByUserId(userId: number): Promise<SalesPerson | undefined> { return undefined; }
-  async getAllSalesPeople(): Promise<SalesPerson[]> { return []; }
+  // Enhanced Sales operations
+  async getSalesPerson(id: number): Promise<SalesPerson | undefined> {
+    try {
+      const [salesPerson] = await db.select().from(salesPeople).where(eq(salesPeople.id, id));
+      return salesPerson;
+    } catch (error) {
+      console.error('Error fetching sales person:', error);
+      return undefined;
+    }
+  }
+
+  async getSalesPersonByUserId(userId: number): Promise<SalesPerson | undefined> {
+    try {
+      const [salesPerson] = await db.select().from(salesPeople).where(eq(salesPeople.userId, userId));
+      return salesPerson;
+    } catch (error) {
+      console.error('Error fetching sales person by user ID:', error);
+      return undefined;
+    }
+  }
+
+  async getSalesPersonByEmail(email: string): Promise<SalesPerson | undefined> {
+    try {
+      const [salesPerson] = await db.select().from(salesPeople).where(eq(salesPeople.email, email));
+      return salesPerson;
+    } catch (error) {
+      console.error('Error fetching sales person by email:', error);
+      return undefined;
+    }
+  }
+
+  async getAllSalesPeople(): Promise<any[]> {
+    try {
+      // Get sales people with comprehensive stats
+      const salesPeopleWithStats = await db
+        .select({
+          id: salesPeople.id,
+          userId: salesPeople.userId,
+          name: salesPeople.name,
+          email: salesPeople.email,
+          phone: salesPeople.phone,
+          commissionRate: salesPeople.commissionRate,
+          isActive: salesPeople.isActive,
+          stripeAccountId: salesPeople.stripeAccountId,
+          totalEarnings: salesPeople.totalEarnings,
+          pendingCommissions: salesPeople.pendingCommissions,
+          createdAt: salesPeople.createdAt,
+          updatedAt: salesPeople.updatedAt,
+          totalCustomers: sql<number>`(
+            SELECT COUNT(*) FROM company_assignments 
+            WHERE sales_person_id = ${salesPeople.id}
+          )`,
+          monthlyEarnings: sql<number>`(
+            SELECT COALESCE(SUM(amount), 0) FROM sales_commissions 
+            WHERE sales_person_id = ${salesPeople.id} 
+            AND payment_date >= DATE_TRUNC('month', CURRENT_DATE)
+            AND status = 'paid'
+          )`,
+          pendingPayouts: sql<number>`(
+            SELECT COALESCE(SUM(amount), 0) FROM sales_commissions 
+            WHERE sales_person_id = ${salesPeople.id} 
+            AND status = 'approved'
+            AND is_paid = false
+          )`
+        })
+        .from(salesPeople)
+        .orderBy(desc(salesPeople.createdAt));
+
+      return salesPeopleWithStats;
+    } catch (error) {
+      console.error('Error fetching all sales people:', error);
+      return [];
+    }
+  }
+
+  async getActiveSalesPeople(): Promise<SalesPerson[]> {
+    try {
+      return await db.select().from(salesPeople).where(eq(salesPeople.isActive, true));
+    } catch (error) {
+      console.error('Error fetching active sales people:', error);
+      return [];
+    }
+  }
+
   async createSalesPerson(salesPerson: InsertSalesPerson): Promise<SalesPerson> {
     const [newSalesPerson] = await db.insert(salesPeople).values(salesPerson).returning();
     return newSalesPerson;
   }
-  async updateSalesPerson(id: number, updates: Partial<SalesPerson>): Promise<SalesPerson | undefined> { return undefined; }
 
-  async getSalesCommission(id: number): Promise<SalesCommission | undefined> { return undefined; }
-  async getSalesCommissionsBySalesPerson(salesPersonId: number): Promise<SalesCommission[]> { return []; }
-  async getSalesCommissionsByCompany(companyId: number): Promise<SalesCommission[]> { return []; }
+  async updateSalesPerson(id: number, updates: Partial<SalesPerson>): Promise<SalesPerson | undefined> {
+    try {
+      const [updatedSalesPerson] = await db
+        .update(salesPeople)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(salesPeople.id, id))
+        .returning();
+      return updatedSalesPerson;
+    } catch (error) {
+      console.error('Error updating sales person:', error);
+      return undefined;
+    }
+  }
+
+  // Enhanced Commission operations
+  async getSalesCommission(id: number): Promise<SalesCommission | undefined> {
+    try {
+      const [commission] = await db.select().from(salesCommissions).where(eq(salesCommissions.id, id));
+      return commission;
+    } catch (error) {
+      console.error('Error fetching sales commission:', error);
+      return undefined;
+    }
+  }
+
+  async getSalesCommissionsBySalesPerson(salesPersonId: number, status?: string): Promise<any[]> {
+    try {
+      let whereCondition = eq(salesCommissions.salesPersonId, salesPersonId);
+      if (status) {
+        whereCondition = and(
+          eq(salesCommissions.salesPersonId, salesPersonId),
+          eq(salesCommissions.status, status)
+        );
+      }
+
+      return await db
+        .select({
+          id: salesCommissions.id,
+          salesPersonId: salesCommissions.salesPersonId,
+          companyId: salesCommissions.companyId,
+          subscriptionId: salesCommissions.subscriptionId,
+          amount: salesCommissions.amount,
+          commissionRate: salesCommissions.commissionRate,
+          baseAmount: salesCommissions.baseAmount,
+          billingPeriod: salesCommissions.billingPeriod,
+          type: salesCommissions.type,
+          status: salesCommissions.status,
+          isPaid: salesCommissions.isPaid,
+          paidAt: salesCommissions.paidAt,
+          paymentDate: salesCommissions.paymentDate,
+          createdAt: salesCommissions.createdAt,
+          // Include company details
+          companyName: companies.name,
+          companyEmail: companies.email
+        })
+        .from(salesCommissions)
+        .leftJoin(companies, eq(salesCommissions.companyId, companies.id))
+        .where(whereCondition)
+        .orderBy(desc(salesCommissions.createdAt));
+    } catch (error) {
+      console.error('Error fetching commissions by sales person:', error);
+      return [];
+    }
+  }
+
+  async getSalesCommissionsByCompany(companyId: number): Promise<SalesCommission[]> {
+    try {
+      return await db.select().from(salesCommissions)
+        .where(eq(salesCommissions.companyId, companyId))
+        .orderBy(desc(salesCommissions.createdAt));
+    } catch (error) {
+      console.error('Error fetching commissions by company:', error);
+      return [];
+    }
+  }
+
+  async getPendingCommissions(): Promise<any[]> {
+    try {
+      return await db
+        .select({
+          id: salesCommissions.id,
+          salesPersonId: salesCommissions.salesPersonId,
+          companyId: salesCommissions.companyId,
+          amount: salesCommissions.amount,
+          type: salesCommissions.type,
+          paymentDate: salesCommissions.paymentDate,
+          createdAt: salesCommissions.createdAt,
+          salesPersonName: salesPeople.name,
+          salesPersonEmail: salesPeople.email,
+          companyName: companies.name
+        })
+        .from(salesCommissions)
+        .leftJoin(salesPeople, eq(salesCommissions.salesPersonId, salesPeople.id))
+        .leftJoin(companies, eq(salesCommissions.companyId, companies.id))
+        .where(eq(salesCommissions.status, 'pending'))
+        .orderBy(desc(salesCommissions.createdAt));
+    } catch (error) {
+      console.error('Error fetching pending commissions:', error);
+      return [];
+    }
+  }
+
+  async getPendingCommissionsBySalesPerson(salesPersonId: number): Promise<SalesCommission[]> {
+    try {
+      return await db.select().from(salesCommissions)
+        .where(and(
+          eq(salesCommissions.salesPersonId, salesPersonId),
+          eq(salesCommissions.status, 'pending')
+        ))
+        .orderBy(desc(salesCommissions.createdAt));
+    } catch (error) {
+      console.error('Error fetching pending commissions by sales person:', error);
+      return [];
+    }
+  }
+
   async createSalesCommission(commission: InsertSalesCommission): Promise<SalesCommission> {
     const [newCommission] = await db.insert(salesCommissions).values(commission).returning();
     return newCommission;
   }
-  async updateSalesCommission(id: number, updates: Partial<SalesCommission>): Promise<SalesCommission | undefined> { return undefined; }
 
-  async getCompanyAssignment(id: number): Promise<CompanyAssignment | undefined> { return undefined; }
-  async getCompanyAssignmentsBySalesPerson(salesPersonId: number): Promise<CompanyAssignment[]> { return []; }
+  async updateSalesCommission(id: number, updates: Partial<SalesCommission>): Promise<SalesCommission | undefined> {
+    try {
+      const [updatedCommission] = await db
+        .update(salesCommissions)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(salesCommissions.id, id))
+        .returning();
+      return updatedCommission;
+    } catch (error) {
+      console.error('Error updating sales commission:', error);
+      return undefined;
+    }
+  }
+
+  async approvePendingCommissions(commissionIds: number[]): Promise<void> {
+    try {
+      await db
+        .update(salesCommissions)
+        .set({ status: 'approved', updatedAt: new Date() })
+        .where(sql`${salesCommissions.id} = ANY(${commissionIds})`);
+    } catch (error) {
+      console.error('Error approving pending commissions:', error);
+      throw error;
+    }
+  }
+
+  // Enhanced Company Assignment operations
+  async getCompanyAssignment(id: number): Promise<CompanyAssignment | undefined> {
+    try {
+      const [assignment] = await db.select().from(companyAssignments).where(eq(companyAssignments.id, id));
+      return assignment;
+    } catch (error) {
+      console.error('Error fetching company assignment:', error);
+      return undefined;
+    }
+  }
+
+  async getCompanyAssignmentsBySalesPerson(salesPersonId: number): Promise<any[]> {
+    try {
+      return await db
+        .select({
+          id: companyAssignments.id,
+          salesPersonId: companyAssignments.salesPersonId,
+          companyId: companyAssignments.companyId,
+          signupDate: companyAssignments.signupDate,
+          subscriptionPlan: companyAssignments.subscriptionPlan,
+          initialPlanPrice: companyAssignments.initialPlanPrice,
+          currentPlanPrice: companyAssignments.currentPlanPrice,
+          billingPeriod: companyAssignments.billingPeriod,
+          status: companyAssignments.status,
+          createdAt: companyAssignments.createdAt,
+          // Include company details
+          companyName: companies.name,
+          companyEmail: companies.email,
+          companyPlan: companies.plan,
+          companyStatus: companies.isTrialActive
+        })
+        .from(companyAssignments)
+        .leftJoin(companies, eq(companyAssignments.companyId, companies.id))
+        .where(eq(companyAssignments.salesPersonId, salesPersonId))
+        .orderBy(desc(companyAssignments.createdAt));
+    } catch (error) {
+      console.error('Error fetching company assignments by sales person:', error);
+      return [];
+    }
+  }
+
+  async getCompanyAssignmentByCompanyId(companyId: number): Promise<CompanyAssignment | undefined> {
+    try {
+      const [assignment] = await db.select().from(companyAssignments)
+        .where(eq(companyAssignments.companyId, companyId));
+      return assignment;
+    } catch (error) {
+      console.error('Error fetching company assignment by company ID:', error);
+      return undefined;
+    }
+  }
+
   async createCompanyAssignment(assignment: InsertCompanyAssignment): Promise<CompanyAssignment> {
     const [newAssignment] = await db.insert(companyAssignments).values(assignment).returning();
     return newAssignment;
   }
-  async updateCompanyAssignment(id: number, updates: Partial<CompanyAssignment>): Promise<CompanyAssignment | undefined> { return undefined; }
+
+  async updateCompanyAssignment(id: number, updates: Partial<CompanyAssignment>): Promise<CompanyAssignment | undefined> {
+    try {
+      const [updatedAssignment] = await db
+        .update(companyAssignments)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(companyAssignments.id, id))
+        .returning();
+      return updatedAssignment;
+    } catch (error) {
+      console.error('Error updating company assignment:', error);
+      return undefined;
+    }
+  }
 
   // Testimonial operations
   async getTestimonial(id: number): Promise<Testimonial | undefined> { return undefined; }
