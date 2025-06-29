@@ -1993,6 +1993,9 @@ Contact us for more information about our professional services and to schedule 
   // Register admin routes for subscription management
   app.use("/api/admin", adminRoutes);
 
+  // Register sales routes for sales staff management
+  app.use("/api/sales", salesRoutes);
+
   // Mount critical missing routes with proper paths - BEFORE catch-all
   app.use("/api/check-ins", checkInRoutes);
   app.use("/api/visits", checkInRoutes); // Add visits alias for dashboard
