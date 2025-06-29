@@ -8,7 +8,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  role: text("role", { enum: ["super_admin", "company_admin", "technician"] }).notNull().default("technician"),
+  role: text("role", { enum: ["super_admin", "company_admin", "technician", "sales_staff"] }).notNull().default("technician"),
   companyId: integer("company_id").references(() => companies.id),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
@@ -523,43 +523,101 @@ export type TechnicianWithStats = Technician & {
 export type APICredentials = typeof apiCredentials.$inferSelect;
 export type InsertAPICredentials = z.infer<typeof insertAPICredentialsSchema>;
 
-// Sales People table - moved to proper location
+// Sales People table - Enhanced for full user integration
 export const salesPeople = pgTable("sales_people", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(), // Link to users table
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
-  commissionRate: numeric("commission_rate", { precision: 5, scale: 4 }).notNull().default("0.05"),
+  commissionRate: numeric("commission_rate", { precision: 5, scale: 4 }).notNull().default("0.10"), // Default 10% commission
   isActive: boolean("is_active").default(true),
+  stripeAccountId: text("stripe_account_id"), // For direct payouts
+  bankingDetails: jsonb("banking_details"), // Encrypted banking info
+  totalEarnings: numeric("total_earnings", { precision: 12, scale: 2 }).default("0.00"),
+  pendingCommissions: numeric("pending_commissions", { precision: 12, scale: 2 }).default("0.00"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Sales Commissions table  
+// Sales Commissions table - Enhanced for comprehensive tracking
 export const salesCommissions = pgTable("sales_commissions", {
   id: serial("id").primaryKey(),
   salesPersonId: integer("sales_person_id").references(() => salesPeople.id).notNull(),
   companyId: integer("company_id").references(() => companies.id).notNull(),
+  subscriptionId: text("subscription_id"), // Stripe subscription ID
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-  month: text("month").notNull(),
-  type: text("type", { enum: ["subscription", "setup", "bonus"] }).notNull().default("subscription"),
+  commissionRate: numeric("commission_rate", { precision: 5, scale: 4 }).notNull(), // Rate at time of sale
+  baseAmount: numeric("base_amount", { precision: 10, scale: 2 }).notNull(), // Original payment amount
+  billingPeriod: text("billing_period").notNull(), // monthly/yearly
+  type: text("type", { enum: ["signup", "renewal", "setup", "bonus"] }).notNull().default("renewal"),
+  status: text("status", { enum: ["pending", "approved", "paid", "disputed"] }).notNull().default("pending"),
   isPaid: boolean("is_paid").default(false).notNull(),
   paidAt: timestamp("paid_at"),
+  stripePayoutId: text("stripe_payout_id"), // Stripe payout reference
   notes: text("notes"),
+  paymentDate: timestamp("payment_date").notNull(), // When customer payment was received
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Commission Payouts table - Track batch payments to sales staff
+export const commissionPayouts = pgTable("commission_payouts", {
+  id: serial("id").primaryKey(),
+  salesPersonId: integer("sales_person_id").references(() => salesPeople.id).notNull(),
+  totalAmount: numeric("total_amount", { precision: 12, scale: 2 }).notNull(),
+  commissionIds: jsonb("commission_ids").notNull(), // Array of commission IDs included
+  stripePayoutId: text("stripe_payout_id").notNull(),
+  payoutDate: timestamp("payout_date").notNull(),
+  status: text("status", { enum: ["pending", "processing", "completed", "failed"] }).notNull().default("pending"),
+  failureReason: text("failure_reason"),
+  metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Company Assignments table
+// Company Assignments table - Enhanced to track sales attribution
 export const companyAssignments = pgTable("company_assignments", {
   id: serial("id").primaryKey(),
   salesPersonId: integer("sales_person_id").references(() => salesPeople.id).notNull(),
   companyId: integer("company_id").references(() => companies.id).notNull(),
-  assignedAt: timestamp("assigned_at").defaultNow(),
+  signupDate: timestamp("signup_date").defaultNow(),
+  subscriptionPlan: text("subscription_plan").notNull(),
+  initialPlanPrice: numeric("initial_plan_price", { precision: 10, scale: 2 }).notNull(),
+  currentPlanPrice: numeric("current_plan_price", { precision: 10, scale: 2 }).notNull(),
+  billingPeriod: text("billing_period", { enum: ["monthly", "yearly"] }).notNull(),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  status: text("status", { enum: ["active", "cancelled", "suspended"] }).notNull().default("active"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Schema validation for sales tables
-export const insertSalesPersonSchema = createInsertSchema(salesPeople).omit({ id: true, createdAt: true });
-export const insertSalesCommissionSchema = createInsertSchema(salesCommissions).omit({ id: true, createdAt: true });
-export const insertCompanyAssignmentSchema = createInsertSchema(companyAssignments).omit({ id: true, assignedAt: true });
+export const insertSalesPersonSchema = createInsertSchema(salesPeople).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true,
+  totalEarnings: true,
+  pendingCommissions: true 
+});
+export const insertSalesCommissionSchema = createInsertSchema(salesCommissions).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true,
+  isPaid: true,
+  paidAt: true,
+  stripePayoutId: true
+});
+export const insertCompanyAssignmentSchema = createInsertSchema(companyAssignments).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true,
+  signupDate: true
+});
+export const insertCommissionPayoutSchema = createInsertSchema(commissionPayouts).omit({ 
+  id: true, 
+  createdAt: true 
+});
 
 // Types for sales system
 export type SalesPerson = typeof salesPeople.$inferSelect;
@@ -568,6 +626,26 @@ export type SalesCommission = typeof salesCommissions.$inferSelect;
 export type InsertSalesCommission = z.infer<typeof insertSalesCommissionSchema>;
 export type CompanyAssignment = typeof companyAssignments.$inferSelect;
 export type InsertCompanyAssignment = z.infer<typeof insertCompanyAssignmentSchema>;
+export type CommissionPayout = typeof commissionPayouts.$inferSelect;
+export type InsertCommissionPayout = z.infer<typeof insertCommissionPayoutSchema>;
+
+// Extended types for sales dashboard
+export type SalesPersonWithStats = SalesPerson & {
+  totalCustomers: number;
+  monthlyEarnings: number;
+  pendingPayouts: number;
+  conversionRate: number;
+  lastSale: Date | null;
+};
+
+export type CommissionWithDetails = SalesCommission & {
+  salesPerson: SalesPerson;
+  company: {
+    id: number;
+    name: string;
+    email: string;
+  };
+};
 
 // Create aliases for storage layer compatibility
 export const salesPersons = salesPeople;
