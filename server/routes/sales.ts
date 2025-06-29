@@ -155,6 +155,72 @@ router.put('/people/:id', isAuthenticated, isSuperAdmin, async (req: Request, re
   }
 });
 
+// Get detailed financial information for a sales person (super admin only)
+router.get('/people/:id/financials', isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    
+    // Get sales person details
+    const salesPerson = await storage.getSalesPerson(id);
+    if (!salesPerson) {
+      return res.status(404).json({ error: 'Sales person not found' });
+    }
+
+    // Get comprehensive financial data safely
+    let commissions = [];
+    let customers = [];
+    let payouts = [];
+    let stats = {
+      totalEarnings: '0.00',
+      pendingCommissions: '0.00', 
+      monthlyEarnings: '0.00',
+      totalCustomers: '0'
+    };
+
+    try {
+      commissions = await storage.getSalesCommissionsBySalesPerson(id) || [];
+    } catch (error) {
+      console.log('No commissions found for sales person:', id);
+    }
+
+    try {
+      customers = await storage.getCompanyAssignmentsBySalesPerson(id) || [];
+    } catch (error) {
+      console.log('No customer assignments found for sales person:', id);
+    }
+
+    try {
+      payouts = await storage.getSalesPayoutsBySalesPerson ? 
+        await storage.getSalesPayoutsBySalesPerson(id) : [];
+    } catch (error) {
+      console.log('No payouts found for sales person:', id);
+      payouts = []; // Default to empty array if method doesn't exist
+    }
+
+    try {
+      stats = await storage.getSalesPersonStats(id) || stats;
+    } catch (error) {
+      console.log('Could not get stats for sales person:', id);
+    }
+
+    const financialDetails = {
+      salesPerson,
+      totalEarnings: stats.totalEarnings || '0.00',
+      pendingCommissions: stats.pendingCommissions || '0.00',
+      monthlyEarnings: stats.monthlyEarnings || '0.00',
+      totalCustomers: stats.totalCustomers || '0',
+      commissions: commissions || [],
+      customers: customers || [],
+      payouts: payouts || []
+    };
+
+    res.json(financialDetails);
+  } catch (error: any) {
+    console.error('Error fetching financial details:', error);
+    res.status(500).json({ error: 'Failed to fetch financial details' });
+  }
+});
+
 // Get sales person dashboard (sales staff only)
 router.get('/dashboard', isAuthenticated, async (req: Request, res: Response) => {
   try {
