@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
-import { DollarSign, Users, TrendingUp, Clock, Plus, CheckCircle, UserPlus } from 'lucide-react';
+import { DollarSign, Users, TrendingUp, Clock, Plus, CheckCircle, UserPlus, Edit, UserX, UserCheck, DollarSign as DollarSignIcon, MoreHorizontal } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -17,12 +17,20 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface CreateSalesPersonForm {
   name: string;
   email: string;
   username: string;
   password: string;
+  phone?: string;
+  commissionRate: number;
+}
+
+interface EditSalesPersonForm {
+  name: string;
+  email: string;
   phone?: string;
   commissionRate: number;
 }
@@ -41,12 +49,23 @@ export default function SalesManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingSalesPerson, setEditingSalesPerson] = useState<any>(null);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [selectedCommissions, setSelectedCommissions] = useState<number[]>([]);
 
   const createForm = useForm<CreateSalesPersonForm>({
     defaultValues: {
       commissionRate: 0.10 // 10% default
+    }
+  });
+
+  const editForm = useForm<EditSalesPersonForm>({
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      commissionRate: 0.10
     }
   });
 
@@ -611,18 +630,19 @@ export default function SalesManagement() {
                     <TableHead>Monthly Earnings</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Bank Connected</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loadingSalesPeople ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center">
+                      <TableCell colSpan={8} className="text-center">
                         <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto" />
                       </TableCell>
                     </TableRow>
                   ) : !salesPeople || salesPeople.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      <TableCell colSpan={8} className="text-center text-muted-foreground">
                         No sales staff members yet
                       </TableCell>
                     </TableRow>
