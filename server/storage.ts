@@ -2624,6 +2624,169 @@ export class DatabaseStorage implements IStorage {
       await db.delete(apiCredentials).where(eq(apiCredentials.id, id));
     });
   }
+
+  // Commission Payout operations
+  async createCommissionPayout(payout: any): Promise<any> {
+    try {
+      const [newPayout] = await db.insert(schema.commissionPayouts).values(payout).returning();
+      return newPayout;
+    } catch (error) {
+      console.error('Error creating commission payout:', error);
+      throw error;
+    }
+  }
+
+  async getCommissionPayoutsBySalesPerson(salesPersonId: number): Promise<any[]> {
+    try {
+      return await db.select().from(schema.commissionPayouts)
+        .where(eq(schema.commissionPayouts.salesPersonId, salesPersonId))
+        .orderBy(desc(schema.commissionPayouts.createdAt));
+    } catch (error) {
+      console.error('Error fetching commission payouts by sales person:', error);
+      return [];
+    }
+  }
+
+  async getAllCommissionPayouts(): Promise<any[]> {
+    try {
+      return await db
+        .select({
+          id: schema.commissionPayouts.id,
+          salesPersonId: schema.commissionPayouts.salesPersonId,
+          totalAmount: schema.commissionPayouts.totalAmount,
+          commissionIds: schema.commissionPayouts.commissionIds,
+          stripePayoutId: schema.commissionPayouts.stripePayoutId,
+          payoutDate: schema.commissionPayouts.payoutDate,
+          status: schema.commissionPayouts.status,
+          createdAt: schema.commissionPayouts.createdAt,
+          salesPersonName: salesPeople.name,
+          salesPersonEmail: salesPeople.email
+        })
+        .from(schema.commissionPayouts)
+        .leftJoin(salesPeople, eq(schema.commissionPayouts.salesPersonId, salesPeople.id))
+        .orderBy(desc(schema.commissionPayouts.createdAt));
+    } catch (error) {
+      console.error('Error fetching all commission payouts:', error);
+      return [];
+    }
+  }
+
+  async updateCommissionPayout(id: number, updates: any): Promise<any> {
+    try {
+      const [updatedPayout] = await db
+        .update(schema.commissionPayouts)
+        .set(updates)
+        .where(eq(schema.commissionPayouts.id, id))
+        .returning();
+      return updatedPayout;
+    } catch (error) {
+      console.error('Error updating commission payout:', error);
+      throw error;
+    }
+  }
+
+  // Sales analytics
+  async getSalesPersonStats(salesPersonId: number): Promise<{
+    totalCustomers: number;
+    monthlyEarnings: number;
+    pendingPayouts: number;
+    conversionRate: number;
+    lastSale: Date | null;
+  }> {
+    try {
+      // Get total customers (company assignments)
+      const totalCustomersResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(companyAssignments)
+        .where(eq(companyAssignments.salesPersonId, salesPersonId));
+
+      // Get monthly earnings (paid commissions this month)
+      const monthlyEarningsResult = await db
+        .select({ total: sql<number>`COALESCE(SUM(amount), 0)` })
+        .from(salesCommissions)
+        .where(and(
+          eq(salesCommissions.salesPersonId, salesPersonId),
+          eq(salesCommissions.status, 'paid'),
+          gte(salesCommissions.paymentDate, sql`DATE_TRUNC('month', CURRENT_DATE)`)
+        ));
+
+      // Get pending payouts (approved but not paid)
+      const pendingPayoutsResult = await db
+        .select({ total: sql<number>`COALESCE(SUM(amount), 0)` })
+        .from(salesCommissions)
+        .where(and(
+          eq(salesCommissions.salesPersonId, salesPersonId),
+          eq(salesCommissions.status, 'approved'),
+          eq(salesCommissions.isPaid, false)
+        ));
+
+      // Get last sale date
+      const lastSaleResult = await db
+        .select({ lastSale: companyAssignments.signupDate })
+        .from(companyAssignments)
+        .where(eq(companyAssignments.salesPersonId, salesPersonId))
+        .orderBy(desc(companyAssignments.signupDate))
+        .limit(1);
+
+      return {
+        totalCustomers: totalCustomersResult[0]?.count || 0,
+        monthlyEarnings: monthlyEarningsResult[0]?.total || 0,
+        pendingPayouts: pendingPayoutsResult[0]?.total || 0,
+        conversionRate: 0.15, // TODO: Calculate based on actual conversion metrics
+        lastSale: lastSaleResult[0]?.lastSale || null
+      };
+    } catch (error) {
+      console.error('Error fetching sales person stats:', error);
+      return {
+        totalCustomers: 0,
+        monthlyEarnings: 0,
+        pendingPayouts: 0,
+        conversionRate: 0,
+        lastSale: null
+      };
+    }
+  }
+
+  async getTotalSalesRevenue(): Promise<number> {
+    try {
+      const result = await db
+        .select({ total: sql<number>`COALESCE(SUM(amount), 0)` })
+        .from(salesCommissions)
+        .where(eq(salesCommissions.status, 'paid'));
+
+      return result[0]?.total || 0;
+    } catch (error) {
+      console.error('Error fetching total sales revenue:', error);
+      return 0;
+    }
+  }
+
+  async getMonthlyCommissionsSummary(): Promise<{ month: string; total: number; paid: number }[]> {
+    try {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+      const commissionsData = await db
+        .select({
+          month: sql<string>`DATE_TRUNC('month', ${salesCommissions.paymentDate})`,
+          totalAmount: sql<number>`SUM(${salesCommissions.amount})`,
+          paidAmount: sql<number>`SUM(CASE WHEN ${salesCommissions.status} = 'paid' THEN ${salesCommissions.amount} ELSE 0 END)`
+        })
+        .from(salesCommissions)
+        .where(gte(salesCommissions.paymentDate, sixMonthsAgo))
+        .groupBy(sql`DATE_TRUNC('month', ${salesCommissions.paymentDate})`)
+        .orderBy(sql`DATE_TRUNC('month', ${salesCommissions.paymentDate})`);
+
+      return commissionsData.map(row => ({
+        month: new Date(row.month).toLocaleDateString('en-US', { month: 'short' }),
+        total: row.totalAmount,
+        paid: row.paidAmount
+      }));
+    } catch (error) {
+      console.error('Error fetching monthly commissions summary:', error);
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
