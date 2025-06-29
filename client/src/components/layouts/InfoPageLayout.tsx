@@ -118,6 +118,17 @@ export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({
                     Admin
                   </span>
                 </Link>
+                <Link href="/login?sales=true" className="text-xs text-slate-600 hover:text-primary transition-colors duration-200 ml-2">
+                  <span className="flex items-center cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    Sales Staff
+                  </span>
+                </Link>
               </div>
             </div>
           </div>

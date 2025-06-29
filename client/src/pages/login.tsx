@@ -31,11 +31,16 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   
+  // Get URL parameters
+  const params = new URLSearchParams(window.location.search);
+  const isAdmin = params.get('admin') === 'true';
+  const isSalesStaff = params.get('sales') === 'true';
+  
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: isSalesStaff ? "demo@salesstaff.com" : isAdmin ? "bill@mrsprinklerrepair.com" : "",
+      password: isSalesStaff ? "SalesDemo2025!" : isAdmin ? "SuperAdmin2025!" : "",
     },
   });
   
@@ -97,6 +102,19 @@ export default function Login() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {(isAdmin || isSalesStaff) && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <h4 className="text-sm font-medium text-blue-800 mb-2">
+                  {isSalesStaff ? "Sales Staff Demo Account" : "Admin Demo Account"}
+                </h4>
+                <div className="text-xs text-blue-700 space-y-1">
+                  <p><strong>Email:</strong> {isSalesStaff ? "demo@salesstaff.com" : "bill@mrsprinklerrepair.com"}</p>
+                  <p><strong>Password:</strong> {isSalesStaff ? "SalesDemo2025!" : "SuperAdmin2025!"}</p>
+                  <p className="text-blue-600">Demo credentials have been pre-filled for you.</p>
+                </div>
+              </div>
+            )}
+            
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
