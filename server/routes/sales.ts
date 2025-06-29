@@ -190,28 +190,36 @@ router.get('/people/:id/financials', isAuthenticated, isSuperAdmin, async (req: 
     }
 
     try {
-      payouts = await storage.getSalesPayoutsBySalesPerson ? 
-        await storage.getSalesPayoutsBySalesPerson(id) : [];
+      payouts = await storage.getCommissionPayoutsBySalesPerson ? 
+        await storage.getCommissionPayoutsBySalesPerson(id) : [];
     } catch (error) {
       console.log('No payouts found for sales person:', id);
       payouts = []; // Default to empty array if method doesn't exist
     }
 
     try {
-      stats = await storage.getSalesPersonStats(id) || stats;
+      const actualStats = await storage.getSalesPersonStats(id);
+      if (actualStats) {
+        stats = {
+          totalEarnings: '0.00', // Will be calculated from commissions
+          pendingCommissions: '0.00', // Will be calculated from pending commissions
+          monthlyEarnings: actualStats.monthlyEarnings?.toString() || '0.00',
+          totalCustomers: actualStats.totalCustomers?.toString() || '0'
+        };
+      }
     } catch (error) {
       console.log('Could not get stats for sales person:', id);
     }
 
     const financialDetails = {
       salesPerson,
-      totalEarnings: stats.totalEarnings || '0.00',
-      pendingCommissions: stats.pendingCommissions || '0.00',
-      monthlyEarnings: stats.monthlyEarnings || '0.00',
-      totalCustomers: stats.totalCustomers || '0',
-      commissions: commissions || [],
-      customers: customers || [],
-      payouts: payouts || []
+      totalEarnings: stats.totalEarnings,
+      pendingCommissions: stats.pendingCommissions,
+      monthlyEarnings: stats.monthlyEarnings,
+      totalCustomers: stats.totalCustomers,
+      commissions: commissions,
+      customers: customers,
+      payouts: payouts
     };
 
     res.json(financialDetails);
