@@ -290,16 +290,243 @@ export default function SalesDashboard() {
             </Card>
           </div>
 
-          {/* Recent Activity */}
+          {/* Customer Management Tabs */}
+          <Tabs defaultValue="customers" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="customers">My Customers</TabsTrigger>
+          <TabsTrigger value="commissions">Commission History</TabsTrigger>
+          <TabsTrigger value="pending">Pending Commissions</TabsTrigger>
+          <TabsTrigger value="payouts">Payout History</TabsTrigger>
+        </TabsList>
+
+        {/* Customers Tab */}
+        <TabsContent value="customers" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Your latest commissions and payments</CardDescription>
+              <CardTitle>My Customers</CardTitle>
+              <CardDescription>
+                Companies you've signed up and are managing
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center text-muted-foreground py-8">
-                Recent activity will appear here
-              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Company Name</TableHead>
+                    <TableHead>Subscription Plan</TableHead>
+                    <TableHead>Monthly Value</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Signup Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {customers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
+                        No customers assigned yet
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    customers.map((customer: any) => (
+                      <TableRow key={customer.id}>
+                        <TableCell className="font-medium">
+                          {customer.companyName}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {customer.subscriptionPlan}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {formatCurrency(parseFloat(customer.currentPlanPrice))}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
+                            {customer.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {customer.signupDate && formatDate(customer.signupDate)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Commission History Tab */}
+        <TabsContent value="commissions" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Commission History</CardTitle>
+              <CardDescription>
+                All your commission earnings and their status
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Rate</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {commissions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                        No commissions yet
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    commissions.map((commission: any) => (
+                      <TableRow key={commission.id}>
+                        <TableCell className="font-medium">
+                          {commission.companyName}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {commission.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {formatCurrency(parseFloat(commission.amount))}
+                        </TableCell>
+                        <TableCell>
+                          {(parseFloat(commission.commissionRate) * 100).toFixed(1)}%
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={
+                            commission.status === 'paid' ? 'default' :
+                            commission.status === 'approved' ? 'secondary' :
+                            commission.status === 'pending' ? 'outline' : 'destructive'
+                          }>
+                            {commission.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {formatDate(commission.paymentDate)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Pending Commissions Tab */}
+        <TabsContent value="pending" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Pending Commissions</CardTitle>
+              <CardDescription>
+                Commissions awaiting approval and payment
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Date Earned</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pendingCommissions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center text-muted-foreground">
+                        No pending commissions
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    pendingCommissions.map((commission: any) => (
+                      <TableRow key={commission.id}>
+                        <TableCell className="font-medium">
+                          {commission.companyName}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {commission.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {formatCurrency(parseFloat(commission.amount))}
+                        </TableCell>
+                        <TableCell>
+                          {formatDate(commission.paymentDate)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Payout History Tab */}
+        <TabsContent value="payouts" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Payout History</CardTitle>
+              <CardDescription>
+                History of commission payments to your bank account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Payout Date</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Commissions Count</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Stripe ID</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {!payouts || payouts.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
+                        No payouts yet
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    payouts.map((payout: any) => (
+                      <TableRow key={payout.id}>
+                        <TableCell>
+                          {formatDate(payout.payoutDate)}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {formatCurrency(parseFloat(payout.totalAmount))}
+                        </TableCell>
+                        <TableCell>
+                          {payout.commissionIds.length} commissions
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={payout.status === 'completed' ? 'default' : 'secondary'}>
+                            {payout.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {payout.stripePayoutId}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
