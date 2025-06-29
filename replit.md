@@ -4,7 +4,7 @@
 
 Rank It Pro is a comprehensive mobile-first SaaS platform designed for home service business management. The system provides intelligent operational tools including technician visit tracking, automated review management, AI-powered content generation, and seamless WordPress integration. Built with modern TypeScript, React, and PostgreSQL, it offers enterprise-level authentication, real-time features, and progressive web app capabilities.
 
-**Current Status:** Production-ready application with secure authentication, functional user preferences system, API testing system, and single super admin account (bill@mrsprinklerrepair.com with password SuperAdmin2025!).
+**Current Status:** Production-ready application with secure authentication, functional user preferences system, API testing system, super admin account (bill@mrsprinklerrepair.com with password SuperAdmin2025!), and test company admin account for embed generator testing (embed@testcompany.com with password EmbedTest2025!).
 
 ## System Architecture
 
