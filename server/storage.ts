@@ -210,6 +210,7 @@ export interface IStorage {
   
   // Subscription Plan operations
   getSubscriptionPlans(): Promise<any[]>;
+  getActiveSubscriptionPlans(): Promise<any[]>;
   getSubscriptionPlan(id: number): Promise<any | undefined>;
   createSubscriptionPlan(plan: any): Promise<any>;
   updateSubscriptionPlan(id: number, updates: any): Promise<any | undefined>;
@@ -2458,6 +2459,31 @@ export class DatabaseStorage implements IStorage {
       return plansWithMetrics;
     } catch (error) {
       console.error('Error fetching subscription plans:', error);
+      return [];
+    }
+  }
+
+  async getActiveSubscriptionPlans(): Promise<any[]> {
+    try {
+      // Get only active subscription plans from database
+      const plans = await db.select().from(subscriptionPlans)
+        .where(eq(subscriptionPlans.isActive, true))
+        .orderBy(subscriptionPlans.price);
+      
+      return plans.map(plan => ({
+        id: plan.id,
+        name: plan.name,
+        price: parseFloat(plan.price.toString()),
+        yearlyPrice: plan.yearlyPrice ? parseFloat(plan.yearlyPrice.toString()) : null,
+        billingPeriod: plan.billingPeriod,
+        maxTechnicians: plan.maxTechnicians,
+        maxCheckIns: plan.maxCheckIns,
+        features: plan.features,
+        stripeProductId: plan.stripeProductId,
+        stripePriceId: plan.stripePriceId
+      }));
+    } catch (error) {
+      console.error('Error fetching active subscription plans:', error);
       return [];
     }
   }

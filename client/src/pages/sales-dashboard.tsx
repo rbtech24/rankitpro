@@ -50,8 +50,13 @@ export default function SalesDashboard() {
     contactEmail: '',
     phone: '',
     address: '',
-    plan: 'starter',
+    plan: '',
     billingPeriod: 'monthly'
+  });
+
+  const { data: subscriptionPlans = [] } = useQuery({
+    queryKey: ['/api/sales/subscription-plans'],
+    enabled: user?.role === 'sales_staff'
   });
 
   const { data: dashboardData, isLoading, refetch } = useQuery<SalesDashboardData>({
@@ -430,12 +435,23 @@ export default function SalesDashboard() {
                         <Label htmlFor="plan">Subscription Plan</Label>
                         <Select value={companyData.plan} onValueChange={(value) => setCompanyData(prev => ({ ...prev, plan: value }))}>
                           <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Select a plan" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="starter">Starter ($49/month)</SelectItem>
-                            <SelectItem value="pro">Pro ($129/month)</SelectItem>
-                            <SelectItem value="agency">Agency ($299/month)</SelectItem>
+                            {subscriptionPlans.map((plan: any) => {
+                              const monthlyPrice = companyData.billingPeriod === 'yearly' && plan.yearlyPrice 
+                                ? Math.round(plan.yearlyPrice / 12) 
+                                : plan.price;
+                              const displayPrice = companyData.billingPeriod === 'yearly' && plan.yearlyPrice
+                                ? `$${plan.yearlyPrice}/year (Save $${Math.round((plan.price * 12) - plan.yearlyPrice)})`
+                                : `$${plan.price}/month`;
+                              
+                              return (
+                                <SelectItem key={plan.id} value={plan.id.toString()}>
+                                  {plan.name} ({displayPrice})
+                                </SelectItem>
+                              );
+                            })}
                           </SelectContent>
                         </Select>
                       </div>

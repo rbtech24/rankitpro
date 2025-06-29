@@ -583,32 +583,37 @@ router.post('/companies', isAuthenticated, async (req: Request, res: Response) =
 
     const { name, contactEmail, phone, address, plan, billingPeriod } = req.body;
 
-    // Plan pricing
-    const planPrices = {
-      starter: billingPeriod === 'yearly' ? 490 : 49,  // $49/month or $490/year
-      pro: billingPeriod === 'yearly' ? 1290 : 129,    // $129/month or $1290/year  
-      agency: billingPeriod === 'yearly' ? 2990 : 299  // $299/month or $2990/year
-    };
+    // Get the selected subscription plan from database
+    const selectedPlan = await storage.getSubscriptionPlan(parseInt(plan));
+    if (!selectedPlan) {
+      return res.status(400).json({ error: 'Invalid subscription plan' });
+    }
 
-    const planPrice = planPrices[plan as keyof typeof planPrices];
+    // Calculate pricing based on plan and billing period
+    const planPrice = billingPeriod === 'yearly' && selectedPlan.yearlyPrice 
+      ? parseFloat(selectedPlan.yearlyPrice.toString())
+      : parseFloat(selectedPlan.price.toString());
 
-    // Create company
+    // Create company with subscription plan
     const company = await storage.createCompany({
       name,
-      contactEmail,
+      email: contactEmail,
       phone,
       address,
-      plan,
+      subscriptionPlanId: selectedPlan.id,
       domain: '', // To be filled later
       isActive: true,
-      subscriptionStatus: 'trial'
+      subscriptionStatus: 'trial',
+      trialStartDate: new Date(),
+      trialEndDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days trial
+      isTrialActive: true
     });
 
     // Create sales assignment
     await storage.createSalesAssignment({
       salesPersonId: salesPerson.id,
       companyId: company.id,
-      subscriptionPlan: plan,
+      subscriptionPlan: selectedPlan.name,
       billingPeriod: billingPeriod as 'monthly' | 'yearly',
       initialPlanPrice: planPrice.toString(),
       currentPlanPrice: planPrice.toString(),
