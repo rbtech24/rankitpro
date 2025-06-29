@@ -1,12 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
-import { DollarSign, Users, TrendingUp, Clock, ExternalLink } from 'lucide-react';
+import { DollarSign, Users, TrendingUp, Clock, ExternalLink, User, Building2, Plus } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { useState } from 'react';
 
 interface SalesDashboardData {
   salesPerson: any;
@@ -24,6 +30,29 @@ interface SalesDashboardData {
 
 export default function SalesDashboard() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [isCompanyDialogOpen, setIsCompanyDialogOpen] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    bankingDetails: {
+      accountName: '',
+      accountNumber: '',
+      routingNumber: '',
+      bankName: ''
+    }
+  });
+  const [companyData, setCompanyData] = useState({
+    name: '',
+    contactEmail: '',
+    phone: '',
+    address: '',
+    plan: 'starter',
+    billingPeriod: 'monthly'
+  });
 
   const { data: dashboardData, isLoading, refetch } = useQuery<SalesDashboardData>({
     queryKey: ['/api/sales/dashboard'],
@@ -35,6 +64,60 @@ export default function SalesDashboard() {
     enabled: user?.role === 'sales_staff'
   });
 
+  // Update profile mutation
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('PUT', '/api/sales/profile', data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profile updated successfully",
+        description: "Your profile information has been saved."
+      });
+      setIsProfileDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/sales/dashboard'] });
+    },
+    onError: () => {
+      toast({
+        title: "Error updating profile",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Create company mutation
+  const createCompanyMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/sales/companies', data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Company created successfully",
+        description: "The new company has been added to your assignments."
+      });
+      setIsCompanyDialogOpen(false);
+      setCompanyData({
+        name: '',
+        contactEmail: '',
+        phone: '',
+        address: '',
+        plan: 'starter',
+        billingPeriod: 'monthly'
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/sales/dashboard'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error creating company",
+        description: error.message || "Please try again later.",
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleConnectStripe = async () => {
     try {
       const response = await apiRequest('POST', '/api/sales/connect-stripe');
@@ -42,10 +125,28 @@ export default function SalesDashboard() {
       
       if (data.accountLink) {
         window.open(data.accountLink, '_blank');
+        toast({
+          title: "Redirecting to Stripe",
+          description: "Complete your bank account setup in the new window."
+        });
       }
     } catch (error) {
-      console.error('Error connecting Stripe:', error);
+      toast({
+        title: "Connection Error",
+        description: "Unable to connect to Stripe. Please contact support.",
+        variant: "destructive"
+      });
     }
+  };
+
+  const handleProfileSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateProfileMutation.mutate(profileData);
+  };
+
+  const handleCompanySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    createCompanyMutation.mutate(companyData);
   };
 
   if (user?.role !== 'sales_staff') {
@@ -125,8 +226,17 @@ export default function SalesDashboard() {
         )}
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="dashboard" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="companies">Sign Up Companies</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="dashboard" className="space-y-6">
+          {/* Stats Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
@@ -420,25 +530,192 @@ export default function SalesDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
 
-      {/* Stripe Account Status */}
-      {!salesPerson.stripeAccountId && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardHeader>
-            <CardTitle className="text-orange-800">Connect Your Bank Account</CardTitle>
-            <CardDescription className="text-orange-700">
-              Connect your bank account to receive commission payments directly via Stripe.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={handleConnectStripe} className="gap-2">
-              <ExternalLink className="h-4 w-4" />
-              Connect Bank Account
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+        <TabsContent value="profile" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Profile Settings
+              </CardTitle>
+              <CardDescription>
+                Update your profile information and banking details
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    value={profileData.name || salesPerson.name}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={profileData.email || salesPerson.email}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={profileData.phone || salesPerson.phone || ''}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label>Bank Account Status</Label>
+                  <div className="flex items-center gap-2 mt-2">
+                    {salesPerson.stripeAccountId ? (
+                      <Badge variant="default">Connected</Badge>
+                    ) : (
+                      <Badge variant="secondary">Not Connected</Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleProfileSubmit}
+                  disabled={updateProfileMutation.isPending}
+                >
+                  {updateProfileMutation.isPending ? 'Saving...' : 'Save Profile'}
+                </Button>
+                {!salesPerson.stripeAccountId && (
+                  <Button onClick={handleConnectStripe} variant="outline" className="gap-2">
+                    <ExternalLink className="h-4 w-4" />
+                    Connect Bank Account
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="companies" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Sign Up Companies
+              </CardTitle>
+              <CardDescription>
+                Add new companies to earn commission on their subscriptions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Dialog open={isCompanyDialogOpen} onOpenChange={setIsCompanyDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add New Company
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Sign Up New Company</DialogTitle>
+                    <DialogDescription>
+                      Fill out the company details to create their account and earn commission
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleCompanySubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="companyName">Company Name</Label>
+                        <Input
+                          id="companyName"
+                          value={companyData.name}
+                          onChange={(e) => setCompanyData(prev => ({ ...prev, name: e.target.value }))}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="contactEmail">Contact Email</Label>
+                        <Input
+                          id="contactEmail"
+                          type="email"
+                          value={companyData.contactEmail}
+                          onChange={(e) => setCompanyData(prev => ({ ...prev, contactEmail: e.target.value }))}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="companyPhone">Phone</Label>
+                        <Input
+                          id="companyPhone"
+                          value={companyData.phone}
+                          onChange={(e) => setCompanyData(prev => ({ ...prev, phone: e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="plan">Subscription Plan</Label>
+                        <Select value={companyData.plan} onValueChange={(value) => setCompanyData(prev => ({ ...prev, plan: value }))}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="starter">Starter ($49/month)</SelectItem>
+                            <SelectItem value="pro">Pro ($129/month)</SelectItem>
+                            <SelectItem value="agency">Agency ($299/month)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="billingPeriod">Billing Period</Label>
+                        <Select value={companyData.billingPeriod} onValueChange={(value) => setCompanyData(prev => ({ ...prev, billingPeriod: value }))}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                            <SelectItem value="yearly">Yearly (2 months free)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="address">Company Address</Label>
+                      <Input
+                        id="address"
+                        value={companyData.address}
+                        onChange={(e) => setCompanyData(prev => ({ ...prev, address: e.target.value }))}
+                        placeholder="123 Main St, City, State, ZIP"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button type="button" variant="outline" onClick={() => setIsCompanyDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={createCompanyMutation.isPending}>
+                        {createCompanyMutation.isPending ? 'Creating...' : 'Create Company'}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
+
+          {/* Recent Company Signups */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Company Signups</CardTitle>
+              <CardDescription>Companies you've successfully signed up</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center text-muted-foreground">
+                Company signup history will appear here
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

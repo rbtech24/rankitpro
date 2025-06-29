@@ -519,4 +519,110 @@ router.post('/connect-stripe', isAuthenticated, async (req: Request, res: Respon
   }
 });
 
+// Update sales person profile
+router.put('/profile', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    
+    if (user.role !== 'sales_staff') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const salesPerson = await storage.getSalesPersonByUserId(user.id);
+    if (!salesPerson) {
+      return res.status(404).json({ error: 'Sales person not found' });
+    }
+
+    const { name, email, phone, bankingDetails } = req.body;
+
+    // Update sales person data
+    const updatedSalesPerson = await storage.updateSalesPerson(salesPerson.id, {
+      name,
+      email,
+      phone,
+      bankingDetails
+    });
+
+    res.json(updatedSalesPerson);
+  } catch (error: any) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+// Create new company (sales staff feature)
+router.post('/companies', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    
+    if (user.role !== 'sales_staff') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const salesPerson = await storage.getSalesPersonByUserId(user.id);
+    if (!salesPerson) {
+      return res.status(404).json({ error: 'Sales person not found' });
+    }
+
+    const { name, contactEmail, phone, address, plan, billingPeriod } = req.body;
+
+    // Plan pricing
+    const planPrices = {
+      starter: billingPeriod === 'yearly' ? 490 : 49,  // $49/month or $490/year
+      pro: billingPeriod === 'yearly' ? 1290 : 129,    // $129/month or $1290/year  
+      agency: billingPeriod === 'yearly' ? 2990 : 299  // $299/month or $2990/year
+    };
+
+    const planPrice = planPrices[plan as keyof typeof planPrices];
+
+    // Create company
+    const company = await storage.createCompany({
+      name,
+      contactEmail,
+      phone,
+      address,
+      plan,
+      domain: '', // To be filled later
+      isActive: true,
+      subscriptionStatus: 'trial'
+    });
+
+    // Create sales assignment
+    await storage.createSalesAssignment({
+      salesPersonId: salesPerson.id,
+      companyId: company.id,
+      subscriptionPlan: plan,
+      billingPeriod: billingPeriod as 'monthly' | 'yearly',
+      initialPlanPrice: planPrice.toString(),
+      currentPlanPrice: planPrice.toString(),
+      status: 'active'
+    });
+
+    // Calculate commission (10% of first payment)
+    const commissionAmount = planPrice * 0.10;
+
+    // Create signup commission
+    await storage.createSalesCommission({
+      salesPersonId: salesPerson.id,
+      companyId: company.id,
+      type: 'signup',
+      amount: commissionAmount.toString(),
+      baseAmount: planPrice.toString(),
+      commissionRate: '0.10',
+      billingPeriod: billingPeriod,
+      paymentDate: new Date(),
+      status: 'pending'
+    });
+
+    res.json({ 
+      company, 
+      message: 'Company created successfully. Commission pending approval.',
+      commission: commissionAmount 
+    });
+  } catch (error: any) {
+    console.error('Error creating company:', error);
+    res.status(500).json({ error: error.message || 'Failed to create company' });
+  }
+});
+
 export default router;
