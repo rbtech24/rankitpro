@@ -51,7 +51,7 @@ export default function SalesDashboard() {
     phone: '',
     address: '',
     plan: '',
-    billingPeriod: 'monthly'
+    billingPeriod: 'yearly'
   });
 
   const { data: subscriptionPlans = [] } = useQuery<any[]>({
@@ -439,16 +439,19 @@ export default function SalesDashboard() {
                           </SelectTrigger>
                           <SelectContent>
                             {subscriptionPlans.map((plan: any) => {
-                              const monthlyPrice = companyData.billingPeriod === 'yearly' && plan.yearlyPrice 
-                                ? Math.round(plan.yearlyPrice / 12) 
-                                : plan.price;
-                              const displayPrice = companyData.billingPeriod === 'yearly' && plan.yearlyPrice
-                                ? `$${plan.yearlyPrice}/year (Save $${Math.round((plan.price * 12) - plan.yearlyPrice)})`
-                                : `$${plan.price}/month`;
+                              const monthlyPrice = parseFloat(plan.price) || 0;
+                              const yearlyPrice = parseFloat(plan.yearlyPrice) || (monthlyPrice * 10);
+                              const annualSavings = (monthlyPrice * 12) - yearlyPrice;
+                              const discountPercent = monthlyPrice > 0 ? 
+                                Math.round(((monthlyPrice * 12 - yearlyPrice) / (monthlyPrice * 12)) * 100) : 0;
+                              
+                              const displayPrice = companyData.billingPeriod === 'yearly'
+                                ? `$${yearlyPrice}/year • Save $${annualSavings.toFixed(0)} (${discountPercent}% off)`
+                                : `$${monthlyPrice}/month`;
                               
                               return (
                                 <SelectItem key={plan.id} value={plan.id.toString()}>
-                                  {plan.name} ({displayPrice})
+                                  {plan.name} • {displayPrice}
                                 </SelectItem>
                               );
                             })}
@@ -462,8 +465,8 @@ export default function SalesDashboard() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="monthly">Monthly</SelectItem>
-                            <SelectItem value="yearly">Yearly (2 months free)</SelectItem>
+                            <SelectItem value="monthly">Monthly billing</SelectItem>
+                            <SelectItem value="yearly">Annual billing (best value)</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
