@@ -118,6 +118,54 @@ export default function SalesManagement() {
     }
   });
 
+  const editSalesPersonMutation = useMutation({
+    mutationFn: async (data: EditSalesPersonForm & { id: number }) => {
+      const response = await apiRequest('PUT', `/api/sales/people/${data.id}`, {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        commissionRate: data.commissionRate
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/sales/people'] });
+      setEditDialogOpen(false);
+      setEditingSalesPerson(null);
+      editForm.reset();
+      toast({ title: 'Sales person updated successfully' });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Error updating sales person', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    }
+  });
+
+  const toggleSalesPersonStatus = useMutation({
+    mutationFn: async (data: { id: number; isActive: boolean }) => {
+      const response = await apiRequest('PUT', `/api/sales/people/${data.id}`, {
+        isActive: data.isActive
+      });
+      return response.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/sales/people'] });
+      toast({ 
+        title: `Sales person ${variables.isActive ? 'activated' : 'deactivated'} successfully` 
+      });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Error updating sales person status', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    }
+  });
+
   const assignCustomerMutation = useMutation({
     mutationFn: async (data: AssignCustomerForm) => {
       const response = await apiRequest('POST', '/api/sales/customers/assign', data);
@@ -664,6 +712,65 @@ export default function SalesManagement() {
                             {person.stripeAccountId ? 'Connected' : 'Not Connected'}
                           </Badge>
                         </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setEditingSalesPerson(person);
+                                  editForm.reset({
+                                    name: person.name,
+                                    email: person.email,
+                                    phone: person.phone || '',
+                                    commissionRate: parseFloat(person.commissionRate)
+                                  });
+                                  setEditDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Details
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  // Toggle active status
+                                  toggleSalesPersonStatus.mutate({
+                                    id: person.id,
+                                    isActive: !person.isActive
+                                  });
+                                }}
+                              >
+                                {person.isActive ? (
+                                  <>
+                                    <UserX className="mr-2 h-4 w-4" />
+                                    Deactivate
+                                  </>
+                                ) : (
+                                  <>
+                                    <UserCheck className="mr-2 h-4 w-4" />
+                                    Activate
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  // View financial details
+                                  // TODO: Open financial management modal
+                                }}
+                              >
+                                <DollarSignIcon className="mr-2 h-4 w-4" />
+                                View Financials
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -858,6 +965,92 @@ export default function SalesManagement() {
         </TabsContent>
       </Tabs>
       </div>
+
+      {/* Edit Sales Person Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Sales Person</DialogTitle>
+            <DialogDescription>
+              Update sales person details and commission rate
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit((data) => 
+              editSalesPersonMutation.mutate({ ...data, id: editingSalesPerson?.id })
+            )} className="space-y-4">
+              <FormField
+                control={editForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter full name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="Enter email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter phone number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="commissionRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Commission Rate</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        step="0.01" 
+                        min="0" 
+                        max="1"
+                        placeholder="0.10 (10%)" 
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={editSalesPersonMutation.isPending}>
+                  {editSalesPersonMutation.isPending ? 'Updating...' : 'Update Sales Person'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
