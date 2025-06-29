@@ -57,6 +57,7 @@ import TechniciansManagement from "@/pages/technicians-management";
 import SystemSettings from "@/pages/system-settings";
 import SystemOverview from "@/pages/system-overview";
 import SalesDashboard from "@/pages/sales-dashboard";
+import SalesManagement from "@/pages/sales-management";
 import SetupGuide from "@/pages/setup-guide";
 import AIContentGenerator from "@/pages/ai-content-generator";
 import AdminUserManagement from "@/pages/admin-user-management";
@@ -1256,7 +1257,10 @@ function Router() {
         <PrivateRoute component={SystemOverview} path="/system-overview" role="super_admin" />
       </Route>
       <Route path="/sales-dashboard">
-        <PrivateRoute component={SalesDashboard} path="/sales-dashboard" role="super_admin" />
+        <PrivateRoute component={SalesDashboard} path="/sales-dashboard" role="sales_staff" />
+      </Route>
+      <Route path="/sales-management">
+        <PrivateRoute component={SalesManagement} path="/sales-management" role="super_admin" />
       </Route>
       <Route path="/subscription-management">
         <PrivateRoute component={SubscriptionManagement} path="/subscription-management" role="super_admin" />
