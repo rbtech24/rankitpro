@@ -245,6 +245,7 @@ function Router() {
         {auth?.user && !isLoggedOut ? 
           (auth.user.role === "technician" ? <Redirect to="/mobile-field-app" /> : 
            auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> :
+           auth.user.role === "sales_staff" ? <Redirect to="/sales-dashboard" /> :
            <Redirect to="/dashboard" />) 
           : <Login />}
       </Route>
@@ -264,7 +265,9 @@ function Router() {
       </Route>
       <Route path="/register">
         {auth?.user ? 
-          (auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : <Redirect to="/dashboard" />) 
+          (auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : 
+           auth.user.role === "sales_staff" ? <Redirect to="/sales-dashboard" /> :
+           <Redirect to="/dashboard" />) 
           : <Onboarding />}
       </Route>
       {/* Logout route - must be before other routes */}
@@ -275,7 +278,9 @@ function Router() {
 
       <Route path="/onboarding">
         {auth?.user ? 
-          (auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : <Redirect to="/dashboard" />) 
+          (auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : 
+           auth.user.role === "sales_staff" ? <Redirect to="/sales-dashboard" /> :
+           <Redirect to="/dashboard" />) 
           : <Onboarding />}
       </Route>
       <Route path="/">
