@@ -1152,6 +1152,8 @@ function Router() {
       <Route path="/dashboard">
         {auth?.user?.role === "super_admin" ? 
           <Redirect to="/system-overview" /> : 
+          auth?.user?.role === "sales_staff" ?
+          <Redirect to="/sales-dashboard" /> :
           <PrivateRoute component={Dashboard} path="/dashboard" />
         }
       </Route>
