@@ -476,6 +476,23 @@ router.get('/analytics', isAuthenticated, isSuperAdmin, async (req: Request, res
   }
 });
 
+// Get subscription plans for sales staff
+router.get('/subscription-plans', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    
+    if (user.role !== 'sales_staff') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const plans = await storage.getActiveSubscriptionPlans();
+    res.json(plans);
+  } catch (error: any) {
+    console.error('Error fetching subscription plans:', error);
+    res.status(500).json({ error: 'Failed to fetch subscription plans' });
+  }
+});
+
 // Connect Stripe account for sales person
 router.post('/connect-stripe', isAuthenticated, async (req: Request, res: Response) => {
   try {
