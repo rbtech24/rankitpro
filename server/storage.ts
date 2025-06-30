@@ -1482,7 +1482,7 @@ export class DatabaseStorage implements IStorage {
           id: `review-${review.id}`,
           type: 'review',
           title: `${review.rating}-Star Review Received`,
-          description: `${review.customerName} left a review: "${review.reviewText?.substring(0, 100)}${review.reviewText && review.reviewText.length > 100 ? '...' : ''}"`,
+          description: `${review.customerName} left a review: "${review.feedback?.substring(0, 100)}${review.feedback && review.feedback.length > 100 ? '...' : ''}"`,
           company: review.companyName || 'Unknown Company',
           timestamp: review.createdAt,
           metadata: {
@@ -1844,7 +1844,7 @@ export class DatabaseStorage implements IStorage {
         status: transaction.status,
         type: transaction.type,
         date: transaction.createdAt,
-        id: transaction.id
+        transactionId: transaction.id
       }));
     } catch (error) {
       console.error('Error fetching recent transactions:', error);
@@ -2127,17 +2127,34 @@ export class DatabaseStorage implements IStorage {
   async testWordpressConnection(companyId: number): Promise<{ isConnected: boolean; version?: string; message?: string; }> {
     try {
       const company = await this.getCompany(companyId);
-      if (!company?.wordpressUrl || !company?.wordpressApiKey) {
+      if (!company?.wordpressConfig) {
+        return { 
+          isConnected: false, 
+          message: "WordPress configuration must be set up" 
+        };
+      }
+
+      let wpConfig;
+      try {
+        wpConfig = JSON.parse(company.wordpressConfig);
+      } catch (error) {
+        return { 
+          isConnected: false, 
+          message: "WordPress configuration is invalid" 
+        };
+      }
+
+      if (!wpConfig?.url || !wpConfig?.apiKey) {
         return { 
           isConnected: false, 
           message: "WordPress URL and API key must be configured" 
         };
       }
 
-      const wpUrl = company.wordpressUrl.replace(/\/$/, '');
+      const wpUrl = wpConfig.url.replace(/\/$/, '');
       const response = await fetch(`${wpUrl}/wp-json/wp/v2/users/me`, {
         headers: {
-          'Authorization': `Bearer ${company.wordpressApiKey}`,
+          'Authorization': `Bearer ${wpConfig.apiKey}`,
           'Content-Type': 'application/json'
         }
       });
@@ -2165,7 +2182,7 @@ export class DatabaseStorage implements IStorage {
   async syncWordpressCheckIns(companyId: number, checkInIds?: number[]): Promise<{ success: boolean; synced: number; failed: number; message?: string; }> {
     try {
       const company = await this.getCompany(companyId);
-      if (!company?.wordpressUrl || !company?.wordpressApiKey) {
+      if (!company?.wordpressConfig) {
         return {
           success: false,
           synced: 0,
@@ -2207,7 +2224,28 @@ export class DatabaseStorage implements IStorage {
 
       let synced = 0;
       let failed = 0;
-      const wpUrl = company.wordpressUrl.replace(/\/$/, '');
+      let wpConfig;
+      try {
+        wpConfig = JSON.parse(company.wordpressConfig);
+      } catch (error) {
+        return {
+          success: false,
+          synced: 0,
+          failed: 0,
+          message: "WordPress configuration is invalid"
+        };
+      }
+
+      if (!wpConfig?.url || !wpConfig?.apiKey) {
+        return {
+          success: false,
+          synced: 0,
+          failed: 0,
+          message: "WordPress URL and API key must be configured"
+        };
+      }
+
+      const wpUrl = wpConfig.url.replace(/\/$/, '');
 
       for (const checkIn of checkInsToSync) {
         try {
@@ -2259,7 +2297,7 @@ export class DatabaseStorage implements IStorage {
           const response = await fetch(`${wpUrl}/wp-json/wp/v2/posts`, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${company.wordpressApiKey}`,
+              'Authorization': `Bearer ${wpConfig.apiKey}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(postData)
