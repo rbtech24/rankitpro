@@ -45,8 +45,8 @@ const Header: React.FC<HeaderProps> = ({ showNotifications = false }) => {
   return (
     <header className="w-full h-16 border-b bg-white flex items-center justify-between px-6 sticky top-0 z-50">
       <div className="flex items-center">
-        <Link href="/dashboard">
-          <a className="text-xl font-bold text-primary">Rank It Pro</a>
+        <Link href="/dashboard" className="text-xl font-bold text-primary">
+          Rank It Pro
         </Link>
       </div>
       
