@@ -3509,11 +3509,21 @@ export class DatabaseStorage implements IStorage {
         .orderBy(desc(companyAssignments.signupDate))
         .limit(1);
 
+      // Calculate actual conversion rate from review requests to signups
+      const reviewRequestsResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(reviewRequests)
+        .where(eq(reviewRequests.technicianId, salesPersonId));
+
+      const totalReviewRequests = reviewRequestsResult[0]?.count || 0;
+      const conversionRate = totalReviewRequests > 0 ? 
+        Math.min(1, (totalCustomersResult[0]?.count || 0) / totalReviewRequests) : 0;
+
       return {
         totalCustomers: totalCustomersResult[0]?.count || 0,
         monthlyEarnings: monthlyEarningsResult[0]?.total || 0,
         pendingPayouts: pendingPayoutsResult[0]?.total || 0,
-        conversionRate: 0.15, // TODO: Calculate based on actual conversion metrics
+        conversionRate: Math.round(conversionRate * 100) / 100,
         lastSale: lastSaleResult[0]?.lastSale || null
       };
     } catch (error) {
