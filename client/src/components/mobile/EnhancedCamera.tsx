@@ -58,11 +58,8 @@ const EnhancedCamera: React.FC<EnhancedCameraProps> = ({
         height: { ideal: maxHeight, max: maxHeight },
         aspectRatio: { ideal: 16/9 },
         frameRate: { ideal: 30 },
-        // Advanced constraints for better quality
-        ...(enableZoom && { zoom: { min: 1, max: 3, ideal: zoomLevel } }),
-        focusMode: 'continuous',
-        exposureMode: 'continuous',
-        whiteBalanceMode: 'continuous'
+        // Advanced constraints for better quality (where supported)
+        ...(enableZoom && { zoom: { min: 1, max: 3, ideal: zoomLevel } })
       },
       audio: false
     };
@@ -309,7 +306,7 @@ const EnhancedCamera: React.FC<EnhancedCameraProps> = ({
                   size="sm"
                   onClick={toggleFlash}
                 >
-                  {flashMode === 'on' ? <FlashOn className="w-4 h-4" /> : <FlashOff className="w-4 h-4" />}
+                  {flashMode === 'on' ? <Zap className="w-4 h-4" /> : <ZapOff className="w-4 h-4" />}
                 </Button>
               )}
               
