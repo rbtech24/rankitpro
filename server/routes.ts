@@ -3680,6 +3680,40 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     }
   });
 
+  // Company-specific endpoints
+  app.get("/api/companies/:id/technicians", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      const technicians = await storage.getTechniciansByCompany(companyId);
+      res.json(technicians);
+    } catch (error) {
+      console.error('Error fetching company technicians:', error);
+      res.status(500).json({ message: 'Failed to fetch technicians' });
+    }
+  });
+
+  app.get("/api/companies/:id/check-ins", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      const checkIns = await storage.getCheckInsByCompany(companyId);
+      res.json(checkIns);
+    } catch (error) {
+      console.error('Error fetching company check-ins:', error);
+      res.status(500).json({ message: 'Failed to fetch check-ins' });
+    }
+  });
+
+  app.get("/api/companies/:id/reviews", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      const reviews = await storage.getReviewsByCompany(companyId);
+      res.json(reviews);
+    } catch (error) {
+      console.error('Error fetching company reviews:', error);
+      res.status(500).json({ message: 'Failed to fetch reviews' });
+    }
+  });
+
   // Critical Security Fix: API catch-all handler to prevent HTML responses
   // This MUST be the last route handler to catch any unmatched API requests
   app.use('/api/*', (req, res) => {

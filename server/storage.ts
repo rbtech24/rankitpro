@@ -1986,21 +1986,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getAIUsageToday(): Promise<number> {
-    try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const aiUsage = await db.select({ count: sql<number>`count(*)` })
-        .from(aiUsageLogs)
-        .where(gte(aiUsageLogs.createdAt, today));
-      
-      return aiUsage[0]?.count || 0;
-    } catch (error) {
-      console.error('Error fetching AI usage:', error);
-      return 0;
-    }
-  }
+
 
   async getSubscriptionBreakdown(): Promise<any[]> {
     try {

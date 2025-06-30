@@ -75,10 +75,23 @@ import { formatDistanceToNow } from 'date-fns';
 import { Loader2, Users, Briefcase, UserPlus, FileText, Star, BarChart2, Settings2, Mail, AlertTriangle, Check, X, Edit2, Trash2, Settings } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// Simplified company edit schema (only fields that exist in database)
+// Complete company schema with all form fields
 const companySchema = z.object({
   name: z.string().min(1, { message: "Company name is required." }),
   plan: z.enum(["starter", "pro", "agency"], { message: "Please select a subscription plan." }),
+  email: z.string().email({ message: "Please enter a valid email address." }).optional(),
+  phoneNumber: z.string().optional(),
+  website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal("")),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zipCode: z.string().optional(),
+  industry: z.string().optional(),
+  planId: z.string().optional(),
+  maxTechnicians: z.number().min(1, { message: "Must have at least 1 technician." }).optional(),
+  isActive: z.boolean().optional(),
+  featuresEnabled: z.array(z.string()).optional(),
+  notes: z.string().optional(),
 });
 
 // Define types for dynamic data
@@ -745,7 +758,7 @@ export default function CompaniesManagement() {
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Enabled Features</h3>
                         <div className="flex flex-wrap gap-2 mt-1">
-                          {(Array.isArray(selectedCompany.featuresEnabled) ? selectedCompany.featuresEnabled : []).map((featureId: any) => (
+                          {(Array.isArray(selectedCompany.featuresEnabled) ? selectedCompany.featuresEnabled : []).map((featureId: string) => (
                             <Badge key={featureId} variant="outline" className="bg-blue-50">
                               {availableFeatures.find(f => f.id === featureId)?.name}
                             </Badge>
@@ -1254,8 +1267,8 @@ export default function CompaniesManagement() {
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                         <FormControl>
                           <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
+                            checked={field.value || false}
+                            onCheckedChange={(checked) => field.onChange(!!checked)}
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
@@ -1294,13 +1307,14 @@ export default function CompaniesManagement() {
                                 >
                                   <FormControl>
                                     <Checkbox
-                                      checked={field.value?.includes(feature.id)}
+                                      checked={field.value?.includes(feature.id) || false}
                                       onCheckedChange={(checked) => {
+                                        const currentValue = field.value || [];
                                         return checked
-                                          ? field.onChange([...field.value, feature.id])
+                                          ? field.onChange([...currentValue, feature.id])
                                           : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== feature.id
+                                              currentValue.filter(
+                                                (value: string) => value !== feature.id
                                               )
                                             )
                                       }}
