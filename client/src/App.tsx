@@ -8,6 +8,7 @@ import { NotificationProvider } from "@/context/NotificationContext";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import NotFound from "@/pages/not-found";
 import { performImmediateLogout } from "./lib/logout";
+import ChatWidget from "@/components/chat/chat-widget";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Dashboard from "@/pages/dashboard-fixed";

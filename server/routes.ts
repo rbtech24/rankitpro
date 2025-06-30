@@ -3992,6 +3992,193 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     }
   });
 
+  // Chat Support System API endpoints
+  // Chat Session Management
+  app.post("/api/chat/session/start", isAuthenticated, async (req, res) => {
+    try {
+      const { initialMessage, category = 'general', priority = 'medium' } = req.body;
+      const sessionId = crypto.randomUUID();
+      
+      const session = await storage.createChatSession({
+        sessionId,
+        userId: req.session.userId!,
+        companyId: req.user?.companyId || null,
+        category,
+        priority,
+        initialMessage,
+        currentPage: req.headers.referer || '',
+        userAgent: req.headers['user-agent'] || ''
+      });
+      
+      res.json({ session, sessionId });
+    } catch (error) {
+      console.error('Error starting chat session:', error);
+      res.status(500).json({ message: 'Failed to start chat session' });
+    }
+  });
+
+  app.get("/api/chat/session/:sessionId", isAuthenticated, async (req, res) => {
+    try {
+      const session = await storage.getChatSessionBySessionId(req.params.sessionId);
+      if (!session) {
+        return res.status(404).json({ message: 'Chat session not found' });
+      }
+      
+      // Check if user owns this session
+      if (session.userId !== req.session.userId && req.user?.role !== 'super_admin') {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+      
+      const messages = await storage.getChatMessagesBySession(session.id);
+      res.json({ session, messages });
+    } catch (error) {
+      console.error('Error fetching chat session:', error);
+      res.status(500).json({ message: 'Failed to fetch chat session' });
+    }
+  });
+
+  app.post("/api/chat/session/:sessionId/close", isAuthenticated, async (req, res) => {
+    try {
+      const { rating, feedback } = req.body;
+      const sessionId = parseInt(req.params.sessionId);
+      
+      const session = await storage.closeChatSession(sessionId, {
+        rating: rating ? parseInt(rating) : undefined,
+        comment: feedback
+      });
+      
+      res.json({ session });
+    } catch (error) {
+      console.error('Error closing chat session:', error);
+      res.status(500).json({ message: 'Failed to close chat session' });
+    }
+  });
+
+  // Chat Messages
+  app.post("/api/chat/session/:sessionId/message", isAuthenticated, async (req, res) => {
+    try {
+      const { message, messageType = 'text' } = req.body;
+      const sessionId = parseInt(req.params.sessionId);
+      
+      const chatMessage = await storage.createChatMessage({
+        sessionId,
+        senderId: req.session.userId!,
+        senderType: 'customer',
+        senderName: req.user?.username || 'Customer',
+        message,
+        messageType
+      });
+      
+      res.json({ message: chatMessage });
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+      res.status(500).json({ message: 'Failed to send message' });
+    }
+  });
+
+  // Support Agent endpoints (Admin only)
+  app.get("/api/chat/admin/sessions", isSuperAdmin, async (req, res) => {
+    try {
+      const sessions = await storage.getChatSessionsWithDetails();
+      res.json({ sessions });
+    } catch (error) {
+      console.error('Error fetching chat sessions:', error);
+      res.status(500).json({ message: 'Failed to fetch chat sessions' });
+    }
+  });
+
+  app.get("/api/chat/admin/sessions/active", isSuperAdmin, async (req, res) => {
+    try {
+      const sessions = await storage.getActiveChatSessions();
+      res.json({ sessions });
+    } catch (error) {
+      console.error('Error fetching active chat sessions:', error);
+      res.status(500).json({ message: 'Failed to fetch active sessions' });
+    }
+  });
+
+  app.post("/api/chat/admin/agent/create", isSuperAdmin, async (req, res) => {
+    try {
+      const { userId, displayName, expertiseAreas = [] } = req.body;
+      
+      const agent = await storage.createSupportAgent({
+        userId,
+        displayName,
+        expertiseAreas,
+        isOnline: false,
+        isAvailable: true
+      });
+      
+      res.json({ agent });
+    } catch (error) {
+      console.error('Error creating support agent:', error);
+      res.status(500).json({ message: 'Failed to create support agent' });
+    }
+  });
+
+  app.get("/api/chat/admin/agents", isSuperAdmin, async (req, res) => {
+    try {
+      const agents = await storage.getAllSupportAgents();
+      res.json({ agents });
+    } catch (error) {
+      console.error('Error fetching support agents:', error);
+      res.status(500).json({ message: 'Failed to fetch support agents' });
+    }
+  });
+
+  app.post("/api/chat/admin/session/:sessionId/assign", isSuperAdmin, async (req, res) => {
+    try {
+      const { agentId } = req.body;
+      const sessionId = parseInt(req.params.sessionId);
+      
+      const session = await storage.assignChatToAgent(sessionId, agentId);
+      res.json({ session });
+    } catch (error) {
+      console.error('Error assigning chat session:', error);
+      res.status(500).json({ message: 'Failed to assign chat session' });
+    }
+  });
+
+  // Quick Replies Management
+  app.get("/api/chat/admin/quick-replies", isSuperAdmin, async (req, res) => {
+    try {
+      const quickReplies = await storage.getAllChatQuickReplies();
+      res.json({ quickReplies });
+    } catch (error) {
+      console.error('Error fetching quick replies:', error);
+      res.status(500).json({ message: 'Failed to fetch quick replies' });
+    }
+  });
+
+  app.post("/api/chat/admin/quick-reply", isSuperAdmin, async (req, res) => {
+    try {
+      const { category, title, message } = req.body;
+      
+      const quickReply = await storage.createChatQuickReply({
+        category,
+        title,
+        message,
+        createdBy: req.session.userId!
+      });
+      
+      res.json({ quickReply });
+    } catch (error) {
+      console.error('Error creating quick reply:', error);
+      res.status(500).json({ message: 'Failed to create quick reply' });
+    }
+  });
+
+  // Chat Analytics
+  app.get("/api/chat/admin/analytics", isSuperAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getChatSessionStats();
+      res.json({ stats });
+    } catch (error) {
+      console.error('Error fetching chat analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch chat analytics' });
+    }
+  });
+
   // Critical Security Fix: API catch-all handler to prevent HTML responses
   // This MUST be the last route handler to catch any unmatched API requests
   app.use('/api/*', (req, res) => {
