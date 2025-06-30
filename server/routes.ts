@@ -2115,7 +2115,8 @@ Format as professional service documentation.`;
         return res.status(400).json({ message: "Company ID is required" });
       }
       
-      const checkIns = await storage.getCheckInsByCompany(parseInt(company_id as string), parseInt(limit as string));
+      const allCheckIns = await storage.getCheckInsByCompany(parseInt(company_id as string));
+      const checkIns = allCheckIns.slice(0, parseInt(limit as string) || 10);
       
       // Format for public widget display
       const formattedCheckIns = checkIns.map(checkin => ({
@@ -2214,7 +2215,10 @@ Format as professional service documentation.`;
       res.json(testimonials);
     } catch (error) {
       console.error('Error in testimonials API:', error);
-      res.status(500).json({ message: 'Failed to fetch testimonials', error: error.message });
+      res.status(500).json({ 
+        message: 'Failed to fetch testimonials', 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   });
   
@@ -2488,17 +2492,18 @@ Format as professional service documentation.`;
       const format = req.query.format as string;
       console.log(`Widget request: format=${format}, type=${type}, companyId=${companyId}`);
       
+      // Helper function to escape HTML
+      const escapeHtml = (text: string): string => {
+        if (!text) return '';
+        return text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      };
+
       if (format === 'html') {
-        // Helper function to escape HTML
-        function escapeHtml(text: string): string {
-          if (!text) return '';
-          return text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
         
         // Return template-matching HTML content for WordPress shortcodes with theme-friendly CSS
         let html = `<style>
@@ -3345,7 +3350,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
               // or try to extract city from display_name if available
               const displayParts = data.display_name?.split(', ') || [];
               // Look for a part that's not the street, county, state, or postal code
-              const possibleCity = displayParts.find(part => 
+              const possibleCity = displayParts.find((part: string) => 
                 part !== data.address.road &&
                 part !== data.address.county &&
                 part !== data.address.state &&

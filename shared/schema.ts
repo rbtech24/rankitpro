@@ -902,3 +902,59 @@ export type InsertSupportTicketResponse = z.infer<typeof insertSupportTicketResp
 export const insertSocialMediaPostSchema = createInsertSchema(socialMediaPosts).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertSocialMediaPost = z.infer<typeof insertSocialMediaPostSchema>;
 export type SocialMediaPost = typeof socialMediaPosts.$inferSelect;
+
+// Help Topics Table for Community Features
+export const helpTopics = pgTable("help_topics", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  category: text("category").notNull(),
+  tags: jsonb("tags").default([]).notNull(),
+  authorId: integer("author_id").references(() => users.id).notNull(),
+  authorName: text("author_name").notNull(),
+  replies: integer("replies").default(0).notNull(),
+  likes: integer("likes").default(0).notNull(),
+  views: integer("views").default(0).notNull(),
+  isResolved: boolean("is_resolved").default(false).notNull(),
+  isPinned: boolean("is_pinned").default(false).notNull(),
+  lastActivity: timestamp("last_activity").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Help Topic Replies
+export const helpTopicReplies = pgTable("help_topic_replies", {
+  id: serial("id").primaryKey(),
+  topicId: integer("topic_id").references(() => helpTopics.id).notNull(),
+  content: text("content").notNull(),
+  authorId: integer("author_id").references(() => users.id).notNull(),
+  authorName: text("author_name").notNull(),
+  likes: integer("likes").default(0).notNull(),
+  isAcceptedAnswer: boolean("is_accepted_answer").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Help Topic Likes (for tracking who liked what)
+export const helpTopicLikes = pgTable("help_topic_likes", {
+  id: serial("id").primaryKey(),
+  topicId: integer("topic_id").references(() => helpTopics.id),
+  replyId: integer("reply_id").references(() => helpTopicReplies.id),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Help Topics types
+export const insertHelpTopicSchema = createInsertSchema(helpTopics).omit({ id: true, createdAt: true, updatedAt: true, lastActivity: true });
+export type InsertHelpTopic = z.infer<typeof insertHelpTopicSchema>;
+export type HelpTopic = typeof helpTopics.$inferSelect;
+
+// Help Topic Replies types
+export const insertHelpTopicReplySchema = createInsertSchema(helpTopicReplies).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertHelpTopicReply = z.infer<typeof insertHelpTopicReplySchema>;
+export type HelpTopicReply = typeof helpTopicReplies.$inferSelect;
+
+// Help Topic Likes types
+export const insertHelpTopicLikeSchema = createInsertSchema(helpTopicLikes).omit({ id: true, createdAt: true });
+export type InsertHelpTopicLike = z.infer<typeof insertHelpTopicLikeSchema>;
+export type HelpTopicLike = typeof helpTopicLikes.$inferSelect;
