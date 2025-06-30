@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Link } from 'wouter';
+import { Logo } from '@/components/ui/logo';
 import { 
   BookOpen, 
   Download, 
@@ -344,6 +346,26 @@ export default function HelpCenter() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <Link to="/">
+              <Logo size="sm" />
+            </Link>
+            <nav className="hidden md:flex space-x-8">
+              <Link to="/features" className="text-gray-600 hover:text-gray-900">Features</Link>
+              <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
+              <Link to="/help-center" className="text-gray-900 font-medium">Help Center</Link>
+              <Link to="/login" className="text-gray-600 hover:text-gray-900">Login</Link>
+              <Link to="/register">
+                <Button size="sm">Get Started</Button>
+              </Link>
+            </nav>
+          </div>
+        </div>
+      </header>
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -364,48 +386,6 @@ export default function HelpCenter() {
               className="pl-10"
             />
           </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-              <Download className="h-6 w-6 text-blue-600 mr-2" />
-              <div>
-                <CardTitle className="text-lg">PDF Guides</CardTitle>
-                <CardDescription>Downloadable documentation</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Badge variant="secondary">Offline</Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-              <Users className="h-6 w-6 text-green-600 mr-2" />
-              <div>
-                <CardTitle className="text-lg">Community Forum</CardTitle>
-                <CardDescription>Connect with other users</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Badge variant="secondary">Community</Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-              <MessageCircle className="h-6 w-6 text-purple-600 mr-2" />
-              <div>
-                <CardTitle className="text-lg">Contact Support</CardTitle>
-                <CardDescription>Get direct help</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Badge variant="secondary">Support</Badge>
-            </CardContent>
-          </Card>
         </div>
 
         <Tabs defaultValue="all" className="w-full">
@@ -538,6 +518,50 @@ export default function HelpCenter() {
           </div>
         )}
       </div>
+      
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <Logo size="sm" />
+              <p className="text-gray-400 mt-4">
+                The complete home service business management platform.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Platform</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link to="/features" className="hover:text-white">Features</Link></li>
+                <li><Link to="/pricing" className="hover:text-white">Pricing</Link></li>
+                <li><Link to="/demo" className="hover:text-white">Demo</Link></li>
+                <li><Link to="/integrations" className="hover:text-white">Integrations</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Support</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link to="/help-center" className="hover:text-white">Help Center</Link></li>
+                <li><Link to="/documentation" className="hover:text-white">Documentation</Link></li>
+                <li><Link to="/contact" className="hover:text-white">Contact Us</Link></li>
+                <li><Link to="/status" className="hover:text-white">System Status</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Company</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link to="/about" className="hover:text-white">About</Link></li>
+                <li><Link to="/blog" className="hover:text-white">Blog</Link></li>
+                <li><Link to="/careers" className="hover:text-white">Careers</Link></li>
+                <li><Link to="/privacy" className="hover:text-white">Privacy</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2025 Rank It Pro. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
