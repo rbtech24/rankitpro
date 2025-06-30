@@ -461,6 +461,102 @@ router.get('/recent-activity', isSuperAdmin, async (req, res) => {
   }
 });
 
+// Super Admin Analytics Dashboard
+router.get('/analytics/dashboard', isSuperAdmin, async (req, res) => {
+  try {
+    // Get comprehensive analytics data
+    const systemStats = {
+      totalCompanies: await storage.getCompanyCount(),
+      activeCompanies: await storage.getActiveCompaniesCount(),
+      totalUsers: await storage.getUserCount(),
+      totalTechnicians: await storage.getTechnicianCount(),
+      totalCheckIns: await storage.getCheckInCount(),
+      totalReviews: await storage.getReviewCount(),
+      avgRating: (await storage.getSystemReviewStats()).averageRating || 0
+    };
+
+    const financialMetrics = await storage.getFinancialMetrics();
+    const recentActivities = await storage.getRecentActivities();
+    const chartData = {
+      checkIns: await storage.getCheckInChartData(),
+      reviews: await storage.getReviewChartData(),
+      companyGrowth: await storage.getCompanyGrowthData(),
+      revenue: await storage.getRevenueChartData()
+    };
+
+    const subscriptionBreakdown = await storage.getSubscriptionBreakdown();
+    const systemHealth = await storage.getSystemHealthMetrics();
+
+    res.json({
+      systemStats,
+      financialMetrics,
+      recentActivities,
+      chartData,
+      subscriptionBreakdown,
+      systemHealth,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching analytics dashboard:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// User Management for Super Admin
+router.get('/users', isSuperAdmin, async (req, res) => {
+  try {
+    const allUsers = await storage.getAllUsers();
+    
+    // Add additional user information
+    const usersWithStats = allUsers.map(user => ({
+      ...user,
+      lastLogin: user.lastLoginAt || 'Never',
+      status: user.isActive ? 'Active' : 'Inactive',
+      checkInCount: 0, // Would be calculated from user's check-ins
+      companyName: user.companyName || 'No Company'
+    }));
+
+    res.json(usersWithStats);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Company Management with Enhanced Data
+router.get('/companies/detailed', isSuperAdmin, async (req, res) => {
+  try {
+    const companies = await storage.getAllCompanies();
+    
+    // Add detailed metrics for each company
+    const companiesWithMetrics = await Promise.all(
+      companies.map(async (company) => {
+        const checkInCount = await storage.getCheckInCountByCompany(company.id);
+        const reviewCount = await storage.getReviewCountByCompany(company.id);
+        const userCount = await storage.getUserCountByCompany(company.id);
+        const avgRating = await storage.getAverageRatingByCompany(company.id);
+
+        return {
+          ...company,
+          metrics: {
+            checkIns: checkInCount,
+            reviews: reviewCount,
+            users: userCount,
+            averageRating: avgRating,
+            monthlyRevenue: company.plan === 'starter' ? 29 : company.plan === 'pro' ? 79 : 149,
+            lastActivity: await storage.getLastActivityByCompany(company.id)
+          }
+        };
+      })
+    );
+
+    res.json(companiesWithMetrics);
+  } catch (error) {
+    console.error('Error fetching detailed companies:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // API Endpoint Testing Tool
 router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
   const testResults = [];
