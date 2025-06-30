@@ -141,51 +141,571 @@ export async function syncCheckInToCRM(
 
 // ServiceTitan integration functions
 async function testServiceTitanConnection(credentials: any): Promise<boolean> {
-  // TODO: Implement actual ServiceTitan API connection test
-  // For now, validate that required credentials are present
-  return !!(credentials.clientId && credentials.clientSecret && credentials.tenantId);
+  if (!credentials.clientId || !credentials.clientSecret || !credentials.tenantId) {
+    return false;
+  }
+
+  try {
+    // Get OAuth token
+    const tokenResponse = await fetch('https://auth.servicetitan.io/connect/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${Buffer.from(`${credentials.clientId}:${credentials.clientSecret}`).toString('base64')}`
+      },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        scope: 'customers'
+      })
+    });
+
+    if (!tokenResponse.ok) {
+      console.error('ServiceTitan token request failed:', await tokenResponse.text());
+      return false;
+    }
+
+    const tokenData = await tokenResponse.json();
+    
+    // Test API access with a simple customers query
+    const testResponse = await fetch(`https://api.servicetitan.io/customers/v2/${credentials.tenantId}/customers?page=1&pageSize=1`, {
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return testResponse.ok;
+  } catch (error) {
+    console.error('ServiceTitan connection test failed:', error);
+    return false;
+  }
 }
 
 async function syncToServiceTitan(checkIn: any, credentials: any, settings: any): Promise<boolean> {
-  // TODO: Implement actual ServiceTitan API sync
-  console.log('ServiceTitan sync would occur here', { checkIn: checkIn.id, settings });
-  return true;
+  if (!credentials.clientId || !credentials.clientSecret || !credentials.tenantId) {
+    throw new Error('ServiceTitan credentials not configured');
+  }
+
+  try {
+    // Get OAuth token
+    const tokenResponse = await fetch('https://auth.servicetitan.io/connect/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${Buffer.from(`${credentials.clientId}:${credentials.clientSecret}`).toString('base64')}`
+      },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        scope: 'customers jobs'
+      })
+    });
+
+    if (!tokenResponse.ok) {
+      throw new Error('Failed to get ServiceTitan access token');
+    }
+
+    const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
+
+    let customerId = null;
+
+    // Find or create customer
+    if (checkIn.customerEmail || checkIn.customerPhone) {
+      const searchParams = new URLSearchParams({
+        page: '1',
+        pageSize: '10'
+      });
+      
+      if (checkIn.customerEmail) {
+        searchParams.append('email', checkIn.customerEmail);
+      }
+
+      const searchResponse = await fetch(`https://api.servicetitan.io/customers/v2/${credentials.tenantId}/customers?${searchParams}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (searchResponse.ok) {
+        const searchResult = await searchResponse.json();
+        if (searchResult.data && searchResult.data.length > 0) {
+          customerId = searchResult.data[0].id;
+        }
+      }
+    }
+
+    // Create customer if not found
+    if (!customerId && (checkIn.customerName || checkIn.customerEmail)) {
+      const customerData = {
+        name: checkIn.customerName || 'Rank It Pro Customer',
+        email: checkIn.customerEmail || '',
+        phoneNumber: checkIn.customerPhone || '',
+        addresses: checkIn.address ? [{
+          street: checkIn.address,
+          city: checkIn.city || '',
+          state: checkIn.state || '',
+          zip: checkIn.zip || '',
+          country: 'USA'
+        }] : []
+      };
+
+      const createResponse = await fetch(`https://api.servicetitan.io/customers/v2/${credentials.tenantId}/customers`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(customerData)
+      });
+
+      if (createResponse.ok) {
+        const newCustomer = await createResponse.json();
+        customerId = newCustomer.id;
+      }
+    }
+
+    // Create job/service visit record
+    if (customerId) {
+      const jobData = {
+        customerId: customerId,
+        jobTypeId: 1, // Default job type - should be configurable
+        priority: 'Normal',
+        summary: `Service Visit - ${checkIn.jobType || 'General Service'}`,
+        description: `Service completed via Rank It Pro\n\nDetails:\n${checkIn.notes || 'Service completed successfully'}`,
+        address: {
+          street: checkIn.address || '',
+          city: checkIn.city || '',
+          state: checkIn.state || '',
+          zip: checkIn.zip || '',
+          country: 'USA'
+        }
+      };
+
+      const jobResponse = await fetch(`https://api.servicetitan.io/jpm/v2/${credentials.tenantId}/jobs`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jobData)
+      });
+
+      return jobResponse.ok;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('ServiceTitan sync failed:', error);
+    throw error;
+  }
 }
 
 // Housecall Pro integration functions
 async function testHousecallProConnection(credentials: any): Promise<boolean> {
-  // TODO: Implement actual Housecall Pro API connection test
-  return !!(credentials.apiKey);
+  if (!credentials.apiKey) {
+    return false;
+  }
+
+  try {
+    // Test API access with a simple customers query
+    const testResponse = await fetch('https://api.housecallpro.com/customers?page=1&per_page=1', {
+      headers: {
+        'Authorization': `Token ${credentials.apiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return testResponse.ok;
+  } catch (error) {
+    console.error('Housecall Pro connection test failed:', error);
+    return false;
+  }
 }
 
 async function syncToHousecallPro(checkIn: any, credentials: any, settings: any): Promise<boolean> {
-  // TODO: Implement actual Housecall Pro API sync
-  console.log('Housecall Pro sync would occur here', { checkIn: checkIn.id, settings });
-  return true;
+  if (!credentials.apiKey) {
+    throw new Error('Housecall Pro API key not configured');
+  }
+
+  try {
+    let customerId = null;
+
+    // Find existing customer by email or phone
+    if (checkIn.customerEmail || checkIn.customerPhone) {
+      const searchParams = new URLSearchParams({
+        page: '1',
+        per_page: '10'
+      });
+      
+      if (checkIn.customerEmail) {
+        searchParams.append('email', checkIn.customerEmail);
+      }
+
+      const searchResponse = await fetch(`https://api.housecallpro.com/customers?${searchParams}`, {
+        headers: {
+          'Authorization': `Token ${credentials.apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (searchResponse.ok) {
+        const searchResult = await searchResponse.json();
+        if (searchResult.customers && searchResult.customers.length > 0) {
+          // Find exact match by email or phone
+          const exactMatch = searchResult.customers.find((customer: any) => 
+            customer.email === checkIn.customerEmail || 
+            customer.mobile_number === checkIn.customerPhone
+          );
+          if (exactMatch) {
+            customerId = exactMatch.id;
+          }
+        }
+      }
+    }
+
+    // Create customer if not found
+    if (!customerId && (checkIn.customerName || checkIn.customerEmail)) {
+      const customerData: any = {
+        first_name: checkIn.customerName?.split(' ')[0] || 'Rank It Pro',
+        last_name: checkIn.customerName?.split(' ').slice(1).join(' ') || 'Customer',
+        email: checkIn.customerEmail || '',
+        mobile_number: checkIn.customerPhone || '',
+        company: checkIn.companyName || '',
+        notifications_enabled: true
+      };
+
+      // Add address if available
+      if (checkIn.address) {
+        customerData.addresses = [{
+          street: checkIn.address,
+          city: checkIn.city || '',
+          state: checkIn.state || '',
+          zip: checkIn.zip || '',
+          country: 'US',
+          type: 'service'
+        }];
+      }
+
+      const createResponse = await fetch('https://api.housecallpro.com/customers', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${credentials.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ customer: customerData })
+      });
+
+      if (createResponse.ok) {
+        const newCustomer = await createResponse.json();
+        customerId = newCustomer.customer.id;
+      }
+    }
+
+    // Create job/service record
+    if (customerId) {
+      const jobData = {
+        customer_id: customerId,
+        description: `Service Visit - ${checkIn.jobType || 'General Service'}`,
+        note_to_customer: checkIn.notes || 'Service completed successfully',
+        work_status: 'completed',
+        assigned_employee_ids: [], // Could be mapped from technician
+        address: {
+          street: checkIn.address || '',
+          city: checkIn.city || '',
+          state: checkIn.state || '',
+          zip: checkIn.zip || '',
+          country: 'US'
+        },
+        tags: ['Rank It Pro', checkIn.jobType || 'Service'].filter(Boolean)
+      };
+
+      const jobResponse = await fetch('https://api.housecallpro.com/jobs', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${credentials.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ job: jobData })
+      });
+
+      return jobResponse.ok;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Housecall Pro sync failed:', error);
+    throw error;
+  }
 }
 
 // Jobber integration functions
 async function testJobberConnection(credentials: any): Promise<boolean> {
-  // TODO: Implement actual Jobber API connection test
-  return !!(credentials.apiKey);
+  if (!credentials.apiKey) {
+    return false;
+  }
+
+  try {
+    // Test API access with a simple user info query
+    const testResponse = await fetch('https://api.getjobber.com/api/me', {
+      headers: {
+        'Authorization': `Bearer ${credentials.apiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return testResponse.ok;
+  } catch (error) {
+    console.error('Jobber connection test failed:', error);
+    return false;
+  }
 }
 
 async function syncToJobber(checkIn: any, credentials: any, settings: any): Promise<boolean> {
-  // TODO: Implement actual Jobber API sync
-  console.log('Jobber sync would occur here', { checkIn: checkIn.id, settings });
-  return true;
+  if (!credentials.apiKey) {
+    throw new Error('Jobber API key not configured');
+  }
+
+  try {
+    let clientId = null;
+
+    // Find existing client by email
+    if (checkIn.customerEmail) {
+      const searchResponse = await fetch(`https://api.getjobber.com/api/clients?email=${encodeURIComponent(checkIn.customerEmail)}`, {
+        headers: {
+          'Authorization': `Bearer ${credentials.apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (searchResponse.ok) {
+        const searchResult = await searchResponse.json();
+        if (searchResult.clients && searchResult.clients.length > 0) {
+          clientId = searchResult.clients[0].id;
+        }
+      }
+    }
+
+    // Create client if not found
+    if (!clientId && (checkIn.customerName || checkIn.customerEmail)) {
+      const nameParts = (checkIn.customerName || 'Rank It Pro Customer').split(' ');
+      const clientData: any = {
+        first_name: nameParts[0] || 'Rank It Pro',
+        last_name: nameParts.slice(1).join(' ') || 'Customer',
+        company_name: checkIn.companyName || '',
+        email: checkIn.customerEmail || '',
+        phone_number: checkIn.customerPhone || '',
+        mobile_number: checkIn.customerPhone || ''
+      };
+
+      // Add address if available
+      if (checkIn.address) {
+        clientData.billing_address = {
+          street: checkIn.address,
+          city: checkIn.city || '',
+          province: checkIn.state || '',
+          postal_code: checkIn.zip || '',
+          country: 'US'
+        };
+        clientData.property_address = clientData.billing_address;
+      }
+
+      const createResponse = await fetch('https://api.getjobber.com/api/clients', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${credentials.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ client: clientData })
+      });
+
+      if (createResponse.ok) {
+        const newClient = await createResponse.json();
+        clientId = newClient.client.id;
+      }
+    }
+
+    // Create job record
+    if (clientId) {
+      const jobData: any = {
+        client_id: clientId,
+        title: `Service Visit - ${checkIn.jobType || 'General Service'}`,
+        description: `Service completed via Rank It Pro\n\nDetails:\n${checkIn.notes || 'Service completed successfully'}`,
+        status: 'completed',
+        job_number: `RIP-${Date.now()}`, // Generate unique job number
+        start_date: new Date(checkIn.createdAt).toISOString().split('T')[0],
+        end_date: new Date(checkIn.createdAt).toISOString().split('T')[0]
+      };
+
+      // Add property address if available
+      if (checkIn.address) {
+        jobData.property_address = {
+          street: checkIn.address,
+          city: checkIn.city || '',
+          province: checkIn.state || '',
+          postal_code: checkIn.zip || '',
+          country: 'US'
+        };
+      }
+
+      const jobResponse = await fetch('https://api.getjobber.com/api/jobs', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${credentials.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ job: jobData })
+      });
+
+      return jobResponse.ok;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Jobber sync failed:', error);
+    throw error;
+  }
 }
 
 // FieldEdge integration functions
 async function testFieldEdgeConnection(credentials: any): Promise<boolean> {
-  // TODO: Implement actual FieldEdge API connection test
-  return !!(credentials.apiKey);
+  if (!credentials.apiKey || !credentials.username || !credentials.password) {
+    return false;
+  }
+
+  try {
+    // FieldEdge uses basic auth with username/password
+    const authString = Buffer.from(`${credentials.username}:${credentials.password}`).toString('base64');
+    
+    // Test API access with a simple customers query
+    const testResponse = await fetch('https://app.fieldedge.com/api/v2/customers', {
+      headers: {
+        'Authorization': `Basic ${authString}`,
+        'Content-Type': 'application/json',
+        'API-Key': credentials.apiKey
+      }
+    });
+
+    return testResponse.ok;
+  } catch (error) {
+    console.error('FieldEdge connection test failed:', error);
+    return false;
+  }
 }
 
 async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): Promise<boolean> {
-  // TODO: Implement actual FieldEdge API sync
-  console.log('FieldEdge sync would occur here', { checkIn: checkIn.id, settings });
-  return true;
+  if (!credentials.apiKey || !credentials.username || !credentials.password) {
+    throw new Error('FieldEdge credentials not configured');
+  }
+
+  try {
+    const authString = Buffer.from(`${credentials.username}:${credentials.password}`).toString('base64');
+    let customerId = null;
+
+    // Find existing customer by email or phone
+    if (checkIn.customerEmail || checkIn.customerPhone) {
+      const searchParams = new URLSearchParams();
+      if (checkIn.customerEmail) {
+        searchParams.append('email', checkIn.customerEmail);
+      }
+      if (checkIn.customerPhone) {
+        searchParams.append('phone', checkIn.customerPhone);
+      }
+
+      const searchResponse = await fetch(`https://app.fieldedge.com/api/v2/customers?${searchParams}`, {
+        headers: {
+          'Authorization': `Basic ${authString}`,
+          'Content-Type': 'application/json',
+          'API-Key': credentials.apiKey
+        }
+      });
+
+      if (searchResponse.ok) {
+        const searchResult = await searchResponse.json();
+        if (searchResult.customers && searchResult.customers.length > 0) {
+          customerId = searchResult.customers[0].id;
+        }
+      }
+    }
+
+    // Create customer if not found
+    if (!customerId && (checkIn.customerName || checkIn.customerEmail)) {
+      const customerData: any = {
+        name: checkIn.customerName || 'Rank It Pro Customer',
+        email: checkIn.customerEmail || '',
+        phone: checkIn.customerPhone || '',
+        mobile: checkIn.customerPhone || '',
+        company: checkIn.companyName || ''
+      };
+
+      // Add address if available
+      if (checkIn.address) {
+        customerData.address = {
+          street1: checkIn.address,
+          city: checkIn.city || '',
+          state: checkIn.state || '',
+          zip: checkIn.zip || '',
+          country: 'US'
+        };
+      }
+
+      const createResponse = await fetch('https://app.fieldedge.com/api/v2/customers', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${authString}`,
+          'Content-Type': 'application/json',
+          'API-Key': credentials.apiKey
+        },
+        body: JSON.stringify({ customer: customerData })
+      });
+
+      if (createResponse.ok) {
+        const newCustomer = await createResponse.json();
+        customerId = newCustomer.customer.id;
+      }
+    }
+
+    // Create work order
+    if (customerId) {
+      const workOrderData: any = {
+        customer_id: customerId,
+        title: `Service Visit - ${checkIn.jobType || 'General Service'}`,
+        description: `Service completed via Rank It Pro\n\nDetails:\n${checkIn.notes || 'Service completed successfully'}`,
+        status: 'completed',
+        priority: 'normal',
+        scheduled_date: new Date(checkIn.createdAt).toISOString(),
+        completed_date: new Date(checkIn.createdAt).toISOString()
+      };
+
+      // Add service address if available
+      if (checkIn.address) {
+        workOrderData.service_address = {
+          street1: checkIn.address,
+          city: checkIn.city || '',
+          state: checkIn.state || '',
+          zip: checkIn.zip || '',
+          country: 'US'
+        };
+      }
+
+      const workOrderResponse = await fetch('https://app.fieldedge.com/api/v2/work-orders', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${authString}`,
+          'Content-Type': 'application/json',
+          'API-Key': credentials.apiKey
+        },
+        body: JSON.stringify({ work_order: workOrderData })
+      });
+
+      return workOrderResponse.ok;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('FieldEdge sync failed:', error);
+    throw error;
+  }
 }
 
 // HubSpot integration functions
@@ -319,12 +839,188 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
 
 // Salesforce integration functions
 async function testSalesforceConnection(credentials: any): Promise<boolean> {
-  // TODO: Implement actual Salesforce API connection test
-  return !!(credentials.clientId && credentials.clientSecret);
+  if (!credentials.clientId || !credentials.clientSecret || !credentials.username || !credentials.password) {
+    return false;
+  }
+
+  try {
+    // Get OAuth token using username/password flow
+    const tokenResponse = await fetch(`https://${credentials.instanceUrl || 'login'}.salesforce.com/services/oauth2/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        grant_type: 'password',
+        client_id: credentials.clientId,
+        client_secret: credentials.clientSecret,
+        username: credentials.username,
+        password: credentials.password + (credentials.securityToken || '')
+      })
+    });
+
+    if (!tokenResponse.ok) {
+      console.error('Salesforce token request failed:', await tokenResponse.text());
+      return false;
+    }
+
+    const tokenData = await tokenResponse.json();
+    
+    // Test API access with a simple query
+    const testResponse = await fetch(`${tokenData.instance_url}/services/data/v58.0/sobjects/Account/describe`, {
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return testResponse.ok;
+  } catch (error) {
+    console.error('Salesforce connection test failed:', error);
+    return false;
+  }
 }
 
 async function syncToSalesforce(checkIn: any, credentials: any, settings: any): Promise<boolean> {
-  // TODO: Implement actual Salesforce API sync
-  console.log('Salesforce sync would occur here', { checkIn: checkIn.id, settings });
-  return true;
+  if (!credentials.clientId || !credentials.clientSecret || !credentials.username || !credentials.password) {
+    throw new Error('Salesforce credentials not configured');
+  }
+
+  try {
+    // Get OAuth token
+    const tokenResponse = await fetch(`https://${credentials.instanceUrl || 'login'}.salesforce.com/services/oauth2/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        grant_type: 'password',
+        client_id: credentials.clientId,
+        client_secret: credentials.clientSecret,
+        username: credentials.username,
+        password: credentials.password + (credentials.securityToken || '')
+      })
+    });
+
+    if (!tokenResponse.ok) {
+      throw new Error('Failed to get Salesforce access token');
+    }
+
+    const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
+    const instanceUrl = tokenData.instance_url;
+
+    let accountId = null;
+
+    // Find or create Account
+    if (checkIn.customerName || checkIn.customerEmail) {
+      // Search for existing account
+      const searchQuery = `SELECT Id FROM Account WHERE Name = '${(checkIn.customerName || 'Rank It Pro Customer').replace(/'/g, "\\'")}' LIMIT 1`;
+      const searchResponse = await fetch(`${instanceUrl}/services/data/v58.0/query?q=${encodeURIComponent(searchQuery)}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (searchResponse.ok) {
+        const searchResult = await searchResponse.json();
+        if (searchResult.records && searchResult.records.length > 0) {
+          accountId = searchResult.records[0].Id;
+        }
+      }
+
+      // Create account if not found
+      if (!accountId) {
+        const accountData: any = {
+          Name: checkIn.customerName || 'Rank It Pro Customer',
+          Phone: checkIn.customerPhone || '',
+          Description: 'Customer created via Rank It Pro integration'
+        };
+
+        // Add address if available
+        if (checkIn.address) {
+          accountData.BillingStreet = checkIn.address;
+          accountData.BillingCity = checkIn.city || '';
+          accountData.BillingState = checkIn.state || '';
+          accountData.BillingPostalCode = checkIn.zip || '';
+          accountData.BillingCountry = 'United States';
+        }
+
+        const createResponse = await fetch(`${instanceUrl}/services/data/v58.0/sobjects/Account`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(accountData)
+        });
+
+        if (createResponse.ok) {
+          const newAccount = await createResponse.json();
+          accountId = newAccount.id;
+        }
+      }
+    }
+
+    // Create Contact if email is provided
+    let contactId = null;
+    if (checkIn.customerEmail && accountId) {
+      const contactData: any = {
+        AccountId: accountId,
+        FirstName: checkIn.customerName?.split(' ')[0] || 'Rank It Pro',
+        LastName: checkIn.customerName?.split(' ').slice(1).join(' ') || 'Customer',
+        Email: checkIn.customerEmail,
+        Phone: checkIn.customerPhone || '',
+        Description: 'Contact created via Rank It Pro integration'
+      };
+
+      const contactResponse = await fetch(`${instanceUrl}/services/data/v58.0/sobjects/Contact`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(contactData)
+      });
+
+      if (contactResponse.ok) {
+        const newContact = await contactResponse.json();
+        contactId = newContact.id;
+      }
+    }
+
+    // Create Case for the service visit
+    if (accountId) {
+      const caseData: any = {
+        AccountId: accountId,
+        Subject: `Service Visit - ${checkIn.jobType || 'General Service'}`,
+        Description: `Service completed via Rank It Pro\n\nDetails:\n${checkIn.notes || 'Service completed successfully'}\n\nLocation: ${checkIn.address || 'On-site'}`,
+        Status: 'Closed',
+        Origin: 'Rank It Pro',
+        Priority: 'Medium',
+        Type: 'Service Request'
+      };
+
+      if (contactId) {
+        caseData.ContactId = contactId;
+      }
+
+      const caseResponse = await fetch(`${instanceUrl}/services/data/v58.0/sobjects/Case`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(caseData)
+      });
+
+      return caseResponse.ok;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Salesforce sync failed:', error);
+    throw error;
+  }
 }
