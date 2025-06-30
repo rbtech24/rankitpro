@@ -174,9 +174,13 @@ export default function SupportManagement() {
   const recentClosed = chatSessions.filter(s => s.status === 'closed').slice(0, 5);
 
   return (
-    <DashboardLayout>
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="flex min-h-screen bg-gray-50">
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
+      <div className="flex-1">
+        <div className="max-w-7xl mx-auto p-6 space-y-6">
+          <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Support Management</h1>
           <p className="text-gray-600 mt-2">Manage customer support chats and availability</p>
@@ -408,7 +412,8 @@ export default function SupportManagement() {
           </CardContent>
         </Card>
       )}
+        </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }

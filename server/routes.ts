@@ -2583,11 +2583,20 @@ Format as professional service documentation.`;
         return res.status(403).json({ error: 'Access denied' });
       }
 
+      // Get real chat statistics from database
+      const realStats = await storage.getChatSessionStats();
+      
+      // Get today's chat sessions count
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      
+      const todayChats = await storage.getChatSessionsByDateRange(todayStart, new Date());
+      
       const stats = {
-        totalToday: 5, // Sample data - would be real from database
-        averageResponseTime: 120,
-        customerSatisfaction: 4.5,
-        activeSessions: 2
+        totalToday: todayChats.length,
+        averageResponseTime: realStats.averageResolutionTime,
+        customerSatisfaction: realStats.customerSatisfactionRating,
+        activeSessions: realStats.activeSessions
       };
       res.json(stats);
     } catch (error) {

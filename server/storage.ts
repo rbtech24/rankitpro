@@ -394,6 +394,7 @@ export interface IStorage {
     averageResponseTime: number;
     resolutionRate: number;
   }>;
+  getChatSessionsByDateRange(startDate: Date, endDate: Date): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -4762,6 +4763,15 @@ export class DatabaseStorage implements IStorage {
       .where(eq(supportAgents.userId, userId))
       .returning();
     return updatedAgent;
+  }
+
+  async getChatSessionsByDateRange(startDate: Date, endDate: Date): Promise<any[]> {
+    const sessions = await db.select()
+      .from(chatSessions)
+      .where(
+        sql`${chatSessions.startedAt} >= ${startDate.toISOString()} AND ${chatSessions.startedAt} <= ${endDate.toISOString()}`
+      );
+    return sessions;
   }
 }
 
