@@ -28,7 +28,8 @@ import {
   Loader2,
   CheckCircle,
   MessageSquare,
-  LogOut
+  LogOut,
+  AlertCircle
 } from 'lucide-react';
 
 export default function MobileFieldApp() {
@@ -192,7 +193,7 @@ export default function MobileFieldApp() {
     onSuccess: () => {
       toast({
         title: "Check-in Completed",
-        description: "Work documentation has been submitted successfully.",
+        description: "Work documentation submitted successfully. AI content generated and GPS location recorded.",
       });
       setCheckInForm({
         jobTypeId: '',
@@ -444,11 +445,34 @@ export default function MobileFieldApp() {
           </SelectContent>
         </Select>
 
-        <Input
-          placeholder="Service Address (e.g., 123 Main St, City, State 12345)"
-          value={checkInForm.address || ''}
-          onChange={(e) => setCheckInForm(prev => ({ ...prev, address: e.target.value }))}
-        />
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-medium">Service Address</label>
+            {currentLocation && !checkInForm.address && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCheckInForm(prev => ({ 
+                  ...prev, 
+                  address: formatLocationDisplay(currentLocation) 
+                }))}
+                className="text-xs"
+              >
+                <MapPin className="w-3 h-3 mr-1" />
+                Use GPS
+              </Button>
+            )}
+          </div>
+          <Input
+            placeholder="123 Main St, City, State 12345"
+            value={checkInForm.address || ''}
+            onChange={(e) => setCheckInForm(prev => ({ ...prev, address: e.target.value }))}
+            className={!checkInForm.address && !currentLocation ? 'border-red-300' : ''}
+          />
+          {!checkInForm.address && !currentLocation && (
+            <p className="text-xs text-red-600">Address required - enter manually or enable GPS</p>
+          )}
+        </div>
 
         <Textarea
           placeholder="Work performed..."
@@ -504,12 +528,26 @@ export default function MobileFieldApp() {
 
         <Button
           onClick={() => submitCheckIn.mutate()}
-          disabled={!checkInForm.jobTypeId || !checkInForm.workPerformed || submitCheckIn.isPending}
+          disabled={!checkInForm.jobTypeId || !checkInForm.workPerformed || (!checkInForm.address && !currentLocation) || submitCheckIn.isPending}
           className="w-full"
         >
           {submitCheckIn.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle className="w-4 h-4 mr-2" />}
           Submit Check-In
         </Button>
+        
+        {(!checkInForm.jobTypeId || !checkInForm.workPerformed || (!checkInForm.address && !currentLocation)) && (
+          <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-center gap-2 text-amber-800 text-sm">
+              <AlertCircle className="w-4 h-4" />
+              <span className="font-medium">Required fields missing:</span>
+            </div>
+            <ul className="mt-1 text-sm text-amber-700 ml-6 list-disc">
+              {!checkInForm.jobTypeId && <li>Job type selection</li>}
+              {!checkInForm.workPerformed && <li>Work performed description</li>}
+              {!checkInForm.address && !currentLocation && <li>Service address or GPS location</li>}
+            </ul>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
