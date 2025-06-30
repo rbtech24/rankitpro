@@ -2732,6 +2732,46 @@ Format as professional service documentation.`;
     }
   });
 
+  // Clear all waiting chats
+  app.post("/api/chat/admin/clear-waiting", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      const clearedCount = await storage.clearWaitingChats();
+      res.json({ 
+        success: true, 
+        clearedCount,
+        message: `${clearedCount} waiting chats have been cleared` 
+      });
+    } catch (error) {
+      console.error('Error clearing waiting chats:', error);
+      res.status(500).json({ error: 'Failed to clear waiting chats' });
+    }
+  });
+
+  // Archive old chats
+  app.post("/api/chat/admin/archive-old", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      const { daysOld = 30 } = req.body;
+      const archivedCount = await storage.archiveOldChats(daysOld);
+      
+      res.json({ 
+        success: true, 
+        archivedCount,
+        message: `${archivedCount} old chats have been archived` 
+      });
+    } catch (error) {
+      console.error('Error archiving old chats:', error);
+      res.status(500).json({ error: 'Failed to archive old chats' });
+    }
+  });
+
   // Update agent online status
   app.post("/api/chat/agent/status", isAuthenticated, async (req: Request, res: Response) => {
     try {

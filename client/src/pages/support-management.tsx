@@ -18,6 +18,8 @@ import {
   Users,
   MessageSquare,
   PhoneCall,
+  Archive,
+  Trash2,
   Timer,
   Send,
   X,

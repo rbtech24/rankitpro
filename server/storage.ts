@@ -14,7 +14,7 @@ import {
   ChatQuickReply, InsertChatQuickReply, ChatSessionWithDetails, ChatMessageWithSender
 } from "@shared/schema";
 import { db, queryWithRetry } from "./db";
-import { eq, and, desc, asc, gte, lt, lte, sql, not, like, ilike } from "drizzle-orm";
+import { eq, and, or, desc, asc, gte, lt, lte, sql, not, like, ilike } from "drizzle-orm";
 import * as schema from "@shared/schema";
 import { neon } from "@neondatabase/serverless";
 
@@ -4763,6 +4763,40 @@ export class DatabaseStorage implements IStorage {
       .where(eq(supportAgents.userId, userId))
       .returning();
     return updatedAgent;
+  }
+
+  // Clear all waiting chat sessions
+  async clearWaitingChats(): Promise<number> {
+    const result = await db.delete(chatSessions)
+      .where(eq(chatSessions.status, 'waiting'))
+      .returning();
+    
+    return result.length;
+  }
+
+  // Archive old chat sessions (move to closed status with archive flag)
+  async archiveOldChats(daysOld: number = 30): Promise<number> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+    
+    const result = await db.update(chatSessions)
+      .set({ 
+        status: 'closed',
+        closedAt: new Date(),
+        customerFeedback: 'Archived due to age'
+      })
+      .where(
+        and(
+          lt(chatSessions.createdAt, cutoffDate),
+          or(
+            eq(chatSessions.status, 'waiting'),
+            eq(chatSessions.status, 'active')
+          )
+        )
+      )
+      .returning();
+    
+    return result.length;
   }
 
   async getChatSessionsByDateRange(startDate: Date, endDate: Date): Promise<any[]> {
