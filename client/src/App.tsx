@@ -98,6 +98,7 @@ import TermsOfService from "@/pages/terms-of-service";
 import WordPressIntegration from "@/pages/wordpress-integration";
 import WordPressCustomFields from "@/pages/wordpress-custom-fields";
 import EmbedGenerator from "@/pages/embed-generator";
+import MobileOptimizationsDemo from "@/pages/mobile-optimizations-demo";
 import EmergencyLogin from "@/pages/emergency-login";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
@@ -220,6 +221,7 @@ function Router() {
         <Route path="/resources"><Resources /></Route>
         <Route path="/documentation"><Documentation /></Route>
         <Route path="/help-center"><HelpCenter /></Route>
+        <Route path="/mobile-optimizations-demo"><MobileOptimizationsDemo /></Route>
         <Route path="/support"><SupportPage /></Route>
         <Route path="/docs"><DocsPage /></Route>
         <Route path="/blog"><Blog /></Route>
@@ -298,6 +300,7 @@ function Router() {
       <Route path="/resources"><Resources /></Route>
       <Route path="/documentation"><Documentation /></Route>
       <Route path="/help-center"><HelpCenter /></Route>
+      <Route path="/mobile-optimizations-demo"><MobileOptimizationsDemo /></Route>
       <Route path="/blog"><Blog /></Route>
       <Route path="/api"><API /></Route>
       <Route path="/careers"><Careers /></Route>
