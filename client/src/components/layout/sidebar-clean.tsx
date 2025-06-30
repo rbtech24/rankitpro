@@ -210,20 +210,7 @@ export default function Sidebar({ className }: SidebarProps) {
               </div>
             </Link>
 
-            <Link href="/support-management">
-              <div className={cn(
-                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
-                isActive("/support-management") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
-              )}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
-                  <path d="M8 12h.01"/>
-                  <path d="M12 12h.01"/>
-                  <path d="M16 12h.01"/>
-                  <path d="M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                </svg>
-                Support Management
-              </div>
-            </Link>
+
 
             </div>
           )}
