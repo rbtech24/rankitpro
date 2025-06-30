@@ -1423,60 +1423,137 @@ export class DatabaseStorage implements IStorage {
 
   async getFinancialMetrics(): Promise<any> {
     try {
-      const totalCompanies = await this.getCompanyCount();
-      const activeCompanies = await this.getActiveCompaniesCount();
-      
-      // Only count companies that are NOT test data
-      const realCompaniesData = await db.select({
-        plan: companies.plan,
-        subscriptionPlanId: companies.subscriptionPlanId,
-        createdAt: companies.createdAt,
-        name: companies.name
-      }).from(companies).where(eq(companies.isTrialActive, true));
-      
-      // Filter out test data in application code
-      const filteredRealCompanies = realCompaniesData.filter(company => 
-        !company.name.includes('Test') && 
-        !company.name.includes('Debug') && 
-        !company.name.includes('Tech Test')
-      );
-      
-      let totalMRR = 0;
-      let totalARR = 0;
-      
-      // Calculate revenue only from companies with active paid Stripe subscriptions
-      // Since no companies have active subscriptions yet, revenue should be $0
-      const companiesWithActiveSubscriptions = filteredRealCompanies.filter(company => 
-        company.subscriptionPlanId !== null // Only count companies with actual subscription plans
-      );
-      
-      // Real revenue calculation - only count actual paying customers
-      totalMRR = 0; // No paying customers yet
-      totalARR = 0; // No paying customers yet
+      if (!process.env.STRIPE_SECRET_KEY) {
+        console.warn('Stripe API key not configured, returning zero financial metrics');
+        return {
+          totalRevenue: 0,
+          monthlyRecurringRevenue: 0,
+          annualRecurringRevenue: 0,
+          totalCompanies: 0,
+          activeSubscriptions: 0,
+          monthlySignups: 0,
+          churnRate: 0,
+          averageRevenuePerUser: 0
+        };
+      }
 
-      // Calculate signups this month (excluding test data)
+      const stripe = await import('stripe').then(Stripe => new Stripe.default(process.env.STRIPE_SECRET_KEY!, {
+        apiVersion: '2023-10-16'
+      }));
+
+      // Get all database companies to match with Stripe customers
+      const allCompanies = await db.select({
+        id: companies.id,
+        name: companies.name,
+        stripeCustomerId: companies.stripeCustomerId,
+        createdAt: companies.createdAt,
+        isTrialActive: companies.isTrialActive
+      }).from(companies);
+
+      // Get all users with Stripe subscriptions
+      const allUsers = await db.select({
+        id: users.id,
+        stripeCustomerId: users.stripeCustomerId,
+        stripeSubscriptionId: users.stripeSubscriptionId,
+        companyId: users.companyId
+      }).from(users).where(sql`${users.stripeSubscriptionId} IS NOT NULL`);
+
+      // Get active subscriptions from Stripe
+      const subscriptions = await stripe.subscriptions.list({
+        status: 'active',
+        limit: 100
+      });
+
+      let monthlyRevenue = 0;
+      let activeSubscriptions = 0;
+
+      // Calculate revenue from active Stripe subscriptions
+      for (const subscription of subscriptions.data) {
+        if (subscription.status === 'active') {
+          activeSubscriptions++;
+          
+          for (const item of subscription.items.data) {
+            const price = item.price;
+            if (price.recurring?.interval === 'month') {
+              monthlyRevenue += (price.unit_amount || 0) / 100;
+            } else if (price.recurring?.interval === 'year') {
+              monthlyRevenue += ((price.unit_amount || 0) / 100) / 12;
+            }
+          }
+        }
+      }
+
+      // Get total revenue from successful charges (last 12 months)
+      const since = Math.floor(Date.now() / 1000) - (365 * 24 * 60 * 60);
+      const charges = await stripe.charges.list({
+        created: { gte: since },
+        limit: 100
+      });
+
+      let totalRevenue = 0;
+      let totalPayments = 0;
+      let failedPayments = 0;
+
+      for (const charge of charges.data) {
+        totalPayments++;
+        if (charge.status === 'succeeded') {
+          totalRevenue += charge.amount / 100;
+        } else if (charge.status === 'failed') {
+          failedPayments++;
+        }
+      }
+
+      // Calculate refunds
+      const refunds = await stripe.refunds.list({
+        created: { gte: since },
+        limit: 100
+      });
+
+      let totalRefunds = 0;
+      for (const refund of refunds.data) {
+        if (refund.status === 'succeeded') {
+          totalRefunds += refund.amount / 100;
+        }
+      }
+
+      // Calculate churn rate (canceled subscriptions in last 30 days vs active)
+      const thirtyDaysAgo = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
+      const canceledSubs = await stripe.subscriptions.list({
+        status: 'canceled',
+        created: { gte: thirtyDaysAgo },
+        limit: 100
+      });
+
+      const churnRate = activeSubscriptions > 0 ? (canceledSubs.data.length / activeSubscriptions) : 0;
+
+      // Calculate company metrics
       const currentMonth = new Date();
       currentMonth.setDate(1);
       currentMonth.setHours(0, 0, 0, 0);
       
-      const monthlySignups = filteredRealCompanies.filter(company => 
+      const monthlySignups = allCompanies.filter(company => 
         company.createdAt && new Date(company.createdAt) >= currentMonth
       ).length;
 
-      const realCompanyCount = filteredRealCompanies.length;
+      const netRevenue = totalRevenue - totalRefunds;
+      const annualRecurringRevenue = monthlyRevenue * 12;
 
       return {
-        totalRevenue: totalARR,
-        monthlyRecurringRevenue: totalMRR,
-        annualRecurringRevenue: totalARR,
-        totalCompanies: realCompanyCount,
-        activeSubscriptions: companiesWithActiveSubscriptions.length, // Only count actual paying customers
+        totalRevenue,
+        monthlyRecurringRevenue: monthlyRevenue,
+        annualRecurringRevenue,
+        totalCompanies: allCompanies.length,
+        activeSubscriptions,
         monthlySignups,
-        churnRate: 0,
-        averageRevenuePerUser: companiesWithActiveSubscriptions.length > 0 ? totalMRR / companiesWithActiveSubscriptions.length : 0
+        churnRate,
+        averageRevenuePerUser: activeSubscriptions > 0 ? monthlyRevenue / activeSubscriptions : 0,
+        totalPayments,
+        failedPayments,
+        refunds: totalRefunds,
+        netRevenue
       };
     } catch (error) {
-      console.error('Error calculating financial metrics:', error);
+      console.error('Error fetching financial metrics from Stripe:', error);
       return {
         totalRevenue: 0,
         monthlyRecurringRevenue: 0,
@@ -1485,7 +1562,11 @@ export class DatabaseStorage implements IStorage {
         activeSubscriptions: 0,
         monthlySignups: 0,
         churnRate: 0,
-        averageRevenuePerUser: 0
+        averageRevenuePerUser: 0,
+        totalPayments: 0,
+        failedPayments: 0,
+        refunds: 0,
+        netRevenue: 0
       };
     }
   }
@@ -1686,10 +1767,188 @@ export class DatabaseStorage implements IStorage {
   }
   async updateWordpressCustomFields(id: number, updates: Partial<WordpressCustomFields>): Promise<WordpressCustomFields | undefined> { return undefined; }
   async testWordpressConnection(companyId: number): Promise<{ isConnected: boolean; version?: string; message?: string; }> {
-    return { isConnected: false, message: "WordPress integration not configured" };
+    try {
+      const company = await this.getCompany(companyId);
+      if (!company?.wordpressUrl || !company?.wordpressApiKey) {
+        return { 
+          isConnected: false, 
+          message: "WordPress URL and API key must be configured" 
+        };
+      }
+
+      const wpUrl = company.wordpressUrl.replace(/\/$/, '');
+      const response = await fetch(`${wpUrl}/wp-json/wp/v2/users/me`, {
+        headers: {
+          'Authorization': `Bearer ${company.wordpressApiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        return {
+          isConnected: true,
+          version: '2.0',
+          message: `Connected as ${userData.name || 'WordPress User'}`
+        };
+      } else {
+        return {
+          isConnected: false,
+          message: `Connection failed: ${response.status} ${response.statusText}`
+        };
+      }
+    } catch (error) {
+      return {
+        isConnected: false,
+        message: `Connection error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
   }
   async syncWordpressCheckIns(companyId: number, checkInIds?: number[]): Promise<{ success: boolean; synced: number; failed: number; message?: string; }> {
-    return { success: false, synced: 0, failed: 0, message: "WordPress sync not implemented" };
+    try {
+      const company = await this.getCompany(companyId);
+      if (!company?.wordpressUrl || !company?.wordpressApiKey) {
+        return {
+          success: false,
+          synced: 0,
+          failed: 0,
+          message: "WordPress connection not configured"
+        };
+      }
+
+      let checkInsToSync: CheckIn[];
+      if (checkInIds) {
+        checkInsToSync = [];
+        for (const id of checkInIds) {
+          const checkIn = await this.getCheckIn(id);
+          if (checkIn && checkIn.companyId === companyId) {
+            checkInsToSync.push(checkIn);
+          }
+        }
+      } else {
+        checkInsToSync = await db.select()
+          .from(checkIns)
+          .where(
+            and(
+              eq(checkIns.companyId, companyId),
+              eq(checkIns.isBlog, true),
+              sql`${checkIns.wordpressSyncStatus} != 'synced' OR ${checkIns.wordpressSyncStatus} IS NULL`
+            )
+          )
+          .limit(10);
+      }
+
+      if (checkInsToSync.length === 0) {
+        return {
+          success: true,
+          synced: 0,
+          failed: 0,
+          message: "No check-ins to sync"
+        };
+      }
+
+      let synced = 0;
+      let failed = 0;
+      const wpUrl = company.wordpressUrl.replace(/\/$/, '');
+
+      for (const checkIn of checkInsToSync) {
+        try {
+          const technician = await this.getTechnician(checkIn.technicianId);
+          
+          const postData = {
+            title: `${checkIn.jobType} Service Completed - ${checkIn.location || 'Service Call'}`,
+            content: `
+              <div class="service-post">
+                <h2>Professional ${checkIn.jobType} Service</h2>
+                
+                <div class="service-details">
+                  <p><strong>Service Type:</strong> ${checkIn.jobType}</p>
+                  <p><strong>Location:</strong> ${checkIn.location || 'On-site service'}</p>
+                  <p><strong>Technician:</strong> ${technician?.name || 'Professional Technician'}</p>
+                  <p><strong>Date:</strong> ${new Date(checkIn.createdAt).toLocaleDateString()}</p>
+                </div>
+
+                <div class="service-description">
+                  <h3>Service Details</h3>
+                  <p>${checkIn.notes || 'Professional service completed successfully.'}</p>
+                </div>
+
+                ${checkIn.beforePhoto ? `
+                  <div class="service-photos">
+                    <h3>Service Documentation</h3>
+                    <img src="${checkIn.beforePhoto}" alt="Service documentation" class="service-photo" />
+                    ${checkIn.afterPhoto ? `<img src="${checkIn.afterPhoto}" alt="Completed service" class="service-photo" />` : ''}
+                  </div>
+                ` : ''}
+
+                <div class="call-to-action">
+                  <h3>Need Similar Service?</h3>
+                  <p>Contact us today for professional ${checkIn.jobType.toLowerCase()} service in your area. Our experienced technicians are ready to help!</p>
+                </div>
+              </div>
+            `,
+            status: 'publish',
+            categories: [1],
+            tags: [checkIn.jobType.toLowerCase().replace(/\s+/g, '-')],
+            meta: {
+              'service_type': checkIn.jobType,
+              'service_location': checkIn.location,
+              'technician_name': technician?.name,
+              'service_date': checkIn.createdAt
+            }
+          };
+
+          const response = await fetch(`${wpUrl}/wp-json/wp/v2/posts`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${company.wordpressApiKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(postData)
+          });
+
+          if (response.ok) {
+            const wpPost = await response.json();
+            await db.update(checkIns)
+              .set({
+                wordpressSyncStatus: 'synced',
+                wordpressPostId: wpPost.id,
+                wordpressPostUrl: wpPost.link
+              })
+              .where(eq(checkIns.id, checkIn.id));
+            
+            synced++;
+          } else {
+            console.error(`Failed to sync check-in ${checkIn.id}:`, await response.text());
+            await db.update(checkIns)
+              .set({ wordpressSyncStatus: 'failed' })
+              .where(eq(checkIns.id, checkIn.id));
+            failed++;
+          }
+        } catch (error) {
+          console.error(`Error syncing check-in ${checkIn.id}:`, error);
+          await db.update(checkIns)
+            .set({ wordpressSyncStatus: 'failed' })
+            .where(eq(checkIns.id, checkIn.id));
+          failed++;
+        }
+      }
+
+      return {
+        success: synced > 0,
+        synced,
+        failed,
+        message: `Synced ${synced} posts, ${failed} failed`
+      };
+    } catch (error) {
+      console.error('WordPress sync error:', error);
+      return {
+        success: false,
+        synced: 0,
+        failed: 0,
+        message: `Sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
   }
 
   async getReviewFollowUpSettings(companyId: number): Promise<ReviewFollowUpSettings | undefined> { return undefined; }
