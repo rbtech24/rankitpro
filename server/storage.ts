@@ -498,7 +498,7 @@ export class DatabaseStorage implements IStorage {
     .from(aiUsageLogs)
     .where(
       and(
-        eq(aiUsageLogs.provider, provider),
+        sql`${aiUsageLogs.provider} = ${provider}`,
         gte(aiUsageLogs.createdAt, today)
       )
     );
@@ -1910,7 +1910,7 @@ export class DatabaseStorage implements IStorage {
       const dbResponseTime = Date.now() - dbStart;
       
       // Get AI usage statistics
-      const aiUsageToday = await this.getAIUsageToday();
+      const aiUsageToday = await this.getAIUsageToday('openai');
       
       const health = activeCompanies > 0 ? 'healthy' : totalCompanies > 0 ? 'warning' : 'critical';
       
@@ -1949,7 +1949,7 @@ export class DatabaseStorage implements IStorage {
         totalUsers: 0,
         systemLoad: 'N/A',
         memoryUsage: 'N/A',
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -2573,7 +2573,7 @@ export class DatabaseStorage implements IStorage {
     try {
       const conditions = [eq(salesCommissions.salesPersonId, salesPersonId)];
       if (status) {
-        conditions.push(eq(salesCommissions.status, status));
+        conditions.push(sql`${salesCommissions.status} = ${status}`);
       }
       const whereCondition = conditions.length > 1 ? and(...conditions) : conditions[0];
 
@@ -2910,12 +2910,12 @@ export class DatabaseStorage implements IStorage {
       // Calculate revenue based on subscription plans
       const calculateRevenue = (companies: any[]) => {
         return companies.reduce((sum, company) => {
-          const planRevenue = {
+          const planRevenue: Record<string, number> = {
             'starter': 49,
             'pro': 79,
             'agency': 149
-          }[company.plan] || 0;
-          return sum + planRevenue;
+          };
+          return sum + (planRevenue[company.plan] || 0);
         }, 0);
       };
 
