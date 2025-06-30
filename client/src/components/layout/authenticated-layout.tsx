@@ -27,7 +27,7 @@ export default function AuthenticatedLayout({ children }: AuthenticatedLayoutPro
   return (
     <>
       {children}
-      {auth?.user && (
+      {auth?.user && auth.user.role !== 'super_admin' && (
         <ChatWidget user={auth.user} />
       )}
     </>

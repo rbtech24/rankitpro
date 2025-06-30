@@ -27,6 +27,7 @@ import Technicians from "@/pages/technicians";
 import CustomerSupport from "@/pages/customer-support";
 import Support from "@/pages/support";
 import SupportDashboard from "@/pages/support-dashboard";
+import SupportManagement from "@/pages/support-management";
 import Users from "@/pages/users";
 import Integrations from "@/pages/integrations";
 import Settings from "@/pages/settings";
