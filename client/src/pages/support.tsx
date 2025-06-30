@@ -44,6 +44,7 @@ export default function SupportPage() {
 
   const [showBugReportForm, setShowBugReportForm] = useState(false);
   const [showFeatureRequestForm, setShowFeatureRequestForm] = useState(false);
+  const [showDocumentation, setShowDocumentation] = useState(false);
 
   // Fetch system status
   const { data: systemStatus, isLoading: statusLoading } = useQuery({
@@ -410,7 +411,11 @@ export default function SupportPage() {
                   <Lightbulb className="w-4 h-4 mr-2" />
                   Feature Request
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => setShowDocumentation(true)}
+                >
                   <HelpCircle className="w-4 h-4 mr-2" />
                   Documentation
                 </Button>
@@ -604,6 +609,137 @@ export default function SupportPage() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Documentation Modal */}
+      {showDocumentation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900">Documentation & Guides</h2>
+                <Button variant="ghost" onClick={() => setShowDocumentation(false)}>×</Button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* Getting Started */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Getting Started</CardTitle>
+                    <CardDescription>Essential guides to get you up and running</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => window.open('/DEMO_CREDENTIALS.md', '_blank')}
+                    >
+                      <Clock className="w-4 h-4 mr-2" />
+                      Demo Credentials & Login
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => window.open('/README.md', '_blank')}
+                    >
+                      <HelpCircle className="w-4 h-4 mr-2" />
+                      Platform Overview
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* WordPress Integration */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">WordPress Integration</CardTitle>
+                    <CardDescription>Setup and configure WordPress plugin</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => window.open('/FINAL-WORDPRESS-SOLUTION.md', '_blank')}
+                    >
+                      <HelpCircle className="w-4 h-4 mr-2" />
+                      WordPress Setup Guide
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => window.open('/COMPLETE-SHORTCODE-GUIDE.md', '_blank')}
+                    >
+                      <HelpCircle className="w-4 h-4 mr-2" />
+                      Shortcode Reference
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Mobile App */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Mobile App</CardTitle>
+                    <CardDescription>Mobile field app setup and usage</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => window.open('/MOBILE-APP-FUNCTIONALITY-REPORT.md', '_blank')}
+                    >
+                      <Phone className="w-4 h-4 mr-2" />
+                      Mobile App Features
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => window.open('/PWA-SETUP.md', '_blank')}
+                    >
+                      <Phone className="w-4 h-4 mr-2" />
+                      PWA Installation Guide
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* System Configuration */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">System Configuration</CardTitle>
+                    <CardDescription>Advanced setup and integration guides</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => window.open('/CRM-INTEGRATION-IMPLEMENTATION-COMPLETE.md', '_blank')}
+                    >
+                      <HelpCircle className="w-4 h-4 mr-2" />
+                      CRM Integration Guide
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => window.open('/SOCIAL-MEDIA-INTEGRATION.md', '_blank')}
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Social Media Setup
+                    </Button>
+                  </CardContent>
+                </Card>
+
+              </div>
+              
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h3 className="font-semibold text-blue-900 mb-2">Need Additional Help?</h3>
+                <p className="text-blue-700 text-sm">
+                  Can't find what you're looking for? Use the Bug Report or Feature Request buttons above to get personalized assistance from our support team.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}
