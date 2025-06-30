@@ -540,13 +540,86 @@ export class DatabaseStorage implements IStorage {
     activeConnections: number;
     lastBackup?: Date;
   }> {
-    return {
-      status: "healthy",
-      uptime: process.uptime(),
-      memoryUsage: Math.round((process.memoryUsage().heapUsed / process.memoryUsage().heapTotal) * 100),
-      activeConnections: 1,
-      lastBackup: new Date()
-    };
+    try {
+      const startTime = Date.now();
+
+      // Test database connection
+      let dbStatus = 'connected';
+      let activeConnections = 0;
+      try {
+        const testQuery = await db.select({ count: sql`count(*)` }).from(users);
+        activeConnections = testQuery.length > 0 ? 1 : 0;
+      } catch (error) {
+        dbStatus = 'error';
+      }
+
+      // Memory usage
+      const memUsage = process.memoryUsage();
+      const memoryUsage = Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100);
+
+      // API response time
+      const responseTime = Date.now() - startTime;
+
+      // Determine overall status
+      let status: "healthy" | "degraded" | "down" = "healthy";
+      
+      if (dbStatus !== 'connected') {
+        status = "down";
+      } else if (memoryUsage > 90 || responseTime > 2000) {
+        status = "down";
+      } else if (memoryUsage > 70 || responseTime > 1000) {
+        status = "degraded";
+      }
+
+      // Test external services
+      const servicesHealthy = await this.testExternalServices();
+      if (!servicesHealthy && status === "healthy") {
+        status = "degraded";
+      }
+
+      return {
+        status,
+        uptime: Math.floor(process.uptime()),
+        memoryUsage,
+        activeConnections,
+        lastBackup: new Date()
+      };
+    } catch (error) {
+      console.error('Error checking system health:', error);
+      return {
+        status: "down",
+        uptime: Math.floor(process.uptime()),
+        memoryUsage: 0,
+        activeConnections: 0,
+        lastBackup: new Date()
+      };
+    }
+  }
+
+  private async testExternalServices(): Promise<boolean> {
+    try {
+      let servicesOk = true;
+
+      // Test Stripe if configured
+      if (process.env.STRIPE_SECRET_KEY) {
+        try {
+          const stripe = await import('stripe').then(Stripe => new Stripe.default(process.env.STRIPE_SECRET_KEY!));
+          await stripe.prices.list({ limit: 1 });
+        } catch (error) {
+          servicesOk = false;
+        }
+      }
+
+      // Test email service if configured
+      if (process.env.RESEND_API_KEY) {
+        // Could add actual test here, for now just check if key exists
+        servicesOk = servicesOk && true;
+      }
+
+      return servicesOk;
+    } catch (error) {
+      return false;
+    }
   }
 
   async getReviewRequestCount(): Promise<number> {
@@ -1437,9 +1510,7 @@ export class DatabaseStorage implements IStorage {
         };
       }
 
-      const stripe = await import('stripe').then(Stripe => new Stripe.default(process.env.STRIPE_SECRET_KEY!, {
-        apiVersion: '2023-10-16'
-      }));
+      const stripe = await import('stripe').then(Stripe => new Stripe.default(process.env.STRIPE_SECRET_KEY!));
 
       // Get all database companies to match with Stripe customers
       const allCompanies = await db.select({

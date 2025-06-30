@@ -190,8 +190,23 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
 
 // HubSpot integration functions
 async function testHubSpotConnection(credentials: any): Promise<boolean> {
-  // TODO: Implement actual HubSpot API connection test
-  return !!(credentials.accessToken);
+  if (!credentials.accessToken) {
+    return false;
+  }
+
+  try {
+    const response = await fetch('https://api.hubapi.com/crm/v3/objects/contacts?limit=1', {
+      headers: {
+        'Authorization': `Bearer ${credentials.accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('HubSpot connection test failed:', error);
+    return false;
+  }
 }
 
 async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Promise<boolean> {
