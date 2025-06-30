@@ -172,29 +172,51 @@ async function createSuperAdminIfNotExists() {
     process.exit(1);
   }
 
-  // Add database connection verification with retry logic
+  // Add database connection verification with improved retry logic
   let dbConnected = false;
   let retryCount = 0;
-  const maxRetries = 3;
+  const maxRetries = 5;
   
   while (!dbConnected && retryCount < maxRetries) {
     try {
       console.log(`🔄 Verifying database connection... (attempt ${retryCount + 1}/${maxRetries})`);
+      
       // Import storage to trigger connection initialization
       const { storage } = await import("./storage");
+      
       // Test the connection with a simple query
-      await storage.getAllUsers();
-      console.log("✅ Database connection verified");
+      const users = await storage.getAllUsers();
+      console.log(`✅ Database connection verified - found ${users.length} users`);
       dbConnected = true;
     } catch (error) {
       retryCount++;
-      console.error(`❌ Database connection attempt ${retryCount} failed:`, error instanceof Error ? error.message : String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`❌ Database connection attempt ${retryCount} failed:`, errorMessage);
       
-      if (retryCount < maxRetries) {
-        console.log(`Retrying in ${retryCount * 2} seconds...`);
-        await new Promise(resolve => setTimeout(resolve, retryCount * 2000));
+      // Check if it's a connection-related error
+      const isConnectionError = errorMessage.includes('connect') || 
+                              errorMessage.includes('timeout') ||
+                              errorMessage.includes('SSL') ||
+                              errorMessage.includes('ENOTFOUND') ||
+                              errorMessage.includes('ECONNREFUSED');
+      
+      if (retryCount < maxRetries && isConnectionError) {
+        const delay = Math.min(retryCount * 3000, 15000); // 3s, 6s, 9s, 12s, 15s
+        console.log(`🔄 Connection error detected. Retrying in ${delay/1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else if (retryCount >= maxRetries) {
+        console.error("❌ Database connection failed after all retries.");
+        console.error("💡 This might be due to:");
+        console.error("   - Network connectivity issues");
+        console.error("   - Incorrect DATABASE_URL configuration");
+        console.error("   - Database server being unavailable");
+        console.error("   - SSL configuration problems");
+        console.error("\n🚨 Application will start but database operations will fail!");
+        break;
       } else {
-        console.error("Database connection failed after all retries. The application will continue but database operations may fail");
+        // Non-connection error, don't retry
+        console.error("❌ Non-connection database error:", errorMessage);
+        break;
       }
     }
   }

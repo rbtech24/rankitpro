@@ -31,26 +31,52 @@ function createDatabaseConnection() {
   }
 
   try {
-    // Always use SSL for production deployments to ensure reliable connections
-    // This works consistently for both Render external URLs and other cloud providers
+    // Detect database provider and configure SSL appropriately
     const isProduction = process.env.NODE_ENV === 'production';
-    const isCloudDatabase = databaseUrl.includes('.render.com') || 
+    const isNeonDatabase = databaseUrl.includes('neon.tech');
+    const isRenderDatabase = databaseUrl.includes('.render.com');
+    const isCloudDatabase = isNeonDatabase || isRenderDatabase || 
                            databaseUrl.includes('.amazonaws.com') || 
-                           databaseUrl.includes('.digitalocean.com') ||
-                           databaseUrl.includes('.internal');
+                           databaseUrl.includes('.digitalocean.com');
     
-    const useSSL = isProduction || isCloudDatabase;
+    // Configure SSL based on database provider
+    let sslConfig: any = false;
+    if (isNeonDatabase) {
+      // Neon requires SSL with specific configuration
+      sslConfig = { rejectUnauthorized: false };
+    } else if (isCloudDatabase) {
+      // Other cloud providers may need SSL
+      sslConfig = { rejectUnauthorized: false };
+    }
     
-    console.log(`Database connection mode: ${isProduction ? 'production' : 'development'}, SSL: ${useSSL}`);
+    console.log(`Database connection mode: ${isProduction ? 'production' : 'development'}, SSL: ${!!sslConfig}, Provider: ${isNeonDatabase ? 'Neon' : isRenderDatabase ? 'Render' : 'Other'}`);
     
     // Create connection pool with reliable settings
     const pool = new Pool({ 
       connectionString: databaseUrl,
-      ssl: useSSL ? { rejectUnauthorized: false } : false,
-      max: 5, // Reasonable pool size
+      ssl: sslConfig,
+      max: 3, // Smaller pool size for better connection management
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000, // Longer timeout for cloud connections
-      application_name: 'rankitpro_saas'
+      connectionTimeoutMillis: 10000, // Longer timeout for cloud connections
+      application_name: 'rankitpro_saas',
+      // Additional connection stability settings
+      statement_timeout: 30000,
+      query_timeout: 30000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10000
+    });
+    
+    // Add error handling for pool-level issues
+    pool.on('error', (err) => {
+      console.error('Unexpected error on idle client', err);
+    });
+    
+    pool.on('connect', (client) => {
+      console.log('New database client connected');
+    });
+    
+    pool.on('remove', (client) => {
+      console.log('Database client removed from pool');
     });
     
     const db = drizzle(pool, { schema });
@@ -63,10 +89,41 @@ function createDatabaseConnection() {
   }
 }
 
-// Create database connection with error handling
+// Create database connection with error handling and retry logic
 let pool: Pool;
 let db: ReturnType<typeof drizzle>;
 
+async function initializeDatabaseConnection() {
+  let lastError: Error;
+  const maxRetries = 3;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`Database initialization attempt ${attempt}/${maxRetries}`);
+      const connection = createDatabaseConnection();
+      pool = connection.pool;
+      db = connection.db;
+      
+      // Test the connection
+      await pool.query('SELECT 1');
+      console.log("✅ Database connection test successful");
+      return;
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`Database initialization attempt ${attempt} failed:`, error instanceof Error ? error.message : String(error));
+      
+      if (attempt < maxRetries) {
+        const delay = attempt * 2000; // 2s, 4s, 6s
+        console.log(`Retrying in ${delay/1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  
+  throw new Error(`Database initialization failed after ${maxRetries} attempts: ${lastError!.message}`);
+}
+
+// Initialize connection synchronously for module loading
 try {
   const connection = createDatabaseConnection();
   pool = connection.pool;
