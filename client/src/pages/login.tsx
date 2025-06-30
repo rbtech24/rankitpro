@@ -35,12 +35,17 @@ export default function Login() {
   const params = new URLSearchParams(window.location.search);
   const isAdmin = params.get('admin') === 'true';
   const isSalesStaff = params.get('sales') === 'true';
+  const isTechnician = params.get('tech') === 'true';
   
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: isAdmin ? "bill@mrsprinklerrepair.com" : "",
-      password: isAdmin ? "SuperAdmin2025!" : "",
+      email: isAdmin ? "bill@mrsprinklerrepair.com" : 
+             isTechnician ? "tech@acme.com" :
+             isSalesStaff ? "demo@salesstaff.com" : "",
+      password: isAdmin ? "SuperAdmin2025!" : 
+                isTechnician ? "demo123" :
+                isSalesStaff ? "SalesDemo2025!" : "",
     },
   });
   
@@ -173,6 +178,26 @@ export default function Login() {
             </Form>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
+            <div className="w-full space-y-2 border-t pt-4">
+              <p className="text-sm text-gray-500 text-center mb-2">Quick Demo Access</p>
+              <div className="grid grid-cols-3 gap-2">
+                <Link href="/login?admin=true">
+                  <Button variant="outline" size="sm" className="w-full">
+                    Admin
+                  </Button>
+                </Link>
+                <Link href="/login?tech=true">
+                  <Button variant="outline" size="sm" className="w-full">
+                    Technician
+                  </Button>
+                </Link>
+                <Link href="/login?sales=true">
+                  <Button variant="outline" size="sm" className="w-full">
+                    Sales
+                  </Button>
+                </Link>
+              </div>
+            </div>
             <p className="text-sm text-gray-600">
               Don't have an account?{" "}
               <Link href="/register">
