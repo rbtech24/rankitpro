@@ -3627,7 +3627,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
         location,
         visits,
         revenue: visits * 150,
-        growth: Math.random() * 20 - 10
+        growth: 0 // TODO: Calculate based on historical location data
       })).slice(0, 10);
 
       // Customer satisfaction trends

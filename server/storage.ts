@@ -1981,7 +1981,7 @@ export class DatabaseStorage implements IStorage {
         revenue: plan.totalRevenue,
         percentage: totalRevenue > 0 ? Math.round((plan.totalRevenue / totalRevenue) * 100) : 0,
         monthlyRevenue: plan.totalRevenue,
-        growthRate: Math.floor(Math.random() * 20) + 5
+        growthRate: 0 // TODO: Calculate based on historical plan changes
       }));
     } catch (error) {
       console.error('Error fetching subscription breakdown:', error);
@@ -2822,23 +2822,127 @@ export class DatabaseStorage implements IStorage {
 
   // Billing operations
   async getBillingOverview(): Promise<any> {
-    return {
-      totalRevenue: 50000,
-      monthlyRecurringRevenue: 10000,
-      totalCompanies: 13,
-      activeSubscriptions: 10,
-      churnRate: 0.05,
-      averageRevenuePerUser: 99
-    };
+    try {
+      // Get real company data
+      const allCompanies = await db.select().from(companies);
+      const activeCompanies = allCompanies.filter(c => !c.isTrialActive);
+      
+      // Calculate real revenue based on subscription plans
+      const totalRevenue = activeCompanies.reduce((sum, company) => {
+        const planRevenue = {
+          'starter': 49,
+          'pro': 79, 
+          'agency': 149
+        }[company.plan] || 0;
+        return sum + planRevenue;
+      }, 0);
+
+      // Calculate churn rate based on actual company activity
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      
+      const recentActivity = await db
+        .select({ companyId: checkIns.companyId })
+        .from(checkIns)
+        .where(gte(checkIns.createdAt, oneMonthAgo));
+      
+      const activeInLastMonth = new Set(recentActivity.map(c => c.companyId)).size;
+      const churnRate = activeCompanies.length > 0 ? 
+        Math.max(0, (activeCompanies.length - activeInLastMonth) / activeCompanies.length) : 0;
+
+      return {
+        totalRevenue,
+        monthlyRecurringRevenue: totalRevenue,
+        totalCompanies: allCompanies.length,
+        activeSubscriptions: activeCompanies.length,
+        churnRate: Math.round(churnRate * 100) / 100,
+        averageRevenuePerUser: activeCompanies.length > 0 ? 
+          Math.round(totalRevenue / activeCompanies.length) : 0
+      };
+    } catch (error) {
+      console.error('Error fetching billing overview:', error);
+      return {
+        totalRevenue: 0,
+        monthlyRecurringRevenue: 0,
+        totalCompanies: 0,
+        activeSubscriptions: 0,
+        churnRate: 0,
+        averageRevenuePerUser: 0
+      };
+    }
   }
 
   async getRevenueMetrics(): Promise<any> {
-    return {
-      thisMonth: 10000,
-      lastMonth: 9500,
-      growth: 5.26,
-      yearToDate: 95000
-    };
+    try {
+      const now = new Date();
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const yearStart = new Date(now.getFullYear(), 0, 1);
+
+      // Get companies created this month
+      const thisMonthCompanies = await db
+        .select()
+        .from(companies)
+        .where(and(
+          gte(companies.createdAt, thisMonth),
+          eq(companies.isTrialActive, false)
+        ));
+
+      // Get companies created last month
+      const lastMonthCompanies = await db
+        .select()
+        .from(companies)
+        .where(and(
+          gte(companies.createdAt, lastMonth),
+          lt(companies.createdAt, thisMonth),
+          eq(companies.isTrialActive, false)
+        ));
+
+      // Get all companies created this year
+      const yearToDateCompanies = await db
+        .select()
+        .from(companies)
+        .where(and(
+          gte(companies.createdAt, yearStart),
+          eq(companies.isTrialActive, false)
+        ));
+
+      // Calculate revenue based on subscription plans
+      const calculateRevenue = (companies: any[]) => {
+        return companies.reduce((sum, company) => {
+          const planRevenue = {
+            'starter': 49,
+            'pro': 79,
+            'agency': 149
+          }[company.plan] || 0;
+          return sum + planRevenue;
+        }, 0);
+      };
+
+      const thisMonthRevenue = calculateRevenue(thisMonthCompanies);
+      const lastMonthRevenue = calculateRevenue(lastMonthCompanies);
+      const yearToDateRevenue = calculateRevenue(yearToDateCompanies);
+
+      // Calculate growth percentage
+      const growth = lastMonthRevenue > 0 ? 
+        ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 
+        thisMonthRevenue > 0 ? 100 : 0;
+
+      return {
+        thisMonth: thisMonthRevenue,
+        lastMonth: lastMonthRevenue,
+        growth: Math.round(growth * 100) / 100,
+        yearToDate: yearToDateRevenue
+      };
+    } catch (error) {
+      console.error('Error fetching revenue metrics:', error);
+      return {
+        thisMonth: 0,
+        lastMonth: 0,
+        growth: 0,
+        yearToDate: 0
+      };
+    }
   }
 
   async getSubscriptionMetrics(): Promise<any> {
