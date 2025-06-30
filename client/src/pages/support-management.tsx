@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -17,7 +18,10 @@ import {
   Users,
   MessageSquare,
   PhoneCall,
-  Timer
+  Timer,
+  Send,
+  X,
+  ArrowLeft
 } from "lucide-react";
 
 interface ChatSession {
@@ -56,10 +60,32 @@ interface SupportAgent {
   lastSeen: string;
 }
 
+interface ChatMessage {
+  id: number;
+  sessionId: number;
+  senderId: number;
+  senderType: 'customer' | 'agent' | 'system';
+  senderName: string;
+  message: string;
+  messageType: 'text' | 'image' | 'file';
+  attachments: any[];
+  metadata: any;
+  isRead: boolean;
+  readAt: string | null;
+  isEdited: boolean;
+  editedAt: string | null;
+  createdAt: string;
+}
+
 export default function SupportManagement() {
   const { toast } = useToast();
   const [availabilityStatus, setAvailabilityStatus] = useState(false);
-  const [selectedSession, setSelectedSession] = useState<string | null>(null);
+  const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
+  const [showChatInterface, setShowChatInterface] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   // Get current agent status
   const { data: agentStatus } = useQuery<SupportAgent>({
@@ -74,6 +100,12 @@ export default function SupportManagement() {
   // Get chat statistics
   const { data: chatStats } = useQuery({
     queryKey: ['/api/chat/admin/stats']
+  });
+
+  // Get messages for selected session
+  const { data: messagesData = [] } = useQuery<ChatMessage[]>({
+    queryKey: ['/api/chat/session', selectedSession?.sessionId, 'messages'],
+    enabled: !!selectedSession?.sessionId
   });
 
   // Availability toggle mutation
@@ -98,7 +130,7 @@ export default function SupportManagement() {
     }
   });
 
-  // Join chat session mutation
+  // Join session mutation
   const joinSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
       const response = await apiRequest('POST', `/api/chat/session/${sessionId}/join`);
@@ -107,8 +139,8 @@ export default function SupportManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/chat/agent/sessions'] });
       toast({
-        title: "Session Joined",
-        description: "You have joined the chat session",
+        title: "Joined Chat",
+        description: "You've successfully joined the chat session",
       });
     },
     onError: () => {
@@ -119,6 +151,32 @@ export default function SupportManagement() {
       });
     }
   });
+
+  // Send message mutation
+  const sendMessageMutation = useMutation({
+    mutationFn: async (data: { sessionId: string; message: string }) => {
+      const response = await apiRequest('POST', `/api/chat/session/${data.sessionId}/message`, {
+        message: data.message,
+        senderType: 'agent'
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      setNewMessage("");
+      queryClient.invalidateQueries({ 
+        queryKey: ['/api/chat/session', selectedSession?.sessionId, 'messages'] 
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+    }
+  });
+
+
 
   // Update availability status from agent data
   useEffect(() => {
