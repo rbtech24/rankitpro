@@ -2203,7 +2203,6 @@ Format as professional service documentation.`;
       const services = [
         { name: 'Database', status: 'online', responseTime: null, message: null },
         { name: 'Authentication', status: 'online', responseTime: null, message: null },
-        { name: 'CRM Integrations', status: 'online', responseTime: null, message: null },
         { name: 'File Storage', status: 'online', responseTime: null, message: null },
         { name: 'API Services', status: 'online', responseTime: null, message: null }
       ];
@@ -2226,14 +2225,14 @@ Format as professional service documentation.`;
         const startTime = Date.now();
         const testResponse = await fetch(`${req.protocol}://${req.get('host')}/api/health`);
         const responseTime = Date.now() - startTime;
-        services[4].responseTime = responseTime;
-        services[4].status = testResponse.ok ? 'online' : 'degraded';
+        services[3].responseTime = responseTime;
+        services[3].status = testResponse.ok ? 'online' : 'degraded';
         if (!testResponse.ok) {
-          services[4].message = 'Health check failed';
+          services[3].message = 'Health check failed';
         }
       } catch (error) {
-        services[4].status = 'offline';
-        services[4].message = 'Service unavailable';
+        services[3].status = 'offline';
+        services[3].message = 'Service unavailable';
       }
 
       // Check authentication service
@@ -2263,7 +2262,6 @@ Format as professional service documentation.`;
         services: [
           { name: 'Database', status: 'offline', responseTime: null, message: 'System check failed' },
           { name: 'Authentication', status: 'offline', responseTime: null, message: 'System check failed' },
-          { name: 'CRM Integrations', status: 'offline', responseTime: null, message: 'System check failed' },
           { name: 'File Storage', status: 'offline', responseTime: null, message: 'System check failed' },
           { name: 'API Services', status: 'offline', responseTime: null, message: 'System check failed' }
         ],
