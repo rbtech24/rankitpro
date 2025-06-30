@@ -2459,6 +2459,208 @@ Format as professional service documentation.`;
     }
   });
 
+  // Chat System API Endpoints
+  
+  // Start a new chat session
+  app.post("/api/chat/session/start", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { initialMessage, category = "general", priority = "medium" } = req.body;
+      
+      const sessionId = Math.random().toString(36).substring(2, 15);
+      
+      const session = await storage.createChatSession({
+        sessionId,
+        userId: req.user.id,
+        companyId: req.user.companyId,
+        status: 'waiting',
+        category,
+        priority,
+        title: initialMessage?.substring(0, 100) || 'Support Request'
+      });
+
+      // Send initial message if provided
+      if (initialMessage) {
+        await storage.createChatMessage({
+          sessionId,
+          senderId: req.user.id,
+          senderType: 'customer',
+          senderName: req.user.username,
+          message: initialMessage
+        });
+      }
+
+      res.json({ session });
+    } catch (error) {
+      console.error('Error starting chat session:', error);
+      res.status(500).json({ error: 'Failed to start chat session' });
+    }
+  });
+
+  // Get agent's assigned chat sessions
+  app.get("/api/chat/agent/sessions", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      const sessions = await storage.getChatSessionsForAgent();
+      res.json(sessions);
+    } catch (error) {
+      console.error('Error fetching agent sessions:', error);
+      res.status(500).json({ error: 'Failed to fetch sessions' });
+    }
+  });
+
+  // Get agent profile
+  app.get("/api/chat/agent/profile", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      const agent = await storage.getSupportAgentByUserId(req.user.id);
+      if (!agent) {
+        // Create support agent profile if it doesn't exist
+        const newAgent = await storage.createSupportAgent({
+          userId: req.user.id,
+          displayName: req.user.username,
+          isOnline: true,
+          role: 'general_support',
+          capabilities: ['general_support', 'technical_support'],
+          maxConcurrentChats: 5
+        });
+        return res.json(newAgent);
+      }
+
+      res.json(agent);
+    } catch (error) {
+      console.error('Error fetching agent profile:', error);
+      res.status(500).json({ error: 'Failed to fetch agent profile' });
+    }
+  });
+
+  // Join a chat session as an agent
+  app.post("/api/chat/session/:sessionId/join", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      const { sessionId } = req.params;
+      
+      // Get or create support agent
+      let agent = await storage.getSupportAgentByUserId(req.user.id);
+      if (!agent) {
+        agent = await storage.createSupportAgent({
+          userId: req.user.id,
+          displayName: req.user.username,
+          isOnline: true,
+          role: 'general_support',
+          capabilities: ['general_support', 'technical_support'],
+          maxConcurrentChats: 5
+        });
+      }
+
+      const session = await storage.assignAgentToSession(sessionId, agent.id);
+      
+      // Send system message
+      await storage.createChatMessage({
+        sessionId,
+        senderId: req.user.id,
+        senderType: 'system',
+        senderName: 'System',
+        message: `${agent.displayName} has joined the chat`
+      });
+
+      res.json({ session });
+    } catch (error) {
+      console.error('Error joining chat session:', error);
+      res.status(500).json({ error: 'Failed to join session' });
+    }
+  });
+
+  // Send a message in a chat session
+  app.post("/api/chat/session/:sessionId/message", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { sessionId } = req.params;
+      const { message } = req.body;
+
+      if (!message?.trim()) {
+        return res.status(400).json({ error: 'Message is required' });
+      }
+
+      // Determine sender type based on user role
+      const senderType = req.user.role === 'super_admin' ? 'agent' : 'customer';
+
+      const chatMessage = await storage.createChatMessage({
+        sessionId,
+        senderId: req.user.id,
+        senderType,
+        senderName: req.user.username,
+        message: message.trim()
+      });
+
+      res.json({ message: chatMessage });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      res.status(500).json({ error: 'Failed to send message' });
+    }
+  });
+
+  // Get messages for a chat session
+  app.get("/api/chat/session/:sessionId/messages", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { sessionId } = req.params;
+      
+      const messages = await storage.getChatMessages(sessionId);
+      res.json(messages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      res.status(500).json({ error: 'Failed to fetch messages' });
+    }
+  });
+
+  // Close a chat session
+  app.post("/api/chat/session/:sessionId/close", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { sessionId } = req.params;
+      const { rating, feedback } = req.body;
+
+      const session = await storage.closeChatSession(sessionId, rating, feedback);
+      
+      // Send system message
+      await storage.createChatMessage({
+        sessionId,
+        senderId: req.user.id,
+        senderType: 'system',
+        senderName: 'System',
+        message: 'Chat session has been closed'
+      });
+
+      res.json({ session });
+    } catch (error) {
+      console.error('Error closing chat session:', error);
+      res.status(500).json({ error: 'Failed to close session' });
+    }
+  });
+
+  // Update agent online status
+  app.post("/api/chat/agent/status", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      const { isOnline } = req.body;
+      
+      const agent = await storage.updateSupportAgentStatus(req.user.id, isOnline);
+      res.json({ agent });
+    } catch (error) {
+      console.error('Error updating agent status:', error);
+      res.status(500).json({ error: 'Failed to update status' });
+    }
+  });
+
   app.post("/api/feature-requests/:id/vote", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const featureRequestId = parseInt(req.params.id);
