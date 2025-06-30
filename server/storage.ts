@@ -816,8 +816,8 @@ export class DatabaseStorage implements IStorage {
         )
     ]);
 
-    const checkInsCount = checkInsResult[0]?.count || 0;
-    const reviewsCount = reviewsResult[0]?.count || 0;
+    const checkInsCount: number = checkInsResult[0]?.count as number || 0;
+    const reviewsCount: number = reviewsResult[0]?.count as number || 0;
 
     // Return total submissions across all types
     return checkInsCount + reviewsCount;
@@ -1741,7 +1741,7 @@ export class DatabaseStorage implements IStorage {
         status: transaction.status,
         type: transaction.type,
         date: transaction.createdAt,
-        stripeTransactionId: transaction.stripeTransactionId || null
+        stripeTransactionId: transaction.id?.toString() || null
       }));
     } catch (error) {
       console.error('Error fetching recent transactions:', error);
@@ -1936,7 +1936,7 @@ export class DatabaseStorage implements IStorage {
                   <p><strong>Service Type:</strong> ${checkIn.jobType}</p>
                   <p><strong>Location:</strong> ${checkIn.location || 'On-site service'}</p>
                   <p><strong>Technician:</strong> ${technician?.name || 'Professional Technician'}</p>
-                  <p><strong>Date:</strong> ${new Date(checkIn.createdAt).toLocaleDateString()}</p>
+                  <p><strong>Date:</strong> ${checkIn.createdAt ? new Date(checkIn.createdAt).toLocaleDateString() : 'Recent service'}</p>
                 </div>
 
                 <div class="service-description">
@@ -1944,11 +1944,11 @@ export class DatabaseStorage implements IStorage {
                   <p>${checkIn.notes || 'Professional service completed successfully.'}</p>
                 </div>
 
-                ${checkIn.beforePhoto ? `
+                ${checkIn.beforePhotos && checkIn.beforePhotos.length > 0 ? `
                   <div class="service-photos">
                     <h3>Service Documentation</h3>
-                    <img src="${checkIn.beforePhoto}" alt="Service documentation" class="service-photo" />
-                    ${checkIn.afterPhoto ? `<img src="${checkIn.afterPhoto}" alt="Completed service" class="service-photo" />` : ''}
+                    <img src="${checkIn.beforePhotos[0]}" alt="Service documentation" class="service-photo" />
+                    ${checkIn.afterPhotos && checkIn.afterPhotos.length > 0 ? `<img src="${checkIn.afterPhotos[0]}" alt="Completed service" class="service-photo" />` : ''}
                   </div>
                 ` : ''}
 

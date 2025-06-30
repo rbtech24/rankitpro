@@ -43,11 +43,8 @@ type NotificationContextType = {
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
 
-// Real notifications are fetched from API - no mock data
-const initialNotifications: Notification[] = [];
-
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const markAsRead = (id: string) => {
     setNotifications(prev => 
@@ -79,7 +76,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
-  // Load real notifications from API
+  // Load real notifications from API - no mock data
   useEffect(() => {
     const loadNotifications = async () => {
       try {
