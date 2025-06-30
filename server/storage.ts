@@ -3148,6 +3148,34 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
   }
+
+  // CRITICAL MISSING METHODS FOR ANALYTICS DASHBOARD
+  async getAllCheckIns(): Promise<CheckIn[]> {
+    try {
+      return await db.select().from(checkIns).orderBy(desc(checkIns.createdAt));
+    } catch (error) {
+      console.error('Error fetching all check-ins:', error);
+      return [];
+    }
+  }
+
+  async getAllReviews(): Promise<any[]> {
+    try {
+      return await db.select().from(reviewResponses).orderBy(desc(reviewResponses.createdAt));
+    } catch (error) {
+      console.error('Error fetching all reviews:', error);
+      return [];
+    }
+  }
+
+  async getAllBlogPosts(): Promise<BlogPost[]> {
+    try {
+      return await db.select().from(blogPosts).orderBy(desc(blogPosts.publishDate));
+    } catch (error) {
+      console.error('Error fetching all blog posts:', error);
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

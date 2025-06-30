@@ -31,71 +31,80 @@ const notifications = new Map<number, Array<{
 
 let nextNotificationId = 1;
 
-// Function to create sample notifications for new technicians
-function createSampleNotifications(technicianId: number) {
+// Function to create real notifications from database activity
+async function createRealNotifications(technicianId: number) {
   const techNotifications = [];
   
-  // Add a welcome notification
-  techNotifications.push({
-    id: nextNotificationId++,
-    technicianId,
-    title: 'Welcome to Rank It Pro',
-    message: 'Thank you for using the Rank It Pro mobile app! We\'re excited to help you manage your service calls more efficiently.',
-    type: 'info',
-    priority: 'normal',
-    read: false,
-    createdAt: new Date()
-  });
-  
-  // Add a check-in tip notification
-  techNotifications.push({
-    id: nextNotificationId++,
-    technicianId,
-    title: 'Quick Tip: Check-ins',
-    message: 'Remember to include photos in your check-ins to improve customer confidence and document your work properly.',
-    type: 'info',
-    priority: 'low',
-    read: false,
-    createdAt: new Date(Date.now() - 3600000) // 1 hour ago
-  });
-  
-  // Add a sample schedule notification
-  techNotifications.push({
-    id: nextNotificationId++,
-    technicianId,
-    title: 'New Schedule Item',
-    message: 'You have a new job scheduled for tomorrow at 10:00 AM.',
-    type: 'info',
-    priority: 'high',
-    data: {
-      scheduleItemId: 123,
-      jobType: 'Maintenance',
-      location: '123 Main St',
-      time: '10:00 AM'
-    },
-    read: false,
-    createdAt: new Date(Date.now() - 7200000) // 2 hours ago
-  });
-  
-  // Add a sample review notification
-  techNotifications.push({
-    id: nextNotificationId++,
-    technicianId,
-    title: 'New 5-Star Review',
-    message: 'You received a new 5-star review from a customer. Great job!',
-    type: 'success',
-    priority: 'normal',
-    data: {
-      reviewId: 456,
-      rating: 5,
-      customerName: 'John Doe'
-    },
-    read: true,
-    createdAt: new Date(Date.now() - 86400000) // 1 day ago
-  });
-  
-  // Store the notifications
-  notifications.set(technicianId, techNotifications);
+  try {
+    // Get recent check-ins for this technician
+    const recentCheckIns = await storage.getCheckInsByTechnician(technicianId, 5);
+    
+    // Create notifications for recent check-ins
+    for (const checkIn of recentCheckIns) {
+      if (checkIn.createdAt && new Date(checkIn.createdAt) > new Date(Date.now() - 24 * 60 * 60 * 1000)) {
+        techNotifications.push({
+          id: nextNotificationId++,
+          technicianId,
+          title: 'Check-in Completed',
+          message: `Your check-in at ${checkIn.location || 'customer location'} has been recorded successfully.`,
+          type: 'success',
+          priority: 'normal',
+          read: false,
+          createdAt: checkIn.createdAt
+        });
+      }
+    }
+    
+    // Get recent reviews for this technician
+    const recentReviews = await storage.getReviewResponsesByTechnician(technicianId);
+    
+    // Create notifications for recent reviews
+    for (const review of recentReviews.slice(0, 3)) {
+      if (review.createdAt && new Date(review.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) {
+        const rating = review.rating || 0;
+        const ratingText = rating >= 4 ? `${rating}-Star Review` : 'Customer Review';
+        
+        techNotifications.push({
+          id: nextNotificationId++,
+          technicianId,
+          title: `New ${ratingText}`,
+          message: review.rating >= 4 ? 
+            `You received a ${rating}-star review! Keep up the excellent work.` : 
+            'You received feedback from a customer.',
+          type: rating >= 4 ? 'success' : 'info',
+          priority: 'normal',
+          data: {
+            reviewId: review.id,
+            rating: review.rating,
+            checkInId: review.checkInId
+          },
+          read: false,
+          createdAt: review.createdAt
+        });
+      }
+    }
+    
+    // If no recent activity, add a helpful tip
+    if (techNotifications.length === 0) {
+      techNotifications.push({
+        id: nextNotificationId++,
+        technicianId,
+        title: 'Welcome to Rank It Pro',
+        message: 'Start your day by checking in to your first service call. Remember to include photos and notes for better customer service.',
+        type: 'info',
+        priority: 'low',
+        read: false,
+        createdAt: new Date()
+      });
+    }
+    
+    // Store the notifications
+    notifications.set(technicianId, techNotifications);
+    return techNotifications;
+  } catch (error) {
+    console.error('Error creating real notifications:', error);
+    return [];
+  }
 }
 
 // Get all notifications for the technician
