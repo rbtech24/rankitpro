@@ -97,9 +97,14 @@ export interface IStorage {
   
   // Reviews operations (new table)
   getReviewsByCompany(companyId: number): Promise<any[]>;
+  getAllReviews(): Promise<any[]>;
   
   // Testimonials operations (new table)
   getTestimonialsByCompany(companyId: number): Promise<any[]>;
+  
+  // Analytics operations - CRITICAL FOR DASHBOARD
+  getAllCheckIns(): Promise<CheckIn[]>;
+  getAllBlogPosts(): Promise<BlogPost[]>;
   
   // WordPress Custom Fields operations
   getWordpressCustomFields(id: number): Promise<WordpressCustomFields | undefined>;
