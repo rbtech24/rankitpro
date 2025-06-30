@@ -1000,7 +1000,7 @@ Make it compelling for search engine users to click.`;
         const content = response.choices[0].message.content;
         res.json({ content });
       } catch (openaiError) {
-        console.log('Using fallback content generation:', openaiError.message);
+        console.log('Using fallback content generation:', openaiError instanceof Error ? openaiError.message : String(openaiError));
         
         // Generate fallback content based on type
         let fallbackContent = '';
@@ -1031,7 +1031,7 @@ We pride ourselves on providing exceptional service that exceeds customer expect
 
 Contact us for more information about our professional services and to schedule your consultation.`;
         } else if (type === 'excerpt' && content) {
-          const sentences = content.split('.').filter(s => s.trim().length > 0);
+          const sentences = content.split('.').filter((s: string) => s.trim().length > 0);
           fallbackContent = sentences.slice(0, 2).join('.') + '.';
         } else {
           fallbackContent = 'Professional content crafted for your business needs with attention to quality and customer engagement.';
@@ -1747,7 +1747,7 @@ Format as professional service documentation.`;
       
       // Handle planId to plan conversion
       if (req.body.planId) {
-        const planMapping = { "1": "starter", "2": "pro", "3": "agency" };
+        const planMapping: Record<string, string> = { "1": "starter", "2": "pro", "3": "agency" };
         updateData.plan = planMapping[req.body.planId] || req.body.planId;
       }
       

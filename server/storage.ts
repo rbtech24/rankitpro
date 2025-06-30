@@ -493,12 +493,12 @@ export class DatabaseStorage implements IStorage {
     today.setHours(0, 0, 0, 0);
     
     const result = await db.select({
-      usage: sql<number>`SUM(tokens_used)`
+      usage: sql<number>`SUM(${aiUsageLogs.tokensUsed})`
     })
     .from(aiUsageLogs)
     .where(
       and(
-        sql`${aiUsageLogs.provider} = ${provider}`,
+        eq(aiUsageLogs.provider, provider as any),
         gte(aiUsageLogs.createdAt, today)
       )
     );
@@ -2573,7 +2573,7 @@ export class DatabaseStorage implements IStorage {
     try {
       const conditions = [eq(salesCommissions.salesPersonId, salesPersonId)];
       if (status) {
-        conditions.push(sql`${salesCommissions.status} = ${status}`);
+        conditions.push(eq(salesCommissions.status, status as any));
       }
       const whereCondition = conditions.length > 1 ? and(...conditions) : conditions[0];
 
