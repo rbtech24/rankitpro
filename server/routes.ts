@@ -2772,6 +2772,23 @@ Format as professional service documentation.`;
     }
   });
 
+  // Check support availability (public endpoint for company users)
+  app.get("/api/chat/support/availability", async (req: Request, res: Response) => {
+    try {
+      const availableAgents = await storage.getAvailableSupportAgents();
+      const isAvailable = availableAgents.length > 0;
+      
+      res.json({ 
+        isAvailable,
+        agentCount: availableAgents.length,
+        status: isAvailable ? 'online' : 'offline'
+      });
+    } catch (error) {
+      console.error('Error checking support availability:', error);
+      res.json({ isAvailable: false, agentCount: 0, status: 'offline' });
+    }
+  });
+
   // Update agent online status
   app.post("/api/chat/agent/status", isAuthenticated, async (req: Request, res: Response) => {
     try {
