@@ -210,9 +210,111 @@ async function testHubSpotConnection(credentials: any): Promise<boolean> {
 }
 
 async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Promise<boolean> {
-  // TODO: Implement actual HubSpot API sync
-  console.log('HubSpot sync would occur here', { checkIn: checkIn.id, settings });
-  return true;
+  if (!credentials.accessToken) {
+    throw new Error('HubSpot access token not configured');
+  }
+
+  try {
+    let contactId = null;
+    
+    // First, try to find existing contact by email
+    if (checkIn.customerEmail) {
+      const searchResponse = await fetch(`https://api.hubapi.com/crm/v3/objects/contacts/search`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${credentials.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          filterGroups: [{
+            filters: [{
+              propertyName: 'email',
+              operator: 'EQ',
+              value: checkIn.customerEmail
+            }]
+          }]
+        })
+      });
+
+      if (searchResponse.ok) {
+        const searchResult = await searchResponse.json();
+        if (searchResult.results && searchResult.results.length > 0) {
+          contactId = searchResult.results[0].id;
+        }
+      }
+    }
+
+    // Create new contact if not found
+    if (!contactId && checkIn.customerEmail) {
+      const contactData = {
+        properties: {
+          email: checkIn.customerEmail,
+          firstname: checkIn.customerName?.split(' ')[0] || '',
+          lastname: checkIn.customerName?.split(' ').slice(1).join(' ') || '',
+          phone: checkIn.customerPhone || '',
+          address: checkIn.address || '',
+          city: checkIn.city || '',
+          state: checkIn.state || '',
+          zip: checkIn.zip || '',
+          source: 'Rank It Pro',
+          lifecycle_stage: 'customer'
+        }
+      };
+
+      const createResponse = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${credentials.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(contactData)
+      });
+
+      if (createResponse.ok) {
+        const newContact = await createResponse.json();
+        contactId = newContact.id;
+      }
+    }
+
+    // Create service visit note
+    if (contactId) {
+      const noteData = {
+        properties: {
+          hs_note_body: `Service Visit Completed\n\nJob Type: ${checkIn.jobType}\nLocation: ${checkIn.location || 'On-site'}\nNotes: ${checkIn.notes || 'Service completed successfully'}\n\nCompleted via Rank It Pro`,
+          hs_timestamp: new Date(checkIn.createdAt).getTime()
+        },
+        associations: [
+          {
+            to: {
+              id: contactId
+            },
+            types: [
+              {
+                associationCategory: 'HUBSPOT_DEFINED',
+                associationTypeId: 202
+              }
+            ]
+          }
+        ]
+      };
+
+      const noteResponse = await fetch('https://api.hubapi.com/crm/v3/objects/notes', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${credentials.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(noteData)
+      });
+
+      return noteResponse.ok;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('HubSpot sync failed:', error);
+    throw error;
+  }
 }
 
 // Salesforce integration functions

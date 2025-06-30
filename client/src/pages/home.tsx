@@ -378,52 +378,31 @@ const Home = () => {
             <p className="text-xl text-gray-600">See how service businesses are transforming their growth with Rank It Pro</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Mike Rodriguez",
-                company: "Premier HVAC Services",
-                role: "Owner",
-                quote: "We went from 20 leads per month to 75 in just 8 weeks. The AI content and review automation are game-changers.",
-                metrics: "275% lead increase",
-                avatar: "MR"
-              },
-              {
-                name: "Sarah Chen",
-                company: "Elite Plumbing Co.",
-                role: "Marketing Director", 
-                quote: "Our Google rankings improved dramatically. We're now #1 for 'plumber near me' in our city.",
-                metrics: "#1 local rankings",
-                avatar: "SC"
-              },
-              {
-                name: "David Thompson",
-                company: "AllPro Landscaping",
-                role: "CEO",
-                quote: "The mobile app makes our technicians look professional, and the automatic content keeps us visible online.",
-                metrics: "40% more bookings",
-                avatar: "DT"
-              }
-            ].map((testimonial, index) => (
-              <Card key={index} className="hover:shadow-lg transition-all">
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold mr-4">
-                      {testimonial.avatar}
-                    </div>
-                    <div>
-                      <div className="font-semibold">{testimonial.name}</div>
-                      <div className="text-sm text-gray-600">{testimonial.role}</div>
-                      <div className="text-sm font-medium text-blue-600">{testimonial.company}</div>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 mb-4 italic">"{testimonial.quote}"</p>
-                  <Badge className="bg-green-100 text-green-800">
-                    {testimonial.metrics}
-                  </Badge>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="text-center bg-gray-50 rounded-lg p-8 border-2 border-dashed border-gray-300">
+            <div className="max-w-2xl mx-auto">
+              <MessageSquare className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                Customer Success Stories Coming Soon
+              </h3>
+              <p className="text-gray-600 mb-6">
+                We're working with our customers to collect authentic testimonials. 
+                Real stories from real home service businesses will be featured here soon.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-500">
+                <div className="flex items-center justify-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  Audio Testimonials
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  Video Reviews
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  Written Feedback
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
