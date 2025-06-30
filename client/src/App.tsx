@@ -79,6 +79,7 @@ import InstallationGuide from "@/pages/installation-guide";
 import APIDocumentation from "@/pages/api-documentation";
 import Troubleshooting from "@/pages/troubleshooting";
 import PlatformSetupGuide from "@/pages/platform-setup-guide";
+import DocsTest from "@/pages/docs-test";
 
 import { getCurrentUser, AuthState } from "@/lib/auth";
 
@@ -1307,6 +1308,9 @@ function Router() {
       </Route>
       
       {/* Documentation Pages */}
+      <Route path="/docs-test">
+        <PrivateRoute component={DocsTest} path="/docs-test" />
+      </Route>
       <Route path="/documentation">
         <PrivateRoute component={Documentation} path="/documentation" />
       </Route>
