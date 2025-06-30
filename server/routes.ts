@@ -1045,6 +1045,97 @@ Contact us for more information about our professional services and to schedule 
     }
   });
 
+  // Advanced AI Content Generation with Multiple Options
+  app.post('/api/ai/generate-advanced', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { serviceType, location, workDetails, materials, customerNotes, contentType } = req.body;
+      
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ error: 'AI service not configured' });
+      }
+
+      let aiPrompt = '';
+      let contentOptions = [];
+
+      // Generate multiple content variations based on type
+      if (contentType === 'social-media') {
+        aiPrompt = `Create 3 different social media posts about this service call:
+- Service: ${serviceType} in ${location}
+- Work completed: ${workDetails}
+- Materials used: ${materials}
+
+Generate:
+1. Facebook post (conversational, community-focused, 2-3 sentences)
+2. Instagram caption (visual-focused, hashtag-ready, engaging)
+3. LinkedIn post (professional, industry expertise, business-focused)
+
+Each should highlight professionalism, quality work, and customer satisfaction.`;
+      } else if (contentType === 'email-follow-up') {
+        aiPrompt = `Write a professional follow-up email template for this service:
+- Service: ${serviceType} at ${location}
+- Work completed: ${workDetails}
+- Materials used: ${materials}
+- Customer notes: ${customerNotes || 'Standard service completed'}
+
+Include:
+- Warm, professional greeting
+- Summary of work completed
+- Care instructions or recommendations
+- Request for feedback/review
+- Contact information for future service
+- Call-to-action for referrals
+
+Tone: Helpful, professional, and customer-focused.`;
+      } else if (contentType === 'technical-report') {
+        aiPrompt = `Create a detailed technical service report for:
+- Service type: ${serviceType}
+- Location: ${location}
+- Work performed: ${workDetails}
+- Materials/parts used: ${materials}
+
+Include:
+- Executive summary
+- Detailed work description
+- Materials and specifications
+- Quality assurance notes
+- Recommendations for future maintenance
+- Warranty information
+
+Format as professional service documentation.`;
+      }
+
+      try {
+        const openaiModule = await import('openai');
+        const OpenAI = openaiModule.default || openaiModule.OpenAI;
+        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [{ role: "user", content: aiPrompt }],
+          max_tokens: 800,
+          temperature: 0.7,
+        });
+
+        const content = response.choices[0].message.content;
+        res.json({ content, type: contentType });
+      } catch (openaiError) {
+        // Enhanced fallback content
+        let fallbackContent = '';
+        if (contentType === 'social-media') {
+          fallbackContent = `Professional ${serviceType} service completed in ${location}. Quality workmanship and customer satisfaction are our top priorities. Contact us for all your service needs!`;
+        } else if (contentType === 'email-follow-up') {
+          fallbackContent = `Thank you for choosing our services for your ${serviceType} needs. We completed the work as discussed and used quality materials to ensure lasting results. Please let us know if you have any questions or need future service.`;
+        } else {
+          fallbackContent = `Professional ${serviceType} service completed successfully using quality materials and proven techniques.`;
+        }
+        res.json({ content: fallbackContent, type: contentType });
+      }
+    } catch (error) {
+      console.error('Advanced AI generation error:', error);
+      res.status(500).json({ error: 'Failed to generate advanced content' });
+    }
+  });
+
   // Removed duplicate authentication endpoint - using main server endpoint instead
 
   // User verification endpoint with trial status
