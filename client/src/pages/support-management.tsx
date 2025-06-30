@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import Sidebar from "@/components/layout/sidebar-clean";
 import { 
   MessageCircle, 
   Clock, 
@@ -173,7 +174,8 @@ export default function SupportManagement() {
   const recentClosed = chatSessions.filter(s => s.status === 'closed').slice(0, 5);
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Support Management</h1>
@@ -406,6 +408,7 @@ export default function SupportManagement() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
