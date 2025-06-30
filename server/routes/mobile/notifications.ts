@@ -37,7 +37,7 @@ async function createRealNotifications(technicianId: number) {
   
   try {
     // Get recent check-ins for this technician
-    const recentCheckIns = await storage.getCheckInsByTechnician(technicianId, 5);
+    const recentCheckIns = await storage.getCheckInsByTechnician(technicianId);
     
     // Create notifications for recent check-ins
     for (const checkIn of recentCheckIns) {
@@ -47,8 +47,8 @@ async function createRealNotifications(technicianId: number) {
           technicianId,
           title: 'Check-in Completed',
           message: `Your check-in at ${checkIn.location || 'customer location'} has been recorded successfully.`,
-          type: 'success',
-          priority: 'normal',
+          type: 'success' as const,
+          priority: 'normal' as const,
           read: false,
           createdAt: checkIn.createdAt
         });
@@ -71,12 +71,12 @@ async function createRealNotifications(technicianId: number) {
           message: review.rating >= 4 ? 
             `You received a ${rating}-star review! Keep up the excellent work.` : 
             'You received feedback from a customer.',
-          type: rating >= 4 ? 'success' : 'info',
-          priority: 'normal',
+          type: rating >= 4 ? 'success' as const : 'info' as const,
+          priority: 'normal' as const,
           data: {
             reviewId: review.id,
             rating: review.rating,
-            checkInId: review.checkInId
+            reviewRequestId: review.reviewRequestId
           },
           read: false,
           createdAt: review.createdAt
@@ -91,8 +91,8 @@ async function createRealNotifications(technicianId: number) {
         technicianId,
         title: 'Welcome to Rank It Pro',
         message: 'Start your day by checking in to your first service call. Remember to include photos and notes for better customer service.',
-        type: 'info',
-        priority: 'low',
+        type: 'info' as const,
+        priority: 'low' as const,
         read: false,
         createdAt: new Date()
       });
@@ -127,7 +127,7 @@ router.get('/', isAuthenticated, async (req, res) => {
     
     // Get or create notifications for this technician
     if (!notifications.has(technician.id)) {
-      createSampleNotifications(technician.id);
+      await createRealNotifications(technician.id);
     }
     
     let technicianNotifications = notifications.get(technician.id) || [];
