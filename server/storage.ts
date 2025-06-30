@@ -4629,6 +4629,140 @@ export class DatabaseStorage implements IStorage {
         Math.round((resolvedChats[0]?.count || 0) / totalChats[0].count * 100) : 0
     };
   }
+
+  // Additional Chat System Methods needed for API
+  async getChatSessionsForAgent(): Promise<any[]> {
+    return await db.select({
+      id: chatSessions.id,
+      sessionId: chatSessions.sessionId,
+      userId: chatSessions.userId,
+      companyId: chatSessions.companyId,
+      supportAgentId: chatSessions.supportAgentId,
+      status: chatSessions.status,
+      category: chatSessions.category,
+      priority: chatSessions.priority,
+      title: chatSessions.initialMessage,
+      lastMessageAt: chatSessions.lastMessageAt,
+      createdAt: chatSessions.startedAt,
+      closedAt: chatSessions.closedAt,
+      user: {
+        id: users.id,
+        username: users.username,
+        email: users.email
+      },
+      company: {
+        id: companies.id,
+        name: companies.name
+      },
+      supportAgent: {
+        id: supportAgents.id,
+        displayName: supportAgents.displayName,
+        isOnline: supportAgents.isOnline
+      },
+      messageCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${chatMessages} WHERE ${chatMessages.sessionId} = ${chatSessions.sessionId}), 0)`,
+      lastMessage: sql<string>`(SELECT ${chatMessages.message} FROM ${chatMessages} WHERE ${chatMessages.sessionId} = ${chatSessions.sessionId} ORDER BY ${chatMessages.createdAt} DESC LIMIT 1)`
+    })
+    .from(chatSessions)
+    .leftJoin(users, eq(chatSessions.userId, users.id))
+    .leftJoin(companies, eq(chatSessions.companyId, companies.id))
+    .leftJoin(supportAgents, eq(chatSessions.supportAgentId, supportAgents.id))
+    .orderBy(desc(chatSessions.lastMessageAt));
+  }
+
+  async getSupportAgentByUserId(userId: number): Promise<any> {
+    const [agent] = await db.select()
+      .from(supportAgents)
+      .where(eq(supportAgents.userId, userId));
+    return agent;
+  }
+
+  async createChatSession(session: any): Promise<any> {
+    const [newSession] = await db.insert(chatSessions).values({
+      sessionId: session.sessionId,
+      userId: session.userId,
+      companyId: session.companyId,
+      status: session.status || 'waiting',
+      category: session.category || 'general',
+      priority: session.priority || 'medium',
+      initialMessage: session.title || session.initialMessage,
+      startedAt: new Date(),
+      lastMessageAt: new Date()
+    }).returning();
+    return newSession;
+  }
+
+  async createSupportAgent(agent: any): Promise<any> {
+    const [newAgent] = await db.insert(supportAgents).values({
+      userId: agent.userId,
+      displayName: agent.displayName,
+      isOnline: agent.isOnline || false,
+      role: agent.role || 'general_support',
+      capabilities: agent.capabilities || [],
+      maxConcurrentChats: agent.maxConcurrentChats || 5
+    }).returning();
+    return newAgent;
+  }
+
+  async assignAgentToSession(sessionId: string, agentId: number): Promise<any> {
+    const [updatedSession] = await db.update(chatSessions)
+      .set({ 
+        supportAgentId: agentId, 
+        status: 'active',
+        agentJoinedAt: new Date()
+      })
+      .where(eq(chatSessions.sessionId, sessionId))
+      .returning();
+    return updatedSession;
+  }
+
+  async createChatMessage(message: any): Promise<any> {
+    const [newMessage] = await db.insert(chatMessages).values({
+      sessionId: message.sessionId,
+      senderId: message.senderId,
+      senderType: message.senderType,
+      senderName: message.senderName,
+      message: message.message,
+      createdAt: new Date()
+    }).returning();
+
+    // Update session's last message time
+    await db.update(chatSessions)
+      .set({ lastMessageAt: new Date() })
+      .where(eq(chatSessions.sessionId, message.sessionId));
+
+    return newMessage;
+  }
+
+  async getChatMessages(sessionId: string): Promise<any[]> {
+    return await db.select()
+      .from(chatMessages)
+      .where(eq(chatMessages.sessionId, sessionId))
+      .orderBy(asc(chatMessages.createdAt));
+  }
+
+  async closeChatSession(sessionId: string, rating?: number, feedback?: string): Promise<any> {
+    const [closedSession] = await db.update(chatSessions)
+      .set({ 
+        status: 'closed',
+        closedAt: new Date(),
+        customerRating: rating,
+        customerFeedback: feedback
+      })
+      .where(eq(chatSessions.sessionId, sessionId))
+      .returning();
+    return closedSession;
+  }
+
+  async updateSupportAgentStatus(userId: number, isOnline: boolean): Promise<any> {
+    const [updatedAgent] = await db.update(supportAgents)
+      .set({ 
+        isOnline: isOnline,
+        updatedAt: new Date()
+      })
+      .where(eq(supportAgents.userId, userId))
+      .returning();
+    return updatedAgent;
+  }
 }
 
 export const storage = new DatabaseStorage();
