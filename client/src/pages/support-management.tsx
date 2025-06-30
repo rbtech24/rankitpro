@@ -185,16 +185,59 @@ export default function SupportManagement() {
     }
   }, [agentStatus]);
 
+  // Update messages when data changes
+  useEffect(() => {
+    if (messagesData && messagesData.length > 0) {
+      setMessages(messagesData);
+    }
+  }, [messagesData]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   // Handle availability toggle
   const handleAvailabilityToggle = (checked: boolean) => {
     setAvailabilityStatus(checked);
     toggleAvailabilityMutation.mutate(checked);
   };
 
-  // Handle session join
+  // Handle joining a chat session
   const handleJoinSession = (sessionId: string) => {
-    joinSessionMutation.mutate(sessionId);
+    const session = chatSessions.find(s => s.sessionId === sessionId);
+    if (session) {
+      setSelectedSession(session);
+      setShowChatInterface(true);
+      joinSessionMutation.mutate(sessionId);
+    }
   };
+
+  // Handle viewing a chat session
+  const handleViewSession = (session: ChatSession) => {
+    setSelectedSession(session);
+    setShowChatInterface(true);
+  };
+
+  // Handle sending a message
+  const sendMessage = () => {
+    if (!newMessage.trim() || !selectedSession) return;
+    
+    sendMessageMutation.mutate({
+      sessionId: selectedSession.sessionId,
+      message: newMessage.trim()
+    });
+  };
+
+  // Format time for display
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+
 
   // Auto-logout availability toggle (would be called on logout)
   useEffect(() => {
@@ -402,7 +445,10 @@ export default function SupportManagement() {
                       <span>Page: {session.currentPage}</span>
                     </div>
                   </div>
-                  <Button variant="outline">
+                  <Button 
+                    variant="outline"
+                    onClick={() => handleViewSession(session)}
+                  >
                     View Chat
                   </Button>
                 </div>
@@ -472,6 +518,118 @@ export default function SupportManagement() {
       )}
         </div>
       </div>
+
+      {/* Chat Interface Modal */}
+      {showChatInterface && selectedSession && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-[90vw] h-[80vh] max-w-4xl flex flex-col">
+            {/* Chat Header */}
+            <div className="flex items-center justify-between p-4 border-b bg-gray-50 rounded-t-lg">
+              <div className="flex items-center space-x-3">
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    Chat with {selectedSession.companyName || 'Customer'}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Session ID: {selectedSession.sessionId} • {selectedSession.category} • {selectedSession.priority} priority
+                  </p>
+                </div>
+                <Badge className={getStatusColor(selectedSession.status)}>
+                  {selectedSession.status}
+                </Badge>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowChatInterface(false)}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-1" />
+                  Back to Dashboard
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowChatInterface(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Messages Area */}
+            <div className="flex-1 overflow-auto p-4 space-y-4 bg-gray-50">
+              {messages.length === 0 ? (
+                <div className="text-center text-gray-500 mt-8">
+                  <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <p>No messages yet. Start the conversation!</p>
+                </div>
+              ) : (
+                <>
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${
+                        message.senderType === 'agent' ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      <div
+                        className={`max-w-[70%] p-3 rounded-lg ${
+                          message.senderType === 'agent'
+                            ? 'bg-blue-600 text-white'
+                            : message.senderType === 'system'
+                            ? 'bg-gray-200 text-gray-800 text-center'
+                            : 'bg-white border shadow-sm'
+                        }`}
+                      >
+                        {message.senderType !== 'agent' && message.senderType !== 'system' && (
+                          <p className="text-xs font-medium mb-1 text-gray-600">{message.senderName}</p>
+                        )}
+                        <p className="text-sm">{message.message}</p>
+                        <p className={`text-xs mt-1 ${
+                          message.senderType === 'agent' ? 'text-blue-100' : 'text-gray-500'
+                        }`}>
+                          {formatTime(message.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </>
+              )}
+            </div>
+
+            {/* Message Input */}
+            <div className="p-4 border-t bg-white rounded-b-lg">
+              <div className="flex space-x-2">
+                <Textarea
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type your response..."
+                  className="flex-1"
+                  rows={2}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                />
+                <Button 
+                  onClick={sendMessage} 
+                  disabled={!newMessage.trim() || sendMessageMutation.isPending}
+                  className="self-end bg-blue-600 hover:bg-blue-700"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Press Enter to send, Shift+Enter for new line
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
