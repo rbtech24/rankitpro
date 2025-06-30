@@ -8,10 +8,11 @@ import {
   SalesPerson, InsertSalesPerson, SalesCommission, InsertSalesCommission,
   CompanyAssignment, InsertCompanyAssignment, Testimonial, InsertTestimonial,
   TestimonialApproval, InsertTestimonialApproval, SupportTicket, InsertSupportTicket,
-  SupportTicketResponse, InsertSupportTicketResponse
+  SupportTicketResponse, InsertSupportTicketResponse, HelpTopic, InsertHelpTopic,
+  HelpTopicReply, InsertHelpTopicReply, HelpTopicLike, InsertHelpTopicLike
 } from "@shared/schema";
 import { db, queryWithRetry } from "./db";
-import { eq, and, desc, asc, gte, lt, lte, sql, not, like } from "drizzle-orm";
+import { eq, and, desc, asc, gte, lt, lte, sql, not, like, ilike } from "drizzle-orm";
 import * as schema from "@shared/schema";
 import { neon } from "@neondatabase/serverless";
 
@@ -21,7 +22,7 @@ const {
   wordpressIntegrations, monthlyAiUsage, salesPeople, salesCommissions, 
   companyAssignments, testimonials, testimonialApprovals, wordpressCustomFields,
   supportTickets, supportTicketResponses, subscriptionStatus, paymentTransactions,
-  subscriptionPlans, jobTypes
+  subscriptionPlans, jobTypes, helpTopics, helpTopicReplies, helpTopicLikes
 } = schema;
 
 export interface IStorage {
@@ -299,6 +300,23 @@ export interface IStorage {
   createJobType(jobType: any): Promise<any>;
   updateJobType(id: number, updates: any): Promise<any | undefined>;
   deleteJobType(id: number): Promise<boolean>;
+  
+  // Help Topics operations (Community Features)
+  getHelpTopics(category?: string, search?: string): Promise<schema.HelpTopic[]>;
+  getHelpTopic(id: number): Promise<schema.HelpTopic | undefined>;
+  createHelpTopic(topic: schema.InsertHelpTopic): Promise<schema.HelpTopic>;
+  updateHelpTopic(id: number, updates: Partial<schema.HelpTopic>): Promise<schema.HelpTopic | undefined>;
+  deleteHelpTopic(id: number): Promise<boolean>;
+  likeHelpTopic(topicId: number, userId: number): Promise<boolean>;
+  unlikeHelpTopic(topicId: number, userId: number): Promise<boolean>;
+  
+  // Help Topic Replies operations
+  getHelpTopicReplies(topicId: number): Promise<schema.HelpTopicReply[]>;
+  createHelpTopicReply(reply: schema.InsertHelpTopicReply): Promise<schema.HelpTopicReply>;
+  updateHelpTopicReply(id: number, updates: Partial<schema.HelpTopicReply>): Promise<schema.HelpTopicReply | undefined>;
+  deleteHelpTopicReply(id: number): Promise<boolean>;
+  likeHelpTopicReply(replyId: number, userId: number): Promise<boolean>;
+  unlikeHelpTopicReply(replyId: number, userId: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3677,6 +3695,253 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error getting financial export data:', error);
       return [];
+    }
+  }
+
+  // Help Topics operations (Community Features)
+  async getHelpTopics(category?: string, search?: string): Promise<HelpTopic[]> {
+    try {
+      let whereConditions = [];
+      
+      if (category) {
+        whereConditions.push(eq(helpTopics.category, category));
+      }
+      
+      if (search) {
+        whereConditions.push(like(helpTopics.title, `%${search}%`));
+      }
+      
+      const query = db.select().from(helpTopics);
+      
+      if (whereConditions.length > 0) {
+        return await query.where(and(...whereConditions)).orderBy(desc(helpTopics.lastActivity));
+      } else {
+        return await query.orderBy(desc(helpTopics.lastActivity));
+      }
+    } catch (error) {
+      console.error('Error fetching help topics:', error);
+      return [];
+    }
+  }
+
+  async getHelpTopic(id: number): Promise<schema.HelpTopic | undefined> {
+    try {
+      const topic = await db.select().from(helpTopics).where(eq(helpTopics.id, id)).limit(1);
+      
+      if (topic.length > 0) {
+        // Increment view count
+        await db.update(helpTopics)
+          .set({ views: sql`${helpTopics.views} + 1` })
+          .where(eq(helpTopics.id, id));
+      }
+      
+      return topic[0];
+    } catch (error) {
+      console.error('Error fetching help topic:', error);
+      return undefined;
+    }
+  }
+
+  async createHelpTopic(topic: schema.InsertHelpTopic): Promise<schema.HelpTopic> {
+    try {
+      const [newTopic] = await db.insert(helpTopics).values(topic).returning();
+      return newTopic;
+    } catch (error) {
+      console.error('Error creating help topic:', error);
+      throw error;
+    }
+  }
+
+  async updateHelpTopic(id: number, updates: Partial<schema.HelpTopic>): Promise<schema.HelpTopic | undefined> {
+    try {
+      const [updatedTopic] = await db.update(helpTopics)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(helpTopics.id, id))
+        .returning();
+      return updatedTopic;
+    } catch (error) {
+      console.error('Error updating help topic:', error);
+      return undefined;
+    }
+  }
+
+  async deleteHelpTopic(id: number): Promise<boolean> {
+    try {
+      // Delete associated replies and likes first
+      await db.delete(helpTopicReplies).where(eq(helpTopicReplies.topicId, id));
+      await db.delete(helpTopicLikes).where(eq(helpTopicLikes.topicId, id));
+      
+      const result = await db.delete(helpTopics).where(eq(helpTopics.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error('Error deleting help topic:', error);
+      return false;
+    }
+  }
+
+  async likeHelpTopic(topicId: number, userId: number): Promise<boolean> {
+    try {
+      // Check if already liked
+      const existingLike = await db.select()
+        .from(helpTopicLikes)
+        .where(and(eq(helpTopicLikes.topicId, topicId), eq(helpTopicLikes.userId, userId)))
+        .limit(1);
+      
+      if (existingLike.length > 0) {
+        return false; // Already liked
+      }
+      
+      // Add like
+      await db.insert(helpTopicLikes).values({ topicId, userId });
+      
+      // Update topic likes count
+      await db.update(helpTopics)
+        .set({ likes: sql`${helpTopics.likes} + 1` })
+        .where(eq(helpTopics.id, topicId));
+      
+      return true;
+    } catch (error) {
+      console.error('Error liking help topic:', error);
+      return false;
+    }
+  }
+
+  async unlikeHelpTopic(topicId: number, userId: number): Promise<boolean> {
+    try {
+      const result = await db.delete(helpTopicLikes)
+        .where(and(eq(helpTopicLikes.topicId, topicId), eq(helpTopicLikes.userId, userId)));
+      
+      if (result.rowCount > 0) {
+        // Update topic likes count
+        await db.update(helpTopics)
+          .set({ likes: sql`${helpTopics.likes} - 1` })
+          .where(eq(helpTopics.id, topicId));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error unliking help topic:', error);
+      return false;
+    }
+  }
+
+  // Help Topic Replies operations
+  async getHelpTopicReplies(topicId: number): Promise<schema.HelpTopicReply[]> {
+    try {
+      return await db.select()
+        .from(helpTopicReplies)
+        .where(eq(helpTopicReplies.topicId, topicId))
+        .orderBy(asc(helpTopicReplies.createdAt));
+    } catch (error) {
+      console.error('Error fetching help topic replies:', error);
+      return [];
+    }
+  }
+
+  async createHelpTopicReply(reply: schema.InsertHelpTopicReply): Promise<schema.HelpTopicReply> {
+    try {
+      const [newReply] = await db.insert(helpTopicReplies).values(reply).returning();
+      
+      // Update topic reply count and last activity
+      await db.update(helpTopics)
+        .set({ 
+          replies: sql`${helpTopics.replies} + 1`,
+          lastActivity: new Date()
+        })
+        .where(eq(helpTopics.id, reply.topicId));
+      
+      return newReply;
+    } catch (error) {
+      console.error('Error creating help topic reply:', error);
+      throw error;
+    }
+  }
+
+  async updateHelpTopicReply(id: number, updates: Partial<schema.HelpTopicReply>): Promise<schema.HelpTopicReply | undefined> {
+    try {
+      const [updatedReply] = await db.update(helpTopicReplies)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(helpTopicReplies.id, id))
+        .returning();
+      return updatedReply;
+    } catch (error) {
+      console.error('Error updating help topic reply:', error);
+      return undefined;
+    }
+  }
+
+  async deleteHelpTopicReply(id: number): Promise<boolean> {
+    try {
+      // Get reply to update topic count
+      const reply = await db.select()
+        .from(helpTopicReplies)
+        .where(eq(helpTopicReplies.id, id))
+        .limit(1);
+      
+      if (reply.length === 0) return false;
+      
+      // Delete reply likes first
+      await db.delete(helpTopicLikes).where(eq(helpTopicLikes.replyId, id));
+      
+      const result = await db.delete(helpTopicReplies).where(eq(helpTopicReplies.id, id));
+      
+      if (result.rowCount > 0) {
+        // Update topic reply count
+        await db.update(helpTopics)
+          .set({ replies: sql`${helpTopics.replies} - 1` })
+          .where(eq(helpTopics.id, reply[0].topicId));
+      }
+      
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error('Error deleting help topic reply:', error);
+      return false;
+    }
+  }
+
+  async likeHelpTopicReply(replyId: number, userId: number): Promise<boolean> {
+    try {
+      // Check if already liked
+      const existingLike = await db.select()
+        .from(helpTopicLikes)
+        .where(and(eq(helpTopicLikes.replyId, replyId), eq(helpTopicLikes.userId, userId)))
+        .limit(1);
+      
+      if (existingLike.length > 0) {
+        return false; // Already liked
+      }
+      
+      // Add like
+      await db.insert(helpTopicLikes).values({ replyId, userId });
+      
+      // Update reply likes count
+      await db.update(helpTopicReplies)
+        .set({ likes: sql`${helpTopicReplies.likes} + 1` })
+        .where(eq(helpTopicReplies.id, replyId));
+      
+      return true;
+    } catch (error) {
+      console.error('Error liking help topic reply:', error);
+      return false;
+    }
+  }
+
+  async unlikeHelpTopicReply(replyId: number, userId: number): Promise<boolean> {
+    try {
+      const result = await db.delete(helpTopicLikes)
+        .where(and(eq(helpTopicLikes.replyId, replyId), eq(helpTopicLikes.userId, userId)));
+      
+      if (result.rowCount > 0) {
+        // Update reply likes count
+        await db.update(helpTopicReplies)
+          .set({ likes: sql`${helpTopicReplies.likes} - 1` })
+          .where(eq(helpTopicReplies.id, replyId));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error unliking help topic reply:', error);
+      return false;
     }
   }
 }
