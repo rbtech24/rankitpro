@@ -65,21 +65,21 @@ export default function SuperAdminDashboard() {
     }
   });
 
-  // Fetch users data
-  const { data: users = [] } = useQuery({
-    queryKey: ['/api/admin/users'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/admin/users');
-      return response.json();
-    }
-  });
-
+  // Extract data from the comprehensive dashboard response
   const systemStats = dashboardData?.systemStats;
   const financialMetrics = dashboardData?.financialMetrics;
   const recentActivities = dashboardData?.recentActivities || [];
   const chartData = dashboardData?.chartData || {};
   const subscriptionBreakdown = dashboardData?.subscriptionBreakdown || [];
   const systemHealth = dashboardData?.systemHealth;
+
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   const SystemOverviewCards = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -88,7 +88,10 @@ export default function SuperAdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Companies</p>
-              <p className="text-2xl font-bold">{systemStats?.totalCompanies || companies.length}</p>
+              <p className="text-2xl font-bold">{systemStats?.totalCompanies || 0}</p>
+              <p className="text-xs text-gray-500">
+                {systemStats?.activeCompanies || 0} active
+              </p>
             </div>
             <Building2 className="h-8 w-8 text-blue-500" />
           </div>
@@ -101,6 +104,9 @@ export default function SuperAdminDashboard() {
             <div>
               <p className="text-sm font-medium text-gray-600">Total Users</p>
               <p className="text-2xl font-bold">{systemStats?.totalUsers || 0}</p>
+              <p className="text-xs text-gray-500">
+                {systemStats?.totalTechnicians || 0} technicians
+              </p>
             </div>
             <Users className="h-8 w-8 text-green-500" />
           </div>
@@ -112,7 +118,12 @@ export default function SuperAdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
-              <p className="text-2xl font-bold">${systemStats?.totalRevenue || 0}</p>
+              <p className="text-2xl font-bold">
+                ${(financialMetrics?.monthlyRecurringRevenue || 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500">
+                ${(financialMetrics?.totalRevenue || 0).toLocaleString()} total
+              </p>
             </div>
             <DollarSign className="h-8 w-8 text-purple-500" />
           </div>
@@ -125,9 +136,23 @@ export default function SuperAdminDashboard() {
             <div>
               <p className="text-sm font-medium text-gray-600">System Health</p>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span className="text-sm font-medium text-green-600">Healthy</span>
+                {systemHealth?.status === 'healthy' ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                ) : systemHealth?.status === 'warning' ? (
+                  <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                ) : (
+                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                )}
+                <span className={`text-sm font-medium ${
+                  systemHealth?.status === 'healthy' ? 'text-green-600' :
+                  systemHealth?.status === 'warning' ? 'text-yellow-600' : 'text-red-600'
+                }`}>
+                  {systemHealth?.status || 'Unknown'}
+                </span>
               </div>
+              <p className="text-xs text-gray-500">
+                {systemHealth?.memoryUsage || 'N/A'} memory
+              </p>
             </div>
             <Server className="h-8 w-8 text-orange-500" />
           </div>
