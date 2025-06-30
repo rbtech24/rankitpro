@@ -1039,3 +1039,163 @@ export type BugReport = typeof bugReports.$inferSelect;
 export type InsertBugReport = z.infer<typeof insertBugReportSchema>;
 export type FeatureRequest = typeof featureRequests.$inferSelect;
 export type InsertFeatureRequest = z.infer<typeof insertFeatureRequestSchema>;
+
+// Chat Support System Tables
+export const supportAgents = pgTable("support_agents", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  displayName: text("display_name").notNull(),
+  isOnline: boolean("is_online").default(false).notNull(),
+  isAvailable: boolean("is_available").default(true).notNull(),
+  expertiseAreas: text("expertise_areas").array().default([]).notNull(), // ["technical", "billing", "setup"]
+  maxConcurrentChats: integer("max_concurrent_chats").default(5).notNull(),
+  currentChatCount: integer("current_chat_count").default(0).notNull(),
+  lastSeen: timestamp("last_seen").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const chatSessions = pgTable("chat_sessions", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull().unique(), // UUID for client connection
+  companyId: integer("company_id").references(() => companies.id),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  supportAgentId: integer("support_agent_id").references(() => supportAgents.id),
+  
+  // Session metadata
+  status: text("status", { 
+    enum: ["waiting", "active", "resolved", "closed", "abandoned"] 
+  }).default("waiting").notNull(),
+  priority: text("priority", { 
+    enum: ["low", "medium", "high", "urgent"] 
+  }).default("medium").notNull(),
+  category: text("category", { 
+    enum: ["technical", "billing", "setup", "feature", "bug", "general"] 
+  }).default("general").notNull(),
+  
+  // Context information
+  currentPage: text("current_page"), // Where user was when chat started
+  userAgent: text("user_agent"),
+  initialMessage: text("initial_message"),
+  
+  // Timing
+  startedAt: timestamp("started_at").defaultNow().notNull(),
+  agentJoinedAt: timestamp("agent_joined_at"),
+  lastMessageAt: timestamp("last_message_at").defaultNow().notNull(),
+  closedAt: timestamp("closed_at"),
+  
+  // Ratings and feedback
+  customerRating: integer("customer_rating"), // 1-5 stars
+  customerFeedback: text("customer_feedback"),
+  resolvedByAgent: boolean("resolved_by_agent").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const chatMessages = pgTable("chat_messages", {
+  id: serial("id").primaryKey(),
+  sessionId: integer("session_id").references(() => chatSessions.id, { onDelete: "cascade" }).notNull(),
+  
+  // Message details
+  senderId: integer("sender_id").references(() => users.id).notNull(),
+  senderType: text("sender_type", { enum: ["customer", "agent", "system"] }).notNull(),
+  senderName: text("sender_name").notNull(),
+  
+  // Message content
+  message: text("message").notNull(),
+  messageType: text("message_type", { 
+    enum: ["text", "file", "image", "system_notification", "quick_reply"] 
+  }).default("text").notNull(),
+  
+  // Attachments and metadata
+  attachments: jsonb("attachments").default([]).notNull(), // File URLs, images, etc.
+  metadata: jsonb("metadata").default({}).notNull(), // Read receipts, edit history, etc.
+  
+  // Status tracking
+  isRead: boolean("is_read").default(false).notNull(),
+  readAt: timestamp("read_at"),
+  isEdited: boolean("is_edited").default(false).notNull(),
+  editedAt: timestamp("edited_at"),
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const chatQuickReplies = pgTable("chat_quick_replies", {
+  id: serial("id").primaryKey(),
+  category: text("category").notNull(), // "billing", "technical", "general"
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  useCount: integer("use_count").default(0).notNull(),
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Insert schemas for chat system
+export const insertSupportAgentSchema = createInsertSchema(supportAgents).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true,
+  lastSeen: true,
+  currentChatCount: true
+});
+
+export const insertChatSessionSchema = createInsertSchema(chatSessions).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true,
+  startedAt: true,
+  lastMessageAt: true
+});
+
+export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({ 
+  id: true, 
+  createdAt: true 
+});
+
+export const insertChatQuickReplySchema = createInsertSchema(chatQuickReplies).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true,
+  useCount: true
+});
+
+// Types for chat system
+export type SupportAgent = typeof supportAgents.$inferSelect;
+export type InsertSupportAgent = z.infer<typeof insertSupportAgentSchema>;
+export type ChatSession = typeof chatSessions.$inferSelect;
+export type InsertChatSession = z.infer<typeof insertChatSessionSchema>;
+export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type ChatQuickReply = typeof chatQuickReplies.$inferSelect;
+export type InsertChatQuickReply = z.infer<typeof insertChatQuickReplySchema>;
+
+// Extended types for chat functionality
+export type ChatSessionWithDetails = ChatSession & {
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    role: string;
+  };
+  company?: {
+    id: number;
+    name: string;
+  };
+  supportAgent?: {
+    id: number;
+    displayName: string;
+    isOnline: boolean;
+  };
+  messageCount: number;
+  lastMessage?: string;
+};
+
+export type ChatMessageWithSender = ChatMessage & {
+  sender: {
+    id: number;
+    username: string;
+  };
+};
