@@ -72,15 +72,15 @@ const Header: React.FC<HeaderProps> = ({ showNotifications = false }) => {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLocation("/profile")}>
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLocation("/settings")}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLocation("/help-center")}>
               <HelpCircle className="mr-2 h-4 w-4" />
               <span>Help</span>
             </DropdownMenuItem>

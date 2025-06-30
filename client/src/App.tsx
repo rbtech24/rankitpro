@@ -106,6 +106,7 @@ import ResetPassword from "@/pages/reset-password";
 import AdminSetup from "@/pages/AdminSetup";
 import Landing from "@/pages/landing";
 import SocialMediaSettings from "@/pages/social-media-settings";
+import Profile from "@/pages/profile";
 
 
 
@@ -1322,6 +1323,9 @@ function Router() {
       </Route>
       <Route path="/troubleshooting">
         <PrivateRoute component={Troubleshooting} path="/troubleshooting" />
+      </Route>
+      <Route path="/profile">
+        <PrivateRoute component={Profile} path="/profile" />
       </Route>
       <Route path="/settings">
         <PrivateRoute component={Settings} path="/settings" />
