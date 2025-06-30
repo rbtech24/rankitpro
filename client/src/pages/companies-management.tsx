@@ -123,6 +123,7 @@ interface SubscriptionPlan {
 const availableFeatures = [
   { id: "ai_content", name: "AI Content Generation" },
   { id: "wordpress_integration", name: "WordPress Integration" },
+  { id: "social_media_integration", name: "Social Media Integration" },
   { id: "crm_integration", name: "CRM Integration" },
   { id: "review_requests", name: "Review Requests" },
   { id: "custom_branding", name: "Custom Branding" },
