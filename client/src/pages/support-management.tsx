@@ -229,6 +229,98 @@ export default function SupportManagement() {
     });
   };
 
+  // Clear waiting chats mutation
+  const clearWaitingChatsMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/chat/admin/clear-waiting');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/chat/agent/sessions'] });
+      toast({
+        title: "Success",
+        description: "All waiting chats have been cleared",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to clear waiting chats",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Archive old chats mutation
+  const archiveOldChatsMutation = useMutation({
+    mutationFn: async (daysOld: number = 30) => {
+      const response = await apiRequest('POST', '/api/chat/admin/archive-old', { daysOld });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/chat/agent/sessions'] });
+      toast({
+        title: "Success",
+        description: `${data.archivedCount} old chats have been archived`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to archive old chats",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Close specific chat session
+  const closeSessionMutation = useMutation({
+    mutationFn: async (sessionId: string) => {
+      const response = await apiRequest('POST', `/api/chat/session/${sessionId}/close`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/chat/agent/sessions'] });
+      toast({
+        title: "Success",
+        description: "Chat session has been closed",
+      });
+      setShowChatInterface(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to close chat session",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle clearing waiting chats
+  const handleClearWaitingChats = () => {
+    if (waitingSessions.length === 0) return;
+    
+    if (confirm(`Are you sure you want to clear all ${waitingSessions.length} waiting chats? This action cannot be undone.`)) {
+      clearWaitingChatsMutation.mutate();
+    }
+  };
+
+  // Handle archiving old chats
+  const handleArchiveOldChats = () => {
+    if (confirm('Archive all chats older than 30 days? This will move them to the archived section.')) {
+      archiveOldChatsMutation.mutate(30);
+    }
+  };
+
+  // Handle closing current session
+  const handleCloseSession = () => {
+    if (!selectedSession) return;
+    
+    if (confirm('Are you sure you want to close this chat session? The customer will be notified.')) {
+      closeSessionMutation.mutate(selectedSession.sessionId);
+    }
+  };
+
   // Format time for display
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString([], { 
@@ -369,13 +461,38 @@ export default function SupportManagement() {
       {waitingSessions.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-500" />
-              Customers Waiting ({waitingSessions.length})
-            </CardTitle>
-            <CardDescription>
-              Customers are waiting for support. Join a conversation to help them.
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-500" />
+                  Customers Waiting ({waitingSessions.length})
+                </CardTitle>
+                <CardDescription>
+                  Customers are waiting for support. Join a conversation to help them.
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleArchiveOldChats}
+                  disabled={archiveOldChatsMutation.isPending}
+                  className="text-gray-600 hover:text-gray-800"
+                >
+                  <Archive className="h-4 w-4 mr-1" />
+                  Archive Old
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleClearWaitingChats}
+                  disabled={clearWaitingChatsMutation.isPending || waitingSessions.length === 0}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Clear Waiting ({waitingSessions.length})
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
