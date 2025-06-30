@@ -958,3 +958,84 @@ export type HelpTopicReply = typeof helpTopicReplies.$inferSelect;
 export const insertHelpTopicLikeSchema = createInsertSchema(helpTopicLikes).omit({ id: true, createdAt: true });
 export type InsertHelpTopicLike = z.infer<typeof insertHelpTopicLikeSchema>;
 export type HelpTopicLike = typeof helpTopicLikes.$inferSelect;
+
+// Bug Reports Table
+export const bugReports = pgTable("bug_reports", {
+  id: serial("id").primaryKey(),
+  ticketNumber: text("ticket_number").notNull().unique(),
+  companyId: integer("company_id").references(() => companies.id),
+  submitterId: integer("submitter_id").references(() => users.id).notNull(),
+  submitterName: text("submitter_name").notNull(),
+  submitterEmail: text("submitter_email").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  stepsToReproduce: text("steps_to_reproduce"),
+  expectedBehavior: text("expected_behavior"),
+  actualBehavior: text("actual_behavior"),
+  browserInfo: text("browser_info"),
+  deviceInfo: text("device_info"),
+  priority: text("priority", { enum: ["low", "medium", "high", "critical"] }).default("medium").notNull(),
+  status: text("status", { enum: ["open", "investigating", "in_progress", "resolved", "closed"] }).default("open").notNull(),
+  assignedToId: integer("assigned_to_id").references(() => users.id),
+  assignedAt: timestamp("assigned_at"),
+  resolution: text("resolution"),
+  resolvedAt: timestamp("resolved_at"),
+  resolvedById: integer("resolved_by_id").references(() => users.id),
+  attachments: text("attachments").array(),
+  tags: text("tags").array(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  lastResponseAt: timestamp("last_response_at").defaultNow().notNull()
+});
+
+// Feature Requests Table
+export const featureRequests = pgTable("feature_requests", {
+  id: serial("id").primaryKey(),
+  ticketNumber: text("ticket_number").notNull().unique(),
+  companyId: integer("company_id").references(() => companies.id),
+  submitterId: integer("submitter_id").references(() => users.id).notNull(),
+  submitterName: text("submitter_name").notNull(),
+  submitterEmail: text("submitter_email").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  businessJustification: text("business_justification"),
+  proposedSolution: text("proposed_solution"),
+  priority: text("priority", { enum: ["low", "medium", "high", "critical"] }).default("medium").notNull(),
+  status: text("status", { enum: ["submitted", "under_review", "planned", "in_development", "completed", "rejected"] }).default("submitted").notNull(),
+  votes: integer("votes").default(0).notNull(),
+  estimatedEffort: text("estimated_effort"),
+  targetRelease: text("target_release"),
+  assignedToId: integer("assigned_to_id").references(() => users.id),
+  assignedAt: timestamp("assigned_at"),
+  implementationNotes: text("implementation_notes"),
+  completedAt: timestamp("completed_at"),
+  completedById: integer("completed_by_id").references(() => users.id),
+  attachments: text("attachments").array(),
+  tags: text("tags").array(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  lastResponseAt: timestamp("last_response_at").defaultNow().notNull()
+});
+
+// Bug Report and Feature Request Insert Schemas
+export const insertBugReportSchema = createInsertSchema(bugReports).omit({ 
+  id: true, 
+  ticketNumber: true,
+  createdAt: true, 
+  updatedAt: true,
+  lastResponseAt: true 
+});
+
+export const insertFeatureRequestSchema = createInsertSchema(featureRequests).omit({ 
+  id: true, 
+  ticketNumber: true,
+  createdAt: true, 
+  updatedAt: true,
+  lastResponseAt: true 
+});
+
+// Bug Report and Feature Request Types
+export type BugReport = typeof bugReports.$inferSelect;
+export type InsertBugReport = z.infer<typeof insertBugReportSchema>;
+export type FeatureRequest = typeof featureRequests.$inferSelect;
+export type InsertFeatureRequest = z.infer<typeof insertFeatureRequestSchema>;

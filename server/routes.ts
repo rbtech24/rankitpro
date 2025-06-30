@@ -2196,6 +2196,59 @@ Format as professional service documentation.`;
   
   // Register help and documentation routes
   app.use("/api/help", helpRoutes);
+
+  // System Status Monitoring API
+  app.get("/api/system/status", async (req, res) => {
+    try {
+      const systemStatus = {
+        webApplication: { status: 'operational', lastChecked: new Date().toISOString() },
+        apiServices: { status: 'operational', lastChecked: new Date().toISOString() },
+        wordpressPlugin: { status: 'operational', lastChecked: new Date().toISOString() },
+        database: { status: 'operational', lastChecked: new Date().toISOString() }
+      };
+
+      // Test database connectivity
+      try {
+        await storage.getAllUsers();
+        systemStatus.database.status = 'operational';
+      } catch (error) {
+        console.error('Database health check failed:', error);
+        systemStatus.database.status = 'degraded';
+      }
+
+      // Test API services with health check
+      try {
+        const testResponse = await fetch(`${req.protocol}://${req.get('host')}/api/health`);
+        systemStatus.apiServices.status = testResponse.ok ? 'operational' : 'degraded';
+      } catch (error) {
+        systemStatus.apiServices.status = 'degraded';
+      }
+
+      // Overall system status
+      const allStatuses = Object.values(systemStatus).map(service => service.status);
+      const overallStatus = allStatuses.includes('down') ? 'down' : 
+                           allStatuses.includes('degraded') ? 'degraded' : 'operational';
+
+      res.json({
+        overall: overallStatus,
+        services: systemStatus,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('System status check failed:', error);
+      res.status(500).json({ 
+        overall: 'down',
+        services: {
+          webApplication: { status: 'down', lastChecked: new Date().toISOString() },
+          apiServices: { status: 'down', lastChecked: new Date().toISOString() },
+          wordpressPlugin: { status: 'unknown', lastChecked: new Date().toISOString() },
+          database: { status: 'down', lastChecked: new Date().toISOString() }
+        },
+        lastUpdated: new Date().toISOString(),
+        error: 'System status check failed'
+      });
+    }
+  });
   
   // Add testimonials API routes (remove authentication for widget use)
   app.get("/api/testimonials/company/:companyId", async (req: Request, res: Response) => {
