@@ -310,21 +310,7 @@ export default function Sidebar({ className }: SidebarProps) {
                 </svg>
                 WordPress Plugin
               </Link>
-              <Link 
-                href="/crm-integrations" 
-                className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 text-gray-700 no-underline",
-                  isActive("/crm-integrations") && "bg-blue-50 border-l-4 border-blue-600 text-blue-700"
-                )}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-                CRM Integrations
-              </Link>
+
             </div>
 
             <div className="mb-4">

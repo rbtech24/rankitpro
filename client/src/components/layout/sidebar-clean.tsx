@@ -197,18 +197,6 @@ export default function Sidebar({ className }: SidebarProps) {
               </div>
             </Link>
 
-            <Link href="/crm-integrations">
-              <div className={cn(
-                "flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 mb-1 cursor-pointer transition-colors",
-                isActive("/crm-integrations") && "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
-              )}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 mr-3">
-                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                  <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
-                </svg>
-                CRM Integrations
-              </div>
-            </Link>
 
             <Link href="/social-media-settings">
               <div className={cn(
