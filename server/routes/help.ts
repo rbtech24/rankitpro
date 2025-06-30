@@ -591,66 +591,32 @@ startxref
 // Community features
 router.get('/community/topics', isAuthenticated, async (req, res) => {
   try {
-    // Mock community topics - in production, this would come from a database
-    const topics = [
-      {
-        id: 1,
-        title: 'Best practices for GPS accuracy in the field',
-        author: 'TechPro123',
-        replies: 15,
-        lastActivity: new Date('2025-06-29'),
-        category: 'Mobile App',
-        tags: ['GPS', 'accuracy', 'troubleshooting'],
-        content: 'Looking for tips to improve GPS accuracy when technicians are working in challenging environments...',
-        likes: 8
-      },
-      {
-        id: 2,
-        title: 'WordPress plugin customization tips',
-        author: 'WebMaster456',
-        replies: 8,
-        lastActivity: new Date('2025-06-28'),
-        category: 'WordPress Integration',
-        tags: ['plugin', 'customization', 'CSS'],
-        content: 'Has anyone successfully customized the WordPress plugin styling to match their brand?',
-        likes: 12
-      },
-      {
-        id: 3,
-        title: 'Improving customer review response rates',
-        author: 'ServiceKing',
-        replies: 23,
-        lastActivity: new Date('2025-06-27'),
-        category: 'Reviews & Automation',
-        tags: ['reviews', 'email', 'automation'],
-        content: 'What email templates and timing strategies work best for getting customers to leave reviews?',
-        likes: 18
-      },
-      {
-        id: 4,
-        title: 'Mobile app offline functionality questions',
-        author: 'FieldWorker88',
-        replies: 6,
-        lastActivity: new Date('2025-06-26'),
-        category: 'Mobile App',
-        tags: ['offline', 'sync', 'mobile'],
-        content: 'How reliable is the offline mode when working in areas with poor cell coverage?',
-        likes: 5
-      },
-      {
-        id: 5,
-        title: 'Analytics dashboard best practices',
-        author: 'DataDriven',
-        replies: 11,
-        lastActivity: new Date('2025-06-25'),
-        category: 'Analytics & Reports',
-        tags: ['analytics', 'reports', 'KPIs'],
-        content: 'Which metrics do you track most closely for measuring technician performance?',
-        likes: 14
-      }
-    ];
+    const { category, search } = req.query;
     
-    res.json(topics);
+    // Get real topics from database
+    const topics = await storage.getHelpTopics(
+      category as string | undefined,
+      search as string | undefined
+    );
+    
+    // Transform database data to match frontend expectations
+    const formattedTopics = topics.map(topic => ({
+      id: topic.id,
+      title: topic.title,
+      author: topic.authorName,
+      replies: topic.replies,
+      lastActivity: topic.lastActivity,
+      category: topic.category,
+      tags: topic.tags,
+      content: topic.content,
+      likes: topic.likes,
+      views: topic.views,
+      isResolved: topic.isResolved,
+      isPinned: topic.isPinned,
+      createdAt: topic.createdAt
+    }));
+    
+    res.json(formattedTopics);
   } catch (error) {
     console.error('Error fetching community topics:', error);
     res.status(500).json({ error: 'Failed to fetch community topics' });
@@ -667,19 +633,15 @@ router.post('/community/topics', isAuthenticated, async (req, res) => {
       return res.status(401).json({ error: 'User not authenticated' });
     }
     
-    // In production, this would create a topic in the database
-    const newTopic = {
-      id: Math.floor(Math.random() * 10000),
+    // Create a real topic in the database
+    const newTopic = await storage.createHelpTopic({
       title,
       content,
       category,
       tags: tags ? tags.split(',').map((tag: string) => tag.trim()) : [],
-      author: req.user?.username || 'Anonymous',
-      replies: 0,
-      likes: 0,
-      lastActivity: new Date(),
-      createdAt: new Date()
-    };
+      authorId: req.user?.id || 1,
+      authorName: req.user?.username || 'Anonymous',
+    });
     
     res.status(201).json({
       message: 'Topic created successfully',
@@ -688,6 +650,100 @@ router.post('/community/topics', isAuthenticated, async (req, res) => {
   } catch (error) {
     console.error('Error creating community topic:', error);
     res.status(500).json({ error: 'Failed to create topic' });
+  }
+});
+
+// Get individual topic with replies
+router.get('/community/topics/:id', isAuthenticated, async (req, res) => {
+  try {
+    const topicId = parseInt(req.params.id);
+    
+    const topic = await storage.getHelpTopic(topicId);
+    if (!topic) {
+      return res.status(404).json({ error: 'Topic not found' });
+    }
+    
+    const replies = await storage.getHelpTopicReplies(topicId);
+    
+    res.json({
+      topic,
+      replies
+    });
+  } catch (error) {
+    console.error('Error fetching topic:', error);
+    res.status(500).json({ error: 'Failed to fetch topic' });
+  }
+});
+
+// Create reply to topic
+router.post('/community/topics/:id/replies', isAuthenticated, async (req, res) => {
+  try {
+    const topicId = parseInt(req.params.id);
+    const { content } = req.body;
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+    
+    const reply = await storage.createHelpTopicReply({
+      topicId,
+      content,
+      authorId: userId,
+      authorName: req.user?.username || 'Anonymous'
+    });
+    
+    res.status(201).json({
+      message: 'Reply created successfully',
+      reply
+    });
+  } catch (error) {
+    console.error('Error creating reply:', error);
+    res.status(500).json({ error: 'Failed to create reply' });
+  }
+});
+
+// Like/unlike topic
+router.post('/community/topics/:id/like', isAuthenticated, async (req, res) => {
+  try {
+    const topicId = parseInt(req.params.id);
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+    
+    const liked = await storage.likeHelpTopic(topicId, userId);
+    
+    res.json({
+      message: liked ? 'Topic liked' : 'Already liked',
+      liked
+    });
+  } catch (error) {
+    console.error('Error liking topic:', error);
+    res.status(500).json({ error: 'Failed to like topic' });
+  }
+});
+
+// Unlike topic
+router.delete('/community/topics/:id/like', isAuthenticated, async (req, res) => {
+  try {
+    const topicId = parseInt(req.params.id);
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+    
+    const unliked = await storage.unlikeHelpTopic(topicId, userId);
+    
+    res.json({
+      message: unliked ? 'Topic unliked' : 'Not previously liked',
+      unliked
+    });
+  } catch (error) {
+    console.error('Error unliking topic:', error);
+    res.status(500).json({ error: 'Failed to unlike topic' });
   }
 });
 
