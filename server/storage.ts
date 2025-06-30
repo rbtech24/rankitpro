@@ -4767,6 +4767,22 @@ export class DatabaseStorage implements IStorage {
 
   // Clear all waiting chat sessions
   async clearWaitingChats(): Promise<number> {
+    // First get all waiting session IDs
+    const waitingSessions = await db.select({ sessionId: chatSessions.sessionId })
+      .from(chatSessions)
+      .where(eq(chatSessions.status, 'waiting'));
+    
+    if (waitingSessions.length === 0) {
+      return 0;
+    }
+    
+    const sessionIds = waitingSessions.map(s => s.sessionId);
+    
+    // First delete all messages for these sessions
+    await db.delete(chatMessages)
+      .where(sql`session_id IN (${sql.join(sessionIds.map(id => `'${id}'`), sql`, `)})`);
+    
+    // Then delete the sessions themselves
     const result = await db.delete(chatSessions)
       .where(eq(chatSessions.status, 'waiting'))
       .returning();
