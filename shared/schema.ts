@@ -57,8 +57,6 @@ export const companies = pgTable("companies", {
   subscriptionPlanId: integer("subscription_plan_id").references(() => subscriptionPlans.id),
   usageLimit: integer("usage_limit").notNull().default(50),
   wordpressConfig: text("wordpress_config"),
-  wordpressUrl: text("wordpress_url"),
-  wordpressApiKey: text("wordpress_api_key"),
   javaScriptEmbedConfig: text("javascript_embed_config"),
   reviewSettings: text("review_settings"),
   crmIntegrations: text("crm_integrations"),
@@ -126,9 +124,7 @@ export const checkIns = pgTable("check_ins", {
   followUpNotes: text("follow_up_notes"),
   isBlog: boolean("is_blog").default(false),
   generatedContent: text("generated_content"), // AI-generated content
-  wordpressSyncStatus: text("wordpress_sync_status", { enum: ["pending", "synced", "failed"] }),
-  wordpressPostId: integer("wordpress_post_id"),
-  wordpressPostUrl: text("wordpress_post_url"),
+
   technicianId: integer("technician_id").references(() => technicians.id).notNull(),
   companyId: integer("company_id").references(() => companies.id).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
