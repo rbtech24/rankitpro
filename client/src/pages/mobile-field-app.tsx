@@ -56,6 +56,7 @@ export default function MobileFieldApp() {
     jobTypeId: '',
     workPerformed: '',
     materialsUsed: '',
+    address: '',
     notes: '',
     photos: [] as File[]
   });
@@ -176,7 +177,7 @@ export default function MobileFieldApp() {
       formData.append('workPerformed', checkInForm.workPerformed);
       formData.append('materialsUsed', checkInForm.materialsUsed);
       formData.append('notes', checkInForm.notes);
-      formData.append('address', currentLocation ? formatLocationDisplay(currentLocation) : 'Location not detected');
+      formData.append('address', checkInForm.address || (currentLocation ? formatLocationDisplay(currentLocation) : 'Location not detected'));
       
       checkInForm.photos.forEach((photo, index) => {
         formData.append(`photos`, photo);
@@ -197,6 +198,7 @@ export default function MobileFieldApp() {
         jobTypeId: '',
         workPerformed: '',
         materialsUsed: '',
+        address: '',
         notes: '',
         photos: []
       });
@@ -441,6 +443,12 @@ export default function MobileFieldApp() {
             ))}
           </SelectContent>
         </Select>
+
+        <Input
+          placeholder="Service Address (e.g., 123 Main St, City, State 12345)"
+          value={checkInForm.address || ''}
+          onChange={(e) => setCheckInForm(prev => ({ ...prev, address: e.target.value }))}
+        />
 
         <Textarea
           placeholder="Work performed..."
