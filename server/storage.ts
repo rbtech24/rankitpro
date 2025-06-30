@@ -3724,7 +3724,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getHelpTopic(id: number): Promise<schema.HelpTopic | undefined> {
+  async getHelpTopic(id: number): Promise<HelpTopic | undefined> {
     try {
       const topic = await db.select().from(helpTopics).where(eq(helpTopics.id, id)).limit(1);
       
@@ -3742,7 +3742,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async createHelpTopic(topic: schema.InsertHelpTopic): Promise<schema.HelpTopic> {
+  async createHelpTopic(topic: InsertHelpTopic): Promise<HelpTopic> {
     try {
       const [newTopic] = await db.insert(helpTopics).values(topic).returning();
       return newTopic;
@@ -3752,7 +3752,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateHelpTopic(id: number, updates: Partial<schema.HelpTopic>): Promise<schema.HelpTopic | undefined> {
+  async updateHelpTopic(id: number, updates: Partial<HelpTopic>): Promise<HelpTopic | undefined> {
     try {
       const [updatedTopic] = await db.update(helpTopics)
         .set({ ...updates, updatedAt: new Date() })
@@ -3772,7 +3772,7 @@ export class DatabaseStorage implements IStorage {
       await db.delete(helpTopicLikes).where(eq(helpTopicLikes.topicId, id));
       
       const result = await db.delete(helpTopics).where(eq(helpTopics.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount || 0) > 0;
     } catch (error) {
       console.error('Error deleting help topic:', error);
       return false;
@@ -3811,7 +3811,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(helpTopicLikes)
         .where(and(eq(helpTopicLikes.topicId, topicId), eq(helpTopicLikes.userId, userId)));
       
-      if (result.rowCount > 0) {
+      if ((result.rowCount || 0) > 0) {
         // Update topic likes count
         await db.update(helpTopics)
           .set({ likes: sql`${helpTopics.likes} - 1` })
@@ -3826,7 +3826,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Help Topic Replies operations
-  async getHelpTopicReplies(topicId: number): Promise<schema.HelpTopicReply[]> {
+  async getHelpTopicReplies(topicId: number): Promise<HelpTopicReply[]> {
     try {
       return await db.select()
         .from(helpTopicReplies)
@@ -3838,7 +3838,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async createHelpTopicReply(reply: schema.InsertHelpTopicReply): Promise<schema.HelpTopicReply> {
+  async createHelpTopicReply(reply: InsertHelpTopicReply): Promise<HelpTopicReply> {
     try {
       const [newReply] = await db.insert(helpTopicReplies).values(reply).returning();
       
@@ -3857,7 +3857,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateHelpTopicReply(id: number, updates: Partial<schema.HelpTopicReply>): Promise<schema.HelpTopicReply | undefined> {
+  async updateHelpTopicReply(id: number, updates: Partial<HelpTopicReply>): Promise<HelpTopicReply | undefined> {
     try {
       const [updatedReply] = await db.update(helpTopicReplies)
         .set({ ...updates, updatedAt: new Date() })
@@ -3885,14 +3885,14 @@ export class DatabaseStorage implements IStorage {
       
       const result = await db.delete(helpTopicReplies).where(eq(helpTopicReplies.id, id));
       
-      if (result.rowCount > 0) {
+      if ((result.rowCount || 0) > 0) {
         // Update topic reply count
         await db.update(helpTopics)
           .set({ replies: sql`${helpTopics.replies} - 1` })
           .where(eq(helpTopics.id, reply[0].topicId));
       }
       
-      return result.rowCount > 0;
+      return (result.rowCount || 0) > 0;
     } catch (error) {
       console.error('Error deleting help topic reply:', error);
       return false;
@@ -3931,7 +3931,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(helpTopicLikes)
         .where(and(eq(helpTopicLikes.replyId, replyId), eq(helpTopicLikes.userId, userId)));
       
-      if (result.rowCount > 0) {
+      if ((result.rowCount || 0) > 0) {
         // Update reply likes count
         await db.update(helpTopicReplies)
           .set({ likes: sql`${helpTopicReplies.likes} - 1` })
