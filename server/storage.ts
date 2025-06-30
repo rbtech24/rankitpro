@@ -2138,9 +2138,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getSubscriptionBreakdown(): Promise<any[]> {
-    return this.getRevenueBreakdown();
-  }
+
 
   async getRevenueTrends(period: string = '12months'): Promise<any[]> {
     return this.getSignupMetrics(period);
