@@ -124,7 +124,9 @@ export const checkIns = pgTable("check_ins", {
   followUpNotes: text("follow_up_notes"),
   isBlog: boolean("is_blog").default(false),
   generatedContent: text("generated_content"), // AI-generated content
-
+  wordpressSyncStatus: text("wordpress_sync_status", { enum: ["pending", "synced", "failed"] }),
+  wordpressPostId: integer("wordpress_post_id"),
+  wordpressPostUrl: text("wordpress_post_url"),
   technicianId: integer("technician_id").references(() => technicians.id).notNull(),
   companyId: integer("company_id").references(() => companies.id).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
