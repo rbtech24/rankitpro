@@ -1625,108 +1625,26 @@ export class DatabaseStorage implements IStorage {
 
   async getFinancialMetrics(): Promise<any> {
     try {
-      if (!process.env.STRIPE_SECRET_KEY) {
-        console.warn('Stripe API key not configured, returning zero financial metrics');
-        return {
-          totalRevenue: 0,
-          monthlyRecurringRevenue: 0,
-          annualRecurringRevenue: 0,
-          totalCompanies: 0,
-          activeSubscriptions: 0,
-          monthlySignups: 0,
-          churnRate: 0,
-          averageRevenuePerUser: 0
-        };
-      }
-
-      const stripe = await import('stripe').then(Stripe => new Stripe.default(process.env.STRIPE_SECRET_KEY!));
-
-      // Get all database companies to match with Stripe customers
+      // Get all database companies for baseline metrics
       const allCompanies = await db.select({
         id: companies.id,
         name: companies.name,
+        plan: companies.plan,
         stripeCustomerId: companies.stripeCustomerId,
         createdAt: companies.createdAt,
         isTrialActive: companies.isTrialActive
       }).from(companies);
 
-      // Get all users with Stripe subscriptions
-      const allUsers = await db.select({
-        id: users.id,
-        stripeCustomerId: users.stripeCustomerId,
-        stripeSubscriptionId: users.stripeSubscriptionId,
-        companyId: users.companyId
-      }).from(users).where(sql`${users.stripeSubscriptionId} IS NOT NULL`);
-
-      // Get active subscriptions from Stripe
-      const subscriptions = await stripe.subscriptions.list({
-        status: 'active',
-        limit: 100
+      // Calculate metrics from database companies (fallback/baseline data)
+      const planPrices = { starter: 29, pro: 79, agency: 149 };
+      const activeCompanies = allCompanies.filter(company => !company.isTrialActive);
+      
+      let baselineMonthlyRevenue = 0;
+      activeCompanies.forEach(company => {
+        baselineMonthlyRevenue += planPrices[company.plan as keyof typeof planPrices] || 29;
       });
 
-      let monthlyRevenue = 0;
-      let activeSubscriptions = 0;
-
-      // Calculate revenue from active Stripe subscriptions
-      for (const subscription of subscriptions.data) {
-        if (subscription.status === 'active') {
-          activeSubscriptions++;
-          
-          for (const item of subscription.items.data) {
-            const price = item.price;
-            if (price.recurring?.interval === 'month') {
-              monthlyRevenue += (price.unit_amount || 0) / 100;
-            } else if (price.recurring?.interval === 'year') {
-              monthlyRevenue += ((price.unit_amount || 0) / 100) / 12;
-            }
-          }
-        }
-      }
-
-      // Get total revenue from successful charges (last 12 months)
-      const since = Math.floor(Date.now() / 1000) - (365 * 24 * 60 * 60);
-      const charges = await stripe.charges.list({
-        created: { gte: since },
-        limit: 100
-      });
-
-      let totalRevenue = 0;
-      let totalPayments = 0;
-      let failedPayments = 0;
-
-      for (const charge of charges.data) {
-        totalPayments++;
-        if (charge.status === 'succeeded') {
-          totalRevenue += charge.amount / 100;
-        } else if (charge.status === 'failed') {
-          failedPayments++;
-        }
-      }
-
-      // Calculate refunds
-      const refunds = await stripe.refunds.list({
-        created: { gte: since },
-        limit: 100
-      });
-
-      let totalRefunds = 0;
-      for (const refund of refunds.data) {
-        if (refund.status === 'succeeded') {
-          totalRefunds += refund.amount / 100;
-        }
-      }
-
-      // Calculate churn rate (canceled subscriptions in last 30 days vs active)
-      const thirtyDaysAgo = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
-      const canceledSubs = await stripe.subscriptions.list({
-        status: 'canceled',
-        created: { gte: thirtyDaysAgo },
-        limit: 100
-      });
-
-      const churnRate = activeSubscriptions > 0 ? (canceledSubs.data.length / activeSubscriptions) : 0;
-
-      // Calculate company metrics
+      // Calculate monthly signups
       const currentMonth = new Date();
       currentMonth.setDate(1);
       currentMonth.setHours(0, 0, 0, 0);
@@ -1735,25 +1653,112 @@ export class DatabaseStorage implements IStorage {
         company.createdAt && new Date(company.createdAt) >= currentMonth
       ).length;
 
-      const netRevenue = totalRevenue - totalRefunds;
-      const annualRecurringRevenue = monthlyRevenue * 12;
+      // If Stripe is configured, try to get real financial data
+      if (process.env.STRIPE_SECRET_KEY) {
+        try {
+          const stripe = await import('stripe').then(Stripe => new Stripe.default(process.env.STRIPE_SECRET_KEY!));
 
+          // Get active subscriptions from Stripe
+          const subscriptions = await stripe.subscriptions.list({
+            status: 'active',
+            limit: 100
+          });
+
+          let stripeMonthlyRevenue = 0;
+          let activeSubscriptions = 0;
+
+          // Calculate revenue from active Stripe subscriptions
+          for (const subscription of subscriptions.data) {
+            if (subscription.status === 'active') {
+              activeSubscriptions++;
+              
+              for (const item of subscription.items.data) {
+                const price = item.price;
+                if (price.recurring?.interval === 'month') {
+                  stripeMonthlyRevenue += (price.unit_amount || 0) / 100;
+                } else if (price.recurring?.interval === 'year') {
+                  stripeMonthlyRevenue += ((price.unit_amount || 0) / 100) / 12;
+                }
+              }
+            }
+          }
+
+          // Get total revenue from successful charges (last 12 months)
+          const since = Math.floor(Date.now() / 1000) - (365 * 24 * 60 * 60);
+          const charges = await stripe.charges.list({
+            created: { gte: since },
+            limit: 100
+          });
+
+          let totalRevenue = 0;
+          let totalPayments = 0;
+          let failedPayments = 0;
+
+          for (const charge of charges.data) {
+            totalPayments++;
+            if (charge.status === 'succeeded') {
+              totalRevenue += charge.amount / 100;
+            } else if (charge.status === 'failed') {
+              failedPayments++;
+            }
+          }
+
+          // Calculate refunds
+          const refunds = await stripe.refunds.list({
+            created: { gte: since },
+            limit: 100
+          });
+
+          let totalRefunds = 0;
+          for (const refund of refunds.data) {
+            if (refund.status === 'succeeded') {
+              totalRefunds += refund.amount / 100;
+            }
+          }
+
+          // Use Stripe data if we have active subscriptions, otherwise use baseline
+          const monthlyRecurringRevenue = activeSubscriptions > 0 ? stripeMonthlyRevenue : baselineMonthlyRevenue;
+          const finalActiveSubscriptions = activeSubscriptions > 0 ? activeSubscriptions : activeCompanies.length;
+
+          return {
+            totalRevenue,
+            monthlyRecurringRevenue,
+            annualRecurringRevenue: monthlyRecurringRevenue * 12,
+            totalCompanies: allCompanies.length,
+            activeSubscriptions: finalActiveSubscriptions,
+            monthlySignups,
+            churnRate: 0, // Would need historical tracking to calculate properly
+            averageRevenuePerUser: finalActiveSubscriptions > 0 ? monthlyRecurringRevenue / finalActiveSubscriptions : 0,
+            totalPayments,
+            failedPayments,
+            refunds: totalRefunds,
+            netRevenue: totalRevenue - totalRefunds,
+            dataSource: activeSubscriptions > 0 ? 'stripe' : 'database'
+          };
+        } catch (stripeError) {
+          console.warn('Stripe API error, using database baseline:', stripeError);
+          // Fall through to database baseline
+        }
+      }
+
+      // Return database-based calculations as fallback
       return {
-        totalRevenue,
-        monthlyRecurringRevenue: monthlyRevenue,
-        annualRecurringRevenue,
+        totalRevenue: 0,
+        monthlyRecurringRevenue: baselineMonthlyRevenue,
+        annualRecurringRevenue: baselineMonthlyRevenue * 12,
         totalCompanies: allCompanies.length,
-        activeSubscriptions,
+        activeSubscriptions: activeCompanies.length,
         monthlySignups,
-        churnRate,
-        averageRevenuePerUser: activeSubscriptions > 0 ? monthlyRevenue / activeSubscriptions : 0,
-        totalPayments,
-        failedPayments,
-        refunds: totalRefunds,
-        netRevenue
+        churnRate: 0,
+        averageRevenuePerUser: activeCompanies.length > 0 ? baselineMonthlyRevenue / activeCompanies.length : 0,
+        totalPayments: 0,
+        failedPayments: 0,
+        refunds: 0,
+        netRevenue: 0,
+        dataSource: 'database'
       };
     } catch (error) {
-      console.error('Error fetching financial metrics from Stripe:', error);
+      console.error('Error fetching financial metrics:', error);
       return {
         totalRevenue: 0,
         monthlyRecurringRevenue: 0,
@@ -1766,7 +1771,8 @@ export class DatabaseStorage implements IStorage {
         totalPayments: 0,
         failedPayments: 0,
         refunds: 0,
-        netRevenue: 0
+        netRevenue: 0,
+        dataSource: 'error'
       };
     }
   }
