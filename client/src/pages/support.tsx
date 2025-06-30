@@ -637,18 +637,18 @@ export default function SupportPage() {
                     <Button 
                       variant="outline" 
                       className="w-full justify-start"
-                      onClick={() => window.open('/DEMO_CREDENTIALS.md', '_blank')}
-                    >
-                      <Clock className="w-4 h-4 mr-2" />
-                      Demo Credentials & Login
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
                       onClick={() => window.open('/README.md', '_blank')}
                     >
                       <HelpCircle className="w-4 h-4 mr-2" />
                       Platform Overview
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => window.open('/FUNCTIONAL-TESTING-REPORT.md', '_blank')}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Feature Testing Guide
                     </Button>
                   </CardContent>
                 </Card>
