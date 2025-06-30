@@ -43,7 +43,7 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  trustProxy: process.env.NODE_ENV === 'production' ? 1 : false,
+  // trustProxy handled separately above
   skip: (req) => {
     // Skip rate limiting for health checks
     return req.path === '/health' || req.path === '/api/health';
@@ -270,19 +270,21 @@ async function createSuperAdminIfNotExists() {
       const originalJson = res.json;
       const originalEnd = res.end;
       
-      res.send = function(...args) {
+      const clearTimerAndCall = (originalFn: Function, thisArg: any, args: any[]) => {
         clearTimeout(timer);
-        return originalSend.apply(this, args);
+        return originalFn.apply(thisArg, args);
       };
       
-      res.json = function(...args) {
-        clearTimeout(timer);
-        return originalJson.apply(this, args);
+      res.send = function(...args: any[]) {
+        return clearTimerAndCall(originalSend, this, args);
       };
       
-      res.end = function(...args) {
-        clearTimeout(timer);
-        return originalEnd.apply(this, args);
+      res.json = function(...args: any[]) {
+        return clearTimerAndCall(originalJson, this, args);
+      };
+      
+      res.end = function(...args: any[]) {
+        return clearTimerAndCall(originalEnd, this, args);
       };
     }
     next();
