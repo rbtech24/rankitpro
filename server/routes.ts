@@ -63,6 +63,99 @@ const SessionStore = MemoryStore(session);
 const companyConnections = new Map<number, Set<WebSocket>>();
 // Map to store active WebSocket connections by user ID
 const userConnections = new Map<number, WebSocket>();
+// Map to store chat session connections
+const chatSessionConnections = new Map<string, Set<WebSocket>>();
+
+// Chat message handler
+async function handleChatMessage(data: any, ws: WebSocket) {
+  try {
+    const { sessionId, senderId, senderType, senderName, message } = data;
+    
+    // Create message in database
+    const newMessage = await storage.createChatMessage({
+      sessionId: parseInt(sessionId),
+      senderId: parseInt(senderId),
+      senderType,
+      senderName,
+      message,
+      messageType: 'text'
+    });
+    
+    // Broadcast to all connections in this chat session
+    const sessionConnections = chatSessionConnections.get(sessionId);
+    if (sessionConnections) {
+      const messageData = JSON.stringify({
+        type: 'new_chat_message',
+        message: newMessage,
+        timestamp: new Date().toISOString()
+      });
+      
+      sessionConnections.forEach(connection => {
+        if (connection.readyState === WebSocket.OPEN) {
+          connection.send(messageData);
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error handling chat message:', error);
+    ws.send(JSON.stringify({ type: 'error', message: 'Failed to send message' }));
+  }
+}
+
+// Join chat session handler
+async function handleJoinChatSession(data: any, ws: WebSocket) {
+  try {
+    const { sessionId, userId } = data;
+    
+    // Add connection to session connections
+    if (!chatSessionConnections.has(sessionId)) {
+      chatSessionConnections.set(sessionId, new Set());
+    }
+    chatSessionConnections.get(sessionId)?.add(ws);
+    
+    // Send session joined confirmation
+    ws.send(JSON.stringify({
+      type: 'chat_session_joined',
+      sessionId,
+      timestamp: new Date().toISOString()
+    }));
+    
+    // Get existing messages for this session
+    const messages = await storage.getChatMessagesBySession(parseInt(sessionId));
+    ws.send(JSON.stringify({
+      type: 'chat_history',
+      sessionId,
+      messages,
+      timestamp: new Date().toISOString()
+    }));
+  } catch (error) {
+    console.error('Error joining chat session:', error);
+    ws.send(JSON.stringify({ type: 'error', message: 'Failed to join chat session' }));
+  }
+}
+
+// Agent typing handler
+function handleAgentTyping(data: any, ws: WebSocket) {
+  const { sessionId, isTyping, agentName } = data;
+  
+  // Broadcast typing status to session participants
+  const sessionConnections = chatSessionConnections.get(sessionId);
+  if (sessionConnections) {
+    const typingData = JSON.stringify({
+      type: 'agent_typing',
+      sessionId,
+      isTyping,
+      agentName,
+      timestamp: new Date().toISOString()
+    });
+    
+    sessionConnections.forEach(connection => {
+      if (connection !== ws && connection.readyState === WebSocket.OPEN) {
+        connection.send(typingData);
+      }
+    });
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configure session middleware with production-ready settings
@@ -202,6 +295,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
               companyConnections.get(cId)?.add(ws);
               console.log(`🏢 Client subscribed to company ${cId} updates`);
             }
+          }
+          
+          // Handle chat messages
+          if (data.type === 'chat_message') {
+            handleChatMessage(data, ws);
+          }
+          
+          // Handle chat session events
+          if (data.type === 'join_chat_session') {
+            handleJoinChatSession(data, ws);
+          }
+          
+          if (data.type === 'agent_typing') {
+            handleAgentTyping(data, ws);
           }
         } catch (error) {
           console.error('WebSocket message processing error:', error);

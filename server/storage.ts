@@ -9,7 +9,9 @@ import {
   CompanyAssignment, InsertCompanyAssignment, Testimonial, InsertTestimonial,
   TestimonialApproval, InsertTestimonialApproval, SupportTicket, InsertSupportTicket,
   SupportTicketResponse, InsertSupportTicketResponse, HelpTopic, InsertHelpTopic,
-  HelpTopicReply, InsertHelpTopicReply, HelpTopicLike, InsertHelpTopicLike
+  HelpTopicReply, InsertHelpTopicReply, HelpTopicLike, InsertHelpTopicLike,
+  SupportAgent, InsertSupportAgent, ChatSession, InsertChatSession, ChatMessage, InsertChatMessage,
+  ChatQuickReply, InsertChatQuickReply, ChatSessionWithDetails, ChatMessageWithSender
 } from "@shared/schema";
 import { db, queryWithRetry } from "./db";
 import { eq, and, desc, asc, gte, lt, lte, sql, not, like, ilike } from "drizzle-orm";
@@ -22,7 +24,8 @@ const {
   wordpressIntegrations, monthlyAiUsage, salesPeople, salesCommissions, 
   companyAssignments, testimonials, testimonialApprovals, wordpressCustomFields,
   supportTickets, supportTicketResponses, subscriptionStatus, paymentTransactions,
-  subscriptionPlans, jobTypes, helpTopics, helpTopicReplies, helpTopicLikes
+  subscriptionPlans, jobTypes, helpTopics, helpTopicReplies, helpTopicLikes,
+  supportAgents, chatSessions, chatMessages, chatQuickReplies
 } = schema;
 
 export interface IStorage {
@@ -336,6 +339,61 @@ export interface IStorage {
   voteFeatureRequest(id: number): Promise<any>;
   assignFeatureRequest(id: number, assigneeId: number): Promise<any>;
   completeFeatureRequest(id: number, completedById: number): Promise<any>;
+  
+  // Chat Support System operations
+  // Support Agent operations
+  getSupportAgent(id: number): Promise<SupportAgent | undefined>;
+  getSupportAgentByUserId(userId: number): Promise<SupportAgent | undefined>;
+  getAllSupportAgents(): Promise<SupportAgent[]>;
+  getOnlineSupportAgents(): Promise<SupportAgent[]>;
+  getAvailableSupportAgents(expertiseArea?: string): Promise<SupportAgent[]>;
+  createSupportAgent(agent: InsertSupportAgent): Promise<SupportAgent>;
+  updateSupportAgent(id: number, updates: Partial<SupportAgent>): Promise<SupportAgent | undefined>;
+  updateSupportAgentStatus(id: number, isOnline: boolean, isAvailable: boolean): Promise<void>;
+  incrementAgentChatCount(agentId: number): Promise<void>;
+  decrementAgentChatCount(agentId: number): Promise<void>;
+  
+  // Chat Session operations
+  getChatSession(id: number): Promise<ChatSession | undefined>;
+  getChatSessionBySessionId(sessionId: string): Promise<ChatSession | undefined>;
+  getChatSessionsWithDetails(): Promise<ChatSessionWithDetails[]>;
+  getActiveChatSessions(): Promise<ChatSessionWithDetails[]>;
+  getChatSessionsByAgent(agentId: number): Promise<ChatSessionWithDetails[]>;
+  getChatSessionsByUser(userId: number): Promise<ChatSession[]>;
+  createChatSession(session: InsertChatSession): Promise<ChatSession>;
+  updateChatSession(id: number, updates: Partial<ChatSession>): Promise<ChatSession | undefined>;
+  assignChatToAgent(sessionId: number, agentId: number): Promise<ChatSession | undefined>;
+  closeChatSession(sessionId: number, feedback?: { rating?: number; comment?: string }): Promise<ChatSession | undefined>;
+  
+  // Chat Message operations
+  getChatMessage(id: number): Promise<ChatMessage | undefined>;
+  getChatMessagesBySession(sessionId: number): Promise<ChatMessageWithSender[]>;
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  markMessageAsRead(messageId: number, readAt?: Date): Promise<void>;
+  editChatMessage(messageId: number, newContent: string): Promise<ChatMessage | undefined>;
+  
+  // Quick Reply operations
+  getChatQuickReply(id: number): Promise<ChatQuickReply | undefined>;
+  getChatQuickRepliesByCategory(category: string): Promise<ChatQuickReply[]>;
+  getAllChatQuickReplies(): Promise<ChatQuickReply[]>;
+  createChatQuickReply(quickReply: InsertChatQuickReply): Promise<ChatQuickReply>;
+  updateChatQuickReply(id: number, updates: Partial<ChatQuickReply>): Promise<ChatQuickReply | undefined>;
+  incrementQuickReplyUsage(id: number): Promise<void>;
+  
+  // Chat Analytics operations
+  getChatSessionStats(): Promise<{
+    totalSessions: number;
+    activeSessions: number;
+    averageResolutionTime: number;
+    customerSatisfactionRating: number;
+    messagesPerSession: number;
+  }>;
+  getAgentPerformanceStats(agentId: number): Promise<{
+    totalChats: number;
+    averageRating: number;
+    averageResponseTime: number;
+    resolutionRate: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -4152,6 +4210,424 @@ export class DatabaseStorage implements IStorage {
       console.error('Error completing feature request:', error);
       throw error;
     }
+  }
+
+  // Chat Support System implementations
+  // Support Agent operations
+  async getSupportAgent(id: number): Promise<SupportAgent | undefined> {
+    const [agent] = await db.select().from(supportAgents).where(eq(supportAgents.id, id));
+    return agent;
+  }
+
+  async getSupportAgentByUserId(userId: number): Promise<SupportAgent | undefined> {
+    const [agent] = await db.select().from(supportAgents).where(eq(supportAgents.userId, userId));
+    return agent;
+  }
+
+  async getAllSupportAgents(): Promise<SupportAgent[]> {
+    return await db.select().from(supportAgents).orderBy(asc(supportAgents.displayName));
+  }
+
+  async getOnlineSupportAgents(): Promise<SupportAgent[]> {
+    return await db.select().from(supportAgents)
+      .where(eq(supportAgents.isOnline, true))
+      .orderBy(asc(supportAgents.displayName));
+  }
+
+  async getAvailableSupportAgents(expertiseArea?: string): Promise<SupportAgent[]> {
+    let query = db.select().from(supportAgents)
+      .where(and(
+        eq(supportAgents.isOnline, true),
+        eq(supportAgents.isAvailable, true)
+      ));
+    
+    if (expertiseArea) {
+      query = query.where(sql`${supportAgents.expertiseAreas} @> ${[expertiseArea]}`);
+    }
+    
+    return await query.orderBy(asc(supportAgents.currentChatCount));
+  }
+
+  async createSupportAgent(agent: InsertSupportAgent): Promise<SupportAgent> {
+    const [newAgent] = await db.insert(supportAgents).values(agent).returning();
+    return newAgent;
+  }
+
+  async updateSupportAgent(id: number, updates: Partial<SupportAgent>): Promise<SupportAgent | undefined> {
+    const [updatedAgent] = await db.update(supportAgents)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(supportAgents.id, id))
+      .returning();
+    return updatedAgent;
+  }
+
+  async updateSupportAgentStatus(id: number, isOnline: boolean, isAvailable: boolean): Promise<void> {
+    await db.update(supportAgents)
+      .set({ 
+        isOnline, 
+        isAvailable, 
+        lastSeen: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(supportAgents.id, id));
+  }
+
+  async incrementAgentChatCount(agentId: number): Promise<void> {
+    await db.update(supportAgents)
+      .set({ 
+        currentChatCount: sql`${supportAgents.currentChatCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(supportAgents.id, agentId));
+  }
+
+  async decrementAgentChatCount(agentId: number): Promise<void> {
+    await db.update(supportAgents)
+      .set({ 
+        currentChatCount: sql`${supportAgents.currentChatCount} - 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(supportAgents.id, agentId));
+  }
+
+  // Chat Session operations
+  async getChatSession(id: number): Promise<ChatSession | undefined> {
+    const [session] = await db.select().from(chatSessions).where(eq(chatSessions.id, id));
+    return session;
+  }
+
+  async getChatSessionBySessionId(sessionId: string): Promise<ChatSession | undefined> {
+    const [session] = await db.select().from(chatSessions).where(eq(chatSessions.sessionId, sessionId));
+    return session;
+  }
+
+  async getChatSessionsWithDetails(): Promise<ChatSessionWithDetails[]> {
+    const sessions = await db.select({
+      id: chatSessions.id,
+      sessionId: chatSessions.sessionId,
+      companyId: chatSessions.companyId,
+      userId: chatSessions.userId,
+      supportAgentId: chatSessions.supportAgentId,
+      status: chatSessions.status,
+      priority: chatSessions.priority,
+      category: chatSessions.category,
+      currentPage: chatSessions.currentPage,
+      userAgent: chatSessions.userAgent,
+      initialMessage: chatSessions.initialMessage,
+      startedAt: chatSessions.startedAt,
+      agentJoinedAt: chatSessions.agentJoinedAt,
+      lastMessageAt: chatSessions.lastMessageAt,
+      closedAt: chatSessions.closedAt,
+      customerRating: chatSessions.customerRating,
+      customerFeedback: chatSessions.customerFeedback,
+      resolvedByAgent: chatSessions.resolvedByAgent,
+      createdAt: chatSessions.createdAt,
+      updatedAt: chatSessions.updatedAt,
+      user: {
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        role: users.role
+      },
+      company: {
+        id: companies.id,
+        name: companies.name
+      },
+      supportAgent: {
+        id: supportAgents.id,
+        displayName: supportAgents.displayName,
+        isOnline: supportAgents.isOnline
+      }
+    })
+    .from(chatSessions)
+    .leftJoin(users, eq(chatSessions.userId, users.id))
+    .leftJoin(companies, eq(chatSessions.companyId, companies.id))
+    .leftJoin(supportAgents, eq(chatSessions.supportAgentId, supportAgents.id))
+    .orderBy(desc(chatSessions.lastMessageAt));
+
+    // Add message count for each session
+    const sessionsWithCount = await Promise.all(
+      sessions.map(async (session) => {
+        const messageCount = await db.select({ count: sql<number>`count(*)` })
+          .from(chatMessages)
+          .where(eq(chatMessages.sessionId, session.id));
+        
+        const lastMessage = await db.select({ message: chatMessages.message })
+          .from(chatMessages)
+          .where(eq(chatMessages.sessionId, session.id))
+          .orderBy(desc(chatMessages.createdAt))
+          .limit(1);
+
+        return {
+          ...session,
+          messageCount: messageCount[0]?.count || 0,
+          lastMessage: lastMessage[0]?.message
+        };
+      })
+    );
+
+    return sessionsWithCount as ChatSessionWithDetails[];
+  }
+
+  async getActiveChatSessions(): Promise<ChatSessionWithDetails[]> {
+    const sessions = await this.getChatSessionsWithDetails();
+    return sessions.filter(session => ['waiting', 'active'].includes(session.status));
+  }
+
+  async getChatSessionsByAgent(agentId: number): Promise<ChatSessionWithDetails[]> {
+    const sessions = await this.getChatSessionsWithDetails();
+    return sessions.filter(session => session.supportAgentId === agentId);
+  }
+
+  async getChatSessionsByUser(userId: number): Promise<ChatSession[]> {
+    return await db.select().from(chatSessions)
+      .where(eq(chatSessions.userId, userId))
+      .orderBy(desc(chatSessions.createdAt));
+  }
+
+  async createChatSession(session: InsertChatSession): Promise<ChatSession> {
+    const [newSession] = await db.insert(chatSessions).values(session).returning();
+    return newSession;
+  }
+
+  async updateChatSession(id: number, updates: Partial<ChatSession>): Promise<ChatSession | undefined> {
+    const [updatedSession] = await db.update(chatSessions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(chatSessions.id, id))
+      .returning();
+    return updatedSession;
+  }
+
+  async assignChatToAgent(sessionId: number, agentId: number): Promise<ChatSession | undefined> {
+    const [updatedSession] = await db.update(chatSessions)
+      .set({ 
+        supportAgentId: agentId,
+        status: 'active' as const,
+        agentJoinedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(chatSessions.id, sessionId))
+      .returning();
+    
+    if (updatedSession) {
+      await this.incrementAgentChatCount(agentId);
+    }
+    
+    return updatedSession;
+  }
+
+  async closeChatSession(sessionId: number, feedback?: { rating?: number; comment?: string }): Promise<ChatSession | undefined> {
+    const session = await this.getChatSession(sessionId);
+    if (!session) return undefined;
+
+    const updates: Partial<ChatSession> = {
+      status: 'closed' as const,
+      closedAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    if (feedback) {
+      if (feedback.rating) updates.customerRating = feedback.rating;
+      if (feedback.comment) updates.customerFeedback = feedback.comment;
+    }
+
+    const [updatedSession] = await db.update(chatSessions)
+      .set(updates)
+      .where(eq(chatSessions.id, sessionId))
+      .returning();
+
+    if (session.supportAgentId) {
+      await this.decrementAgentChatCount(session.supportAgentId);
+    }
+
+    return updatedSession;
+  }
+
+  // Chat Message operations
+  async getChatMessage(id: number): Promise<ChatMessage | undefined> {
+    const [message] = await db.select().from(chatMessages).where(eq(chatMessages.id, id));
+    return message;
+  }
+
+  async getChatMessagesBySession(sessionId: number): Promise<ChatMessageWithSender[]> {
+    const messages = await db.select({
+      id: chatMessages.id,
+      sessionId: chatMessages.sessionId,
+      senderId: chatMessages.senderId,
+      senderType: chatMessages.senderType,
+      senderName: chatMessages.senderName,
+      message: chatMessages.message,
+      messageType: chatMessages.messageType,
+      attachments: chatMessages.attachments,
+      metadata: chatMessages.metadata,
+      isRead: chatMessages.isRead,
+      readAt: chatMessages.readAt,
+      isEdited: chatMessages.isEdited,
+      editedAt: chatMessages.editedAt,
+      createdAt: chatMessages.createdAt,
+      sender: {
+        id: users.id,
+        username: users.username
+      }
+    })
+    .from(chatMessages)
+    .leftJoin(users, eq(chatMessages.senderId, users.id))
+    .where(eq(chatMessages.sessionId, sessionId))
+    .orderBy(asc(chatMessages.createdAt));
+
+    return messages as ChatMessageWithSender[];
+  }
+
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    const [newMessage] = await db.insert(chatMessages).values(message).returning();
+    
+    // Update session's last message timestamp
+    await db.update(chatSessions)
+      .set({ lastMessageAt: new Date(), updatedAt: new Date() })
+      .where(eq(chatSessions.id, message.sessionId));
+    
+    return newMessage;
+  }
+
+  async markMessageAsRead(messageId: number, readAt: Date = new Date()): Promise<void> {
+    await db.update(chatMessages)
+      .set({ isRead: true, readAt })
+      .where(eq(chatMessages.id, messageId));
+  }
+
+  async editChatMessage(messageId: number, newContent: string): Promise<ChatMessage | undefined> {
+    const [editedMessage] = await db.update(chatMessages)
+      .set({ 
+        message: newContent,
+        isEdited: true,
+        editedAt: new Date()
+      })
+      .where(eq(chatMessages.id, messageId))
+      .returning();
+    return editedMessage;
+  }
+
+  // Quick Reply operations
+  async getChatQuickReply(id: number): Promise<ChatQuickReply | undefined> {
+    const [quickReply] = await db.select().from(chatQuickReplies).where(eq(chatQuickReplies.id, id));
+    return quickReply;
+  }
+
+  async getChatQuickRepliesByCategory(category: string): Promise<ChatQuickReply[]> {
+    return await db.select().from(chatQuickReplies)
+      .where(and(
+        eq(chatQuickReplies.category, category),
+        eq(chatQuickReplies.isActive, true)
+      ))
+      .orderBy(desc(chatQuickReplies.useCount), asc(chatQuickReplies.title));
+  }
+
+  async getAllChatQuickReplies(): Promise<ChatQuickReply[]> {
+    return await db.select().from(chatQuickReplies)
+      .where(eq(chatQuickReplies.isActive, true))
+      .orderBy(asc(chatQuickReplies.category), asc(chatQuickReplies.title));
+  }
+
+  async createChatQuickReply(quickReply: InsertChatQuickReply): Promise<ChatQuickReply> {
+    const [newQuickReply] = await db.insert(chatQuickReplies).values(quickReply).returning();
+    return newQuickReply;
+  }
+
+  async updateChatQuickReply(id: number, updates: Partial<ChatQuickReply>): Promise<ChatQuickReply | undefined> {
+    const [updatedQuickReply] = await db.update(chatQuickReplies)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(chatQuickReplies.id, id))
+      .returning();
+    return updatedQuickReply;
+  }
+
+  async incrementQuickReplyUsage(id: number): Promise<void> {
+    await db.update(chatQuickReplies)
+      .set({ 
+        useCount: sql`${chatQuickReplies.useCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(chatQuickReplies.id, id));
+  }
+
+  // Chat Analytics operations
+  async getChatSessionStats(): Promise<{
+    totalSessions: number;
+    activeSessions: number;
+    averageResolutionTime: number;
+    customerSatisfactionRating: number;
+    messagesPerSession: number;
+  }> {
+    const totalSessions = await db.select({ count: sql<number>`count(*)` })
+      .from(chatSessions);
+
+    const activeSessions = await db.select({ count: sql<number>`count(*)` })
+      .from(chatSessions)
+      .where(sql`${chatSessions.status} IN ('waiting', 'active')`);
+
+    const avgResolution = await db.select({ 
+      avg: sql<number>`AVG(EXTRACT(EPOCH FROM (${chatSessions.closedAt} - ${chatSessions.startedAt})) / 60)` 
+    })
+    .from(chatSessions)
+    .where(eq(chatSessions.status, 'closed'));
+
+    const avgRating = await db.select({ 
+      avg: sql<number>`AVG(${chatSessions.customerRating})` 
+    })
+    .from(chatSessions)
+    .where(sql`${chatSessions.customerRating} IS NOT NULL`);
+
+    const avgMessages = await db.select({ 
+      avg: sql<number>`AVG(message_count)` 
+    })
+    .from(sql`(
+      SELECT session_id, COUNT(*) as message_count 
+      FROM chat_messages 
+      GROUP BY session_id
+    ) as msg_stats`);
+
+    return {
+      totalSessions: totalSessions[0]?.count || 0,
+      activeSessions: activeSessions[0]?.count || 0,
+      averageResolutionTime: Math.round(avgResolution[0]?.avg || 0),
+      customerSatisfactionRating: Number((avgRating[0]?.avg || 0).toFixed(1)),
+      messagesPerSession: Math.round(avgMessages[0]?.avg || 0)
+    };
+  }
+
+  async getAgentPerformanceStats(agentId: number): Promise<{
+    totalChats: number;
+    averageRating: number;
+    averageResponseTime: number;
+    resolutionRate: number;
+  }> {
+    const totalChats = await db.select({ count: sql<number>`count(*)` })
+      .from(chatSessions)
+      .where(eq(chatSessions.supportAgentId, agentId));
+
+    const avgRating = await db.select({ 
+      avg: sql<number>`AVG(${chatSessions.customerRating})` 
+    })
+    .from(chatSessions)
+    .where(and(
+      eq(chatSessions.supportAgentId, agentId),
+      sql`${chatSessions.customerRating} IS NOT NULL`
+    ));
+
+    const resolvedChats = await db.select({ count: sql<number>`count(*)` })
+      .from(chatSessions)
+      .where(and(
+        eq(chatSessions.supportAgentId, agentId),
+        eq(chatSessions.resolvedByAgent, true)
+      ));
+
+    return {
+      totalChats: totalChats[0]?.count || 0,
+      averageRating: Number((avgRating[0]?.avg || 0).toFixed(1)),
+      averageResponseTime: 0, // Would need more complex query with message timestamps
+      resolutionRate: totalChats[0]?.count ? 
+        Math.round((resolvedChats[0]?.count || 0) / totalChats[0].count * 100) : 0
+    };
   }
 }
 
