@@ -8,7 +8,7 @@ import { NotificationProvider } from "@/context/NotificationContext";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import NotFound from "@/pages/not-found";
 import { performImmediateLogout } from "./lib/logout";
-import ChatWidget from "@/components/chat/chat-widget";
+import AuthenticatedLayout from "@/components/layout/authenticated-layout";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Dashboard from "@/pages/dashboard-fixed";
@@ -26,6 +26,7 @@ import Technicians from "@/pages/technicians";
 
 import CustomerSupport from "@/pages/customer-support";
 import Support from "@/pages/support";
+import SupportDashboard from "@/pages/support-dashboard";
 import Users from "@/pages/users";
 import Integrations from "@/pages/integrations";
 import Settings from "@/pages/settings";
@@ -1239,6 +1240,9 @@ function Router() {
       <Route path="/customer-support">
         <PrivateRoute component={CustomerSupport} path="/customer-support" role="super_admin" />
       </Route>
+      <Route path="/support-dashboard">
+        <PrivateRoute component={SupportDashboard} path="/support-dashboard" role="super_admin" />
+      </Route>
       <Route path="/support">
         <PrivateRoute component={Support} path="/support" role="company_admin" />
       </Route>
@@ -1394,7 +1398,9 @@ function App() {
       <NotificationProvider>
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <AuthenticatedLayout>
+            <Router />
+          </AuthenticatedLayout>
           <PWAInstallPrompt />
         </TooltipProvider>
       </NotificationProvider>
