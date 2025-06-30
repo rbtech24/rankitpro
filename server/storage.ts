@@ -2571,13 +2571,11 @@ export class DatabaseStorage implements IStorage {
 
   async getSalesCommissionsBySalesPerson(salesPersonId: number, status?: string): Promise<any[]> {
     try {
-      let whereCondition = eq(salesCommissions.salesPersonId, salesPersonId);
+      const conditions = [eq(salesCommissions.salesPersonId, salesPersonId)];
       if (status) {
-        whereCondition = and(
-          eq(salesCommissions.salesPersonId, salesPersonId),
-          eq(salesCommissions.status, status)
-        );
+        conditions.push(eq(salesCommissions.status, status));
       }
+      const whereCondition = conditions.length > 1 ? and(...conditions) : conditions[0];
 
       return await db
         .select({
@@ -2596,8 +2594,7 @@ export class DatabaseStorage implements IStorage {
           paymentDate: salesCommissions.paymentDate,
           createdAt: salesCommissions.createdAt,
           // Include company details
-          companyName: companies.name,
-          companyEmail: companies.email
+          companyName: companies.name
         })
         .from(salesCommissions)
         .leftJoin(companies, eq(salesCommissions.companyId, companies.id))
@@ -2718,7 +2715,6 @@ export class DatabaseStorage implements IStorage {
           createdAt: companyAssignments.createdAt,
           // Include company details
           companyName: companies.name,
-          companyEmail: companies.email,
           companyPlan: companies.plan,
           companyStatus: companies.isTrialActive
         })
