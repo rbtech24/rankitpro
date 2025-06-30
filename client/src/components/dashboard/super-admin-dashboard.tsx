@@ -46,23 +46,40 @@ interface SystemStats {
 export default function SuperAdminDashboard() {
   const [, setLocation] = useLocation();
 
-  // Fetch system-wide statistics
-  const { data: systemStats } = useQuery<SystemStats>({
-    queryKey: ['/api/admin/system-stats'],
+  // Fetch comprehensive analytics dashboard data
+  const { data: dashboardData, isLoading } = useQuery({
+    queryKey: ['/api/admin/analytics/dashboard'],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/admin/system-stats');
+      const response = await apiRequest('GET', '/api/admin/analytics/dashboard');
+      return response.json();
+    },
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  // Fetch companies data with detailed metrics
+  const { data: companies = [] } = useQuery<Company[]>({
+    queryKey: ['/api/admin/companies/detailed'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/admin/companies/detailed');
       return response.json();
     }
   });
 
-  // Fetch all companies for system management
-  const { data: companies = [] } = useQuery<Company[]>({
-    queryKey: ['/api/admin/companies'],
+  // Fetch users data
+  const { data: users = [] } = useQuery({
+    queryKey: ['/api/admin/users'],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/admin/companies');
+      const response = await apiRequest('GET', '/api/admin/users');
       return response.json();
     }
   });
+
+  const systemStats = dashboardData?.systemStats;
+  const financialMetrics = dashboardData?.financialMetrics;
+  const recentActivities = dashboardData?.recentActivities || [];
+  const chartData = dashboardData?.chartData || {};
+  const subscriptionBreakdown = dashboardData?.subscriptionBreakdown || [];
+  const systemHealth = dashboardData?.systemHealth;
 
   const SystemOverviewCards = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
