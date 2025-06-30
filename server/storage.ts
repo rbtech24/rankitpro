@@ -4767,8 +4767,8 @@ export class DatabaseStorage implements IStorage {
 
   // Clear all waiting chat sessions
   async clearWaitingChats(): Promise<number> {
-    // First get all waiting session IDs
-    const waitingSessions = await db.select({ sessionId: chatSessions.sessionId })
+    // First get all waiting session IDs (the integer primary keys)
+    const waitingSessions = await db.select({ id: chatSessions.id })
       .from(chatSessions)
       .where(eq(chatSessions.status, 'waiting'));
     
@@ -4776,11 +4776,13 @@ export class DatabaseStorage implements IStorage {
       return 0;
     }
     
-    const sessionIds = waitingSessions.map(s => s.sessionId);
+    const sessionIds = waitingSessions.map(s => s.id);
     
-    // First delete all messages for these sessions
-    await db.delete(chatMessages)
-      .where(sql`session_id IN (${sql.join(sessionIds.map(id => `'${id}'`), sql`, `)})`);
+    // First delete all messages for these sessions (using integer session IDs)
+    for (const sessionId of sessionIds) {
+      await db.delete(chatMessages)
+        .where(eq(chatMessages.sessionId, sessionId));
+    }
     
     // Then delete the sessions themselves
     const result = await db.delete(chatSessions)
