@@ -1741,7 +1741,7 @@ export class DatabaseStorage implements IStorage {
         status: transaction.status,
         type: transaction.type,
         date: transaction.createdAt,
-        stripeTransactionId: transaction.id?.toString() || null
+        id: transaction.id
       }));
     } catch (error) {
       console.error('Error fetching recent transactions:', error);
@@ -1944,11 +1944,11 @@ export class DatabaseStorage implements IStorage {
                   <p>${checkIn.notes || 'Professional service completed successfully.'}</p>
                 </div>
 
-                ${checkIn.beforePhotos && checkIn.beforePhotos.length > 0 ? `
+                ${(checkIn.beforePhotos as string[])?.length > 0 ? `
                   <div class="service-photos">
                     <h3>Service Documentation</h3>
-                    <img src="${checkIn.beforePhotos[0]}" alt="Service documentation" class="service-photo" />
-                    ${checkIn.afterPhotos && checkIn.afterPhotos.length > 0 ? `<img src="${checkIn.afterPhotos[0]}" alt="Completed service" class="service-photo" />` : ''}
+                    <img src="${(checkIn.beforePhotos as string[])[0]}" alt="Service documentation" class="service-photo" />
+                    ${(checkIn.afterPhotos as string[])?.length > 0 ? `<img src="${(checkIn.afterPhotos as string[])[0]}" alt="Completed service" class="service-photo" />` : ''}
                   </div>
                 ` : ''}
 
