@@ -2511,6 +2511,91 @@ Format as professional service documentation.`;
     }
   });
 
+  // Get agent status
+  app.get("/api/chat/agent/status", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      let agent = await storage.getSupportAgentByUserId(req.user.id);
+      if (!agent) {
+        // Create default agent record
+        agent = await storage.createSupportAgent({
+          userId: req.user.id,
+          displayName: req.user.username || req.user.email,
+          isOnline: false,
+          isAvailable: false,
+          role: 'general_support',
+          capabilities: ['general_support', 'technical_support'],
+          maxConcurrentChats: 5
+        });
+      }
+      
+      res.json(agent);
+    } catch (error) {
+      console.error('Error fetching agent status:', error);
+      res.status(500).json({ error: 'Failed to fetch agent status' });
+    }
+  });
+
+  // Toggle agent availability
+  app.post("/api/chat/agent/availability", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      const { isAvailable } = req.body;
+      
+      let agent = await storage.getSupportAgentByUserId(req.user.id);
+      if (!agent) {
+        // Create agent if doesn't exist
+        agent = await storage.createSupportAgent({
+          userId: req.user.id,
+          displayName: req.user.username || req.user.email,
+          isOnline: isAvailable,
+          isAvailable,
+          role: 'general_support',
+          capabilities: ['general_support', 'technical_support'],
+          maxConcurrentChats: 5
+        });
+      } else {
+        // Update availability and online status
+        agent = await storage.updateSupportAgent(req.user.id, { 
+          isAvailable,
+          isOnline: isAvailable,
+          lastSeen: new Date()
+        });
+      }
+      
+      res.json({ success: true, agent });
+    } catch (error) {
+      console.error('Error updating agent availability:', error);
+      res.status(500).json({ error: 'Failed to update availability' });
+    }
+  });
+
+  // Chat statistics endpoint
+  app.get("/api/chat/admin/stats", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      if (req.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      const stats = {
+        totalToday: 5, // Sample data - would be real from database
+        averageResponseTime: 120,
+        customerSatisfaction: 4.5,
+        activeSessions: 2
+      };
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching chat stats:', error);
+      res.status(500).json({ error: 'Failed to fetch statistics' });
+    }
+  });
+
   // Get agent profile
   app.get("/api/chat/agent/profile", isAuthenticated, async (req: Request, res: Response) => {
     try {
