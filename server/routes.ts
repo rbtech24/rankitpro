@@ -48,6 +48,7 @@ import publicBlogRoutes from "./routes/public-blog";
 import publicReviewsRoutes from "./routes/public-reviews";
 import publicCompanyRoutes from "./routes/public-company";
 import testimonialsRoutes from "./routes/testimonials";
+import helpRoutes from "./routes/help";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
 import { analyticsService } from "./services/analytics-service";
@@ -2039,6 +2040,9 @@ Contact us for more information about our professional services and to schedule 
     }
   });
   app.use("/api/testimonials", testimonialsRoutes);
+  
+  // Register help and documentation routes
+  app.use("/api/help", helpRoutes);
   
   // Add testimonials API routes (remove authentication for widget use)
   app.get("/api/testimonials/company/:companyId", async (req: Request, res: Response) => {
