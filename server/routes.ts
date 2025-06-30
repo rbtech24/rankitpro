@@ -905,7 +905,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "working", timestamp: Date.now() });
   });
 
-  // AI Content Generation for Check-ins
+  // Enhanced AI Content Generation for Check-ins and Blog Posts
   app.post('/api/ai/generate-content', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { prompt, type, context } = req.body;
@@ -915,8 +915,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       let aiPrompt = prompt;
+      
+      // Enhanced prompts for different content types
       if (type === 'checkin' && context) {
-        aiPrompt = 'Create a professional check-in summary for a ' + context.jobType + ' job at ' + context.location + '. Work performed: ' + context.workPerformed + '. Materials used: ' + context.materialsUsed + '. Generate a concise, professional summary (2-3 sentences) that could be shared with the customer and used for business documentation. Focus on the value provided and technical details.';
+        aiPrompt = `Create a professional service check-in summary for a ${context.jobType} job at ${context.location}.
+
+Work completed: ${context.workPerformed}
+Materials used: ${context.materialsUsed}
+Customer concerns addressed: ${context.customerNotes || 'Standard service maintenance'}
+
+Generate a comprehensive, professional summary (3-4 sentences) that:
+- Highlights the technical expertise and value delivered
+- Mentions specific materials and techniques used
+- Emphasizes quality workmanship and customer satisfaction
+- Can be shared with customers and used for business documentation
+- Uses industry-specific terminology appropriately
+
+Tone: Professional, confident, and customer-focused.`;
+      } else if (type === 'blog-post' && context) {
+        aiPrompt = `Create an SEO-optimized blog post about: ${context.title}
+
+Based on this service experience:
+- Service type: ${context.jobType}
+- Location: ${context.location}
+- Work performed: ${context.workPerformed}
+- Materials used: ${context.materialsUsed}
+
+Generate a 400-500 word blog post that:
+- Starts with an engaging headline and introduction
+- Includes relevant local SEO keywords naturally
+- Provides educational value to homeowners
+- Showcases expertise and builds trust
+- Ends with a call-to-action for services
+- Uses H2 and H3 headings for structure
+- Maintains a helpful, authoritative tone
+
+Focus on: practical tips, industry insights, and local service benefits.`;
+      } else if (type === 'seo-title' && context) {
+        aiPrompt = `Create 3 SEO-optimized blog post titles for:
+- Service: ${context.jobType}
+- Location: ${context.location}
+- Key work: ${context.workPerformed}
+
+Requirements:
+- 50-60 characters each
+- Include location for local SEO
+- Emphasize benefits and expertise
+- Make them clickable and engaging
+- Use action words and clear value propositions
+
+Format as numbered list.`;
+      } else if (type === 'meta-description' && context) {
+        aiPrompt = `Write a compelling meta description (150-160 characters) for:
+- Service: ${context.jobType}
+- Location: ${context.location}
+- Key benefits: ${context.workPerformed}
+
+Include:
+- Clear service offering
+- Location for local SEO
+- Primary benefit or outcome
+- Call-to-action phrase
+
+Make it compelling for search engine users to click.`;
       }
 
       // OpenAI integration for content generation with fallback

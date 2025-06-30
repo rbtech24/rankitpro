@@ -64,6 +64,16 @@ class RankItProIntegration {
             'rank-it-pro-shortcodes',
             array($this, 'shortcodes_page')
         );
+        
+        // Add Advanced Features submenu
+        add_submenu_page(
+            'rank-it-pro',
+            'Advanced Features',
+            'Advanced Features',
+            'manage_options',
+            'rank-it-pro-advanced',
+            array($this, 'advanced_features_page')
+        );
     }
     
     public function admin_init() {
@@ -443,6 +453,112 @@ class RankItProIntegration {
         set_transient($cache_key, $output, $cache_time);
         
         return $output;
+    }
+    
+    public function advanced_features_page() {
+        ?>
+        <div class="wrap">
+            <h1>Advanced Features</h1>
+            
+            <div class="card" style="max-width: 900px;">
+                <h2>Content Automation & SEO Tools</h2>
+                
+                <div class="feature-section" style="border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                    <h3>🤖 AI-Powered Blog Content</h3>
+                    <p>Automatically generate SEO-optimized blog posts from your service visits:</p>
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 3px; font-family: monospace;">
+                        [rankitpro type="ai-blogs" limit="3" company="<?php echo esc_attr(get_option('rankitpro_company_id', '')); ?>"]
+                    </div>
+                    <p><strong>Features:</strong></p>
+                    <ul>
+                        <li>Automatic SEO optimization with targeted keywords</li>
+                        <li>Local business schema markup included</li>
+                        <li>Mobile-optimized responsive design</li>
+                        <li>Google Business Profile integration ready</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-section" style="border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                    <h3>⭐ Smart Review Displays</h3>
+                    <p>Showcase customer reviews with advanced filtering and presentation:</p>
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 3px; font-family: monospace;">
+                        [rankitpro type="reviews" rating="5" limit="6" style="grid" company="<?php echo esc_attr(get_option('rankitpro_company_id', '')); ?>"]
+                    </div>
+                    <p><strong>Advanced Options:</strong></p>
+                    <ul>
+                        <li>Filter by star rating (1-5 stars)</li>
+                        <li>Display styles: list, grid, carousel, testimonial cards</li>
+                        <li>Category filtering for specific services</li>
+                        <li>Rich snippets for search engines</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-section" style="border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                    <h3>📱 Interactive Service Tracker</h3>
+                    <p>Live service visit tracking with GPS locations and photo documentation:</p>
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 3px; font-family: monospace;">
+                        [rankitpro type="live-tracker" technician="all" show-photos="true" company="<?php echo esc_attr(get_option('rankitpro_company_id', '')); ?>"]
+                    </div>
+                    <p><strong>Real-time Features:</strong></p>
+                    <ul>
+                        <li>Live GPS tracking of technician locations</li>
+                        <li>Before/after photo galleries</li>
+                        <li>Service completion notifications</li>
+                        <li>Customer communication portal</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-section" style="border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                    <h3>🎥 Media Testimonials</h3>
+                    <p>Showcase audio and video testimonials from your customers:</p>
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 3px; font-family: monospace;">
+                        [rankitpro type="media-testimonials" format="video" limit="4" company="<?php echo esc_attr(get_option('rankitpro_company_id', '')); ?>"]
+                    </div>
+                    <p><strong>Media Options:</strong></p>
+                    <ul>
+                        <li>Video testimonials with custom thumbnails</li>
+                        <li>Audio reviews with waveform visualizations</li>
+                        <li>Automatic transcription for accessibility</li>
+                        <li>Social sharing integration</li>
+                    </ul>
+                </div>
+                
+                <h2>Performance & Analytics</h2>
+                
+                <div class="feature-section" style="border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                    <h3>📊 Business Analytics Dashboard</h3>
+                    <p>Display key performance metrics directly on your website:</p>
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 3px; font-family: monospace;">
+                        [rankitpro type="analytics" metrics="revenue,satisfaction,growth" company="<?php echo esc_attr(get_option('rankitpro_company_id', '')); ?>"]
+                    </div>
+                    <p><strong>Available Metrics:</strong></p>
+                    <ul>
+                        <li>Revenue growth and trends</li>
+                        <li>Customer satisfaction scores</li>
+                        <li>Service completion rates</li>
+                        <li>Review generation statistics</li>
+                    </ul>
+                </div>
+                
+                <div class="notice notice-info">
+                    <p><strong>Pro Tip:</strong> All advanced features automatically optimize for local SEO and include structured data markup to improve your search engine rankings.</p>
+                </div>
+                
+                <h2>Custom Integration Code</h2>
+                <p>For developers who want direct control over the integration:</p>
+                <div style="background: #2c3e50; color: #ecf0f1; padding: 20px; border-radius: 5px; overflow-x: auto;">
+                    <pre><code>&lt;!-- Custom JavaScript Widget --&gt;
+&lt;script src="https://rankitpro.com/widget/embed.js"&gt;&lt;/script&gt;
+&lt;div class="rankitpro-embed" 
+     data-company="<?php echo esc_attr(get_option('rankitpro_company_id', '')); ?>"
+     data-type="checkins"
+     data-limit="5"
+     data-theme="light"&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+        <?php
     }
     
     public function enqueue_styles() {
