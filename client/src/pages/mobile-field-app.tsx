@@ -9,6 +9,9 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { getCurrentLocation, checkLocationPermission, getFallbackLocation, formatLocationDisplay } from '@/lib/locationService';
 import type { LocationData } from '@/lib/locationService';
+import EnhancedGPS from '@/components/mobile/EnhancedGPS';
+import EnhancedCamera from '@/components/mobile/EnhancedCamera';
+import OfflineSync from '@/components/mobile/OfflineSync';
 import {
   Camera,
   MapPin,
@@ -396,7 +399,32 @@ export default function MobileFieldApp() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <LocationDisplay />
+        {/* Enhanced GPS Location */}
+        <EnhancedGPS
+          onLocationUpdate={(position) => {
+            setCurrentLocation({
+              latitude: position.latitude,
+              longitude: position.longitude,
+              accuracy: position.accuracy,
+              streetName: 'GPS Location',
+              city: 'Unknown',
+              state: 'Unknown',
+              zipCode: 'Unknown',
+              fullAddress: `GPS: ${position.latitude.toFixed(6)}, ${position.longitude.toFixed(6)}`,
+              source: 'enhanced-gps',
+              isReliable: position.accuracy <= 10
+            });
+          }}
+          onLocationError={(error) => {
+            toast({
+              title: "GPS Error",
+              description: error,
+              variant: "destructive"
+            });
+          }}
+          requiredAccuracy={10}
+          enableHighAccuracy={true}
+        />
         
         <Select
           value={checkInForm.jobTypeId}
@@ -428,19 +456,20 @@ export default function MobileFieldApp() {
           rows={3}
         />
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Work Photos</label>
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={(e) => handlePhotoUpload(e.target.files, 'checkin')}
-            className="w-full p-2 border rounded"
-          />
-          {checkInForm.photos.length > 0 && (
-            <p className="text-sm text-gray-600 mt-1">{checkInForm.photos.length} photos selected</p>
-          )}
-        </div>
+        {/* Enhanced Camera for Photo Capture */}
+        <EnhancedCamera
+          onPhotoCapture={(photos) => {
+            // Convert captured photos to File objects for form submission
+            const photoFiles = photos.map(photo => new File([photo.blob], `photo-${photo.timestamp}.jpg`, { type: 'image/jpeg' }));
+            setCheckInForm(prev => ({ ...prev, photos: photoFiles }));
+          }}
+          maxPhotos={10}
+          quality={0.8}
+          maxWidth={1920}
+          maxHeight={1080}
+          enableFlash={true}
+          enableZoom={true}
+        />
 
         <div className="space-y-2">
           <Button
@@ -786,6 +815,23 @@ export default function MobileFieldApp() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Offline Sync Status */}
+      <div className="p-4 bg-gray-50 border-b">
+        <OfflineSync
+          onDataSync={(success, count) => {
+            if (success) {
+              toast({
+                title: "Sync Complete",
+                description: `${count} items synchronized successfully`,
+              });
+            }
+          }}
+          maxRetries={3}
+          syncInterval={30000}
+          enableAutoSync={true}
+        />
       </div>
 
       {/* Tab Content */}
