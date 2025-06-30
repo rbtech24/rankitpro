@@ -3492,6 +3492,79 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
   }
+
+  async getFinancialExportData(period: string = '12months'): Promise<any[]> {
+    try {
+      let startDate = new Date();
+      
+      switch (period) {
+        case '1month':
+          startDate.setMonth(startDate.getMonth() - 1);
+          break;
+        case '3months':
+          startDate.setMonth(startDate.getMonth() - 3);
+          break;
+        case '6months':
+          startDate.setMonth(startDate.getMonth() - 6);
+          break;
+        case '12months':
+        default:
+          startDate.setFullYear(startDate.getFullYear() - 1);
+          break;
+      }
+
+      // Get comprehensive financial data for export
+      const financialData = await db
+        .select({
+          date: sql<string>`DATE_TRUNC('month', ${companies.createdAt})`,
+          companyName: companies.name,
+          plan: companies.plan,
+          isTrialActive: companies.isTrialActive,
+          revenue: sql<number>`
+            CASE 
+              WHEN ${companies.plan} = 'starter' THEN 49
+              WHEN ${companies.plan} = 'pro' THEN 79
+              WHEN ${companies.plan} = 'agency' THEN 149
+              ELSE 0
+            END
+          `,
+          mrr: sql<number>`
+            CASE 
+              WHEN ${companies.isTrialActive} = false THEN
+                CASE 
+                  WHEN ${companies.plan} = 'starter' THEN 49
+                  WHEN ${companies.plan} = 'pro' THEN 79
+                  WHEN ${companies.plan} = 'agency' THEN 149
+                  ELSE 0
+                END
+              ELSE 0
+            END
+          `,
+          status: sql<string>`
+            CASE 
+              WHEN ${companies.isTrialActive} = true THEN 'trial'
+              ELSE 'active'
+            END
+          `
+        })
+        .from(companies)
+        .where(gte(companies.createdAt, startDate))
+        .orderBy(desc(sql`DATE_TRUNC('month', ${companies.createdAt})`));
+
+      return financialData.map(row => ({
+        month: new Date(row.date).toISOString().slice(0, 7),
+        companyName: row.companyName,
+        plan: row.plan,
+        status: row.status,
+        monthlyRevenue: row.revenue,
+        mrr: row.mrr,
+        isTrialActive: row.isTrialActive
+      }));
+    } catch (error) {
+      console.error('Error getting financial export data:', error);
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
