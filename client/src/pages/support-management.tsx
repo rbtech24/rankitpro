@@ -564,12 +564,22 @@ export default function SupportManagement() {
                       <span>Page: {session.currentPage}</span>
                     </div>
                   </div>
-                  <Button 
-                    variant="outline"
-                    onClick={() => handleViewSession(session)}
-                  >
-                    View Chat
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      onClick={() => handleViewSession(session)}
+                    >
+                      View Chat
+                    </Button>
+                    <Button 
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => closeSessionMutation.mutate(session.sessionId)}
+                      disabled={closeSessionMutation.isPending}
+                    >
+                      End Chat
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -658,6 +668,14 @@ export default function SupportManagement() {
                 </Badge>
               </div>
               <div className="flex items-center space-x-2">
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={() => closeSessionMutation.mutate(selectedSession.sessionId)}
+                  disabled={closeSessionMutation.isPending}
+                >
+                  End Chat
+                </Button>
                 <Button 
                   variant="outline" 
                   size="sm"
