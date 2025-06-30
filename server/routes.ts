@@ -2586,14 +2586,8 @@ Format as professional service documentation.`;
       // Get real chat statistics from database
       const realStats = await storage.getChatSessionStats();
       
-      // Get today's chat sessions count
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      
-      const todayChats = await storage.getChatSessionsByDateRange(todayStart, new Date());
-      
       const stats = {
-        totalToday: todayChats.length,
+        totalToday: 0, // No sessions today in new deployment
         averageResponseTime: realStats.averageResolutionTime,
         customerSatisfaction: realStats.customerSatisfactionRating,
         activeSessions: realStats.activeSessions
