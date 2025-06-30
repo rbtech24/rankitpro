@@ -142,10 +142,34 @@ export default function SupportPage() {
             <p className="text-gray-600 mt-1">Get help and find answers to your questions</p>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-green-100 text-green-800">
-              <CheckCircle className="w-3 h-3 mr-1" />
-              All Systems Operational
-            </Badge>
+            {statusLoading ? (
+              <Badge variant="secondary" className="bg-gray-100 text-gray-800">
+                <div className="animate-spin w-3 h-3 mr-1 border-2 border-gray-400 border-t-transparent rounded-full" />
+                Checking Status...
+              </Badge>
+            ) : systemStatus ? (
+              <Badge variant="secondary" className={
+                systemStatus.overallStatus === 'healthy' 
+                  ? 'bg-green-100 text-green-800' 
+                  : systemStatus.overallStatus === 'degraded'
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : 'bg-red-100 text-red-800'
+              }>
+                {systemStatus.overallStatus === 'healthy' ? (
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                ) : (
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                )}
+                {systemStatus.overallStatus === 'healthy' ? 'All Systems Operational' :
+                 systemStatus.overallStatus === 'degraded' ? 'Some Services Degraded' :
+                 'System Issues Detected'}
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="bg-red-100 text-red-800">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                Status Unknown
+              </Badge>
+            )}
           </div>
         </div>
 
@@ -269,39 +293,60 @@ export default function SupportPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                          <span className="font-medium">Web Application</span>
-                        </div>
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">Operational</Badge>
+                    {statusLoading ? (
+                      <div className="p-8 text-center">
+                        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+                        <p className="text-gray-600">Checking system status...</p>
                       </div>
-
-                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                          <span className="font-medium">API Services</span>
+                    ) : systemStatus ? (
+                      <div className="space-y-3">
+                        {systemStatus.services.map((service: any) => (
+                          <div key={service.name} className={`flex items-center justify-between p-3 rounded-lg border ${
+                            service.status === 'online' 
+                              ? 'bg-green-50 border-green-200' 
+                              : service.status === 'degraded'
+                              ? 'bg-yellow-50 border-yellow-200'
+                              : 'bg-red-50 border-red-200'
+                          }`}>
+                            <div className="flex items-center gap-3">
+                              {service.status === 'online' ? (
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                              ) : (
+                                <AlertCircle className={`h-5 w-5 ${
+                                  service.status === 'degraded' ? 'text-yellow-600' : 'text-red-600'
+                                }`} />
+                              )}
+                              <div>
+                                <span className="font-medium">{service.name}</span>
+                                {service.message && (
+                                  <p className="text-sm text-gray-600">{service.message}</p>
+                                )}
+                              </div>
+                            </div>
+                            <Badge variant="secondary" className={
+                              service.status === 'online' 
+                                ? 'bg-green-100 text-green-800' 
+                                : service.status === 'degraded'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                            }>
+                              {service.status === 'online' ? 'Operational' :
+                               service.status === 'degraded' ? 'Degraded' : 'Down'}
+                            </Badge>
+                          </div>
+                        ))}
+                        <div className="text-xs text-gray-500 mt-4">
+                          Last updated: {new Date(systemStatus.lastUpdated).toLocaleString()}
                         </div>
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">Operational</Badge>
                       </div>
-
-                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                          <span className="font-medium">WordPress Plugin</span>
+                    ) : (
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <AlertCircle className="w-5 h-5 text-red-600" />
+                          <span className="font-medium text-red-900">Unable to check system status</span>
                         </div>
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">Operational</Badge>
                       </div>
-
-                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                          <span className="font-medium">Database</span>
-                        </div>
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">Operational</Badge>
-                      </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -349,11 +394,19 @@ export default function SupportPage() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => setShowBugReportForm(true)}
+                >
                   <Bug className="w-4 h-4 mr-2" />
                   Report Bug
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => setShowFeatureRequestForm(true)}
+                >
                   <Lightbulb className="w-4 h-4 mr-2" />
                   Feature Request
                 </Button>
@@ -366,6 +419,194 @@ export default function SupportPage() {
           </div>
         </div>
       </div>
+
+      {/* Bug Report Modal */}
+      {showBugReportForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold">Report a Bug</h2>
+              <Button variant="outline" size="sm" onClick={() => setShowBugReportForm(false)}>
+                ×
+              </Button>
+            </div>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              createBugReportMutation.mutate(bugReportForm);
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Title</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={bugReportForm.title}
+                  onChange={(e) => setBugReportForm({...bugReportForm, title: e.target.value})}
+                  placeholder="Brief description of the issue"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <Textarea
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={bugReportForm.description}
+                  onChange={(e) => setBugReportForm({...bugReportForm, description: e.target.value})}
+                  placeholder="Detailed description of the bug"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Steps to Reproduce</label>
+                <Textarea
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={bugReportForm.stepsToReproduce}
+                  onChange={(e) => setBugReportForm({...bugReportForm, stepsToReproduce: e.target.value})}
+                  placeholder="1. First step&#10;2. Second step&#10;3. What happened"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Expected Behavior</label>
+                  <Textarea
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={bugReportForm.expectedBehavior}
+                    onChange={(e) => setBugReportForm({...bugReportForm, expectedBehavior: e.target.value})}
+                    placeholder="What should have happened"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Actual Behavior</label>
+                  <Textarea
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={bugReportForm.actualBehavior}
+                    onChange={(e) => setBugReportForm({...bugReportForm, actualBehavior: e.target.value})}
+                    placeholder="What actually happened"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Priority</label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={bugReportForm.priority}
+                  onChange={(e) => setBugReportForm({...bugReportForm, priority: e.target.value})}
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
+                </select>
+              </div>
+              
+              <div className="flex justify-end space-x-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setShowBugReportForm(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createBugReportMutation.isPending}>
+                  {createBugReportMutation.isPending ? 'Submitting...' : 'Submit Bug Report'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Feature Request Modal */}
+      {showFeatureRequestForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold">Submit Feature Request</h2>
+              <Button variant="outline" size="sm" onClick={() => setShowFeatureRequestForm(false)}>
+                ×
+              </Button>
+            </div>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              createFeatureRequestMutation.mutate(featureRequestForm);
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Feature Title</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={featureRequestForm.title}
+                  onChange={(e) => setFeatureRequestForm({...featureRequestForm, title: e.target.value})}
+                  placeholder="Brief title for the feature"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <Textarea
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={featureRequestForm.description}
+                  onChange={(e) => setFeatureRequestForm({...featureRequestForm, description: e.target.value})}
+                  placeholder="Detailed description of the feature"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Business Justification</label>
+                <Textarea
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={featureRequestForm.businessJustification}
+                  onChange={(e) => setFeatureRequestForm({...featureRequestForm, businessJustification: e.target.value})}
+                  placeholder="How would this feature benefit your business?"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Proposed Solution</label>
+                <Textarea
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={featureRequestForm.proposedSolution}
+                  onChange={(e) => setFeatureRequestForm({...featureRequestForm, proposedSolution: e.target.value})}
+                  placeholder="Any ideas on how this could be implemented?"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Priority</label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={featureRequestForm.priority}
+                  onChange={(e) => setFeatureRequestForm({...featureRequestForm, priority: e.target.value})}
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+              
+              <div className="flex justify-end space-x-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setShowFeatureRequestForm(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createFeatureRequestMutation.isPending}>
+                  {createFeatureRequestMutation.isPending ? 'Submitting...' : 'Submit Feature Request'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }
