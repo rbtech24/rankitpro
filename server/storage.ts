@@ -498,7 +498,7 @@ export class DatabaseStorage implements IStorage {
     .from(aiUsageLogs)
     .where(
       and(
-        sql`provider = ${provider}`,
+        eq(aiUsageLogs.provider, provider),
         gte(aiUsageLogs.createdAt, today)
       )
     );
@@ -1468,7 +1468,7 @@ export class DatabaseStorage implements IStorage {
         id: reviewResponses.id,
         rating: reviewResponses.rating,
         customerName: reviewResponses.customerName,
-        reviewText: reviewResponses.reviewText,
+        feedback: reviewResponses.feedback,
         createdAt: reviewResponses.createdAt,
         companyId: reviewResponses.companyId,
         companyName: companies.name
@@ -1589,39 +1589,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getRevenueChartData(): Promise<Array<{ month: string; revenue: number }>> {
-    try {
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-      
-      const planPrices = { starter: 29, pro: 79, agency: 149 };
-      
-      const result = await db.select({
-        month: sql<string>`TO_CHAR(${companies.createdAt}, 'Mon')`,
-        plan: companies.plan,
-        count: sql<number>`COUNT(*)`
-      })
-      .from(companies)
-      .where(gte(companies.createdAt, sixMonthsAgo))
-      .groupBy(sql`TO_CHAR(${companies.createdAt}, 'Mon')`, companies.plan)
-      .orderBy(sql`TO_CHAR(${companies.createdAt}, 'Mon')`);
-      
-      // Calculate revenue by month
-      const monthlyRevenue: { [key: string]: number } = {};
-      result.forEach(row => {
-        const revenue = planPrices[row.plan as keyof typeof planPrices] || 0;
-        monthlyRevenue[row.month] = (monthlyRevenue[row.month] || 0) + (revenue * row.count);
-      });
-      
-      return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
-        month,
-        revenue
-      }));
-    } catch (error) {
-      console.error('Error fetching revenue chart data:', error);
-      return [];
-    }
-  }
+
 
   async getFinancialMetrics(): Promise<any> {
     try {
