@@ -317,6 +317,25 @@ export interface IStorage {
   deleteHelpTopicReply(id: number): Promise<boolean>;
   likeHelpTopicReply(replyId: number, userId: number): Promise<boolean>;
   unlikeHelpTopicReply(replyId: number, userId: number): Promise<boolean>;
+  
+  // Bug Reports operations
+  getBugReport(id: number): Promise<any | undefined>;
+  getBugReports(): Promise<any[]>;
+  getBugReportsByCompany(companyId: number): Promise<any[]>;
+  createBugReport(bugReport: any): Promise<any>;
+  updateBugReport(id: number, updates: any): Promise<any | undefined>;
+  assignBugReport(id: number, assigneeId: number): Promise<any>;
+  resolveBugReport(id: number, resolution: string, resolvedById: number): Promise<any>;
+  
+  // Feature Requests operations
+  getFeatureRequest(id: number): Promise<any | undefined>;
+  getFeatureRequests(): Promise<any[]>;
+  getFeatureRequestsByCompany(companyId: number): Promise<any[]>;
+  createFeatureRequest(featureRequest: any): Promise<any>;
+  updateFeatureRequest(id: number, updates: any): Promise<any | undefined>;
+  voteFeatureRequest(id: number): Promise<any>;
+  assignFeatureRequest(id: number, assigneeId: number): Promise<any>;
+  completeFeatureRequest(id: number, completedById: number): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3942,6 +3961,196 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error unliking help topic reply:', error);
       return false;
+    }
+  }
+
+  // Bug Reports operations
+  async getBugReport(id: number): Promise<any | undefined> {
+    try {
+      const [bugReport] = await db.select().from(schema.bugReports).where(eq(schema.bugReports.id, id));
+      return bugReport;
+    } catch (error) {
+      console.error('Error fetching bug report:', error);
+      return undefined;
+    }
+  }
+
+  async getBugReports(): Promise<any[]> {
+    try {
+      return await db.select().from(schema.bugReports).orderBy(desc(schema.bugReports.createdAt));
+    } catch (error) {
+      console.error('Error fetching bug reports:', error);
+      return [];
+    }
+  }
+
+  async getBugReportsByCompany(companyId: number): Promise<any[]> {
+    try {
+      return await db.select().from(schema.bugReports)
+        .where(eq(schema.bugReports.companyId, companyId))
+        .orderBy(desc(schema.bugReports.createdAt));
+    } catch (error) {
+      console.error('Error fetching company bug reports:', error);
+      return [];
+    }
+  }
+
+  async createBugReport(bugReport: any): Promise<any> {
+    try {
+      const ticketNumber = `BUG-${Date.now()}`;
+      const [newBugReport] = await db.insert(schema.bugReports)
+        .values({ ...bugReport, ticketNumber })
+        .returning();
+      return newBugReport;
+    } catch (error) {
+      console.error('Error creating bug report:', error);
+      throw error;
+    }
+  }
+
+  async updateBugReport(id: number, updates: any): Promise<any | undefined> {
+    try {
+      const [updatedBugReport] = await db.update(schema.bugReports)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(schema.bugReports.id, id))
+        .returning();
+      return updatedBugReport;
+    } catch (error) {
+      console.error('Error updating bug report:', error);
+      return undefined;
+    }
+  }
+
+  async assignBugReport(id: number, assigneeId: number): Promise<any> {
+    try {
+      const [assignedBugReport] = await db.update(schema.bugReports)
+        .set({ assignedToId: assigneeId, assignedAt: new Date(), updatedAt: new Date() })
+        .where(eq(schema.bugReports.id, id))
+        .returning();
+      return assignedBugReport;
+    } catch (error) {
+      console.error('Error assigning bug report:', error);
+      throw error;
+    }
+  }
+
+  async resolveBugReport(id: number, resolution: string, resolvedById: number): Promise<any> {
+    try {
+      const [resolvedBugReport] = await db.update(schema.bugReports)
+        .set({ 
+          status: 'resolved', 
+          resolution, 
+          resolvedAt: new Date(), 
+          resolvedById, 
+          updatedAt: new Date() 
+        })
+        .where(eq(schema.bugReports.id, id))
+        .returning();
+      return resolvedBugReport;
+    } catch (error) {
+      console.error('Error resolving bug report:', error);
+      throw error;
+    }
+  }
+
+  // Feature Requests operations
+  async getFeatureRequest(id: number): Promise<any | undefined> {
+    try {
+      const [featureRequest] = await db.select().from(schema.featureRequests).where(eq(schema.featureRequests.id, id));
+      return featureRequest;
+    } catch (error) {
+      console.error('Error fetching feature request:', error);
+      return undefined;
+    }
+  }
+
+  async getFeatureRequests(): Promise<any[]> {
+    try {
+      return await db.select().from(schema.featureRequests).orderBy(desc(schema.featureRequests.votes), desc(schema.featureRequests.createdAt));
+    } catch (error) {
+      console.error('Error fetching feature requests:', error);
+      return [];
+    }
+  }
+
+  async getFeatureRequestsByCompany(companyId: number): Promise<any[]> {
+    try {
+      return await db.select().from(schema.featureRequests)
+        .where(eq(schema.featureRequests.companyId, companyId))
+        .orderBy(desc(schema.featureRequests.votes), desc(schema.featureRequests.createdAt));
+    } catch (error) {
+      console.error('Error fetching company feature requests:', error);
+      return [];
+    }
+  }
+
+  async createFeatureRequest(featureRequest: any): Promise<any> {
+    try {
+      const ticketNumber = `FTR-${Date.now()}`;
+      const [newFeatureRequest] = await db.insert(schema.featureRequests)
+        .values({ ...featureRequest, ticketNumber })
+        .returning();
+      return newFeatureRequest;
+    } catch (error) {
+      console.error('Error creating feature request:', error);
+      throw error;
+    }
+  }
+
+  async updateFeatureRequest(id: number, updates: any): Promise<any | undefined> {
+    try {
+      const [updatedFeatureRequest] = await db.update(schema.featureRequests)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(schema.featureRequests.id, id))
+        .returning();
+      return updatedFeatureRequest;
+    } catch (error) {
+      console.error('Error updating feature request:', error);
+      return undefined;
+    }
+  }
+
+  async voteFeatureRequest(id: number): Promise<any> {
+    try {
+      const [votedFeatureRequest] = await db.update(schema.featureRequests)
+        .set({ votes: sql`${schema.featureRequests.votes} + 1`, updatedAt: new Date() })
+        .where(eq(schema.featureRequests.id, id))
+        .returning();
+      return votedFeatureRequest;
+    } catch (error) {
+      console.error('Error voting for feature request:', error);
+      throw error;
+    }
+  }
+
+  async assignFeatureRequest(id: number, assigneeId: number): Promise<any> {
+    try {
+      const [assignedFeatureRequest] = await db.update(schema.featureRequests)
+        .set({ assignedToId: assigneeId, assignedAt: new Date(), updatedAt: new Date() })
+        .where(eq(schema.featureRequests.id, id))
+        .returning();
+      return assignedFeatureRequest;
+    } catch (error) {
+      console.error('Error assigning feature request:', error);
+      throw error;
+    }
+  }
+
+  async completeFeatureRequest(id: number, completedById: number): Promise<any> {
+    try {
+      const [completedFeatureRequest] = await db.update(schema.featureRequests)
+        .set({ 
+          status: 'completed', 
+          completedAt: new Date(), 
+          completedById, 
+          updatedAt: new Date() 
+        })
+        .where(eq(schema.featureRequests.id, id))
+        .returning();
+      return completedFeatureRequest;
+    } catch (error) {
+      console.error('Error completing feature request:', error);
+      throw error;
     }
   }
 }

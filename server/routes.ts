@@ -2249,6 +2249,98 @@ Format as professional service documentation.`;
       });
     }
   });
+
+  // Bug Reports API
+  app.get("/api/bug-reports", isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
+    try {
+      const bugReports = await storage.getBugReports();
+      res.json(bugReports);
+    } catch (error) {
+      console.error('Error fetching bug reports:', error);
+      res.status(500).json({ error: 'Failed to fetch bug reports' });
+    }
+  });
+
+  app.post("/api/bug-reports", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { title, description, stepsToReproduce, expectedBehavior, actualBehavior, priority } = req.body;
+      
+      if (!title || !description) {
+        return res.status(400).json({ error: 'Title and description are required' });
+      }
+
+      const bugReport = await storage.createBugReport({
+        companyId: req.user.companyId,
+        submitterId: req.user.id,
+        submitterName: req.user.username,
+        submitterEmail: req.user.email,
+        title,
+        description,
+        stepsToReproduce,
+        expectedBehavior,
+        actualBehavior,
+        priority: priority || 'medium',
+        browserInfo: req.headers['user-agent'] || '',
+        deviceInfo: 'Web Application'
+      });
+
+      res.status(201).json(bugReport);
+    } catch (error) {
+      console.error('Error creating bug report:', error);
+      res.status(500).json({ error: 'Failed to create bug report' });
+    }
+  });
+
+  // Feature Requests API
+  app.get("/api/feature-requests", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const featureRequests = req.user.role === 'super_admin' 
+        ? await storage.getFeatureRequests()
+        : await storage.getFeatureRequestsByCompany(req.user.companyId!);
+      res.json(featureRequests);
+    } catch (error) {
+      console.error('Error fetching feature requests:', error);
+      res.status(500).json({ error: 'Failed to fetch feature requests' });
+    }
+  });
+
+  app.post("/api/feature-requests", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { title, description, businessJustification, proposedSolution, priority } = req.body;
+      
+      if (!title || !description) {
+        return res.status(400).json({ error: 'Title and description are required' });
+      }
+
+      const featureRequest = await storage.createFeatureRequest({
+        companyId: req.user.companyId,
+        submitterId: req.user.id,
+        submitterName: req.user.username,
+        submitterEmail: req.user.email,
+        title,
+        description,
+        businessJustification,
+        proposedSolution,
+        priority: priority || 'medium'
+      });
+
+      res.status(201).json(featureRequest);
+    } catch (error) {
+      console.error('Error creating feature request:', error);
+      res.status(500).json({ error: 'Failed to create feature request' });
+    }
+  });
+
+  app.post("/api/feature-requests/:id/vote", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const featureRequestId = parseInt(req.params.id);
+      const updatedFeatureRequest = await storage.voteFeatureRequest(featureRequestId);
+      res.json(updatedFeatureRequest);
+    } catch (error) {
+      console.error('Error voting for feature request:', error);
+      res.status(500).json({ error: 'Failed to vote for feature request' });
+    }
+  });
   
   // Add testimonials API routes (remove authentication for widget use)
   app.get("/api/testimonials/company/:companyId", async (req: Request, res: Response) => {

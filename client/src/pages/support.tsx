@@ -9,14 +9,99 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { HelpCircle, MessageSquare, Phone, Mail, Clock, CheckCircle, AlertCircle, Bug, Lightbulb } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SupportPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
   const [ticketForm, setTicketForm] = useState({
     subject: '',
     category: '',
     priority: '',
     description: ''
+  });
+
+  const [bugReportForm, setBugReportForm] = useState({
+    title: '',
+    description: '',
+    stepsToReproduce: '',
+    expectedBehavior: '',
+    actualBehavior: '',
+    priority: 'medium'
+  });
+
+  const [featureRequestForm, setFeatureRequestForm] = useState({
+    title: '',
+    description: '',
+    businessJustification: '',
+    proposedSolution: '',
+    priority: 'medium'
+  });
+
+  const [showBugReportForm, setShowBugReportForm] = useState(false);
+  const [showFeatureRequestForm, setShowFeatureRequestForm] = useState(false);
+
+  // Fetch system status
+  const { data: systemStatus, isLoading: statusLoading } = useQuery({
+    queryKey: ['/api/system/status'],
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  // Bug report mutation
+  const createBugReportMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', '/api/bug-reports', data),
+    onSuccess: () => {
+      toast({
+        title: "Bug Report Submitted",
+        description: "Thank you for reporting this issue. We'll investigate it shortly.",
+      });
+      setBugReportForm({
+        title: '',
+        description: '',
+        stepsToReproduce: '',
+        expectedBehavior: '',
+        actualBehavior: '',
+        priority: 'medium'
+      });
+      setShowBugReportForm(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit bug report",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Feature request mutation
+  const createFeatureRequestMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', '/api/feature-requests', data),
+    onSuccess: () => {
+      toast({
+        title: "Feature Request Submitted",
+        description: "Thank you for your suggestion. We'll review it and consider it for future releases.",
+      });
+      setFeatureRequestForm({
+        title: '',
+        description: '',
+        businessJustification: '',
+        proposedSolution: '',
+        priority: 'medium'
+      });
+      setShowFeatureRequestForm(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit feature request",
+        variant: "destructive",
+      });
+    },
   });
 
   const faqs = [
