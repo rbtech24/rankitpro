@@ -33,11 +33,11 @@ const updateSalesPersonSchema = z.object({
 });
 
 const createCompanyAssignmentSchema = z.object({
-  salesPersonId: z.number(),
-  companyId: z.number(),
+  salesPersonId: z.union([z.number(), z.string().transform(val => parseInt(val))]),
+  companyId: z.union([z.number(), z.string().transform(val => parseInt(val))]),
   subscriptionPlan: z.string(),
-  initialPlanPrice: z.number(),
-  currentPlanPrice: z.number(),
+  initialPlanPrice: z.union([z.number(), z.string().transform(val => parseFloat(val) || 0)]),
+  currentPlanPrice: z.union([z.number(), z.string().transform(val => parseFloat(val) || 0)]),
   billingPeriod: z.enum(['monthly', 'yearly']),
   stripeSubscriptionId: z.string().optional()
 });
