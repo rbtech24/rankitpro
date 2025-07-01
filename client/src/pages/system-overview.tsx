@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Sidebar from '../../components/layout/sidebar-clean';
+import Sidebar from '@/components/layout/sidebar-clean';
 import {
   Card,
   CardContent,
@@ -41,7 +41,7 @@ import {
 } from 'recharts';
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import NotificationBell from '../../components/notifications/NotificationBell';
+import NotificationBell from '@/components/notifications/NotificationBell';
 import { 
   Gauge, 
   RefreshCw, 

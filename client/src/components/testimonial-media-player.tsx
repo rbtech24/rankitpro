@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Card, CardContent } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Play, Pause, Volume2, VolumeX, Download } from 'lucide-react';
 
 interface MediaPlayerProps {
