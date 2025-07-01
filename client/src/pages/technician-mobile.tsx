@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useRoute, Link } from 'wouter';
-import { apiRequest } from '../../lib/queryClient';
+import { apiRequest } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
-import { getCurrentUser, AuthState } from '../../lib/auth';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
+import { getCurrentUser, AuthState } from '@/lib/auth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../../components/ui/card';
+} from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../../components/ui/dialog';
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -29,23 +29,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../../components/ui/form';
+} from '@/components/ui/form';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '../../components/ui/tabs';
+} from '@/components/ui/tabs';
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from '../../components/ui/avatar';
-import { useToast } from '../../hooks/use-toast';
+} from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { hasFeature, getPlanName, getRequiredPlan } from '../../lib/features';
+import { hasFeature, getPlanName, getRequiredPlan } from '@/lib/features';
 import { 
   Home, 
   CheckCircle, 
@@ -257,7 +257,7 @@ export default function TechnicianMobile() {
   
   // Handle logout
   const handleLogout = () => {
-    import('../../lib/logout').then(({ performImmediateLogout }) => {
+    import('@/lib/logout').then(({ performImmediateLogout }) => {
       performImmediateLogout();
     });
   };
