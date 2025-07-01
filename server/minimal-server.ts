@@ -5,13 +5,20 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
-import cors from "cors";
-
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000');
 
-// Basic middleware
-app.use(cors());
+// Basic CORS middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -24,7 +31,7 @@ interface AuthenticatedRequest extends Request {
     role: string;
     companyId?: number;
   };
-  isAuthenticated: () => boolean;
+  isAuthenticated(): boolean;
 }
 
 // Mock authentication middleware
@@ -103,7 +110,7 @@ app.post("/api/chat/session/start", async (req: AuthenticatedRequest, res: Respo
     });
   } catch (error) {
     console.error('Error starting chat session:', error);
-    res.status(500).json({ error: 'Failed to start chat session', details: error.message });
+    res.status(500).json({ error: 'Failed to start chat session', details: (error as Error).message });
   }
 });
 
@@ -149,7 +156,7 @@ app.post("/api/chat/session/:sessionId/message", async (req: AuthenticatedReques
     res.json({ message: chatMessage });
   } catch (error) {
     console.error('Error sending message:', error);
-    res.status(500).json({ error: 'Failed to send message', details: error.message });
+    res.status(500).json({ error: 'Failed to send message', details: (error as Error).message });
   }
 });
 
@@ -166,7 +173,7 @@ app.get("/api/chat/session/:sessionId/messages", async (req: AuthenticatedReques
     res.json(messages);
   } catch (error) {
     console.error('Error fetching messages:', error);
-    res.status(500).json({ error: 'Failed to fetch messages', details: error.message });
+    res.status(500).json({ error: 'Failed to fetch messages', details: (error as Error).message });
   }
 });
 
@@ -192,7 +199,7 @@ app.post("/api/chat/session/:sessionId/close", async (req: AuthenticatedRequest,
     res.json({ session });
   } catch (error) {
     console.error('Error closing chat session:', error);
-    res.status(500).json({ error: 'Failed to close session', details: error.message });
+    res.status(500).json({ error: 'Failed to close session', details: (error as Error).message });
   }
 });
 
