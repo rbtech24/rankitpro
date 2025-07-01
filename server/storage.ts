@@ -4660,8 +4660,8 @@ export class DatabaseStorage implements IStorage {
         displayName: supportAgents.displayName,
         isOnline: supportAgents.isOnline
       },
-      messageCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${chatMessages} WHERE ${chatMessages.sessionId} = ${chatSessions.id}), 0)`,
-      lastMessage: sql<string>`(SELECT ${chatMessages.message} FROM ${chatMessages} WHERE ${chatMessages.sessionId} = ${chatSessions.id} ORDER BY ${chatMessages.createdAt} DESC LIMIT 1)`
+      messageCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${chatMessages} WHERE ${chatMessages.sessionId} = ${chatSessions.sessionId}), 0)`,
+      lastMessage: sql<string>`(SELECT ${chatMessages.message} FROM ${chatMessages} WHERE ${chatMessages.sessionId} = ${chatSessions.sessionId} ORDER BY ${chatMessages.createdAt} DESC LIMIT 1)`
     })
     .from(chatSessions)
     .leftJoin(users, eq(chatSessions.userId, users.id))
