@@ -6,7 +6,7 @@ import { Button } from "../components/ui/button";
 import { Switch } from "../components/ui/switch";
 import { Badge } from "../components/ui/badge";
 import { useToast } from "../hooks/use-toast";
-import { PLANS, hasFeature, getPlanName } from "../components/features";
+import { PLANS, hasFeature, getPlanName } from "../lib/features";
 import { 
   Settings,
   Crown,
