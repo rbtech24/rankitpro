@@ -71,9 +71,16 @@ async function handleChatMessage(data: any, ws: WebSocket) {
   try {
     const { sessionId, senderId, senderType, senderName, message } = data;
     
+    // Get the session by sessionId to get the database ID
+    const session = await storage.getChatSessionBySessionId(sessionId);
+    if (!session) {
+      console.error('Chat session not found:', sessionId);
+      return;
+    }
+    
     // Create message in database
     const newMessage = await storage.createChatMessage({
-      sessionId: parseInt(sessionId),
+      sessionId: session.id, // Use the database primary key ID
       senderId: parseInt(senderId),
       senderType,
       senderName,
@@ -2724,7 +2731,7 @@ Format as professional service documentation.`;
       
       // Send system message
       await storage.createChatMessage({
-        sessionId,
+        sessionId: session.id, // Use the database primary key ID
         senderId: req.user.id,
         senderType: 'system',
         senderName: 'System',
@@ -4411,10 +4418,16 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
   app.post("/api/chat/session/:sessionId/message", isAuthenticated, async (req, res) => {
     try {
       const { message, messageType = 'text' } = req.body;
-      const sessionId = parseInt(req.params.sessionId);
+      const { sessionId } = req.params;
+      
+      // Get the session by sessionId to get the database ID
+      const session = await storage.getChatSessionBySessionId(sessionId);
+      if (!session) {
+        return res.status(404).json({ error: 'Chat session not found' });
+      }
       
       const chatMessage = await storage.createChatMessage({
-        sessionId,
+        sessionId: session.id, // Use the database primary key ID
         senderId: req.session.userId!,
         senderType: 'customer',
         senderName: req.user?.username || 'Customer',
