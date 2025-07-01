@@ -4660,8 +4660,8 @@ export class DatabaseStorage implements IStorage {
         displayName: supportAgents.displayName,
         isOnline: supportAgents.isOnline
       },
-      messageCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${chatMessages} WHERE ${chatMessages.sessionId} = ${chatSessions.sessionId}), 0)`,
-      lastMessage: sql<string>`(SELECT ${chatMessages.message} FROM ${chatMessages} WHERE ${chatMessages.sessionId} = ${chatSessions.sessionId} ORDER BY ${chatMessages.createdAt} DESC LIMIT 1)`
+      messageCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${chatMessages} WHERE ${chatMessages.sessionId} = ${chatSessions.id}), 0)`,
+      lastMessage: sql<string>`(SELECT ${chatMessages.message} FROM ${chatMessages} WHERE ${chatMessages.sessionId} = ${chatSessions.id} ORDER BY ${chatMessages.createdAt} DESC LIMIT 1)`
     })
     .from(chatSessions)
     .leftJoin(users, eq(chatSessions.userId, users.id))
@@ -4717,8 +4717,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createChatMessage(message: any): Promise<any> {
+    // First get the session to find the numeric ID
+    const [session] = await db.select({ id: chatSessions.id })
+      .from(chatSessions)
+      .where(eq(chatSessions.sessionId, message.sessionId));
+    
+    if (!session) {
+      throw new Error(`Chat session not found: ${message.sessionId}`);
+    }
+
     const [newMessage] = await db.insert(chatMessages).values({
-      sessionId: message.sessionId,
+      sessionId: session.id,
       senderId: message.senderId,
       senderType: message.senderType,
       senderName: message.senderName,
@@ -4735,9 +4744,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getChatMessages(sessionId: string): Promise<any[]> {
+    // First get the session to find the numeric ID
+    const [session] = await db.select({ id: chatSessions.id })
+      .from(chatSessions)
+      .where(eq(chatSessions.sessionId, sessionId));
+    
+    if (!session) {
+      return [];
+    }
+
     return await db.select()
       .from(chatMessages)
-      .where(eq(chatMessages.sessionId, sessionId))
+      .where(eq(chatMessages.sessionId, session.id))
       .orderBy(asc(chatMessages.createdAt));
   }
 
