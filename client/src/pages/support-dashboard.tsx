@@ -148,6 +148,10 @@ export default function SupportDashboard() {
 
   // WebSocket connection for real-time updates
   useEffect(() => {
+    // Temporarily disable WebSocket - using API polling instead
+    console.log('WebSocket disabled for support dashboard - using API polling instead');
+    return;
+    
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     
