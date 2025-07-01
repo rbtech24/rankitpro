@@ -140,7 +140,7 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         wsRef.current.send(JSON.stringify({
           type: 'join_chat_session',
-          sessionId: session.sessionId,
+          sessionId: data.session.sessionId,
           userId: user.id
         }));
       }

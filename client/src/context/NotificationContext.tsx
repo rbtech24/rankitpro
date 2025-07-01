@@ -124,6 +124,10 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
   useEffect(() => {
     if (!userData?.user) return;
     
+    // Temporarily disable WebSocket to prevent connection attempts
+    console.log('WebSocket disabled for notifications - using API polling instead');
+    return;
+    
     let reconnectAttempts = 0;
     const maxReconnectAttempts = 3;
     const reconnectInterval = 5000; // 5 seconds
