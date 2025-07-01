@@ -1,7 +1,7 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "../../components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "../../lib/queryClient";
 import { useLocation } from "wouter";
 import { CheckCircle, Users, FileText, Star, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
 

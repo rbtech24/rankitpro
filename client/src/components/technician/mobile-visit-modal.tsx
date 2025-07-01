@@ -5,9 +5,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription
-} from "@/components/ui/dialog";
+} from "../../components/ui/dialog";
 import VisitForm from "./visit-form";
-import { detectLanguage, getTechnicianTranslations } from "@/lib/i18n";
+import { detectLanguage, getTechnicianTranslations } from "../../lib/i18n";
 
 interface MobileVisitModalProps {
   isOpen: boolean;

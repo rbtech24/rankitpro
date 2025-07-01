@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Separator } from "../components/ui/separator";
 import { Download, FileText, Settings, Check, Copy, ExternalLink } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { useToast } from "../hooks/use-toast";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
 
 export default function WordPressPlugin() {
   const [copiedItems, setCopiedItems] = useState(new Set<string>());

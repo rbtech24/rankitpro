@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { Bell } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "../../components/ui/popover";
 import {
   Card,
   CardContent,
   CardFooter,
-} from "@/components/ui/card";
+} from "../../components/ui/card";
 import { useNotifications } from '@/context/NotificationContext';
 import { Link } from 'wouter';
 

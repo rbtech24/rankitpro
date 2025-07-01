@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { InfoPageLayout } from '../../../components/layouts/InfoPageLayout';
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "../../../components/ui/input";
+import { Slider } from "../../../components/ui/slider";
+import { Button } from "../../../components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card";
 
 export default function RoiCalculator() {
   // Calculator state

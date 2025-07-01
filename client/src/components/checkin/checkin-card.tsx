@@ -1,7 +1,7 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
 import { formatDistanceToNow } from "date-fns";
-import { fixImageUrl } from "@/lib/url-utils";
+import { fixImageUrl } from "../../lib/url-utils";
 
 interface Technician {
   id: number;

@@ -1,6 +1,6 @@
 import { useLocation, Link } from "wouter";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/useAuth";
+import { cn } from "../../lib/utils";
+import { useAuth } from "../../hooks/useAuth";
 
 interface SidebarProps {
   className?: string;

@@ -1,13 +1,13 @@
 import React from 'react';
 import { XCircle, Maximize } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogClose,
-} from "@/components/ui/dialog";
+} from "../../components/ui/dialog";
 
 interface ImagePreviewProps {
   url: string;

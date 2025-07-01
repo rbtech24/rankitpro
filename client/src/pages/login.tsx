@@ -4,9 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { useToast } from "@/hooks/use-toast";
-import { login } from "@/lib/auth";
-import { InfoPageLayout } from "@/components/layouts/InfoPageLayout";
+import { useToast } from "../hooks/use-toast";
+import { login } from "../lib/auth";
+import { InfoPageLayout } from "../components/layouts/InfoPageLayout";
 
 import {
   Form,

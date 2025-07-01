@@ -3,8 +3,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { detectLanguage, getTechnicianTranslations } from "@/lib/i18n";
+import { useToast } from "../../hooks/use-toast";
+import { detectLanguage, getTechnicianTranslations } from "../../lib/i18n";
 
 import {
   Form,
@@ -14,19 +14,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+} from "../../components/ui/form";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Textarea } from "../../components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { apiRequest } from "@/lib/queryClient";
+} from "../../components/ui/select";
+import { Checkbox } from "../../components/ui/checkbox";
+import { apiRequest } from "../../lib/queryClient";
 
 // Job types will now be fetched from the server
 // as they're controlled by company admin

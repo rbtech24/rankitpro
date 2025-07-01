@@ -1,8 +1,8 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { AuthState, getCurrentUser } from "@/lib/auth";
+import { AuthState, getCurrentUser } from "../../lib/auth";
 
 interface TechnicianSidebarProps {
   className?: string;

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import RecentCheckIns from "@/components/dashboard/recent-visits";
-import { detectLanguage, getTechnicianTranslations } from "@/lib/i18n";
+import { Button } from "../../components/ui/button";
+import RecentCheckIns from "../../components/dashboard/recent-visits";
+import { detectLanguage, getTechnicianTranslations } from "../../lib/i18n";
 
 interface TechDashboardProps {
   onNewVisit: () => void;

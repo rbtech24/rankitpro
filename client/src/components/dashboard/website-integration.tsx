@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { useToast } from "../../hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { AuthState, getCurrentUser } from "@/lib/auth";
+import { AuthState, getCurrentUser } from "../../lib/auth";
 import { useLocation } from "wouter";
 
 export default function WebsiteIntegration() {

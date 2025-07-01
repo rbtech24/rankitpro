@@ -6,9 +6,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+} from "../components/ui/dialog";
+import { Button } from "../components/ui/button";
+import { Progress } from "../components/ui/progress";
 import { AlertTriangle, TrendingUp } from "lucide-react";
 import { useLocation } from "wouter";
 

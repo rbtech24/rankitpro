@@ -1,11 +1,11 @@
 import React from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle } from "../../components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { Button } from "@/components/ui/button";
+import { apiRequest } from "../../lib/queryClient";
+import { Button } from "../../components/ui/button";
 import { format, formatDistanceToNow } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
-import CheckinCard from "@/components/checkin/checkin-card";
+import { useToast } from "../../hooks/use-toast";
+import CheckinCard from "../../components/checkin/checkin-card";
 
 interface Technician {
   id: number;

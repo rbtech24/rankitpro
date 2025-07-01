@@ -6,9 +6,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import VisitForm from "@/components/visit/visit-form";
+} from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
+import VisitForm from "../../components/visit/visit-form";
 
 interface VisitModalProps {
   isOpen: boolean;

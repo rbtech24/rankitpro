@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { AIProviderSelector } from "@/components/ui/ai-provider-selector";
-import { apiRequest } from "@/lib/queryClient";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { useToast } from "../hooks/use-toast";
+import { AIProviderSelector } from "../components/ui/ai-provider-selector";
+import { apiRequest } from "../lib/queryClient";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 
 function AISettings() {
   const { toast } = useToast();

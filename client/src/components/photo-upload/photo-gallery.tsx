@@ -1,6 +1,6 @@
 import React from 'react';
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { Label } from "../../components/ui/label";
+import { Button } from "../../components/ui/button";
 import { Camera, UploadCloud } from 'lucide-react';
 import ImagePreview from './image-preview';
 

@@ -2,9 +2,9 @@ import React from 'react';
 import { format } from 'date-fns';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "../../components/ui/card";
+import { ScrollArea } from "../../components/ui/scroll-area";
+import { Button } from "../../components/ui/button";
 import { ListChecks, Plus } from "lucide-react";
 
 interface Task {

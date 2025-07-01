@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,9 +7,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
+} from "../../components/ui/card";
+import { Progress } from "../../components/ui/progress";
+import { useToast } from "../../hooks/use-toast";
 
 // Photo types for the wizard
 type PhotoStage = "before" | "during" | "after";

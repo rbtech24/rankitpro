@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle } from "../../components/ui/card";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { Button } from "@/components/ui/button";
+import { apiRequest } from "../../lib/queryClient";
+import { Button } from "../../components/ui/button";
 import { format, formatDistanceToNow } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
-import VisitCard from "@/components/visit/visit-card";
-import { AuthState, getCurrentUser } from "@/lib/auth";
-import ReviewRequestModal from "@/components/modals/review-request-modal";
+import { useToast } from "../../hooks/use-toast";
+import VisitCard from "../../components/visit/visit-card";
+import { AuthState, getCurrentUser } from "../../lib/auth";
+import ReviewRequestModal from "../../components/modals/review-request-modal";
 import { Edit, Trash2, Eye } from "lucide-react";
 
 interface Technician {

@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useToast } from "@/hooks/use-toast";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { useToast } from "../hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { AuthState, getCurrentUser } from "@/lib/auth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { AuthState, getCurrentUser } from "../lib/auth";
+import { apiRequest, queryClient } from "../lib/queryClient";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import PaymentForm from "@/components/billing/payment-form";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import PaymentForm from "../components/billing/payment-form";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Loader2 } from "lucide-react";
-import StripeConfigNotice from "@/components/billing/stripe-config-notice";
+import StripeConfigNotice from "../components/billing/stripe-config-notice";
 
 // Initialize Stripe conditionally - only if public key is available and valid
 const getStripePromise = () => {

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card";
+import { Progress } from "../../components/ui/progress";
 import { BarChart3, TrendingUp, Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 

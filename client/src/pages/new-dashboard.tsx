@@ -1,35 +1,35 @@
 import React, { useState } from "react";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import StatsOverview from "@/components/dashboard/stats-overview";
-import RecentVisits from "@/components/dashboard/recent-visits";
-import RecentActivityTimeline from "@/components/dashboard/RecentActivityTimeline";
-import PerformanceWidget from "@/components/dashboard/PerformanceWidget";
-import UpcomingTasks from "@/components/dashboard/UpcomingTasks";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
+import StatsOverview from "../components/dashboard/stats-overview";
+import RecentVisits from "../components/dashboard/recent-visits";
+import RecentActivityTimeline from "../components/dashboard/RecentActivityTimeline";
+import PerformanceWidget from "../components/dashboard/PerformanceWidget";
+import UpcomingTasks from "../components/dashboard/UpcomingTasks";
 
-import QuickActions from "@/components/dashboard/quick-actions";
-import AIWriter from "@/components/dashboard/ai-writer";
-import TechnicianPerformance from "@/components/dashboard/technician-performance";
-import WebsiteIntegration from "@/components/dashboard/website-integration";
-import AdminBusinessManagement from "@/components/dashboard/admin-business-management";
-import CompaniesManagement from "@/components/dashboard/companies-management";
-import BillingManagement from "@/components/dashboard/billing-management";
-import VisitModal from "@/components/modals/visit-modal";
-import MobileVisitModal from "@/components/technician/mobile-visit-modal";
-import TechDashboard from "@/components/technician/tech-dashboard";
+import QuickActions from "../components/dashboard/quick-actions";
+import AIWriter from "../components/dashboard/ai-writer";
+import TechnicianPerformance from "../components/dashboard/technician-performance";
+import WebsiteIntegration from "../components/dashboard/website-integration";
+import AdminBusinessManagement from "../components/dashboard/admin-business-management";
+import CompaniesManagement from "../components/dashboard/companies-management";
+import BillingManagement from "../components/dashboard/billing-management";
+import VisitModal from "../components/modals/visit-modal";
+import MobileVisitModal from "../components/technician/mobile-visit-modal";
+import TechDashboard from "../components/technician/tech-dashboard";
 
 import { useQuery } from "@tanstack/react-query";
-import { AuthState, getCurrentUser } from "@/lib/auth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AuthState, getCurrentUser } from "../lib/auth";
+import { apiRequest, queryClient } from "../lib/queryClient";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useLocation } from "wouter";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Progress } from "../components/ui/progress";
+import { ScrollArea } from "../components/ui/scroll-area";
+import { Separator } from "../components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { 
   Users,
   Building2,

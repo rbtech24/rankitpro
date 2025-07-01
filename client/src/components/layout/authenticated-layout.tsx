@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import ChatWidget from "@/components/chat/chat-widget";
+import ChatWidget from "../../components/chat/chat-widget";
 
 interface AuthenticatedLayoutProps {
   children: ReactNode;

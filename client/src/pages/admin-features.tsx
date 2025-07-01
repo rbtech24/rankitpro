@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { PLANS, hasFeature, getPlanName } from "@/lib/features";
+import { apiRequest } from "../lib/queryClient";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Switch } from "../components/ui/switch";
+import { Badge } from "../components/ui/badge";
+import { useToast } from "../hooks/use-toast";
+import { PLANS, hasFeature, getPlanName } from "../lib/features";
 import { 
   Settings,
   Crown,
