@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { log } from '../vite';
+import { log } from '../vite-safe';
 import { storage } from '../storage';
 import { isAuthenticated, isCompanyAdmin } from '../middleware/auth';
 import { 

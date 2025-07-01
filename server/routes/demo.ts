@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { createSampleData } from '../utils/sample-data';
 import { isSuperAdmin } from '../middleware/auth';
-import { log } from '../vite';
+import { log } from '../vite-safe';
 
 const router = express.Router();
 

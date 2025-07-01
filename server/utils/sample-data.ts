@@ -1,6 +1,6 @@
 import { storage } from '../storage';
 import bcrypt from 'bcrypt';
-import { log } from '../vite';
+import { log } from '../vite-safe';
 import { generateBlogPost } from '../ai/index';
 
 /**
