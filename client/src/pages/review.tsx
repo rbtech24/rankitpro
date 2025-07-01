@@ -21,7 +21,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
-import rankItProLogo from "@assets/rank it pro logo.png";
+const rankItProLogo = "/rank it pro logo.png";
 
 export default function Review() {
   const { token } = useParams();

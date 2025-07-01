@@ -20,7 +20,18 @@ export function log(message: string, source = "express") {
 
 // Safe Vite configuration without top-level await
 const safeViteConfig = {
-  plugins: [],
+  plugins: [
+    {
+      name: 'react',
+      config() {
+        return {
+          esbuild: {
+            jsx: 'automatic' as 'automatic',
+          },
+        };
+      },
+    },
+  ],
   resolve: {
     alias: {
       "@": path.resolve(process.cwd(), "client", "src"),
@@ -36,20 +47,65 @@ const safeViteConfig = {
 };
 
 export async function setupVite(app: Express, server: Server) {
-  // Skip Vite in development due to configuration issues
-  // Fall back to static file serving for now
-  log("Skipping Vite setup due to configuration issues, using static fallback", "vite-safe");
-  
-  // Serve client files directly
-  const clientPath = path.resolve(process.cwd(), "client");
-  app.use(express.static(clientPath));
-  
-  // Serve node_modules for development dependencies
-  const nodeModulesPath = path.resolve(process.cwd(), "node_modules");
-  app.use("/node_modules", express.static(nodeModulesPath));
-  
-  log("Static file serving enabled as Vite replacement", "fallback");
-  return null;
+  try {
+    log("Setting up Vite development server with safe configuration", "vite-safe");
+    
+    const serverOptions = {
+      middlewareMode: true,
+      hmr: { server },
+    };
+
+    const vite = await createViteServer({
+      ...safeViteConfig,
+      configFile: false,
+      customLogger: {
+        ...viteLogger,
+        error: (msg, options) => {
+          viteLogger.error(msg, options);
+          // Don't exit on error in safe mode
+        },
+      },
+      server: serverOptions,
+      appType: "custom",
+    });
+
+    app.use(vite.middlewares);
+    app.use("*", async (req, res, next) => {
+      const url = req.originalUrl;
+
+      try {
+        const clientTemplate = path.resolve(process.cwd(), "client", "index.html");
+
+        // Always reload the index.html file from disk
+        let template = await fs.promises.readFile(clientTemplate, "utf-8");
+        template = template.replace(
+          `src="/src/main.tsx"`,
+          `src="/src/main.tsx?v=${nanoid()}"`,
+        );
+        const page = await vite.transformIndexHtml(url, template);
+        res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      } catch (e) {
+        vite.ssrFixStacktrace(e as Error);
+        next(e);
+      }
+    });
+    
+    log("Vite development server initialized successfully", "vite-safe");
+    return vite;
+  } catch (error) {
+    log(`Vite setup failed: ${error instanceof Error ? error.message : String(error)}`, "vite-safe");
+    log("Falling back to static file serving", "vite-safe");
+    
+    // Fallback to static serving
+    const clientPath = path.resolve(process.cwd(), "client");
+    app.use(express.static(clientPath));
+    
+    const nodeModulesPath = path.resolve(process.cwd(), "node_modules");
+    app.use("/node_modules", express.static(nodeModulesPath));
+    
+    log("Static file serving enabled as fallback", "fallback");
+    return null;
+  }
 }
 
 export function serveStatic(app: Express) {
