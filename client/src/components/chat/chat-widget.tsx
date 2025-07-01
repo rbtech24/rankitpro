@@ -74,6 +74,24 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
     scrollToBottom();
   }, [messages]);
 
+  // Periodic message polling for active sessions
+  useEffect(() => {
+    let pollInterval: NodeJS.Timeout;
+    
+    if (currentSession && isOpen) {
+      // Poll for new messages every 2 seconds
+      pollInterval = setInterval(() => {
+        fetchMessages();
+      }, 2000);
+    }
+    
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
+  }, [currentSession, isOpen]);
+
   // Check support availability via API
   const checkSupportAvailability = async () => {
     try {
@@ -83,6 +101,21 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
     } catch (error) {
       console.error('Failed to check support availability:', error);
       setIsConnected(false);
+    }
+  };
+
+  // Fetch latest messages for the current session
+  const fetchMessages = async () => {
+    if (!currentSession) return;
+    
+    try {
+      const response = await apiRequest('GET', `/api/chat/session/${currentSession.sessionId}/messages`);
+      const data = await response.json();
+      if (data.messages) {
+        setMessages(data.messages);
+      }
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
     }
   };
 
@@ -187,6 +220,23 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
       await apiRequest("POST", `/api/chat/session/${currentSession.sessionId}/message`, {
         message: messageText
       });
+      
+      // Add the message to local state immediately for better UX
+      const newMessageObj: ChatMessage = {
+        id: Date.now(), // Temporary ID
+        message: messageText,
+        senderType: 'customer',
+        senderName: user.username,
+        createdAt: new Date().toISOString(),
+        isRead: true
+      };
+      
+      setMessages(prev => [...prev, newMessageObj]);
+      
+      // Fetch updated messages from server after a short delay
+      setTimeout(() => {
+        fetchMessages();
+      }, 1000);
       
     } catch (error) {
       toast({
