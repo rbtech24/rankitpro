@@ -77,10 +77,11 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
   // Check support availability via API
   const checkSupportAvailability = async () => {
     try {
-      const response = await apiRequest('GET', '/api/chat/agent/status');
+      const response = await apiRequest('GET', '/api/chat/support/availability');
       const data = await response.json();
-      setIsConnected(data?.isOnline || false);
+      setIsConnected(data?.isAvailable || false);
     } catch (error) {
+      console.error('Failed to check support availability:', error);
       setIsConnected(false);
     }
   };
@@ -88,46 +89,12 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
   const connectWebSocket = () => {
     // Skip WebSocket connection for now and use polling instead
     // This prevents the constant connection failures
-    setIsConnected(true);
+    setIsConnected(false);
     
     // Check support availability via API instead of WebSocket
     checkSupportAvailability();
     
-    return; // Disable WebSocket temporarily
-    
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
-    
-    wsRef.current = new WebSocket(wsUrl);
-    
-    wsRef.current.onopen = () => {
-      setIsConnected(true);
-      wsRef.current?.send(JSON.stringify({
-        type: 'auth',
-        userId: user.id,
-        companyId: user.companyId
-      }));
-    };
-    
-    wsRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      handleWebSocketMessage(data);
-    };
-    
-    wsRef.current.onclose = () => {
-      setIsConnected(false);
-      // Use API polling instead of WebSocket reconnection
-      setTimeout(() => {
-        if (isOpen) {
-          connectWebSocket();
-        }
-      }, 3000);
-    };
-    
-    wsRef.current.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      setIsConnected(false);
-    };
+    return; // Disable WebSocket completely for now
   };
 
   const handleWebSocketMessage = (data: any) => {
@@ -166,8 +133,8 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
         priority: "medium"
       });
       
-      const { session } = response;
-      setCurrentSession(session);
+      const data = await response.json();
+      setCurrentSession(data.session);
       
       // Join the chat session via WebSocket
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
