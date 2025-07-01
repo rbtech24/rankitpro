@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { cn } from '../lib/utils';
+import { cn } from '@/lib/utils';
 import {
   Home,
   ClipboardList,

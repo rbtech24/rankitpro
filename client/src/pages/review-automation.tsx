@@ -3,9 +3,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '../lib/queryClient';
-import { useToast } from '../hooks/use-toast';
-import Sidebar from '../components/layout/sidebar';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import Sidebar from '@/components/layout/sidebar';
 import {
   Card,
   CardContent,
@@ -65,7 +65,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../components/ui/collapsible";
-import { getCurrentUser } from '../lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 
 // Define form validation schema based on our data model
 const reviewAutomationSchema = z.object({

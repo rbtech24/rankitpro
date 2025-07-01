@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, BellRing } from 'lucide-react';
-import { Badge } from '../components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { 
   Popover, 
   PopoverContent, 
   PopoverTrigger 
-} from '../components/ui/popover';
-import { ScrollArea } from '../components/ui/scroll-area';
-import { Button } from '../components/ui/button';
-import { AuthState } from '../lib/auth';
+} from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { AuthState } from '@/lib/auth';
 
 interface Notification {
   id: string;

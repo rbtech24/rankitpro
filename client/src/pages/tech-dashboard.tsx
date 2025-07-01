@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
-import { AuthState, getCurrentUser } from '../lib/auth';
-import TechNavigation from '../components/layout/tech-navigation';
-import TechDashboard from '../components/technician/tech-dashboard';
-import MobileVisitModal from '../components/technician/mobile-visit-modal';
-import { Button } from '../components/ui/button';
-import NotificationBell from '../components/notifications/NotificationBell';
+import { AuthState, getCurrentUser } from '@/lib/auth';
+import TechNavigation from '@/components/layout/tech-navigation';
+import TechDashboard from '@/components/technician/tech-dashboard';
+import MobileVisitModal from '@/components/technician/mobile-visit-modal';
+import { Button } from '@/components/ui/button';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 export default function TechDashboardPage() {
   const [location, setLocation] = useLocation();
@@ -19,7 +19,7 @@ export default function TechDashboardPage() {
   });
   
   const handleLogout = () => {
-    import('../lib/logout').then(({ performImmediateLogout }) => {
+    import('@/lib/logout').then(({ performImmediateLogout }) => {
       performImmediateLogout();
     });
   };

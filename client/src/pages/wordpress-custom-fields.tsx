@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '../lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import {
   Card,
   CardContent,
@@ -51,7 +51,7 @@ import { useToast } from "../hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import Sidebar from '../components/layout/sidebar';
+import Sidebar from '@/components/layout/sidebar';
 import { 
   Save, 
   Copy, 

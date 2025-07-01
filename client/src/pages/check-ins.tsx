@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import CheckinCard from "../components/checkin/checkin-card";
-import CheckinModal from "../components/modals/checkin-modal";
-import EditCheckinModal from "../components/modals/edit-checkin-modal";
-import { apiRequest } from "../lib/queryClient";
-import { useToast } from "../hooks/use-toast";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import CheckinCard from "@/components/checkin/checkin-card";
+import CheckinModal from "@/components/modals/checkin-modal";
+import EditCheckinModal from "@/components/modals/edit-checkin-modal";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Trash2 } from "lucide-react";
 
 interface Technician {
