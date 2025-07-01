@@ -5,6 +5,8 @@ import { fileURLToPath } from 'url';
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
+import tailwindcss from "tailwindcss";
+import autoprefixer from "autoprefixer";
 
 // Get __dirname equivalent for ESM
 const __filename = fileURLToPath(import.meta.url);
