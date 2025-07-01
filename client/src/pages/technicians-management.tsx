@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Sidebar from "../components/layout/sidebar-clean";
-import NotificationBell from "notifications/NotificationBell";
+import NotificationBell from "../components/notifications/NotificationBell";
 import {
   Card,
   CardContent,

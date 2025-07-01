@@ -8,7 +8,7 @@ import {
   useResendReviewRequest,
   useReviewRequestStats,
   type ReviewRequestSettings
-} from "use-review-requests";
+} from "../hooks/use-review-requests";
 import {
   Card,
   CardContent,

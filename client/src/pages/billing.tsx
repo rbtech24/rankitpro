@@ -10,10 +10,10 @@ import { AuthState, getCurrentUser } from "../lib/auth";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import PaymentForm from "billing/payment-form";
+import PaymentForm from "../components/billing/payment-form";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Loader2 } from "lucide-react";
-import StripeConfigNotice from "billing/stripe-config-notice";
+import StripeConfigNotice from "../components/billing/stripe-config-notice";
 
 // Initialize Stripe conditionally - only if public key is available and valid
 const getStripePromise = () => {

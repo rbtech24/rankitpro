@@ -30,7 +30,7 @@ import {
   Play,
   ChevronRight
 } from "lucide-react";
-import { useIsMobile } from "use-mobile";
+import { useIsMobile } from "../hooks/use-mobile";
 import { Logo } from "../components/ui/logo";
 
 const Home = () => {
