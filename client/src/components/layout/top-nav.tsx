@@ -28,7 +28,7 @@ export default function TopNav({ onToggleSidebar, onMenuClick }: TopNavProps) {
   const [, setLocation] = useLocation();
   
   const handleLogout = () => {
-    import('@/lib/logout').then(({ performImmediateLogout }) => {
+    import('../../lib/logout').then(({ performImmediateLogout }) => {
       performImmediateLogout();
     });
   };

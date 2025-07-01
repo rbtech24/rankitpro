@@ -4,7 +4,7 @@ import {
   Menu,
   X,
 } from 'lucide-react';
-import NotificationBell from '@/components/notifications/NotificationBell';
+import NotificationBell from '../../components/notifications/NotificationBell';
 import Sidebar from './sidebar-clean';
 
 interface DashboardLayoutProps {
