@@ -94,7 +94,7 @@ app.post("/api/chat/session/start", async (req: AuthenticatedRequest, res: Respo
     // Send initial message if provided
     if (initialMessage) {
       await storage.createChatMessage({
-        sessionId: session.id, // Use the internal session ID for messages
+        sessionId: session.sessionId, // Use the string sessionId, not the numeric id
         senderId: req.user!.id,
         senderType: 'customer',
         senderName: req.user!.username,
@@ -137,9 +137,9 @@ app.post("/api/chat/session/:sessionId/message", async (req: AuthenticatedReques
     // Determine sender type based on user role
     const senderType = req.user!.role === 'super_admin' ? 'agent' : 'customer';
 
-    // Use the internal session ID (integer) for message storage
+    // Use the string sessionId for message storage
     const chatMessage = await storage.createChatMessage({
-      sessionId: session.id, // Use the internal integer ID
+      sessionId: session.sessionId, // Use the string sessionId, not the numeric id
       senderId: req.user!.id,
       senderType,
       senderName: req.user!.username,
