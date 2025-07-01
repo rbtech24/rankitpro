@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Badge } from "../../components/ui/badge";
 import { 
   CheckCircle, 
   BarChart2, 
@@ -30,8 +30,8 @@ import {
   Play,
   ChevronRight
 } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Logo } from "@/components/ui/logo";
+import { useIsMobile } from "../../hooks/use-mobile";
+import { Logo } from "../../components/ui/logo";
 
 const Home = () => {
   const isMobile = useIsMobile();

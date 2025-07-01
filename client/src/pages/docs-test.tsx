@@ -1,9 +1,9 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
 import { CheckCircle, AlertCircle, Book, Code, HelpCircle } from "lucide-react";
 import { Link } from "wouter";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { DashboardLayout } from "../../components/layout/DashboardLayout";
 
 export default function DocsTest() {
   const documentationRoutes = [
