@@ -7,7 +7,7 @@ import { createServer } from "http";
 import path from "path";
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '5000');
+const PORT = parseInt(process.env.PORT || '3000');
 
 // Basic middleware
 app.use(express.json({ limit: '50mb' }));
