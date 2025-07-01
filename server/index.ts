@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite-safe";
+import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import emailService from "./services/resend-email-service";

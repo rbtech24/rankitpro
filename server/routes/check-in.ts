@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { storage } from '../storage';
 import { isAuthenticated } from '../middleware/auth';
 import emailService from '../services/email-service';
-import { log } from '../vite-safe';
+import { log } from '../vite';
 import { insertCheckInSchema } from '../../shared/schema';
 import { generateSummary, generateBlogPost } from '../ai/index';
 import type { AIProviderType } from '../ai/types';

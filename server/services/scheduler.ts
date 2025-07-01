@@ -1,5 +1,5 @@
 import reviewAutomationService from './review-automation-service';
-import { log } from '../vite-safe';
+import { log } from '../vite';
 
 /**
  * Service for handling scheduled tasks in the system.
