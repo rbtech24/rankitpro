@@ -4670,39 +4670,11 @@ export class DatabaseStorage implements IStorage {
     .orderBy(desc(chatSessions.lastMessageAt));
   }
 
-  async getSupportAgentByUserId(userId: number): Promise<any> {
-    const [agent] = await db.select()
-      .from(supportAgents)
-      .where(eq(supportAgents.userId, userId));
-    return agent;
-  }
 
-  async createChatSession(session: any): Promise<any> {
-    const [newSession] = await db.insert(chatSessions).values({
-      sessionId: session.sessionId,
-      userId: session.userId,
-      companyId: session.companyId,
-      status: session.status || 'waiting',
-      category: session.category || 'general',
-      priority: session.priority || 'medium',
-      initialMessage: session.title || session.initialMessage,
-      startedAt: new Date(),
-      lastMessageAt: new Date()
-    }).returning();
-    return newSession;
-  }
 
-  async createSupportAgent(agent: any): Promise<any> {
-    const [newAgent] = await db.insert(supportAgents).values({
-      userId: agent.userId,
-      displayName: agent.displayName,
-      isOnline: agent.isOnline || false,
-      role: agent.role || 'general_support',
-      capabilities: agent.capabilities || [],
-      maxConcurrentChats: agent.maxConcurrentChats || 5
-    }).returning();
-    return newAgent;
-  }
+
+
+
 
   async assignAgentToSession(sessionId: string, agentId: number): Promise<any> {
     const [updatedSession] = await db.update(chatSessions)
@@ -4716,32 +4688,7 @@ export class DatabaseStorage implements IStorage {
     return updatedSession;
   }
 
-  async createChatMessage(message: any): Promise<any> {
-    // Verify the session exists
-    const [session] = await db.select({ sessionId: chatSessions.sessionId })
-      .from(chatSessions)
-      .where(eq(chatSessions.sessionId, message.sessionId));
-    
-    if (!session) {
-      throw new Error(`Chat session not found: ${message.sessionId}`);
-    }
 
-    const [newMessage] = await db.insert(chatMessages).values({
-      sessionId: message.sessionId, // Store as text to match database schema
-      senderId: message.senderId,
-      senderType: message.senderType,
-      senderName: message.senderName,
-      message: message.message,
-      createdAt: new Date()
-    }).returning();
-
-    // Update session's last message time
-    await db.update(chatSessions)
-      .set({ lastMessageAt: new Date() })
-      .where(eq(chatSessions.sessionId, message.sessionId));
-
-    return newMessage;
-  }
 
   async getChatMessages(sessionId: string): Promise<any[]> {
     // Verify session exists then query messages directly using sessionId
