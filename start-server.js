@@ -7,9 +7,9 @@ const path = require('path');
 // Set environment variables
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Start the server directly
+// Start the server directly with updated import flag
 const serverProcess = spawn('node', [
-  '--loader', 'tsx/esm',
+  '--import', 'tsx/esm',
   path.join(__dirname, 'server/index.ts')
 ], {
   stdio: 'inherit',
