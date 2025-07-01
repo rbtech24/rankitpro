@@ -8,13 +8,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
+} from "ui/card";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "../components/ui/tabs";
+} from "ui/tabs";
 import {
   Table,
   TableBody,
@@ -23,14 +23,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../components/ui/table";
+} from "ui/table";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
+} from "ui/select";
 import {
   Form,
   FormControl,
@@ -39,15 +39,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../components/ui/form";
-import { Label } from "../components/ui/label";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import { Textarea } from "../components/ui/textarea";
-import { Badge } from "../components/ui/badge";
-import { Switch } from "../components/ui/switch";
-import { Checkbox } from "../components/ui/checkbox";
-import { useToast } from "../hooks/use-toast";
+} from "ui/form";
+import { Label } from "ui/label";
+import { Input } from "ui/input";
+import { Button } from "ui/button";
+import { Textarea } from "ui/textarea";
+import { Badge } from "ui/badge";
+import { Switch } from "ui/switch";
+import { Checkbox } from "ui/checkbox";
+import { useToast } from "use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";

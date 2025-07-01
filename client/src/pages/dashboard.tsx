@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
-import StatsOverview from "../components/dashboard/stats-overview";
-import RecentVisits from "../components/dashboard/recent-visits";
-import QuickActions from "../components/dashboard/quick-actions";
-import TechnicianPerformance from "../components/dashboard/technician-performance";
-import WebsiteIntegration from "../components/dashboard/website-integration";
-import SuperAdminDashboard from "../components/dashboard/super-admin-dashboard";
-import VisitModal from "../components/modals/visit-modal";
-import MobileVisitModal from "../components/technician/mobile-visit-modal";
-import TechDashboard from "../components/technician/tech-dashboard";
-import UsageWarningBanner from "../components/usage-warning-banner";
+import { DashboardLayout } from "layout/DashboardLayout";
+import StatsOverview from "dashboard/stats-overview";
+import RecentVisits from "dashboard/recent-visits";
+import QuickActions from "dashboard/quick-actions";
+import TechnicianPerformance from "dashboard/technician-performance";
+import WebsiteIntegration from "dashboard/website-integration";
+import SuperAdminDashboard from "dashboard/super-admin-dashboard";
+import VisitModal from "modals/visit-modal";
+import MobileVisitModal from "technician/mobile-visit-modal";
+import TechDashboard from "technician/tech-dashboard";
+import UsageWarningBanner from "usage-warning-banner";
 
 import { useQuery } from "@tanstack/react-query";
-import { AuthState, getCurrentUser } from "../lib/auth";
+import { AuthState, getCurrentUser } from "auth";
 
 export default function Dashboard() {
   const [visitModalOpen, setVisitModalOpen] = useState(false);

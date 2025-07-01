@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { DashboardLayout } from "layout/DashboardLayout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "ui/card";
+import { Button } from "ui/button";
+import { Badge } from "ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "ui/select";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "../lib/queryClient";
+import { apiRequest } from "queryClient";
 import { 
   DollarSign, 
   TrendingUp, 

@@ -1,27 +1,27 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "../hooks/use-toast";
-import { apiRequest } from "../lib/queryClient";
+import { useToast } from "use-toast";
+import { apiRequest } from "queryClient";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
-import { Label } from "../components/ui/label";
-import { Checkbox } from "../components/ui/checkbox";
+} from "ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
+import { Button } from "ui/button";
+import { Input } from "ui/input";
+import { Textarea } from "ui/textarea";
+import { Label } from "ui/label";
+import { Checkbox } from "ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
+} from "ui/select";
 import {
   Table,
   TableBody,
@@ -29,8 +29,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../components/ui/table";
-import { Badge } from "../components/ui/badge";
+} from "ui/table";
+import { Badge } from "ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,7 +41,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../components/ui/alert-dialog";
+} from "ui/alert-dialog";
 import {
   Clock,
   Mail,
@@ -56,7 +56,7 @@ import {
   Calendar,
   BarChart3,
 } from "lucide-react";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { DashboardLayout } from "layout/DashboardLayout";
 import { format } from "date-fns";
 
 interface ReviewRequest {

@@ -1,17 +1,17 @@
-import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
-import { Badge } from "../components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../components/ui/accordion";
+import { DashboardLayout } from "layout/DashboardLayout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "ui/card";
+import { Button } from "ui/button";
+import { Input } from "ui/input";
+import { Textarea } from "ui/textarea";
+import { Badge } from "ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "ui/accordion";
 import { HelpCircle, MessageSquare, Phone, Mail, Clock, CheckCircle, AlertCircle, Bug, Lightbulb } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "../lib/queryClient";
-import { useToast } from "../hooks/use-toast";
+import { apiRequest } from "queryClient";
+import { useToast } from "use-toast";
 
 export default function SupportPage() {
   const { user } = useAuth();

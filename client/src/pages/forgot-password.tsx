@@ -2,16 +2,16 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../components/ui/form";
-import { Alert, AlertDescription } from "../components/ui/alert";
+import { Button } from "ui/button";
+import { Input } from "ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "ui/form";
+import { Alert, AlertDescription } from "ui/alert";
 import { Link } from "wouter";
-import { Logo } from "../components/ui/logo";
+import { Logo } from "ui/logo";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "../lib/queryClient";
-import { useToast } from "../hooks/use-toast";
+import { apiRequest } from "queryClient";
+import { useToast } from "use-toast";
 import { Mail, ArrowLeft } from "lucide-react";
 
 const forgotPasswordSchema = z.object({

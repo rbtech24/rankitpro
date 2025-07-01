@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Badge } from "../components/ui/badge";
-import { Progress } from "../components/ui/progress";
+import { DashboardLayout } from "layout/DashboardLayout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "ui/card";
+import { Button } from "ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
+import { Badge } from "ui/badge";
+import { Progress } from "ui/progress";
 import { 
   LineChart, 
   Line, 
@@ -41,7 +41,7 @@ import {
   Download,
   Filter
 } from "lucide-react";
-import { apiRequest } from "../lib/queryClient";
+import { apiRequest } from "queryClient";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
 
 interface AnalyticsData {

@@ -1,8 +1,8 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, AlertDescription } from "../components/ui/alert";
-import { Button } from "../components/ui/button";
-import { Progress } from "../components/ui/progress";
+import { Alert, AlertDescription } from "ui/alert";
+import { Button } from "ui/button";
+import { Progress } from "ui/progress";
 import { AlertTriangle, TrendingUp, Info } from "lucide-react";
 import { useLocation } from "wouter";
 

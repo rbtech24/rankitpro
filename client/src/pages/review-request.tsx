@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useToast } from "../hooks/use-toast";
+import { useToast } from "use-toast";
 import { 
   useReviewRequestSettings, 
   useUpdateReviewRequestSettings,
@@ -8,7 +8,7 @@ import {
   useResendReviewRequest,
   useReviewRequestStats,
   type ReviewRequestSettings
-} from "../hooks/use-review-requests";
+} from "use-review-requests";
 import {
   Card,
   CardContent,
@@ -16,20 +16,20 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
-import { Label } from "../components/ui/label";
-import { Checkbox } from "../components/ui/checkbox";
+} from "ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
+import { Button } from "ui/button";
+import { Input } from "ui/input";
+import { Textarea } from "ui/textarea";
+import { Label } from "ui/label";
+import { Checkbox } from "ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
+} from "ui/select";
 import {
   Table,
   TableBody,
@@ -38,7 +38,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../components/ui/table";
+} from "ui/table";
 import {
   Clock,
   Mail,
@@ -49,7 +49,7 @@ import {
   ThumbsUp,
   Users,
 } from "lucide-react";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { DashboardLayout } from "layout/DashboardLayout";
 
 export default function ReviewRequests() {
   const { toast } = useToast();

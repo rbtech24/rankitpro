@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Navigation, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { useToast } from '../hooks/use-toast';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
+import { useToast } from '../../hooks/use-toast';
 
 interface GPSPosition {
   latitude: number;

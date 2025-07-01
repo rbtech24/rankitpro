@@ -4,11 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { useToast } from "../hooks/use-toast";
-import { register as registerUser } from "../lib/auth";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Progress } from "../components/ui/progress";
+import { useToast } from "use-toast";
+import { register as registerUser } from "auth";
+import { Button } from "ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "ui/card";
+import { Progress } from "ui/progress";
 import { CheckCircle, Building2 } from "lucide-react";
 import {
   Form,
@@ -17,9 +17,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../components/ui/form";
-import { Input } from "../components/ui/input";
-import { InfoPageLayout } from "../components/layouts/InfoPageLayout";
+} from "ui/form";
+import { Input } from "ui/input";
+import { InfoPageLayout } from "layouts/InfoPageLayout";
 
 const formSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),

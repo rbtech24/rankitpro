@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
-import { Switch } from "../components/ui/switch";
-import { Label } from "../components/ui/label";
-import { useToast } from "../hooks/use-toast";
-import { getCurrentUser, AuthState } from "../lib/auth";
-import { apiRequest } from "../lib/queryClient";
+import { DashboardLayout } from "layout/DashboardLayout";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
+import { Button } from "ui/button";
+import { Input } from "ui/input";
+import { Textarea } from "ui/textarea";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "ui/card";
+import { Switch } from "ui/switch";
+import { Label } from "ui/label";
+import { useToast } from "use-toast";
+import { getCurrentUser, AuthState } from "auth";
+import { apiRequest } from "queryClient";
 import { 
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "../components/ui/select";
+} from "ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -29,7 +29,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../components/ui/form";
+} from "ui/form";
 
 export default function Settings() {
   const { toast } = useToast();

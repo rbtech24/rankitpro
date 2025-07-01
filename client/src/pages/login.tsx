@@ -4,9 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { useToast } from "../hooks/use-toast";
-import { login } from "../lib/auth";
-import { InfoPageLayout } from "../components/layouts/InfoPageLayout";
+import { useToast } from "use-toast";
+import { login } from "auth";
+import { InfoPageLayout } from "layouts/InfoPageLayout";
 
 import {
   Form,
@@ -15,10 +15,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../components/ui/form";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+} from "ui/form";
+import { Input } from "ui/input";
+import { Button } from "ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "ui/card";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),

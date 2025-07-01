@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Badge } from "../components/ui/badge";
-import { Progress } from "../components/ui/progress";
+import { DashboardLayout } from "layout/DashboardLayout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "ui/card";
+import { Button } from "ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
+import { Badge } from "ui/badge";
+import { Progress } from "ui/progress";
 import { 
   LineChart, 
   Line, 
@@ -36,7 +36,7 @@ import {
   Download,
   Filter
 } from "lucide-react";
-import { getCurrentUser, AuthState } from "../lib/auth";
+import { getCurrentUser, AuthState } from "auth";
 
 export default function AnalyticsDashboard() {
   const [timeRange, setTimeRange] = useState("30");
