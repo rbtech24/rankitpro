@@ -4717,8 +4717,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createChatMessage(message: any): Promise<any> {
-    // First get the session to find the numeric ID
-    const [session] = await db.select({ id: chatSessions.id })
+    // Verify the session exists
+    const [session] = await db.select({ sessionId: chatSessions.sessionId })
       .from(chatSessions)
       .where(eq(chatSessions.sessionId, message.sessionId));
     
@@ -4727,7 +4727,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     const [newMessage] = await db.insert(chatMessages).values({
-      sessionId: session.id,
+      sessionId: message.sessionId, // Store as text to match database schema
       senderId: message.senderId,
       senderType: message.senderType,
       senderName: message.senderName,
