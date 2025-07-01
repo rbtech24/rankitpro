@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { DashboardLayout } from "layout/DashboardLayout";
-import { Button } from "ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "ui/card";
-import { Badge } from "ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "ui/table";
-import { useToast } from "use-toast";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { useToast } from "../hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { AuthState, getCurrentUser } from "auth";
-import { apiRequest, queryClient } from "queryClient";
+import { AuthState, getCurrentUser } from "../lib/auth";
+import { apiRequest, queryClient } from "../lib/queryClient";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import PaymentForm from "billing/payment-form";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import StripeConfigNotice from "billing/stripe-config-notice";
 

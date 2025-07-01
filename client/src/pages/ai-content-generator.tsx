@@ -3,21 +3,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { DashboardLayout } from "layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "ui/card";
-import { Button } from "ui/button";
-import { Input } from "ui/input";
-import { Textarea } from "ui/textarea";
-import { Label } from "ui/label";
-import { Badge } from "ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Textarea } from "../components/ui/textarea";
+import { Label } from "../components/ui/label";
+import { Badge } from "../components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { 
   Select, 
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
   SelectValue 
-} from "ui/select";
+} from "../components/ui/select";
 import {
   Form,
   FormControl,
@@ -26,11 +26,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "ui/form";
-import { Checkbox } from "ui/checkbox";
-import { Separator } from "ui/separator";
-import { useToast } from "use-toast";
-import { apiRequest } from "queryClient";
+} from "../components/ui/form";
+import { Checkbox } from "../components/ui/checkbox";
+import { Separator } from "../components/ui/separator";
+import { useToast } from "../hooks/use-toast";
+import { apiRequest } from "../lib/queryClient";
 import { 
   Brain, 
   Wand2, 

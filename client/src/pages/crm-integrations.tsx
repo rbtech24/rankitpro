@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "queryClient";
-import { useToast } from "use-toast";
-import { DashboardLayout } from "layout/DashboardLayout";
+import { queryClient, apiRequest } from "../lib/queryClient";
+import { useToast } from "../hooks/use-toast";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
 import {
   Card,
   CardContent,
@@ -10,13 +10,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "ui/card";
+} from "../components/ui/card";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "ui/tabs";
+} from "../components/ui/tabs";
 import {
   Form,
   FormControl,
@@ -25,14 +25,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "ui/form";
+} from "../components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "ui/select";
+} from "../components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -41,7 +41,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "ui/dialog";
+} from "../components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,14 +52,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "ui/alert-dialog";
-import { Button } from "ui/button";
-import { Input } from "ui/input";
-import { Checkbox } from "ui/checkbox";
-import { Label } from "ui/label";
-import { Separator } from "ui/separator";
-import { Badge } from "ui/badge";
-import { Switch } from "ui/switch";
+} from "../components/ui/alert-dialog";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Checkbox } from "../components/ui/checkbox";
+import { Label } from "../components/ui/label";
+import { Separator } from "../components/ui/separator";
+import { Badge } from "../components/ui/badge";
+import { Switch } from "../components/ui/switch";
 import { Loader2, Check, X, Settings2 } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";

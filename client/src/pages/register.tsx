@@ -4,9 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { useToast } from "use-toast";
-import { register as registerUser } from "auth";
-import { InfoPageLayout } from "layouts/InfoPageLayout";
+import { useToast } from "../hooks/use-toast";
+import { register as registerUser } from "../lib/auth";
+import { InfoPageLayout } from "../components/layouts/InfoPageLayout";
 
 import {
   Form,
@@ -16,17 +16,17 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "ui/form";
-import { Input } from "ui/input";
-import { Button } from "ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "ui/card";
+} from "../components/ui/form";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { 
   Select, 
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
   SelectValue 
-} from "ui/select";
+} from "../components/ui/select";
 
 const formSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),

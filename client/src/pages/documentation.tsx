@@ -1,7 +1,7 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "ui/card";
-import { Badge } from "ui/badge";
-import { Button } from "ui/button";
-import { Separator } from "ui/separator";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Separator } from "../components/ui/separator";
 import { 
   BookOpen, 
   Video, 
@@ -14,8 +14,8 @@ import {
   BarChart3,
   MessageSquare
 } from "lucide-react";
-import { DashboardLayout } from "layout/DashboardLayout";
-import { useToast } from "use-toast";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { useToast } from "../hooks/use-toast";
 import { useLocation } from "wouter";
 
 export default function Documentation() {

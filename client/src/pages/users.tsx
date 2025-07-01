@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DashboardLayout } from "layout/DashboardLayout";
-import { Button } from "ui/button";
-import { Input } from "ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "ui/card";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { 
   Dialog,
   DialogContent,
@@ -11,9 +11,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "ui/dialog";
-import { apiRequest } from "queryClient";
-import { useToast } from "use-toast";
+} from "../components/ui/dialog";
+import { apiRequest } from "../lib/queryClient";
+import { useToast } from "../hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -25,22 +25,22 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "ui/form";
+} from "../components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "ui/select";
+} from "../components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "ui/dropdown-menu";
-import { Badge } from "ui/badge";
-import { AuthState, getCurrentUser } from "auth";
+} from "../components/ui/dropdown-menu";
+import { Badge } from "../components/ui/badge";
+import { AuthState, getCurrentUser } from "../lib/auth";
 
 interface User {
   id: number;

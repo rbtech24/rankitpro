@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { queryClient } from "queryClient";
+import { queryClient } from "../lib/queryClient";
 
 export default function ForceLogout() {
   useEffect(() => {

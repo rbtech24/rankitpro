@@ -20,7 +20,7 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "ui/alert";
+} from "../components/ui/alert";
 // import "data:image/svg+xml,%3Csvg width="100" height="40" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="100" height="40" fill="%234338ca"/%3E%3Ctext x="50" y="25" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle" fill="white"%3ERank It Pro%3C/text%3E%3C/svg%3E" from "../../attached_assets/rank it pro logo.png";
 
 export default function Review() {

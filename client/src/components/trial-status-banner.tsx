@@ -5,8 +5,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Calendar, CreditCard } from "lucide-react";
-import { Alert, AlertDescription } from "ui/alert";
-import { Button } from "ui/button";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Button } from "../components/ui/button";
 import { useLocation } from "wouter";
 
 interface TrialStatus {

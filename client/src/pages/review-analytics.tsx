@@ -1,22 +1,22 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "queryClient";
+import { apiRequest } from "../lib/queryClient";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
-import { Badge } from "ui/badge";
+} from "../components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Badge } from "../components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "ui/select";
+} from "../components/ui/select";
 import {
   BarChart,
   Bar,

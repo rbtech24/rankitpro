@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useToast } from "use-toast";
+import { useToast } from "../hooks/use-toast";
 import {
   Card,
   CardContent,
@@ -7,13 +7,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
-import { Button } from "ui/button";
-import { Input } from "ui/input";
-import { Label } from "ui/label";
-import { Checkbox } from "ui/checkbox";
-import { Separator } from "ui/separator";
+} from "../components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Checkbox } from "../components/ui/checkbox";
+import { Separator } from "../components/ui/separator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +23,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "ui/alert-dialog";
+} from "../components/ui/alert-dialog";
 import {
   ArrowRight,
   Check,
@@ -35,8 +35,8 @@ import {
   Copy,
   ExternalLink
 } from "lucide-react";
-import { DashboardLayout } from "layout/DashboardLayout";
-import { apiRequest } from "queryClient";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { apiRequest } from "../lib/queryClient";
 
 // Define WordPress configuration types
 interface WordPressCredentials {

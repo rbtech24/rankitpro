@@ -1,22 +1,22 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "queryClient";
+import { apiRequest } from "../lib/queryClient";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
-import { Button } from "ui/button";
+} from "../components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Button } from "../components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "ui/select";
+} from "../components/ui/select";
 import {
   BarChart,
   Bar,
@@ -34,7 +34,7 @@ import {
   TrendingUp,
   Filter,
 } from "lucide-react";
-import { DashboardLayout } from "layout/DashboardLayout";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
 
 interface ReviewMetrics {
   totalRequests: number;

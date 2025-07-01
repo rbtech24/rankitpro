@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DashboardLayout } from "layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "ui/card";
-import { Button } from "ui/button";
-import { Input } from "ui/input";
-import { Label } from "ui/label";
-import { Switch } from "ui/switch";
-import { Textarea } from "ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "ui/select";
-import { useToast } from "use-toast";
-import { apiRequest } from "queryClient";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Switch } from "../components/ui/switch";
+import { Textarea } from "../components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { useToast } from "../hooks/use-toast";
+import { apiRequest } from "../lib/queryClient";
 import { Code, Eye, Copy, Check } from "lucide-react";
-import { useAuth } from "useAuth";
+import { useAuth } from "../hooks/useAuth";
 
 type EmbedIntegration = {
   token: string;

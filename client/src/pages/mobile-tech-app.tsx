@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "queryClient";
-import { Button } from "ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "ui/card";
-import PhotoUploadWizard from "technician/photo-upload-wizard";
-import JobFormWizard from "technician/job-form-wizard";
+import { apiRequest } from "../lib/queryClient";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import PhotoUploadWizard from "../components/technician/photo-upload-wizard";
+import JobFormWizard from "../components/technician/job-form-wizard";
 
 export default function MobileTechApp() {
   // We'll get user info from the server

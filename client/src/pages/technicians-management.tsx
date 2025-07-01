@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Sidebar from "layout/sidebar-clean";
+import Sidebar from "../components/layout/sidebar-clean";
 import NotificationBell from "notifications/NotificationBell";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "ui/card";
+} from "../components/ui/card";
 import {
   Table,
   TableBody,
@@ -15,20 +15,20 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "ui/table";
+} from "../components/ui/table";
 import {
   Badge,
-} from "ui/badge";
+} from "../components/ui/badge";
 import {
   Input,
-} from "ui/input";
+} from "../components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "ui/select";
+} from "../components/ui/select";
 import { 
   Users, 
   Building2, 
@@ -40,9 +40,9 @@ import {
   Power,
   PowerOff
 } from "lucide-react";
-import { useToast } from "use-toast";
-import { apiRequest } from "queryClient";
-import { Button } from "ui/button";
+import { useToast } from "../hooks/use-toast";
+import { apiRequest } from "../lib/queryClient";
+import { Button } from "../components/ui/button";
 
 interface Technician {
   id: number;

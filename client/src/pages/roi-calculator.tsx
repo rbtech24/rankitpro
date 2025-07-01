@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { Button } from "ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "ui/card";
-import { Input } from "ui/input";
-import { Label } from "ui/label";
-// import { Input type="range" } from "ui/slider";
-import { Badge } from "ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+// import { Input type="range" } from "../components/ui/slider";
+import { Badge } from "../components/ui/badge";
 import { 
   Calculator,
   DollarSign,
@@ -20,7 +20,7 @@ import {
   Zap,
   ArrowLeft
 } from "lucide-react";
-import { Logo } from "ui/logo";
+import { Logo } from "../components/ui/logo";
 
 const ROICalculator = () => {
   const [monthlyLeads, setMonthlyLeads] = useState(50);

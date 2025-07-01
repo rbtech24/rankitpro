@@ -7,13 +7,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "ui/card";
+} from "../components/ui/card";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "ui/tabs";
+} from "../components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -21,16 +21,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "ui/table";
-import { Badge } from "ui/badge";
-import { Button } from "ui/button";
+} from "../components/ui/table";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "ui/select";
+} from "../components/ui/select";
 import { 
   BarChart, 
   Bar, 

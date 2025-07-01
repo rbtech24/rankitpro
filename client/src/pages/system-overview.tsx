@@ -7,13 +7,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "ui/card";
+} from "../components/ui/card";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "ui/tabs";
+} from "../components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -21,7 +21,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "ui/table";
+} from "../components/ui/table";
 import { 
   BarChart, 
   Bar, 
@@ -39,8 +39,8 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { Badge } from "ui/badge";
-import { Button } from "ui/button";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
 import NotificationBell from '../components/notifications/NotificationBell';
 import { 
   Gauge, 

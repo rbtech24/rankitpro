@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "ui/card";
-import { Button } from "ui/button";
-import { Badge } from "ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Copy, Check, ExternalLink, Settings, Globe, Users, Smartphone, TestTube } from "lucide-react";
-import { useToast } from "use-toast";
-import { DashboardLayout } from "layout/DashboardLayout";
+import { useToast } from "../hooks/use-toast";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
 
 export default function PlatformSetupGuide() {
   const [copiedItems, setCopiedItems] = useState(new Set<string>());

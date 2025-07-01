@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { DashboardLayout } from "layout/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "ui/card";
-import { Button } from "ui/button";
-import { Input } from "ui/input";
-import { Label } from "ui/label";
-import { Textarea } from "ui/textarea";
-import { Badge } from "ui/badge";
-import { useToast } from "use-toast";
-import { apiRequest, queryClient } from "queryClient";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import { Badge } from "../components/ui/badge";
+import { useToast } from "../hooks/use-toast";
+import { apiRequest, queryClient } from "../lib/queryClient";
 import { Shield, Plus, Trash2, Edit, AlertTriangle, Clock, Eye } from "lucide-react";
 import {
   Dialog,
@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "ui/dialog";
+} from "../components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -26,8 +26,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "ui/table";
-import { Switch } from "ui/switch";
+} from "../components/ui/table";
+import { Switch } from "../components/ui/switch";
 
 interface BlockedIp {
   id: number;

@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "use-toast";
+import { useToast } from "../hooks/use-toast";
 import { useLocation } from "wouter";
-import { apiRequest } from "queryClient";
-import { AuthState, getCurrentUser } from "auth";
+import { apiRequest } from "../lib/queryClient";
+import { AuthState, getCurrentUser } from "../lib/auth";
 
 // Offline capabilities
 const initOfflineSupport = () => {
@@ -67,18 +67,18 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "ui/card";
-import { Button } from "ui/button";
-import { Input } from "ui/input";
-import { Textarea } from "ui/textarea";
-import { Label } from "ui/label";
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Textarea } from "../components/ui/textarea";
+import { Label } from "../components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "ui/select";
+} from "../components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -90,9 +90,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "ui/form";
-import { Checkbox } from "ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
+} from "../components/ui/form";
+import { Checkbox } from "../components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { format, formatDistanceToNow } from "date-fns";
 
 const JOB_TYPES = [
