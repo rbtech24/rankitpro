@@ -4744,8 +4744,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getChatMessages(sessionId: string): Promise<any[]> {
-    // First get the session to find the numeric ID
-    const [session] = await db.select({ id: chatSessions.id })
+    // Verify session exists then query messages directly using sessionId
+    const [session] = await db.select({ sessionId: chatSessions.sessionId })
       .from(chatSessions)
       .where(eq(chatSessions.sessionId, sessionId));
     
@@ -4755,7 +4755,7 @@ export class DatabaseStorage implements IStorage {
 
     return await db.select()
       .from(chatMessages)
-      .where(eq(chatMessages.sessionId, session.id))
+      .where(eq(chatMessages.sessionId, sessionId))
       .orderBy(asc(chatMessages.createdAt));
   }
 

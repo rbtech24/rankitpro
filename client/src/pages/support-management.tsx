@@ -106,8 +106,9 @@ export default function SupportManagement() {
 
   // Get messages for selected session
   const { data: messagesData = [] } = useQuery<ChatMessage[]>({
-    queryKey: ['/api/chat/session', selectedSession?.sessionId, 'messages'],
-    enabled: !!selectedSession?.sessionId
+    queryKey: [`/api/chat/session/${selectedSession?.sessionId}/messages`],
+    enabled: !!selectedSession?.sessionId,
+    refetchInterval: 2000, // Poll for new messages every 2 seconds
   });
 
   // Availability toggle mutation
