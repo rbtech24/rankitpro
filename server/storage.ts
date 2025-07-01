@@ -4706,29 +4706,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(asc(chatMessages.createdAt));
   }
 
-  async closeChatSession(sessionId: string, rating?: number, feedback?: string): Promise<any> {
-    const [closedSession] = await db.update(chatSessions)
-      .set({ 
-        status: 'closed',
-        closedAt: new Date(),
-        customerRating: rating,
-        customerFeedback: feedback
-      })
-      .where(eq(chatSessions.sessionId, sessionId))
-      .returning();
-    return closedSession;
-  }
 
-  async updateSupportAgentStatus(userId: number, isOnline: boolean): Promise<any> {
-    const [updatedAgent] = await db.update(supportAgents)
-      .set({ 
-        isOnline: isOnline,
-        updatedAt: new Date()
-      })
-      .where(eq(supportAgents.userId, userId))
-      .returning();
-    return updatedAgent;
-  }
 
   // Clear all waiting chat sessions
   async clearWaitingChats(): Promise<number> {
