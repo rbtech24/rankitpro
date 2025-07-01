@@ -10,10 +10,10 @@ import {
 } from "../../components/ui/dropdown-menu";
 import { Button } from "../../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { getCurrentUser } from '../../../lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { User, LogOut, Settings, HelpCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import NotificationBell from '../../../components/notifications/NotificationBell';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 interface HeaderProps {
   showNotifications?: boolean;
