@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from "../lib/queryClient";
-import Sidebar from '@/components/layout/sidebar-clean';
+import Sidebar from '../../components/layout/sidebar-clean';
 import {
   Card,
   CardContent,

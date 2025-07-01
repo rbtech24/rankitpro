@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCurrentUser, AuthState } from '@/lib/auth';
-import { apiRequest } from '@/lib/queryClient';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import { getCurrentUser, AuthState } from '../../lib/auth';
+import { apiRequest } from '../../lib/queryClient';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
+import { Textarea } from '../../components/ui/textarea';
+import { useToast } from '../../hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -163,7 +163,7 @@ export default function TechnicianMobile() {
 
   // Handle logout
   const handleLogout = () => {
-    import('@/lib/logout').then(({ performImmediateLogout }) => {
+    import('../../lib/logout').then(({ performImmediateLogout }) => {
       performImmediateLogout();
     });
   };
