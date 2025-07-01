@@ -55,7 +55,7 @@ import { useToast } from "../hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import Sidebar from '@/components/layout/sidebar';
+import Sidebar from '../components/layout/sidebar';
 import { formatDistanceToNow } from 'date-fns';
 import { 
   Loader2, 
