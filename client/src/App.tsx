@@ -114,7 +114,7 @@ import Profile from "@/pages/profile";
 
 
 // Authenticated route that redirects to login if not authenticated
-function PrivateRoute({ component: Component, role, ...rest }: { component: React.ComponentType<any>, role?: string, path: string }) {
+function PrivateRoute({ component: Component, role, ...rest }: { component: React.ComponentType<any>, role?: string | string[], path: string }) {
   const { data: auth, isLoading, error } = useQuery<AuthState>({
     queryKey: ["/api/auth/me"],
     queryFn: getCurrentUser,
@@ -150,9 +150,10 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
     return null;
   }
   
-  // Role-based access control removed - allow normal navigation
+  // Role-based access control - check if user role is allowed
+  const allowedRoles = Array.isArray(role) ? role : (role ? [role] : []);
   
-  if (role && auth.user.role !== role && auth.user.role !== "super_admin") {
+  if (role && !allowedRoles.includes(auth.user.role) && auth.user.role !== "super_admin") {
     // Redirect based on user role
     if (auth.user.role === "technician") {
       return <Redirect to="/mobile-field-app" />;
@@ -1242,7 +1243,7 @@ function Router() {
         <PrivateRoute component={CustomerSupport} path="/customer-support" role="super_admin" />
       </Route>
       <Route path="/support-dashboard">
-        <PrivateRoute component={SupportDashboard} path="/support-dashboard" role="super_admin" />
+        <PrivateRoute component={SupportDashboard} path="/support-dashboard" role={["super_admin", "company_admin"]} />
       </Route>
       <Route path="/support">
         <PrivateRoute component={Support} path="/support" role="company_admin" />
