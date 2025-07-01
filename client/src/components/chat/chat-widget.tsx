@@ -312,8 +312,8 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
   return (
     <div className="fixed bottom-6 right-6 z-50">
       <Card className={`w-96 shadow-2xl transition-all duration-300 ${
-        isMinimized ? 'h-16' : 'h-[600px]'
-      }`}>
+        isMinimized ? 'h-16' : 'h-[580px]'
+      } flex flex-col`}>
         {/* Chat Header */}
         <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
           <div className="flex items-center space-x-2">
@@ -424,7 +424,7 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
               /* Active Chat Screen */
               <>
                 {/* Messages Area */}
-                <div className="flex-1 p-4 space-y-3 h-[calc(600px-160px)] overflow-auto">
+                <div className="flex-1 p-4 space-y-3 overflow-auto min-h-0">
                   {messages.map((message) => (
                     <div
                       key={message.id}
@@ -468,7 +468,7 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
                 </div>
 
                 {/* Message Input */}
-                <div className="p-4 border-t space-y-2">
+                <div className="p-3 border-t space-y-2 flex-shrink-0">
                   {currentSession.status === 'waiting' && (
                     <Badge variant="secondary" className="w-full justify-center">
                       Waiting for support agent to join...
