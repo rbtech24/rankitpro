@@ -342,7 +342,7 @@ export default function TechApp() {
   
   // Handle logout
   const handleLogout = () => {
-    import('../../lib/logout').then(({ performImmediateLogout }) => {
+    import('../lib/logout').then(({ performImmediateLogout }) => {
       performImmediateLogout();
     });
   };
