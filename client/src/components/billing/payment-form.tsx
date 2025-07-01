@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
-import { Button } from '@/components/ui/button';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from '../../components/ui/button';
+import { apiRequest } from '../../lib/queryClient';
+import { useToast } from '../../hooks/use-toast';
 
 interface PaymentFormProps {
   clientSecret?: string;
