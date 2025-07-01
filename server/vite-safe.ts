@@ -36,33 +36,20 @@ const safeViteConfig = {
 };
 
 export async function setupVite(app: Express, server: Server) {
-  const serverOptions = {
-    middlewareMode: true,
-    hmr: { server },
-    allowedHosts: true,
-  };
-
-  try {
-    const vite = await createViteServer({
-      ...safeViteConfig,
-      server: serverOptions,
-    });
-
-    app.use(vite.ssrFixStacktrace);
-    app.use(vite.middlewares);
-
-    log("Vite dev server setup complete");
-    return vite;
-  } catch (error) {
-    log(`Vite setup failed: ${error.message}`, "vite-error");
-    
-    // Fallback to static file serving
-    const staticPath = path.resolve(process.cwd(), "client");
-    app.use(express.static(staticPath));
-    log("Fallback to static file serving enabled", "fallback");
-    
-    return null;
-  }
+  // Skip Vite in development due to configuration issues
+  // Fall back to static file serving for now
+  log("Skipping Vite setup due to configuration issues, using static fallback", "vite-safe");
+  
+  // Serve client files directly
+  const clientPath = path.resolve(process.cwd(), "client");
+  app.use(express.static(clientPath));
+  
+  // Serve node_modules for development dependencies
+  const nodeModulesPath = path.resolve(process.cwd(), "node_modules");
+  app.use("/node_modules", express.static(nodeModulesPath));
+  
+  log("Static file serving enabled as Vite replacement", "fallback");
+  return null;
 }
 
 export function serveStatic(app: Express) {
