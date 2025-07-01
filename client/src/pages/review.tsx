@@ -130,7 +130,7 @@ export default function Review() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <img 
-              src={"data:image/svg+xml,%3Csvg width="100" height="40" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="100" height="40" fill="%234338ca"/%3E%3Ctext x="50" y="25" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle" fill="white"%3ERank It Pro%3C/text%3E%3C/svg%3E"} 
+              src="/rank it pro logo.png" 
               alt="Rank It Pro" 
               className="h-12 mx-auto mb-4" 
             />
@@ -159,7 +159,7 @@ export default function Review() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <img 
-              src={"data:image/svg+xml,%3Csvg width="100" height="40" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="100" height="40" fill="%234338ca"/%3E%3Ctext x="50" y="25" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle" fill="white"%3ERank It Pro%3C/text%3E%3C/svg%3E"} 
+              src="/rank it pro logo.png" 
               alt="Rank It Pro" 
               className="h-12 mx-auto mb-4" 
             />
@@ -207,7 +207,7 @@ export default function Review() {
         <Card>
           <CardHeader className="text-center">
             <img 
-              src={"data:image/svg+xml,%3Csvg width="100" height="40" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="100" height="40" fill="%234338ca"/%3E%3Ctext x="50" y="25" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle" fill="white"%3ERank It Pro%3C/text%3E%3C/svg%3E"} 
+              src="/rank it pro logo.png" 
               alt="Rank It Pro" 
               className="h-12 mx-auto mb-4" 
             />
