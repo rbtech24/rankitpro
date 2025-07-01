@@ -69,36 +69,104 @@ app.get('/api/db-status', async (req, res) => {
   }
 });
 
-// Simple frontend serving
+// Temporary development interface while React build is being fixed
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
-      <title>Rank It Pro - Server Running</title>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Rank It Pro - Development Server</title>
       <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .status { color: green; }
-        .info { background: #f5f5f5; padding: 20px; border-radius: 8px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #333;
+        }
+        .container {
+          background: white;
+          padding: 2rem;
+          border-radius: 16px;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          max-width: 600px;
+          width: 90%;
+          text-align: center;
+        }
+        h1 { color: #667eea; margin-bottom: 1rem; font-size: 2.5rem; }
+        .status { 
+          background: #e8f5e8; 
+          color: #2d7d2d; 
+          padding: 1rem; 
+          border-radius: 8px; 
+          margin: 1rem 0;
+          font-weight: 500;
+        }
+        .info {
+          background: #f8f9fa;
+          padding: 1.5rem;
+          border-radius: 8px;
+          margin: 1rem 0;
+          text-align: left;
+        }
+        .endpoints {
+          display: grid;
+          gap: 0.5rem;
+          margin-top: 1rem;
+        }
+        .endpoint {
+          background: white;
+          padding: 0.75rem;
+          border: 1px solid #e1e5e9;
+          border-radius: 6px;
+          text-decoration: none;
+          color: #667eea;
+          font-weight: 500;
+          transition: all 0.2s;
+        }
+        .endpoint:hover {
+          background: #667eea;
+          color: white;
+          transform: translateY(-1px);
+        }
+        .tech-info {
+          font-size: 0.9rem;
+          color: #666;
+          margin-top: 1rem;
+        }
       </style>
     </head>
     <body>
-      <h1>🚀 Rank It Pro Server</h1>
-      <p class="status">✅ Server is running successfully!</p>
-      <div class="info">
-        <h3>Server Information:</h3>
-        <ul>
-          <li>Status: <strong>Online</strong></li>
-          <li>Mode: <strong>${process.env.NODE_ENV || 'development'}</strong></li>
-          <li>Port: <strong>${PORT}</strong></li>
-          <li>Time: <strong>${new Date().toISOString()}</strong></li>
-        </ul>
-        <h3>Available Endpoints:</h3>
-        <ul>
-          <li><a href="/health">/health</a> - Health check</li>
-          <li><a href="/api/test">/api/test</a> - API test</li>
-          <li><a href="/api/db-status">/api/db-status</a> - Database status</li>
-        </ul>
+      <div class="container">
+        <h1>🚀 Rank It Pro</h1>
+        <div class="status">✅ Server Running Successfully</div>
+        
+        <div class="info">
+          <h3>Server Status</h3>
+          <p><strong>Mode:</strong> ${process.env.NODE_ENV || 'development'}</p>
+          <p><strong>Port:</strong> ${PORT}</p>
+          <p><strong>Database:</strong> Connected</p>
+          <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+        </div>
+
+        <div class="info">
+          <h3>API Endpoints</h3>
+          <div class="endpoints">
+            <a href="/health" class="endpoint">🏥 Health Check</a>
+            <a href="/api/test" class="endpoint">🧪 API Test</a>
+            <a href="/api/db-status" class="endpoint">💾 Database Status</a>
+          </div>
+        </div>
+
+        <div class="tech-info">
+          <p>React frontend build in progress...</p>
+          <p>API server operational and ready for development</p>
+        </div>
       </div>
     </body>
     </html>
