@@ -160,13 +160,29 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
 
   const startChat = async () => {
     try {
+      console.log('Starting chat session...');
+      
       const response = await apiRequest("POST", "/api/chat/session/start", {
         initialMessage: "Hello, I need assistance.",
         category: "general",
         priority: "medium"
       });
       
-      const { session } = response;
+      console.log('Chat session response:', response);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Chat session data:', data);
+      
+      const { session } = data;
+      
+      if (!session) {
+        throw new Error('No session returned from server');
+      }
+      
       setCurrentSession(session);
       
       // Join the chat session via WebSocket
@@ -188,10 +204,16 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
         isRead: true
       }]);
       
+      toast({
+        title: "Chat Started",
+        description: "Your support session has been created. An agent will join shortly.",
+      });
+      
     } catch (error) {
+      console.error('Error starting chat:', error);
       toast({
         title: "Error",
-        description: "Failed to start chat session. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to start chat session. Please try again.",
         variant: "destructive"
       });
     }
