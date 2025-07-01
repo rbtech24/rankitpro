@@ -1,8 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Camera, RotateCcw, Zap, ZapOff, ZoomIn, ZoomOut, Download, Trash2, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
+import { useToast } from '../../hooks/use-toast';
 
 interface CapturedPhoto {
   id: string;
