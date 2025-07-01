@@ -184,7 +184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       secure: isProduction, // HTTPS only in production
       httpOnly: true,
       sameSite: 'strict',
-      maxAge: isProduction ? 2 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000 // 2 hours in production, 24 hours in dev
+      maxAge: isProduction ? 2 * 60 * 60 * 1000 : 4 * 60 * 60 * 1000 // 2 hours in production, 4 hours in dev
     }
   }));
 
@@ -4414,33 +4414,6 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     }
   });
 
-  // Chat Messages
-  app.post("/api/chat/session/:sessionId/message", isAuthenticated, async (req, res) => {
-    try {
-      const { message, messageType = 'text' } = req.body;
-      const { sessionId } = req.params;
-      
-      // Get the session by sessionId to get the database ID
-      const session = await storage.getChatSessionBySessionId(sessionId);
-      if (!session) {
-        return res.status(404).json({ error: 'Chat session not found' });
-      }
-      
-      const chatMessage = await storage.createChatMessage({
-        sessionId: session.id, // Use the database primary key ID
-        senderId: req.session.userId!,
-        senderType: 'customer',
-        senderName: req.user?.username || 'Customer',
-        message,
-        messageType
-      });
-      
-      res.json({ message: chatMessage });
-    } catch (error) {
-      console.error('Error sending chat message:', error);
-      res.status(500).json({ message: 'Failed to send message' });
-    }
-  });
 
   // Support Agent endpoints (Admin only)
   app.get("/api/chat/admin/sessions", isSuperAdmin, async (req, res) => {

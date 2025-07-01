@@ -21,7 +21,14 @@
       if (key === 'className') {
         element.className = attributes[key];
       } else if (key === 'innerHTML') {
-        element.innerHTML = attributes[key];
+        // Sanitize HTML to prevent XSS attacks
+        const sanitizedHTML = attributes[key]
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#x27;')
+          .replace(/\//g, '&#x2F;');
+        element.innerHTML = sanitizedHTML;
       } else {
         element.setAttribute(key, attributes[key]);
       }
