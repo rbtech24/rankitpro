@@ -26,7 +26,10 @@ export function log(message: string, source = "express") {
 export async function setupVite(app: Express, server: Server) {
   // Custom Vite configuration that handles dirname properly
   const viteConfig = {
-    plugins: [],
+    plugins: [
+      // Add React plugin for proper React support
+      (await import('@vitejs/plugin-react')).default(),
+    ],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "..", "client", "src"),
@@ -38,6 +41,15 @@ export async function setupVite(app: Express, server: Server) {
     build: {
       outDir: path.resolve(__dirname, "..", "dist/public"),
       emptyOutDir: true,
+    },
+    css: {
+      postcss: {
+        plugins: [
+          // Ensure PostCSS processes Tailwind properly
+          require('tailwindcss'),
+          require('autoprefixer'),
+        ],
+      },
     },
   };
 
