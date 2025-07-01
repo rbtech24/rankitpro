@@ -2499,7 +2499,7 @@ Format as professional service documentation.`;
   // Get agent's assigned chat sessions
   app.get("/api/chat/agent/sessions", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      if (req.user.role !== 'super_admin') {
+      if (req.user.role !== 'super_admin' && req.user.role !== 'company_admin') {
         return res.status(403).json({ error: 'Access denied' });
       }
 
@@ -2514,7 +2514,7 @@ Format as professional service documentation.`;
   // Get agent status
   app.get("/api/chat/agent/status", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      if (req.user.role !== 'super_admin') {
+      if (req.user.role !== 'super_admin' && req.user.role !== 'company_admin') {
         return res.status(403).json({ error: 'Access denied' });
       }
 
@@ -2542,7 +2542,7 @@ Format as professional service documentation.`;
   // Toggle agent availability
   app.post("/api/chat/agent/availability", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      if (req.user.role !== 'super_admin') {
+      if (req.user.role !== 'super_admin' && req.user.role !== 'company_admin') {
         return res.status(403).json({ error: 'Access denied' });
       }
 
@@ -2579,7 +2579,7 @@ Format as professional service documentation.`;
   // Chat statistics endpoint
   app.get("/api/chat/admin/stats", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      if (req.user.role !== 'super_admin') {
+      if (req.user.role !== 'super_admin' && req.user.role !== 'company_admin') {
         return res.status(403).json({ error: 'Access denied' });
       }
 

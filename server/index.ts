@@ -30,8 +30,20 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      connectSrc: ["'self'", "https://api.openai.com", "https://api.anthropic.com"]
+      scriptSrc: [
+        "'self'", 
+        "'unsafe-inline'", 
+        "'unsafe-eval'",
+        "https://js.stripe.com",
+        "https://replit.com"
+      ],
+      connectSrc: [
+        "'self'", 
+        "https://api.openai.com", 
+        "https://api.anthropic.com",
+        "https://api.stripe.com",
+        "wss:"
+      ]
     }
   }
 }));
