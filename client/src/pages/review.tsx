@@ -21,7 +21,8 @@ import {
   AlertDescription,
   AlertTitle,
 } from "../components/ui/alert";
-import rankItProLogo from "@assets/rank it pro logo.png";
+// Logo import temporarily disabled for build compatibility
+// import rankItProLogo from "../../../attached_assets/rank it pro logo.png";
 
 export default function Review() {
   const { token } = useParams();
@@ -130,7 +131,7 @@ export default function Review() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <img 
-              src={rankItProLogo} 
+              src="#" // rankItProLogo placeholder 
               alt="Rank It Pro" 
               className="h-12 mx-auto mb-4" 
             />
@@ -159,7 +160,7 @@ export default function Review() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <img 
-              src={rankItProLogo} 
+              src="#" // rankItProLogo placeholder 
               alt="Rank It Pro" 
               className="h-12 mx-auto mb-4" 
             />
@@ -207,7 +208,7 @@ export default function Review() {
         <Card>
           <CardHeader className="text-center">
             <img 
-              src={rankItProLogo} 
+              src="#" // rankItProLogo placeholder 
               alt="Rank It Pro" 
               className="h-12 mx-auto mb-4" 
             />
