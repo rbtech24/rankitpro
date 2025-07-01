@@ -2481,7 +2481,7 @@ Format as professional service documentation.`;
       // Send initial message if provided
       if (initialMessage) {
         await storage.createChatMessage({
-          sessionId,
+          sessionId: session.id, // Use the database primary key ID, not the string sessionId
           senderId: req.user.id,
           senderType: 'customer',
           senderName: req.user.username,
@@ -2653,7 +2653,7 @@ Format as professional service documentation.`;
       
       // Send system message
       await storage.createChatMessage({
-        sessionId,
+        sessionId: session.id, // Use the database primary key ID
         senderId: req.user.id,
         senderType: 'system',
         senderName: 'System',
@@ -2677,11 +2677,17 @@ Format as professional service documentation.`;
         return res.status(400).json({ error: 'Message is required' });
       }
 
+      // Get the session by sessionId to get the database ID
+      const session = await storage.getChatSessionBySessionId(sessionId);
+      if (!session) {
+        return res.status(404).json({ error: 'Chat session not found' });
+      }
+
       // Determine sender type based on user role
       const senderType = req.user.role === 'super_admin' ? 'agent' : 'customer';
 
       const chatMessage = await storage.createChatMessage({
-        sessionId,
+        sessionId: session.id, // Use the database primary key ID
         senderId: req.user.id,
         senderType,
         senderName: req.user.username,
