@@ -20,9 +20,9 @@ delete pkg.dependencies['lightningcss-linux-x64-musl'];
 delete pkg.devDependencies?.['lightningcss'];
 delete pkg.optionalDependencies?.['lightningcss'];
 
-// Also remove any other problematic platform-specific deps
-const problematic = ['lightningcss', '@swc/core'];
-problematic.forEach(dep => {
+// Only remove lightningcss specifically - keep other build tools  
+const lightningCssOnly = ['lightningcss', 'lightningcss-linux-x64-gnu', 'lightningcss-linux-x64-musl'];
+lightningCssOnly.forEach(dep => {
   delete pkg.dependencies[dep];
   delete pkg.devDependencies?.[dep];
   delete pkg.optionalDependencies?.[dep];
