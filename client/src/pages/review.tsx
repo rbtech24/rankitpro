@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'wouter';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '../lib/queryClient';
+import { useToast } from '../hooks/use-toast';
 import { 
   Card, 
   CardContent, 
@@ -9,19 +9,19 @@ import {
   CardFooter, 
   CardHeader, 
   CardTitle 
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+} from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Textarea } from '../components/ui/textarea';
+import { Switch } from '../components/ui/switch';
+import { Label } from '../components/ui/label';
+import { Checkbox } from '../components/ui/checkbox';
 import { Star, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@/components/ui/alert";
-import rankItProLogo from "@assets/rank it pro logo.png";
+} from "../components/ui/alert";
+// import "data:image/svg+xml,%3Csvg width="100" height="40" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="100" height="40" fill="%234338ca"/%3E%3Ctext x="50" y="25" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle" fill="white"%3ERank It Pro%3C/text%3E%3C/svg%3E" from "../../attached_assets/rank it pro logo.png";
 
 export default function Review() {
   const { token } = useParams();
@@ -130,7 +130,7 @@ export default function Review() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <img 
-              src={rankItProLogo} 
+              src={"data:image/svg+xml,%3Csvg width="100" height="40" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="100" height="40" fill="%234338ca"/%3E%3Ctext x="50" y="25" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle" fill="white"%3ERank It Pro%3C/text%3E%3C/svg%3E"} 
               alt="Rank It Pro" 
               className="h-12 mx-auto mb-4" 
             />
@@ -159,7 +159,7 @@ export default function Review() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <img 
-              src={rankItProLogo} 
+              src={"data:image/svg+xml,%3Csvg width="100" height="40" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="100" height="40" fill="%234338ca"/%3E%3Ctext x="50" y="25" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle" fill="white"%3ERank It Pro%3C/text%3E%3C/svg%3E"} 
               alt="Rank It Pro" 
               className="h-12 mx-auto mb-4" 
             />
@@ -207,7 +207,7 @@ export default function Review() {
         <Card>
           <CardHeader className="text-center">
             <img 
-              src={rankItProLogo} 
+              src={"data:image/svg+xml,%3Csvg width="100" height="40" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="100" height="40" fill="%234338ca"/%3E%3Ctext x="50" y="25" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle" fill="white"%3ERank It Pro%3C/text%3E%3C/svg%3E"} 
               alt="Rank It Pro" 
               className="h-12 mx-auto mb-4" 
             />

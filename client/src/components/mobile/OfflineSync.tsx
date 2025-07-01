@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Wifi, WifiOff, Upload, Download, AlertCircle, CheckCircle, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { Progress } from '../components/ui/progress';
+import { useToast } from '../hooks/use-toast';
 
 interface OfflineData {
   id: string;

@@ -12,7 +12,7 @@ import {
   CardContent,
   CardFooter,
 } from "../../components/ui/card";
-import { useNotifications } from '@/context/NotificationContext';
+import { useNotifications } from '../context/NotificationContext';
 import { Link } from 'wouter';
 
 interface NotificationBellProps {

@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Switch } from "../components/ui/switch";
+import { Textarea } from "../components/ui/textarea";
+import { useToast } from "../hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import Sidebar from "@/components/layout/sidebar-clean";
+import { apiRequest, queryClient } from "../lib/queryClient";
+import Sidebar from "../components/layout/sidebar-clean";
 import { 
   MessageCircle, 
   Clock, 
