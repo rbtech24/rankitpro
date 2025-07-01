@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'wouter';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '../lib/queryClient';
+import { useToast } from '../hooks/use-toast';
 import { 
   Card, 
   CardContent, 
@@ -9,18 +9,18 @@ import {
   CardFooter, 
   CardHeader, 
   CardTitle 
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+} from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Textarea } from '../components/ui/textarea';
+import { Switch } from '../components/ui/switch';
+import { Label } from '../components/ui/label';
+import { Checkbox } from '../components/ui/checkbox';
 import { Star, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@/components/ui/alert";
+} from "../components/ui/alert";
 import rankItProLogo from "@assets/rank it pro logo.png";
 
 export default function Review() {
