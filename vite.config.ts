@@ -7,14 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
-        ]
-      : []),
+    // Removed the problematic top-level await cartographer plugin
   ],
   resolve: {
     alias: {
