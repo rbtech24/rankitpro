@@ -8,9 +8,13 @@ echo "🔨 Starting production build with custom configuration..."
 # Create dist directory if it doesn't exist
 mkdir -p dist
 
-# Build client first using Vite
+# Set Node.js to ignore optional dependencies that might cause platform issues
+export npm_config_optional=false
+export npm_config_ignore_optional=true
+
+# Build client first using Vite (with fallback CSS processing)
 echo "📦 Building client application..."
-npx vite build client
+npx vite build client --mode production
 
 # Build server with comprehensive external dependencies to avoid babel/lightningcss issues
 echo "🚀 Building server application with enhanced exclusions..."
