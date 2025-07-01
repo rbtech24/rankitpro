@@ -129,8 +129,8 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
     return;
     
     let reconnectAttempts = 0;
-    const maxReconnectAttempts = 3;
-    const reconnectInterval = 5000; // 5 seconds
+    const maxReconnectAttempts = 1; // Reduced from 3 to 1
+    const reconnectInterval = 30000; // Increased from 5 to 30 seconds
     
     const connectWebSocket = () => {
       try {
