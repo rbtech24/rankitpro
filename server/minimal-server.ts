@@ -42,7 +42,7 @@ app.use((req: AuthenticatedRequest, res, next) => {
     email: 'embed@testcompany.com',
     username: 'embed@testcompany.com',
     role: 'company_admin',
-    companyId: 1
+    companyId: 21  // Use real company ID from database
   };
   req.isAuthenticated = () => true;
   next();
