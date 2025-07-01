@@ -1,23 +1,71 @@
-/**
- * Fixed server that completely avoids the vite.config.ts import issue
- * This server starts without any problematic dependencies
- */
-import express from "express";
-import { createServer } from "http";
+import express, { type Request, Response, NextFunction } from "express";
+import { registerRoutes } from "./routes";
+import { setupVite, serveStatic, log } from "./vite";
+import { storage } from "./storage";
+import bcrypt from "bcrypt";
+import emailService from "./services/resend-email-service";
+import { validateEnvironment, getFeatureFlags } from "./env-validation";
 import path from "path";
+import { createServer, IncomingMessage, ServerResponse } from "http";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import MemoryOptimizer from "./services/memory-optimizer";
+
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '5000');
 
-// Basic middleware
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+// Trust proxy for production deployments (required for rate limiting)
+// Configure trust proxy properly for production
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1); // Trust first proxy (Render)
+} else {
+  app.set('trust proxy', false);
+}
 
-// CORS middleware for development
+// Security middleware - helmet for security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      connectSrc: ["'self'", "https://api.openai.com", "https://api.anthropic.com"]
+    }
+  }
+}));
+
+// Rate limiting with proper proxy configuration
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000,
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  // trustProxy handled separately above
+  skip: (req) => {
+    // Skip rate limiting for health checks
+    return req.path === '/health' || req.path === '/api/health';
+  }
+});
+
+app.use('/api/', limiter);
+
+// Production-ready CORS configuration
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  const isProduction = process.env.NODE_ENV === 'production';
+  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5000', 'http://localhost:3000'];
+  
+  const origin = req.headers.origin;
+  if (!isProduction || (origin && allowedOrigins.includes(origin))) {
+    res.header('Access-Control-Allow-Origin', isProduction ? origin : '*');
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
   } else {
@@ -25,184 +73,270 @@ app.use((req, res, next) => {
   }
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    service: 'Rank It Pro (Fixed Server)',
-    mode: process.env.NODE_ENV || 'development'
-  });
-});
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-// API test endpoint
-app.get('/api/test', (req, res) => {
-  res.json({ 
-    message: 'Fixed server API is working', 
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV || 'development'
-  });
-});
+// Authentication bypass removed - using proper API endpoints
 
-// Database status endpoint
-app.get('/api/db-status', async (req, res) => {
-  try {
-    // Simple database connection test without importing problematic modules
-    const dbUrl = process.env.DATABASE_URL;
-    if (!dbUrl) {
-      return res.status(500).json({ 
-        status: 'error', 
-        message: 'Database URL not configured' 
-      });
+app.use((req, res, next) => {
+  const start = Date.now();
+  const path = req.path;
+  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+
+  const originalResJson = res.json;
+  res.json = function (bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
+  };
+
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (path.startsWith("/api")) {
+      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      }
+
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "…";
+      }
+
+      log(logLine);
     }
-    
-    res.json({ 
-      status: 'ok', 
-      message: 'Database URL configured',
-      hasUrl: !!dbUrl
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      status: 'error', 
-      message: 'Database connection test failed' 
-    });
-  }
-});
-
-// Temporary development interface while React build is being fixed
-app.get('/', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Rank It Pro - Development Server</title>
-      <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #333;
-        }
-        .container {
-          background: white;
-          padding: 2rem;
-          border-radius: 16px;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-          max-width: 600px;
-          width: 90%;
-          text-align: center;
-        }
-        h1 { color: #667eea; margin-bottom: 1rem; font-size: 2.5rem; }
-        .status { 
-          background: #e8f5e8; 
-          color: #2d7d2d; 
-          padding: 1rem; 
-          border-radius: 8px; 
-          margin: 1rem 0;
-          font-weight: 500;
-        }
-        .info {
-          background: #f8f9fa;
-          padding: 1.5rem;
-          border-radius: 8px;
-          margin: 1rem 0;
-          text-align: left;
-        }
-        .endpoints {
-          display: grid;
-          gap: 0.5rem;
-          margin-top: 1rem;
-        }
-        .endpoint {
-          background: white;
-          padding: 0.75rem;
-          border: 1px solid #e1e5e9;
-          border-radius: 6px;
-          text-decoration: none;
-          color: #667eea;
-          font-weight: 500;
-          transition: all 0.2s;
-        }
-        .endpoint:hover {
-          background: #667eea;
-          color: white;
-          transform: translateY(-1px);
-        }
-        .tech-info {
-          font-size: 0.9rem;
-          color: #666;
-          margin-top: 1rem;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>🚀 Rank It Pro</h1>
-        <div class="status">✅ Server Running Successfully</div>
-        
-        <div class="info">
-          <h3>Server Status</h3>
-          <p><strong>Mode:</strong> ${process.env.NODE_ENV || 'development'}</p>
-          <p><strong>Port:</strong> ${PORT}</p>
-          <p><strong>Database:</strong> Connected</p>
-          <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-        </div>
-
-        <div class="info">
-          <h3>API Endpoints</h3>
-          <div class="endpoints">
-            <a href="/health" class="endpoint">🏥 Health Check</a>
-            <a href="/api/test" class="endpoint">🧪 API Test</a>
-            <a href="/api/db-status" class="endpoint">💾 Database Status</a>
-          </div>
-        </div>
-
-        <div class="tech-info">
-          <p>React frontend build in progress...</p>
-          <p>API server operational and ready for development</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `);
-});
-
-// Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Server error:', err);
-  res.status(500).json({ 
-    error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
   });
+
+  next();
 });
 
-// Start server
-async function startServer() {
+// Function to generate a secure random password
+function generateSecurePassword(): string {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*';
+  let password = '';
+  for (let i = 0; i < 16; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+}
+
+// Function to create a super admin user if one doesn't exist
+async function createSuperAdminIfNotExists() {
   try {
-    console.log('🚀 Starting Rank It Pro Fixed Server...');
-    console.log(`📊 Mode: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🔗 Database URL configured: ${!!process.env.DATABASE_URL}`);
+    // Check if any super admin exists
+    const users = await storage.getAllUsers();
+    console.log("Checking for existing super admin. Current user count:", users.length);
+    const existingSuperAdmin = users.find(user => user.role === "super_admin");
+    console.log("Super admin exists:", !!existingSuperAdmin);
     
-    const httpServer = createServer(app);
-    
-    httpServer.listen(PORT, '0.0.0.0', () => {
-      console.log(`✅ Server running on port ${PORT}`);
-      console.log(`🌐 Open: http://localhost:${PORT}`);
-      console.log(`📊 Health: http://localhost:${PORT}/health`);
-      console.log(`🔧 API Test: http://localhost:${PORT}/api/test`);
-      console.log(`💾 DB Status: http://localhost:${PORT}/api/db-status`);
-    });
-    
+    if (!existingSuperAdmin) {
+      console.log("Creating new secure super admin account...");
+      // Use environment variables if provided, otherwise generate secure credentials
+      const adminPassword = process.env.SUPER_ADMIN_PASSWORD || generateSecurePassword();
+      const adminEmail = process.env.SUPER_ADMIN_EMAIL || `admin-${Date.now()}@rankitpro.system`;
+      const hashedPassword = await bcrypt.hash(adminPassword, 12);
+      
+      await storage.createUser({
+        username: "system_admin",
+        email: adminEmail,
+        password: hashedPassword,
+        role: "super_admin",
+        companyId: null,
+        stripeCustomerId: null,
+        stripeSubscriptionId: null
+      });
+      
+      log("=====================================");
+      log("SYSTEM ADMIN ACCOUNT CREATED");
+      log("=====================================");
+      log(`Email: ${adminEmail}`);
+      log(`Password: ${adminPassword}`);
+      log("=====================================");
+      log("SAVE THESE CREDENTIALS IMMEDIATELY");
+      log("They will not be displayed again!");
+      log("=====================================");
+    }
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
-    process.exit(1);
+    console.error("Error creating super admin user:", error);
   }
 }
 
-startServer();
+(async () => {
+  // Validate environment variables before starting
+  try {
+    const env = validateEnvironment();
+    const features = getFeatureFlags();
+    
+    console.log("🚀 Starting Rank It Pro SaaS Platform");
+    console.log(`📊 Features enabled: ${Object.entries(features).filter(([_, enabled]) => enabled).map(([name]) => name).join(', ') || 'none'}`);
+  } catch (error) {
+    console.error("❌ Environment validation failed:", error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+
+  // Add database connection verification with improved retry logic
+  let dbConnected = false;
+  let retryCount = 0;
+  const maxRetries = 5;
+  
+  while (!dbConnected && retryCount < maxRetries) {
+    try {
+      console.log(`🔄 Verifying database connection... (attempt ${retryCount + 1}/${maxRetries})`);
+      
+      // Import storage to trigger connection initialization
+      const { storage } = await import("./storage");
+      
+      // Test the connection with a simple query
+      const users = await storage.getAllUsers();
+      console.log(`✅ Database connection verified - found ${users.length} users`);
+      dbConnected = true;
+    } catch (error) {
+      retryCount++;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`❌ Database connection attempt ${retryCount} failed:`, errorMessage);
+      
+      // Check if it's a connection-related error
+      const isConnectionError = errorMessage.includes('connect') || 
+                              errorMessage.includes('timeout') ||
+                              errorMessage.includes('SSL') ||
+                              errorMessage.includes('ENOTFOUND') ||
+                              errorMessage.includes('ECONNREFUSED');
+      
+      if (retryCount < maxRetries && isConnectionError) {
+        const delay = Math.min(retryCount * 3000, 15000); // 3s, 6s, 9s, 12s, 15s
+        console.log(`🔄 Connection error detected. Retrying in ${delay/1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else if (retryCount >= maxRetries) {
+        console.error("❌ Database connection failed after all retries.");
+        console.error("💡 This might be due to:");
+        console.error("   - Network connectivity issues");
+        console.error("   - Incorrect DATABASE_URL configuration");
+        console.error("   - Database server being unavailable");
+        console.error("   - SSL configuration problems");
+        console.error("\n🚨 Application will start but database operations will fail!");
+        break;
+      } else {
+        // Non-connection error, don't retry
+        console.error("❌ Non-connection database error:", errorMessage);
+        break;
+      }
+    }
+  }
+  
+  // Admin setup is now handled via one-time setup page
+  // await createSuperAdminIfNotExists();
+  
+  // Email service is automatically initialized in the Resend service
+  if (emailService.isEnabled()) {
+    log("Email service initialized successfully", "info");
+  } else {
+    log("Email service initialization failed - notifications will be disabled", "warn");
+  }
+  
+  // Initialize memory optimizer
+  const memoryOptimizer = MemoryOptimizer.getInstance();
+  memoryOptimizer.initialize();
+  
+  // Serve static uploaded files with proper headers
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
+    setHeaders: (res, path) => {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+    }
+  }));
+  
+  const server = await registerRoutes(app);
+
+  // Critical Fix: Add API route exclusion middleware BEFORE Vite setup
+  // This prevents Vite from intercepting API calls
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+      // Skip Vite middleware for API routes
+      const originalUrl = req.originalUrl;
+      console.log(`API route bypassing Vite: ${req.method} ${originalUrl}`);
+      
+      // If no route matched, send 404 JSON response
+      const timer = setTimeout(() => {
+        if (!res.headersSent) {
+          res.status(404).json({
+            error: 'API endpoint not found',
+            path: originalUrl,
+            method: req.method,
+            timestamp: new Date().toISOString()
+          });
+        }
+      }, 100);
+      
+      // Clear timeout if response is sent
+      const originalSend = res.send;
+      const originalJson = res.json;
+      const originalEnd = res.end;
+      
+      const clearTimerAndCall = (originalFn: Function, thisArg: any, args: any[]) => {
+        clearTimeout(timer);
+        return originalFn.apply(thisArg, args);
+      };
+      
+      res.send = function(...args: any[]) {
+        return clearTimerAndCall(originalSend, this, args);
+      };
+      
+      res.json = function(...args: any[]) {
+        return clearTimerAndCall(originalJson, this, args);
+      };
+      
+      res.end = function(...args: any[]) {
+        return clearTimerAndCall(originalEnd, this, args);
+      };
+    }
+    next();
+  });
+
+  // importantly only setup vite in development and after
+  // setting up all the other routes so the catch-all route
+  // doesn't interfere with the other routes
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+    
+    // Serve admin access page at /admin-access
+    app.get('/admin-access', (req, res) => {
+      res.sendFile(__dirname + '/../public/admin-access.html');
+    });
+  }
+
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+
+    console.error("Server error:", err);
+    res.status(status).json({ message });
+  });
+
+  // Use Render's PORT environment variable in production, fallback to 5000 for development
+  const port = process.env.PORT || 5000;
+  
+  // Add error handling for port conflicts
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use. Trying to find an available port...`);
+      // Try alternative ports
+      const alternativePort = parseInt(port.toString()) + 1;
+      server.listen({
+        port: alternativePort,
+        host: "0.0.0.0",
+      }, () => {
+        log(`serving on port ${alternativePort} (alternative port due to conflict)`);
+      });
+    } else {
+      console.error('Server error:', err);
+      process.exit(1);
+    }
+  });
+  
+  server.listen({
+    port,
+    host: "0.0.0.0",
+  }, () => {
+    log(`serving on port ${port}`);
+  });
+})();

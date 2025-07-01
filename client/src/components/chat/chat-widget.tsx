@@ -183,7 +183,6 @@ export default function ChatWidget({ user }: ChatWidgetProps) {
         throw new Error('No session returned from server');
       }
       
-      console.log('Setting current session:', session);
       setCurrentSession(session);
       
       // Join the chat session via WebSocket

@@ -2461,24 +2461,12 @@ Format as professional service documentation.`;
 
   // Chat System API Endpoints
   
-  // Start a new chat session (MAIN ENDPOINT)
+  // Start a new chat session
   app.post("/api/chat/session/start", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { initialMessage, category = "general", priority = "medium" } = req.body;
       
-      // Generate unique session ID
-      const sessionId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Get company name for better session display
-      let companyName = 'Unknown Company';
-      if (req.user.companyId) {
-        try {
-          const company = await storage.getCompany(req.user.companyId);
-          companyName = company?.name || 'Unknown Company';
-        } catch (error) {
-          console.error('Error fetching company name:', error);
-        }
-      }
+      const sessionId = Math.random().toString(36).substring(2, 15);
       
       const session = await storage.createChatSession({
         sessionId,
@@ -2487,17 +2475,13 @@ Format as professional service documentation.`;
         status: 'waiting',
         category,
         priority,
-        title: initialMessage?.substring(0, 100) || 'Support Request',
-        companyName: companyName,
-        initialMessage: initialMessage || 'Hello, I need assistance.',
-        currentPage: req.headers.referer || '',
-        userAgent: req.headers['user-agent'] || ''
+        title: initialMessage?.substring(0, 100) || 'Support Request'
       });
 
       // Send initial message if provided
       if (initialMessage) {
         await storage.createChatMessage({
-          sessionId: session.id, // Use the internal session ID for messages
+          sessionId,
           senderId: req.user.id,
           senderType: 'customer',
           senderName: req.user.username,
@@ -2505,12 +2489,7 @@ Format as professional service documentation.`;
         });
       }
 
-      res.json({ 
-        session: {
-          ...session,
-          companyName
-        }
-      });
+      res.json({ session });
     } catch (error) {
       console.error('Error starting chat session:', error);
       res.status(500).json({ error: 'Failed to start chat session' });
@@ -2698,28 +2677,16 @@ Format as professional service documentation.`;
         return res.status(400).json({ error: 'Message is required' });
       }
 
-      // First, find the session by sessionId (string) to get the internal ID (integer)
-      const session = await storage.getChatSessionBySessionId(sessionId);
-      if (!session) {
-        return res.status(404).json({ error: 'Chat session not found' });
-      }
-
       // Determine sender type based on user role
       const senderType = req.user.role === 'super_admin' ? 'agent' : 'customer';
 
-      // Use the internal session ID (integer) for message storage
       const chatMessage = await storage.createChatMessage({
-        sessionId: session.id, // Use the internal integer ID
+        sessionId,
         senderId: req.user.id,
         senderType,
         senderName: req.user.username,
         message: message.trim()
       });
-
-      // If this is an agent joining for the first time, update session status
-      if (senderType === 'agent' && session.status === 'waiting') {
-        await storage.updateChatSession(session.id, { status: 'active', supportAgentId: req.user.id });
-      }
 
       res.json({ message: chatMessage });
     } catch (error) {
@@ -4372,7 +4339,30 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     }
   });
 
-  // Chat Support System API endpoints (REMOVED DUPLICATE - see line 2465)
+  // Chat Support System API endpoints
+  // Chat Session Management
+  app.post("/api/chat/session/start", isAuthenticated, async (req, res) => {
+    try {
+      const { initialMessage, category = 'general', priority = 'medium' } = req.body;
+      const sessionId = crypto.randomUUID();
+      
+      const session = await storage.createChatSession({
+        sessionId,
+        userId: req.session.userId!,
+        companyId: req.user?.companyId || null,
+        category,
+        priority,
+        initialMessage,
+        currentPage: req.headers.referer || '',
+        userAgent: req.headers['user-agent'] || ''
+      });
+      
+      res.json({ session, sessionId });
+    } catch (error) {
+      console.error('Error starting chat session:', error);
+      res.status(500).json({ message: 'Failed to start chat session' });
+    }
+  });
 
   app.get("/api/chat/session/:sessionId", isAuthenticated, async (req, res) => {
     try {
