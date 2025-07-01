@@ -2718,7 +2718,7 @@ Format as professional service documentation.`;
 
       // If this is an agent joining for the first time, update session status
       if (senderType === 'agent' && session.status === 'waiting') {
-        await storage.updateChatSession(session.id, { status: 'active', agentId: req.user.id });
+        await storage.updateChatSession(session.id, { status: 'active', supportAgentId: req.user.id });
       }
 
       res.json({ message: chatMessage });
