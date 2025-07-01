@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
-import tailwindcss from "tailwindcss";
+import tailwindcss from "@tailwindcss/postcss";
 import autoprefixer from "autoprefixer";
 
 // Get __dirname equivalent for ESM
@@ -48,8 +48,8 @@ export async function setupVite(app: Express, server: Server) {
       postcss: {
         plugins: [
           // Ensure PostCSS processes Tailwind properly
-          require('tailwindcss'),
-          require('autoprefixer'),
+          tailwindcss,
+          autoprefixer,
         ],
       },
     },
