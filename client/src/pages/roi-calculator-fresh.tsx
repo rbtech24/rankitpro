@@ -15,21 +15,18 @@ const ROICalculatorFresh = () => {
   const [averageJobValue, setAverageJobValue] = useState(300);
   const [currentSearchPosition, setCurrentSearchPosition] = useState(15);
   const [targetSearchPosition, setTargetSearchPosition] = useState(5);
-  const [timeSpentOnMarketing, setTimeSpentOnMarketing] = useState(10);
 
   // Calculated results
   const [results, setResults] = useState({
     currentRevenue: 0,
     additionalRevenue: 0,
     totalNewRevenue: 0,
-    timeSavings: 0,
-    timeSavingsValue: 0,
     totalMonthlyBenefit: 0,
     monthlyCost: 197, // Pro plan
     netBenefit: 0,
     roi: 0,
     paybackMonths: 0,
-    additionalLeadsFromRankings: 0,
+    additionalCustomersFromRankings: 0,
     currentCTR: 0,
     targetCTR: 0,
     rankingImprovement: 0
@@ -80,13 +77,8 @@ const ROICalculatorFresh = () => {
     const additionalRevenue = additionalCustomersFromRankings * averageJobValue;
     const totalNewRevenue = currentRevenue + additionalRevenue;
 
-    // Time savings (automation reduces marketing time by ~40%)
-    const timeReduction = timeSpentOnMarketing * 0.4; // 40% time savings
-    const hourlyValue = 50; // Typical business owner hourly rate
-    const timeSavingsValue = timeReduction * hourlyValue * 4.33; // Monthly value
-
-    // Total benefit and ROI
-    const totalMonthlyBenefit = additionalRevenue + timeSavingsValue;
+    // Total benefit and ROI (revenue only, no time savings)
+    const totalMonthlyBenefit = additionalRevenue;
     const monthlyCost = planPricing.pro;
     const netBenefit = totalMonthlyBenefit - monthlyCost;
     const roi = totalMonthlyBenefit > 0 ? (netBenefit / monthlyCost) * 100 : 0;
@@ -96,8 +88,6 @@ const ROICalculatorFresh = () => {
       currentRevenue,
       additionalRevenue,
       totalNewRevenue,
-      timeSavings: timeReduction,
-      timeSavingsValue,
       totalMonthlyBenefit,
       monthlyCost,
       netBenefit,
@@ -108,7 +98,7 @@ const ROICalculatorFresh = () => {
       targetCTR,
       rankingImprovement: currentSearchPosition - validTargetPosition
     });
-  }, [currentLeads, averageJobValue, currentSearchPosition, targetSearchPosition, timeSpentOnMarketing]);
+  }, [currentLeads, averageJobValue, currentSearchPosition, targetSearchPosition]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -271,32 +261,7 @@ const ROICalculatorFresh = () => {
                   <p className="text-sm text-gray-500">Target position #{targetSearchPosition} (moving up {results.rankingImprovement} spots)</p>
                 </div>
 
-                {/* Time Spent Marketing */}
-                <div className="space-y-3">
-                  <Label className="text-lg font-medium">Hours per week on marketing tasks?</Label>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-1">
-                      <Input
-                        type="range"
-                        value={timeSpentOnMarketing.toString()}
-                        onChange={(e) => setTimeSpentOnMarketing(Number(e.target.value))}
-                        max="40"
-                        min="2"
-                        step="1"
-                        className="w-full"
-                      />
-                    </div>
-                    <div className="min-w-[80px]">
-                      <Input
-                        type="number"
-                        value={timeSpentOnMarketing.toString()}
-                        onChange={(e) => setTimeSpentOnMarketing(Number(e.target.value))}
-                        className="text-center"
-                      />
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-500">Automation saves you 40% of this time</p>
-                </div>
+
               </CardContent>
             </Card>
 
@@ -337,18 +302,13 @@ const ROICalculatorFresh = () => {
                   </div>
                 </div>
 
-                {/* Time Savings Value */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <p className="text-blue-200 text-sm font-medium">+ Time Savings Value</p>
-                  <p className="text-2xl font-bold text-green-300">+${results.timeSavingsValue.toLocaleString()}/month</p>
-                  <p className="text-blue-200 text-xs mt-1">{results.timeSavings.toFixed(1)} hours saved weekly × $50/hour</p>
-                </div>
 
-                {/* Total Value */}
+
+                {/* Total Revenue Impact */}
                 <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 backdrop-blur-sm rounded-lg p-6 border border-yellow-400/30 text-center">
-                  <p className="text-yellow-100 text-lg font-bold mb-2">🎯 TOTAL VALUE TO YOUR BUSINESS</p>
+                  <p className="text-yellow-100 text-lg font-bold mb-2">🎯 TOTAL ADDITIONAL REVENUE</p>
                   <p className="text-5xl font-bold text-yellow-300">${results.totalMonthlyBenefit.toLocaleString()}</p>
-                  <p className="text-yellow-200 text-sm mt-2">Every Month</p>
+                  <p className="text-yellow-200 text-sm mt-2">Every Month from Better Rankings</p>
                 </div>
 
                 {/* Investment vs Return */}
