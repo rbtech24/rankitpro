@@ -26,6 +26,7 @@ const ROICalculatorWorking = () => {
   const [currentReviews, setCurrentReviews] = useState(10);
   const [monthlyMarketing, setMonthlyMarketing] = useState(1000);
   const [timeSpentMarketing, setTimeSpentMarketing] = useState(15);
+  const [additionalLeadsFromContent, setAdditionalLeadsFromContent] = useState(15); // New leads from web content
 
   // Calculated values
   const [results, setResults] = useState({
@@ -59,12 +60,10 @@ const ROICalculatorWorking = () => {
     const currentClosedJobs = monthlyLeads * (conversionRate / 100);
     const currentRevenue = currentClosedJobs * averageJobValue;
     
-    // Base calculation on current inputs - no assumptions about improvements
-    const newLeadsWithRankItPro = monthlyLeads; // Same leads, better conversion
-    const newConversionRate = conversionRate; // Use actual input rate
-    const newClosedJobs = newLeadsWithRankItPro * (newConversionRate / 100);
-    const newRevenue = newClosedJobs * averageJobValue;
-    const additionalRevenue = 0; // No additional revenue from lead/conversion assumptions
+    // Calculate additional revenue from web content generated leads
+    const totalLeadsWithRankItPro = monthlyLeads + additionalLeadsFromContent;
+    const additionalJobsClosed = additionalLeadsFromContent * (conversionRate / 100);
+    const additionalRevenue = additionalJobsClosed * averageJobValue;
     
     // Review improvements (50% increase - realistic and sustainable)
     const newReviews = Math.round(currentReviews * 1.5);
@@ -83,10 +82,10 @@ const ROICalculatorWorking = () => {
     setResults({
       currentRevenue,
       currentClosedJobs,
-      newLeadsWithRankItPro,
-      newConversionRate,
-      newClosedJobs,
-      newRevenue,
+      newLeadsWithRankItPro: totalLeadsWithRankItPro,
+      newConversionRate: conversionRate,
+      newClosedJobs: additionalJobsClosed,
+      newRevenue: currentRevenue + additionalRevenue,
       additionalRevenue,
       newReviews,
       timeSaved,
@@ -94,7 +93,7 @@ const ROICalculatorWorking = () => {
       totalRoi,
       paybackPeriod
     });
-  }, [monthlyLeads, averageJobValue, conversionRate, currentReviews, monthlyMarketing, timeSpentMarketing]);
+  }, [monthlyLeads, averageJobValue, conversionRate, currentReviews, monthlyMarketing, timeSpentMarketing, additionalLeadsFromContent]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -239,6 +238,33 @@ const ROICalculatorWorking = () => {
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Additional Leads from Web Content */}
+                <div className="space-y-3">
+                  <Label className="text-lg font-medium">How many additional leads do you expect from web content each month?</Label>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-1">
+                      <Input
+                        type="range"
+                        value={additionalLeadsFromContent.toString()}
+                        onChange={(e) => setAdditionalLeadsFromContent(Number(e.target.value))}
+                        max="100"
+                        min="0"
+                        step="5"
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="min-w-[80px]">
+                      <Input
+                        type="number"
+                        value={additionalLeadsFromContent.toString()}
+                        onChange={(e) => setAdditionalLeadsFromContent(Number(e.target.value))}
+                        className="text-center"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500">Rank It Pro generates leads through automated blog posts and web content</p>
                 </div>
 
                 {/* Current Monthly Reviews */}
