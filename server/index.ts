@@ -10,6 +10,7 @@ import { createServer, IncomingMessage, ServerResponse } from "http";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import MemoryOptimizer from "./services/memory-optimizer";
+import { errorMonitor, logError } from "./error-monitor";
 
 
 const app = express();
@@ -255,6 +256,10 @@ async function createSuperAdminIfNotExists() {
     }
   }));
   
+  // Initialize error monitoring system
+  errorMonitor.setupRoutes(app);
+  logError('Application startup initiated', 'info');
+
   const server = await registerRoutes(app);
 
   // Critical Fix: Add API route exclusion middleware BEFORE Vite setup
@@ -316,13 +321,8 @@ async function createSuperAdminIfNotExists() {
     });
   }
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    console.error("Server error:", err);
-    res.status(status).json({ message });
-  });
+  // Use enhanced error monitoring middleware
+  app.use(errorMonitor.middleware());
 
   // Use Render's PORT environment variable in production, fallback to 5000 for development
   const port = process.env.PORT || 5000;
