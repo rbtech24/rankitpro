@@ -42,6 +42,14 @@ const ROICalculatorFresh = () => {
   };
 
   useEffect(() => {
+    // Input validation to prevent mathematical errors
+    if (currentLeads <= 0 || conversionRate <= 0 || averageJobValue <= 0) {
+      return; // Skip calculation if invalid inputs
+    }
+
+    // Ensure target position is better than current position
+    const validTargetPosition = Math.min(targetSearchPosition, currentSearchPosition);
+    
     // Current situation
     const currentJobs = currentLeads * (conversionRate / 100);
     const currentRevenue = currentJobs * averageJobValue;
@@ -56,7 +64,7 @@ const ROICalculatorFresh = () => {
     };
     
     const currentCTR = clickThroughRates[Math.min(currentSearchPosition, 20)] || 0.5;
-    const targetCTR = clickThroughRates[Math.min(targetSearchPosition, 20)] || 0.5;
+    const targetCTR = clickThroughRates[Math.min(validTargetPosition, 20)] || 0.5;
     const ctrImprovement = targetCTR / currentCTR;
     
     // Estimate monthly searches for local service keywords (conservative estimate)
@@ -100,7 +108,7 @@ const ROICalculatorFresh = () => {
       additionalLeadsFromRankings,
       currentCTR,
       targetCTR,
-      rankingImprovement: currentSearchPosition - targetSearchPosition
+      rankingImprovement: currentSearchPosition - validTargetPosition
     });
   }, [currentLeads, conversionRate, averageJobValue, currentSearchPosition, targetSearchPosition, timeSpentOnMarketing]);
 
