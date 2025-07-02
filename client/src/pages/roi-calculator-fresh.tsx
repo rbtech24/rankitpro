@@ -47,13 +47,10 @@ const ROICalculatorFresh = () => {
       return; // Skip calculation if invalid inputs
     }
 
-    // Ensure target position is better than current position
-    const validTargetPosition = Math.min(targetSearchPosition, currentSearchPosition);
-    
     // Current situation (currentLeads now represents customers directly)
     const currentRevenue = currentLeads * averageJobValue;
 
-    // Calculate additional leads based on search ranking improvement
+    // Calculate additional customers based on search ranking improvement
     // Industry data shows significant click-through rate differences by position
     const clickThroughRates = {
       1: 28.5, 2: 15.7, 3: 11.0, 4: 8.0, 5: 7.2,
@@ -62,19 +59,29 @@ const ROICalculatorFresh = () => {
       16: 1.3, 17: 1.2, 18: 1.1, 19: 1.0, 20: 0.9
     };
     
+    // Ensure target position makes sense (lower number = better ranking)
+    const validTargetPosition = Math.max(1, Math.min(targetSearchPosition, currentSearchPosition - 1));
+    
     const currentCTR = clickThroughRates[Math.min(currentSearchPosition, 20)] || 0.5;
     const targetCTR = clickThroughRates[Math.min(validTargetPosition, 20)] || 0.5;
-    const ctrImprovement = targetCTR / currentCTR;
     
     // Estimate monthly searches for local service keywords (conservative estimate)
     const estimatedMonthlySearches = 1000; // Local service searches per month
     const currentClicks = estimatedMonthlySearches * (currentCTR / 100);
     const improvedClicks = estimatedMonthlySearches * (targetCTR / 100);
-    const additionalClicks = improvedClicks - currentClicks;
+    const additionalClicks = Math.max(0, improvedClicks - currentClicks);
     
     // Assume 15% of website visitors become customers (industry average for service businesses)
     const websiteToCustomerRate = 0.15;
-    const additionalCustomersFromRankings = additionalClicks * websiteToCustomerRate;
+    let additionalCustomersFromRankings = additionalClicks * websiteToCustomerRate;
+    
+    // Special case: if already ranking well, show content maintenance benefits
+    if (currentSearchPosition <= targetSearchPosition || currentSearchPosition <= 3) {
+      // For businesses already ranking well, fresh content helps maintain position
+      // and capture 10-15% more seasonal traffic variations
+      additionalCustomersFromRankings = Math.max(additionalCustomersFromRankings, 
+        (currentClicks * websiteToCustomerRate * 0.12)); // 12% maintenance benefit
+    }
 
     // Additional revenue from ranking improvements
     const additionalRevenue = additionalCustomersFromRankings * averageJobValue;
