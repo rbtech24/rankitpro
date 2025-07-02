@@ -312,15 +312,9 @@ const ROICalculatorWorking = () => {
               <CardContent className="space-y-6">
                 
                 {/* Current vs New Revenue */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-white rounded-lg border">
-                    <div className="text-2xl font-bold text-gray-600">${results.currentRevenue.toLocaleString()}</div>
-                    <div className="text-sm text-gray-500">Current Monthly Revenue</div>
-                  </div>
-                  <div className="text-center p-4 bg-green-100 rounded-lg border border-green-200">
-                    <div className="text-2xl font-bold text-green-600">${results.newRevenue.toLocaleString()}</div>
-                    <div className="text-sm text-green-700">Projected New Revenue</div>
-                  </div>
+                <div className="text-center p-4 bg-green-100 rounded-lg border border-green-200">
+                  <div className="text-2xl font-bold text-green-600">${results.newRevenue.toLocaleString()}</div>
+                  <div className="text-sm text-green-700">Projected Monthly Revenue</div>
                 </div>
 
                 {/* Key Metrics */}
