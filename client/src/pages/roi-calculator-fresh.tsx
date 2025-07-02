@@ -10,7 +10,7 @@ import { Logo } from '@/components/ui/logo';
 
 const ROICalculatorFresh = () => {
   // User inputs
-  const [currentLeads, setCurrentLeads] = useState(50);
+  const [currentLeads, setCurrentLeads] = useState(12);
   const [conversionRate, setConversionRate] = useState(25);
   const [averageJobValue, setAverageJobValue] = useState(300);
   const [currentSearchPosition, setCurrentSearchPosition] = useState(15);
@@ -43,16 +43,15 @@ const ROICalculatorFresh = () => {
 
   useEffect(() => {
     // Input validation to prevent mathematical errors
-    if (currentLeads <= 0 || conversionRate <= 0 || averageJobValue <= 0) {
+    if (currentLeads <= 0 || averageJobValue <= 0) {
       return; // Skip calculation if invalid inputs
     }
 
     // Ensure target position is better than current position
     const validTargetPosition = Math.min(targetSearchPosition, currentSearchPosition);
     
-    // Current situation
-    const currentJobs = currentLeads * (conversionRate / 100);
-    const currentRevenue = currentJobs * averageJobValue;
+    // Current situation (currentLeads now represents customers directly)
+    const currentRevenue = currentLeads * averageJobValue;
 
     // Calculate additional leads based on search ranking improvement
     // Industry data shows significant click-through rate differences by position
@@ -73,13 +72,12 @@ const ROICalculatorFresh = () => {
     const improvedClicks = estimatedMonthlySearches * (targetCTR / 100);
     const additionalClicks = improvedClicks - currentClicks;
     
-    // Assume 15% of website visitors become leads (industry average for service businesses)
-    const websiteToLeadRate = 0.15;
-    const additionalLeadsFromRankings = additionalClicks * websiteToLeadRate;
+    // Assume 15% of website visitors become customers (industry average for service businesses)
+    const websiteToCustomerRate = 0.15;
+    const additionalCustomersFromRankings = additionalClicks * websiteToCustomerRate;
 
     // Additional revenue from ranking improvements
-    const additionalJobs = additionalLeadsFromRankings * (conversionRate / 100);
-    const additionalRevenue = additionalJobs * averageJobValue;
+    const additionalRevenue = additionalCustomersFromRankings * averageJobValue;
     const totalNewRevenue = currentRevenue + additionalRevenue;
 
     // Time savings (automation reduces marketing time by ~40%)
@@ -105,12 +103,12 @@ const ROICalculatorFresh = () => {
       netBenefit,
       roi,
       paybackMonths,
-      additionalLeadsFromRankings,
+      additionalCustomersFromRankings,
       currentCTR,
       targetCTR,
       rankingImprovement: currentSearchPosition - validTargetPosition
     });
-  }, [currentLeads, conversionRate, averageJobValue, currentSearchPosition, targetSearchPosition, timeSpentOnMarketing]);
+  }, [currentLeads, averageJobValue, currentSearchPosition, targetSearchPosition, timeSpentOnMarketing]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -140,13 +138,13 @@ const ROICalculatorFresh = () => {
           <div className="text-center mb-12">
             <Badge className="mb-4 bg-blue-100 text-blue-800 hover:bg-blue-200">
               <Search className="w-4 h-4 mr-1" />
-              SEO-Powered Lead Generation
+              SEO-Powered Customer Generation
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               See What's Possible
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Calculate your potential ROI from automated content creation that boosts your Google rankings and generates more leads
+              Calculate your potential ROI from automated content creation that boosts your Google rankings and generates more customers
             </p>
           </div>
 
@@ -161,57 +159,30 @@ const ROICalculatorFresh = () => {
                 <p className="text-gray-600">Tell us about your business to see your potential</p>
               </CardHeader>
               <CardContent className="space-y-8">
-                {/* Current Monthly Leads */}
+                {/* Current Monthly Customers */}
                 <div className="space-y-3">
-                  <Label className="text-lg font-medium">How many leads do you get per month?</Label>
+                  <Label className="text-lg font-medium">How many customers do you get per month?</Label>
                   <div className="flex items-center space-x-4">
                     <div className="flex-1">
                       <Input
                         type="range"
                         value={currentLeads.toString()}
                         onChange={(e) => setCurrentLeads(Number(e.target.value))}
-                        max="500"
-                        min="10"
-                        step="10"
-                        className="w-full"
-                      />
-                    </div>
-                    <div className="min-w-[80px]">
-                      <Input
-                        type="number"
-                        value={currentLeads.toString()}
-                        onChange={(e) => setCurrentLeads(Number(e.target.value))}
-                        className="text-center"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Conversion Rate */}
-                <div className="space-y-3">
-                  <Label className="text-lg font-medium">What percentage of leads become customers?</Label>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-1">
-                      <Input
-                        type="range"
-                        value={conversionRate.toString()}
-                        onChange={(e) => setConversionRate(Number(e.target.value))}
-                        max="80"
+                        max="200"
                         min="5"
-                        step="1"
+                        step="5"
                         className="w-full"
                       />
                     </div>
                     <div className="min-w-[80px]">
                       <Input
                         type="number"
-                        value={conversionRate.toString()}
-                        onChange={(e) => setConversionRate(Number(e.target.value))}
+                        value={currentLeads.toString()}
+                        onChange={(e) => setCurrentLeads(Number(e.target.value))}
                         className="text-center"
                       />
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500">%</p>
                 </div>
 
                 {/* Average Job Value */}
@@ -344,7 +315,7 @@ const ROICalculatorFresh = () => {
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
                   <p className="text-blue-200 text-sm font-medium">Additional Revenue from Better Rankings</p>
                   <p className="text-3xl font-bold text-green-300">+${results.additionalRevenue.toLocaleString()}</p>
-                  <p className="text-blue-200 text-xs mt-1">From moving up {results.rankingImprovement} positions → {Math.round(results.additionalLeadsFromRankings)} extra leads/month</p>
+                  <p className="text-blue-200 text-xs mt-1">From moving up {results.rankingImprovement} positions → {Math.round(results.additionalCustomersFromRankings)} extra customers/month</p>
                   <p className="text-blue-200 text-xs">Current CTR: {results.currentCTR}% → Target CTR: {results.targetCTR}%</p>
                 </div>
 
@@ -427,7 +398,7 @@ const ROICalculatorFresh = () => {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl font-bold text-green-600">4</span>
                 </div>
-                <h3 className="font-semibold mb-2">More Leads & Revenue</h3>
+                <h3 className="font-semibold mb-2">More Customers & Revenue</h3>
                 <p className="text-gray-600 text-sm">Higher rankings = more visibility = more customers</p>
               </div>
             </div>
