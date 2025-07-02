@@ -13,7 +13,8 @@ const ROICalculatorFresh = () => {
   const [currentLeads, setCurrentLeads] = useState(50);
   const [conversionRate, setConversionRate] = useState(25);
   const [averageJobValue, setAverageJobValue] = useState(300);
-  const [additionalLeadsFromSEO, setAdditionalLeadsFromSEO] = useState(20);
+  const [currentSearchPosition, setCurrentSearchPosition] = useState(15);
+  const [targetSearchPosition, setTargetSearchPosition] = useState(5);
   const [timeSpentOnMarketing, setTimeSpentOnMarketing] = useState(10);
 
   // Calculated results
@@ -27,7 +28,11 @@ const ROICalculatorFresh = () => {
     monthlyCost: 197, // Pro plan
     netBenefit: 0,
     roi: 0,
-    paybackMonths: 0
+    paybackMonths: 0,
+    additionalLeadsFromRankings: 0,
+    currentCTR: 0,
+    targetCTR: 0,
+    rankingImprovement: 0
   });
 
   const planPricing = {
@@ -41,8 +46,31 @@ const ROICalculatorFresh = () => {
     const currentJobs = currentLeads * (conversionRate / 100);
     const currentRevenue = currentJobs * averageJobValue;
 
-    // Additional revenue from SEO-generated leads
-    const additionalJobs = additionalLeadsFromSEO * (conversionRate / 100);
+    // Calculate additional leads based on search ranking improvement
+    // Industry data shows significant click-through rate differences by position
+    const clickThroughRates = {
+      1: 28.5, 2: 15.7, 3: 11.0, 4: 8.0, 5: 7.2,
+      6: 5.1, 7: 4.0, 8: 3.2, 9: 2.8, 10: 2.5,
+      11: 2.3, 12: 2.1, 13: 1.9, 14: 1.7, 15: 1.5,
+      16: 1.3, 17: 1.2, 18: 1.1, 19: 1.0, 20: 0.9
+    };
+    
+    const currentCTR = clickThroughRates[Math.min(currentSearchPosition, 20)] || 0.5;
+    const targetCTR = clickThroughRates[Math.min(targetSearchPosition, 20)] || 0.5;
+    const ctrImprovement = targetCTR / currentCTR;
+    
+    // Estimate monthly searches for local service keywords (conservative estimate)
+    const estimatedMonthlySearches = 1000; // Local service searches per month
+    const currentClicks = estimatedMonthlySearches * (currentCTR / 100);
+    const improvedClicks = estimatedMonthlySearches * (targetCTR / 100);
+    const additionalClicks = improvedClicks - currentClicks;
+    
+    // Assume 15% of website visitors become leads (industry average for service businesses)
+    const websiteToLeadRate = 0.15;
+    const additionalLeadsFromRankings = additionalClicks * websiteToLeadRate;
+
+    // Additional revenue from ranking improvements
+    const additionalJobs = additionalLeadsFromRankings * (conversionRate / 100);
     const additionalRevenue = additionalJobs * averageJobValue;
     const totalNewRevenue = currentRevenue + additionalRevenue;
 
@@ -68,9 +96,13 @@ const ROICalculatorFresh = () => {
       monthlyCost,
       netBenefit,
       roi,
-      paybackMonths
+      paybackMonths,
+      additionalLeadsFromRankings,
+      currentCTR,
+      targetCTR,
+      rankingImprovement: currentSearchPosition - targetSearchPosition
     });
-  }, [currentLeads, conversionRate, averageJobValue, additionalLeadsFromSEO, timeSpentOnMarketing]);
+  }, [currentLeads, conversionRate, averageJobValue, currentSearchPosition, targetSearchPosition, timeSpentOnMarketing]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -201,31 +233,58 @@ const ROICalculatorFresh = () => {
                   <p className="text-sm text-gray-500">$</p>
                 </div>
 
-                {/* Additional SEO Leads */}
+                {/* Current Search Position */}
                 <div className="space-y-3">
-                  <Label className="text-lg font-medium">How many extra leads from better Google rankings?</Label>
+                  <Label className="text-lg font-medium">Where do you currently rank on Google?</Label>
                   <div className="flex items-center space-x-4">
                     <div className="flex-1">
                       <Input
                         type="range"
-                        value={additionalLeadsFromSEO.toString()}
-                        onChange={(e) => setAdditionalLeadsFromSEO(Number(e.target.value))}
-                        max="100"
-                        min="5"
-                        step="5"
+                        value={currentSearchPosition.toString()}
+                        onChange={(e) => setCurrentSearchPosition(Number(e.target.value))}
+                        max="30"
+                        min="1"
+                        step="1"
                         className="w-full"
                       />
                     </div>
                     <div className="min-w-[80px]">
                       <Input
                         type="number"
-                        value={additionalLeadsFromSEO.toString()}
-                        onChange={(e) => setAdditionalLeadsFromSEO(Number(e.target.value))}
+                        value={currentSearchPosition.toString()}
+                        onChange={(e) => setCurrentSearchPosition(Number(e.target.value))}
                         className="text-center"
                       />
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500">Fresh content → Higher rankings → More leads</p>
+                  <p className="text-sm text-gray-500">Position #{currentSearchPosition} on Google search results</p>
+                </div>
+
+                {/* Target Search Position */}
+                <div className="space-y-3">
+                  <Label className="text-lg font-medium">Where could you rank with fresh content?</Label>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-1">
+                      <Input
+                        type="range"
+                        value={targetSearchPosition.toString()}
+                        onChange={(e) => setTargetSearchPosition(Number(e.target.value))}
+                        max="20"
+                        min="1"
+                        step="1"
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="min-w-[80px]">
+                      <Input
+                        type="number"
+                        value={targetSearchPosition.toString()}
+                        onChange={(e) => setTargetSearchPosition(Number(e.target.value))}
+                        className="text-center"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500">Target position #{targetSearchPosition} (moving up {results.rankingImprovement} spots)</p>
                 </div>
 
                 {/* Time Spent Marketing */}
@@ -275,9 +334,10 @@ const ROICalculatorFresh = () => {
 
                 {/* Additional Revenue */}
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <p className="text-blue-200 text-sm font-medium">Additional Revenue from SEO</p>
+                  <p className="text-blue-200 text-sm font-medium">Additional Revenue from Better Rankings</p>
                   <p className="text-3xl font-bold text-green-300">+${results.additionalRevenue.toLocaleString()}</p>
-                  <p className="text-blue-200 text-xs mt-1">From {additionalLeadsFromSEO} extra leads/month</p>
+                  <p className="text-blue-200 text-xs mt-1">From moving up {results.rankingImprovement} positions → {Math.round(results.additionalLeadsFromRankings)} extra leads/month</p>
+                  <p className="text-blue-200 text-xs">Current CTR: {results.currentCTR}% → Target CTR: {results.targetCTR}%</p>
                 </div>
 
                 {/* Time Savings */}
