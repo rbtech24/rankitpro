@@ -1,0 +1,35 @@
+{
+  "errors": [
+    [
+      "bfdbcb60",
+      {
+        "id": "bfdbcb60",
+        "timestamp": "2025-07-02T00:15:04.080Z",
+        "level": "info",
+        "message": "Application startup initiated",
+        "resolved": false,
+        "count": 2
+      }
+    ]
+  ],
+  "stats": {
+    "totalErrors": 2,
+    "criticalErrors": 0,
+    "errorsByHour": {
+      "0": 2
+    },
+    "errorsByEndpoint": {},
+    "errorsByType": {
+      "General": 2
+    },
+    "lastError": {
+      "id": "bfdbcb60",
+      "timestamp": "2025-07-02T00:15:04.080Z",
+      "level": "info",
+      "message": "Application startup initiated",
+      "resolved": false,
+      "count": 2
+    }
+  },
+  "lastSaved": "2025-07-02T00:15:04.080Z"
+}

@@ -4,9 +4,10 @@
  * Performs comprehensive security checks and vulnerability scanning
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import crypto from 'crypto';
 
 class SecurityScanner {
   constructor() {
@@ -402,7 +403,7 @@ class SecurityScanner {
 }
 
 // Run security scan if called directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const scanner = new SecurityScanner();
   scanner.runAllScans().catch(error => {
     console.error('❌ Security scan failed:', error.message);
@@ -410,4 +411,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = SecurityScanner;
+export default SecurityScanner;

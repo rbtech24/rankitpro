@@ -4,9 +4,9 @@
  * Performs smart dependency updates with safety checks
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
 
 class DependencyUpdater {
   constructor() {
@@ -308,7 +308,7 @@ class DependencyUpdater {
 }
 
 // Run dependency update if called directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const updater = new DependencyUpdater();
   updater.runUpdate().catch(error => {
     console.error('❌ Dependency update failed:', error.message);
@@ -316,4 +316,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = DependencyUpdater;
+export default DependencyUpdater;
