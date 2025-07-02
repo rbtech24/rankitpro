@@ -26,7 +26,7 @@ const ROICalculatorWorking = () => {
   const [currentReviews, setCurrentReviews] = useState(10);
   const [monthlyMarketing, setMonthlyMarketing] = useState(1000);
   const [timeSpentMarketing, setTimeSpentMarketing] = useState(15);
-  const [additionalLeadsFromContent, setAdditionalLeadsFromContent] = useState(15); // New leads from web content
+  const [additionalLeadsFromSEO, setAdditionalLeadsFromSEO] = useState(15); // New leads from improved Google rankings
 
   // Calculated values
   const [results, setResults] = useState({
@@ -60,9 +60,9 @@ const ROICalculatorWorking = () => {
     const currentClosedJobs = monthlyLeads * (conversionRate / 100);
     const currentRevenue = currentClosedJobs * averageJobValue;
     
-    // Calculate additional revenue from web content generated leads
-    const totalLeadsWithRankItPro = monthlyLeads + additionalLeadsFromContent;
-    const additionalJobsClosed = additionalLeadsFromContent * (conversionRate / 100);
+    // Calculate additional revenue from SEO-generated leads
+    const totalLeadsWithRankItPro = monthlyLeads + additionalLeadsFromSEO;
+    const additionalJobsClosed = additionalLeadsFromSEO * (conversionRate / 100);
     const additionalRevenue = additionalJobsClosed * averageJobValue;
     
     // Review improvements (50% increase - realistic and sustainable)
@@ -242,13 +242,13 @@ const ROICalculatorWorking = () => {
 
                 {/* Additional Leads from Web Content */}
                 <div className="space-y-3">
-                  <Label className="text-lg font-medium">How many additional leads do you expect from web content each month?</Label>
+                  <Label className="text-lg font-medium">How many additional leads do you expect from higher Google rankings?</Label>
                   <div className="flex items-center space-x-4">
                     <div className="flex-1">
                       <Input
                         type="range"
-                        value={additionalLeadsFromContent.toString()}
-                        onChange={(e) => setAdditionalLeadsFromContent(Number(e.target.value))}
+                        value={additionalLeadsFromSEO.toString()}
+                        onChange={(e) => setAdditionalLeadsFromSEO(Number(e.target.value))}
                         max="100"
                         min="0"
                         step="5"
@@ -258,13 +258,13 @@ const ROICalculatorWorking = () => {
                     <div className="min-w-[80px]">
                       <Input
                         type="number"
-                        value={additionalLeadsFromContent.toString()}
-                        onChange={(e) => setAdditionalLeadsFromContent(Number(e.target.value))}
+                        value={additionalLeadsFromSEO.toString()}
+                        onChange={(e) => setAdditionalLeadsFromSEO(Number(e.target.value))}
                         className="text-center"
                       />
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500">Rank It Pro generates leads through automated blog posts and web content</p>
+                  <p className="text-sm text-gray-500">Fresh content → Higher Google rankings → More organic leads → More revenue</p>
                 </div>
 
                 {/* Current Monthly Reviews */}

@@ -36,6 +36,7 @@ import TechApp from "./pages/tech-app";
 import AISettings from "./pages/ai-settings";
 import Home from "./pages/home";
 import ROICalculatorWorking from "./pages/roi-calculator-working";
+import ROICalculatorFresh from "./pages/roi-calculator-fresh";
 import TechnicianMobileField from "./pages/technician-mobile-field";
 import MobileSimple from "./pages/mobile-simple";
 import MobileTechApp from "./pages/mobile-tech-app";
@@ -220,7 +221,7 @@ function Router() {
         
         {/* Public informational pages */}
         <Route path="/"><Home /></Route>
-        <Route path="/roi-calculator"><ROICalculatorWorking /></Route>
+        <Route path="/roi-calculator"><ROICalculatorFresh /></Route>
         <Route path="/about"><About /></Route>
         <Route path="/case-studies"><CaseStudies /></Route>
         <Route path="/testimonials"><Testimonials /></Route>
