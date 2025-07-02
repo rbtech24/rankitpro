@@ -72,14 +72,15 @@ const ROICalculatorWorking = () => {
     const newReviews = Math.round(currentReviews * 1.5);
     
     // Time savings (realistic 40% reduction in marketing admin time)
-    const timeSaved = timeSpentMarketing * 0.4; // 40% time reduction
-    const timeSavedValue = timeSaved * 50; // $50/hour value
+    const timeSaved = timeSpentMarketing * 0.4; // 40% time reduction per week
+    const timeSavedValue = (timeSaved * 50) * 4.33; // $50/hour * weeks per month
     
     // ROI calculation (using Pro plan as default)
     const monthlyCost = planPricing.pro;
     const monthlyBenefit = additionalRevenue + timeSavedValue;
-    const totalRoi = ((monthlyBenefit - monthlyCost) / monthlyCost) * 100;
-    const paybackPeriod = monthlyCost / monthlyBenefit;
+    const netBenefit = monthlyBenefit - monthlyCost;
+    const totalRoi = (netBenefit / monthlyCost) * 100; // Net ROI percentage
+    const paybackPeriod = netBenefit > 0 ? monthlyCost / netBenefit : 0; // Months to break even
 
     setResults({
       currentRevenue,
@@ -371,7 +372,7 @@ const ROICalculatorWorking = () => {
                     <div className="text-4xl font-bold mb-2">{results.totalRoi.toFixed(0)}%</div>
                     <div className="text-lg mb-4">Monthly ROI</div>
                     <div className="text-sm opacity-90">
-                      Payback period: {results.paybackPeriod < 1 ? `${Math.ceil(results.paybackPeriod * 30)} days` : `${results.paybackPeriod.toFixed(1)} months`}
+                      Payback period: {results.paybackPeriod === 0 ? 'No payback needed' : results.paybackPeriod < 1 ? `${Math.ceil(results.paybackPeriod * 30)} days` : `${results.paybackPeriod.toFixed(1)} months`}
                     </div>
                   </div>
                 </div>
