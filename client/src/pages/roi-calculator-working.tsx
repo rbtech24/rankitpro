@@ -59,14 +59,12 @@ const ROICalculatorWorking = () => {
     const currentClosedJobs = monthlyLeads * (conversionRate / 100);
     const currentRevenue = currentClosedJobs * averageJobValue;
     
-    // With Rank It Pro improvements (realistic industry standard increases)
-    const leadMultiplier = 1.35; // 35% increase in leads (industry realistic)
-    const conversionImprovement = 1.15; // 15% improvement in conversion rate
-    const newLeadsWithRankItPro = monthlyLeads * leadMultiplier;
-    const newConversionRate = conversionRate * conversionImprovement;
+    // Base calculation on current inputs - no assumptions about improvements
+    const newLeadsWithRankItPro = monthlyLeads; // Same leads, better conversion
+    const newConversionRate = conversionRate; // Use actual input rate
     const newClosedJobs = newLeadsWithRankItPro * (newConversionRate / 100);
     const newRevenue = newClosedJobs * averageJobValue;
-    const additionalRevenue = newRevenue - currentRevenue;
+    const additionalRevenue = 0; // No additional revenue from lead/conversion assumptions
     
     // Review improvements (50% increase - realistic and sustainable)
     const newReviews = Math.round(currentReviews * 1.5);
