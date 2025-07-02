@@ -305,7 +305,7 @@ const ROICalculatorWorking = () => {
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center">
                   <TrendingUp className="w-6 h-6 mr-3 text-green-600" />
-                  Your ROI Projection
+                  See What's Possible
                 </CardTitle>
                 <p className="text-gray-600">Based on average customer results with Rank It Pro</p>
               </CardHeader>
