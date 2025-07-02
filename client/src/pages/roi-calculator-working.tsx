@@ -22,6 +22,7 @@ import { Logo } from "../components/ui/logo";
 const ROICalculatorWorking = () => {
   const [monthlyLeads, setMonthlyLeads] = useState(50);
   const [averageJobValue, setAverageJobValue] = useState(300);
+  const [conversionRate, setConversionRate] = useState(25);
   const [currentReviews, setCurrentReviews] = useState(10);
   const [monthlyMarketing, setMonthlyMarketing] = useState(1000);
   const [timeSpentMarketing, setTimeSpentMarketing] = useState(15);
@@ -29,7 +30,10 @@ const ROICalculatorWorking = () => {
   // Calculated values
   const [results, setResults] = useState({
     currentRevenue: 0,
+    currentClosedJobs: 0,
     newLeadsWithRankItPro: 0,
+    newConversionRate: 0,
+    newClosedJobs: 0,
     newRevenue: 0,
     additionalRevenue: 0,
     newReviews: 0,
@@ -51,13 +55,17 @@ const ROICalculatorWorking = () => {
   }, []);
 
   useEffect(() => {
-    // ROI Calculation Logic
-    const currentRevenue = monthlyLeads * averageJobValue;
+    // ROI Calculation Logic with Conversion Rate
+    const currentClosedJobs = monthlyLeads * (conversionRate / 100);
+    const currentRevenue = currentClosedJobs * averageJobValue;
     
     // With Rank It Pro improvements (realistic industry standard increases)
     const leadMultiplier = 1.35; // 35% increase in leads (industry realistic)
+    const conversionImprovement = 1.15; // 15% improvement in conversion rate
     const newLeadsWithRankItPro = monthlyLeads * leadMultiplier;
-    const newRevenue = newLeadsWithRankItPro * averageJobValue;
+    const newConversionRate = conversionRate * conversionImprovement;
+    const newClosedJobs = newLeadsWithRankItPro * (newConversionRate / 100);
+    const newRevenue = newClosedJobs * averageJobValue;
     const additionalRevenue = newRevenue - currentRevenue;
     
     // Review improvements (50% increase - realistic and sustainable)
@@ -75,7 +83,10 @@ const ROICalculatorWorking = () => {
 
     setResults({
       currentRevenue,
+      currentClosedJobs,
       newLeadsWithRankItPro,
+      newConversionRate,
+      newClosedJobs,
       newRevenue,
       additionalRevenue,
       newReviews,
@@ -84,7 +95,7 @@ const ROICalculatorWorking = () => {
       totalRoi,
       paybackPeriod
     });
-  }, [monthlyLeads, averageJobValue, currentReviews, monthlyMarketing, timeSpentMarketing]);
+  }, [monthlyLeads, averageJobValue, conversionRate, currentReviews, monthlyMarketing, timeSpentMarketing]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -205,6 +216,33 @@ const ROICalculatorWorking = () => {
                   <p className="text-sm text-gray-500">What's your average job/project value?</p>
                 </div>
 
+                {/* Conversion Rate */}
+                <div className="space-y-3">
+                  <Label className="text-lg font-medium">Lead to Customer Conversion Rate (%)</Label>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-1">
+                      <Input
+                        type="range"
+                        value={conversionRate.toString()}
+                        onChange={(e) => setConversionRate(Number(e.target.value))}
+                        max="80"
+                        min="5"
+                        step="1"
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="min-w-[80px]">
+                      <Input
+                        type="number"
+                        value={conversionRate.toString()}
+                        onChange={(e) => setConversionRate(Number(e.target.value))}
+                        className="text-center"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500">What percentage of leads become paying customers?</p>
+                </div>
+
                 {/* Current Monthly Reviews */}
                 <div className="space-y-3">
                   <Label className="text-lg font-medium">Monthly Reviews Received</Label>
@@ -293,6 +331,14 @@ const ROICalculatorWorking = () => {
                       <span className="font-medium">Additional Monthly Leads</span>
                     </div>
                     <span className="text-xl font-bold text-blue-600">+{(results.newLeadsWithRankItPro - monthlyLeads).toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center p-4 bg-white rounded-lg border">
+                    <div className="flex items-center">
+                      <TrendingUp className="w-5 h-5 text-orange-600 mr-3" />
+                      <span className="font-medium">Improved Conversion Rate</span>
+                    </div>
+                    <span className="text-xl font-bold text-orange-600">{results.newConversionRate.toFixed(1)}%</span>
                   </div>
 
                   <div className="flex justify-between items-center p-4 bg-white rounded-lg border">
