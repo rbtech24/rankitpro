@@ -218,7 +218,7 @@ const ROICalculatorWorking = () => {
 
                 {/* Conversion Rate */}
                 <div className="space-y-3">
-                  <Label className="text-lg font-medium">Lead to Customer Conversion Rate (%)</Label>
+                  <Label className="text-lg font-medium">Customer Conversion Rate (%)</Label>
                   <div className="flex items-center space-x-4">
                     <div className="flex-1">
                       <Input
@@ -240,7 +240,7 @@ const ROICalculatorWorking = () => {
                       />
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500">What percentage of leads become paying customers?</p>
+                  <p className="text-sm text-gray-500">What percentage of leads turn into customers?</p>
                 </div>
 
                 {/* Current Monthly Reviews */}
