@@ -140,12 +140,17 @@ const ROICalculatorFresh = () => {
               <Search className="w-4 h-4 mr-1" />
               SEO-Powered Customer Generation
             </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              See What's Possible
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              Calculate Your Revenue Growth
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Calculate your potential ROI from automated content creation that boosts your Google rankings and generates more customers
+            <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
+              See exactly how much <span className="font-bold text-green-600">extra revenue</span> you'll earn every month with Rank It Pro's automated SEO system.
             </p>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-w-2xl mx-auto mb-8">
+              <p className="text-green-800 font-semibold text-center">
+                💡 The Formula: Fresh Content → Higher Google Rankings → More Customers → More Revenue
+              </p>
+            </div>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
@@ -305,52 +310,77 @@ const ROICalculatorFresh = () => {
                 <p className="text-blue-100">With Rank It Pro's SEO automation</p>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Current Revenue */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <p className="text-blue-200 text-sm font-medium">Current Monthly Revenue</p>
-                  <p className="text-3xl font-bold">${results.currentRevenue.toLocaleString()}</p>
+                {/* Primary Value - New Revenue */}
+                <div className="bg-gradient-to-r from-green-400/20 to-emerald-500/20 backdrop-blur-sm rounded-lg p-6 border border-green-400/30">
+                  <div className="text-center mb-4">
+                    <p className="text-white text-lg font-bold mb-2">💰 EXTRA REVENUE YOU'LL EARN</p>
+                    <p className="text-6xl font-bold text-green-300">${results.additionalRevenue.toLocaleString()}</p>
+                    <p className="text-green-200 text-lg font-semibold mt-2">Every Month</p>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <p className="text-blue-200 text-sm">How? Moving from position #{currentSearchPosition} to #{targetSearchPosition} on Google</p>
+                    <p className="text-blue-200 text-sm">= {Math.round(results.additionalCustomersFromRankings)} extra customers × ${averageJobValue} = <span className="text-green-300 font-bold">${results.additionalRevenue.toLocaleString()}/month</span></p>
+                  </div>
                 </div>
 
-                {/* Additional Revenue */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <p className="text-blue-200 text-sm font-medium">Additional Revenue from Better Rankings</p>
-                  <p className="text-3xl font-bold text-green-300">+${results.additionalRevenue.toLocaleString()}</p>
-                  <p className="text-blue-200 text-xs mt-1">From moving up {results.rankingImprovement} positions → {Math.round(results.additionalCustomersFromRankings)} extra customers/month</p>
-                  <p className="text-blue-200 text-xs">Current CTR: {results.currentCTR}% → Target CTR: {results.targetCTR}%</p>
-                </div>
-
-                {/* Time Savings */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <p className="text-blue-200 text-sm font-medium">Time Savings Value</p>
-                  <p className="text-2xl font-bold text-green-300">+${results.timeSavingsValue.toLocaleString()}</p>
-                  <p className="text-blue-200 text-xs mt-1">{results.timeSavings.toFixed(1)} hours saved weekly</p>
-                </div>
-
-                {/* Total Monthly Benefit */}
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                  <p className="text-blue-200 text-sm font-medium">Total Monthly Benefit</p>
-                  <p className="text-4xl font-bold text-yellow-300">${results.totalMonthlyBenefit.toLocaleString()}</p>
-                </div>
-
-                {/* Cost and Net Benefit */}
+                {/* Revenue Comparison */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                    <p className="text-blue-200 text-sm font-medium">Monthly Cost</p>
-                    <p className="text-xl font-bold">${results.monthlyCost}</p>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+                    <p className="text-blue-200 text-sm font-medium">Current Revenue</p>
+                    <p className="text-2xl font-bold">${results.currentRevenue.toLocaleString()}</p>
+                    <p className="text-blue-300 text-xs">{currentLeads} customers/month</p>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                    <p className="text-blue-200 text-sm font-medium">Net Benefit</p>
-                    <p className="text-xl font-bold text-green-300">${results.netBenefit.toLocaleString()}</p>
+                  <div className="bg-green-500/20 backdrop-blur-sm rounded-lg p-4 text-center border border-green-400/30">
+                    <p className="text-green-200 text-sm font-medium">New Revenue</p>
+                    <p className="text-2xl font-bold text-green-300">${results.totalNewRevenue.toLocaleString()}</p>
+                    <p className="text-green-300 text-xs">{currentLeads + Math.round(results.additionalCustomersFromRankings)} customers/month</p>
                   </div>
                 </div>
 
-                {/* ROI */}
-                <div className="bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg p-6 text-center">
-                  <p className="text-green-100 text-sm font-medium mb-2">Return on Investment</p>
-                  <p className="text-5xl font-bold text-white">{results.roi.toFixed(0)}%</p>
-                  <p className="text-green-100 text-sm mt-2">
-                    Pays for itself in {results.paybackMonths.toFixed(1)} months
-                  </p>
+                {/* Time Savings Value */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                  <p className="text-blue-200 text-sm font-medium">+ Time Savings Value</p>
+                  <p className="text-2xl font-bold text-green-300">+${results.timeSavingsValue.toLocaleString()}/month</p>
+                  <p className="text-blue-200 text-xs mt-1">{results.timeSavings.toFixed(1)} hours saved weekly × $50/hour</p>
+                </div>
+
+                {/* Total Value */}
+                <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 backdrop-blur-sm rounded-lg p-6 border border-yellow-400/30 text-center">
+                  <p className="text-yellow-100 text-lg font-bold mb-2">🎯 TOTAL VALUE TO YOUR BUSINESS</p>
+                  <p className="text-5xl font-bold text-yellow-300">${results.totalMonthlyBenefit.toLocaleString()}</p>
+                  <p className="text-yellow-200 text-sm mt-2">Every Month</p>
+                </div>
+
+                {/* Investment vs Return */}
+                <div className="bg-gray-900/40 backdrop-blur-sm rounded-lg p-6 border border-gray-600/30">
+                  <div className="text-center mb-4">
+                    <p className="text-gray-300 text-lg font-bold mb-4">💡 YOUR INVESTMENT</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="text-center">
+                      <p className="text-gray-400 text-sm">You Pay</p>
+                      <p className="text-3xl font-bold text-red-300">${results.monthlyCost}</p>
+                      <p className="text-gray-400 text-xs">per month</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-green-200 text-sm">You Get Back</p>
+                      <p className="text-3xl font-bold text-green-300">${results.totalMonthlyBenefit.toLocaleString()}</p>
+                      <p className="text-green-200 text-xs">per month</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-gray-600/30 text-center">
+                    <p className="text-white text-lg font-bold">
+                      = ${results.netBenefit.toLocaleString()} PROFIT every month
+                    </p>
+                    <p className="text-gray-300 text-sm">That's {results.roi.toFixed(0)}% return on your investment</p>
+                  </div>
+                </div>
+
+                {/* Payback Period */}
+                <div className="bg-blue-600/20 backdrop-blur-sm rounded-lg p-4 text-center border border-blue-400/30">
+                  <p className="text-blue-200 text-sm font-medium">⚡ PAYBACK PERIOD</p>
+                  <p className="text-3xl font-bold text-blue-300">{results.paybackMonths.toFixed(1)} months</p>
+                  <p className="text-blue-200 text-sm">Then it's pure profit</p>
                 </div>
 
                 {/* CTA */}
