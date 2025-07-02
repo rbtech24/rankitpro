@@ -240,7 +240,6 @@ const ROICalculatorWorking = () => {
                       />
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500">What percentage of leads turn into customers?</p>
                 </div>
 
                 {/* Current Monthly Reviews */}
