@@ -294,11 +294,13 @@ const ROICalculatorFresh = () => {
                     <p className="text-blue-200 text-sm font-medium">Current Revenue</p>
                     <p className="text-2xl font-bold">${results.currentRevenue.toLocaleString()}</p>
                     <p className="text-blue-300 text-xs">{currentLeads} customers/month</p>
+                    <p className="text-blue-400 text-xs mt-1">Based on Position {currentSearchPosition}</p>
                   </div>
                   <div className="bg-green-500/20 backdrop-blur-sm rounded-lg p-4 text-center border border-green-400/30">
                     <p className="text-green-200 text-sm font-medium">New Revenue</p>
                     <p className="text-2xl font-bold text-green-300">${results.totalNewRevenue.toLocaleString()}</p>
                     <p className="text-green-300 text-xs">{currentLeads + Math.round(results.additionalCustomersFromRankings)} customers/month</p>
+                    <p className="text-green-400 text-xs mt-1">With Position {targetSearchPosition}</p>
                   </div>
                 </div>
 
