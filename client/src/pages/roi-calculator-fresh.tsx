@@ -209,7 +209,7 @@ const ROICalculatorFresh = () => {
 
                 {/* Current Search Position */}
                 <div className="space-y-3">
-                  <Label className="text-lg font-medium">Where do you currently rank on Google?</Label>
+                  <Label className="text-lg font-medium">Ranked at Position 15</Label>
                   <div className="flex items-center space-x-4">
                     <div className="flex-1">
                       <Input
@@ -231,12 +231,12 @@ const ROICalculatorFresh = () => {
                       />
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500">Position #{currentSearchPosition} on Google search results</p>
+                  <p className="text-sm text-gray-500">Currently at position #{currentSearchPosition} - getting {currentLeads} customers/month</p>
                 </div>
 
                 {/* Target Search Position */}
                 <div className="space-y-3">
-                  <Label className="text-lg font-medium">Where could you rank with fresh content?</Label>
+                  <Label className="text-lg font-medium">When you move to position 5</Label>
                   <div className="flex items-center space-x-4">
                     <div className="flex-1">
                       <Input
@@ -258,7 +258,7 @@ const ROICalculatorFresh = () => {
                       />
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500">Target position #{targetSearchPosition} (moving up {results.rankingImprovement} spots)</p>
+                  <p className="text-sm text-gray-500">From position #{currentSearchPosition} to position #{targetSearchPosition} (moving up {results.rankingImprovement} spots)</p>
                 </div>
 
 
@@ -296,9 +296,9 @@ const ROICalculatorFresh = () => {
                     <p className="text-blue-300 text-xs">{currentLeads} customers/month</p>
                   </div>
                   <div className="bg-green-500/20 backdrop-blur-sm rounded-lg p-4 text-center border border-green-400/30">
-                    <p className="text-green-200 text-sm font-medium">New Revenue</p>
+                    <p className="text-green-200 text-sm font-medium">New Revenue at Position 5</p>
                     <p className="text-2xl font-bold text-green-300">${results.totalNewRevenue.toLocaleString()}</p>
-                    <p className="text-green-300 text-xs">{currentLeads + Math.round(results.additionalCustomersFromRankings)} customers/month</p>
+                    <p className="text-green-300 text-sm font-bold">{currentLeads + Math.round(results.additionalCustomersFromRankings)} customers/month</p>
                   </div>
                 </div>
 
