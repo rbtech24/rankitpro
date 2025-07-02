@@ -4,36 +4,36 @@
       "bfdbcb60",
       {
         "id": "bfdbcb60",
-        "timestamp": "2025-07-02T20:05:57.443Z",
+        "timestamp": "2025-07-02T20:02:21.629Z",
         "level": "info",
         "message": "Application startup initiated",
         "resolved": false,
-        "count": 19
+        "count": 18
       }
     ]
   ],
   "stats": {
-    "totalErrors": 19,
+    "totalErrors": 18,
     "criticalErrors": 0,
     "errorsByHour": {
       "0": 3,
       "10": 1,
       "18": 1,
       "19": 12,
-      "20": 2
+      "20": 1
     },
     "errorsByEndpoint": {},
     "errorsByType": {
-      "General": 19
+      "General": 18
     },
     "lastError": {
       "id": "bfdbcb60",
-      "timestamp": "2025-07-02T20:05:57.443Z",
+      "timestamp": "2025-07-02T20:02:21.629Z",
       "level": "info",
       "message": "Application startup initiated",
       "resolved": false,
-      "count": 19
+      "count": 18
     }
   },
-  "lastSaved": "2025-07-02T20:05:57.443Z"
+  "lastSaved": "2025-07-02T20:02:21.629Z"
 }
