@@ -445,8 +445,11 @@ const Home = () => {
                     Email support
                   </li>
                 </ul>
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <p className="text-sm text-gray-500 text-center mb-4">Cancel anytime, no long-term contract required</p>
+                </div>
                 <Link to="/register">
-                  <Button className="w-full mt-8" variant="outline">
+                  <Button className="w-full mt-4" variant="outline">
                     Start Free Trial
                   </Button>
                 </Link>
@@ -485,8 +488,11 @@ const Home = () => {
                     Priority support
                   </li>
                 </ul>
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <p className="text-sm text-gray-500 text-center mb-4">Cancel anytime, no long-term contract required</p>
+                </div>
                 <Link to="/register">
-                  <Button className="w-full mt-8 bg-blue-600 hover:bg-blue-700">
+                  <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700">
                     Start Free Trial
                   </Button>
                 </Link>
@@ -522,8 +528,11 @@ const Home = () => {
                     Dedicated support
                   </li>
                 </ul>
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <p className="text-sm text-gray-500 text-center mb-4">Cancel anytime, no long-term contract required</p>
+                </div>
                 <Link to="/register">
-                  <Button className="w-full mt-8" variant="outline">
+                  <Button className="w-full mt-4" variant="outline">
                     Start Free Trial
                   </Button>
                 </Link>
