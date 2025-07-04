@@ -84,6 +84,7 @@ import APIDocumentation from "./pages/api-documentation";
 import Troubleshooting from "./pages/troubleshooting";
 import PlatformSetupGuide from "./pages/platform-setup-guide";
 import DocsTest from "./pages/docs-test";
+import SecurityDashboard from "./pages/security-dashboard";
 
 import { getCurrentUser, AuthState } from "./lib/auth";
 
@@ -1263,6 +1264,9 @@ function Router() {
       </Route>
       <Route path="/admin-system">
         <PrivateRoute component={AdminSystem} path="/admin-system" role="super_admin" />
+      </Route>
+      <Route path="/security-dashboard">
+        <PrivateRoute component={SecurityDashboard} path="/security-dashboard" role="super_admin" />
       </Route>
       <Route path="/admin/settings">
         <PrivateRoute component={SystemSettings} path="/admin/settings" role="super_admin" />

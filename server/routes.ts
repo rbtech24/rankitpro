@@ -55,6 +55,9 @@ import { analyticsService } from "./services/analytics-service";
 import { fromZodError } from "zod-validation-error";
 import { WebSocketServer, WebSocket } from 'ws';
 import crypto from 'crypto';
+import { securityMonitor, securityMonitoringMiddleware } from "./security-monitor";
+import { penetrationTester } from "./penetration-tester";
+import { sessionTester } from "./session-tester";
 // Removed conflicting auth modules
 
 const SessionStore = MemoryStore(session);
@@ -194,6 +197,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
     next();
   });
+
+  // Add security monitoring middleware
+  app.use(securityMonitoringMiddleware());
 
   // Main login endpoint
   app.post("/api/auth/login", async (req, res) => {
@@ -4518,6 +4524,182 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     }
   });
 
+  // Security Monitoring Dashboard API Routes
+  app.get("/api/security/monitor/metrics", isSuperAdmin, async (req, res) => {
+    try {
+      const metrics = securityMonitor.getMetrics();
+      res.json({ metrics });
+    } catch (error) {
+      console.error('Error fetching security metrics:', error);
+      res.status(500).json({ message: 'Failed to fetch security metrics' });
+    }
+  });
+
+  app.get("/api/security/monitor/events", isSuperAdmin, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const type = req.query.type as string;
+      
+      let events;
+      if (type) {
+        events = securityMonitor.getEventsByType(type as any, limit);
+      } else {
+        events = securityMonitor.getRecentEvents(limit);
+      }
+      
+      res.json({ events });
+    } catch (error) {
+      console.error('Error fetching security events:', error);
+      res.status(500).json({ message: 'Failed to fetch security events' });
+    }
+  });
+
+  app.get("/api/security/monitor/blocked-ips", isSuperAdmin, async (req, res) => {
+    try {
+      const blockedIPs = securityMonitor.getBlockedIPs();
+      res.json({ blockedIPs });
+    } catch (error) {
+      console.error('Error fetching blocked IPs:', error);
+      res.status(500).json({ message: 'Failed to fetch blocked IPs' });
+    }
+  });
+
+  app.post("/api/security/monitor/unblock-ip", isSuperAdmin, async (req, res) => {
+    try {
+      const { ip } = req.body;
+      const success = securityMonitor.unblockIP(ip);
+      res.json({ success, message: success ? 'IP unblocked successfully' : 'IP not found in blocked list' });
+    } catch (error) {
+      console.error('Error unblocking IP:', error);
+      res.status(500).json({ message: 'Failed to unblock IP' });
+    }
+  });
+
+  app.post("/api/security/monitor/clear-blocked-ips", async (req, res) => {
+    try {
+      const blockedIPs = securityMonitor.getBlockedIPs();
+      blockedIPs.forEach(ip => securityMonitor.unblockIP(ip));
+      res.json({ success: true, message: `Cleared ${blockedIPs.length} blocked IPs` });
+    } catch (error) {
+      console.error('Error clearing blocked IPs:', error);
+      res.status(500).json({ message: 'Failed to clear blocked IPs' });
+    }
+  });
+
+  app.post("/api/security/monitor/resolve-event", isSuperAdmin, async (req, res) => {
+    try {
+      const { eventId } = req.body;
+      const success = securityMonitor.resolveEvent(eventId);
+      res.json({ success, message: success ? 'Event resolved successfully' : 'Event not found' });
+    } catch (error) {
+      console.error('Error resolving security event:', error);
+      res.status(500).json({ message: 'Failed to resolve security event' });
+    }
+  });
+
+  app.get("/api/security/monitor/health", isSuperAdmin, async (req, res) => {
+    try {
+      const healthReport = securityMonitor.getHealthReport();
+      res.json({ health: healthReport });
+    } catch (error) {
+      console.error('Error fetching security health:', error);
+      res.status(500).json({ message: 'Failed to fetch security health' });
+    }
+  });
+
+  // Penetration Testing API Routes
+  app.post("/api/security/pentest/run-all", isSuperAdmin, async (req, res) => {
+    try {
+      const results = await penetrationTester.runAllTests();
+      res.json({ results, message: 'Penetration tests completed' });
+    } catch (error) {
+      console.error('Error running penetration tests:', error);
+      res.status(500).json({ message: 'Failed to run penetration tests' });
+    }
+  });
+
+  app.post("/api/security/pentest/run-category", isSuperAdmin, async (req, res) => {
+    try {
+      const { category } = req.body;
+      const results = await penetrationTester.runTestsByCategory(category);
+      res.json({ results, message: `${category} tests completed` });
+    } catch (error) {
+      console.error('Error running category tests:', error);
+      res.status(500).json({ message: 'Failed to run category tests' });
+    }
+  });
+
+  app.get("/api/security/pentest/results", isSuperAdmin, async (req, res) => {
+    try {
+      const results = penetrationTester.getAllTestResults();
+      res.json({ results });
+    } catch (error) {
+      console.error('Error fetching pentest results:', error);
+      res.status(500).json({ message: 'Failed to fetch pentest results' });
+    }
+  });
+
+  app.get("/api/security/pentest/vulnerabilities", isSuperAdmin, async (req, res) => {
+    try {
+      const vulnerabilities = penetrationTester.getVulnerableResults();
+      res.json({ vulnerabilities });
+    } catch (error) {
+      console.error('Error fetching vulnerabilities:', error);
+      res.status(500).json({ message: 'Failed to fetch vulnerabilities' });
+    }
+  });
+
+  app.get("/api/security/pentest/categories", isSuperAdmin, async (req, res) => {
+    try {
+      const categories = penetrationTester.getTestCategories();
+      res.json({ categories });
+    } catch (error) {
+      console.error('Error fetching test categories:', error);
+      res.status(500).json({ message: 'Failed to fetch test categories' });
+    }
+  });
+
+  // Session Testing API Routes
+  app.post("/api/security/session/run-all", isSuperAdmin, async (req, res) => {
+    try {
+      const results = await sessionTester.runAllTests();
+      res.json({ results, message: 'Session tests completed' });
+    } catch (error) {
+      console.error('Error running session tests:', error);
+      res.status(500).json({ message: 'Failed to run session tests' });
+    }
+  });
+
+  app.get("/api/security/session/results", isSuperAdmin, async (req, res) => {
+    try {
+      const results = sessionTester.getAllTestResults();
+      res.json({ results });
+    } catch (error) {
+      console.error('Error fetching session test results:', error);
+      res.status(500).json({ message: 'Failed to fetch session test results' });
+    }
+  });
+
+  app.get("/api/security/session/failed", isSuperAdmin, async (req, res) => {
+    try {
+      const failedTests = sessionTester.getFailedTests();
+      res.json({ failedTests });
+    } catch (error) {
+      console.error('Error fetching failed session tests:', error);
+      res.status(500).json({ message: 'Failed to fetch failed session tests' });
+    }
+  });
+
+  app.get("/api/security/session/metrics", isSuperAdmin, async (req, res) => {
+    try {
+      const metrics = sessionTester.getSessionMetrics();
+      res.json({ metrics });
+    } catch (error) {
+      console.error('Error fetching session metrics:', error);
+      res.status(500).json({ message: 'Failed to fetch session metrics' });
+    }
+  });
+
   // Critical Security Fix: API catch-all handler to prevent HTML responses
   // This MUST be the last route handler to catch any unmatched API requests
   app.use('/api/*', (req, res) => {
@@ -4530,6 +4712,38 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
   });
 
   const httpServer = createServer(app);
+  
+  // Set up WebSocket server for security monitoring
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws/security' });
+  
+  wss.on('connection', (ws: WebSocket, req: any) => {
+    console.log('Security monitoring WebSocket connected');
+    
+    // Add client to security monitor for real-time updates
+    securityMonitor.addClient(ws);
+    
+    ws.on('message', (message: any) => {
+      try {
+        const data = JSON.parse(message.toString());
+        console.log('Security monitoring WebSocket message:', data);
+        
+        // Handle specific commands if needed
+        if (data.type === 'ping') {
+          ws.send(JSON.stringify({ type: 'pong', timestamp: new Date().toISOString() }));
+        }
+      } catch (error) {
+        console.error('Error handling security monitoring WebSocket message:', error);
+      }
+    });
+    
+    ws.on('close', () => {
+      console.log('Security monitoring WebSocket disconnected');
+    });
+    
+    ws.on('error', (error: any) => {
+      console.error('Security monitoring WebSocket error:', error);
+    });
+  });
   
   return httpServer;
 }
