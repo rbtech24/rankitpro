@@ -36,16 +36,7 @@ export default function Dashboard() {
   const company = auth?.company;
   const businessType = company?.businessType || company?.business_type;
   
-  // Debug logging
-  console.log('=== DASHBOARD DEBUG ===');
-  console.log('Company data:', company);
-  console.log('Business type:', businessType);
-  console.log('Is company admin:', isCompanyAdmin);
-  console.log('Should show switcher:', isCompanyAdmin && businessType);
-  console.log('========================');
-  
-  // TEMPORARY: Force switcher to show for testing
-  const showSwitcher = true;
+  // Business type determines dashboard version
 
   // Redirect technicians to enhanced mobile field app
   useEffect(() => {
@@ -59,6 +50,8 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="fade-in">
+
+        
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-sm text-gray-500">
