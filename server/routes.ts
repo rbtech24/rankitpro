@@ -4575,7 +4575,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     }
   });
 
-  app.post("/api/security/monitor/clear-blocked-ips", async (req, res) => {
+  app.post("/api/security/monitor/clear-blocked-ips", isSuperAdmin, async (req, res) => {
     try {
       const blockedIPs = securityMonitor.getBlockedIPs();
       blockedIPs.forEach(ip => securityMonitor.unblockIP(ip));
