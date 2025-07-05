@@ -15,7 +15,7 @@ import MemoryStore from "memorystore";
 import connectPg from "connect-pg-simple";
 import bcrypt from "bcrypt";
 import { generateSummary, generateBlogPost } from "./ai-service";
-import { insertUserSchema, insertCompanySchema, insertTechnicianSchema, insertCheckInSchema, insertBlogPostSchema, insertReviewRequestSchema, insertAPICredentialsSchema } from "@shared/schema";
+import { insertUserSchema, insertCompanySchema, insertCompanyLocationSchema, insertTechnicianSchema, insertCheckInSchema, insertBlogPostSchema, insertReviewRequestSchema, insertAPICredentialsSchema } from "@shared/schema";
 import { apiCredentialService } from "./services/api-credentials";
 import { isAuthenticated, isCompanyAdmin, isSuperAdmin, belongsToCompany } from "./middleware/auth";
 import { enforceTrialLimits } from "./middleware/trial-enforcement";

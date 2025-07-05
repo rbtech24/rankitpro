@@ -78,6 +78,37 @@ export const companies = pgTable("companies", {
   salesPersonId: integer("sales_person_id"),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
+  businessType: text("business_type").notNull().default("field_service"), // 'field_service' or 'marketing_focused'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Company locations table
+export const companyLocations = pgTable("company_locations", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  address: text("address").notNull(),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  zip: text("zip").notNull(),
+  phone: text("phone"),
+  email: text("email"),
+  latitude: numeric("latitude"),
+  longitude: numeric("longitude"),
+  managerName: text("manager_name"),
+  managerEmail: text("manager_email"),
+  managerPhone: text("manager_phone"),
+  operatingHours: jsonb("operating_hours").default({
+    monday: { open: "09:00", close: "17:00", closed: false },
+    tuesday: { open: "09:00", close: "17:00", closed: false },
+    wednesday: { open: "09:00", close: "17:00", closed: false },
+    thursday: { open: "09:00", close: "17:00", closed: false },
+    friday: { open: "09:00", close: "17:00", closed: false },
+    saturday: { open: "09:00", close: "17:00", closed: true },
+    sunday: { open: "09:00", close: "17:00", closed: true }
+  }),
+  timezone: text("timezone").default("UTC"),
+  isActive: boolean("is_active").default(true).notNull(),
+  companyId: integer("company_id").references(() => companies.id).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -88,7 +119,8 @@ export const technicians = pgTable("technicians", {
   email: text("email").notNull(),
   phone: text("phone").notNull(),
   specialty: text("specialty"),
-  location: text("location").notNull(),
+  location: text("location").notNull(), // Keep for backward compatibility
+  locationId: integer("location_id").references(() => companyLocations.id),
   userId: integer("user_id").references(() => users.id),
   companyId: integer("company_id").references(() => companies.id).notNull(),
   active: boolean("active").default(true).notNull(),
@@ -129,6 +161,7 @@ export const checkIns = pgTable("check_ins", {
   wordpressPostUrl: text("wordpress_post_url"),
   technicianId: integer("technician_id").references(() => technicians.id).notNull(),
   companyId: integer("company_id").references(() => companies.id).notNull(),
+  locationId: integer("location_id").references(() => companyLocations.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -198,6 +231,7 @@ export const reviewResponses = pgTable("review_responses", {
 // Schema validation
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertCompanySchema = createInsertSchema(companies).omit({ id: true, createdAt: true });
+export const insertCompanyLocationSchema = createInsertSchema(companyLocations).omit({ id: true, createdAt: true });
 export const insertTechnicianSchema = createInsertSchema(technicians).omit({ id: true, createdAt: true });
 export const insertCheckInSchema = createInsertSchema(checkIns).omit({ id: true, createdAt: true }).extend({
   jobType: z.string().min(1),
@@ -235,6 +269,9 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export type Company = typeof companies.$inferSelect;
 export type InsertCompany = z.infer<typeof insertCompanySchema>;
+
+export type CompanyLocation = typeof companyLocations.$inferSelect;
+export type InsertCompanyLocation = z.infer<typeof insertCompanyLocationSchema>;
 
 export type Technician = typeof technicians.$inferSelect;
 export type InsertTechnician = z.infer<typeof insertTechnicianSchema>;

@@ -1,10 +1,10 @@
 import { 
-  User, InsertUser, Company, InsertCompany, Technician, InsertTechnician, 
-  CheckIn, InsertCheckIn, BlogPost, InsertBlogPost, ReviewRequest, InsertReviewRequest,
-  ReviewResponse, InsertReviewResponse, CheckInWithTechnician, TechnicianWithStats,
-  ReviewFollowUpSettings, InsertReviewFollowUpSettings, ReviewRequestStatus, InsertReviewRequestStatus,
-  WordpressCustomFields, InsertWordpressCustomFields, AiUsageLogs, InsertAiUsageLogs,
-  MonthlyAiUsage, InsertMonthlyAiUsage, APICredentials, InsertAPICredentials,
+  User, InsertUser, Company, InsertCompany, CompanyLocation, InsertCompanyLocation,
+  Technician, InsertTechnician, CheckIn, InsertCheckIn, BlogPost, InsertBlogPost, 
+  ReviewRequest, InsertReviewRequest, ReviewResponse, InsertReviewResponse, 
+  CheckInWithTechnician, TechnicianWithStats, ReviewFollowUpSettings, InsertReviewFollowUpSettings, 
+  ReviewRequestStatus, InsertReviewRequestStatus, WordpressCustomFields, InsertWordpressCustomFields, 
+  AiUsageLogs, InsertAiUsageLogs, MonthlyAiUsage, InsertMonthlyAiUsage, APICredentials, InsertAPICredentials,
   SalesPerson, InsertSalesPerson, SalesCommission, InsertSalesCommission,
   CompanyAssignment, InsertCompanyAssignment, Testimonial, InsertTestimonial,
   TestimonialApproval, InsertTestimonialApproval, SupportTicket, InsertSupportTicket,
@@ -19,7 +19,7 @@ import * as schema from "@shared/schema";
 import { neon } from "@neondatabase/serverless";
 
 const {
-  users, companies, technicians, checkIns, blogPosts, reviewRequests, reviewResponses,
+  users, companies, companyLocations, technicians, checkIns, blogPosts, reviewRequests, reviewResponses,
   reviewFollowUpSettings, reviewRequestStatuses, apiCredentials, aiUsageLogs, 
   wordpressIntegrations, monthlyAiUsage, salesPeople, salesCommissions, 
   companyAssignments, testimonials, testimonialApprovals, wordpressCustomFields,
@@ -55,6 +55,13 @@ export interface IStorage {
   getCompanyCount(): Promise<number>;
   getActiveCompaniesCount(): Promise<number>;
   expireCompanyTrial(companyId: number): Promise<void>;
+  
+  // Company Location operations
+  getCompanyLocation(id: number): Promise<CompanyLocation | undefined>;
+  getLocationsByCompany(companyId: number): Promise<CompanyLocation[]>;
+  createCompanyLocation(location: InsertCompanyLocation): Promise<CompanyLocation>;
+  updateCompanyLocation(id: number, updates: Partial<CompanyLocation>): Promise<CompanyLocation | undefined>;
+  deleteCompanyLocation(id: number): Promise<boolean>;
   
   // Technician operations
   getTechnician(id: number): Promise<Technician | undefined>;
@@ -581,6 +588,49 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveCompanyCount(): Promise<number> {
     return this.getActiveCompaniesCount();
+  }
+
+  // Company Location operations
+  async getCompanyLocation(id: number): Promise<CompanyLocation | undefined> {
+    return queryWithRetry(async () => {
+      const [location] = await db.select().from(companyLocations).where(eq(companyLocations.id, id));
+      return location;
+    });
+  }
+
+  async getLocationsByCompany(companyId: number): Promise<CompanyLocation[]> {
+    return queryWithRetry(async () => {
+      return await db.select().from(companyLocations)
+        .where(eq(companyLocations.companyId, companyId))
+        .orderBy(asc(companyLocations.name));
+    });
+  }
+
+  async createCompanyLocation(location: InsertCompanyLocation): Promise<CompanyLocation> {
+    return queryWithRetry(async () => {
+      const [newLocation] = await db.insert(companyLocations).values(location).returning();
+      return newLocation;
+    });
+  }
+
+  async updateCompanyLocation(id: number, updates: Partial<CompanyLocation>): Promise<CompanyLocation | undefined> {
+    return queryWithRetry(async () => {
+      const [updatedLocation] = await db.update(companyLocations)
+        .set(updates)
+        .where(eq(companyLocations.id, id))
+        .returning();
+      return updatedLocation;
+    });
+  }
+
+  async deleteCompanyLocation(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(companyLocations).where(eq(companyLocations.id, id));
+      return result.rowCount ? result.rowCount > 0 : false;
+    } catch (error) {
+      console.error('Error deleting company location:', error);
+      throw error;
+    }
   }
 
   // AI Usage operations
