@@ -1,11 +1,11 @@
-# Rank It Pro - Home Service Business Management Platform
+# Rank It Pro - Business Management Platform
 
-A comprehensive SaaS platform designed for home service businesses with intelligent operational tools, real-time chat support, AI-powered content generation, and seamless WordPress integration.
+A comprehensive SaaS platform designed for customer-facing businesses with intelligent operational tools, real-time chat support, AI-powered content generation, and seamless WordPress integration.
 
 ## Features
 
 - **Mobile Field App**: GPS check-ins, photo documentation, offline capabilities
-- **AI Content Generation**: Automated blog posts and SEO content from service visits
+- **AI Content Generation**: Automated blog posts and SEO content from customer interactions
 - **Internal Chat Support**: Real-time messaging between companies and support agents
 - **Review Management**: Automated collection and follow-up systems
 - **WordPress Integration**: Seamless content publishing with custom plugin

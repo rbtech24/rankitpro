@@ -70,7 +70,7 @@ const Home = () => {
         <div className="container mx-auto relative z-10">
           <Badge className="mb-6 bg-blue-100 text-blue-800 border-blue-200">
             <Zap className="w-3 h-3 mr-1" />
-            Trusted by 500+ Home Service Businesses
+            Trusted by 500+ Growing Businesses
           </Badge>
           
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
@@ -78,7 +78,7 @@ const Home = () => {
           </h1>
           
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
-            The complete platform that turns every service visit into powerful SEO content, customer reviews, and social media presence. 
+            The complete platform that turns every customer interaction into powerful SEO content, authentic reviews, and social media presence. 
             <span className="font-semibold text-blue-600"> Boost your online visibility and grow revenue by 40% in 90 days.</span>
           </p>
 
@@ -98,7 +98,7 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="text-center">
               <div className="text-3xl font-bold text-blue-600 mb-2">10,000+</div>
-              <div className="text-gray-600">Service Visits Automated</div>
+              <div className="text-gray-600">Customer Interactions Automated</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600 mb-2">85%</div>
@@ -116,9 +116,9 @@ const Home = () => {
       <section className="py-16 px-6 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Top Service Companies Choose Rank It Pro</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Growing Businesses Choose Rank It Pro</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Stop leaving money on the table. Every service visit is an opportunity to dominate local search and build customer trust.
+              Stop leaving money on the table. Every customer interaction is an opportunity to dominate local search and build customer trust.
             </p>
           </div>
 
@@ -156,11 +156,11 @@ const Home = () => {
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <Smartphone className="w-6 h-6 text-green-600" />
                 </div>
-                <CardTitle className="text-xl">Mobile-First Technician App</CardTitle>
+                <CardTitle className="text-xl">Mobile-First Staff App</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">
-                  GPS-tracked check-ins, photo documentation, and instant customer communication - all from your technician's phone.
+                  GPS-tracked check-ins, photo documentation, and instant customer communication - all from your team's mobile device.
                 </p>
                 <ul className="space-y-2">
                   <li className="flex items-center text-sm">
@@ -225,7 +225,7 @@ const Home = () => {
               {
                 icon: <MapPin className="w-6 h-6" />,
                 title: "GPS Check-Ins",
-                description: "Location-verified service visits with automatic job documentation",
+                description: "Location-verified customer interactions with automatic documentation",
                 color: "blue"
               },
               {
@@ -243,7 +243,7 @@ const Home = () => {
               {
                 icon: <FileText className="w-6 h-6" />,
                 title: "SEO Blog Generation",
-                description: "AI creates local SEO blog posts from every service visit",
+                description: "AI creates local SEO blog posts from every customer interaction",
                 color: "orange"
               },
               {
@@ -425,7 +425,7 @@ const Home = () => {
               </h3>
               <p className="text-gray-600 mb-6">
                 We're working with our customers to collect authentic testimonials. 
-                Real stories from real home service businesses will be featured here soon.
+                Real stories from growing businesses will be featured here soon.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-500">
                 <div className="flex items-center justify-center gap-2">
@@ -584,9 +584,9 @@ const Home = () => {
       {/* CTA Section */}
       <section className="py-16 px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Transform Your Service Business?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Transform Your Business?</h2>
           <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
-            Join hundreds of successful service companies using Rank It Pro to dominate local search and grow revenue.
+            Join hundreds of successful businesses using Rank It Pro to dominate local search and grow revenue.
           </p>
           
           <div className="flex justify-center mb-8">
