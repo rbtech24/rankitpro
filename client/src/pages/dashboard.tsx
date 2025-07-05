@@ -34,11 +34,12 @@ export default function Dashboard() {
   
   // Get company from auth response - it includes business_type
   const company = auth?.company;
-  const businessType = company?.business_type || company?.businessType;
+  const businessType = company?.businessType || company?.business_type;
   
   // Debug logging
   console.log('Company data:', company);
   console.log('Business type:', businessType);
+  console.log('Should show switcher:', isCompanyAdmin && businessType);
 
   // Redirect technicians to enhanced mobile field app
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function Dashboard() {
             <UsageWarningBanner />
             
             {/* Temporary Dashboard Switcher - TODO: Remove after testing */}
-            {businessType && (
+            {(businessType || true) && (
               <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
