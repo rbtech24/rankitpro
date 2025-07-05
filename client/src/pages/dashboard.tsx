@@ -27,17 +27,18 @@ export default function Dashboard() {
     queryFn: getCurrentUser
   });
 
-  // Fetch company data to determine business type
-  const { data: company } = useQuery({
-    queryKey: ['/api/companies', auth?.user?.companyId],
-    enabled: !!auth?.user?.companyId && auth?.user?.role === 'company_admin'
-  });
-  
   const userRole = auth?.user?.role;
   const isSuperAdmin = userRole === "super_admin";
   const isCompanyAdmin = userRole === "company_admin";
   const isTechnician = userRole === "technician";
-  const businessType = company?.businessType;
+  
+  // Get company from auth response - it includes business_type
+  const company = auth?.company;
+  const businessType = company?.business_type || company?.businessType;
+  
+  // Debug logging
+  console.log('Company data:', company);
+  console.log('Business type:', businessType);
 
   // Redirect technicians to enhanced mobile field app
   useEffect(() => {

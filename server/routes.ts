@@ -1839,10 +1839,44 @@ Format as professional service documentation.`;
     }
   });
 
-  // Update company endpoint
-  app.put("/api/companies/:id", isSuperAdmin, async (req, res) => {
+  // Get individual company endpoint (for company admins)
+  app.get("/api/companies/:id", isAuthenticated, async (req, res) => {
     try {
       const companyId = parseInt(req.params.id);
+      const user = req.user;
+      
+      // Company admins can only view their own company, super admins can view any
+      if (user.role === 'company_admin' && user.companyId !== companyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const company = await storage.getCompany(companyId);
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      
+      res.json(company);
+    } catch (error) {
+      console.error("Error fetching company data:", error);
+      res.status(500).json({ error: "Failed to fetch company data" });
+    }
+  });
+
+  // Update company endpoint
+  app.put("/api/companies/:id", async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      const user = req.user;
+      
+      // Allow company admins to update their own company, super admins can update any
+      if (user.role === 'company_admin' && user.companyId !== companyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Super admins have more update permissions
+      if (user.role !== 'super_admin' && user.role !== 'company_admin') {
+        return res.status(403).json({ message: "Insufficient permissions" });
+      }
       
       if (isNaN(companyId)) {
         return res.status(400).json({ message: "Invalid company ID" });
@@ -1857,8 +1891,10 @@ Format as professional service documentation.`;
       // Extract allowed update fields from request
       const updateData: any = {};
       
-      // Only allow specific fields to be updated
-      const allowedFields = ['name', 'email', 'plan', 'phoneNumber', 'website', 'address', 'city', 'state', 'zipCode', 'industry', 'isActive', 'notes', 'maxTechnicians', 'featuresEnabled'];
+      // Allow company admins to update business type and limited fields
+      const allowedFields = user.role === 'super_admin' 
+        ? ['name', 'email', 'plan', 'phoneNumber', 'website', 'address', 'city', 'state', 'zipCode', 'industry', 'isActive', 'notes', 'maxTechnicians', 'featuresEnabled', 'businessType']
+        : ['businessType']; // Company admins can only update business type for now
       
       for (const field of allowedFields) {
         if (req.body[field] !== undefined) {
