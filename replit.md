@@ -133,3 +133,4 @@ Rank It Pro is a comprehensive SaaS platform designed for customer-facing busine
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Preferred terminology: "submissions" instead of "interactions" when describing customer engagement tracking.

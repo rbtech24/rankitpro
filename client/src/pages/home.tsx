@@ -419,7 +419,7 @@ const Home = () => {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works For Any Business</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Whether you're a restaurant, dental office, retailer, or service provider - we help you turn customer interactions into growth
+              Whether you're a restaurant, dental office, retailer, or service provider - we help you turn customer submissions into growth
             </p>
           </div>
 
@@ -428,9 +428,9 @@ const Home = () => {
               <div className="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Users className="w-10 h-10 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Track Customer Interactions</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Track Customer Submissions</h3>
               <p className="text-gray-600">
-                Staff logs every customer interaction - restaurant visits, dental appointments, retail purchases, service calls - with photos and details
+                Staff logs every customer submission - restaurant visits, dental appointments, retail purchases, service calls - with photos and details
               </p>
             </div>
             
