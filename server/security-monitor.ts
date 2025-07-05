@@ -156,8 +156,8 @@ class SecurityMonitor extends EventEmitter {
     attempts.lastAttempt = Date.now();
     this.loginAttempts.set(ip, attempts);
 
-    // Block IP after 5 failed attempts in 15 minutes
-    if (attempts.count >= 5) {
+    // Block IP after 10 failed attempts in 15 minutes (increased for development)
+    if (attempts.count >= 10) {
       this.blockedIPs.add(ip);
       this.metrics.blockedIPs = this.blockedIPs.size;
       
