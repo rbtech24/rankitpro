@@ -70,6 +70,37 @@ export default function Dashboard() {
             {/* Usage Warning Banner for Company Admins */}
             <UsageWarningBanner />
             
+            {/* Temporary Dashboard Switcher - TODO: Remove after testing */}
+            {businessType && (
+              <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-yellow-800">
+                      Current: {businessType === 'field_service' ? 'Field Service Edition' : 'Marketing Edition'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      const newType = businessType === 'field_service' ? 'marketing_focused' : 'field_service';
+                      try {
+                        await fetch(`/api/companies/${company?.id}`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ businessType: newType })
+                        });
+                        window.location.reload();
+                      } catch (error) {
+                        console.error('Failed to switch dashboard:', error);
+                      }
+                    }}
+                    className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700 transition-colors"
+                  >
+                    Switch to {businessType === 'field_service' ? 'Marketing' : 'Field Service'}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Business Type Based Dashboard Routing */}
             {!businessType ? (
               // Show business type selector if not set
