@@ -37,9 +37,15 @@ export default function Dashboard() {
   const businessType = company?.businessType || company?.business_type;
   
   // Debug logging
+  console.log('=== DASHBOARD DEBUG ===');
   console.log('Company data:', company);
   console.log('Business type:', businessType);
+  console.log('Is company admin:', isCompanyAdmin);
   console.log('Should show switcher:', isCompanyAdmin && businessType);
+  console.log('========================');
+  
+  // TEMPORARY: Force switcher to show for testing
+  const showSwitcher = true;
 
   // Redirect technicians to enhanced mobile field app
   useEffect(() => {
@@ -73,7 +79,7 @@ export default function Dashboard() {
             <UsageWarningBanner />
             
             {/* Temporary Dashboard Switcher - TODO: Remove after testing */}
-            {(businessType || true) && (
+            {(showSwitcher && isCompanyAdmin) && (
               <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
