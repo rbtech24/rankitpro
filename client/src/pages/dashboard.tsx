@@ -11,6 +11,9 @@ import VisitModal from "../components/modals/visit-modal";
 import MobileVisitModal from "../components/technician/mobile-visit-modal";
 import TechDashboard from "../components/technician/tech-dashboard";
 import UsageWarningBanner from "../components/usage-warning-banner";
+import { FieldServiceDashboard } from "../components/dashboards/FieldServiceDashboard";
+import { MarketingDashboard } from "../components/dashboards/MarketingDashboard";
+import { BusinessTypeSelector } from "../components/BusinessTypeSelector";
 
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "../lib/auth";
@@ -23,11 +26,18 @@ export default function Dashboard() {
     queryKey: ["/api/auth/me"],
     queryFn: getCurrentUser
   });
+
+  // Fetch company data to determine business type
+  const { data: company } = useQuery({
+    queryKey: ['/api/companies', auth?.user?.companyId],
+    enabled: !!auth?.user?.companyId && auth?.user?.role === 'company_admin'
+  });
   
   const userRole = auth?.user?.role;
   const isSuperAdmin = userRole === "super_admin";
   const isCompanyAdmin = userRole === "company_admin";
   const isTechnician = userRole === "technician";
+  const businessType = company?.businessType;
 
   // Redirect technicians to enhanced mobile field app
   useEffect(() => {
@@ -60,10 +70,45 @@ export default function Dashboard() {
             {/* Usage Warning Banner for Company Admins */}
             <UsageWarningBanner />
             
-            {/* Company Admin Dashboard */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <StatsOverview />
-            </div>
+            {/* Business Type Based Dashboard Routing */}
+            {!businessType ? (
+              // Show business type selector if not set
+              <div className="max-w-4xl mx-auto">
+                <BusinessTypeSelector 
+                  onSelect={async (type) => {
+                    try {
+                      // Update company business type via API
+                      await fetch(`/api/companies/${company?.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ businessType: type })
+                      });
+                      // Refresh the page to show new dashboard
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('Failed to update business type:', error);
+                    }
+                  }}
+                />
+              </div>
+            ) : businessType === 'field_service' ? (
+              // Field Service Dashboard
+              <FieldServiceDashboard 
+                company={company} 
+                user={auth?.user} 
+              />
+            ) : businessType === 'marketing_focused' ? (
+              // Marketing Dashboard
+              <MarketingDashboard 
+                company={company} 
+                user={auth?.user} 
+              />
+            ) : (
+              // Fallback to original dashboard if business type is unknown
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <StatsOverview />
+              </div>
+            )}
             
             {/* Enhanced Business Insights */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
