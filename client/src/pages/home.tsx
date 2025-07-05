@@ -82,7 +82,7 @@ const Home = () => {
           </h1>
           
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
-            The complete platform that turns every customer interaction into powerful SEO content, authentic reviews, and social media presence. 
+            The complete platform that turns every customer submission into powerful SEO content, authentic reviews, and social media presence. 
             <span className="font-semibold text-blue-600"> Boost your online visibility and grow revenue by 40% in 90 days.</span>
           </p>
 
@@ -122,7 +122,7 @@ const Home = () => {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Growing Businesses Choose Rank It Pro</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Stop leaving money on the table. Every customer interaction is an opportunity to dominate local search and build customer trust.
+              Stop leaving money on the table. Every customer submission is an opportunity to dominate local search and build customer trust.
             </p>
           </div>
 
@@ -229,7 +229,7 @@ const Home = () => {
               {
                 icon: <MapPin className="w-6 h-6" />,
                 title: "GPS Check-Ins",
-                description: "Location-verified customer interactions with automatic documentation",
+                description: "Location-verified customer submissions with automatic documentation",
                 color: "blue"
               },
               {
@@ -247,7 +247,7 @@ const Home = () => {
               {
                 icon: <FileText className="w-6 h-6" />,
                 title: "SEO Blog Generation",
-                description: "AI creates local SEO blog posts from every customer interaction",
+                description: "AI creates local SEO blog posts from every customer submission",
                 color: "orange"
               },
               {
@@ -548,7 +548,7 @@ const Home = () => {
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    Track all customer interactions
+                    Track all customer submissions
                   </li>
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
