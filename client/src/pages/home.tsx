@@ -28,7 +28,11 @@ import {
   Award,
   Lightbulb,
   Play,
-  ChevronRight
+  ChevronRight,
+  UtensilsCrossed,
+  Stethoscope,
+  ShoppingBag,
+  Sparkles
 } from "lucide-react";
 import { useIsMobile } from "../hooks/use-mobile";
 import { Logo } from "../components/ui/logo";
@@ -409,12 +413,91 @@ const Home = () => {
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section className="py-16 px-6 bg-gray-50">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works For Any Business</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Whether you're a restaurant, dental office, retailer, or service provider - we help you turn customer interactions into growth
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center">
+              <div className="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Users className="w-10 h-10 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Track Customer Interactions</h3>
+              <p className="text-gray-600">
+                Staff logs every customer interaction - restaurant visits, dental appointments, retail purchases, service calls - with photos and details
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Sparkles className="w-10 h-10 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">AI Creates Content</h3>
+              <p className="text-gray-600">
+                Our AI automatically transforms your customer stories into professional blog posts, testimonials, and social media content
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <TrendingUp className="w-10 h-10 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">More Customers Find You</h3>
+              <p className="text-gray-600">
+                Fresh content improves your Google rankings, driving more organic traffic and customers to your business
+              </p>
+            </div>
+          </div>
+          
+          {/* Business Type Examples */}
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            <div className="bg-white rounded-lg p-6 shadow-md">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                <UtensilsCrossed className="w-6 h-6 text-orange-600" />
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Restaurants</h4>
+              <p className="text-sm text-gray-600">Table visits, special dishes, customer satisfaction stories</p>
+            </div>
+            
+            <div className="bg-white rounded-lg p-6 shadow-md">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                <Stethoscope className="w-6 h-6 text-blue-600" />
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Healthcare</h4>
+              <p className="text-sm text-gray-600">Patient appointments, treatments, recovery success stories</p>
+            </div>
+            
+            <div className="bg-white rounded-lg p-6 shadow-md">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <ShoppingBag className="w-6 h-6 text-green-600" />
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Retail</h4>
+              <p className="text-sm text-gray-600">Customer purchases, product experiences, style consultations</p>
+            </div>
+            
+            <div className="bg-white rounded-lg p-6 shadow-md">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                <Wrench className="w-6 h-6 text-purple-600" />
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Services</h4>
+              <p className="text-sm text-gray-600">Home repairs, consultations, project completions</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
-      <section id="testimonials" className="py-16 px-6 bg-gray-50">
+      <section id="testimonials" className="py-16 px-6 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Success Stories from Real Customers</h2>
-            <p className="text-xl text-gray-600">See how service businesses are transforming their growth with Rank It Pro</p>
+            <p className="text-xl text-gray-600">See how businesses are transforming their growth with Rank It Pro</p>
           </div>
 
           <div className="text-center bg-gray-50 rounded-lg p-8 border-2 border-dashed border-gray-300">
@@ -457,23 +540,23 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <Card className="hover:shadow-lg transition-all border-2">
               <CardHeader className="text-center pb-8">
-                <CardTitle className="text-2xl">Starter</CardTitle>
+                <CardTitle className="text-2xl">Essential</CardTitle>
                 <div className="text-4xl font-bold mt-4">$97<span className="text-lg text-gray-500">/month</span></div>
-                <p className="text-gray-600 mt-2">Perfect for small teams</p>
+                <p className="text-gray-600 mt-2">Perfect for growing businesses</p>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    Up to 50 check-ins/month
+                    Track all customer interactions
                   </li>
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    AI blog post generation
+                    AI content generation (10 posts/month)
                   </li>
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    Review automation
+                    Review automation & collection
                   </li>
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
@@ -481,7 +564,7 @@ const Home = () => {
                   </li>
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    Email support
+                    Basic analytics dashboard
                   </li>
                 </ul>
                 <div className="mt-6 pt-4 border-t border-gray-200">
@@ -500,15 +583,19 @@ const Home = () => {
                 <Badge className="bg-blue-600 text-white px-4 py-1">Most Popular</Badge>
               </div>
               <CardHeader className="text-center pb-8">
-                <CardTitle className="text-2xl">Pro</CardTitle>
+                <CardTitle className="text-2xl">Professional</CardTitle>
                 <div className="text-4xl font-bold mt-4">$197<span className="text-lg text-gray-500">/month</span></div>
-                <p className="text-gray-600 mt-2">For growing businesses</p>
+                <p className="text-gray-600 mt-2">For scaling businesses</p>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    Up to 200 check-ins/month
+                    Everything in Essential
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    AI content generation (50 posts/month)
                   </li>
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
@@ -516,15 +603,11 @@ const Home = () => {
                   </li>
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    Audio/video testimonials
+                    Advanced customer analytics
                   </li>
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    Advanced analytics
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    Priority support
+                    Multi-location management
                   </li>
                 </ul>
                 <div className="mt-6 pt-4 border-t border-gray-200">
@@ -540,31 +623,35 @@ const Home = () => {
 
             <Card className="hover:shadow-lg transition-all border-2">
               <CardHeader className="text-center pb-8">
-                <CardTitle className="text-2xl">Agency</CardTitle>
+                <CardTitle className="text-2xl">Enterprise</CardTitle>
                 <div className="text-4xl font-bold mt-4">$397<span className="text-lg text-gray-500">/month</span></div>
-                <p className="text-gray-600 mt-2">For large operations</p>
+                <p className="text-gray-600 mt-2">For large organizations</p>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    Unlimited check-ins
+                    Everything in Professional
                   </li>
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    White-label solution
+                    Unlimited AI content generation
                   </li>
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    API access
+                    White-label branding
                   </li>
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    Custom integrations
+                    Custom integrations & API access
                   </li>
                   <li className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    Dedicated support
+                    Dedicated account manager
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    Advanced security & compliance
                   </li>
                 </ul>
                 <div className="mt-6 pt-4 border-t border-gray-200">
