@@ -48,6 +48,7 @@ import publicBlogRoutes from "./routes/public-blog";
 import publicReviewsRoutes from "./routes/public-reviews";
 import publicCompanyRoutes from "./routes/public-company";
 import testimonialsRoutes from "./routes/testimonials";
+import { securityMonitor } from "./security-monitor";
 import helpRoutes from "./routes/help";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
