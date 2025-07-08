@@ -398,6 +398,166 @@ export default function IntegrationsPage() {
             </form>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Code className="h-5 w-5" />
+              JSON API Integration
+            </CardTitle>
+            <CardDescription>
+              Access your content data directly via JSON API for custom integrations
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h4 className="font-medium">API Endpoints</h4>
+                <div className="space-y-3">
+                  <div className="bg-gray-50 p-3 rounded-md border">
+                    <p className="text-sm font-medium mb-1">Testimonials</p>
+                    <code className="text-xs break-all text-blue-600">
+                      GET /widget/marketing-test-company?type=testimonials&limit=5
+                    </code>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-md border">
+                    <p className="text-sm font-medium mb-1">Blog Posts</p>
+                    <code className="text-xs break-all text-blue-600">
+                      GET /widget/marketing-test-company?type=blogs&limit=3
+                    </code>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-md border">
+                    <p className="text-sm font-medium mb-1">All Content</p>
+                    <code className="text-xs break-all text-blue-600">
+                      GET /widget/marketing-test-company?type=all&limit=10
+                    </code>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium">JavaScript Fetch Example</h4>
+                <div className="bg-gray-900 text-green-400 p-4 rounded-md font-mono text-sm overflow-x-auto">
+                  <pre>{`// Fetch testimonials via JSON
+fetch('${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=5')
+  .then(response => response.text())
+  .then(script => {
+    // Extract JSON from script
+    const jsonMatch = script.match(/const WIDGET_CONFIG = ({.*?});/);
+    if (jsonMatch) {
+      const data = JSON.parse(jsonMatch[1]);
+      console.log(data.content.testimonials);
+      
+      // Use the data in your app
+      data.content.testimonials.forEach(testimonial => {
+        console.log(testimonial.customer_name, testimonial.content);
+      });
+    }
+  });`}</pre>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-medium text-blue-900 mb-2">Working Example</h4>
+              <p className="text-blue-700 text-sm mb-3">
+                This live API endpoint is working and returns real data from your Marketing Test Company:
+              </p>
+              <div className="bg-white p-3 rounded border">
+                <code className="text-sm break-all">
+                  {window.location.origin}/widget/marketing-test-company?type=testimonials&limit=3
+                </code>
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(`${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=3`)}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy API URL
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(`${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=3`, '_blank')}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  View JSON Data
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-medium">Custom Integration Examples</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <h5 className="text-sm font-medium">React Component</h5>
+                  <div className="bg-gray-900 text-green-400 p-3 rounded-md font-mono text-xs overflow-x-auto">
+                    <pre>{`import { useState, useEffect } from 'react';
+
+function Testimonials() {
+  const [testimonials, setTestimonials] = useState([]);
+  
+  useEffect(() => {
+    fetch('/widget/marketing-test-company?type=testimonials&limit=5')
+      .then(response => response.text())
+      .then(script => {
+        const jsonMatch = script.match(/const WIDGET_CONFIG = ({.*?});/);
+        if (jsonMatch) {
+          const data = JSON.parse(jsonMatch[1]);
+          setTestimonials(data.content.testimonials);
+        }
+      });
+  }, []);
+  
+  return (
+    <div>
+      {testimonials.map(testimonial => (
+        <div key={testimonial.id}>
+          <h4>{testimonial.customer_name}</h4>
+          <p>{testimonial.content}</p>
+        </div>
+      ))}
+    </div>
+  );
+}`}</pre>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h5 className="text-sm font-medium">Vanilla JavaScript</h5>
+                  <div className="bg-gray-900 text-green-400 p-3 rounded-md font-mono text-xs overflow-x-auto">
+                    <pre>{`// Load testimonials into HTML
+async function loadTestimonials() {
+  const response = await fetch(
+    '/widget/marketing-test-company?type=testimonials&limit=5'
+  );
+  const script = await response.text();
+  
+  const jsonMatch = script.match(/const WIDGET_CONFIG = ({.*?});/);
+  if (jsonMatch) {
+    const data = JSON.parse(jsonMatch[1]);
+    
+    const container = document.getElementById('testimonials');
+    container.innerHTML = data.content.testimonials.map(t => 
+      \`<div class="testimonial">
+        <h4>\${t.customer_name}</h4>
+        <p>\${t.content}</p>
+      </div>\`
+    ).join('');
+  }
+}
+
+loadTestimonials();`}</pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
