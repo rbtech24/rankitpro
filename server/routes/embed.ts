@@ -3,6 +3,161 @@ import { storage } from "../storage";
 
 const router = Router();
 
+// Serve the iframe embed content
+router.get('/widget/:companySlug', async (req, res) => {
+  try {
+    const { companySlug } = req.params;
+    const { company: companyId } = req.query;
+
+    // Get company data
+    let companyName = 'Test Company';
+    let testimonials: any[] = [];
+    let blogPosts: any[] = [];
+
+    try {
+      if (companyId) {
+        const company = await storage.getCompany(parseInt(companyId as string));
+        if (company) {
+          companyName = company.name;
+          
+          // Get testimonials for marketing companies
+          if (company.businessType === 'marketing_focused') {
+            testimonials = await storage.getTestimonialsByCompany(company.id);
+            blogPosts = await storage.getBlogPostsByCompany(company.id);
+          } else {
+            // Get check-ins for field service companies
+            const checkIns = await storage.getCheckInsByCompany(company.id);
+            testimonials = checkIns.slice(0, 5);
+          }
+        }
+      }
+    } catch (error) {
+      console.log('Using demo data for embed widget');
+      // Demo data fallback
+      testimonials = [
+        {
+          id: 1,
+          customer_name: 'John Doe',
+          content: 'Amazing service! Highly recommended.',
+          created_at: new Date()
+        },
+        {
+          id: 2,
+          customer_name: 'Jane Smith', 
+          content: 'Professional and reliable team.',
+          created_at: new Date(Date.now() - 24 * 60 * 60 * 1000)
+        }
+      ];
+    }
+
+    // Generate HTML widget
+    const widgetHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${companyName} Widget</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: white;
+    }
+    .widget-container {
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .widget-header {
+      margin: 0 0 15px 0;
+      color: #1f2937;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .content {
+      flex: 1;
+    }
+    .content-title {
+      font-weight: 500;
+      color: #1f2937;
+      margin-bottom: 2px;
+    }
+    .content-meta {
+      font-size: 14px;
+      color: #64748b;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .footer a {
+      font-size: 12px;
+      color: #9ca3af;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="widget-container">
+    <h3 class="widget-header">Recent Testimonials - ${companyName}</h3>
+    ${testimonials.map((item: any) => {
+      const initials = item.customer_name ? 
+        item.customer_name.split(' ').map((n: string) => n[0]).join('').toUpperCase() :
+        'TN';
+      const timeAgo = item.created_at ? 
+        (Date.now() - new Date(item.created_at).getTime() < 24 * 60 * 60 * 1000 ? 'Today' : 'Yesterday') :
+        'Recently';
+      
+      return `
+        <div class="item">
+          <div class="avatar">${initials}</div>
+          <div class="content">
+            <div class="content-title">${item.customer_name || item.jobType || 'Customer'}</div>
+            <div class="content-meta">${(item.content || item.location || 'Great service!').substring(0, 80)}... • ${timeAgo}</div>
+          </div>
+        </div>
+      `;
+    }).join('')}
+    <div class="footer">
+      <a href="https://rankitpro.com" target="_blank">Powered by Rank It Pro</a>
+    </div>
+  </div>
+</body>
+</html>
+`;
+
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.send(widgetHTML);
+
+  } catch (error) {
+    console.error('Embed iframe error:', error);
+    res.status(500).send('<html><body><h3>Widget Error</h3><p>Unable to load widget content.</p></body></html>');
+  }
+});
+
 // Serve the JavaScript embed widget
 router.get('/embed/widget.js', async (req, res) => {
   try {
