@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rank It Pro Widget - Integration Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #2196F3 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .demo-section {
+            padding: 40px;
+            border-bottom: 1px solid #eee;
+        }
+        .demo-section:last-child {
+            border-bottom: none;
+        }
+        .demo-section h2 {
+            color: #333;
+            margin-top: 0;
+            font-size: 1.8em;
+            font-weight: 400;
+        }
+        .method-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            position: relative;
+        }
+        .method-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        .code-snippet {
+            background: #263238;
+            color: #eeff41;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .widget-preview {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            min-height: 200px;
+            background: #fff;
+            position: relative;
+        }
+        .widget-preview::before {
+            content: "Widget Preview Area";
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #6c757d;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .benefits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .benefit-card {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .benefit-card h3 {
+            margin: 0 0 10px;
+            color: #2e7d32;
+        }
+        .benefit-card p {
+            margin: 0;
+            color: #555;
+        }
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-working {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-cors {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Rank It Pro Widget Integration</h1>
+            <p>Flexible embedding solutions for your website</p>
+        </div>
+
+        <div class="demo-section">
+            <h2>🎯 Integration Methods Available</h2>
+            <p>The Rank It Pro widget supports multiple integration methods for maximum flexibility:</p>
+            
+            <div class="method-card">
+                <div class="method-title">1. Company Slug Method <span class="status-indicator status-working">✅ Working</span></div>
+                <p>Use your company's slug (URL-friendly name) for easy integration:</p>
+                <div class="code-snippet">
+&lt;script src="https://your-domain.com/widget/marketing-test-company?type=testimonials&limit=5"&gt;&lt;/script&gt;
+                </div>
+                <div class="widget-preview" id="testimonials-slug">
+                    <p>Loading testimonials via company slug...</p>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <div class="method-title">2. Numeric ID Method <span class="status-indicator status-working">✅ Working</span></div>
+                <p>Use your company's numeric ID for direct access:</p>
+                <div class="code-snippet">
+&lt;script src="https://your-domain.com/widget/22?type=testimonials&limit=5"&gt;&lt;/script&gt;
+                </div>
+                <div class="widget-preview" id="testimonials-id">
+                    <p>Loading testimonials via company ID...</p>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <div class="method-title">3. Hybrid Method <span class="status-indicator status-working">✅ Working</span></div>
+                <p>Combine slug with explicit ID for maximum compatibility:</p>
+                <div class="code-snippet">
+&lt;script src="https://your-domain.com/widget/marketing-test-company?company=22&type=testimonials"&gt;&lt;/script&gt;
+                </div>
+                <div class="widget-preview" id="testimonials-hybrid">
+                    <p>Loading testimonials via hybrid method...</p>
+                </div>
+            </div>
+
+            <div class="method-card">
+                <div class="method-title">4. Blog Posts Widget <span class="status-indicator status-working">✅ Working</span></div>
+                <p>Display your latest blog posts:</p>
+                <div class="code-snippet">
+&lt;script src="https://your-domain.com/widget/marketing-test-company?type=blogs&limit=3"&gt;&lt;/script&gt;
+                </div>
+                <div class="widget-preview" id="blogs-display">
+                    <p>Loading blog posts...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🚀 Key Benefits</h2>
+            <div class="benefits">
+                <div class="benefit-card">
+                    <h3>Cross-Origin Compatible</h3>
+                    <p>Proper CORS headers enable embedding on any domain without restrictions.</p>
+                </div>
+                <div class="benefit-card">
+                    <h3>Flexible Identification</h3>
+                    <p>Use company names, slugs, or IDs - whatever works best for your integration.</p>
+                </div>
+                <div class="benefit-card">
+                    <h3>Content Type Control</h3>
+                    <p>Choose testimonials, blogs, reviews, or all content types as needed.</p>
+                </div>
+                <div class="benefit-card">
+                    <h3>Responsive Design</h3>
+                    <p>Automatically adapts to your website's layout and styling.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>⚙️ Technical Status</h2>
+            <div class="method-card">
+                <div class="method-title">CORS Configuration <span class="status-indicator status-working">✅ Resolved</span></div>
+                <p>All cross-origin resource sharing issues have been resolved:</p>
+                <ul>
+                    <li>✅ Access-Control-Allow-Origin: * (allows all domains)</li>
+                    <li>✅ Cross-Origin-Resource-Policy: cross-origin</li>
+                    <li>✅ X-Frame-Options: ALLOWALL (iframe embedding)</li>
+                    <li>✅ Helmet security policies adjusted</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 Rank It Pro - Widget Integration Demo</p>
+            <p>This demonstration shows the flexible widget integration capabilities</p>
+        </div>
+    </div>
+
+    <script>
+        // Base URL for API calls
+        const baseUrl = 'http://localhost:5000';
+        
+        // Function to render widget content
+        function renderWidgetContent(containerId, content, type) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            let html = '';
+            
+            if (type === 'testimonials' && content.testimonials) {
+                html = '<div style="margin-top: 20px;">';
+                content.testimonials.forEach(testimonial => {
+                    html += `
+                        <div style="border-left: 4px solid #4caf50; padding: 15px; margin: 10px 0; background: #f8f9fa; border-radius: 8px;">
+                            <h4 style="margin: 0 0 10px; color: #2e7d32;">${testimonial.customer_name}</h4>
+                            <p style="margin: 0; color: #555; font-style: italic;">"${testimonial.content}"</p>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            } else if (type === 'blogs' && content.blogs) {
+                html = '<div style="margin-top: 20px;">';
+                content.blogs.forEach(blog => {
+                    html += `
+                        <div style="border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 8px;">
+                            <h4 style="margin: 0 0 10px; color: #333;">${blog.title}</h4>
+                            <p style="margin: 0; color: #666; font-size: 14px;">${blog.excerpt || blog.content.substring(0, 150)}...</p>
+                            <small style="color: #999;">By ${blog.author} • ${new Date(blog.date).toLocaleDateString()}</small>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            } else {
+                html = '<div style="color: #666; font-style: italic; margin-top: 20px;">No content available</div>';
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        // Load testimonials using different methods
+        async function loadWidgetContent() {
+            try {
+                // Method 1: Company slug
+                const response1 = await fetch(`${baseUrl}/widget/marketing-test-company?type=testimonials&limit=3`);
+                const script1 = await response1.text();
+                
+                // Extract JSON from script
+                const jsonMatch1 = script1.match(/const WIDGET_CONFIG = ({.*?});/);
+                if (jsonMatch1) {
+                    const config1 = JSON.parse(jsonMatch1[1]);
+                    renderWidgetContent('testimonials-slug', config1.content, 'testimonials');
+                }
+                
+                // Method 2: Numeric ID
+                const response2 = await fetch(`${baseUrl}/widget/22?type=testimonials&limit=3`);
+                const script2 = await response2.text();
+                
+                const jsonMatch2 = script2.match(/const WIDGET_CONFIG = ({.*?});/);
+                if (jsonMatch2) {
+                    const config2 = JSON.parse(jsonMatch2[1]);
+                    renderWidgetContent('testimonials-id', config2.content, 'testimonials');
+                }
+                
+                // Method 3: Hybrid
+                const response3 = await fetch(`${baseUrl}/widget/marketing-test-company?company=22&type=testimonials&limit=3`);
+                const script3 = await response3.text();
+                
+                const jsonMatch3 = script3.match(/const WIDGET_CONFIG = ({.*?});/);
+                if (jsonMatch3) {
+                    const config3 = JSON.parse(jsonMatch3[1]);
+                    renderWidgetContent('testimonials-hybrid', config3.content, 'testimonials');
+                }
+                
+                // Method 4: Blog posts
+                const response4 = await fetch(`${baseUrl}/widget/marketing-test-company?type=blogs&limit=3`);
+                const script4 = await response4.text();
+                
+                const jsonMatch4 = script4.match(/const WIDGET_CONFIG = ({.*?});/);
+                if (jsonMatch4) {
+                    const config4 = JSON.parse(jsonMatch4[1]);
+                    renderWidgetContent('blogs-display', config4.content, 'blogs');
+                }
+                
+            } catch (error) {
+                console.error('Error loading widget content:', error);
+                // Show error message in all containers
+                ['testimonials-slug', 'testimonials-id', 'testimonials-hybrid', 'blogs-display'].forEach(id => {
+                    const container = document.getElementById(id);
+                    if (container) {
+                        container.innerHTML = '<div style="color: #dc3545; font-weight: bold;">Error loading content. Please check console for details.</div>';
+                    }
+                });
+            }
+        }
+        
+        // Load content when page loads
+        window.addEventListener('load', loadWidgetContent);
+    </script>
+</body>
+</html>

@@ -2919,34 +2919,60 @@ Format as professional service documentation.`;
       res.setHeader('X-Frame-Options', 'ALLOWALL');
       
       const { companyId } = req.params;
-      const { type = 'all', limit = 10 } = req.query;
+      const { type = 'all', limit = 10, company: companyIdFromQuery } = req.query;
 
-      // Validate companyId to prevent NaN database errors
+      let actualCompanyId: number;
+      let company: any;
+
+      // Check if companyId is numeric (direct ID) or slug (company name)
       const parsedCompanyId = parseInt(companyId);
-      if (isNaN(parsedCompanyId) || parsedCompanyId <= 0) {
-        console.error('Widget error: Invalid company ID:', companyId);
-        return res.status(400).json({ error: 'Invalid company ID' });
+      if (!isNaN(parsedCompanyId) && parsedCompanyId > 0) {
+        // It's a numeric ID
+        actualCompanyId = parsedCompanyId;
+        company = await storage.getCompany(actualCompanyId);
+      } else {
+        // It's a company slug, try to find by name or use query parameter
+        if (companyIdFromQuery) {
+          const queryCompanyId = parseInt(companyIdFromQuery as string);
+          if (!isNaN(queryCompanyId) && queryCompanyId > 0) {
+            actualCompanyId = queryCompanyId;
+            company = await storage.getCompany(actualCompanyId);
+          }
+        }
+        
+        // If still no company found, try to find by slug/name
+        if (!company) {
+          const allCompanies = await storage.getAllCompanies();
+          const slug = companyId.toLowerCase().replace(/\s+/g, '-');
+          company = allCompanies.find((c: any) => 
+            c.name.toLowerCase().replace(/\s+/g, '-') === slug ||
+            c.name.toLowerCase() === companyId.toLowerCase()
+          );
+          if (company) {
+            actualCompanyId = company.id;
+          }
+        }
+      }
+
+      if (!company) {
+        console.error('Widget error: Company not found for identifier:', companyId);
+        return res.status(404).json({ error: 'Company not found' });
       }
 
       // Validate limit parameter
       const parsedLimit = parseInt(String(limit));
       const validLimit = isNaN(parsedLimit) ? 10 : Math.max(1, Math.min(50, parsedLimit));
 
-      const company = await storage.getCompany(parsedCompanyId);
-      if (!company) {
-        return res.status(404).json({ error: 'Company not found' });
-      }
-
       let content: any = {};
 
       if (type === 'checkins' || type === 'all') {
-        const checkins = await storage.getCheckInsByCompany(parsedCompanyId);
+        const checkins = await storage.getCheckInsByCompany(actualCompanyId);
         content.checkins = checkins.slice(0, validLimit);
       }
 
       if (type === 'blogs' || type === 'all') {
         // Get actual blog posts from database
-        const blogPosts = await storage.getBlogPostsByCompany(parsedCompanyId);
+        const blogPosts = await storage.getBlogPostsByCompany(actualCompanyId);
         if (blogPosts && blogPosts.length > 0) {
           content.blogs = blogPosts.map(post => ({
             id: post.id,
@@ -2962,12 +2988,12 @@ Format as professional service documentation.`;
       }
 
       if (type === 'reviews' || type === 'all') {
-        const reviews = await storage.getReviewsByCompany(parsedCompanyId);
+        const reviews = await storage.getReviewsByCompany(actualCompanyId);
         content.reviews = reviews.slice(0, validLimit);
       }
 
       if (type === 'testimonials' || type === 'all') {
-        const testimonials = await storage.getTestimonialsByCompany(parsedCompanyId);
+        const testimonials = await storage.getTestimonialsByCompany(actualCompanyId);
         content.testimonials = testimonials.slice(0, validLimit);
       }
 
@@ -2976,7 +3002,7 @@ Format as professional service documentation.`;
   'use strict';
   
   const WIDGET_CONFIG = ${JSON.stringify({
-    companyId: parseInt(companyId),
+    companyId: actualCompanyId,
     companyName: company.name,
     content,
     type: type as string
