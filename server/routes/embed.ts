@@ -6,6 +6,13 @@ const router = Router();
 // Serve the iframe embed content
 router.get('/widget/:companySlug', async (req, res) => {
   try {
+    // Set headers to allow iframe embedding on external domains
+    res.removeHeader('X-Frame-Options');
+    res.removeHeader('Content-Security-Policy');
+    res.setHeader('X-Frame-Options', 'ALLOWALL');
+    res.setHeader('Content-Security-Policy', 'frame-ancestors *; default-src *; script-src * \'unsafe-inline\' \'unsafe-eval\'; style-src * \'unsafe-inline\';');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
     const { companySlug } = req.params;
     const { company: companyId } = req.query;
 
@@ -293,6 +300,181 @@ router.get('/api/embed/:companySlug', async (req, res) => {
   } catch (error) {
     console.error('Embed API error:', error);
     res.status(500).json({ error: 'Failed to get embed data' });
+  }
+});
+
+// Create a dedicated iframe embed route that matches the user's expected URL pattern
+router.get('/embed/:companySlug', async (req, res) => {
+  try {
+    // Set headers to allow iframe embedding on external domains
+    res.removeHeader('X-Frame-Options');
+    res.removeHeader('Content-Security-Policy');
+    res.setHeader('X-Frame-Options', 'ALLOWALL');
+    res.setHeader('Content-Security-Policy', 'frame-ancestors *; default-src *; script-src * \'unsafe-inline\' \'unsafe-eval\'; style-src * \'unsafe-inline\';');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    const { companySlug } = req.params;
+    const { company: companyId } = req.query;
+
+    // Get company data
+    let companyName = 'Marketing Test Company';
+    let testimonials: any[] = [];
+    let blogPosts: any[] = [];
+
+    try {
+      if (companyId) {
+        const company = await storage.getCompany(parseInt(companyId as string));
+        if (company) {
+          companyName = company.name;
+          testimonials = await storage.getTestimonialsByCompany(company.id);
+          blogPosts = await storage.getBlogPostsByCompany(company.id);
+        }
+      }
+    } catch (error) {
+      console.log('Using demo data for iframe embed');
+    }
+
+    // Generate iframe-friendly HTML widget
+    const iframeHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${companyName} - Customer Testimonials</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: white;
+      padding: 20px;
+    }
+    .widget-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .widget-header {
+      margin: 0 0 20px 0;
+      color: #1f2937;
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      border-bottom: 2px solid #3b82f6;
+      padding-bottom: 15px;
+    }
+    .testimonial {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 4px solid #3b82f6;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .testimonial-content {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #374151;
+      margin-bottom: 15px;
+      font-style: italic;
+    }
+    .testimonial-author {
+      font-weight: 600;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .author-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .blog-post {
+      background: #fff7ed;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 4px solid #f59e0b;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .blog-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 10px;
+    }
+    .blog-excerpt {
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .footer a {
+      font-size: 12px;
+      color: #9ca3af;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="widget-container">
+    <h2 class="widget-header">${companyName}</h2>
+    
+    ${testimonials.length > 0 ? `
+      <h3 style="color: #1f2937; margin-bottom: 15px;">Customer Testimonials</h3>
+      ${testimonials.slice(0, 3).map((testimonial: any) => {
+        const initials = testimonial.customer_name ? 
+          testimonial.customer_name.split(' ').map((n: string) => n[0]).join('').toUpperCase() :
+          'C';
+        
+        return `
+          <div class="testimonial">
+            <div class="testimonial-content">"${testimonial.content}"</div>
+            <div class="testimonial-author">
+              <div class="author-avatar">${initials}</div>
+              <span>${testimonial.customer_name}</span>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    ` : ''}
+    
+    ${blogPosts.length > 0 ? `
+      <h3 style="color: #1f2937; margin-bottom: 15px; margin-top: 30px;">Recent Blog Posts</h3>
+      ${blogPosts.slice(0, 2).map((post: any) => `
+        <div class="blog-post">
+          <div class="blog-title">${post.title}</div>
+          <div class="blog-excerpt">${post.content.substring(0, 150)}...</div>
+        </div>
+      `).join('')}
+    ` : ''}
+    
+    <div class="footer">
+      <a href="https://rankitpro.com" target="_parent">Powered by Rank It Pro</a>
+    </div>
+  </div>
+</body>
+</html>
+`;
+
+    res.setHeader('Content-Type', 'text/html');
+    res.send(iframeHTML);
+
+  } catch (error) {
+    console.error('Iframe embed error:', error);
+    res.status(500).send('<html><body><h3>Widget Error</h3><p>Unable to load widget content.</p></body></html>');
   }
 });
 
