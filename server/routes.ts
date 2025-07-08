@@ -2898,9 +2898,23 @@ Format as professional service documentation.`;
     }
   });
   
+  // OPTIONS handler for widget endpoint CORS preflight
+  app.options('/widget/:companyId', (req: Request, res: Response) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+    res.sendStatus(200);
+  });
+
   // Widget endpoint for WordPress integration
   app.get('/widget/:companyId', async (req: Request, res: Response) => {
     try {
+      // Set CORS headers for all widget responses
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      
       const { companyId } = req.params;
       const { type = 'all', limit = 10 } = req.query;
 
