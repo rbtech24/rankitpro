@@ -46,7 +46,8 @@ app.use(helmet({
         "wss:"
       ]
     }
-  }
+  },
+  crossOriginResourcePolicy: false // Disable to allow widget embedding
 }));
 
 // Rate limiting with proper proxy configuration

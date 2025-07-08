@@ -2914,6 +2914,9 @@ Format as professional service documentation.`;
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      // Override security headers that block cross-origin embedding
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      res.setHeader('X-Frame-Options', 'ALLOWALL');
       
       const { companyId } = req.params;
       const { type = 'all', limit = 10 } = req.query;
