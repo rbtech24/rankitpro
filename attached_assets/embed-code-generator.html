@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rank It Pro - Widget Embed Code Generator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.2em;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+        .section {
+            padding: 30px;
+            border-bottom: 1px solid #eee;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        .section h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        .code-container {
+            background: #2d3748;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            position: relative;
+            overflow-x: auto;
+        }
+        .code-container code {
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre;
+            display: block;
+        }
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+        .copy-button:hover {
+            background: #3182ce;
+        }
+        .copy-button.copied {
+            background: #38a169;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .option-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .option-card h3 {
+            margin: 0 0 15px;
+            color: #495057;
+        }
+        .option-card p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .highlight {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .highlight strong {
+            color: #856404;
+        }
+        .demo-preview {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            background: #fff;
+        }
+        .demo-preview h4 {
+            margin: 0 0 15px;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Widget Embed Code Generator</h1>
+            <p>Copy and paste these codes into any website to display your Rank It Pro content</p>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Method 1: Script Tag (Recommended)</h2>
+            <p>This is the most flexible method. Just paste this single line of code anywhere in your HTML:</p>
+            
+            <div class="code-container">
+                <button class="copy-button" onclick="copyToClipboard('script-code')">Copy</button>
+                <code id="script-code">&lt;script src="https://your-domain.com/widget/marketing-test-company?type=testimonials&limit=5"&gt;&lt;/script&gt;</code>
+            </div>
+
+            <div class="highlight">
+                <strong>Customization Options:</strong>
+                <ul>
+                    <li><strong>Company:</strong> Replace <code>marketing-test-company</code> with your company slug or ID</li>
+                    <li><strong>Content Type:</strong> <code>testimonials</code>, <code>blogs</code>, <code>reviews</code>, or <code>all</code></li>
+                    <li><strong>Limit:</strong> Number of items to display (1-50)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🖼️ Method 2: Iframe Embed</h2>
+            <p>For websites with strict security policies, use this iframe method:</p>
+            
+            <div class="code-container">
+                <button class="copy-button" onclick="copyToClipboard('iframe-code')">Copy</button>
+                <code id="iframe-code">&lt;iframe src="https://your-domain.com/widget/marketing-test-company?type=testimonials&limit=5&format=html" 
+       width="100%" 
+       height="400" 
+       frameborder="0" 
+       style="border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"&gt;
+&lt;/iframe&gt;</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚙️ Customization Examples</h2>
+            <div class="options">
+                <div class="option-card">
+                    <h3>Testimonials Only</h3>
+                    <p>Show customer testimonials</p>
+                    <div class="code-container">
+                        <code>type=testimonials&limit=3</code>
+                    </div>
+                </div>
+                
+                <div class="option-card">
+                    <h3>Blog Posts</h3>
+                    <p>Display latest blog content</p>
+                    <div class="code-container">
+                        <code>type=blogs&limit=5</code>
+                    </div>
+                </div>
+                
+                <div class="option-card">
+                    <h3>All Content</h3>
+                    <p>Show testimonials and blogs</p>
+                    <div class="code-container">
+                        <code>type=all&limit=10</code>
+                    </div>
+                </div>
+                
+                <div class="option-card">
+                    <h3>Reviews</h3>
+                    <p>Display customer reviews</p>
+                    <div class="code-container">
+                        <code>type=reviews&limit=4</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🌐 Complete Integration Examples</h2>
+            
+            <h3>Example 1: Testimonials Widget</h3>
+            <div class="code-container">
+                <button class="copy-button" onclick="copyToClipboard('example1')">Copy</button>
+                <code id="example1">&lt;!-- Rank It Pro Testimonials Widget --&gt;
+&lt;div id="testimonials-section"&gt;
+    &lt;h3&gt;What Our Customers Say&lt;/h3&gt;
+    &lt;script src="https://your-domain.com/widget/your-company-name?type=testimonials&limit=5"&gt;&lt;/script&gt;
+&lt;/div&gt;</code>
+            </div>
+
+            <h3>Example 2: Blog Posts Widget</h3>
+            <div class="code-container">
+                <button class="copy-button" onclick="copyToClipboard('example2')">Copy</button>
+                <code id="example2">&lt;!-- Rank It Pro Blog Posts Widget --&gt;
+&lt;div id="blog-section"&gt;
+    &lt;h3&gt;Latest From Our Blog&lt;/h3&gt;
+    &lt;script src="https://your-domain.com/widget/your-company-name?type=blogs&limit=3"&gt;&lt;/script&gt;
+&lt;/div&gt;</code>
+            </div>
+
+            <h3>Example 3: Complete Page Integration</h3>
+            <div class="code-container">
+                <button class="copy-button" onclick="copyToClipboard('example3')">Copy</button>
+                <code id="example3">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Your Website&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header&gt;
+        &lt;h1&gt;Welcome to Our Website&lt;/h1&gt;
+    &lt;/header&gt;
+    
+    &lt;main&gt;
+        &lt;section id="testimonials"&gt;
+            &lt;h2&gt;Customer Testimonials&lt;/h2&gt;
+            &lt;script src="https://your-domain.com/widget/your-company?type=testimonials&limit=5"&gt;&lt;/script&gt;
+        &lt;/section&gt;
+        
+        &lt;section id="blog"&gt;
+            &lt;h2&gt;Latest News&lt;/h2&gt;
+            &lt;script src="https://your-domain.com/widget/your-company?type=blogs&limit=3"&gt;&lt;/script&gt;
+        &lt;/section&gt;
+    &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Setup Instructions</h2>
+            <div class="demo-preview">
+                <h4>Step-by-Step Setup:</h4>
+                <ol>
+                    <li><strong>Choose your method:</strong> Script tag (easier) or iframe (more secure)</li>
+                    <li><strong>Replace the URL:</strong> Change <code>https://your-domain.com</code> to your actual Rank It Pro domain</li>
+                    <li><strong>Set your company identifier:</strong> Use your company slug or numeric ID</li>
+                    <li><strong>Configure content type:</strong> Choose testimonials, blogs, reviews, or all</li>
+                    <li><strong>Set the limit:</strong> Number of items to display (1-50)</li>
+                    <li><strong>Paste the code:</strong> Add it to your website's HTML</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Technical Details</h2>
+            <div class="options">
+                <div class="option-card">
+                    <h3>CORS Compatible</h3>
+                    <p>Works on any domain without cross-origin restrictions</p>
+                </div>
+                <div class="option-card">
+                    <h3>Responsive Design</h3>
+                    <p>Automatically adapts to your website's layout</p>
+                </div>
+                <div class="option-card">
+                    <h3>Fast Loading</h3>
+                    <p>Optimized for quick page load times</p>
+                </div>
+                <div class="option-card">
+                    <h3>SEO Friendly</h3>
+                    <p>Content is crawlable by search engines</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const button = element.parentElement.querySelector('.copy-button');
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            });
+        }
+    </script>
+</body>
+</html>

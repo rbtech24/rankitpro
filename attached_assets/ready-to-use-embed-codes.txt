@@ -1,0 +1,84 @@
+RANK IT PRO - READY-TO-USE EMBED CODES
+==========================================
+
+🚀 BASIC TESTIMONIALS WIDGET (Copy & Paste)
+-------------------------------------------
+<script src="https://your-domain.com/widget/marketing-test-company?type=testimonials&limit=5"></script>
+
+🚀 BASIC BLOG POSTS WIDGET (Copy & Paste)
+------------------------------------------
+<script src="https://your-domain.com/widget/marketing-test-company?type=blogs&limit=3"></script>
+
+🚀 ALL CONTENT WIDGET (Copy & Paste)
+-------------------------------------
+<script src="https://your-domain.com/widget/marketing-test-company?type=all&limit=10"></script>
+
+🖼️ IFRAME VERSION (For Strict Security)
+----------------------------------------
+<iframe src="https://your-domain.com/widget/marketing-test-company?type=testimonials&limit=5&format=html" 
+        width="100%" 
+        height="400" 
+        frameborder="0" 
+        style="border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+</iframe>
+
+📝 COMPLETE SECTION EXAMPLE
+----------------------------
+<div id="customer-testimonials">
+    <h3>What Our Customers Say</h3>
+    <script src="https://your-domain.com/widget/marketing-test-company?type=testimonials&limit=5"></script>
+</div>
+
+⚙️ CUSTOMIZATION OPTIONS
+-------------------------
+Replace these values in the URLs above:
+
+• your-domain.com → Your actual Rank It Pro domain
+• marketing-test-company → Your company slug or ID number
+• type=testimonials → testimonials, blogs, reviews, or all
+• limit=5 → Number of items to show (1-50)
+
+🔧 WORKING EXAMPLES (Ready to Test)
+-----------------------------------
+For Marketing Test Company (ID: 22):
+
+METHOD 1 - Company Slug:
+<script src="http://localhost:5000/widget/marketing-test-company?type=testimonials&limit=3"></script>
+
+METHOD 2 - Company ID:
+<script src="http://localhost:5000/widget/22?type=testimonials&limit=3"></script>
+
+METHOD 3 - Blog Posts:
+<script src="http://localhost:5000/widget/marketing-test-company?type=blogs&limit=3"></script>
+
+METHOD 4 - All Content:
+<script src="http://localhost:5000/widget/marketing-test-company?type=all&limit=5"></script>
+
+🌐 CROSS-DOMAIN COMPATIBILITY
+------------------------------
+✅ Works on any website
+✅ No CORS restrictions
+✅ Responsive design
+✅ Fast loading
+✅ SEO friendly
+
+📋 USAGE INSTRUCTIONS
+---------------------
+1. Copy any code snippet above
+2. Paste it into your website's HTML
+3. Replace placeholder values with your actual details
+4. The widget will automatically load and display your content
+
+🔄 MULTIPLE WIDGETS
+--------------------
+You can use multiple widgets on the same page:
+
+<div id="testimonials-section">
+    <h3>Customer Reviews</h3>
+    <script src="https://your-domain.com/widget/your-company?type=testimonials&limit=3"></script>
+</div>
+
+<div id="blog-section">
+    <h3>Latest Blog Posts</h3>
+    <script src="https://your-domain.com/widget/your-company?type=blogs&limit=3"></script>
+</div>
