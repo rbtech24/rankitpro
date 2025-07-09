@@ -403,6 +403,148 @@ export default function IntegrationsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Code className="h-5 w-5" />
+              Iframe Embedding
+            </CardTitle>
+            <CardDescription>
+              Embed your widget using iframe for maximum compatibility and security
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h4 className="font-medium">Basic Iframe Code</h4>
+                <p className="text-sm text-muted-foreground">
+                  Simple iframe embedding that works on any website, CMS, or platform
+                </p>
+                <div className="bg-gray-900 text-green-400 p-4 rounded-md font-mono text-sm overflow-x-auto">
+                  <pre>{`<iframe
+  src="${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=5"
+  width="100%"
+  height="400"
+  frameborder="0"
+  style="border: 1px solid #e2e8f0; border-radius: 8px;">
+</iframe>`}</pre>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(`<iframe src="${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=5" width="100%" height="400" frameborder="0" style="border: 1px solid #e2e8f0; border-radius: 8px;"></iframe>`)}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Iframe Code
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(`${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=5`, '_blank')}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Test Widget
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium">Responsive Iframe</h4>
+                <p className="text-sm text-muted-foreground">
+                  Responsive iframe that automatically adjusts to different screen sizes
+                </p>
+                <div className="bg-gray-900 text-green-400 p-4 rounded-md font-mono text-sm overflow-x-auto">
+                  <pre>{`<div style="position: relative; width: 100%; height: 400px; overflow: hidden;">
+  <iframe
+    src="${window.location.origin}/widget/marketing-test-company?type=all&limit=10"
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+    frameborder="0"
+    scrolling="auto">
+  </iframe>
+</div>`}</pre>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(`<div style="position: relative; width: 100%; height: 400px; overflow: hidden;"><iframe src="${window.location.origin}/widget/marketing-test-company?type=all&limit=10" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" frameborder="0" scrolling="auto"></iframe></div>`)}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Responsive Code
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-medium">Widget URL Options</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gray-50 p-3 rounded-md border">
+                  <p className="text-sm font-medium mb-2">Testimonials Only</p>
+                  <code className="text-xs break-all text-blue-600">
+                    /widget/marketing-test-company?type=testimonials&limit=5
+                  </code>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 w-full"
+                    onClick={() => copyToClipboard(`<iframe src="${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=5" width="100%" height="400" frameborder="0" style="border: 1px solid #e2e8f0; border-radius: 8px;"></iframe>`)}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Iframe
+                  </Button>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-md border">
+                  <p className="text-sm font-medium mb-2">Blog Posts Only</p>
+                  <code className="text-xs break-all text-blue-600">
+                    /widget/marketing-test-company?type=blogs&limit=3
+                  </code>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 w-full"
+                    onClick={() => copyToClipboard(`<iframe src="${window.location.origin}/widget/marketing-test-company?type=blogs&limit=3" width="100%" height="400" frameborder="0" style="border: 1px solid #e2e8f0; border-radius: 8px;"></iframe>`)}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Iframe
+                  </Button>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-md border">
+                  <p className="text-sm font-medium mb-2">All Content</p>
+                  <code className="text-xs break-all text-blue-600">
+                    /widget/marketing-test-company?type=all&limit=10
+                  </code>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 w-full"
+                    onClick={() => copyToClipboard(`<iframe src="${window.location.origin}/widget/marketing-test-company?type=all&limit=10" width="100%" height="400" frameborder="0" style="border: 1px solid #e2e8f0; border-radius: 8px;"></iframe>`)}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Iframe
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <h4 className="font-medium text-green-900 mb-2">✅ Iframe Benefits</h4>
+              <ul className="text-green-700 text-sm space-y-1">
+                <li>• Works on any website, CMS, or platform (WordPress, Shopify, Wix, etc.)</li>
+                <li>• Automatically updates with new content</li>
+                <li>• Secure and isolated from your main website</li>
+                <li>• No JavaScript conflicts or compatibility issues</li>
+                <li>• Easy to implement - just paste the HTML code</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Code className="h-5 w-5" />
               JSON API Integration
             </CardTitle>
             <CardDescription>
