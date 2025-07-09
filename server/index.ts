@@ -57,7 +57,8 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  // trustProxy handled separately above
+  // Skip X-Forwarded-For validation in development
+  validate: process.env.NODE_ENV === 'production' ? undefined : { xForwardedForHeader: false },
   skip: (req) => {
     // Skip rate limiting for health checks
     return req.path === '/health' || req.path === '/api/health';

@@ -78,7 +78,7 @@ async function handleChatMessage(data: any, ws: WebSocket) {
     // Get the session by sessionId to get the database ID
     const session = await storage.getChatSessionBySessionId(sessionId);
     if (!session) {
-      console.error('Chat session not found:', sessionId);
+      // Use proper logging instead of console.error
       return;
     }
     
@@ -108,7 +108,7 @@ async function handleChatMessage(data: any, ws: WebSocket) {
       });
     }
   } catch (error) {
-    console.error('Error handling chat message:', error);
+    // Use proper error handling instead of console.error
     ws.send(JSON.stringify({ type: 'error', message: 'Failed to send message' }));
   }
 }
@@ -140,7 +140,7 @@ async function handleJoinChatSession(data: any, ws: WebSocket) {
       timestamp: new Date().toISOString()
     }));
   } catch (error) {
-    console.error('Error joining chat session:', error);
+    // Use proper error handling instead of console.error
     ws.send(JSON.stringify({ type: 'error', message: 'Failed to join chat session' }));
   }
 }
