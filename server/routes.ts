@@ -62,6 +62,9 @@ import { sessionTester } from "./session-tester";
 import { errorHandler, asyncHandler } from "./middleware/error-handler";
 import { validateBody, validateParams, validateQuery, commonSchemas } from "./middleware/validation";
 import { logger } from "./services/logger";
+import { enforceSessionTimeout, enforceConcurrentSessions, sessionMonitoring, cleanupSession } from "./middleware/session-management";
+import { generalRateLimit, authRateLimit, passwordResetRateLimit, contentGenerationRateLimit, adminRateLimit } from "./middleware/rate-limiting";
+import { securityHeaders, additionalSecurityHeaders, apiSecurityHeaders } from "./middleware/security-headers";
 // Removed conflicting auth modules
 
 const SessionStore = MemoryStore(session);
@@ -202,8 +205,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
+  // Add security headers
+  app.use(securityHeaders());
+  app.use(additionalSecurityHeaders);
+  
   // Add security monitoring middleware
   app.use(securityMonitoringMiddleware());
+  
+  // Add session management middleware
+  app.use(sessionMonitoring);
+  app.use(enforceSessionTimeout);
+  app.use(enforceConcurrentSessions);
+
+  // Apply security headers and rate limiting to API routes
+  app.use('/api', apiSecurityHeaders);
+  app.use('/api', generalRateLimit);
 
   // Login validation schema
   const loginSchema = z.object({
@@ -211,8 +227,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     password: z.string().min(1, "Password is required")
   });
 
-  // Main login endpoint with validation
+  // Main login endpoint with validation and rate limiting
   app.post("/api/auth/login", 
+    authRateLimit,
     validateBody(loginSchema),
     asyncHandler(async (req, res) => {
       const { email, password } = req.body;
@@ -644,7 +661,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Emergency admin password reset with verification
-  app.post("/api/emergency-reset-admin", async (req, res) => {
+  app.post("/api/emergency-reset-admin", passwordResetRateLimit, async (req, res) => {
     try {
       const { newPassword, adminEmail } = req.body;
       
@@ -1028,7 +1045,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Enhanced AI Content Generation for Check-ins and Blog Posts
-  app.post('/api/ai/generate-content', isAuthenticated, async (req: Request, res: Response) => {
+  app.post('/api/ai/generate-content', contentGenerationRateLimit, isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { prompt, type, context } = req.body;
       
@@ -1168,7 +1185,7 @@ Contact us for more information about our professional services and to schedule 
   });
 
   // Advanced AI Content Generation with Multiple Options
-  app.post('/api/ai/generate-advanced', isAuthenticated, async (req: Request, res: Response) => {
+  app.post('/api/ai/generate-advanced', contentGenerationRateLimit, isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { serviceType, location, workDetails, materials, customerNotes, contentType } = req.body;
       
@@ -1517,7 +1534,7 @@ Format as professional service documentation.`;
   });
 
   // Password reset
-  app.post("/api/auth/reset-password", async (req, res) => {
+  app.post("/api/auth/reset-password", passwordResetRateLimit, async (req, res) => {
     try {
       const { token, password } = req.body;
       
@@ -1660,7 +1677,7 @@ Format as professional service documentation.`;
 
   
   // Admin password management routes
-  app.post("/api/admin/change-user-password", isSuperAdmin, async (req, res) => {
+  app.post("/api/admin/change-user-password", adminRateLimit, isSuperAdmin, async (req, res) => {
     try {
       const { userId, newPassword } = req.body;
       
