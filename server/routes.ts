@@ -62,6 +62,25 @@ import { sessionTester } from "./session-tester";
 import { errorHandler, asyncHandler } from "./middleware/error-handler";
 import { validateBody, validateParams, validateQuery, commonSchemas } from "./middleware/validation";
 import { logger } from "./services/logger";
+import { 
+  globalErrorHandler, 
+  notFoundHandler, 
+  AppError, 
+  ValidationError, 
+  AuthenticationError, 
+  NotFoundError,
+  asyncHandler as safeAsyncHandler,
+  successResponse,
+  createdResponse,
+  updatedResponse
+} from "./middleware/error-handling";
+import { 
+  validateUser, 
+  validateCompany, 
+  validateCheckIn, 
+  validateParams as validateInputParams,
+  sanitizeAllInputs
+} from "./middleware/input-validation";
 import { enforceSessionTimeout, enforceConcurrentSessions, sessionMonitoring, cleanupSession } from "./middleware/session-management";
 import { generalRateLimit, authRateLimit, passwordResetRateLimit, contentGenerationRateLimit, adminRateLimit } from "./middleware/rate-limiting";
 import { securityHeaders, additionalSecurityHeaders, apiSecurityHeaders } from "./middleware/security-headers";
@@ -76,25 +95,31 @@ const userConnections = new Map<number, WebSocket>();
 // Map to store chat session connections
 const chatSessionConnections = new Map<string, Set<WebSocket>>();
 
-// Chat message handler
+// Chat message handler with proper error handling
 async function handleChatMessage(data: any, ws: WebSocket) {
   try {
     const { sessionId, senderId, senderType, senderName, message } = data;
     
-    // Get the session by sessionId to get the database ID
-    const session = await storage.getChatSessionBySessionId(sessionId);
-    if (!session) {
-      // Use proper logging instead of console.error
+    // Validate required fields
+    if (!sessionId || !senderId || !senderType || !senderName || !message) {
+      logger.warn('Invalid chat message data', { data });
       return;
     }
     
-    // Create message in database
+    // Get the session by sessionId to get the database ID
+    const session = await storage.getChatSessionBySessionId(sessionId);
+    if (!session) {
+      logger.warn('Chat session not found', { sessionId });
+      return;
+    }
+    
+    // Create message in database with proper validation
     const newMessage = await storage.createChatMessage({
       sessionId: session.id, // Use the database primary key ID
       senderId: parseInt(senderId),
-      senderType,
-      senderName,
-      message,
+      senderType: senderType as 'user' | 'support_agent',
+      senderName: String(senderName).substring(0, 100), // Limit length
+      message: String(message).substring(0, 1000), // Limit length
       messageType: 'text'
     });
     

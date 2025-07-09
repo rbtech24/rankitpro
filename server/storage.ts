@@ -50,7 +50,7 @@ export interface IStorage {
   getAllCompanies(): Promise<Company[]>;
   createCompany(company: InsertCompany): Promise<Company>;
   updateCompany(id: number, updates: Partial<Company>): Promise<Company | undefined>;
-  updateCompanyFeatures(id: number, featuresEnabled: any): Promise<Company | undefined>;
+  updateCompanyFeatures(id: number, featuresEnabled: Record<string, boolean>): Promise<Company | undefined>;
   deleteCompany(id: number): Promise<boolean>;
   getCompanyCount(): Promise<number>;
   getActiveCompaniesCount(): Promise<number>;
@@ -107,11 +107,11 @@ export interface IStorage {
   }>;
   
   // Reviews operations (new table)
-  getReviewsByCompany(companyId: number): Promise<any[]>;
-  getAllReviews(): Promise<any[]>;
+  getReviewsByCompany(companyId: number): Promise<ReviewResponse[]>;
+  getAllReviews(): Promise<ReviewResponse[]>;
   
   // Testimonials operations (new table)
-  getTestimonialsByCompany(companyId: number): Promise<any[]>;
+  getTestimonialsByCompany(companyId: number): Promise<Testimonial[]>;
   
   // Analytics operations - CRITICAL FOR DASHBOARD
   getAllCheckIns(): Promise<CheckIn[]>;

@@ -3,6 +3,8 @@ import { isAuthenticated, isCompanyAdmin } from "../middleware/auth";
 import { storage } from "../storage";
 import { generateBlogPost, generateSummary, getAvailableAIProviders } from "../ai";
 import { AIProviderType } from "../ai/types";
+import { escapeHtml, sanitizeText, sanitizeUrl, createSafeTextContent } from "../utils/html-sanitizer";
+import { logger } from "../services/logger";
 
 const router = express.Router();
 
@@ -57,7 +59,7 @@ router.get("/wordpress", isAuthenticated, isCompanyAdmin, async (req: Request, r
 
     return res.json(wordpressIntegration);
   } catch (error) {
-    console.error("Error fetching WordPress integration:", error);
+    logger.error("Error fetching WordPress integration", { error: error instanceof Error ? error.message : 'Unknown error' });
     return res.status(500).json({ message: "Error fetching WordPress integration" });
   }
 });
@@ -297,7 +299,7 @@ router.post("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res:
 
     return res.json(embedIntegration);
   } catch (error) {
-    console.error("Error updating embed integration:", error);
+    logger.error("Error updating embed integration", { error: error instanceof Error ? error.message : 'Unknown error' });
     return res.status(500).json({ message: "Error updating embed integration" });
   }
 });
@@ -333,16 +335,23 @@ const CheckInWidget = (function() {
     const container = document.querySelector(config.targetSelector);
     if (!container) return;
     
-    container.innerHTML = '';
+    // Clear container safely
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
     
-    // Apply theme
-    container.classList.add('checkin-theme-' + (config.theme || 'light'));
-    container.classList.add('checkin-style-' + (config.style || 'modern'));
+    // Apply theme safely
+    const safeTheme = (config.theme || 'light').replace(/[^a-zA-Z0-9-]/g, '');
+    const safeStyle = (config.style || 'modern').replace(/[^a-zA-Z0-9-]/g, '');
+    container.classList.add('checkin-theme-' + safeTheme);
+    container.classList.add('checkin-style-' + safeStyle);
     
-    // Header
+    // Header - safe text content
     const header = document.createElement('div');
     header.className = 'checkin-header';
-    header.innerHTML = '<h3>Recent Service Check-Ins</h3>';
+    const headerTitle = document.createElement('h3');
+    headerTitle.textContent = 'Recent Service Check-Ins';
+    header.appendChild(headerTitle);
     container.appendChild(header);
     
     // Check-ins
@@ -354,44 +363,86 @@ const CheckInWidget = (function() {
         const checkInElement = document.createElement('div');
         checkInElement.className = 'checkin-item';
         
-        let technicianInfo = '';
+        // Create technician info safely
+        const technicianInfoDiv = document.createElement('div');
+        technicianInfoDiv.className = 'technician-info';
+        
         if (config.showTechPhotos && checkIn.technician && checkIn.technician.photo) {
-          technicianInfo += \`<img src="\${checkIn.technician.photo}" alt="\${checkIn.technician.name}" class="technician-photo">\`;
+          const techPhoto = document.createElement('img');
+          techPhoto.src = sanitizeUrl(checkIn.technician.photo);
+          techPhoto.alt = sanitizeText(checkIn.technician.name);
+          techPhoto.className = 'technician-photo';
+          technicianInfoDiv.appendChild(techPhoto);
         }
-        technicianInfo += \`<span class="technician-name">\${checkIn.technician ? checkIn.technician.name : 'Technician'}</span>\`;
         
-        let checkInPhotos = '';
+        const techNameSpan = document.createElement('span');
+        techNameSpan.className = 'technician-name';
+        techNameSpan.textContent = sanitizeText(checkIn.technician ? checkIn.technician.name : 'Technician');
+        technicianInfoDiv.appendChild(techNameSpan);
+        
+        // Create check-in photos safely
+        const checkInPhotosDiv = document.createElement('div');
+        checkInPhotosDiv.className = 'checkin-photos';
+        
         if (config.showCheckInPhotos && checkIn.photos && checkIn.photos.length > 0) {
-          checkInPhotos = '<div class="checkin-photos">';
           checkIn.photos.forEach(photo => {
-            checkInPhotos += \`<img src="\${photo}" alt="Check-in photo" class="checkin-photo">\`;
+            const photoImg = document.createElement('img');
+            photoImg.src = sanitizeUrl(photo);
+            photoImg.alt = 'Check-in photo';
+            photoImg.className = 'checkin-photo';
+            checkInPhotosDiv.appendChild(photoImg);
           });
-          checkInPhotos += '</div>';
         }
         
-        checkInElement.innerHTML = \`
-          <div class="checkin-header">
-            <div class="technician-info">\${technicianInfo}</div>
-            <div class="checkin-time">\${new Date(checkIn.createdAt).toLocaleDateString()}</div>
-          </div>
-          <div class="checkin-job-type">\${checkIn.jobType}</div>
-          <div class="checkin-location">\${checkIn.location || ''}</div>
-          <div class="checkin-notes">\${checkIn.notes || ''}</div>
-          \${checkInPhotos}
-        \`;
+        // Build check-in element safely
+        const checkInHeaderDiv = document.createElement('div');
+        checkInHeaderDiv.className = 'checkin-header';
+        checkInHeaderDiv.appendChild(technicianInfoDiv);
+        
+        const checkInTime = document.createElement('div');
+        checkInTime.className = 'checkin-time';
+        checkInTime.textContent = new Date(checkIn.createdAt).toLocaleDateString();
+        checkInHeaderDiv.appendChild(checkInTime);
+        
+        const jobTypeDiv = document.createElement('div');
+        jobTypeDiv.className = 'checkin-job-type';
+        jobTypeDiv.textContent = sanitizeText(checkIn.jobType);
+        
+        const locationDiv = document.createElement('div');
+        locationDiv.className = 'checkin-location';
+        locationDiv.textContent = sanitizeText(checkIn.location || '');
+        
+        const notesDiv = document.createElement('div');
+        notesDiv.className = 'checkin-notes';
+        notesDiv.textContent = sanitizeText(checkIn.notes || '');
+        
+        checkInElement.appendChild(checkInHeaderDiv);
+        checkInElement.appendChild(jobTypeDiv);
+        checkInElement.appendChild(locationDiv);
+        checkInElement.appendChild(notesDiv);
+        if (checkInPhotosDiv.children.length > 0) {
+          checkInElement.appendChild(checkInPhotosDiv);
+        }
         
         checkInsContainer.appendChild(checkInElement);
       });
     } else {
-      checkInsContainer.innerHTML = '<div class="checkin-empty">No recent check-ins available.</div>';
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'checkin-empty';
+      emptyDiv.textContent = 'No recent check-ins available.';
+      checkInsContainer.appendChild(emptyDiv);
     }
     
     container.appendChild(checkInsContainer);
     
-    // Footer
+    // Footer - safe link creation
     const footer = document.createElement('div');
     footer.className = 'checkin-footer';
-    footer.innerHTML = '<a href="#" target="_blank">Powered by Rank it Pro</a>';
+    const footerLink = document.createElement('a');
+    footerLink.href = '#';
+    footerLink.target = '_blank';
+    footerLink.textContent = 'Powered by Rank it Pro';
+    footer.appendChild(footerLink);
     container.appendChild(footer);
     
     // Apply styles
@@ -575,7 +626,7 @@ router.get("/embed/data", async (req: Request, res: Response) => {
 
     return res.json({ checkIns: formattedCheckIns });
   } catch (error) {
-    console.error("Error fetching embed data:", error);
+    logger.error("Error fetching embed data", { error: error instanceof Error ? error.message : 'Unknown error' });
     return res.status(500).json({ message: "Error fetching embed data" });
   }
 });
@@ -588,7 +639,7 @@ router.get("/ai/providers", isAuthenticated, isCompanyAdmin, async (_req: Reques
     const providers = getAvailableAIProviders();
     return res.json({ providers });
   } catch (error) {
-    console.error("Error fetching AI providers:", error);
+    logger.error("Error fetching AI providers", { error: error instanceof Error ? error.message : 'Unknown error' });
     return res.status(500).json({ message: "Error fetching AI providers" });
   }
 });
@@ -611,7 +662,7 @@ router.post("/ai/generate-summary", isAuthenticated, async (req: Request, res: R
 
     return res.json({ summary });
   } catch (error) {
-    console.error("Error generating summary:", error);
+    logger.error("Error generating summary", { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
     return res.status(500).json({ message: "Error generating summary" });
   }
 });
@@ -634,7 +685,7 @@ router.post("/ai/generate-blog-post", isAuthenticated, async (req: Request, res:
 
     return res.json(blogPost);
   } catch (error) {
-    console.error("Error generating blog post:", error);
+    logger.error("Error generating blog post", { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
     return res.status(500).json({ message: "Error generating blog post" });
   }
 });
