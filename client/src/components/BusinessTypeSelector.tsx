@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 
 interface BusinessTypeSelectorProps {
-  onSelect: (businessType: 'field_service' | 'marketing_focused') => void;
-  selectedType?: 'field_service' | 'marketing_focused';
+  onSelect: (businessType: 'service_business' | 'non_service_business') => void;
+  selectedType?: 'service_business' | 'non_service_business';
 }
 
 export function BusinessTypeSelector({ onSelect, selectedType }: BusinessTypeSelectorProps) {
@@ -25,31 +25,35 @@ export function BusinessTypeSelector({ onSelect, selectedType }: BusinessTypeSel
 
   const businessTypes = [
     {
-      id: 'field_service',
-      title: 'Field Service Edition',
-      subtitle: 'For businesses with staff in the field',
-      description: 'Perfect for service technicians, home services, and field workers who need to track jobs and customer interactions.',
+      id: 'service_business',
+      title: 'Service Business',
+      subtitle: 'For businesses with field staff and on-site services',
+      description: 'Perfect for service technicians, home services, and field workers. Get ALL features including check-ins, reviews, content generation, and more.',
       examples: ['HVAC Repair', 'Plumbing', 'Electrical', 'Landscaping', 'Appliance Repair'],
       features: [
-        { icon: <MapPin className="w-4 h-4" />, text: 'GPS Check-ins' },
+        { icon: <MapPin className="w-4 h-4" />, text: 'GPS Check-ins & Job Tracking' },
         { icon: <Camera className="w-4 h-4" />, text: 'Photo/Audio Uploads' },
-        { icon: <Smartphone className="w-4 h-4" />, text: 'Mobile App' },
-        { icon: <Wrench className="w-4 h-4" />, text: 'Job Tracking' }
+        { icon: <Star className="w-4 h-4" />, text: 'Review Management' },
+        { icon: <MessageSquare className="w-4 h-4" />, text: 'AI Content Generation' },
+        { icon: <Smartphone className="w-4 h-4" />, text: 'Mobile App Access' },
+        { icon: <Share2 className="w-4 h-4" />, text: 'Social Media Integration' }
       ],
-      pricing: 'Starting at $97/month',
+      pricing: 'All features based on plan',
       color: 'bg-blue-50 border-blue-200 hover:bg-blue-100'
     },
     {
-      id: 'marketing_focused',
-      title: 'Business Marketing Edition',
-      subtitle: 'For businesses focused on online reputation',
-      description: 'Ideal for restaurants, dentists, retailers, and office-based businesses that want to boost their online presence.',
+      id: 'non_service_business',
+      title: 'Non-Service Business',
+      subtitle: 'For location-based businesses without field staff',
+      description: 'Ideal for restaurants, dentists, retailers, and office-based businesses. Get ALL features except check-ins - perfect for boosting online presence.',
       examples: ['Restaurants', 'Dental Offices', 'Retail Stores', 'Salons', 'Professional Services'],
       features: [
         { icon: <Star className="w-4 h-4" />, text: 'Review Management' },
-        { icon: <MessageSquare className="w-4 h-4" />, text: 'Testimonial Collection' },
+        { icon: <MessageSquare className="w-4 h-4" />, text: 'AI Content Generation' },
         { icon: <Share2 className="w-4 h-4" />, text: 'Social Media Integration' },
-        { icon: <Bot className="w-4 h-4" />, text: 'AI Content Generation' }
+        { icon: <Globe className="w-4 h-4" />, text: 'Website Integration' },
+        { icon: <Bot className="w-4 h-4" />, text: 'SEO Optimization' },
+        { icon: <Store className="w-4 h-4" />, text: 'Business Analytics' }
       ],
       pricing: 'Starting at $97/month',
       color: 'bg-green-50 border-green-200 hover:bg-green-100'
@@ -70,7 +74,7 @@ export function BusinessTypeSelector({ onSelect, selectedType }: BusinessTypeSel
             className={`cursor-pointer transition-all duration-200 ${type.color} ${
               selectedType === type.id ? 'ring-2 ring-blue-500' : ''
             }`}
-            onClick={() => onSelect(type.id as 'field_service' | 'marketing_focused')}
+            onClick={() => onSelect(type.id as 'service_business' | 'non_service_business')}
             onMouseEnter={() => setHoveredType(type.id)}
             onMouseLeave={() => setHoveredType(null)}
           >

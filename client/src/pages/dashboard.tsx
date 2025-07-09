@@ -11,8 +11,7 @@ import VisitModal from "../components/modals/visit-modal";
 import MobileVisitModal from "../components/technician/mobile-visit-modal";
 import TechDashboard from "../components/technician/tech-dashboard";
 import UsageWarningBanner from "../components/usage-warning-banner";
-import { FieldServiceDashboard } from "../components/dashboards/FieldServiceDashboard";
-import { MarketingDashboard } from "../components/dashboards/MarketingDashboard";
+import { UniversalDashboard } from "../components/dashboards/UniversalDashboard";
 import { BusinessTypeSelector } from "../components/BusinessTypeSelector";
 
 import { useQuery } from "@tanstack/react-query";
@@ -94,23 +93,14 @@ export default function Dashboard() {
                   }}
                 />
               </div>
-            ) : businessType === 'field_service' ? (
-              // Field Service Dashboard
-              <FieldServiceDashboard 
-                company={company} 
-                user={auth?.user} 
-              />
-            ) : businessType === 'marketing_focused' ? (
-              // Marketing Dashboard
-              <MarketingDashboard 
-                company={company} 
-                user={auth?.user} 
-              />
             ) : (
-              // Fallback to field service dashboard if business type is unknown
-              <FieldServiceDashboard 
+              // Universal Dashboard - shows all features based on business type
+              <UniversalDashboard 
                 company={company} 
-                user={auth?.user} 
+                user={auth?.user}
+                businessType={businessType}
+              />
+            )} 
               />
             )}
           </>
