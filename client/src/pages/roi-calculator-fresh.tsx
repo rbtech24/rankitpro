@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, TrendingUp, Search, Globe } from 'lucide-react';
+import { ArrowRight, TrendingUp, Search, Globe, CheckCircle } from 'lucide-react';
 import { Logo } from '@/components/ui/logo';
 
 const ROICalculatorFresh = () => {
@@ -114,11 +114,24 @@ const ROICalculatorFresh = () => {
               <Logo size="md" />
             </div>
           </Link>
-          <Link to="/login">
-            <Button variant="outline" className="bg-white/50">
-              Sign In
-            </Button>
-          </Link>
+          <nav className="hidden md:flex items-center space-x-6">
+            <Link to="/" className="text-sm font-medium hover:text-blue-600 transition-colors">Home</Link>
+            <a href="/#features" className="text-sm font-medium hover:text-blue-600 transition-colors">Features</a>
+            <a href="/#benefits" className="text-sm font-medium hover:text-blue-600 transition-colors">Benefits</a>
+            <a href="/#testimonials" className="text-sm font-medium hover:text-blue-600 transition-colors">Success Stories</a>
+            <a href="/#pricing" className="text-sm font-medium hover:text-blue-600 transition-colors">Pricing</a>
+            <Link to="/login">
+              <Button variant="outline" size="sm">Sign In</Button>
+            </Link>
+            <Link to="/register">
+              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Start Free Trial</Button>
+            </Link>
+          </nav>
+          <div className="md:hidden">
+            <Link to="/register">
+              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Try Free</Button>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -398,13 +411,75 @@ const ROICalculatorFresh = () => {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-6 text-center">
-          <Logo size="sm" variant="white" />
-          <p className="text-gray-400 mt-4">
-            © 2025 Rank It Pro. All rights reserved.
+      {/* CTA Section */}
+      <section className="py-16 px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div className="container mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Transform Your Business?</h2>
+          <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
+            Join hundreds of successful businesses using Rank It Pro to dominate local search and grow revenue.
           </p>
+          
+          <div className="flex justify-center mb-8">
+            <Link to="/register">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-4 h-auto">
+                Start Your Free 14-Day Trial
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="flex items-center justify-center space-x-6 text-sm opacity-75">
+            <div className="flex items-center">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              No credit card required
+            </div>
+            <div className="flex items-center">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Setup in under 5 minutes
+            </div>
+            <div className="flex items-center">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Cancel anytime
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-6 bg-gray-900 text-gray-300">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="col-span-1 md:col-span-2">
+              <Logo size="md" variant="white" />
+              <p className="mt-4 text-gray-400 max-w-md">
+                The complete platform for service businesses to automate content creation, collect reviews, and dominate local search.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Product</h3>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/#features" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link to="/#pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link to="/integrations" className="hover:text-white transition-colors">Integrations</Link></li>
+                <li><Link to="/api" className="hover:text-white transition-colors">API</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Support</h3>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/help-center" className="hover:text-white transition-colors">Help Center</Link></li>
+                <li><Link to="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
+                <li><Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+            <p>&copy; 2025 Rank It Pro. All rights reserved.</p>
+          </div>
         </div>
       </footer>
     </div>
