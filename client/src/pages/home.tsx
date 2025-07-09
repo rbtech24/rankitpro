@@ -86,17 +86,13 @@ const Home = () => {
             <span className="font-semibold text-blue-600"> Boost your online visibility and grow revenue by 40% in 90 days.</span>
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+          <div className="flex justify-center mb-12">
             <Link to="/register">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-4 h-auto">
                 Start Your Free 14-Day Trial
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-4 h-auto group">
-              <Play className="mr-2 w-5 h-5 group-hover:scale-110 transition-transform" />
-              Watch 2-Min Demo
-            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -402,7 +398,7 @@ const Home = () => {
                 </div>
               </div>
               
-              <Link to="/roi-calculator-fresh">
+              <Link to="/roi-calculator">
                 <Button className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold" size="lg">
                   Calculate Your Exact Revenue Growth
                   <ArrowRight className="ml-2 w-4 h-4" />
