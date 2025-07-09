@@ -9,6 +9,7 @@ import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import NotFound from "./pages/not-found";
 import { performImmediateLogout } from "./lib/logout";
 import AuthenticatedLayout from "./components/layout/authenticated-layout";
+import { OnboardingProvider } from "./components/onboarding/OnboardingProvider";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard-fixed";
@@ -1406,13 +1407,15 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <NotificationProvider>
-        <TooltipProvider>
-          <Toaster />
-          <AuthenticatedLayout>
-            <Router />
-          </AuthenticatedLayout>
-          <PWAInstallPrompt />
-        </TooltipProvider>
+        <OnboardingProvider>
+          <TooltipProvider>
+            <Toaster />
+            <AuthenticatedLayout>
+              <Router />
+            </AuthenticatedLayout>
+            <PWAInstallPrompt />
+          </TooltipProvider>
+        </OnboardingProvider>
       </NotificationProvider>
     </QueryClientProvider>
   );

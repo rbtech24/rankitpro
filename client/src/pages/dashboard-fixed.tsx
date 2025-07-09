@@ -16,6 +16,7 @@ import TechDashboard from "../components/technician/tech-dashboard";
 
 import { useQuery } from "@tanstack/react-query";
 import { AuthState, getCurrentUser } from "../lib/auth";
+import { OnboardingTrigger } from "../components/onboarding/OnboardingTrigger";
 
 export default function Dashboard() {
   const [visitModalOpen, setVisitModalOpen] = useState(false);
@@ -44,14 +45,19 @@ export default function Dashboard() {
     <DashboardLayout>
       <div className="fade-in">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-500">
-            {isSuperAdmin 
-              ? "System administration dashboard for managing the entire platform."
-              : isAdmin 
-              ? "Welcome back! Here's what's happening with your company."
-              : "Welcome back! Here's what's happening with your visits."}
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-sm text-gray-500">
+                {isSuperAdmin 
+                  ? "System administration dashboard for managing the entire platform."
+                  : isAdmin 
+                  ? "Welcome back! Here's what's happening with your company."
+                  : "Welcome back! Here's what's happening with your visits."}
+              </p>
+            </div>
+            <OnboardingTrigger variant="button" size="sm" />
+          </div>
         </div>
         
         {/* Super Admin System Dashboard */}

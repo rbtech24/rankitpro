@@ -2350,6 +2350,10 @@ Format as professional service documentation.`;
   // Register sales routes for sales staff management
   app.use("/api/sales", salesRoutes);
 
+  // Register onboarding routes for user walkthrough
+  const onboardingRoutes = await import("./routes/onboarding");
+  app.use("/api/onboarding", onboardingRoutes.default);
+
   // Mount critical missing routes with proper paths - BEFORE catch-all
   app.use("/api/check-ins", checkInRoutes);
   app.use("/api/visits", checkInRoutes); // Add visits alias for dashboard

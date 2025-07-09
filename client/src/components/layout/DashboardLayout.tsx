@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import NotificationBell from '../../components/notifications/NotificationBell';
 import Sidebar from './sidebar-clean';
+import { OnboardingMenuItem } from '../onboarding/OnboardingTrigger';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -37,7 +38,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex-1 flex items-center">
               <img src="/rank it pro logo.png" alt="RANK IT PRO" className="h-10" />
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center space-x-2">
+              <OnboardingMenuItem />
               <NotificationBell />
             </div>
           </div>
@@ -71,7 +73,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         )}
         
         {/* Desktop header */}
-        <div className="hidden md:flex md:justify-end md:p-4">
+        <div className="hidden md:flex md:justify-end md:p-4 space-x-2">
+          <OnboardingMenuItem />
           <NotificationBell />
         </div>
         
