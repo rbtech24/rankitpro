@@ -57,8 +57,11 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip X-Forwarded-For validation in development
-  validate: process.env.NODE_ENV === 'production' ? undefined : { xForwardedForHeader: false },
+  // Disable X-Forwarded-For validation in development to prevent ValidationError
+  validate: process.env.NODE_ENV === 'production' ? undefined : {
+    xForwardedForHeader: false,
+    trustProxy: false
+  },
   skip: (req) => {
     // Skip rate limiting for health checks
     return req.path === '/health' || req.path === '/api/health';

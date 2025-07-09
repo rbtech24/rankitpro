@@ -1,113 +1,166 @@
 /**
- * Structured Logging Service for Rank It Pro
- * Provides centralized logging with proper levels and formatting
+ * Structured Logging Service
+ * Centralized logging system with different levels and proper formatting
  */
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+import { logError } from '../error-monitor';
 
-interface LogEntry {
+export enum LogLevel {
+  ERROR = 'error',
+  WARN = 'warn',
+  INFO = 'info',
+  DEBUG = 'debug'
+}
+
+export interface LogEntry {
   timestamp: string;
   level: LogLevel;
   message: string;
-  context?: Record<string, any>;
+  context?: any;
   error?: Error;
+  metadata?: {
+    method?: string;
+    url?: string;
+    userId?: number;
+    companyId?: number;
+    ip?: string;
+    userAgent?: string;
+  };
 }
 
 class Logger {
-  private isProduction = process.env.NODE_ENV === 'production';
-  private logLevel: LogLevel = this.isProduction ? 'info' : 'debug';
+  private isDevelopment: boolean;
+
+  constructor() {
+    this.isDevelopment = process.env.NODE_ENV !== 'production';
+  }
 
   private formatMessage(entry: LogEntry): string {
-    const timestamp = new Date(entry.timestamp).toISOString();
-    let formatted = `[${timestamp}] [${entry.level.toUpperCase()}] ${entry.message}`;
+    const timestamp = entry.timestamp;
+    const level = entry.level.toUpperCase();
+    const baseMessage = `[${timestamp}] [${level}] ${entry.message}`;
     
-    if (entry.context && Object.keys(entry.context).length > 0) {
-      formatted += ` | Context: ${JSON.stringify(entry.context)}`;
+    if (entry.metadata && Object.keys(entry.metadata).length > 0) {
+      const metadataString = Object.entries(entry.metadata)
+        .filter(([_, value]) => value !== undefined)
+        .map(([key, value]) => `${key}=${value}`)
+        .join(' ');
+      return `${baseMessage} [${metadataString}]`;
     }
     
-    if (entry.error) {
-      formatted += ` | Error: ${entry.error.message}`;
-      if (!this.isProduction) {
-        formatted += `\n${entry.error.stack}`;
-      }
-    }
-    
-    return formatted;
+    return baseMessage;
   }
 
-  private shouldLog(level: LogLevel): boolean {
-    const levels = { debug: 0, info: 1, warn: 2, error: 3 };
-    return levels[level] >= levels[this.logLevel];
-  }
-
-  private log(level: LogLevel, message: string, context?: Record<string, any>, error?: Error): void {
-    if (!this.shouldLog(level)) return;
-
+  private log(level: LogLevel, message: string, context?: any, metadata?: LogEntry['metadata']) {
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,
       message,
       context,
-      error
+      metadata
     };
 
-    const formatted = this.formatMessage(entry);
-    
-    // In production, you might want to send to external logging service
-    if (this.isProduction) {
-      // Could integrate with services like Winston, Pino, or external logging
-      console.log(formatted);
-    } else {
-      // Development logging with colors
-      switch (level) {
-        case 'debug':
-          console.debug(formatted);
-          break;
-        case 'info':
-          console.info(formatted);
-          break;
-        case 'warn':
-          console.warn(formatted);
-          break;
-        case 'error':
-          console.error(formatted);
-          break;
-      }
+    const formattedMessage = this.formatMessage(entry);
+
+    // Console output based on level
+    switch (level) {
+      case LogLevel.ERROR:
+        console.error(formattedMessage);
+        if (context instanceof Error) {
+          console.error(context.stack);
+        } else if (context) {
+          console.error('Context:', context);
+        }
+        break;
+      case LogLevel.WARN:
+        console.warn(formattedMessage);
+        break;
+      case LogLevel.INFO:
+        console.info(formattedMessage);
+        break;
+      case LogLevel.DEBUG:
+        if (this.isDevelopment) {
+          console.debug(formattedMessage);
+        }
+        break;
+    }
+
+    // Send errors to error monitoring system
+    if (level === LogLevel.ERROR && context instanceof Error) {
+      logError(message, context, metadata);
     }
   }
 
-  debug(message: string, context?: Record<string, any>): void {
-    this.log('debug', message, context);
+  // Public logging methods
+  error(message: string, error?: Error, metadata?: LogEntry['metadata']) {
+    this.log(LogLevel.ERROR, message, error, metadata);
   }
 
-  info(message: string, context?: Record<string, any>): void {
-    this.log('info', message, context);
+  warn(message: string, context?: any, metadata?: LogEntry['metadata']) {
+    this.log(LogLevel.WARN, message, context, metadata);
   }
 
-  warn(message: string, context?: Record<string, any>): void {
-    this.log('warn', message, context);
+  info(message: string, context?: any, metadata?: LogEntry['metadata']) {
+    this.log(LogLevel.INFO, message, context, metadata);
   }
 
-  error(message: string, error?: Error, context?: Record<string, any>): void {
-    this.log('error', message, context, error);
+  debug(message: string, context?: any, metadata?: LogEntry['metadata']) {
+    this.log(LogLevel.DEBUG, message, context, metadata);
   }
 
-  // Convenience methods for common use cases
-  auth(message: string, context?: Record<string, any>): void {
-    this.debug(`[AUTH] ${message}`, context);
+  // Request-specific logging
+  request(method: string, url: string, statusCode: number, duration: number, userId?: number) {
+    this.info(`${method} ${url} - ${statusCode}`, null, {
+      method,
+      url,
+      userId,
+      metadata: { duration: `${duration}ms` }
+    });
   }
 
-  database(message: string, context?: Record<string, any>): void {
-    this.debug(`[DB] ${message}`, context);
+  // Authentication logging
+  auth(message: string, userId?: number, email?: string, metadata?: LogEntry['metadata']) {
+    this.info(message, null, {
+      userId,
+      ...metadata,
+      email: email ? email.replace(/(.{2}).*@/, '$1***@') : undefined // Mask email
+    });
   }
 
-  api(message: string, context?: Record<string, any>): void {
-    this.debug(`[API] ${message}`, context);
+  // Database logging
+  database(message: string, query?: string, duration?: number, error?: Error) {
+    if (error) {
+      this.error(`Database error: ${message}`, error, {
+        query: query ? query.substring(0, 100) + '...' : undefined,
+        metadata: { duration: duration ? `${duration}ms` : undefined }
+      });
+    } else {
+      this.debug(`Database: ${message}`, null, {
+        query: query ? query.substring(0, 100) + '...' : undefined,
+        metadata: { duration: duration ? `${duration}ms` : undefined }
+      });
+    }
   }
 
-  security(message: string, context?: Record<string, any>): void {
-    this.warn(`[SECURITY] ${message}`, context);
+  // Security logging
+  security(message: string, level: LogLevel = LogLevel.WARN, metadata?: LogEntry['metadata']) {
+    this.log(level, `[SECURITY] ${message}`, null, metadata);
+  }
+
+  // WebSocket logging
+  websocket(message: string, connectionId?: string, metadata?: LogEntry['metadata']) {
+    this.debug(`[WS] ${message}`, null, {
+      connectionId,
+      ...metadata
+    });
   }
 }
 
+// Export singleton instance
 export const logger = new Logger();
+
+// Helper functions for backward compatibility
+export const logInfo = (message: string, context?: any) => logger.info(message, context);
+export const logError = (message: string, error?: Error, metadata?: any) => logger.error(message, error, metadata);
+export const logWarn = (message: string, context?: any) => logger.warn(message, context);
+export const logDebug = (message: string, context?: any) => logger.debug(message, context);

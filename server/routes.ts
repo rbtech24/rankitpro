@@ -59,6 +59,9 @@ import crypto from 'crypto';
 import { securityMonitor, securityMonitoringMiddleware } from "./security-monitor";
 import { penetrationTester } from "./penetration-tester";
 import { sessionTester } from "./session-tester";
+import { errorHandler, asyncHandler } from "./middleware/error-handler";
+import { validateBody, validateParams, validateQuery, commonSchemas } from "./middleware/validation";
+import { logger } from "./services/logger";
 // Removed conflicting auth modules
 
 const SessionStore = MemoryStore(session);
@@ -202,14 +205,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add security monitoring middleware
   app.use(securityMonitoringMiddleware());
 
-  // Main login endpoint
-  app.post("/api/auth/login", async (req, res) => {
-    try {
+  // Login validation schema
+  const loginSchema = z.object({
+    email: commonSchemas.email,
+    password: z.string().min(1, "Password is required")
+  });
+
+  // Main login endpoint with validation
+  app.post("/api/auth/login", 
+    validateBody(loginSchema),
+    asyncHandler(async (req, res) => {
       const { email, password } = req.body;
-      
-      if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
-      }
       
       // Find user by email
       const user = await storage.getUserByEmail(email);
@@ -235,10 +241,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await new Promise<void>((resolve, reject) => {
         req.session.save((err: any) => {
           if (err) {
-            console.error("Login session save error:", err);
             reject(new Error("Session save failed"));
           } else {
-            console.log("Login session saved successfully for user ${user.id}");
             resolve();
           }
         });
@@ -248,11 +252,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password: _, ...userWithoutPassword } = user;
       
       res.json(userWithoutPassword);
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ message: "Server error during login" });
-    }
-  });
+    })
+  );
   // Create HTTP server to be returned
   const server = createServer(app);
   
@@ -291,7 +292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             if (userId) {
               userConnections.set(parseInt(userId), ws);
-              console.log(`🔗 User ${userId} connected via WebSocket`);
+              logger.websocket(`User ${userId} connected via WebSocket`, `user-${userId}`);
               
               // Send authentication confirmation
               ws.send(JSON.stringify({ 
@@ -307,7 +308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 companyConnections.set(cId, new Set());
               }
               companyConnections.get(cId)?.add(ws);
-              console.log(`🏢 Client subscribed to company ${cId} updates`);
+              logger.websocket(`Client subscribed to company ${cId} updates`, `company-${cId}`);
             }
           }
           
@@ -325,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             handleAgentTyping(data, ws);
           }
         } catch (error) {
-          console.error('WebSocket message processing error:', error);
+          logger.error('WebSocket message processing error', error as Error);
           ws.send(JSON.stringify({ 
             type: 'error', 
             message: 'Invalid message format' 
@@ -4779,6 +4780,9 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       res.status(500).json({ message: 'Failed to fetch session metrics' });
     }
   });
+
+  // Add global error handling middleware
+  app.use(errorHandler);
 
   // Critical Security Fix: API catch-all handler to prevent HTML responses
   // This MUST be the last route handler to catch any unmatched API requests

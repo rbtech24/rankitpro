@@ -5,6 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { storage } from '../storage';
+import { logError } from '../error-monitor';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -81,7 +82,8 @@ export async function enforceTrialLimits(req: AuthenticatedRequest, res: Respons
 
     next();
   } catch (error) {
-    console.error('Trial enforcement error:', error);
+    // Log trial enforcement error to error monitoring system
+    logError('Trial enforcement error', error);
     return res.status(500).json({ 
       error: 'system_error',
       message: 'Unable to verify trial status'
@@ -116,7 +118,8 @@ export async function getTrialStatus(companyId: number) {
       trialEndDate: trialEndDate.toISOString()
     };
   } catch (error) {
-    console.error('Error getting trial status:', error);
+    // Log trial status error to error monitoring system
+    logError('Error getting trial status', error);
     return { expired: true, daysLeft: 0 };
   }
 }
