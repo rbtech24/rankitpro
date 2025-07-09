@@ -298,7 +298,7 @@ export function validateFileUpload(options: {
  * Middleware to sanitize all string inputs
  */
 export function sanitizeAllInputs(req: Request, res: Response, next: NextFunction) {
-  function sanitizeObject(obj: any): any {
+  function sanitizeObject(obj: unknown): unknown {
     if (typeof obj === 'string') {
       return sanitizeText(obj);
     }
@@ -308,7 +308,7 @@ export function sanitizeAllInputs(req: Request, res: Response, next: NextFunctio
     }
     
     if (obj && typeof obj === 'object') {
-      const sanitized: any = {};
+      const sanitized: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(obj)) {
         sanitized[key] = sanitizeObject(value);
       }

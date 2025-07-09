@@ -4,6 +4,9 @@ import { isAuthenticated, isCompanyAdmin, isSuperAdmin } from "../middleware/aut
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import bcrypt from "bcrypt";
+import { validateUser, validateParams, sanitizeAllInputs } from "../middleware/input-validation";
+import { asyncHandler, successResponse, createdResponse, updatedResponse, notFoundError, validationError } from "../middleware/error-handling";
+import { logger } from "../services/logger";
 
 const router = Router();
 
@@ -56,8 +59,9 @@ router.get("/", isAuthenticated, async (req: Request, res: Response) => {
     }
 
     res.json(users);
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    logger.error("Error fetching users", { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
+    res.status(500).json({ message: "Error fetching users" });
   }
 });
 
@@ -85,8 +89,9 @@ router.get("/:id", isAuthenticated, async (req: Request, res: Response) => {
     
     // If user is found and authorized, return the user
     res.json(user);
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    logger.error("Error fetching user", { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
+    res.status(500).json({ message: "Error fetching user" });
   }
 });
 

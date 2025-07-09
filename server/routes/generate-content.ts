@@ -3,6 +3,9 @@ import { isAuthenticated } from '../middleware/auth';
 import { storage } from '../storage';
 import { generateSummary, generateBlogPost } from '../ai';
 import { AIProviderType } from '../ai/types';
+import { validateAIContent, validateParams, sanitizeAllInputs } from '../middleware/input-validation';
+import { asyncHandler, successResponse, notFoundError, validationError } from '../middleware/error-handling';
+import { logger } from '../services/logger';
 
 const router = express.Router();
 
@@ -93,7 +96,7 @@ router.post('/check-ins/:id/generate-content', isAuthenticated, async (req: Requ
     
     return res.json(result);
   } catch (error) {
-    console.error('Error generating content:', error);
+    logger.error('Error generating content', { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
     return res.status(500).json({ message: 'Failed to generate content' });
   }
 });

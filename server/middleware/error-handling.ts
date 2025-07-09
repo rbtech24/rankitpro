@@ -9,20 +9,20 @@ import { logger } from '../services/logger';
 export interface ApiError extends Error {
   statusCode?: number;
   code?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export class AppError extends Error implements ApiError {
   public statusCode: number;
   public code: string;
-  public details?: Record<string, any>;
+  public details?: Record<string, unknown>;
   public isOperational: boolean;
 
   constructor(
     message: string,
     statusCode: number = 500,
     code: string = 'INTERNAL_ERROR',
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   ) {
     super(message);
     this.statusCode = statusCode;
@@ -36,7 +36,7 @@ export class AppError extends Error implements ApiError {
 
 // Common error types
 export class ValidationError extends AppError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, 400, 'VALIDATION_ERROR', details);
   }
 }
@@ -72,7 +72,7 @@ export class RateLimitError extends AppError {
 }
 
 export class DatabaseError extends AppError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, 500, 'DATABASE_ERROR', details);
   }
 }
@@ -86,7 +86,7 @@ export class ExternalServiceError extends AppError {
 /**
  * Async error handler wrapper
  */
-export function asyncHandler(fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) {
+export function asyncHandler(fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
@@ -98,7 +98,7 @@ export function asyncHandler(fn: (req: Request, res: Response, next: NextFunctio
 function formatErrorResponse(error: ApiError, req: Request) {
   const isDevelopment = process.env.NODE_ENV === 'development';
   
-  const response: any = {
+  const response: Record<string, unknown> = {
     message: error.message,
     code: error.code || 'INTERNAL_ERROR',
     timestamp: new Date().toISOString(),
@@ -173,7 +173,7 @@ export function notFoundHandler(req: Request, res: Response) {
 /**
  * Database operation error handler
  */
-export function handleDatabaseError(error: any, operation: string): never {
+export function handleDatabaseError(error: Error & { code?: string }, operation: string): never {
   logger.error('Database operation failed', {
     operation,
     error: error.message,
@@ -199,7 +199,7 @@ export function handleDatabaseError(error: any, operation: string): never {
 /**
  * External service error handler
  */
-export function handleExternalServiceError(error: any, service: string): never {
+export function handleExternalServiceError(error: Error & { status?: number; statusCode?: number }, service: string): never {
   logger.error('External service error', {
     service,
     error: error.message,
@@ -215,11 +215,11 @@ export function handleExternalServiceError(error: any, service: string): never {
  */
 export function successResponse(
   res: Response,
-  data: any,
+  data: unknown,
   message?: string,
   statusCode: number = 200
 ) {
-  const response: any = {
+  const response: Record<string, unknown> = {
     success: true,
     data,
     timestamp: new Date().toISOString()
@@ -237,7 +237,7 @@ export function successResponse(
  */
 export function paginatedResponse(
   res: Response,
-  data: any[],
+  data: unknown[],
   pagination: {
     page: number;
     limit: number;
@@ -260,14 +260,14 @@ export function paginatedResponse(
 /**
  * Created response helper
  */
-export function createdResponse(res: Response, data: any, message?: string) {
+export function createdResponse(res: Response, data: unknown, message?: string) {
   successResponse(res, data, message || 'Resource created successfully', 201);
 }
 
 /**
  * Updated response helper
  */
-export function updatedResponse(res: Response, data: any, message?: string) {
+export function updatedResponse(res: Response, data: unknown, message?: string) {
   successResponse(res, data, message || 'Resource updated successfully');
 }
 
@@ -281,7 +281,7 @@ export function deletedResponse(res: Response, message?: string) {
 /**
  * Validation error helper
  */
-export function validationError(message: string, details?: Record<string, any>): never {
+export function validationError(message: string, details?: Record<string, unknown>): never {
   throw new ValidationError(message, details);
 }
 

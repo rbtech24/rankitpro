@@ -12,6 +12,9 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
+import { validateCheckIn, validateParams, validateFileUpload, sanitizeAllInputs } from '../middleware/input-validation';
+import { asyncHandler, successResponse, createdResponse, updatedResponse, notFoundError, validationError } from '../middleware/error-handling';
+import { logger } from '../services/logger';
 
 const router = express.Router();
 
@@ -80,7 +83,7 @@ router.post('/upload-photos', isAuthenticated, upload.array('photos', 10), async
     
     res.json(photosByCategory);
   } catch (error) {
-    console.error('Error uploading photos:', error);
+    logger.error('Error uploading photos', { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
     res.status(500).json({ message: 'Failed to upload photos' });
   }
 });
@@ -120,7 +123,7 @@ router.put('/:id', isAuthenticated, async (req: Request, res: Response) => {
 
     res.json(updatedCheckIn);
   } catch (error) {
-    console.error('Error updating check-in:', error);
+    logger.error('Error updating check-in', { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
     res.status(500).json({ message: 'Failed to update check-in' });
   }
 });
@@ -190,7 +193,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
               formattedLocation = fullAddress;
             }
           } catch (error) {
-            console.warn('Reverse geocoding failed for', checkIn.latitude, checkIn.longitude, ':', error);
+            logger.warn('Reverse geocoding failed', { latitude: checkIn.latitude, longitude: checkIn.longitude, error: error instanceof Error ? error.message : 'Unknown error' });
             formattedLocation = `${checkIn.latitude}, ${checkIn.longitude}`;
           }
         }
@@ -218,7 +221,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'application/json');
     return res.json(enrichedCheckIns);
   } catch (error) {
-    console.error('Error fetching check-ins:', error);
+    logger.error('Error fetching check-ins', { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
     res.setHeader('Content-Type', 'application/json');
     return res.status(500).json({ message: 'Failed to fetch check-ins' });
   }
@@ -235,7 +238,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
       // Use correct upload path that matches the server setup
       const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
       photoUrls = req.files.map(file => `${baseUrl}${file.filename}`);
-      console.log('Photo URLs generated:', photoUrls);
+      logger.info('Photo URLs generated', { photoUrls, userId: req.user?.id });
     }
     
     // Prepare check-in data with photos
@@ -253,7 +256,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
       generatedContent: req.body.generatedContent || null,
     };
 
-    console.log('Creating check-in with data:', checkInData);
+    logger.info('Creating check-in', { checkInData, userId: req.user?.id });
 
     // Create the check-in
     const checkIn = await storage.createCheckIn(checkInData);
@@ -299,7 +302,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
         }
       }
     } catch (error) {
-      console.error('Error sending check-in notification:', error);
+      logger.error('Error sending check-in notification', { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
       // Don't fail the check-in creation if notification fails
     }
 
