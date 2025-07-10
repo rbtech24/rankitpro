@@ -32,6 +32,8 @@ export default function IntegrationsPage() {
   const queryClient = useQueryClient();
   const { data: auth } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [testResult, setTestResult] = useState<any>(null);
+  const [testing, setTesting] = useState(false);
 
   // JavaScript embed integration
   const { data: embedData, isLoading: embedLoading, refetch: refetchEmbed } = useQuery({
@@ -557,77 +559,141 @@ export default function IntegrationsPage() {
                 <h4 className="font-medium">API Endpoints</h4>
                 <div className="space-y-3">
                   <div className="bg-gray-50 p-3 rounded-md border">
-                    <p className="text-sm font-medium mb-1">Testimonials</p>
+                    <p className="text-sm font-medium mb-1">Public Widget (No Auth)</p>
                     <code className="text-xs break-all text-blue-600">
                       GET /widget/marketing-test-company?type=testimonials&limit=5
                     </code>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-md border">
-                    <p className="text-sm font-medium mb-1">Blog Posts</p>
-                    <code className="text-xs break-all text-blue-600">
-                      GET /widget/marketing-test-company?type=blogs&limit=3
+                  <div className="bg-green-50 p-3 rounded-md border border-green-200">
+                    <p className="text-sm font-medium mb-1 text-green-800">🔑 Authenticated API - Testimonials</p>
+                    <code className="text-xs break-all text-green-600">
+                      GET /api/testimonials/company/{auth?.company?.id || 'COMPANY_ID'}
                     </code>
+                    <p className="text-xs text-green-700 mt-1">Requires API Key authentication</p>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-md border">
-                    <p className="text-sm font-medium mb-1">All Content</p>
-                    <code className="text-xs break-all text-blue-600">
-                      GET /widget/marketing-test-company?type=all&limit=10
+                  <div className="bg-green-50 p-3 rounded-md border border-green-200">
+                    <p className="text-sm font-medium mb-1 text-green-800">🔑 Authenticated API - Blog Posts</p>
+                    <code className="text-xs break-all text-green-600">
+                      GET /api/blog-posts/company/{auth?.company?.id || 'COMPANY_ID'}
                     </code>
+                    <p className="text-xs text-green-700 mt-1">Requires API Key authentication</p>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-md border border-green-200">
+                    <p className="text-sm font-medium mb-1 text-green-800">🔑 Authenticated API - Check-ins</p>
+                    <code className="text-xs break-all text-green-600">
+                      GET /api/check-ins/company/{auth?.company?.id || 'COMPANY_ID'}
+                    </code>
+                    <p className="text-xs text-green-700 mt-1">Requires API Key with check-in permissions</p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <h4 className="font-medium">JavaScript Fetch Example</h4>
+                <h4 className="font-medium">API Authentication Examples</h4>
+                <p className="text-sm text-muted-foreground">
+                  Use your API credentials to securely access data programmatically
+                </p>
+                
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                  <p className="text-amber-800 text-sm font-medium mb-2">🔑 API Key Required</p>
+                  <p className="text-amber-700 text-sm">
+                    To use these API endpoints, you'll need to create API credentials in the{' '}
+                    <a href="/api-credentials" className="text-blue-600 hover:underline font-medium">
+                      API Credentials
+                    </a> section first.
+                  </p>
+                </div>
+
                 <div className="bg-gray-900 text-green-400 p-4 rounded-md font-mono text-sm overflow-x-auto">
-                  <pre>{`// Fetch testimonials via JSON
-fetch('${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=5')
-  .then(response => response.text())
-  .then(script => {
-    // Extract JSON from script
-    const jsonMatch = script.match(/const WIDGET_CONFIG = ({.*?});/);
-    if (jsonMatch) {
-      const data = JSON.parse(jsonMatch[1]);
-      console.log(data.content.testimonials);
-      
-      // Use the data in your app
-      data.content.testimonials.forEach(testimonial => {
-        console.log(testimonial.customer_name, testimonial.content);
-      });
-    }
-  });`}</pre>
+                  <pre>{`// Using API Key Authentication
+const API_KEY = 'your_api_key_here';
+const SECRET_KEY = 'your_secret_key_here';
+
+// Fetch testimonials with authentication
+fetch('/api/testimonials/company/{auth?.company?.id || 'COMPANY_ID'}', {
+  headers: {
+    'Authorization': 'Bearer ' + API_KEY,
+    'X-API-Secret': SECRET_KEY,
+    'Content-Type': 'application/json'
+  }
+})
+.then(response => response.json())
+.then(testimonials => {
+  console.log('Testimonials:', testimonials);
+  
+  // Display testimonials in your app
+  testimonials.forEach(testimonial => {
+    console.log(\`⭐ \${testimonial.customer_name}: \${testimonial.content}\`);
+  });
+})
+.catch(error => {
+  console.error('API Error:', error);
+});`}</pre>
+                </div>
+
+                <div className="bg-gray-900 text-green-400 p-4 rounded-md font-mono text-sm overflow-x-auto">
+                  <pre>{`// Node.js/Express Backend Example
+const express = require('express');
+const axios = require('axios');
+
+app.get('/my-testimonials', async (req, res) => {
+  try {
+    const response = await axios.get(
+      '${window.location.origin}/api/testimonials/company/${auth?.company?.id || 'COMPANY_ID'}',
+      {
+        headers: {
+          'Authorization': 'Bearer YOUR_API_KEY',
+          'X-API-Secret': 'YOUR_SECRET_KEY'
+        }
+      }
+    );
+    
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch testimonials' });
+  }
+});`}</pre>
                 </div>
               </div>
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="font-medium text-blue-900 mb-2">Working Example</h4>
+              <h4 className="font-medium text-blue-900 mb-2">🔑 Live API Testing</h4>
               <p className="text-blue-700 text-sm mb-3">
-                This live API endpoint is working and returns real data from your Marketing Test Company:
+                Test these authenticated API endpoints with your API credentials:
               </p>
-              <div className="bg-white p-3 rounded border">
-                <code className="text-sm break-all">
-                  {window.location.origin}/widget/marketing-test-company?type=testimonials&limit=3
-                </code>
+              <div className="space-y-2">
+                <div className="bg-white p-3 rounded border">
+                  <p className="text-xs text-gray-600 mb-1">Testimonials API:</p>
+                  <code className="text-sm break-all">
+                    GET {window.location.origin}/api/testimonials/company/{auth?.company?.id || 'COMPANY_ID'}
+                  </code>
+                </div>
+                <div className="bg-white p-3 rounded border">
+                  <p className="text-xs text-gray-600 mb-1">Blog Posts API:</p>
+                  <code className="text-sm break-all">
+                    GET {window.location.origin}/api/blog-posts/company/{auth?.company?.id || 'COMPANY_ID'}
+                  </code>
+                </div>
               </div>
               <div className="flex gap-2 mt-3">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => copyToClipboard(`${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=3`)}
+                  onClick={() => copyToClipboard(`curl -X GET "${window.location.origin}/api/testimonials/company/${auth?.company?.id || 'COMPANY_ID'}" -H "Authorization: Bearer YOUR_API_KEY" -H "X-API-Secret: YOUR_SECRET_KEY"`)}
                 >
                   <Copy className="h-4 w-4 mr-2" />
-                  Copy API URL
+                  Copy cURL Example
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => window.open(`${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=3`, '_blank')}
+                  onClick={() => window.open('/api-credentials', '_blank')}
                 >
                   <Eye className="h-4 w-4 mr-2" />
-                  View JSON Data
+                  Get API Keys
                 </Button>
               </div>
             </div>

@@ -210,7 +210,9 @@ export interface IStorage {
   
   // API Credentials operations
   getAPICredentials(companyId: number): Promise<APICredentials[]>;
+  getAllAPICredentials(): Promise<APICredentials[]>;
   createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials>;
+  updateAPICredentialsLastUsed(id: number): Promise<void>;
   deactivateAPICredentials(id: number, companyId: number): Promise<boolean>;
   regenerateAPICredentialsSecret(id: number, companyId: number): Promise<string | null>;
   
@@ -4835,6 +4837,29 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error fetching API credentials:', error);
       return [];
+    }
+  }
+
+  async getAllAPICredentials(): Promise<APICredentials[]> {
+    try {
+      const credentials = await db.select()
+        .from(apiCredentials)
+        .orderBy(desc(apiCredentials.createdAt));
+      
+      return credentials;
+    } catch (error) {
+      console.error('Error fetching all API credentials:', error);
+      return [];
+    }
+  }
+
+  async updateAPICredentialsLastUsed(id: number): Promise<void> {
+    try {
+      await db.update(apiCredentials)
+        .set({ lastUsedAt: new Date() })
+        .where(eq(apiCredentials.id, id));
+    } catch (error) {
+      console.error('Error updating API credentials last used:', error);
     }
   }
 

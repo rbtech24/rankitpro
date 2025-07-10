@@ -4939,6 +4939,63 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     }
   });
 
+  // API Key authenticated endpoints
+  const { apiKeyAuth } = await import('./middleware/api-auth');
+  
+  app.get("/api/testimonials/company/:companyId", apiKeyAuth(['read_testimonials']), async (req: Request, res: Response) => {
+    try {
+      const companyId = parseInt(req.params.companyId);
+      const apiCredentials = (req as any).apiCredentials;
+      
+      // Ensure user can only access their own company's data
+      if (apiCredentials.companyId !== companyId) {
+        return res.status(403).json({ error: 'Access denied to this company data' });
+      }
+      
+      const testimonials = await storage.getTestimonialsByCompany(companyId);
+      res.json(testimonials);
+    } catch (error) {
+      console.error('Error fetching testimonials via API:', error);
+      res.status(500).json({ error: 'Failed to fetch testimonials' });
+    }
+  });
+
+  app.get("/api/blog-posts/company/:companyId", apiKeyAuth(['read_blog_posts']), async (req: Request, res: Response) => {
+    try {
+      const companyId = parseInt(req.params.companyId);
+      const apiCredentials = (req as any).apiCredentials;
+      
+      // Ensure user can only access their own company's data
+      if (apiCredentials.companyId !== companyId) {
+        return res.status(403).json({ error: 'Access denied to this company data' });
+      }
+      
+      const blogPosts = await storage.getBlogPostsByCompany(companyId);
+      res.json(blogPosts);
+    } catch (error) {
+      console.error('Error fetching blog posts via API:', error);
+      res.status(500).json({ error: 'Failed to fetch blog posts' });
+    }
+  });
+
+  app.get("/api/check-ins/company/:companyId", apiKeyAuth(['read_check_ins']), async (req: Request, res: Response) => {
+    try {
+      const companyId = parseInt(req.params.companyId);
+      const apiCredentials = (req as any).apiCredentials;
+      
+      // Ensure user can only access their own company's data
+      if (apiCredentials.companyId !== companyId) {
+        return res.status(403).json({ error: 'Access denied to this company data' });
+      }
+      
+      const checkIns = await storage.getCheckInsWithTechnician(companyId);
+      res.json(checkIns);
+    } catch (error) {
+      console.error('Error fetching check-ins via API:', error);
+      res.status(500).json({ error: 'Failed to fetch check-ins' });
+    }
+  });
+
   // Add global error handling middleware
   app.use(errorHandler);
 
