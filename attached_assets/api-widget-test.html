@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>API Widget Test - Rank It Pro</title>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f8fafc;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #1f2937;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .test-info {
+      background: #f3f4f6;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #3b82f6;
+    }
+    .test-info h3 {
+      margin: 0 0 10px 0;
+      color: #374151;
+    }
+    .test-info p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+    .widget-container {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 API Widget Authentication Test</h1>
+    
+    <div class="test-info">
+      <h3>Test Details</h3>
+      <p><strong>API Key:</strong> rip_k3aogdl2gcg_1752125909835</p>
+      <p><strong>Secret Key:</strong> rip_secret_10a9udbvewg8_1752125909835</p>
+      <p><strong>Company ID:</strong> 22</p>
+      <p><strong>Endpoint:</strong> /api/testimonials/company/22</p>
+    </div>
+    
+    <div class="widget-container">
+      <div id="rankitpro-widget" data-company="22" data-slug="marketing-test-company"></div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    const API_KEY = 'rip_k3aogdl2gcg_1752125909835';
+    const SECRET_KEY = 'rip_secret_10a9udbvewg8_1752125909835';
+    const COMPANY_ID = '22';
+    
+    async function loadWidgetData() {
+      console.log('Loading widget data...');
+      try {
+        const response = await fetch(`${window.location.origin}/api/testimonials/company/${COMPANY_ID}`, {
+          headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'X-API-Secret': SECRET_KEY,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`Authentication failed: ${response.status}`);
+        }
+        
+        const testimonials = await response.json();
+        console.log('Testimonials loaded:', testimonials.length);
+        renderWidget(testimonials);
+      } catch (error) {
+        console.error('Widget loading error:', error);
+        renderErrorWidget();
+      }
+    }
+    
+    function renderWidget(testimonials) {
+      const widget = document.getElementById('rankitpro-widget');
+      if (!widget) return;
+      
+      const html = `
+        <div style="background: white; border: 2px solid #e2e8f0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px; text-align: center;">✅ Customer Testimonials (API Authenticated)</h3>
+          <div>
+            ${testimonials.slice(0, 3).map(t => `
+              <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #3b82f6; margin-bottom: 10px;">
+                <p style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">"${t.content}"</p>
+                <p style="margin: 0; color: #6b7280; font-size: 12px; font-weight: 500;">- ${t.customer_name}</p>
+              </div>
+            `).join('')}
+          </div>
+          <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+            <a href="https://rankitpro.com" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 12px;">Powered by Rank It Pro</a>
+          </div>
+        </div>
+      `;
+      widget.innerHTML = html;
+    }
+    
+    function renderErrorWidget() {
+      const widget = document.getElementById('rankitpro-widget');
+      if (!widget) return;
+      
+      widget.innerHTML = `
+        <div style="background: #fef2f2; border: 2px solid #fecaca; padding: 20px; border-radius: 8px; text-align: center;">
+          <p style="margin: 0; color: #dc2626; font-size: 14px;">❌ Unable to load testimonials. Please check your API credentials.</p>
+        </div>
+      `;
+    }
+    
+    // Initialize widget when page loads
+    document.addEventListener('DOMContentLoaded', loadWidgetData);
+    
+    // Also try to load immediately in case DOM is already ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadWidgetData);
+    } else {
+      loadWidgetData();
+    }
+  })();
+  </script>
+</body>
+</html>

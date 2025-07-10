@@ -10,7 +10,7 @@ import { Textarea } from "../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
-import { Code, Eye, Copy, Check } from "lucide-react";
+import { Code, Eye, Copy, Check, AlertCircle, Key } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 type EmbedIntegration = {
@@ -405,10 +405,422 @@ export default function IntegrationsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Code className="h-5 w-5" />
-              Iframe Embedding
+              🔐 API-Authenticated Embed Code
             </CardTitle>
             <CardDescription>
-              Embed your widget using iframe for maximum compatibility and security
+              Secure embed code with API key authentication for protected data access
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                <span className="text-sm font-medium text-amber-800">API Key Required</span>
+              </div>
+              <p className="text-sm text-amber-700">
+                This embed code requires API credentials for authentication. 
+                <Button
+                  variant="link"
+                  className="p-0 h-auto text-amber-700 underline"
+                  onClick={() => window.open('/api-credentials', '_blank')}
+                >
+                  Create API credentials here
+                </Button>
+              </p>
+            </div>
+
+            <div className="bg-gray-900 text-green-400 p-4 rounded-md font-mono text-sm overflow-x-auto">
+              <pre>{`<div id="rankitpro-widget" data-company="${auth?.company?.id || 'YOUR_COMPANY_ID'}" data-slug="${auth?.company?.slug || 'your-company-slug'}"></div>
+<script>
+(function() {
+  // Your API credentials
+  const API_KEY = 'YOUR_API_KEY_HERE';
+  const SECRET_KEY = 'YOUR_SECRET_KEY_HERE';
+  const COMPANY_ID = '${auth?.company?.id || 'YOUR_COMPANY_ID'}';
+  
+  // Fetch data with API authentication
+  async function loadWidgetData() {
+    try {
+      const response = await fetch(\`${window.location.origin}/api/testimonials/company/\${COMPANY_ID}\`, {
+        headers: {
+          'Authorization': \`Bearer \${API_KEY}\`,
+          'X-API-Secret': SECRET_KEY,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Authentication failed');
+      }
+      
+      const testimonials = await response.json();
+      renderWidget(testimonials);
+    } catch (error) {
+      console.error('Widget loading error:', error);
+      renderErrorWidget();
+    }
+  }
+  
+  function renderWidget(testimonials) {
+    const widget = document.getElementById('rankitpro-widget');
+    if (!widget) return;
+    
+    const html = \`
+      <div style="background: white; border: 2px solid #e2e8f0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px; text-align: center;">Customer Testimonials</h3>
+        <div style="space-y: 10px;">
+          \${testimonials.slice(0, 3).map(t => \`
+            <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #3b82f6; margin-bottom: 10px;">
+              <p style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">"\${t.content}"</p>
+              <p style="margin: 0; color: #6b7280; font-size: 12px; font-weight: 500;">- \${t.customer_name}</p>
+            </div>
+          \`).join('')}
+        </div>
+        <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+          <a href="https://rankitpro.com" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 12px;">Powered by Rank It Pro</a>
+        </div>
+      </div>
+    \`;
+    widget.innerHTML = html;
+  }
+  
+  function renderErrorWidget() {
+    const widget = document.getElementById('rankitpro-widget');
+    if (!widget) return;
+    
+    widget.innerHTML = \`
+      <div style="background: #fef2f2; border: 2px solid #fecaca; padding: 20px; border-radius: 8px; text-align: center;">
+        <p style="margin: 0; color: #dc2626; font-size: 14px;">Unable to load testimonials. Please check your API credentials.</p>
+      </div>
+    \`;
+  }
+  
+  // Initialize widget
+  loadWidgetData();
+})();
+</script>`}</pre>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(`<div id="rankitpro-widget" data-company="${auth?.company?.id || 'YOUR_COMPANY_ID'}" data-slug="${auth?.company?.slug || 'your-company-slug'}"></div>
+<script>
+(function() {
+  // Your API credentials
+  const API_KEY = 'YOUR_API_KEY_HERE';
+  const SECRET_KEY = 'YOUR_SECRET_KEY_HERE';
+  const COMPANY_ID = '${auth?.company?.id || 'YOUR_COMPANY_ID'}';
+  
+  // Fetch data with API authentication
+  async function loadWidgetData() {
+    try {
+      const response = await fetch(\`${window.location.origin}/api/testimonials/company/\${COMPANY_ID}\`, {
+        headers: {
+          'Authorization': \`Bearer \${API_KEY}\`,
+          'X-API-Secret': SECRET_KEY,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Authentication failed');
+      }
+      
+      const testimonials = await response.json();
+      renderWidget(testimonials);
+    } catch (error) {
+      console.error('Widget loading error:', error);
+      renderErrorWidget();
+    }
+  }
+  
+  function renderWidget(testimonials) {
+    const widget = document.getElementById('rankitpro-widget');
+    if (!widget) return;
+    
+    const html = \`
+      <div style="background: white; border: 2px solid #e2e8f0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px; text-align: center;">Customer Testimonials</h3>
+        <div style="space-y: 10px;">
+          \${testimonials.slice(0, 3).map(t => \`
+            <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #3b82f6; margin-bottom: 10px;">
+              <p style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">"\${t.content}"</p>
+              <p style="margin: 0; color: #6b7280; font-size: 12px; font-weight: 500;">- \${t.customer_name}</p>
+            </div>
+          \`).join('')}
+        </div>
+        <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+          <a href="https://rankitpro.com" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 12px;">Powered by Rank It Pro</a>
+        </div>
+      </div>
+    \`;
+    widget.innerHTML = html;
+  }
+  
+  function renderErrorWidget() {
+    const widget = document.getElementById('rankitpro-widget');
+    if (!widget) return;
+    
+    widget.innerHTML = \`
+      <div style="background: #fef2f2; border: 2px solid #fecaca; padding: 20px; border-radius: 8px; text-align: center;">
+        <p style="margin: 0; color: #dc2626; font-size: 14px;">Unable to load testimonials. Please check your API credentials.</p>
+      </div>
+    \`;
+  }
+  
+  // Initialize widget
+  loadWidgetData();
+})();
+</script>`)}
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy API Embed Code
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => window.open('/api-credentials', '_blank')}
+              >
+                <Key className="h-4 w-4 mr-2" />
+                Get API Keys
+              </Button>
+            </div>
+
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+              <h4 className="font-medium text-green-900 mb-2">📋 Working Example with Test API Keys</h4>
+              <p className="text-green-700 text-sm mb-3">
+                Here's the embed code populated with actual working API credentials for testing:
+              </p>
+              <div className="bg-gray-900 text-green-400 p-3 rounded-md font-mono text-xs overflow-x-auto">
+                <pre>{`<div id="rankitpro-widget" data-company="22" data-slug="marketing-test-company"></div>
+<script>
+(function() {
+  const API_KEY = 'rip_k3aogdl2gcg_1752125909835';
+  const SECRET_KEY = 'rip_secret_10a9udbvewg8_1752125909835';
+  const COMPANY_ID = '22';
+  
+  async function loadWidgetData() {
+    try {
+      const response = await fetch(\`${window.location.origin}/api/testimonials/company/\${COMPANY_ID}\`, {
+        headers: {
+          'Authorization': \`Bearer \${API_KEY}\`,
+          'X-API-Secret': SECRET_KEY,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) throw new Error('Authentication failed');
+      
+      const testimonials = await response.json();
+      renderWidget(testimonials);
+    } catch (error) {
+      console.error('Widget loading error:', error);
+      renderErrorWidget();
+    }
+  }
+  
+  function renderWidget(testimonials) {
+    const widget = document.getElementById('rankitpro-widget');
+    if (!widget) return;
+    
+    const html = \`
+      <div style="background: white; border: 2px solid #e2e8f0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px; text-align: center;">Customer Testimonials</h3>
+        <div>
+          \${testimonials.slice(0, 3).map(t => \`
+            <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #3b82f6; margin-bottom: 10px;">
+              <p style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">"\${t.content}"</p>
+              <p style="margin: 0; color: #6b7280; font-size: 12px; font-weight: 500;">- \${t.customer_name}</p>
+            </div>
+          \`).join('')}
+        </div>
+        <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+          <a href="https://rankitpro.com" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 12px;">Powered by Rank It Pro</a>
+        </div>
+      </div>
+    \`;
+    widget.innerHTML = html;
+  }
+  
+  function renderErrorWidget() {
+    const widget = document.getElementById('rankitpro-widget');
+    if (!widget) return;
+    widget.innerHTML = \`<div style="background: #fef2f2; border: 2px solid #fecaca; padding: 20px; border-radius: 8px; text-align: center;"><p style="margin: 0; color: #dc2626; font-size: 14px;">Unable to load testimonials. Please check your API credentials.</p></div>\`;
+  }
+  
+  loadWidgetData();
+})();
+</script>`}</pre>
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(`<div id="rankitpro-widget" data-company="22" data-slug="marketing-test-company"></div>
+<script>
+(function() {
+  const API_KEY = 'rip_k3aogdl2gcg_1752125909835';
+  const SECRET_KEY = 'rip_secret_10a9udbvewg8_1752125909835';
+  const COMPANY_ID = '22';
+  
+  async function loadWidgetData() {
+    try {
+      const response = await fetch(\`${window.location.origin}/api/testimonials/company/\${COMPANY_ID}\`, {
+        headers: {
+          'Authorization': \`Bearer \${API_KEY}\`,
+          'X-API-Secret': SECRET_KEY,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) throw new Error('Authentication failed');
+      
+      const testimonials = await response.json();
+      renderWidget(testimonials);
+    } catch (error) {
+      console.error('Widget loading error:', error);
+      renderErrorWidget();
+    }
+  }
+  
+  function renderWidget(testimonials) {
+    const widget = document.getElementById('rankitpro-widget');
+    if (!widget) return;
+    
+    const html = \`
+      <div style="background: white; border: 2px solid #e2e8f0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px; text-align: center;">Customer Testimonials</h3>
+        <div>
+          \${testimonials.slice(0, 3).map(t => \`
+            <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #3b82f6; margin-bottom: 10px;">
+              <p style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">"\${t.content}"</p>
+              <p style="margin: 0; color: #6b7280; font-size: 12px; font-weight: 500;">- \${t.customer_name}</p>
+            </div>
+          \`).join('')}
+        </div>
+        <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+          <a href="https://rankitpro.com" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 12px;">Powered by Rank It Pro</a>
+        </div>
+      </div>
+    \`;
+    widget.innerHTML = html;
+  }
+  
+  function renderErrorWidget() {
+    const widget = document.getElementById('rankitpro-widget');
+    if (!widget) return;
+    widget.innerHTML = \`<div style="background: #fef2f2; border: 2px solid #fecaca; padding: 20px; border-radius: 8px; text-align: center;"><p style="margin: 0; color: #dc2626; font-size: 14px;">Unable to load testimonials. Please check your API credentials.</p></div>\`;
+  }
+  
+  loadWidgetData();
+})();
+</script>`)}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Complete Working Example
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    // Create a test HTML file and open it
+                    const testHTML = `<!DOCTYPE html>
+<html>
+<head>
+  <title>API Widget Test</title>
+  <meta charset="utf-8">
+</head>
+<body>
+  <h1>API Widget Test Page</h1>
+  <div id="rankitpro-widget" data-company="22" data-slug="marketing-test-company"></div>
+  <script>
+  (function() {
+    const API_KEY = 'rip_k3aogdl2gcg_1752125909835';
+    const SECRET_KEY = 'rip_secret_10a9udbvewg8_1752125909835';
+    const COMPANY_ID = '22';
+    
+    async function loadWidgetData() {
+      try {
+        const response = await fetch(\`${window.location.origin}/api/testimonials/company/\${COMPANY_ID}\`, {
+          headers: {
+            'Authorization': \`Bearer \${API_KEY}\`,
+            'X-API-Secret': SECRET_KEY,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) throw new Error('Authentication failed');
+        
+        const testimonials = await response.json();
+        renderWidget(testimonials);
+      } catch (error) {
+        console.error('Widget loading error:', error);
+        renderErrorWidget();
+      }
+    }
+    
+    function renderWidget(testimonials) {
+      const widget = document.getElementById('rankitpro-widget');
+      if (!widget) return;
+      
+      const html = \`
+        <div style="background: white; border: 2px solid #e2e8f0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px; text-align: center;">Customer Testimonials</h3>
+          <div>
+            \${testimonials.slice(0, 3).map(t => \`
+              <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #3b82f6; margin-bottom: 10px;">
+                <p style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">"\${t.content}"</p>
+                <p style="margin: 0; color: #6b7280; font-size: 12px; font-weight: 500;">- \${t.customer_name}</p>
+              </div>
+            \`).join('')}
+          </div>
+          <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+            <a href="https://rankitpro.com" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 12px;">Powered by Rank It Pro</a>
+          </div>
+        </div>
+      \`;
+      widget.innerHTML = html;
+    }
+    
+    function renderErrorWidget() {
+      const widget = document.getElementById('rankitpro-widget');
+      if (!widget) return;
+      widget.innerHTML = \`<div style="background: #fef2f2; border: 2px solid #fecaca; padding: 20px; border-radius: 8px; text-align: center;"><p style="margin: 0; color: #dc2626; font-size: 14px;">Unable to load testimonials. Please check your API credentials.</p></div>\`;
+    }
+    
+    loadWidgetData();
+  })();
+  </script>
+</body>
+</html>`;
+                    const blob = new Blob([testHTML], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    const testWindow = window.open(url, '_blank');
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                  }}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Test Live Demo
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Code className="h-5 w-5" />
+              Simple Iframe Embedding
+            </CardTitle>
+            <CardDescription>
+              Basic iframe embedding for public widgets (no API key required)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
