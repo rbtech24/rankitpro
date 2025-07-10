@@ -2944,6 +2944,199 @@ Format as professional service documentation.`;
       });
     }
   });
+
+  // API-authenticated embed endpoint for iframe integration
+  app.get('/embed/:companySlug', async (req: Request, res: Response) => {
+    try {
+      const { companySlug } = req.params;
+      const { company: companyId, apiKey, secretKey } = req.query;
+
+      // Validate API credentials
+      if (!apiKey || !secretKey) {
+        return res.status(401).send(`
+          <html>
+            <head><title>Authentication Required</title></head>
+            <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+              <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h2 style="color: #dc3545; margin-bottom: 15px;">Authentication Required</h2>
+                <p style="color: #666; margin-bottom: 15px;">This embed widget requires valid API credentials.</p>
+                <p style="color: #666; font-size: 14px;">Please provide apiKey and secretKey parameters.</p>
+              </div>
+            </body>
+          </html>
+        `);
+      }
+
+      try {
+        // Validate API credentials
+        const credentials = await apiCredentialService.validateCredentials(apiKey as string, secretKey as string);
+        
+        if (!credentials) {
+          return res.status(401).send(`
+            <html>
+              <head><title>Invalid Credentials</title></head>
+              <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+                <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                  <h2 style="color: #dc3545; margin-bottom: 15px;">Invalid Credentials</h2>
+                  <p style="color: #666; margin-bottom: 15px;">The provided API credentials are invalid or expired.</p>
+                  <p style="color: #666; font-size: 14px;">Please check your API keys and try again.</p>
+                </div>
+              </body>
+            </html>
+          `);
+        }
+
+        // Update last used timestamp
+        await apiCredentialService.updateLastUsed(credentials.id);
+
+        // Get company data
+        const actualCompanyId = parseInt(companyId as string) || credentials.companyId;
+        const company = await storage.getCompany(actualCompanyId);
+
+        if (!company) {
+          return res.status(404).send(`
+            <html>
+              <head><title>Company Not Found</title></head>
+              <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+                <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                  <h2 style="color: #dc3545; margin-bottom: 15px;">Company Not Found</h2>
+                  <p style="color: #666; margin-bottom: 15px;">The specified company could not be found.</p>
+                  <p style="color: #666; font-size: 14px;">Please check the company ID and try again.</p>
+                </div>
+              </body>
+            </html>
+          `);
+        }
+
+        // Fetch testimonials using authenticated API
+        const neonSql = neon(process.env.DATABASE_URL!);
+        const testimonials = await neonSql`
+          SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
+          FROM testimonials 
+          WHERE company_id = ${actualCompanyId}
+          ORDER BY created_at DESC
+          LIMIT 5
+        `;
+
+        // Generate HTML widget
+        const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${company.name} - Customer Testimonials</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .widget-container { 
+      background: white; 
+      border: 2px solid #e2e8f0; 
+      border-radius: 8px; 
+      padding: 20px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+      max-width: 600px; 
+      margin: 0 auto; 
+    }
+    .widget-title { 
+      margin: 0 0 15px 0; 
+      color: #1f2937; 
+      font-size: 18px; 
+      font-weight: 600; 
+      text-align: center; 
+      border-bottom: 2px solid #3b82f6; 
+      padding-bottom: 10px; 
+    }
+    .testimonial { 
+      background: #f8fafc; 
+      padding: 15px; 
+      border-radius: 6px; 
+      border-left: 4px solid #3b82f6; 
+      margin-bottom: 15px; 
+    }
+    .testimonial-content { 
+      margin: 0 0 8px 0; 
+      color: #374151; 
+      font-size: 14px; 
+      line-height: 1.5; 
+    }
+    .testimonial-author { 
+      margin: 0; 
+      color: #6b7280; 
+      font-size: 12px; 
+      font-weight: 600; 
+    }
+    .widget-footer { 
+      text-align: center; 
+      margin-top: 15px; 
+      padding-top: 15px; 
+      border-top: 1px solid #e2e8f0; 
+    }
+    .powered-by { 
+      color: #3b82f6; 
+      text-decoration: none; 
+      font-size: 12px; 
+      font-weight: 500; 
+    }
+    .no-testimonials { 
+      text-align: center; 
+      color: #6b7280; 
+      font-style: italic; 
+      padding: 20px; 
+    }
+  </style>
+</head>
+<body>
+  <div class="widget-container">
+    <h3 class="widget-title">${company.name} - Customer Testimonials</h3>
+    ${testimonials.length > 0 ? testimonials.map(testimonial => `
+      <div class="testimonial">
+        <p class="testimonial-content">"${testimonial.content}"</p>
+        <p class="testimonial-author">— ${testimonial.customer_name}</p>
+      </div>
+    `).join('') : '<p class="no-testimonials">No testimonials available at this time.</p>'}
+    <div class="widget-footer">
+      <a href="https://rankitpro.com" target="_blank" class="powered-by">Powered by Rank It Pro</a>
+    </div>
+  </div>
+</body>
+</html>`;
+
+        res.setHeader('Content-Type', 'text/html');
+        res.setHeader('X-Frame-Options', 'ALLOWALL');
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.send(html);
+
+      } catch (authError) {
+        console.error('Authentication error:', authError);
+        return res.status(401).send(`
+          <html>
+            <head><title>Authentication Error</title></head>
+            <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+              <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h2 style="color: #dc3545; margin-bottom: 15px;">Authentication Error</h2>
+                <p style="color: #666; margin-bottom: 15px;">Unable to validate API credentials.</p>
+                <p style="color: #666; font-size: 14px;">Please check your API keys and try again.</p>
+              </div>
+            </body>
+          </html>
+        `);
+      }
+    } catch (error) {
+      console.error('Error in embed endpoint:', error);
+      res.status(500).send(`
+        <html>
+          <head><title>Server Error</title></head>
+          <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+            <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <h2 style="color: #dc3545; margin-bottom: 15px;">Server Error</h2>
+              <p style="color: #666; margin-bottom: 15px;">Unable to load testimonials widget.</p>
+              <p style="color: #666; font-size: 14px;">Please try again later.</p>
+            </div>
+          </body>
+        </html>
+      `);
+    }
+  });
   
   // OPTIONS handler for widget endpoint CORS preflight
   app.options('/widget/:companyId', (req: Request, res: Response) => {

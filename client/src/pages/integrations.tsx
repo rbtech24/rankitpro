@@ -366,11 +366,73 @@ export default function IntegrationsPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="font-medium">Your Embed Code</h4>
-                  <div className="bg-gray-50 p-4 rounded-md border max-h-32 overflow-auto">
-                    <code className="text-sm break-all whitespace-pre-wrap">
-                      {embedLoading ? "Loading..." : embedData?.embedCode || "Click 'Save Embed Settings' to generate your embed code"}
-                    </code>
+                  <h4 className="font-medium">🔐 Your API-Authenticated Embed Code</h4>
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
+                    <p className="text-sm text-amber-700">
+                      <AlertCircle className="inline h-4 w-4 mr-1" />
+                      This embed code includes API key authentication for secure data access.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gray-900 text-green-400 p-4 rounded-md font-mono text-xs overflow-auto max-h-64">
+                    <pre>{`<iframe
+  src="${window.location.origin}/embed/marketing-test-company?company=${auth?.company?.id || 'YOUR_COMPANY_ID'}&apiKey=rip_k3aogdl2gcg_1752125909835&secretKey=rip_secret_10a9udbvewg8_1752125909835"
+  width="100%"
+  height="400"
+  frameborder="0"
+  style="border: 1px solid #e2e8f0; border-radius: 8px;">
+</iframe>
+
+<!-- Alternative: JavaScript Widget with API Authentication -->
+<div id="rankitpro-widget" data-company="${auth?.company?.id || 'YOUR_COMPANY_ID'}"></div>
+<script>
+(function() {
+  const API_KEY = 'rip_k3aogdl2gcg_1752125909835';
+  const SECRET_KEY = 'rip_secret_10a9udbvewg8_1752125909835';
+  const COMPANY_ID = '${auth?.company?.id || 'YOUR_COMPANY_ID'}';
+  
+  async function loadWidget() {
+    try {
+      const response = await fetch(\`${window.location.origin}/api/testimonials/company/\${COMPANY_ID}\`, {
+        headers: {
+          'Authorization': \`Bearer \${API_KEY}\`,
+          'X-API-Secret': SECRET_KEY,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) throw new Error('Auth failed');
+      
+      const testimonials = await response.json();
+      document.getElementById('rankitpro-widget').innerHTML = \`
+        <div style="background: white; border: 2px solid #e2e8f0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px; text-align: center;">Customer Testimonials</h3>
+          <div>
+            \${testimonials.slice(0, 3).map(t => \`
+              <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #3b82f6; margin-bottom: 10px;">
+                <p style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">"\${t.content}"</p>
+                <p style="margin: 0; color: #6b7280; font-size: 12px; font-weight: 500;">- \${t.customer_name}</p>
+              </div>
+            \`).join('')}
+          </div>
+          <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+            <a href="https://rankitpro.com" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 12px;">Powered by Rank It Pro</a>
+          </div>
+        </div>
+      \`;
+    } catch (error) {
+      console.error('Widget error:', error);
+      document.getElementById('rankitpro-widget').innerHTML = \`<div style="background: #fef2f2; border: 2px solid #fecaca; padding: 20px; border-radius: 8px; text-align: center;"><p style="margin: 0; color: #dc2626; font-size: 14px;">Unable to load testimonials. Please check your API credentials.</p></div>\`;
+    }
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadWidget);
+  } else {
+    loadWidget();
+  }
+})();
+</script>`}</pre>
                   </div>
                   
                   <div className="flex gap-2">
@@ -378,21 +440,93 @@ export default function IntegrationsPage() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => copyToClipboard(embedData?.embedCode || '')}
-                      disabled={!embedData?.embedCode}
+                      onClick={() => copyToClipboard(`<iframe src="${window.location.origin}/embed/marketing-test-company?company=${auth?.company?.id || 'YOUR_COMPANY_ID'}&apiKey=rip_k3aogdl2gcg_1752125909835&secretKey=rip_secret_10a9udbvewg8_1752125909835" width="100%" height="400" frameborder="0" style="border: 1px solid #e2e8f0; border-radius: 8px;"></iframe>`)}
                     >
-                      {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
-                      {copied ? 'Copied!' : 'Copy Code'}
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy Iframe Code
                     </Button>
                     
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={openPreview}
+                      onClick={() => copyToClipboard(`<div id="rankitpro-widget" data-company="${auth?.company?.id || 'YOUR_COMPANY_ID'}"></div>
+<script>
+(function() {
+  const API_KEY = 'rip_k3aogdl2gcg_1752125909835';
+  const SECRET_KEY = 'rip_secret_10a9udbvewg8_1752125909835';
+  const COMPANY_ID = '${auth?.company?.id || 'YOUR_COMPANY_ID'}';
+  
+  async function loadWidget() {
+    try {
+      const response = await fetch(\`${window.location.origin}/api/testimonials/company/\${COMPANY_ID}\`, {
+        headers: {
+          'Authorization': \`Bearer \${API_KEY}\`,
+          'X-API-Secret': SECRET_KEY,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) throw new Error('Auth failed');
+      
+      const testimonials = await response.json();
+      document.getElementById('rankitpro-widget').innerHTML = \`
+        <div style="background: white; border: 2px solid #e2e8f0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px; text-align: center;">Customer Testimonials</h3>
+          <div>
+            \${testimonials.slice(0, 3).map(t => \`
+              <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #3b82f6; margin-bottom: 10px;">
+                <p style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">"\${t.content}"</p>
+                <p style="margin: 0; color: #6b7280; font-size: 12px; font-weight: 500;">- \${t.customer_name}</p>
+              </div>
+            \`).join('')}
+          </div>
+          <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+            <a href="https://rankitpro.com" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 12px;">Powered by Rank It Pro</a>
+          </div>
+        </div>
+      \`;
+    } catch (error) {
+      console.error('Widget error:', error);
+      document.getElementById('rankitpro-widget').innerHTML = \`<div style="background: #fef2f2; border: 2px solid #fecaca; padding: 20px; border-radius: 8px; text-align: center;"><p style="margin: 0; color: #dc2626; font-size: 14px;">Unable to load testimonials. Please check your API credentials.</p></div>\`;
+    }
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadWidget);
+  } else {
+    loadWidget();
+  }
+})();
+</script>`)}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy JavaScript Widget
+                    </Button>
+                    
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(`${window.location.origin}/embed/marketing-test-company?company=${auth?.company?.id || 'YOUR_COMPANY_ID'}&apiKey=rip_k3aogdl2gcg_1752125909835&secretKey=rip_secret_10a9udbvewg8_1752125909835`, '_blank')}
                     >
                       <Eye className="h-4 w-4 mr-2" />
-                      Preview Widget
+                      Test Widget
+                    </Button>
+                    
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="sm"
+                      onClick={() => {
+                        const testWindow = window.open('', '_blank');
+                        if (testWindow) {
+                          testWindow.location.href = '/attached_assets/embed-test-complete.html';
+                        }
+                      }}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Complete Demo
                     </Button>
                   </div>
                 </div>
@@ -826,13 +960,13 @@ export default function IntegrationsPage() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <h4 className="font-medium">Basic Iframe Code</h4>
+                <h4 className="font-medium">🔐 API-Authenticated Iframe</h4>
                 <p className="text-sm text-muted-foreground">
-                  Simple iframe embedding that works on any website, CMS, or platform
+                  Secure iframe with API key authentication for protected content
                 </p>
                 <div className="bg-gray-900 text-green-400 p-4 rounded-md font-mono text-sm overflow-x-auto">
                   <pre>{`<iframe
-  src="${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=5"
+  src="${window.location.origin}/embed/marketing-test-company?company=22&apiKey=rip_k3aogdl2gcg_1752125909835&secretKey=rip_secret_10a9udbvewg8_1752125909835"
   width="100%"
   height="400"
   frameborder="0"
@@ -844,7 +978,7 @@ export default function IntegrationsPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => copyToClipboard(`<iframe src="${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=5" width="100%" height="400" frameborder="0" style="border: 1px solid #e2e8f0; border-radius: 8px;"></iframe>`)}
+                    onClick={() => copyToClipboard(`<iframe src="${window.location.origin}/embed/marketing-test-company?company=22&apiKey=rip_k3aogdl2gcg_1752125909835&secretKey=rip_secret_10a9udbvewg8_1752125909835" width="100%" height="400" frameborder="0" style="border: 1px solid #e2e8f0; border-radius: 8px;"></iframe>`)}
                   >
                     <Copy className="h-4 w-4 mr-2" />
                     Copy Iframe Code
@@ -853,7 +987,7 @@ export default function IntegrationsPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(`${window.location.origin}/widget/marketing-test-company?type=testimonials&limit=5`, '_blank')}
+                    onClick={() => window.open(`${window.location.origin}/embed/marketing-test-company?company=22&apiKey=rip_k3aogdl2gcg_1752125909835&secretKey=rip_secret_10a9udbvewg8_1752125909835`, '_blank')}
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     Test Widget
