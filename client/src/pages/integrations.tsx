@@ -528,6 +528,21 @@ export default function IntegrationsPage() {
                       <Eye className="h-4 w-4 mr-2" />
                       Complete Demo
                     </Button>
+                    
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const testWindow = window.open('', '_blank');
+                        if (testWindow) {
+                          testWindow.location.href = '/attached_assets/php-curl-embed-test.php';
+                        }
+                      }}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      PHP Demo
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -1200,6 +1215,87 @@ app.get('/my-testimonials', async (req, res) => {
   }
 });`}</pre>
                 </div>
+
+                <div className="bg-gray-900 text-green-400 p-4 rounded-md font-mono text-sm overflow-x-auto">
+                  <pre>{`// PHP cURL Example - Fetch Embed Widget
+<?php
+// Target URL with API authentication
+$url = "${window.location.origin}/embed/marketing-test-company?company=${auth?.company?.id || 'COMPANY_ID'}&apiKey=rip_k3aogdl2gcg_1752125909835&secretKey=rip_secret_10a9udbvewg8_1752125909835";
+
+// Initialize cURL session
+$ch = curl_init();
+
+// Set cURL options
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return response instead of printing
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // For development only
+
+// Optional: Set headers if needed
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'User-Agent: PHP-cURL/1.0',
+    'Accept: text/html,application/xhtml+xml'
+]);
+
+// Execute the request
+$response = curl_exec($ch);
+
+// Check for errors
+if (curl_errno($ch)) {
+    echo 'cURL Error: ' . curl_error($ch);
+} else {
+    // Output the response (HTML widget)
+    echo $response;
+}
+
+// Close cURL session
+curl_close($ch);
+?>`}</pre>
+                </div>
+
+                <div className="bg-gray-900 text-green-400 p-4 rounded-md font-mono text-sm overflow-x-auto">
+                  <pre>{`// PHP cURL Example - Fetch JSON Data
+<?php
+// API endpoint with authentication
+$url = "${window.location.origin}/api/testimonials/company/${auth?.company?.id || 'COMPANY_ID'}";
+$apiKey = "rip_k3aogdl2gcg_1752125909835";
+$secretKey = "rip_secret_10a9udbvewg8_1752125909835";
+
+// Initialize cURL session
+$ch = curl_init();
+
+// Set cURL options
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $apiKey,
+    'X-API-Secret: ' . $secretKey,
+    'Content-Type: application/json'
+]);
+
+// Execute the request
+$response = curl_exec($ch);
+
+// Check for errors
+if (curl_errno($ch)) {
+    echo 'cURL Error: ' . curl_error($ch);
+} else {
+    // Decode JSON response
+    $testimonials = json_decode($response, true);
+    
+    // Display testimonials
+    foreach ($testimonials as $testimonial) {
+        echo "<div class='testimonial'>";
+        echo "<h4>" . htmlspecialchars($testimonial['customer_name']) . "</h4>";
+        echo "<p>" . htmlspecialchars($testimonial['content']) . "</p>";
+        echo "</div>";
+    }
+}
+
+// Close cURL session
+curl_close($ch);
+?>`}</pre>
+                </div>
               </div>
             </div>
 
@@ -1222,7 +1318,7 @@ app.get('/my-testimonials', async (req, res) => {
                   </code>
                 </div>
               </div>
-              <div className="flex gap-2 mt-3">
+              <div className="flex gap-2 mt-3 flex-wrap">
                 <Button
                   type="button"
                   variant="outline"
@@ -1231,6 +1327,95 @@ app.get('/my-testimonials', async (req, res) => {
                 >
                   <Copy className="h-4 w-4 mr-2" />
                   Copy cURL Example
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(`<?php
+// Target URL with API authentication
+$url = "${window.location.origin}/embed/marketing-test-company?company=${auth?.company?.id || 'COMPANY_ID'}&apiKey=rip_k3aogdl2gcg_1752125909835&secretKey=rip_secret_10a9udbvewg8_1752125909835";
+
+// Initialize cURL session
+$ch = curl_init();
+
+// Set cURL options
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+// Optional: Set headers if needed
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'User-Agent: PHP-cURL/1.0',
+    'Accept: text/html,application/xhtml+xml'
+]);
+
+// Execute the request
+$response = curl_exec($ch);
+
+// Check for errors
+if (curl_errno($ch)) {
+    echo 'cURL Error: ' . curl_error($ch);
+} else {
+    // Output the response (HTML widget)
+    echo $response;
+}
+
+// Close cURL session
+curl_close($ch);
+?>`)}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy PHP Embed
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(`<?php
+// API endpoint with authentication
+$url = "${window.location.origin}/api/testimonials/company/${auth?.company?.id || 'COMPANY_ID'}";
+$apiKey = "rip_k3aogdl2gcg_1752125909835";
+$secretKey = "rip_secret_10a9udbvewg8_1752125909835";
+
+// Initialize cURL session
+$ch = curl_init();
+
+// Set cURL options
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $apiKey,
+    'X-API-Secret: ' . $secretKey,
+    'Content-Type: application/json'
+]);
+
+// Execute the request
+$response = curl_exec($ch);
+
+// Check for errors
+if (curl_errno($ch)) {
+    echo 'cURL Error: ' . curl_error($ch);
+} else {
+    // Decode JSON response
+    $testimonials = json_decode($response, true);
+    
+    // Display testimonials
+    foreach ($testimonials as $testimonial) {
+        echo "<div class='testimonial'>";
+        echo "<h4>" . htmlspecialchars($testimonial['customer_name']) . "</h4>";
+        echo "<p>" . htmlspecialchars($testimonial['content']) . "</p>";
+        echo "</div>";
+    }
+}
+
+// Close cURL session
+curl_close($ch);
+?>`)}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy PHP API
                 </Button>
                 <Button
                   type="button"
