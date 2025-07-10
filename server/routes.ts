@@ -4827,55 +4827,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     }
   });
 
-  // Add global error handling middleware
-  app.use(errorHandler);
-
-  // Critical Security Fix: API catch-all handler to prevent HTML responses
-  // This MUST be the last route handler to catch any unmatched API requests
-  app.use('/api/*', (req, res) => {
-    res.status(404).json({ 
-      message: 'API endpoint not found',
-      path: req.originalUrl,
-      method: req.method,
-      timestamp: new Date().toISOString()
-    });
-  });
-
-  const httpServer = createServer(app);
-  
-  // Set up WebSocket server for security monitoring
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws/security' });
-  
-  wss.on('connection', (ws: WebSocket, req: any) => {
-    console.log('Security monitoring WebSocket connected');
-    
-    // Add client to security monitor for real-time updates
-    securityMonitor.addClient(ws);
-    
-    ws.on('message', (message: any) => {
-      try {
-        const data = JSON.parse(message.toString());
-        console.log('Security monitoring WebSocket message:', data);
-        
-        // Handle specific commands if needed
-        if (data.type === 'ping') {
-          ws.send(JSON.stringify({ type: 'pong', timestamp: new Date().toISOString() }));
-        }
-      } catch (error) {
-        console.error('Error handling security monitoring WebSocket message:', error);
-      }
-    });
-    
-    ws.on('close', () => {
-      console.log('Security monitoring WebSocket disconnected');
-    });
-    
-    ws.on('error', (error: any) => {
-      console.error('Security monitoring WebSocket error:', error);
-    });
-  });
-
-  // API Credentials endpoints
+  // API Credentials endpoints - MUST be before catch-all handler
   app.get("/api/api-credentials", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const credentials = await storage.getAPICredentials(req.user.companyId);
@@ -4985,6 +4937,54 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       console.error('Error regenerating API credentials secret:', error);
       res.status(500).json({ error: 'Failed to regenerate secret' });
     }
+  });
+
+  // Add global error handling middleware
+  app.use(errorHandler);
+
+  // Critical Security Fix: API catch-all handler to prevent HTML responses
+  // This MUST be the last route handler to catch any unmatched API requests
+  app.use('/api/*', (req, res) => {
+    res.status(404).json({ 
+      message: 'API endpoint not found',
+      path: req.originalUrl,
+      method: req.method,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  const httpServer = createServer(app);
+  
+  // Set up WebSocket server for security monitoring
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws/security' });
+  
+  wss.on('connection', (ws: WebSocket, req: any) => {
+    console.log('Security monitoring WebSocket connected');
+    
+    // Add client to security monitor for real-time updates
+    securityMonitor.addClient(ws);
+    
+    ws.on('message', (message: any) => {
+      try {
+        const data = JSON.parse(message.toString());
+        console.log('Security monitoring WebSocket message:', data);
+        
+        // Handle specific commands if needed
+        if (data.type === 'ping') {
+          ws.send(JSON.stringify({ type: 'pong', timestamp: new Date().toISOString() }));
+        }
+      } catch (error) {
+        console.error('Error handling security monitoring WebSocket message:', error);
+      }
+    });
+    
+    ws.on('close', () => {
+      console.log('Security monitoring WebSocket disconnected');
+    });
+    
+    ws.on('error', (error: any) => {
+      console.error('Security monitoring WebSocket error:', error);
+    });
   });
   
   return httpServer;

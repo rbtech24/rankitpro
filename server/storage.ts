@@ -17,6 +17,7 @@ import { db, queryWithRetry } from "./db";
 import { eq, and, or, desc, asc, gte, lt, lte, sql, not, like, ilike } from "drizzle-orm";
 import * as schema from "@shared/schema";
 import { neon } from "@neondatabase/serverless";
+import { createHash } from "crypto";
 
 const {
   users, companies, companyLocations, technicians, checkIns, blogPosts, reviewRequests, reviewResponses,
@@ -4823,7 +4824,14 @@ export class DatabaseStorage implements IStorage {
         .from(apiCredentials)
         .where(eq(apiCredentials.companyId, companyId))
         .orderBy(desc(apiCredentials.createdAt));
-      return credentials;
+      
+      // Parse permissions from JSON string and hide sensitive data
+      return credentials.map(cred => ({
+        ...cred,
+        permissions: JSON.parse(cred.permissions || '[]'),
+        apiKey: `${cred.apiKeyHash?.substring(0, 12)}...`, // Show partial hash
+        secretKey: '••••••••••••••••' // Hide secret completely
+      }));
     } catch (error) {
       console.error('Error fetching API credentials:', error);
       return [];
@@ -4836,21 +4844,28 @@ export class DatabaseStorage implements IStorage {
       const apiKey = `rip_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
       const secretKey = `rip_secret_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
       
+      // Hash the keys for secure storage
+      const apiKeyHash = createHash('sha256').update(apiKey).digest('hex');
+      const secretKeyHash = createHash('sha256').update(secretKey).digest('hex');
+      
       const [newCredentials] = await db.insert(apiCredentials)
         .values({
           ...credentials,
-          apiKey,
-          secretKey,
+          apiKeyHash,
+          secretKeyHash,
+          permissions: JSON.stringify(credentials.permissions), // Convert array to JSON string
           isActive: true,
           createdAt: new Date(),
           updatedAt: new Date()
         })
         .returning();
       
+      // Return the credentials with the plain text keys (only shown once)
       return {
         ...newCredentials,
         apiKey,
-        secretKey
+        secretKey,
+        permissions: credentials.permissions // Return as array
       };
     } catch (error) {
       console.error('Error creating API credentials:', error);
@@ -4882,9 +4897,12 @@ export class DatabaseStorage implements IStorage {
     try {
       const newSecret = `rip_secret_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
       
+      // Hash the new secret for storage
+      const secretKeyHash = createHash('sha256').update(newSecret).digest('hex');
+      
       const [result] = await db.update(apiCredentials)
         .set({ 
-          secretKey: newSecret,
+          secretKeyHash,
           updatedAt: new Date()
         })
         .where(and(
