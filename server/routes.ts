@@ -4874,6 +4874,118 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       console.error('Security monitoring WebSocket error:', error);
     });
   });
+
+  // API Credentials endpoints
+  app.get("/api/api-credentials", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const credentials = await storage.getAPICredentials(req.user.companyId);
+      res.json(credentials);
+    } catch (error) {
+      console.error('Error fetching API credentials:', error);
+      res.status(500).json({ error: 'Failed to fetch API credentials' });
+    }
+  });
+
+  app.get("/api/api-credentials/permissions", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const permissions = [
+        {
+          id: 'read_check_ins',
+          name: 'Read Check-ins',
+          description: 'Access to view check-in data'
+        },
+        {
+          id: 'read_blog_posts',
+          name: 'Read Blog Posts',
+          description: 'Access to view blog posts'
+        },
+        {
+          id: 'read_reviews',
+          name: 'Read Reviews',
+          description: 'Access to view reviews'
+        },
+        {
+          id: 'read_testimonials',
+          name: 'Read Testimonials',
+          description: 'Access to view testimonials'
+        },
+        {
+          id: 'read_analytics',
+          name: 'Read Analytics',
+          description: 'Access to view analytics data'
+        },
+        {
+          id: 'write_content',
+          name: 'Write Content',
+          description: 'Permission to create and modify content'
+        },
+        {
+          id: 'admin_access',
+          name: 'Admin Access',
+          description: 'Full administrative access'
+        }
+      ];
+      res.json(permissions);
+    } catch (error) {
+      console.error('Error fetching permissions:', error);
+      res.status(500).json({ error: 'Failed to fetch permissions' });
+    }
+  });
+
+  app.post("/api/api-credentials", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { name, permissions, expiresAt } = req.body;
+      
+      if (!name || !permissions || permissions.length === 0) {
+        return res.status(400).json({ error: 'Name and permissions are required' });
+      }
+
+      const credentialData = {
+        name,
+        permissions,
+        expiresAt: expiresAt || null,
+        companyId: req.user.companyId
+      };
+
+      const credentials = await storage.createAPICredentials(credentialData);
+      res.json(credentials);
+    } catch (error) {
+      console.error('Error creating API credentials:', error);
+      res.status(500).json({ error: 'Failed to create API credentials' });
+    }
+  });
+
+  app.post("/api/api-credentials/:id/deactivate", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const credentialId = parseInt(req.params.id);
+      const success = await storage.deactivateAPICredentials(credentialId, req.user.companyId);
+      
+      if (success) {
+        res.json({ message: 'API credentials deactivated successfully' });
+      } else {
+        res.status(404).json({ error: 'API credentials not found' });
+      }
+    } catch (error) {
+      console.error('Error deactivating API credentials:', error);
+      res.status(500).json({ error: 'Failed to deactivate API credentials' });
+    }
+  });
+
+  app.post("/api/api-credentials/:id/regenerate-secret", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const credentialId = parseInt(req.params.id);
+      const newSecret = await storage.regenerateAPICredentialsSecret(credentialId, req.user.companyId);
+      
+      if (newSecret) {
+        res.json({ secretKey: newSecret });
+      } else {
+        res.status(404).json({ error: 'API credentials not found' });
+      }
+    } catch (error) {
+      console.error('Error regenerating API credentials secret:', error);
+      res.status(500).json({ error: 'Failed to regenerate secret' });
+    }
+  });
   
   return httpServer;
 }

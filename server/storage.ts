@@ -208,13 +208,10 @@ export interface IStorage {
   }[]>;
   
   // API Credentials operations
-  getAPICredentials(companyId: number): Promise<APICredentials | undefined>;
-  getAPICredentialsByCompany(companyId: number): Promise<APICredentials[]>;
+  getAPICredentials(companyId: number): Promise<APICredentials[]>;
   createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials>;
-  updateAPICredentials(id: number, updates: Partial<APICredentials>): Promise<APICredentials | undefined>;
-  deleteAPICredentials(id: number): Promise<void>;
-  createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials>;
-  updateAPICredentials(companyId: number, updates: Partial<APICredentials>): Promise<APICredentials | undefined>;
+  deactivateAPICredentials(id: number, companyId: number): Promise<boolean>;
+  regenerateAPICredentialsSecret(id: number, companyId: number): Promise<string | null>;
   
   // AI Usage Logs operations
   createAIUsageLog(log: InsertAiUsageLogs): Promise<AiUsageLogs>;
@@ -4817,6 +4814,90 @@ export class DatabaseStorage implements IStorage {
         sql`${chatSessions.startedAt} >= ${startDate.toISOString()} AND ${chatSessions.startedAt} <= ${endDate.toISOString()}`
       );
     return sessions;
+  }
+
+  // API Credentials methods
+  async getAPICredentials(companyId: number): Promise<APICredentials[]> {
+    try {
+      const credentials = await db.select()
+        .from(apiCredentials)
+        .where(eq(apiCredentials.companyId, companyId))
+        .orderBy(desc(apiCredentials.createdAt));
+      return credentials;
+    } catch (error) {
+      console.error('Error fetching API credentials:', error);
+      return [];
+    }
+  }
+
+  async createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials> {
+    try {
+      // Generate API key and secret
+      const apiKey = `rip_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
+      const secretKey = `rip_secret_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
+      
+      const [newCredentials] = await db.insert(apiCredentials)
+        .values({
+          ...credentials,
+          apiKey,
+          secretKey,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+      
+      return {
+        ...newCredentials,
+        apiKey,
+        secretKey
+      };
+    } catch (error) {
+      console.error('Error creating API credentials:', error);
+      throw error;
+    }
+  }
+
+  async deactivateAPICredentials(id: number, companyId: number): Promise<boolean> {
+    try {
+      const [result] = await db.update(apiCredentials)
+        .set({ 
+          isActive: false,
+          updatedAt: new Date()
+        })
+        .where(and(
+          eq(apiCredentials.id, id),
+          eq(apiCredentials.companyId, companyId)
+        ))
+        .returning();
+      
+      return !!result;
+    } catch (error) {
+      console.error('Error deactivating API credentials:', error);
+      return false;
+    }
+  }
+
+  async regenerateAPICredentialsSecret(id: number, companyId: number): Promise<string | null> {
+    try {
+      const newSecret = `rip_secret_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
+      
+      const [result] = await db.update(apiCredentials)
+        .set({ 
+          secretKey: newSecret,
+          updatedAt: new Date()
+        })
+        .where(and(
+          eq(apiCredentials.id, id),
+          eq(apiCredentials.companyId, companyId)
+        ))
+        .returning();
+      
+      return result ? newSecret : null;
+    } catch (error) {
+      console.error('Error regenerating API credentials secret:', error);
+      return null;
+    }
   }
 }
 
