@@ -37,7 +37,7 @@ router.post("/tickets", isAuthenticated, async (req, res) => {
       ...req.body,
       submitterId: req.session.userId!,
       submitterName: req.user?.email || "Unknown User",
-      submitterEmail: req.user?.email || "unknown@example.com"
+      submitterEmail: req.user?.email || "unknown@user.com"
     };
     
     const validatedData = insertSupportTicketSchema.parse(ticketData);

@@ -407,7 +407,7 @@ export function CheckInForm({ technicianId, companyId, onSuccess, initialValues 
                   <FormItem>
                     <FormLabel>Customer Email</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="customer@example.com" value={field.value || ''} />
+                      <Input {...field} placeholder="customer@email.com" value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

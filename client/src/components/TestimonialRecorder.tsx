@@ -408,7 +408,7 @@ export default function TestimonialRecorder({
                   type="email"
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
-                  placeholder="customer@example.com"
+                  placeholder="customer@email.com"
                 />
               </div>
               

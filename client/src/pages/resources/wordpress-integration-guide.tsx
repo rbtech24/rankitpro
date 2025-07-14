@@ -607,11 +607,11 @@ function rankitpro_recent_shortcode($atts) {
                   <h4 className="font-semibold text-primary mb-2">URL Structure</h4>
                   <div className="mb-2">
                     <p className="text-sm mb-1"><span className="text-red-500">❌ Poor:</span></p>
-                    <code className="text-xs bg-slate-100 p-1.5 rounded block">example.com/?p=123</code>
+                    <code className="text-xs bg-slate-100 p-1.5 rounded block">yoursite.com/?p=123</code>
                   </div>
                   <div className="mb-2">
                     <p className="text-sm mb-1"><span className="text-yellow-500">⚠️ Better:</span></p>
-                    <code className="text-xs bg-slate-100 p-1.5 rounded block">example.com/2023/05/service-checkin</code>
+                    <code className="text-xs bg-slate-100 p-1.5 rounded block">yoursite.com/2023/05/service-checkin</code>
                   </div>
                   <div>
                     <p className="text-sm mb-1"><span className="text-green-500">✅ Best:</span></p>

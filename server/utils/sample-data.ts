@@ -24,7 +24,7 @@ export async function createSampleData() {
     const hashedPassword = await bcrypt.hash('demo123', salt);
     
     const demoAdmin = await storage.createUser({
-      email: 'demo@example.com',
+      email: 'admin@demohomeservices.com',
       username: 'demoadmin',
       password: hashedPassword,
       role: 'company_admin',
@@ -75,7 +75,7 @@ export async function createSampleData() {
         notes: 'Fixed leaky faucet in master bathroom. Replaced worn out washer and adjusted water pressure. Customer very satisfied with quick service.',
         latitude: '37.7749',
         longitude: '-122.4194',
-        photos: [{ url: 'https://example.com/photos/faucet1.jpg' }],
+        photos: [],
         createBlog: true
       },
       {
@@ -85,7 +85,7 @@ export async function createSampleData() {
         notes: 'Replaced old circuit breaker panel with new 200 amp service. Updated wiring to code and installed new GFCI outlets in kitchen and bathrooms. Job took full day but finished on schedule.',
         latitude: '37.7850',
         longitude: '-122.4320',
-        photos: [{ url: 'https://example.com/photos/electrical1.jpg' }],
+        photos: [],
         createBlog: true
       },
       {
@@ -95,7 +95,7 @@ export async function createSampleData() {
         notes: 'Annual maintenance on HVAC system. Cleaned condenser coils, replaced air filter, and checked refrigerant levels. System is running efficiently. Recommended customer replace system within next 2 years due to age.',
         latitude: '37.7651',
         longitude: '-122.4156',
-        photos: [{ url: 'https://example.com/photos/hvac1.jpg' }],
+        photos: [],
         createBlog: true
       },
       {
@@ -105,7 +105,7 @@ export async function createSampleData() {
         notes: 'Unclogged main sewer line using power auger. Discovered tree root intrusion as cause. Recommended customer schedule regular maintenance to prevent future blockages.',
         latitude: '37.7850',
         longitude: '-122.4000',
-        photos: [{ url: 'https://example.com/photos/plumbing2.jpg' }],
+        photos: [],
         createBlog: false
       },
       {
@@ -115,7 +115,7 @@ export async function createSampleData() {
         notes: 'Installed new ceiling fans in three bedrooms. Also replaced outdated light fixtures in hallway with new LED models. Customer very pleased with energy-efficient upgrades.',
         latitude: '37.7950',
         longitude: '-122.4100',
-        photos: [{ url: 'https://example.com/photos/electrical2.jpg' }],
+        photos: [],
         createBlog: false
       }
     ];
@@ -174,7 +174,7 @@ export async function createSampleData() {
           technicianId: technician.id,
           method: 'email',
           customerName: template.technicianIndex === 0 ? 'Alex Johnson' : 'Maya Rodriguez',
-          email: template.technicianIndex === 0 ? 'alex@example.com' : 'maya@example.com',
+          email: template.technicianIndex === 0 ? 'alex.johnson@gmail.com' : 'maya.patel@yahoo.com',
           phone: null
         });
         

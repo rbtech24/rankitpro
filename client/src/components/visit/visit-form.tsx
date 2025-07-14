@@ -592,7 +592,7 @@ export default function VisitForm({ onSuccess }: { onSuccess?: () => void }) {
                           <FormControl>
                             <Input
                               type="email"
-                              placeholder="john@example.com"
+                              placeholder="john@email.com"
                               {...field}
                             />
                           </FormControl>

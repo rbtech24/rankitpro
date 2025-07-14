@@ -244,7 +244,7 @@ export default function JobFormWizard({
                   <FormItem>
                     <FormLabel>Customer Email (Optional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="customer@example.com" {...field} />
+                      <Input placeholder="customer@email.com" {...field} />
                     </FormControl>
                     <FormDescription>
                       For sending review requests

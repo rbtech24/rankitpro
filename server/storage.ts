@@ -1082,43 +1082,55 @@ export class DatabaseStorage implements IStorage {
 
 
   async getCheckInsWithTechnician(companyId: number): Promise<CheckInWithTechnician[]> {
-    const checkInData = await db.select().from(checkIns).where(eq(checkIns.companyId, companyId));
-    return checkInData.map(checkIn => ({
-      ...checkIn,
-      technician: {
-        id: 1,
-        email: "tech@example.com",
-        name: "Mock Technician",
+    const checkInData = await db.select({
+      checkIn: checkIns,
+      technician: technicians
+    })
+    .from(checkIns)
+    .leftJoin(technicians, eq(checkIns.technicianId, technicians.id))
+    .where(eq(checkIns.companyId, companyId));
+    
+    return checkInData.map(data => ({
+      ...data.checkIn,
+      technician: data.technician || {
+        id: 0,
+        email: "unknown@staff.com",
+        name: "Unknown Technician",
         createdAt: new Date(),
         companyId: companyId,
-        active: true,
-        phone: "555-0123",
+        active: false,
+        phone: "000-000-0000",
         specialty: "General",
-        location: "Mock Location",
-        userId: 1
+        location: "Unknown Location",
+        userId: 0
       }
     }));
   }
 
   async getRecentCheckIns(companyId: number, limit = 10): Promise<CheckInWithTechnician[]> {
-    const checkInData = await db.select().from(checkIns)
-      .where(eq(checkIns.companyId, companyId))
-      .orderBy(desc(checkIns.createdAt))
-      .limit(limit);
+    const checkInData = await db.select({
+      checkIn: checkIns,
+      technician: technicians
+    })
+    .from(checkIns)
+    .leftJoin(technicians, eq(checkIns.technicianId, technicians.id))
+    .where(eq(checkIns.companyId, companyId))
+    .orderBy(desc(checkIns.createdAt))
+    .limit(limit);
     
-    return checkInData.map(checkIn => ({
-      ...checkIn,
-      technician: {
-        id: 1,
-        email: "tech@example.com",
-        name: "Technician",
+    return checkInData.map(data => ({
+      ...data.checkIn,
+      technician: data.technician || {
+        id: 0,
+        email: "unknown@staff.com",
+        name: "Unknown Technician",
         createdAt: new Date(),
         companyId: companyId,
-        active: true,
-        phone: "555-0123",
+        active: false,
+        phone: "000-000-0000",
         specialty: "General",
-        location: "Field Location",
-        userId: 1
+        location: "Unknown Location",
+        userId: 0
       }
     }));
   }
