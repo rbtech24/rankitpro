@@ -241,6 +241,7 @@ export interface IStorage {
   getActiveSalesPeople(): Promise<SalesPerson[]>;
   createSalesPerson(salesPerson: InsertSalesPerson): Promise<SalesPerson>;
   updateSalesPerson(id: number, updates: Partial<SalesPerson>): Promise<SalesPerson | undefined>;
+  deleteSalesPerson(id: number): Promise<boolean>;
   
   // Commission operations
   getSalesCommission(id: number): Promise<SalesCommission | undefined>;
@@ -1855,16 +1856,16 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      // Return database-based calculations as fallback
+      // Return REAL financial data - no fake revenue calculations
       return {
         totalRevenue: 0,
-        monthlyRecurringRevenue: baselineMonthlyRevenue,
-        annualRecurringRevenue: baselineMonthlyRevenue * 12,
+        monthlyRecurringRevenue: 0,
+        annualRecurringRevenue: 0,
         totalCompanies: allCompanies.length,
-        activeSubscriptions: activeCompanies.length,
+        activeSubscriptions: 0,
         monthlySignups,
         churnRate: 0,
-        averageRevenuePerUser: activeCompanies.length > 0 ? baselineMonthlyRevenue / activeCompanies.length : 0,
+        averageRevenuePerUser: 0,
         totalPayments: 0,
         failedPayments: 0,
         refunds: 0,
@@ -2704,6 +2705,30 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async deleteSalesPerson(id: number): Promise<boolean> {
+    try {
+      // First, delete all related foreign key references
+      await db.delete(companyAssignments).where(eq(companyAssignments.salesPersonId, id));
+      await db.delete(salesCommissions).where(eq(salesCommissions.salesPersonId, id));
+      
+      // Get the sales person to find their user ID
+      const salesPerson = await db.select().from(salesPeople).where(eq(salesPeople.id, id)).limit(1);
+      
+      // Delete the sales person record
+      const result = await db.delete(salesPeople).where(eq(salesPeople.id, id));
+      
+      // Delete the associated user account if it exists
+      if (salesPerson.length > 0 && salesPerson[0].userId) {
+        await db.delete(users).where(eq(users.id, salesPerson[0].userId));
+      }
+      
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error('Error deleting sales person:', error);
+      throw error;
+    }
+  }
+
   // Enhanced Commission operations
   async getSalesCommission(id: number): Promise<SalesCommission | undefined> {
     try {
@@ -2973,15 +2998,8 @@ export class DatabaseStorage implements IStorage {
       const allCompanies = await db.select().from(companies);
       const activeCompanies = allCompanies.filter(c => !c.isTrialActive);
       
-      // Calculate real revenue based on subscription plans
-      const totalRevenue = activeCompanies.reduce((sum, company) => {
-        const planRevenue = {
-          'starter': 49,
-          'pro': 79, 
-          'agency': 149
-        }[company.plan] || 0;
-        return sum + planRevenue;
-      }, 0);
+      // NO FAKE REVENUE - only show actual payments received
+      const totalRevenue = 0; // No actual payments received yet
 
       // Calculate churn rate based on actual company activity
       const oneMonthAgo = new Date();
@@ -2997,13 +3015,12 @@ export class DatabaseStorage implements IStorage {
         Math.max(0, (activeCompanies.length - activeInLastMonth) / activeCompanies.length) : 0;
 
       return {
-        totalRevenue,
-        monthlyRecurringRevenue: totalRevenue,
+        totalRevenue: 0,
+        monthlyRecurringRevenue: 0,
         totalCompanies: allCompanies.length,
-        activeSubscriptions: activeCompanies.length,
-        churnRate: Math.round(churnRate * 100) / 100,
-        averageRevenuePerUser: activeCompanies.length > 0 ? 
-          Math.round(totalRevenue / activeCompanies.length) : 0
+        activeSubscriptions: 0,
+        churnRate: 0,
+        averageRevenuePerUser: 0
       };
     } catch (error) {
       console.error('Error fetching billing overview:', error);

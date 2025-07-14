@@ -245,6 +245,24 @@ export default function SalesManagement() {
     }
   });
 
+  const deleteSalesPersonMutation = useMutation({
+    mutationFn: async (salesPersonId: number) => {
+      const response = await apiRequest('DELETE', `/api/sales/people/${salesPersonId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/sales/people'] });
+      toast({ title: 'Sales person deleted successfully' });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Error deleting sales person', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    }
+  });
+
   if (user?.role !== 'super_admin') {
     return (
       <div className="flex items-center justify-center h-96">
@@ -780,6 +798,18 @@ export default function SalesManagement() {
                               >
                                 <DollarSignIcon className="mr-2 h-4 w-4" />
                                 View Financials
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  if (confirm(`Are you sure you want to delete ${person.name}? This action cannot be undone.`)) {
+                                    deleteSalesPersonMutation.mutate(person.id);
+                                  }
+                                }}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <UserX className="mr-2 h-4 w-4" />
+                                Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

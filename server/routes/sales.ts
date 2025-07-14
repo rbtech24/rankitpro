@@ -155,6 +155,31 @@ router.put('/people/:id', isAuthenticated, isSuperAdmin, async (req: Request, re
   }
 });
 
+// Delete sales person (super admin only)
+router.delete('/people/:id', isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    
+    // Check if sales person exists
+    const salesPerson = await storage.getSalesPerson(id);
+    if (!salesPerson) {
+      return res.status(404).json({ error: 'Sales person not found' });
+    }
+
+    // Delete sales person (this will also handle foreign key constraints)
+    const success = await storage.deleteSalesPerson(id);
+    
+    if (!success) {
+      return res.status(400).json({ error: 'Failed to delete sales person' });
+    }
+
+    res.json({ message: 'Sales person deleted successfully' });
+  } catch (error: any) {
+    console.error('Error deleting sales person:', error);
+    res.status(500).json({ error: 'Failed to delete sales person' });
+  }
+});
+
 // Get detailed financial information for a sales person (super admin only)
 router.get('/people/:id/financials', isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
   try {
