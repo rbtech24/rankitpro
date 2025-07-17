@@ -1,0 +1,44 @@
+2025-07-17T19:18:14.683627154Z ==> Cloning from https://github.com/rbtech24/rankitpro
+2025-07-17T19:18:16.877513374Z ==> Checking out commit 60cfd9530fe6025687a4db1839288d9e21287eff in branch main
+2025-07-17T19:18:18.145704344Z ==> Downloading cache...
+2025-07-17T19:18:32.7382201Z ==> Transferred 249MB in 8s. Extraction took 6s.
+2025-07-17T19:18:36.023770103Z ==> Using Node.js version 22.14.0 (default)
+2025-07-17T19:18:36.054942664Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-07-17T19:18:36.202842607Z ==> Using Bun version 1.1.0 (default)
+2025-07-17T19:18:36.202864668Z ==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+2025-07-17T19:18:36.264429573Z ==> Running build command 'npm install; npm run build'...
+2025-07-17T19:18:43.293044616Z 
+2025-07-17T19:18:43.293063157Z added 36 packages, removed 316 packages, changed 142 packages, and audited 472 packages in 7s
+2025-07-17T19:18:43.293096879Z 
+2025-07-17T19:18:43.293145582Z 81 packages are looking for funding
+2025-07-17T19:18:43.293152712Z   run `npm fund` for details
+2025-07-17T19:18:43.29464138Z 
+2025-07-17T19:18:43.294652021Z found 0 vulnerabilities
+2025-07-17T19:18:43.543294945Z 
+2025-07-17T19:18:43.543346228Z > workspace@1.0.0 build
+2025-07-17T19:18:43.543353968Z > npm run build:client && npm run build:server
+2025-07-17T19:18:43.543356328Z 
+2025-07-17T19:18:43.649562801Z 
+2025-07-17T19:18:43.649583662Z > workspace@1.0.0 build:client
+2025-07-17T19:18:43.649588202Z > vite build client
+2025-07-17T19:18:43.649591992Z 
+2025-07-17T19:18:43.824246877Z vite v6.3.5 building for production...
+2025-07-17T19:18:44.175528223Z transforming...
+2025-07-17T19:18:46.314741223Z client/src/components/ui/tooltip.tsx (1:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+2025-07-17T19:18:46.31484913Z client/src/components/ui/tooltip.tsx (1:0): Module level directives cause errors when bundled, "use client" in "client/src/components/ui/tooltip.tsx" was ignored.
+2025-07-17T19:18:46.476982175Z ✓ 83 modules transformed.
+2025-07-17T19:18:46.48045442Z ✗ Build failed in 2.63s
+2025-07-17T19:18:46.480514574Z error during build:
+2025-07-17T19:18:46.480523695Z [vite]: Rollup failed to resolve import "@/components/ui/button" from "/opt/render/project/src/client/src/pages/roi-calculator-fresh.tsx".
+2025-07-17T19:18:46.480530665Z This is most likely unintended because it can break your application at runtime.
+2025-07-17T19:18:46.480536605Z If you do want to externalize this module explicitly add it to
+2025-07-17T19:18:46.480542385Z `build.rollupOptions.external`
+2025-07-17T19:18:46.480548496Z     at viteLog (file:///opt/render/project/src/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46345:15)
+2025-07-17T19:18:46.480552106Z     at onRollupLog (file:///opt/render/project/src/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46395:5)
+2025-07-17T19:18:46.480557146Z     at onLog (file:///opt/render/project/src/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46043:7)
+2025-07-17T19:18:46.480563177Z     at file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:20803:32
+2025-07-17T19:18:46.480571987Z     at Object.logger [as onLog] (file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:22683:9)
+2025-07-17T19:18:46.480577118Z     at ModuleLoader.handleInvalidResolvedId (file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:21429:26)
+2025-07-17T19:18:46.480582038Z     at file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:21387:26
+2025-07-17T19:18:46.586635251Z ==> Build failed 😞
+2025-07-17T19:18:46.586652372Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
