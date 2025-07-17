@@ -4,11 +4,11 @@
       "bfdbcb60",
       {
         "id": "bfdbcb60",
-        "timestamp": "2025-07-17T22:05:45.280Z",
+        "timestamp": "2025-07-17T22:12:10.554Z",
         "level": "info",
         "message": "Application startup initiated",
         "resolved": false,
-        "count": 149
+        "count": 150
       }
     ],
     [
@@ -29,10 +29,30 @@
         "resolved": false,
         "count": 1
       }
+    ],
+    [
+      "5c76407f",
+      {
+        "id": "5c76407f",
+        "timestamp": "2025-07-17T22:12:10.875Z",
+        "level": "warn",
+        "message": "ENOENT: no such file or directory, stat '/home/runner/workspace/dist/index.html'",
+        "stack": "Error: ENOENT: no such file or directory, stat '/home/runner/workspace/dist/index.html'",
+        "url": "/",
+        "method": "GET",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+        "ip": "172.31.94.2",
+        "context": {
+          "statusCode": 404,
+          "body": {}
+        },
+        "resolved": false,
+        "count": 1
+      }
     ]
   ],
   "stats": {
-    "totalErrors": 150,
+    "totalErrors": 152,
     "criticalErrors": 0,
     "errorsByHour": {
       "0": 4,
@@ -54,23 +74,32 @@
       "19": 17,
       "20": 13,
       "21": 22,
-      "22": 12,
+      "22": 14,
       "23": 2
     },
     "errorsByEndpoint": {
-      "/": 1
+      "/": 2
     },
     "errorsByType": {
-      "General": 150
+      "General": 152
     },
     "lastError": {
-      "id": "bfdbcb60",
-      "timestamp": "2025-07-17T22:05:45.280Z",
-      "level": "info",
-      "message": "Application startup initiated",
+      "id": "5c76407f",
+      "timestamp": "2025-07-17T22:12:10.875Z",
+      "level": "warn",
+      "message": "ENOENT: no such file or directory, stat '/home/runner/workspace/dist/index.html'",
+      "stack": "Error: ENOENT: no such file or directory, stat '/home/runner/workspace/dist/index.html'",
+      "url": "/",
+      "method": "GET",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "ip": "172.31.94.2",
+      "context": {
+        "statusCode": 404,
+        "body": {}
+      },
       "resolved": false,
-      "count": 149
+      "count": 1
     }
   },
-  "lastSaved": "2025-07-17T22:05:45.280Z"
+  "lastSaved": "2025-07-17T22:12:10.875Z"
 }
