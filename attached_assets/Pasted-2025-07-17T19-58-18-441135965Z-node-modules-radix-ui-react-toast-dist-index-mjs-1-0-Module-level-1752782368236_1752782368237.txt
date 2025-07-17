@@ -1,0 +1,50 @@
+2025-07-17T19:58:18.441135965Z node_modules/@radix-ui/react-toast/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-toast/dist/index.mjs" was ignored.
+2025-07-17T19:58:18.54004617Z node_modules/@radix-ui/react-roving-focus/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-roving-focus/dist/index.mjs" was ignored.
+2025-07-17T19:58:18.618595692Z node_modules/@radix-ui/react-scroll-area/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-scroll-area/dist/index.mjs" was ignored.
+2025-07-17T19:58:18.837324529Z node_modules/@radix-ui/react-menu/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-menu/dist/index.mjs" was ignored.
+2025-07-17T19:58:18.844214166Z node_modules/@radix-ui/react-focus-scope/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-focus-scope/dist/index.mjs" was ignored.
+2025-07-17T19:58:18.846021515Z node_modules/@radix-ui/react-focus-guards/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-focus-guards/dist/index.mjs" was ignored.
+2025-07-17T19:58:18.847584018Z node_modules/@radix-ui/react-collapsible/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-collapsible/dist/index.mjs" was ignored.
+2025-07-17T19:58:18.849236563Z node_modules/@radix-ui/react-collection/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-collection/dist/index.mjs" was ignored.
+2025-07-17T19:58:18.909342164Z node_modules/@radix-ui/react-radio-group/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-radio-group/dist/index.mjs" was ignored.
+2025-07-17T19:58:18.912678984Z node_modules/@radix-ui/react-popover/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-popover/dist/index.mjs" was ignored.
+2025-07-17T19:58:23.444332146Z ✓ 2924 modules transformed.
+2025-07-17T19:58:24.071280004Z rendering chunks...
+2025-07-17T19:58:24.895103007Z computing gzip size...
+2025-07-17T19:58:24.984318958Z dist/index.html                     4.05 kB │ gzip:   1.36 kB
+2025-07-17T19:58:24.984333129Z dist/assets/index-9wLjLJuK.css    127.60 kB │ gzip:  19.65 kB
+2025-07-17T19:58:24.984462872Z dist/assets/logout-BDKhvrkV.js      1.19 kB │ gzip:   0.54 kB
+2025-07-17T19:58:24.984466492Z dist/assets/index-C0QJgQmS.js   2,342.10 kB │ gzip: 560.79 kB
+2025-07-17T19:58:24.984979076Z 
+2025-07-17T19:58:24.984984536Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-07-17T19:58:24.984987686Z - Using dynamic import() to code-split the application
+2025-07-17T19:58:24.984990667Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-07-17T19:58:24.984993196Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-07-17T19:58:24.985074599Z ✓ built in 14.21s
+2025-07-17T19:58:25.398004378Z 
+2025-07-17T19:58:25.398021378Z > workspace@1.0.0 build:server
+2025-07-17T19:58:25.398025428Z > esbuild server/index.ts --platform=node --outfile=dist/index.js --bundle --external:pg-native --external:bcrypt --format=esm
+2025-07-17T19:58:25.398029558Z 
+2025-07-17T19:58:25.870710429Z ✘ [ERROR] Could not resolve "@babel/preset-typescript/package.json"
+2025-07-17T19:58:25.870723749Z 
+2025-07-17T19:58:25.870726739Z     node_modules/@babel/core/lib/config/files/module-types.js:171:36:
+2025-07-17T19:58:25.870729779Z       171 │ ...t packageJson = require("@babel/preset-typescript/package.json");
+2025-07-17T19:58:25.87073206Z           ╵                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2025-07-17T19:58:25.870789281Z 
+2025-07-17T19:58:25.870795961Z   You can mark the path "@babel/preset-typescript/package.json" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle. You can also surround this "require" call with a try/catch block to handle this failure at run-time instead of bundle-time.
+2025-07-17T19:58:25.870798411Z 
+2025-07-17T19:58:25.920574992Z ✘ [ERROR] Could not resolve "../pkg"
+2025-07-17T19:58:25.920584973Z 
+2025-07-17T19:58:25.920587983Z     node_modules/lightningcss/node/index.js:17:27:
+2025-07-17T19:58:25.920590243Z       17 │   module.exports = require(`../pkg`);
+2025-07-17T19:58:25.920592403Z          ╵                            ~~~~~~~~
+2025-07-17T19:58:25.920594343Z 
+2025-07-17T19:58:25.920596703Z ▲ [WARNING] The glob pattern require("../lightningcss.*.node") did not match any files [empty-glob]
+2025-07-17T19:58:25.920598743Z 
+2025-07-17T19:58:25.920601123Z     node_modules/lightningcss/node/index.js:22:29:
+2025-07-17T19:58:25.920604203Z       22 │ ...dule.exports = require(`../lightningcss.${parts.join('-')}.node`);
+2025-07-17T19:58:25.920607403Z          ╵                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2025-07-17T19:58:25.920609773Z 
+2025-07-17T19:58:26.444185446Z 1 warning and 2 errors
+2025-07-17T19:58:26.514666039Z ==> Build failed 😞
+2025-07-17T19:58:26.514688339Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
