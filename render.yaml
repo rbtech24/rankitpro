@@ -3,7 +3,7 @@ services:
     name: rankitpro-saas
     env: node
     plan: starter
-    buildCommand: npm install --ignore-optional --no-optional && npx vite build client --outDir dist && npx esbuild server/index.ts --platform=node --outfile=dist/index.js --bundle --external:pg-native --external:bcrypt --external:@babel/preset-typescript/package.json --external:@babel/preset-typescript --external:@babel/core --external:lightningcss --external:../pkg --external:@swc/core --external:esbuild --external:typescript --external:*.node --format=esm --target=node18 --minify=false
+    buildCommand: npm install --ignore-optional --no-optional && node render-build.cjs
     startCommand: npm start
     envVars:
       - key: NODE_ENV
