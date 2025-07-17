@@ -4,11 +4,11 @@
       "bfdbcb60",
       {
         "id": "bfdbcb60",
-        "timestamp": "2025-07-17T22:12:10.554Z",
+        "timestamp": "2025-07-17T22:24:43.232Z",
         "level": "info",
         "message": "Application startup initiated",
         "resolved": false,
-        "count": 150
+        "count": 152
       }
     ],
     [
@@ -52,7 +52,7 @@
     ]
   ],
   "stats": {
-    "totalErrors": 152,
+    "totalErrors": 154,
     "criticalErrors": 0,
     "errorsByHour": {
       "0": 4,
@@ -74,32 +74,23 @@
       "19": 17,
       "20": 13,
       "21": 22,
-      "22": 14,
+      "22": 16,
       "23": 2
     },
     "errorsByEndpoint": {
       "/": 2
     },
     "errorsByType": {
-      "General": 152
+      "General": 154
     },
     "lastError": {
-      "id": "5c76407f",
-      "timestamp": "2025-07-17T22:12:10.875Z",
-      "level": "warn",
-      "message": "ENOENT: no such file or directory, stat '/home/runner/workspace/dist/index.html'",
-      "stack": "Error: ENOENT: no such file or directory, stat '/home/runner/workspace/dist/index.html'",
-      "url": "/",
-      "method": "GET",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
-      "ip": "172.31.94.2",
-      "context": {
-        "statusCode": 404,
-        "body": {}
-      },
+      "id": "bfdbcb60",
+      "timestamp": "2025-07-17T22:24:43.232Z",
+      "level": "info",
+      "message": "Application startup initiated",
       "resolved": false,
-      "count": 1
+      "count": 152
     }
   },
-  "lastSaved": "2025-07-17T22:12:10.875Z"
+  "lastSaved": "2025-07-17T22:24:43.232Z"
 }
