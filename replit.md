@@ -4,6 +4,19 @@
 
 Rank It Pro is a comprehensive SaaS platform designed for customer-facing businesses to manage their operations, track staff performance, and generate AI-powered content for online marketing. The platform provides multi-role authentication, subscription management, review automation, and mobile-first interfaces that work for restaurants, dentists, retailers, home services, and any business with customers.
 
+## Recent Changes
+
+### Build System Fixes (Jan 17, 2025)
+- **Issue**: Deployment was failing with path alias resolution errors for '@/components/ui/button' imports
+- **Root Cause**: The build:client command was calling `vite build client` instead of `vite build`, causing path alias conflicts
+- **Solution Applied**:
+  - Fixed CSS issues by replacing `@apply border-border` with direct CSS properties
+  - Updated Tailwind content paths for better build compatibility
+  - Created `deploy-build.sh` script that runs builds correctly from root directory
+  - Verified client build works with `npx vite build` from root
+  - Added external dependencies to server build to resolve babel/lightningcss issues
+- **Status**: ✅ Build process now works correctly for deployment
+
 ## System Architecture
 
 ### Frontend Architecture
