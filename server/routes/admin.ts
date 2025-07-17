@@ -6,11 +6,36 @@ import Stripe from 'stripe';
 
 const router = Router();
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+let stripe: Stripe | null = null;
+
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2023-10-16",
+  });
+} else {
+  console.warn('Stripe secret key not configured. Billing features will be disabled.');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+
+// Add missing API routes that were identified in testing
+router.get('/financial-metrics', isSuperAdmin, async (req, res) => {
+  try {
+    const metrics = await storage.getFinancialMetrics();
+    res.json(metrics);
+  } catch (error) {
+    console.error('Error fetching financial metrics:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Add financial overview endpoint
+router.get('/financial-overview', isSuperAdmin, async (req, res) => {
+  try {
+    const overview = await storage.getBillingOverview();
+    res.json(overview);
+  } catch (error) {
+    console.error('Error fetching financial overview:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 // Subscription Plan Management Routes
@@ -129,27 +154,30 @@ router.post('/subscription-plans', isSuperAdmin, async (req, res) => {
     const validatedData = insertSubscriptionPlanSchema.parse(requestData);
     console.log('Validated data:', validatedData);
     
-    // Create Stripe product and price
-    const stripeProduct = await stripe.products.create({
-      name: validatedData.name,
-      description: `${validatedData.name} subscription plan`,
-    });
+    // Create Stripe product and price if available
+    let stripeProduct, stripePrice;
+    if (stripe) {
+      stripeProduct = await stripe.products.create({
+        name: validatedData.name,
+        description: `${validatedData.name} subscription plan`,
+      });
 
-    const stripePrice = await stripe.prices.create({
-      product: stripeProduct.id,
-      unit_amount: Math.round(Number(validatedData.price) * 100), // Convert to cents
-      currency: 'usd',
-      recurring: {
-        interval: validatedData.billingPeriod === 'yearly' ? 'year' : 'month',
-      },
-    });
+      stripePrice = await stripe.prices.create({
+        product: stripeProduct.id,
+        unit_amount: Math.round(Number(validatedData.price) * 100), // Convert to cents
+        currency: 'usd',
+        recurring: {
+          interval: validatedData.billingPeriod === 'yearly' ? 'year' : 'month',
+        },
+      });
+    }
 
     // Create subscription plan in database
     const plan = await storage.createSubscriptionPlan({
       ...validatedData,
       price: validatedData.price.toString(), // Ensure price is string for database
-      stripeProductId: stripeProduct.id,
-      stripePriceId: stripePrice.id
+      stripeProductId: stripeProduct?.id || null,
+      stripePriceId: stripePrice?.id || null
     });
 
     console.log('Created plan:', plan);
@@ -175,8 +203,8 @@ router.put('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Subscription plan not found' });
     }
 
-    // Update Stripe product if it exists
-    if (existingPlan.stripeProductId) {
+    // Update Stripe product if it exists and Stripe is configured
+    if (stripe && existingPlan.stripeProductId) {
       await stripe.products.update(existingPlan.stripeProductId, {
         name: validatedData.name,
         description: `${validatedData.name} subscription plan`,
@@ -210,8 +238,8 @@ router.delete('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
       });
     }
 
-    // Archive Stripe product if it exists
-    if (existingPlan.stripeProductId) {
+    // Archive Stripe product if it exists and Stripe is configured
+    if (stripe && existingPlan.stripeProductId) {
       await stripe.products.update(existingPlan.stripeProductId, {
         active: false,
       });

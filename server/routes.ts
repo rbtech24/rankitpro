@@ -50,6 +50,8 @@ import publicCompanyRoutes from "./routes/public-company";
 import testimonialsRoutes from "./routes/testimonials";
 import { securityMonitor } from "./security-monitor";
 import helpRoutes from "./routes/help";
+import apiCredentialsRoutes from "./routes/api-credentials";
+import supportTicketsRoutes from "./routes/support-tickets";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
 import { analyticsService } from "./services/analytics-service";
@@ -2349,6 +2351,22 @@ Format as professional service documentation.`;
 
   // Register sales routes for sales staff management
   app.use("/api/sales", salesRoutes);
+  
+  // Add missing sales staff endpoint
+  app.get("/api/sales/staff", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user || !user.companyId) {
+        return res.status(400).json({ message: "Company ID required" });
+      }
+      
+      const salesStaff = await storage.getSalesStaffByCompany(user.companyId);
+      res.json(salesStaff);
+    } catch (error) {
+      console.error("Error fetching sales staff:", error);
+      res.status(500).json({ message: "Failed to fetch sales staff" });
+    }
+  });
 
   // Register onboarding routes for user walkthrough
   const onboardingRoutes = await import("./routes/onboarding");
@@ -2400,6 +2418,54 @@ Format as professional service documentation.`;
   
   // Register help and documentation routes
   app.use("/api/help", helpRoutes);
+  
+  // Register new API routes for missing endpoints
+  app.use("/api/integrations/api-credentials", apiCredentialsRoutes);
+  app.use("/api/support-tickets", supportTicketsRoutes);
+  
+  // Add missing company-specific endpoints
+  app.get("/api/companies/:companyId/testimonials", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { companyId } = req.params;
+      const testimonials = await storage.getTestimonialsByCompany(parseInt(companyId));
+      res.json(testimonials);
+    } catch (error) {
+      console.error("Error fetching testimonials:", error);
+      res.status(500).json({ message: "Failed to fetch testimonials" });
+    }
+  });
+  
+  app.get("/api/companies/:companyId/blog-posts", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { companyId } = req.params;
+      const blogPosts = await storage.getBlogPostsByCompany(parseInt(companyId));
+      res.json(blogPosts);
+    } catch (error) {
+      console.error("Error fetching blog posts:", error);
+      res.status(500).json({ message: "Failed to fetch blog posts" });
+    }
+  });
+  
+  app.get("/api/widget/:companyId", async (req: Request, res: Response) => {
+    try {
+      const { companyId } = req.params;
+      const testimonials = await storage.getTestimonialsByCompany(parseInt(companyId));
+      
+      // Format testimonials for widget display
+      const formattedTestimonials = testimonials.map(testimonial => ({
+        id: testimonial.id,
+        customerName: testimonial.customer_name,
+        content: testimonial.content,
+        rating: 5, // Default rating
+        createdAt: testimonial.created_at
+      }));
+      
+      res.json(formattedTestimonials);
+    } catch (error) {
+      console.error("Error fetching widget testimonials:", error);
+      res.status(500).json({ message: "Failed to fetch widget data" });
+    }
+  });
 
   // System Status Monitoring API
   app.get("/api/system/status", async (req, res) => {
