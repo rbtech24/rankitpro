@@ -3,7 +3,7 @@ services:
     name: rankitpro-saas
     env: node
     plan: starter
-    buildCommand: npm install --ignore-optional --no-optional && ./build.sh
+    buildCommand: npm install --ignore-optional --no-optional && chmod +x build.sh && bash build.sh
     startCommand: npm start
     envVars:
       - key: NODE_ENV

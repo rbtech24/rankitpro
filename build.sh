@@ -10,7 +10,7 @@ mkdir -p dist
 
 # Build client first using Vite
 echo "📦 Building client application..."
-npx vite build client
+npx vite build client --outDir dist
 
 # Build server with comprehensive external dependencies to avoid babel/lightningcss issues
 echo "🚀 Building server application with enhanced exclusions..."
@@ -35,7 +35,7 @@ npx esbuild server/index.ts \
   --minify=false
 
 echo "✅ Production build completed successfully!"
-echo "📊 Client assets: $(ls -la dist/assets/ | wc -l) files"
+echo "📊 Client assets: $(find dist -name "*.js" -o -name "*.css" | wc -l) files"
 echo "🖥️  Server bundle: $(ls -lh dist/index.js)"
 echo ""
 echo "📁 Final build structure:"
