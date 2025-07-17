@@ -1,25 +1,28 @@
-import { type ViteDevServer } from "vite";
+
 import express, { type Express } from "express";
-import { createServer } from "http";
 import path from "path";
 import fs from "fs";
-
-// Prevent Vite import in production
-let createViteServer: any;
-if (process.env.NODE_ENV === "development") {
-  createViteServer = require("vite").createServer;
-}
 import { fileURLToPath } from 'url';
-import { createLogger } from "vite";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
 
-
-// Get __dirname equivalent for ESM
+// Get __dirname equivalent for ESM/CJS compatibility
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const viteLogger = createLogger();
+// Only import Vite in development
+let createViteServer: any;
+let createLogger: any;
+
+if (process.env.NODE_ENV === "development") {
+  try {
+    const vite = await import("vite");
+    createViteServer = vite.createServer;
+    createLogger = vite.createLogger;
+  } catch (error) {
+    console.warn("Vite not available:", error);
+  }
+}
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -32,7 +35,7 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
-export async function setupVite(app: Express, server: any) {
+export async function setupVite(app: Express, server: Server) {
   if (process.env.NODE_ENV !== "development") {
     console.warn("setupVite called in production mode - skipping");
     return;
@@ -42,6 +45,8 @@ export async function setupVite(app: Express, server: any) {
     console.error("Vite not available in production");
     return;
   }
+
+  const viteLogger = createLogger();
 
   const viteConfig = {
     plugins: [
@@ -57,11 +62,11 @@ export async function setupVite(app: Express, server: any) {
     },
     root: path.resolve(__dirname, "..", "client"),
     build: {
-      outDir: path.resolve(__dirname, "..", "dist/public"),
+      outDir: path.resolve(__dirname, "..", "dist", "public"),
       emptyOutDir: true,
     },
-
   };
+
   const vite = await createViteServer({
     ...viteConfig,
     configFile: false,
@@ -99,7 +104,8 @@ export async function setupVite(app: Express, server: any) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(__dirname, "..", "dist", "public");
+  // Use path.resolve with __dirname instead of import.meta.dirname for CJS compatibility
+  const distPath = path.resolve(__dirname, "..", "dist");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
