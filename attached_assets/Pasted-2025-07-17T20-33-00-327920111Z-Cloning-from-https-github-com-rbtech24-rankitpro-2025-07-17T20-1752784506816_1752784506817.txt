@@ -1,0 +1,26 @@
+2025-07-17T20:33:00.327920111Z ==> Cloning from https://github.com/rbtech24/rankitpro
+2025-07-17T20:33:01.406878451Z ==> Checking out commit ccbc0da16464e3dd7d8746df599d6671099ee049 in branch main
+2025-07-17T20:33:02.650085621Z ==> Downloading cache...
+2025-07-17T20:33:16.31289636Z ==> Transferred 228MB in 8s. Extraction took 4s.
+2025-07-17T20:33:19.828306029Z ==> Using Node.js version 22.14.0 (default)
+2025-07-17T20:33:19.858804068Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-07-17T20:33:20.097964175Z ==> Using Bun version 1.1.0 (default)
+2025-07-17T20:33:20.097993537Z ==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+2025-07-17T20:33:20.16067458Z ==> Running build command 'rm -rf package-lock.json node_modules && npm install --ignore-optional --no-optional && npm install @rollup/rollup-linux-x64-gnu --save-dev --ignore-optional && mkdir -p dist && cp -r client/dist/* dist/ && npx esbuild server/index.ts --platform=node --outfile=dist/server.js --bundle --external:@babel/preset-typescript/package.json --external:@babel/preset-typescript --external:@babel/core --external:lightningcss --external:../pkg --external:@swc/core --external:esbuild --external:typescript --external:*.node --external:pg-native --external:bcrypt --format=esm && echo 'import("./server.js");' > dist/index.js'...
+2025-07-17T20:34:09.408204193Z 
+2025-07-17T20:34:09.408248945Z added 464 packages, and audited 465 packages in 48s
+2025-07-17T20:34:09.408257876Z 
+2025-07-17T20:34:09.408262826Z 78 packages are looking for funding
+2025-07-17T20:34:09.408267976Z   run `npm fund` for details
+2025-07-17T20:34:09.41027124Z 
+2025-07-17T20:34:09.410284671Z found 0 vulnerabilities
+2025-07-17T20:34:10.660936486Z 
+2025-07-17T20:34:10.660960647Z added 5 packages, and audited 470 packages in 1s
+2025-07-17T20:34:10.660968587Z 
+2025-07-17T20:34:10.660984268Z 78 packages are looking for funding
+2025-07-17T20:34:10.660992809Z   run `npm fund` for details
+2025-07-17T20:34:10.662113632Z 
+2025-07-17T20:34:10.662124203Z found 0 vulnerabilities
+2025-07-17T20:34:10.690397745Z cp: cannot stat 'client/dist/*': No such file or directory
+2025-07-17T20:34:10.69101148Z ==> Build failed 😞
+2025-07-17T20:34:10.691038922Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
