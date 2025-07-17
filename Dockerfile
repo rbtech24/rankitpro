@@ -13,8 +13,10 @@ RUN npm ci --only=production
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build:client
+# Build the application using our fixed build script
+COPY deploy-build.sh ./
+RUN chmod +x deploy-build.sh
+RUN ./deploy-build.sh
 
 # Production stage
 FROM node:18-alpine AS production
@@ -46,4 +48,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Start application
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/server/index.js"]
+CMD ["node", "dist/index.js"]

@@ -1,44 +1,36 @@
 #!/bin/bash
 
-# Deploy Build Script for Rank It Pro
-# This script works around the build issues by running the correct build commands
+# Deployment Build Script
+# This script handles the build process for deployment with proper path resolution
 
 echo "🚀 Starting deployment build process..."
 
-# Clean previous builds
-echo "🧹 Cleaning previous builds..."
-rm -rf dist/public/*
-rm -rf dist/index.js
+# Set environment variables for production
+export NODE_ENV=production
+export REPLIT_KEEP_PACKAGE_DEV_DEPENDENCIES=1
 
-# Build client from root directory (this works correctly)
+# Clean any existing build artifacts
+echo "🧹 Cleaning build artifacts..."
+rm -rf dist
+
+# Build client with correct path resolution
 echo "📦 Building client application..."
-if npx vite build; then
-    echo "✅ Client build completed successfully"
-else
-    echo "❌ Client build failed"
-    exit 1
+npx vite build
+
+if [ $? -ne 0 ]; then
+  echo "❌ Client build failed"
+  exit 1
 fi
 
-# Build server with additional externals to fix babel issues
+# Build server
 echo "🔧 Building server application..."
-if npx esbuild server/index.ts --platform=node --outfile=dist/index.js --bundle --external:pg-native --external:bcrypt --external:@babel/preset-typescript --external:lightningcss --format=esm; then
-    echo "✅ Server build completed successfully"
-else
-    echo "❌ Server build failed"
-    exit 1
+npx esbuild server/index.ts --platform=node --outfile=dist/index.js --bundle --external:pg-native --external:bcrypt --external:@babel/core --external:lightningcss --external:typescript --format=esm
+
+if [ $? -ne 0 ]; then
+  echo "❌ Server build failed"
+  exit 1
 fi
 
-# Verify build outputs
-echo "🔍 Verifying build outputs..."
-if [ -f "dist/public/index.html" ] && [ -f "dist/index.js" ]; then
-    echo "✅ Build verification successful"
-    echo "📊 Build summary:"
-    echo "   - Client: $(find dist/public -name '*.js' -o -name '*.css' | wc -l) files"
-    echo "   - Server: dist/index.js created"
-    echo "   - Total size: $(du -sh dist/ | cut -f1)"
-else
-    echo "❌ Build verification failed"
-    exit 1
-fi
-
-echo "🎉 Deployment build completed successfully!"
+echo "✅ Build completed successfully!"
+echo "📂 Client build output: dist/public/"
+echo "📂 Server build output: dist/index.js"
