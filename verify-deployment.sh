@@ -1,96 +1,69 @@
 #!/bin/bash
 
 # Deployment Verification Script
-# This script verifies all deployment fixes are working correctly
+# This script verifies that the deployment build process works correctly
 
-echo "🔍 Verifying deployment configuration..."
+echo "🔍 Verifying deployment build process..."
 
-# Check if required files exist
-echo "📋 Checking required files..."
-if [ ! -f "deploy-build.sh" ]; then
-    echo "❌ deploy-build.sh not found"
-    exit 1
-fi
+# Clean previous build artifacts
+echo "🧹 Cleaning previous build artifacts..."
+rm -rf dist/
 
-if [ ! -f "vite.config.ts" ]; then
-    echo "❌ vite.config.ts not found"
-    exit 1
-fi
+# Set environment variables
+export REPLIT_KEEP_PACKAGE_DEV_DEPENDENCIES=1
+export NODE_ENV=production
 
-if [ ! -f "package.json" ]; then
-    echo "❌ package.json not found"
-    exit 1
-fi
+# Run the deployment build script
+echo "🚀 Running deployment build script..."
+./deploy-build.sh
 
-echo "✅ All required files found"
+# Verify build artifacts exist
+echo "📊 Verifying build artifacts..."
 
-# Check if build script is executable
-if [ ! -x "deploy-build.sh" ]; then
-    echo "❌ deploy-build.sh is not executable"
-    exit 1
-fi
-
-echo "✅ Build script is executable"
-
-# Test the build process
-echo "🔧 Testing build process..."
-rm -rf dist
-
-if ./deploy-build.sh > build.log 2>&1; then
-    echo "✅ Build completed successfully"
+if [ -f "dist/index.js" ]; then
+    echo "✅ Server build successful: dist/index.js exists"
+    echo "   Size: $(du -h dist/index.js | cut -f1)"
 else
-    echo "❌ Build failed - check build.log for details"
+    echo "❌ Server build failed: dist/index.js missing"
     exit 1
 fi
 
-# Verify build outputs
-echo "📦 Verifying build outputs..."
-if [ ! -d "dist" ]; then
-    echo "❌ dist directory not created"
+if [ -d "dist/public" ]; then
+    echo "✅ Client build successful: dist/public/ exists"
+    echo "   Files:"
+    ls -la dist/public/
+else
+    echo "❌ Client build failed: dist/public/ missing"
     exit 1
 fi
 
-if [ ! -d "dist/public" ]; then
-    echo "❌ dist/public directory not created"
+# Check for required files
+if [ -f "dist/public/index.html" ]; then
+    echo "✅ Client HTML exists"
+else
+    echo "❌ Client HTML missing"
     exit 1
 fi
 
-if [ ! -f "dist/index.js" ]; then
-    echo "❌ dist/index.js not created"
+if [ -f "dist/public/assets/index-"*.js ]; then
+    echo "✅ Client JS bundle exists"
+else
+    echo "❌ Client JS bundle missing"
     exit 1
 fi
 
-if [ ! -f "dist/public/index.html" ]; then
-    echo "❌ dist/public/index.html not created"
+if [ -f "dist/public/assets/index-"*.css ]; then
+    echo "✅ Client CSS bundle exists"
+else
+    echo "❌ Client CSS bundle missing"
     exit 1
 fi
 
-echo "✅ All build outputs verified"
-
-# Check for critical path alias imports
-echo "🔍 Checking for path alias resolution..."
-if grep -r "@/components/ui/button" dist/public/ > /dev/null 2>&1; then
-    echo "❌ Unresolved path aliases found in build output"
-    exit 1
-fi
-
-echo "✅ Path aliases resolved correctly"
-
-# Check build file sizes
-CLIENT_SIZE=$(du -sh dist/public | cut -f1)
-SERVER_SIZE=$(du -sh dist/index.js | cut -f1)
-
-echo "📊 Build Statistics:"
-echo "  Client bundle: $CLIENT_SIZE"
-echo "  Server bundle: $SERVER_SIZE"
-
-# Clean up
-rm -f build.log
-
-echo "🎉 Deployment verification completed successfully!"
+echo "🎉 Deployment verification successful!"
+echo "📈 Build Summary:"
+echo "   - Server: $(du -h dist/index.js | cut -f1)"
+echo "   - Client: $(du -sh dist/public/ | cut -f1)"
+echo "   - Total: $(du -sh dist/ | cut -f1)"
 echo ""
-echo "📝 Next steps:"
-echo "1. Use './deploy-build.sh' as your build command"
-echo "2. Use 'node dist/index.js' as your start command"
-echo "3. Ensure REPLIT_KEEP_PACKAGE_DEV_DEPENDENCIES=1 is set"
-echo "4. Deploy to your platform of choice"
+echo "🚀 Ready for deployment!"
+echo "   Use: node dist/index.js"

@@ -1,36 +1,48 @@
 #!/bin/bash
 
 # Deployment Build Script
-# This script handles the build process for deployment with proper path resolution
+# This script fixes the path alias resolution issues during build
 
 echo "🚀 Starting deployment build process..."
 
-# Set environment variables for production
-export NODE_ENV=production
+# Set environment variables for build process
 export REPLIT_KEEP_PACKAGE_DEV_DEPENDENCIES=1
+export NODE_ENV=production
 
-# Clean any existing build artifacts
-echo "🧹 Cleaning build artifacts..."
-rm -rf dist
-
-# Build client with correct path resolution
-echo "📦 Building client application..."
+# Build client with proper path resolution
+echo "📦 Building client..."
 npx vite build
 
-if [ $? -ne 0 ]; then
-  echo "❌ Client build failed"
-  exit 1
+# Check if client build was successful
+if [ $? -eq 0 ]; then
+    echo "✅ Client build successful"
+else
+    echo "❌ Client build failed"
+    exit 1
 fi
 
-# Build server
-echo "🔧 Building server application..."
-npx esbuild server/index.ts --platform=node --outfile=dist/index.js --bundle --external:pg-native --external:bcrypt --external:@babel/core --external:lightningcss --external:typescript --format=esm
+# Build server with external dependencies
+echo "🔧 Building server..."
+npx esbuild server/index.ts \
+    --platform=node \
+    --outfile=dist/index.js \
+    --bundle \
+    --external:pg-native \
+    --external:bcrypt \
+    --external:@babel/core \
+    --external:lightningcss \
+    --external:typescript \
+    --format=esm
 
-if [ $? -ne 0 ]; then
-  echo "❌ Server build failed"
-  exit 1
+# Check if server build was successful
+if [ $? -eq 0 ]; then
+    echo "✅ Server build successful"
+else
+    echo "❌ Server build failed"
+    exit 1
 fi
 
-echo "✅ Build completed successfully!"
-echo "📂 Client build output: dist/public/"
-echo "📂 Server build output: dist/index.js"
+echo "🎉 Deployment build completed successfully!"
+echo "📊 Build artifacts:"
+echo "   - Client: dist/public/"
+echo "   - Server: dist/index.js"
