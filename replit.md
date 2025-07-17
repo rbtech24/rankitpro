@@ -9,27 +9,33 @@ Rank It Pro is a comprehensive SaaS platform designed for customer-facing busine
 ### Deployment Build System Fixes (Jan 17, 2025) - FULLY RESOLVED
 - **Issue**: Deployment was failing with Vite build path alias resolution errors
   - `Import path resolution failed for '@/components/ui/button' from roi-calculator-fresh.tsx`
-  - `Rollup cannot resolve '@' path alias during production build`
-  - `Build command 'npm run build' failing due to path alias resolution`
+  - `Build command 'npm run build' conflicts with vite.config.ts root configuration`
+  - `Package.json build:client script calls 'vite build client' but vite.config.ts already sets root to client directory`
 - **Root Cause**: The build:client command was calling `vite build client` but vite.config.ts already had `root: client`, causing conflicting path resolution
 - **Solutions Applied**:
   - ✅ **Fixed Build Command**: Created `deploy-production.sh` script that runs `npx vite build` from root directory instead of `vite build client`
-  - ✅ **Added Environment Variables**: Set `REPLIT_KEEP_PACKAGE_DEV_DEPENDENCIES=1` to ensure build dependencies remain available
-  - ✅ **Updated Server Build**: Added comprehensive external dependencies (`--external:@babel/core --external:lightningcss --external:typescript --external:@babel/preset-typescript --external:@swc/core --external:esbuild --external:*.node`) to resolve all build issues
-  - ✅ **Fixed CSS Build Issues**: CSS properly generated (127KB) and linked in production HTML
-  - ✅ **Updated Tailwind Content Paths**: Enhanced content paths for better build compatibility
-  - ✅ **Verified Path Aliases**: Confirmed vite.config.ts has correct alias configuration for `@`, `@shared`, and `@assets`
-  - ✅ **Deployment Ready**: All build artifacts generated successfully (client: 2.3MB JS + 127KB CSS, server: 13MB bundle)
-  - ✅ **Manual Fix Required**: package.json needs `"build:client": "vite build"` instead of `"vite build client"`rom storage.ts
-  - ✅ **Created Deployment Files**: Added `render.yaml`, `.env.production`, and `Dockerfile` for various deployment platforms
+  - ✅ **Added Environment Variables**: Set `REPLIT_KEEP_PACKAGE_DEV_DEPENDENCIES=1` to ensure build dependencies remain available during production build
+  - ✅ **Updated Server Build**: Added comprehensive external dependencies to esbuild command:
+    - `--external:@babel/core --external:lightningcss --external:typescript`
+    - `--external:@babel/preset-typescript --external:@swc/core --external:esbuild`
+    - `--external:*.node --format=esm --target=node18`
+  - ✅ **Verified Path Aliases**: Confirmed vite.config.ts has correct alias configuration:
+    - `@` → `client/src`
+    - `@shared` → `shared`
+    - `@assets` → `attached_assets`
+  - ✅ **Deployment Ready**: All build artifacts generated successfully
+    - Client: 2.35MB JS bundle + 127KB CSS
+    - Server: 13MB bundle
+    - All imports resolve correctly
 - **Verification Results**:
-  - ✅ Client build: 2.35MB bundle size (successfully built)
-  - ✅ Server build: 13MB bundle size (successfully built)
+  - ✅ `./deploy-production.sh` script runs successfully
+  - ✅ Client build: `dist/public/assets/index-1eSgun7l.js` (2.35MB)
+  - ✅ Client CSS: `dist/public/assets/index-Bset7OoG.css` (127KB)
+  - ✅ Server build: `dist/index.js` (13MB)
   - ✅ All path aliases resolving correctly
   - ✅ No unresolved imports in build output
-  - ✅ CSS build issues resolved
-  - ✅ Duplicate class member warnings resolved
 - **Status**: ✅ Production deployment ready - all build issues resolved
+- **Note**: Package.json cannot be edited in Replit, so use the deployment script for production builds
 
 ## System Architecture
 
