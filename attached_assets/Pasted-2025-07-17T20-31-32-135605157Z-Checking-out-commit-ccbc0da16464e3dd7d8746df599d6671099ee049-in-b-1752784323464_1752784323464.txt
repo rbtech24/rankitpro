@@ -1,0 +1,51 @@
+2025-07-17T20:31:32.135605157Z ==> Checking out commit ccbc0da16464e3dd7d8746df599d6671099ee049 in branch main
+2025-07-17T20:31:34.145814384Z ==> Downloading cache...
+2025-07-17T20:31:51.32793663Z ==> Using Node.js version 22.14.0 (default)
+2025-07-17T20:31:51.356140914Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-07-17T20:31:51.59485368Z ==> Using Bun version 1.1.0 (default)
+2025-07-17T20:31:51.594877321Z ==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+2025-07-17T20:31:51.662813563Z ==> Running build command 'npm install --ignore-optional --no-optional && npx vite build client && mkdir -p dist && cp -r client/dist/* dist/ && npx esbuild server/index.ts --platform=node --outfile=dist/server.js --bundle --external:@babel/preset-typescript/package.json --external:@babel/preset-typescript --external:@babel/core --external:lightningcss --external:../pkg --external:@swc/core --external:esbuild --external:typescript --external:*.node --external:pg-native --external:bcrypt --format=esm && echo 'import("./server.js");' > dist/index.js'...
+2025-07-17T20:31:52.685901485Z 
+2025-07-17T20:31:52.685924736Z up to date, audited 462 packages in 944ms
+2025-07-17T20:31:52.685928516Z 
+2025-07-17T20:31:52.685930756Z 78 packages are looking for funding
+2025-07-17T20:31:52.685933446Z   run `npm fund` for details
+2025-07-17T20:31:52.686877335Z 
+2025-07-17T20:31:52.686893436Z found 0 vulnerabilities
+2025-07-17T20:31:53.294763162Z /opt/render/project/src/node_modules/rollup/dist/native.js:64
+2025-07-17T20:31:53.294781972Z 		throw new Error(
+2025-07-17T20:31:53.294784752Z 		      ^
+2025-07-17T20:31:53.294786812Z 
+2025-07-17T20:31:53.294789952Z Error: Cannot find module @rollup/rollup-linux-x64-gnu. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try `npm i` again after removing both package-lock.json and node_modules directory.
+2025-07-17T20:31:53.294793002Z     at requireWithFriendlyError (/opt/render/project/src/node_modules/rollup/dist/native.js:64:9)
+2025-07-17T20:31:53.294796192Z     at Object.<anonymous> (/opt/render/project/src/node_modules/rollup/dist/native.js:73:76)
+2025-07-17T20:31:53.294799202Z     at Module._compile (node:internal/modules/cjs/loader:1554:14)
+2025-07-17T20:31:53.294801272Z     at Object..js (node:internal/modules/cjs/loader:1706:10)
+2025-07-17T20:31:53.294803323Z     at Module.load (node:internal/modules/cjs/loader:1289:32)
+2025-07-17T20:31:53.294805443Z     at Function._load (node:internal/modules/cjs/loader:1108:12)
+2025-07-17T20:31:53.294807503Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-07-17T20:31:53.294809623Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-07-17T20:31:53.294811653Z     at cjsLoader (node:internal/modules/esm/translators:262:5)
+2025-07-17T20:31:53.294813733Z     at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:196:7) {
+2025-07-17T20:31:53.294816183Z   [cause]: Error: Cannot find module '@rollup/rollup-linux-x64-gnu'
+2025-07-17T20:31:53.294818273Z   Require stack:
+2025-07-17T20:31:53.294820803Z   - /opt/render/project/src/node_modules/rollup/dist/native.js
+2025-07-17T20:31:53.294824423Z       at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-07-17T20:31:53.294827983Z       at Function._load (node:internal/modules/cjs/loader:1055:27)
+2025-07-17T20:31:53.294831283Z       at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-07-17T20:31:53.294834793Z       at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-07-17T20:31:53.294842483Z       at Module.require (node:internal/modules/cjs/loader:1311:12)
+2025-07-17T20:31:53.294846173Z       at require (node:internal/modules/helpers:136:16)
+2025-07-17T20:31:53.294849543Z       at requireWithFriendlyError (/opt/render/project/src/node_modules/rollup/dist/native.js:46:10)
+2025-07-17T20:31:53.294867874Z       at Object.<anonymous> (/opt/render/project/src/node_modules/rollup/dist/native.js:73:76)
+2025-07-17T20:31:53.294870344Z       at Module._compile (node:internal/modules/cjs/loader:1554:14)
+2025-07-17T20:31:53.294872454Z       at Object..js (node:internal/modules/cjs/loader:1706:10) {
+2025-07-17T20:31:53.294875414Z     code: 'MODULE_NOT_FOUND',
+2025-07-17T20:31:53.294877554Z     requireStack: [ '/opt/render/project/src/node_modules/rollup/dist/native.js' ]
+2025-07-17T20:31:53.294879734Z   }
+2025-07-17T20:31:53.294881934Z }
+2025-07-17T20:31:53.294883904Z 
+2025-07-17T20:31:53.294886004Z Node.js v22.14.0
+2025-07-17T20:31:53.316500104Z ==> Build failed 😞
+2025-07-17T20:31:53.316518554Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-07-17T20:31:48.747381003Z ==> Transferred 228MB in 8s. Extraction took 4s.
