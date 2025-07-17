@@ -1,0 +1,50 @@
+2025-07-17T19:33:54.535995616Z ==> Using Node.js version 22.14.0 (default)
+2025-07-17T19:33:54.564493594Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-07-17T19:33:54.736376218Z ==> Using Bun version 1.1.0 (default)
+2025-07-17T19:33:54.736398499Z ==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+2025-07-17T19:33:54.804414902Z ==> Running build command 'npm install; npm run build'...
+2025-07-17T19:33:56.212011582Z 
+2025-07-17T19:33:56.212038032Z up to date, audited 472 packages in 1s
+2025-07-17T19:33:56.212049883Z 
+2025-07-17T19:33:56.212052803Z 81 packages are looking for funding
+2025-07-17T19:33:56.212059533Z   run `npm fund` for details
+2025-07-17T19:33:56.213243757Z 
+2025-07-17T19:33:56.213261237Z found 0 vulnerabilities
+2025-07-17T19:33:56.468154705Z 
+2025-07-17T19:33:56.468183446Z > workspace@1.0.0 build
+2025-07-17T19:33:56.468187896Z > npm run build:client && npm run build:server
+2025-07-17T19:33:56.468190796Z 
+2025-07-17T19:33:56.58956083Z 
+2025-07-17T19:33:56.589593091Z > workspace@1.0.0 build:client
+2025-07-17T19:33:56.589597691Z > vite build client
+2025-07-17T19:33:56.589614352Z 
+2025-07-17T19:33:56.842558383Z vite v6.3.5 building for production...
+2025-07-17T19:33:57.211265198Z transforming...
+2025-07-17T19:33:59.360142365Z client/src/components/ui/tooltip.tsx (1:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+2025-07-17T19:33:59.360618358Z client/src/components/ui/tooltip.tsx (1:0): Module level directives cause errors when bundled, "use client" in "client/src/components/ui/tooltip.tsx" was ignored.
+2025-07-17T19:33:59.55749685Z node_modules/@tanstack/react-query/build/modern/useQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useQuery.js" was ignored.
+2025-07-17T19:33:59.564668946Z node_modules/@tanstack/react-query/build/modern/useQueries.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useQueries.js" was ignored.
+2025-07-17T19:33:59.566845938Z node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js" was ignored.
+2025-07-17T19:33:59.567541348Z node_modules/@tanstack/react-query/build/modern/HydrationBoundary.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/HydrationBoundary.js" was ignored.
+2025-07-17T19:33:59.568364082Z node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js" was ignored.
+2025-07-17T19:33:59.573274893Z node_modules/@tanstack/react-query/build/modern/useIsFetching.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useIsFetching.js" was ignored.
+2025-07-17T19:33:59.574091126Z node_modules/@tanstack/react-query/build/modern/useMutationState.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useMutationState.js" was ignored.
+2025-07-17T19:33:59.575112706Z node_modules/@tanstack/react-query/build/modern/useMutation.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useMutation.js" was ignored.
+2025-07-17T19:33:59.57594743Z node_modules/@tanstack/react-query/build/modern/useInfiniteQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/useInfiniteQuery.js" was ignored.
+2025-07-17T19:33:59.576357611Z node_modules/@tanstack/react-query/build/modern/IsRestoringProvider.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@tanstack/react-query/build/modern/IsRestoringProvider.js" was ignored.
+2025-07-17T19:33:59.689010555Z ✓ 72 modules transformed.
+2025-07-17T19:33:59.693790902Z ✗ Build failed in 2.82s
+2025-07-17T19:33:59.693843854Z error during build:
+2025-07-17T19:33:59.693848684Z [vite]: Rollup failed to resolve import "@/components/ui/button" from "/opt/render/project/src/client/src/pages/roi-calculator-fresh.tsx".
+2025-07-17T19:33:59.693852544Z This is most likely unintended because it can break your application at runtime.
+2025-07-17T19:33:59.693855584Z If you do want to externalize this module explicitly add it to
+2025-07-17T19:33:59.693859004Z `build.rollupOptions.external`
+2025-07-17T19:33:59.693862184Z     at viteLog (file:///opt/render/project/src/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46345:15)
+2025-07-17T19:33:59.693864915Z     at onRollupLog (file:///opt/render/project/src/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46395:5)
+2025-07-17T19:33:59.693867735Z     at onLog (file:///opt/render/project/src/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46043:7)
+2025-07-17T19:33:59.693871295Z     at file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:20803:32
+2025-07-17T19:33:59.693877765Z     at Object.logger [as onLog] (file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:22683:9)
+2025-07-17T19:33:59.693881065Z     at ModuleLoader.handleInvalidResolvedId (file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:21429:26)
+2025-07-17T19:33:59.693916616Z     at file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:21387:26
+2025-07-17T19:33:59.807525657Z ==> Build failed 😞
+2025-07-17T19:33:59.807543818Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
