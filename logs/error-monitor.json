@@ -4,11 +4,11 @@
       "bfdbcb60",
       {
         "id": "bfdbcb60",
-        "timestamp": "2025-07-17T22:39:20.233Z",
+        "timestamp": "2025-07-17T22:51:07.975Z",
         "level": "info",
         "message": "Application startup initiated",
         "resolved": false,
-        "count": 153
+        "count": 154
       }
     ],
     [
@@ -49,10 +49,34 @@
         "resolved": false,
         "count": 1
       }
+    ],
+    [
+      "fba0f8a1",
+      {
+        "id": "fba0f8a1",
+        "timestamp": "2025-07-17T22:52:48.742Z",
+        "level": {
+          "code": "MODULE_NOT_FOUND",
+          "requireStack": [
+            "/home/runner/workspace/node_modules/iconv-lite/lib/index.js",
+            "/home/runner/workspace/node_modules/raw-body/index.js",
+            "/home/runner/workspace/node_modules/body-parser/lib/read.js",
+            "/home/runner/workspace/node_modules/body-parser/lib/types/json.js",
+            "/home/runner/workspace/node_modules/body-parser/index.js",
+            "/home/runner/workspace/node_modules/express/lib/express.js"
+          ],
+          "expose": true,
+          "statusCode": 400,
+          "status": 400
+        },
+        "message": "API Error",
+        "resolved": false,
+        "count": 2
+      }
     ]
   ],
   "stats": {
-    "totalErrors": 155,
+    "totalErrors": 158,
     "criticalErrors": 0,
     "errorsByHour": {
       "0": 4,
@@ -74,23 +98,36 @@
       "19": 17,
       "20": 13,
       "21": 22,
-      "22": 17,
+      "22": 20,
       "23": 2
     },
     "errorsByEndpoint": {
       "/": 2
     },
     "errorsByType": {
-      "General": 155
+      "General": 158
     },
     "lastError": {
-      "id": "bfdbcb60",
-      "timestamp": "2025-07-17T22:39:20.233Z",
-      "level": "info",
-      "message": "Application startup initiated",
+      "id": "fba0f8a1",
+      "timestamp": "2025-07-17T22:52:48.742Z",
+      "level": {
+        "code": "MODULE_NOT_FOUND",
+        "requireStack": [
+          "/home/runner/workspace/node_modules/iconv-lite/lib/index.js",
+          "/home/runner/workspace/node_modules/raw-body/index.js",
+          "/home/runner/workspace/node_modules/body-parser/lib/read.js",
+          "/home/runner/workspace/node_modules/body-parser/lib/types/json.js",
+          "/home/runner/workspace/node_modules/body-parser/index.js",
+          "/home/runner/workspace/node_modules/express/lib/express.js"
+        ],
+        "expose": true,
+        "statusCode": 400,
+        "status": 400
+      },
+      "message": "API Error",
       "resolved": false,
-      "count": 153
+      "count": 2
     }
   },
-  "lastSaved": "2025-07-17T22:39:20.234Z"
+  "lastSaved": "2025-07-17T22:52:48.742Z"
 }
