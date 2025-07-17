@@ -31,15 +31,15 @@ async function buildProduction() {
     
     // Build server with esbuild, excluding problematic dependencies
     console.log('🚀 Building server application...');
-    await execAsync(`npx esbuild server/production-index.ts \\
-      --bundle \\
-      --outfile=dist/index.cjs \\
-      --platform=node \\
-      --format=cjs \\
-      --target=node18 \\
-      --define:process.env.NODE_ENV='"production"' \\
-      --external:bcrypt \\
-      --external:pg-native \\
+    await execAsync(`npx esbuild server/production-index.ts \
+      --bundle \
+      --outfile=dist/server.cjs \
+      --platform=node \
+      --format=cjs \
+      --target=node18 \
+      --define:process.env.NODE_ENV='"production"' \
+      --external:bcrypt \
+      --external:pg-native \
       --external:'*.node'`);
     console.log('✅ Server build completed');
     
@@ -63,16 +63,16 @@ const path = require('path');
 global.__dirname = __dirname;
 
 // Load the compiled server
-require('./index.cjs');
+require('./server.cjs');
 `;
     
-    fs.writeFileSync('./dist/index.js', indexJs.trim());
+    fs.writeFileSync('./dist/index.cjs', indexJs.trim());
     console.log('✅ Production entry point created');
     
     // Build verification
     console.log('🔍 Verifying build...');
     const stats = {
-      server: fs.statSync('./dist/index.cjs').size,
+      server: fs.statSync('./dist/server.cjs').size,
       client: fs.existsSync('./dist/index.html') ? 'Ready' : 'Missing',
       assets: fs.readdirSync('./dist').filter(f => f.endsWith('.css') || f.endsWith('.js')).length
     };

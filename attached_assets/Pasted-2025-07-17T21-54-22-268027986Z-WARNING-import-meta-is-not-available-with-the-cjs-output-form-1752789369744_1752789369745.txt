@@ -1,0 +1,73 @@
+2025-07-17T21:54:22.268027986Z ▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+2025-07-17T21:54:22.268064767Z 
+2025-07-17T21:54:22.268068157Z     server/vite.ts:71:32:
+2025-07-17T21:54:22.268071197Z       71 │   const distPath = path.resolve(import.meta.dirname, "public");
+2025-07-17T21:54:22.268074287Z          ╵                                 ~~~~~~~~~~~
+2025-07-17T21:54:22.268076657Z 
+2025-07-17T21:54:22.268079728Z   You need to set the output format to "esm" for "import.meta" to work correctly.
+2025-07-17T21:54:22.268081957Z 
+2025-07-17T21:54:22.360330183Z ▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+2025-07-17T21:54:22.360348083Z 
+2025-07-17T21:54:22.360351623Z     vite.config.ts:8:33:
+2025-07-17T21:54:22.360354683Z       8 │ const __filename = fileURLToPath(import.meta.url);
+2025-07-17T21:54:22.360357174Z         ╵                                  ~~~~~~~~~~~
+2025-07-17T21:54:22.360359414Z 
+2025-07-17T21:54:22.360362263Z   You need to set the output format to "esm" for "import.meta" to work correctly.
+2025-07-17T21:54:22.360364654Z 
+2025-07-17T21:54:22.918187434Z 3 warnings
+2025-07-17T21:54:22.918214035Z 
+2025-07-17T21:54:22.918217845Z   dist/server.cjs  12.9mb ⚠️
+2025-07-17T21:54:22.918220005Z 
+2025-07-17T21:54:22.918222295Z ⚡ Done in 882ms
+2025-07-17T21:54:25.239889291Z ==> Uploading build...
+2025-07-17T21:54:39.038328515Z ==> Uploaded in 5.5s. Compression took 8.3s
+2025-07-17T21:54:39.071008861Z ==> Build successful 🎉
+2025-07-17T21:54:42.556635889Z ==> Deploying...
+2025-07-17T21:55:05.536952833Z ==> Running 'node dist/index.js'
+2025-07-17T21:55:07.656926252Z Database connection mode: production, SSL: true, Provider: Neon
+2025-07-17T21:55:07.659957443Z ✅ Database connection initialized
+2025-07-17T21:55:07.868486537Z node:internal/url:818
+2025-07-17T21:55:07.868508038Z       href = bindingUrl.parse(input, base, true);
+2025-07-17T21:55:07.868512968Z                         ^
+2025-07-17T21:55:07.868516858Z 
+2025-07-17T21:55:07.868521238Z TypeError: Invalid URL
+2025-07-17T21:55:07.86855483Z     at new URL (node:internal/url:818:25)
+2025-07-17T21:55:07.86856185Z     at node_modules/vite/dist/node/constants.js (/opt/render/project/src/dist/server.cjs:100500:40)
+2025-07-17T21:55:07.86856727Z     at __init (/opt/render/project/src/dist/server.cjs:9:59)
+2025-07-17T21:55:07.86857116Z     at node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js (/opt/render/project/src/dist/server.cjs:219614:5)
+2025-07-17T21:55:07.86857511Z     at __init (/opt/render/project/src/dist/server.cjs:9:59)
+2025-07-17T21:55:07.86857934Z     at node_modules/vite/dist/node/index.js (/opt/render/project/src/dist/server.cjs:236408:5)
+2025-07-17T21:55:07.86858342Z     at __init (/opt/render/project/src/dist/server.cjs:9:59)
+2025-07-17T21:55:07.8685884Z     at Object.<anonymous> (/opt/render/project/src/dist/server.cjs:289767:1)
+2025-07-17T21:55:07.868592371Z     at Module._compile (node:internal/modules/cjs/loader:1554:14)
+2025-07-17T21:55:07.868596621Z     at Object..js (node:internal/modules/cjs/loader:1706:10) {
+2025-07-17T21:55:07.868601071Z   code: 'ERR_INVALID_URL',
+2025-07-17T21:55:07.868604881Z   input: '../../package.json'
+2025-07-17T21:55:07.868608821Z }
+2025-07-17T21:55:07.915799476Z 
+2025-07-17T21:55:07.915824207Z Node.js v22.14.0
+2025-07-17T21:55:08.632868429Z ==> Exited with status 1
+2025-07-17T21:55:08.648942907Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-07-17T21:55:10.952365847Z ==> Running 'node dist/index.js'
+2025-07-17T21:55:12.961903211Z Database connection mode: production, SSL: true, Provider: Neon
+2025-07-17T21:55:12.965215601Z ✅ Database connection initialized
+2025-07-17T21:55:13.183123006Z node:internal/url:818
+2025-07-17T21:55:13.183177968Z       href = bindingUrl.parse(input, base, true);
+2025-07-17T21:55:13.183183548Z                         ^
+2025-07-17T21:55:13.183185919Z 
+2025-07-17T21:55:13.183188919Z TypeError: Invalid URL
+2025-07-17T21:55:13.183192259Z     at new URL (node:internal/url:818:25)
+2025-07-17T21:55:13.183195789Z     at node_modules/vite/dist/node/constants.js (/opt/render/project/src/dist/server.cjs:100500:40)
+2025-07-17T21:55:13.183199679Z     at __init (/opt/render/project/src/dist/server.cjs:9:59)
+2025-07-17T21:55:13.183202639Z     at node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js (/opt/render/project/src/dist/server.cjs:219614:5)
+2025-07-17T21:55:13.183205069Z     at __init (/opt/render/project/src/dist/server.cjs:9:59)
+2025-07-17T21:55:13.183208449Z     at node_modules/vite/dist/node/index.js (/opt/render/project/src/dist/server.cjs:236408:5)
+2025-07-17T21:55:13.183211089Z     at __init (/opt/render/project/src/dist/server.cjs:9:59)
+2025-07-17T21:55:13.183214439Z     at Object.<anonymous> (/opt/render/project/src/dist/server.cjs:289767:1)
+2025-07-17T21:55:13.183217039Z     at Module._compile (node:internal/modules/cjs/loader:1554:14)
+2025-07-17T21:55:13.18324681Z     at Object..js (node:internal/modules/cjs/loader:1706:10) {
+2025-07-17T21:55:13.18325036Z   code: 'ERR_INVALID_URL',
+2025-07-17T21:55:13.183253261Z   input: '../../package.json'
+2025-07-17T21:55:13.183256001Z }
+2025-07-17T21:55:13.183258231Z 
+2025-07-17T21:55:13.183260701Z Node.js v22.14.0

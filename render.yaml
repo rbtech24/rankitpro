@@ -3,8 +3,8 @@ services:
     name: rankitpro-saas
     env: node
     plan: starter
-    buildCommand: npm install --ignore-optional --no-optional && ./build.sh
-    startCommand: npm start
+    buildCommand: npm install --ignore-optional --no-optional && node render-build.cjs
+    startCommand: node dist/index.cjs
     envVars:
       - key: NODE_ENV
         value: production
