@@ -1,0 +1,50 @@
+2025-07-17T21:32:41.074158277Z node_modules/@radix-ui/react-menu/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-menu/dist/index.mjs" was ignored.
+2025-07-17T21:32:41.085019014Z node_modules/@radix-ui/react-scroll-area/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-scroll-area/dist/index.mjs" was ignored.
+2025-07-17T21:32:41.091013723Z node_modules/@radix-ui/react-popover/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-popover/dist/index.mjs" was ignored.
+2025-07-17T21:32:41.092964982Z node_modules/@radix-ui/react-radio-group/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/@radix-ui/react-radio-group/dist/index.mjs" was ignored.
+2025-07-17T21:32:45.473947279Z ✓ 2926 modules transformed.
+2025-07-17T21:32:46.169167096Z rendering chunks...
+2025-07-17T21:32:46.811571428Z computing gzip size...
+2025-07-17T21:32:46.876494386Z dist/index.html                     4.05 kB │ gzip:   1.36 kB
+2025-07-17T21:32:46.877164729Z dist/assets/index-9wLjLJuK.css    127.60 kB │ gzip:  19.65 kB
+2025-07-17T21:32:46.877244801Z dist/assets/logout-BK-W3mEp.js      1.19 kB │ gzip:   0.54 kB
+2025-07-17T21:32:46.877283271Z dist/assets/index-CPGikvRT.js   2,342.59 kB │ gzip: 560.98 kB
+2025-07-17T21:32:46.877439785Z 
+2025-07-17T21:32:46.877448255Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-07-17T21:32:46.877454395Z - Using dynamic import() to code-split the application
+2025-07-17T21:32:46.877460755Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-07-17T21:32:46.877464785Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-07-17T21:32:46.877825662Z ✓ built in 11.74s
+2025-07-17T21:32:47.565106781Z ▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+2025-07-17T21:32:47.565127291Z 
+2025-07-17T21:32:47.565145832Z     server/custom-vite.ts:10:33:
+2025-07-17T21:32:47.565149772Z       10 │ const __filename = fileURLToPath(import.meta.url);
+2025-07-17T21:32:47.565152492Z          ╵                                  ~~~~~~~~~~~
+2025-07-17T21:32:47.565155182Z 
+2025-07-17T21:32:47.565158602Z   You need to set the output format to "esm" for "import.meta" to work correctly.
+2025-07-17T21:32:47.565160812Z 
+2025-07-17T21:32:47.565163262Z ✘ [ERROR] Top-level await is currently not supported with the "cjs" output format
+2025-07-17T21:32:47.565165352Z 
+2025-07-17T21:32:47.565167952Z     server/custom-vite.ts:19:17:
+2025-07-17T21:32:47.565170662Z       19 │     const vite = await import("vite");
+2025-07-17T21:32:47.565173612Z          ╵                  ~~~~~
+2025-07-17T21:32:47.565175942Z 
+2025-07-17T21:32:47.670951207Z ▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+2025-07-17T21:32:47.671038638Z 
+2025-07-17T21:32:47.671044609Z     server/vite.ts:71:32:
+2025-07-17T21:32:47.671047819Z       71 │   const distPath = path.resolve(import.meta.dirname, "public");
+2025-07-17T21:32:47.671050759Z          ╵                                 ~~~~~~~~~~~
+2025-07-17T21:32:47.671052719Z 
+2025-07-17T21:32:47.671055639Z   You need to set the output format to "esm" for "import.meta" to work correctly.
+2025-07-17T21:32:47.671057599Z 
+2025-07-17T21:32:48.199055964Z ▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+2025-07-17T21:32:48.199096604Z 
+2025-07-17T21:32:48.199100984Z     vite.config.ts:8:33:
+2025-07-17T21:32:48.199105025Z       8 │ const __filename = fileURLToPath(import.meta.url);
+2025-07-17T21:32:48.199106734Z         ╵                                  ~~~~~~~~~~~
+2025-07-17T21:32:48.199108374Z 
+2025-07-17T21:32:48.199111065Z   You need to set the output format to "esm" for "import.meta" to work correctly.
+2025-07-17T21:32:48.199113755Z 
+2025-07-17T21:32:48.199116365Z 3 warnings and 1 error
+2025-07-17T21:32:48.246305658Z ==> Build failed 😞
+2025-07-17T21:32:48.246320978Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys

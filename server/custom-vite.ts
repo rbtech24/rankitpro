@@ -14,13 +14,15 @@ const __dirname = path.dirname(__filename);
 let createViteServer: any;
 let createLogger: any;
 
-if (process.env.NODE_ENV === "development") {
-  try {
-    const vite = await import("vite");
-    createViteServer = vite.createServer;
-    createLogger = vite.createLogger;
-  } catch (error) {
-    console.warn("Vite not available:", error);
+async function loadVite() {
+  if (process.env.NODE_ENV === "development") {
+    try {
+      const vite = await import("vite");
+      createViteServer = vite.createServer;
+      createLogger = vite.createLogger;
+    } catch (error) {
+      console.warn("Vite not available:", error);
+    }
   }
 }
 
@@ -40,6 +42,8 @@ export async function setupVite(app: Express, server: Server) {
     console.warn("setupVite called in production mode - skipping");
     return;
   }
+
+  await loadVite();
 
   if (!createViteServer) {
     console.error("Vite not available in production");

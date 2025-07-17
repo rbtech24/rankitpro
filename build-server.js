@@ -1,38 +1,37 @@
 #!/usr/bin/env node
 
-const { build } = require('esbuild');
-const path = require('path');
+import { build } from 'esbuild';
+import { readFileSync } from 'fs';
 
-async function buildServer() {
-  try {
-    const result = await build({
-      entryPoints: ['server/index.ts'],
-      bundle: true,
-      platform: 'node',
-      target: 'node18',
-      outfile: 'dist/index.js',
-      format: 'esm',
-      external: [
-        'pg-native',
-        'bcrypt',
-        '@babel/preset-typescript/package.json',
-        '@babel/preset-typescript',
-        'lightningcss',
-        '../pkg',
-        '@swc/core',
-        'esbuild'
-      ],
-      minify: false,
-      sourcemap: false,
-      logLevel: 'info'
-    });
+const packageJson = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
-    console.log('✅ Server build completed successfully');
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Server build failed:', error);
-    process.exit(1);
-  }
+const externals = [
+  'pg-native',
+  'bcrypt',
+  '@babel/preset-typescript/package.json',
+  '../pkg',
+  'lightningcss',
+  'esbuild',
+  'vite',
+  ...Object.keys(packageJson.dependencies || {}),
+  ...Object.keys(packageJson.devDependencies || {}),
+];
+
+try {
+  await build({
+    entryPoints: ['server/index.ts'],
+    bundle: true,
+    outfile: 'dist/index.js',
+    platform: 'node',
+    format: 'esm',
+    external: externals,
+    minify: false,
+    sourcemap: false,
+    target: 'node18',
+  });
+  
+  console.log('✓ Server build completed successfully');
+} catch (error) {
+  console.error('❌ Server build failed:', error);
+  process.exit(1);
 }
-
-buildServer();
