@@ -1,0 +1,50 @@
+2025-07-17T22:01:19.304054873Z ==> Build successful 🎉
+2025-07-17T22:01:22.858754841Z ==> Deploying...
+2025-07-17T22:01:44.162560832Z ==> Running 'node dist/index.js'
+2025-07-17T22:01:45.942158885Z Database connection mode: production, SSL: true, Provider: Neon
+2025-07-17T22:01:45.944436349Z ✅ Database connection initialized
+2025-07-17T22:01:46.138149468Z node:internal/url:818
+2025-07-17T22:01:46.138170948Z       href = bindingUrl.parse(input, base, true);
+2025-07-17T22:01:46.138173778Z                         ^
+2025-07-17T22:01:46.138176098Z 
+2025-07-17T22:01:46.138179708Z TypeError: Invalid URL
+2025-07-17T22:01:46.138183159Z     at new URL (node:internal/url:818:25)
+2025-07-17T22:01:46.138186469Z     at node_modules/vite/dist/node/constants.js (/opt/render/project/src/dist/server.cjs:100500:40)
+2025-07-17T22:01:46.138190989Z     at __init (/opt/render/project/src/dist/server.cjs:9:59)
+2025-07-17T22:01:46.138194049Z     at node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js (/opt/render/project/src/dist/server.cjs:219614:5)
+2025-07-17T22:01:46.138196799Z     at __init (/opt/render/project/src/dist/server.cjs:9:59)
+2025-07-17T22:01:46.138199379Z     at node_modules/vite/dist/node/index.js (/opt/render/project/src/dist/server.cjs:236408:5)
+2025-07-17T22:01:46.138201739Z     at __init (/opt/render/project/src/dist/server.cjs:9:59)
+2025-07-17T22:01:46.138204819Z     at Object.<anonymous> (/opt/render/project/src/dist/server.cjs:289767:1)
+2025-07-17T22:01:46.138207489Z     at Module._compile (node:internal/modules/cjs/loader:1554:14)
+2025-07-17T22:01:46.138210519Z     at Object..js (node:internal/modules/cjs/loader:1706:10) {
+2025-07-17T22:01:46.138213159Z   code: 'ERR_INVALID_URL',
+2025-07-17T22:01:46.138215509Z   input: '../../package.json'
+2025-07-17T22:01:46.138217799Z }
+2025-07-17T22:01:46.13821998Z 
+2025-07-17T22:01:46.13822494Z Node.js v22.14.0
+2025-07-17T22:01:47.545633393Z ==> Exited with status 1
+2025-07-17T22:01:47.560942542Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-07-17T22:01:48.873571931Z ==> Running 'node dist/index.js'
+2025-07-17T22:01:50.665770603Z Database connection mode: production, SSL: true, Provider: Neon
+2025-07-17T22:01:50.667449142Z ✅ Database connection initialized
+2025-07-17T22:01:50.859202264Z node:internal/url:818
+2025-07-17T22:01:50.859226505Z       href = bindingUrl.parse(input, base, true);
+2025-07-17T22:01:50.859230015Z                         ^
+2025-07-17T22:01:50.859232415Z 
+2025-07-17T22:01:50.859235185Z TypeError: Invalid URL
+2025-07-17T22:01:50.859238415Z     at new URL (node:internal/url:818:25)
+2025-07-17T22:01:50.859241825Z     at node_modules/vite/dist/node/constants.js (/opt/render/project/src/dist/server.cjs:100500:40)
+2025-07-17T22:01:50.859246165Z     at __init (/opt/render/project/src/dist/server.cjs:9:59)
+2025-07-17T22:01:50.859248526Z     at node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js (/opt/render/project/src/dist/server.cjs:219614:5)
+2025-07-17T22:01:50.859250775Z     at __init (/opt/render/project/src/dist/server.cjs:9:59)
+2025-07-17T22:01:50.859253486Z     at node_modules/vite/dist/node/index.js (/opt/render/project/src/dist/server.cjs:236408:5)
+2025-07-17T22:01:50.859255586Z     at __init (/opt/render/project/src/dist/server.cjs:9:59)
+2025-07-17T22:01:50.859258346Z     at Object.<anonymous> (/opt/render/project/src/dist/server.cjs:289767:1)
+2025-07-17T22:01:50.859260446Z     at Module._compile (node:internal/modules/cjs/loader:1554:14)
+2025-07-17T22:01:50.859262636Z     at Object..js (node:internal/modules/cjs/loader:1706:10) {
+2025-07-17T22:01:50.859264836Z   code: 'ERR_INVALID_URL',
+2025-07-17T22:01:50.859266936Z   input: '../../package.json'
+2025-07-17T22:01:50.859269146Z }
+2025-07-17T22:01:50.859288296Z 
+2025-07-17T22:01:50.859295776Z Node.js v22.14.0

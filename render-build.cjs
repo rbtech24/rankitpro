@@ -31,7 +31,7 @@ async function buildProduction() {
     
     // Build server with esbuild, excluding problematic dependencies
     console.log('🚀 Building server application...');
-    await execAsync(`npx esbuild server/production-index.ts \
+    await execAsync(`npx esbuild server/minimal-production.ts \
       --bundle \
       --outfile=dist/server.cjs \
       --platform=node \
