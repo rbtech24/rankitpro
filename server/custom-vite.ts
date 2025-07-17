@@ -1,8 +1,16 @@
+import { type ViteDevServer } from "vite";
 import express, { type Express } from "express";
-import fs from "fs";
+import { createServer } from "http";
 import path from "path";
+import fs from "fs";
+
+// Prevent Vite import in production
+let createViteServer: any;
+if (process.env.NODE_ENV === "development") {
+  createViteServer = require("vite").createServer;
+}
 import { fileURLToPath } from 'url';
-import { createServer as createViteServer, createLogger } from "vite";
+import { createLogger } from "vite";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
 
@@ -24,8 +32,17 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
-export async function setupVite(app: Express, server: Server) {
-  // Custom Vite configuration that handles dirname properly
+export async function setupVite(app: Express, server: any) {
+  if (process.env.NODE_ENV !== "development") {
+    console.warn("setupVite called in production mode - skipping");
+    return;
+  }
+
+  if (!createViteServer) {
+    console.error("Vite not available in production");
+    return;
+  }
+
   const viteConfig = {
     plugins: [
       // Add React plugin for proper React support
@@ -45,13 +62,6 @@ export async function setupVite(app: Express, server: Server) {
     },
 
   };
-
-  const serverOptions = {
-    middlewareMode: true,
-    hmr: { server },
-    host: "0.0.0.0",
-  };
-
   const vite = await createViteServer({
     ...viteConfig,
     configFile: false,
@@ -62,10 +72,7 @@ export async function setupVite(app: Express, server: Server) {
         process.exit(1);
       },
     },
-    server: {
-      ...serverOptions,
-      allowedHosts: true,
-    },
+    server: { middlewareMode: true },
     appType: "custom",
   });
 
