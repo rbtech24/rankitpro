@@ -19,6 +19,8 @@ const productionExternals = [
   
   // Problematic bundling dependencies
   '@babel/preset-typescript/package.json',
+  '@babel/preset-typescript',
+  '@babel/core',
   '../pkg',
   'lightningcss',
   'lightningcss-linux-x64-gnu',
@@ -26,6 +28,8 @@ const productionExternals = [
   'fsevents',
   'node-gyp',
   'node-addon-api',
+  '@swc/core',
+  '*.node',
   
   // TypeScript and development tools
   'typescript',
