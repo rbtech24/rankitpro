@@ -989,13 +989,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const data = insertUserSchema.extend({
+      const registrationSchema = z.object({
+        email: z.string().email(),
+        username: z.string().min(1),
+        password: z.string().min(6),
         confirmPassword: z.string(),
+        role: z.enum(["super_admin", "company_admin", "technician", "sales_staff"]).default("company_admin"),
         companyName: z.string().optional(),
+        businessType: z.enum(["service_business", "non_service_business"]).optional(),
       }).refine(data => data.password === data.confirmPassword, {
         message: "Passwords don't match",
         path: ["confirmPassword"],
-      }).parse(req.body);
+      });
+      
+      const data = registrationSchema.parse(req.body);
       
       // Only allow company_admin registration, not technician
       if (data.role === "technician") {
@@ -1021,6 +1028,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           name: data.companyName,
           plan: "starter",
           usageLimit: 50,
+          businessType: data.businessType || "service_business",
         });
         companyId = company.id;
       }
