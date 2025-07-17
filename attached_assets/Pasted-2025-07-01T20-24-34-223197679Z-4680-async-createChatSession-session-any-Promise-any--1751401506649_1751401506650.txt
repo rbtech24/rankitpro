@@ -1,0 +1,50 @@
+2025-07-01T20:24:34.223197679Z       4680 │   async createChatSession(session: any): Promise<any> {
+2025-07-01T20:24:34.223200469Z            ╵         ~~~~~~~~~~~~~~~~~
+2025-07-01T20:24:34.223202889Z 
+2025-07-01T20:24:34.223205799Z   The original member "createChatSession" is here:
+2025-07-01T20:24:34.223208209Z 
+2025-07-01T20:24:34.223210769Z     server/storage.ts:4389:8:
+2025-07-01T20:24:34.22321346Z       4389 │   async createChatSession(session: InsertChatSession): Promise<C...
+2025-07-01T20:24:34.22321616Z            ╵         ~~~~~~~~~~~~~~~~~
+2025-07-01T20:24:34.223218609Z 
+2025-07-01T20:24:34.2232212Z ▲ [WARNING] Duplicate member "createSupportAgent" in class body [duplicate-class-member]
+2025-07-01T20:24:34.22322392Z 
+2025-07-01T20:24:34.2232265Z     server/storage.ts:4695:8:
+2025-07-01T20:24:34.22323804Z       4695 │   async createSupportAgent(agent: any): Promise<any> {
+2025-07-01T20:24:34.22324111Z            ╵         ~~~~~~~~~~~~~~~~~~
+2025-07-01T20:24:34.22324343Z 
+2025-07-01T20:24:34.22324612Z   The original member "createSupportAgent" is here:
+2025-07-01T20:24:34.22324851Z 
+2025-07-01T20:24:34.22325133Z     server/storage.ts:4252:8:
+2025-07-01T20:24:34.22325401Z       4252 │   async createSupportAgent(agent: InsertSupportAgent): Promise<S...
+2025-07-01T20:24:34.22325669Z            ╵         ~~~~~~~~~~~~~~~~~~
+2025-07-01T20:24:34.22325907Z 
+2025-07-01T20:24:34.746374231Z ✘ [ERROR] Could not resolve "@babel/preset-typescript/package.json"
+2025-07-01T20:24:34.746394132Z 
+2025-07-01T20:24:34.746397282Z     node_modules/@babel/core/lib/config/files/module-types.js:151:40:
+2025-07-01T20:24:34.746401012Z       151 │ ...t packageJson = require("@babel/preset-typescript/package.json");
+2025-07-01T20:24:34.746403662Z           ╵                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2025-07-01T20:24:34.746406092Z 
+2025-07-01T20:24:34.746411692Z   You can mark the path "@babel/preset-typescript/package.json" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle. You can also surround this "require" call with a try/catch block to handle this failure at run-time instead of bundle-time.
+2025-07-01T20:24:34.746414142Z 
+2025-07-01T20:24:34.749624682Z ✘ [ERROR] Could not resolve "../pkg"
+2025-07-01T20:24:34.749639133Z 
+2025-07-01T20:24:34.749642862Z     node_modules/lightningcss/node/index.js:17:27:
+2025-07-01T20:24:34.749645602Z       17 │   module.exports = require(`../pkg`);
+2025-07-01T20:24:34.749648333Z          ╵                            ~~~~~~~~
+2025-07-01T20:24:34.749650793Z 
+2025-07-01T20:24:35.049032625Z ▲ [WARNING] Duplicate member "createChatMessage" in class body [duplicate-class-member]
+2025-07-01T20:24:35.049058115Z 
+2025-07-01T20:24:35.049061415Z     server/storage.ts:4719:8:
+2025-07-01T20:24:35.049064355Z       4719 │   async createChatMessage(message: any): Promise<any> {
+2025-07-01T20:24:35.049082105Z            ╵         ~~~~~~~~~~~~~~~~~
+2025-07-01T20:24:35.049084616Z 
+2025-07-01T20:24:35.049087566Z   The original member "createChatMessage" is here:
+2025-07-01T20:24:35.049089966Z 
+2025-07-01T20:24:35.049092406Z     server/storage.ts:4482:8:
+2025-07-01T20:24:35.049094936Z       4482 │   async createChatMessage(message: InsertChatMessage): Promise<C...
+2025-07-01T20:24:35.049097376Z            ╵         ~~~~~~~~~~~~~~~~~
+2025-07-01T20:24:35.049099696Z 
+2025-07-01T20:24:35.049102336Z 4 of 7 warnings and all 2 errors shown (disable the message limit with --log-limit=0)
+2025-07-01T20:24:35.102785475Z ==> Build failed 😞
+2025-07-01T20:24:35.102806046Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys

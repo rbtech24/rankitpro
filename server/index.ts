@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { serveStatic, log } from "./custom-vite";
+import { setupVite, serveStatic, log } from "./custom-vite";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import emailService from "./services/resend-email-service";
@@ -315,14 +315,8 @@ async function createSuperAdminIfNotExists() {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "development") {
-    try {
-      const { setupVite } = await import("./custom-vite");
-      await setupVite(app, server);
-    } catch (error) {
-      console.warn("Vite setup failed, falling back to static serving:", error);
-      serveStatic(app);
-    }
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
   } else {
     serveStatic(app);
     

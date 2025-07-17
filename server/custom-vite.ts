@@ -1,30 +1,17 @@
-
 import express, { type Express } from "express";
-import path from "path";
 import fs from "fs";
+import path from "path";
 import { fileURLToPath } from 'url';
+import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
 
-// Get __dirname equivalent for ESM/CJS compatibility
+
+// Get __dirname equivalent for ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Only import Vite in development
-let createViteServer: any;
-let createLogger: any;
-
-async function loadVite() {
-  if (process.env.NODE_ENV === "development") {
-    try {
-      const vite = await import("vite");
-      createViteServer = vite.createServer;
-      createLogger = vite.createLogger;
-    } catch (error) {
-      console.warn("Vite not available:", error);
-    }
-  }
-}
+const viteLogger = createLogger();
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -38,20 +25,7 @@ export function log(message: string, source = "express") {
 }
 
 export async function setupVite(app: Express, server: Server) {
-  if (process.env.NODE_ENV !== "development") {
-    console.warn("setupVite called in production mode - skipping");
-    return;
-  }
-
-  await loadVite();
-
-  if (!createViteServer) {
-    console.error("Vite not available in production");
-    return;
-  }
-
-  const viteLogger = createLogger();
-
+  // Custom Vite configuration that handles dirname properly
   const viteConfig = {
     plugins: [
       // Add React plugin for proper React support
@@ -66,9 +40,16 @@ export async function setupVite(app: Express, server: Server) {
     },
     root: path.resolve(__dirname, "..", "client"),
     build: {
-      outDir: path.resolve(__dirname, "..", "dist", "public"),
+      outDir: path.resolve(__dirname, "..", "dist/public"),
       emptyOutDir: true,
     },
+
+  };
+
+  const serverOptions = {
+    middlewareMode: true,
+    hmr: { server },
+    host: "0.0.0.0",
   };
 
   const vite = await createViteServer({
@@ -81,7 +62,10 @@ export async function setupVite(app: Express, server: Server) {
         process.exit(1);
       },
     },
-    server: { middlewareMode: true },
+    server: {
+      ...serverOptions,
+      allowedHosts: true,
+    },
     appType: "custom",
   });
 
@@ -108,8 +92,7 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // Use path.resolve with __dirname instead of import.meta.dirname for CJS compatibility
-  const distPath = path.resolve(__dirname, "..", "dist");
+  const distPath = path.resolve(__dirname, "..", "dist", "public");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(

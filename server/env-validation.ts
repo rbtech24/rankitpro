@@ -41,10 +41,13 @@ export function validateEnvironment(): EnvConfig {
     warnings.push("RESEND_API_KEY not set - email notifications will be disabled");
   }
 
-  const hasStripeKeys = process.env.STRIPE_SECRET_KEY && process.env.VITE_STRIPE_PUBLIC_KEY;
+  const hasStripeKeys = process.env.STRIPE_SECRET_KEY && 
+                       process.env.STRIPE_STARTER_PRICE_ID && 
+                       process.env.STRIPE_PRO_PRICE_ID && 
+                       process.env.STRIPE_AGENCY_PRICE_ID;
   
   if (!hasStripeKeys) {
-    warnings.push("Stripe keys not configured - subscription billing will be disabled");
+    warnings.push("Stripe configuration incomplete - subscription billing will be disabled");
   }
 
   const hasAIKeys = process.env.OPENAI_API_KEY || 
@@ -92,7 +95,10 @@ export function validateEnvironment(): EnvConfig {
 export function getFeatureFlags() {
   return {
     emailEnabled: !!process.env.RESEND_API_KEY,
-    paymentsEnabled: !!(process.env.STRIPE_SECRET_KEY && process.env.VITE_STRIPE_PUBLIC_KEY),
+    paymentsEnabled: !!(process.env.STRIPE_SECRET_KEY && 
+                       process.env.STRIPE_STARTER_PRICE_ID && 
+                       process.env.STRIPE_PRO_PRICE_ID && 
+                       process.env.STRIPE_AGENCY_PRICE_ID),
     aiEnabled: !!(process.env.OPENAI_API_KEY || 
                  process.env.ANTHROPIC_API_KEY || 
                  process.env.XAI_API_KEY),

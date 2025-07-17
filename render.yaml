@@ -1,40 +1,25 @@
 services:
   - type: web
-    name: rank-it-pro-saas
-    runtime: node
+    name: rankitpro-saas
+    env: node
     plan: starter
-    region: oregon
-    buildCommand: |
-      # Install dependencies including previously missing ones
-      echo "📦 Installing dependencies..."
-      npm install --ignore-optional --no-optional
-      
-      # Install external dependencies that caused bundling failures
-      echo "🔧 Installing external dependencies..."
-      npm install @babel/preset-typescript lightningcss @rollup/rollup-linux-x64-gnu --save-dev --ignore-optional
-      
-      # Run production build with ESBuild bundling fixes
-      echo "🚀 Running production build with bundling fixes..."
-      bash production-build.sh
-      
-      echo "✅ Production build completed successfully"
-    startCommand: node dist/index.js
+    buildCommand: npm install --ignore-optional --no-optional && ./build.sh
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: NODE_OPTIONS
-        value: --max-old-space-size=2048
-      - key: PORT
-        value: 10000
       - key: DATABASE_URL
         fromDatabase:
-          name: rank-it-pro-db
+          name: rankitpro-db
           property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: PORT
+        value: 10000
     healthCheckPath: /api/health
-    
+
 databases:
-  - name: rank-it-pro-db
-    databaseName: rank_it_pro
-    user: rank_it_pro_user
-    region: oregon
+  - name: rankitpro-db
+    databaseName: rankitpro
+    user: rankitpro_user
     plan: starter

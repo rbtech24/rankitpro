@@ -1,0 +1,50 @@
+2025-07-01T12:43:48.850001557Z ==> Cloning from https://github.com/rbtech24/rankitpro
+2025-07-01T12:43:49.85439107Z ==> Checking out commit 059872cb7ab9de446f78766c5b905dfd3576bf89 in branch main
+2025-07-01T12:43:51.915647697Z ==> Downloading cache...
+2025-07-01T12:44:07.861332291Z ==> Transferred 249MB in 9s. Extraction took 6s.
+2025-07-01T12:44:12.306364771Z ==> Using Node.js version 22.14.0 (default)
+2025-07-01T12:44:12.334907366Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-07-01T12:44:12.498771977Z ==> Using Bun version 1.1.0 (default)
+2025-07-01T12:44:12.498798078Z ==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+2025-07-01T12:44:12.575234384Z ==> Running build command 'npm install; npm run build'...
+2025-07-01T12:44:15.249330973Z 
+2025-07-01T12:44:15.249365595Z up to date, audited 752 packages in 2s
+2025-07-01T12:44:15.252305251Z 
+2025-07-01T12:44:15.252332103Z 105 packages are looking for funding
+2025-07-01T12:44:15.252335763Z   run `npm fund` for details
+2025-07-01T12:44:15.296635754Z 
+2025-07-01T12:44:15.296667616Z 10 vulnerabilities (1 low, 9 moderate)
+2025-07-01T12:44:15.296670506Z 
+2025-07-01T12:44:15.296673296Z To address issues that do not require attention, run:
+2025-07-01T12:44:15.296675556Z   npm audit fix
+2025-07-01T12:44:15.296677737Z 
+2025-07-01T12:44:15.296679886Z To address all issues (including breaking changes), run:
+2025-07-01T12:44:15.296682787Z   npm audit fix --force
+2025-07-01T12:44:15.296684707Z 
+2025-07-01T12:44:15.296688037Z Run `npm audit` for details.
+2025-07-01T12:44:15.464992909Z 
+2025-07-01T12:44:15.465018201Z > workspace@1.0.0 build
+2025-07-01T12:44:15.465022431Z > npm run build:client && npm run build:server
+2025-07-01T12:44:15.465024651Z 
+2025-07-01T12:44:15.578043713Z 
+2025-07-01T12:44:15.578071265Z > workspace@1.0.0 build:client
+2025-07-01T12:44:15.578075675Z > vite build client
+2025-07-01T12:44:15.578078685Z 
+2025-07-01T12:44:15.856528646Z vite v5.4.14 building for production...
+2025-07-01T12:44:15.928263517Z transforming...
+2025-07-01T12:44:16.1676969Z ✓ 5 modules transformed.
+2025-07-01T12:44:16.172147743Z x Build failed in 287ms
+2025-07-01T12:44:16.172251828Z error during build:
+2025-07-01T12:44:16.172258588Z [vite]: Rollup failed to resolve import "@/components/ui/toaster" from "/opt/render/project/src/client/src/App.tsx".
+2025-07-01T12:44:16.172262888Z This is most likely unintended because it can break your application at runtime.
+2025-07-01T12:44:16.172266158Z If you do want to externalize this module explicitly add it to
+2025-07-01T12:44:16.172269769Z `build.rollupOptions.external`
+2025-07-01T12:44:16.172272889Z     at viteWarn (file:///opt/render/project/src/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:65747:17)
+2025-07-01T12:44:16.172275509Z     at onRollupWarning (file:///opt/render/project/src/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:65779:5)
+2025-07-01T12:44:16.172278089Z     at onwarn (file:///opt/render/project/src/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:65442:7)
+2025-07-01T12:44:16.172281569Z     at file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:19452:13
+2025-07-01T12:44:16.172284249Z     at Object.logger [as onLog] (file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:21178:9)
+2025-07-01T12:44:16.172287039Z     at ModuleLoader.handleInvalidResolvedId (file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:20067:26)
+2025-07-01T12:44:16.17228955Z     at file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:20025:26
+2025-07-01T12:44:16.199238195Z ==> Build failed 😞
+2025-07-01T12:44:16.199256426Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys

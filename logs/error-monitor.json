@@ -4,11 +4,11 @@
       "bfdbcb60",
       {
         "id": "bfdbcb60",
-        "timestamp": "2025-07-17T22:51:07.975Z",
+        "timestamp": "2025-07-17T18:59:43.328Z",
         "level": "info",
         "message": "Application startup initiated",
         "resolved": false,
-        "count": 154
+        "count": 127
       }
     ],
     [
@@ -29,54 +29,10 @@
         "resolved": false,
         "count": 1
       }
-    ],
-    [
-      "5c76407f",
-      {
-        "id": "5c76407f",
-        "timestamp": "2025-07-17T22:12:10.875Z",
-        "level": "warn",
-        "message": "ENOENT: no such file or directory, stat '/home/runner/workspace/dist/index.html'",
-        "stack": "Error: ENOENT: no such file or directory, stat '/home/runner/workspace/dist/index.html'",
-        "url": "/",
-        "method": "GET",
-        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
-        "ip": "172.31.94.2",
-        "context": {
-          "statusCode": 404,
-          "body": {}
-        },
-        "resolved": false,
-        "count": 1
-      }
-    ],
-    [
-      "fba0f8a1",
-      {
-        "id": "fba0f8a1",
-        "timestamp": "2025-07-17T22:52:48.742Z",
-        "level": {
-          "code": "MODULE_NOT_FOUND",
-          "requireStack": [
-            "/home/runner/workspace/node_modules/iconv-lite/lib/index.js",
-            "/home/runner/workspace/node_modules/raw-body/index.js",
-            "/home/runner/workspace/node_modules/body-parser/lib/read.js",
-            "/home/runner/workspace/node_modules/body-parser/lib/types/json.js",
-            "/home/runner/workspace/node_modules/body-parser/index.js",
-            "/home/runner/workspace/node_modules/express/lib/express.js"
-          ],
-          "expose": true,
-          "statusCode": 400,
-          "status": 400
-        },
-        "message": "API Error",
-        "resolved": false,
-        "count": 2
-      }
     ]
   ],
   "stats": {
-    "totalErrors": 158,
+    "totalErrors": 128,
     "criticalErrors": 0,
     "errorsByHour": {
       "0": 4,
@@ -95,39 +51,26 @@
       "16": 2,
       "17": 5,
       "18": 14,
-      "19": 17,
-      "20": 13,
-      "21": 22,
-      "22": 20,
+      "19": 13,
+      "20": 6,
+      "21": 12,
+      "22": 11,
       "23": 2
     },
     "errorsByEndpoint": {
-      "/": 2
+      "/": 1
     },
     "errorsByType": {
-      "General": 158
+      "General": 128
     },
     "lastError": {
-      "id": "fba0f8a1",
-      "timestamp": "2025-07-17T22:52:48.742Z",
-      "level": {
-        "code": "MODULE_NOT_FOUND",
-        "requireStack": [
-          "/home/runner/workspace/node_modules/iconv-lite/lib/index.js",
-          "/home/runner/workspace/node_modules/raw-body/index.js",
-          "/home/runner/workspace/node_modules/body-parser/lib/read.js",
-          "/home/runner/workspace/node_modules/body-parser/lib/types/json.js",
-          "/home/runner/workspace/node_modules/body-parser/index.js",
-          "/home/runner/workspace/node_modules/express/lib/express.js"
-        ],
-        "expose": true,
-        "statusCode": 400,
-        "status": 400
-      },
-      "message": "API Error",
+      "id": "bfdbcb60",
+      "timestamp": "2025-07-17T18:59:43.328Z",
+      "level": "info",
+      "message": "Application startup initiated",
       "resolved": false,
-      "count": 2
+      "count": 127
     }
   },
-  "lastSaved": "2025-07-17T22:52:48.742Z"
+  "lastSaved": "2025-07-17T18:59:43.328Z"
 }

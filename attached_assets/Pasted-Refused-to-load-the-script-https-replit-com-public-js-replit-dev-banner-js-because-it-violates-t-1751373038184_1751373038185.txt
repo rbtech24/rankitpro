@@ -1,0 +1,32 @@
+Refused to load the script 'https://replit.com/public/js/replit-dev-banner.js' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval'". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+Understand this error
+index-4SUaTiza.js:943 Stripe public key not configured or invalid
+O4e @ index-4SUaTiza.js:943Understand this warning
+index-4SUaTiza.js:943 Refused to load the script 'https://js.stripe.com/basil/stripe.js' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval'". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+rO @ index-4SUaTiza.js:943Understand this error
+index-4SUaTiza.js:703 getCurrentUser - validating with server
+index-4SUaTiza.js:943 Error: Failed to load Stripe.js
+    at HTMLScriptElement.<anonymous> (index-4SUaTiza.js:943:8249)
+(anonymous) @ index-4SUaTiza.js:943Understand this warning
+index-4SUaTiza.js:703 getCurrentUser - server validation successful: Object
+index-4SUaTiza.js:747 Dashboard: Fetching testimonials for company: 16
+index-4SUaTiza.js:703 getCurrentUser - validating with server
+index-4SUaTiza.js:703 getCurrentUser - server validation successful: Object
+index-4SUaTiza.js:747 Dashboard: Received testimonials: Array(8)
+api/chat/agent/status:1 
+            
+            
+           Failed to load resource: the server responded with a status of 403 ()Understand this error
+index-4SUaTiza.js:703 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+b @ index-4SUaTiza.js:703Understand this error
+index-4SUaTiza.js:703 WebSocket error: Event
+v.onerror @ index-4SUaTiza.js:703Understand this error
+index-4SUaTiza.js:703 WebSocket connection closed
+index-4SUaTiza.js:703 Attempting to reconnect WebSocket...
+index-4SUaTiza.js:703 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ index-4SUaTiza.js:703Understand this error
+index-4SUaTiza.js:703 Attempting to reconnect WebSocket...
+index-4SUaTiza.js:703 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ index-4SUaTiza.js:703Understand this error
+2index-4SUaTiza.js:703 Attempting to reconnect WebSocket...
