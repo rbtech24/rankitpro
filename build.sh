@@ -1,23 +1,18 @@
 #!/bin/bash
-
-# Production build script for Render.com deployment
 set -e
 
-echo "🔨 Starting production build with custom configuration..."
+echo "🔨 Starting production build..."
 
-# Create dist directory if it doesn't exist
+# Ensure dist directory exists
 mkdir -p dist
 
-# Build client first using Vite
-echo "📦 Building client application..."
-npx vite build client --outDir dist
+# Copy pre-built client files
+echo "📦 Copying client application..."
+cp -r client/dist/* dist/
 
-# Build server with comprehensive external dependencies to avoid babel/lightningcss issues
-echo "🚀 Building server application with enhanced exclusions..."
-npx esbuild server/index.ts \
-  --platform=node \
-  --outfile=dist/index.js \
-  --bundle \
+# Build server with external dependencies
+echo "🚀 Building server application..."
+npx esbuild server/index.ts --platform=node --outfile=dist/server.js --bundle \
   --external:pg-native \
   --external:bcrypt \
   --external:@babel/preset-typescript/package.json \
@@ -31,12 +26,20 @@ npx esbuild server/index.ts \
   --external:*.node \
   --format=esm \
   --target=node18 \
-  --log-level=info \
   --minify=false
 
+# Create production wrapper
+echo "import('./server.js').catch(err => { console.error('Failed to start server:', err); process.exit(1); });" > dist/index.js
+
+# Verify build outputs
+if [ ! -f "dist/index.html" ]; then
+  echo "❌ Client build verification failed: index.html not found"
+  exit 1
+fi
+
+if [ ! -f "dist/server.js" ]; then
+  echo "❌ Server build verification failed: server.js not found"
+  exit 1
+fi
+
 echo "✅ Production build completed successfully!"
-echo "📊 Client assets: $(find dist -name "*.js" -o -name "*.css" | wc -l) files"
-echo "🖥️  Server bundle: $(ls -lh dist/index.js)"
-echo ""
-echo "📁 Final build structure:"
-ls -la dist/
