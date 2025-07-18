@@ -12,9 +12,9 @@ mkdir -p dist
 echo "🔧 Installing platform-specific dependencies..."
 npm install @rollup/rollup-linux-x64-gnu --save-dev || true
 
-# Build client first using Vite
+# Build client first using Vite with explicit config and environment
 echo "📦 Building client application..."
-npx vite build client
+NODE_ENV=production npx vite build client --config vite.config.production.ts --mode production
 
 # Build server with comprehensive external dependencies to avoid babel/lightningcss issues
 echo "🚀 Building server application with enhanced exclusions..."
