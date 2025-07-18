@@ -3,7 +3,7 @@ services:
     name: rankitpro
     env: node
     plan: starter
-    buildCommand: rm -rf node_modules && npm install && node build.js
+    buildCommand: rm -rf node_modules && npm install --force && node deploy-working.js
     startCommand: node server.js
     envVars:
       - key: NODE_ENV
