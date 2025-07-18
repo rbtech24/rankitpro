@@ -13,7 +13,7 @@ npx vite build
 
 # Build server with proper externals to avoid ES module issues
 echo "⚙️  Building server..."
-npx esbuild server/production.ts \
+npx esbuild server/production-clean.ts \
   --platform=node \
   --outfile=dist/index.js \
   --bundle \
