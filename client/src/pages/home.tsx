@@ -72,10 +72,7 @@ const Home = () => {
       <section className="relative py-20 px-6 text-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
         <div className="container mx-auto relative z-10">
-          <Badge className="mb-6 bg-blue-100 text-blue-800 border-blue-200">
-            <Zap className="w-3 h-3 mr-1" />
-            Trusted by 500+ Growing Businesses
-          </Badge>
+
           
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
             Transform Your Business with AI-Powered Growth
