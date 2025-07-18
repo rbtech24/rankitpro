@@ -24,7 +24,7 @@ try {
   console.log('   - Converting ESM to CommonJS');
   console.log('   - Externalizing all Node.js built-in modules');
   
-  const serverBuildCmd = `npx esbuild server/production-server.ts --platform=node --outfile=dist/index.js --bundle \
+  const serverBuildCmd = `npx esbuild server/production-isolated.ts --platform=node --outfile=dist/index.js --bundle \
     --external:pg-native \
     --external:bcrypt \
     --external:@babel/core \
@@ -60,6 +60,8 @@ try {
     --external:vite \
     --external:@vitejs/plugin-react \
     --external:@replit/vite-plugin-runtime-error-modal \
+    --external:vite.config.ts \
+    --ignore-annotations \
     --format=cjs \
     --target=node18`;
   

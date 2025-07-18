@@ -1,0 +1,123 @@
+"build:server": "esbuild server/index.ts --platform=node --outfile=dist/index.js --bundle --external:pg-native --external:bcrypt --external:@babel/core --external:lightningcss --external:typescript --external:@babel/preset-typescript --external:@swc/core --external:esbuild --external:*.node --format=esm --target=node18"
+"build:server": "esbuild server/index.ts --platform=node --outfile=dist/index.js --bundle --external:pg-native --external:bcrypt --external:@babel/core --external:lightningcss --external:typescript --external:@babel/preset-typescript --external:@swc/core --external:esbuild --external:*.node --format=cjs --target=node18"
+{
+  "name": "workspace-production",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+--external:pg-native --external:bcrypt --external:@babel/core --external:lightningcss --external:typescript --external:@babel/preset-typescript --external:@swc/core --external:esbuild --external:*.node
+--external:pg-native --external:bcrypt --external:@babel/core --external:lightningcss --external:typescript --external:@babel/preset-typescript --external:@swc/core --external:esbuild --external:*.node --external:path --external:fs --external:http --external:https --external:url --external:stream --external:util --external:crypto --external:os --external:querystring --external:zlib --external:buffer --external:events
+Production
+Status
+Rod deployed 24 days ago
+Visibility
+Public
+Domain
+https://check-in-pro-rodbartrufftech.replit.app
+Type
+Autoscale
+(4 vCPU / 8 GiB RAM / 3 Max)
+See all usage
+9518cac8
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+7ba2a4f6
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+75171fc0
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+64e5e2e3
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+b858c42c
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+51480c60
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+c49d7a7a
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+9389a0d6
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+806eec33
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+bba65e5a
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+1531b611
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+13ec136b
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+9beeba6d
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+bc274cce
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+886077d6
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
+cb990955
+RB
+
+rodbartrufftech
+Rod
+deployed about 1 month ago
