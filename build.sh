@@ -8,6 +8,10 @@ echo "🔨 Starting production build with custom configuration..."
 # Create dist directory if it doesn't exist
 mkdir -p dist
 
+# Install platform-specific dependencies for Render.com
+echo "🔧 Installing platform-specific dependencies..."
+npm install @rollup/rollup-linux-x64-gnu --save-dev || true
+
 # Build client first using Vite
 echo "📦 Building client application..."
 npx vite build client
