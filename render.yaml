@@ -3,8 +3,8 @@ services:
     name: rankitpro
     env: node
     plan: starter
-    buildCommand: rm -rf node_modules && npm install && node emergency-fix.js
-    startCommand: cd dist && npx http-server -p $PORT
+    buildCommand: rm -rf node_modules && npm install && node build-render-final.js
+    startCommand: cd dist && node server.js
     envVars:
       - key: NODE_ENV
         value: production
