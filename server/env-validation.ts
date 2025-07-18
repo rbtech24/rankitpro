@@ -60,19 +60,19 @@ export function validateEnvironment(): EnvConfig {
 
   // Log validation results
   if (errors.length > 0) {
-    console.error("\n🚨 ENVIRONMENT CONFIGURATION ERRORS:");
-    errors.forEach(error => console.error(`  ❌ ${error}`));
-    console.error("\nApplication cannot start. Please fix the above errors.\n");
+    logger.error('\n🚨 ENVIRONMENT CONFIGURATION ERRORS:');
+    errors.forEach(error => logger.error("Configuration error", { error }));
+    logger.error('\nApplication cannot start. Please fix the above errors.\n');
     throw new Error("Environment validation failed");
   }
 
   if (warnings.length > 0) {
-    console.warn("\n⚠️  ENVIRONMENT CONFIGURATION WARNINGS:");
-    warnings.forEach(warning => console.warn(`  ⚠️  ${warning}`));
-    console.warn("\nApplication will start with limited functionality.\n");
+    logger.warn('\n⚠️  ENVIRONMENT CONFIGURATION WARNINGS:');
+    warnings.forEach(warning => logger.warn("Configuration warning", { warning }));
+    logger.warn('\nApplication will start with limited functionality.\n');
   }
 
-  console.log("✅ Environment validation completed");
+  logger.info('✅ Environment validation completed');
 
   return {
     DATABASE_URL: process.env.DATABASE_URL!,

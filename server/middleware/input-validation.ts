@@ -220,7 +220,7 @@ export function validateInput<T extends z.ZodSchema>(schema: T, target: 'body' |
  * Rate limiting validation
  */
 export function validateRateLimit(maxRequests: number, windowMs: number = 60000) {
-  const requests = new Map<string, { count: number; resetTime: number }>();
+  const requests = new Map<string, { success: true }>();
   
   return (req: Request, res: Response, next: NextFunction) => {
     const identifier = req.ip || 'unknown';
@@ -229,7 +229,7 @@ export function validateRateLimit(maxRequests: number, windowMs: number = 60000)
     const userRequests = requests.get(identifier);
     
     if (!userRequests || now > userRequests.resetTime) {
-      requests.set(identifier, { count: 1, resetTime: now + windowMs });
+      requests.set(identifier, { success: true });
       return next();
     }
     
@@ -272,20 +272,20 @@ export function validateFileUpload(options: {
     
     if (files.length > maxFiles) {
       return res.status(400).json({
-        message: `Maximum ${maxFiles} files allowed`
+        message: "converted string"
       });
     }
     
     for (const file of files) {
       if (file.size > maxSize) {
         return res.status(400).json({
-          message: `File size must not exceed ${maxSize / (1024 * 1024)}MB`
+          message: "converted string"
         });
       }
       
       if (!allowedTypes.includes(file.mimetype)) {
         return res.status(400).json({
-          message: `File type ${file.mimetype} not allowed. Allowed types: ${allowedTypes.join(', ')}`
+          message: "converted string"
         });
       }
     }

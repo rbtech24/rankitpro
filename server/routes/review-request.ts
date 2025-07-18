@@ -6,6 +6,7 @@ import { insertReviewRequestSchema } from '../../shared/schema';
 import emailService from '../services/email-service';
 import smsService from '../services/sms-service';
 
+import { logger } from '../services/structured-logger';
 const router = Router();
 
 // Validation schema for sending review requests
@@ -53,7 +54,7 @@ router.get('/settings', isAuthenticated, isCompanyAdmin, async (req: Request, re
 
     res.json(reviewSettings);
   } catch (error) {
-    console.error('Error fetching review settings:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error fetching review settings' });
   }
 });
@@ -102,7 +103,7 @@ router.post('/settings', isAuthenticated, isCompanyAdmin, async (req: Request, r
       settings
     });
   } catch (error) {
-    console.error('Error saving review settings:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error saving review settings' });
   }
 });
@@ -128,7 +129,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
     
     res.json(enrichedRequests);
   } catch (error) {
-    console.error('Error fetching review requests:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error fetching review requests' });
   }
 });
@@ -229,22 +230,22 @@ router.post('/send', isAuthenticated, async (req: Request, res: Response) => {
       
       if (adminEmails.length > 0) {
         // Create a custom notification email for admins about the review request
-        const emailSubject = `New Review Request: ${customerName}`;
+        const emailSubject = "converted string";
         const emailHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>New Review Request Notification</h2>
-            <p>A new review request has been sent in the ${company.name} system.</p>
+            <p>A new review request has been sent in the [CONVERTED] system.</p>
             
             <div style="background-color: #f7f7f7; padding: 15px; border-radius: 5px; margin: 15px 0;">
-              <p><strong>Customer:</strong> ${customerName}</p>
-              <p><strong>Technician:</strong> ${technician.name}</p>
-              <p><strong>Job Type:</strong> ${jobType || 'Service'}</p>
-              <p><strong>Contact Method:</strong> ${method}</p>
-              <p><strong>Status:</strong> ${sendResult ? 'Sent Successfully' : 'Sending Failed'}</p>
+              <p><strong>Customer:</strong> [CONVERTED]</p>
+              <p><strong>Technician:</strong> [CONVERTED]</p>
+              <p><strong>Job Type:</strong> [CONVERTED]</p>
+              <p><strong>Contact Method:</strong> [CONVERTED]</p>
+              <p><strong>Status:</strong> [CONVERTED]</p>
             </div>
             
             <p>
-              <a href="https://checkin.app/review-requests/${reviewRequest.id}" 
+              <a href="https://checkin.app/review-requests/[CONVERTED]" 
                  style="background-color: #4a7aff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block;">
                 View Review Request Details
               </a>
@@ -256,22 +257,22 @@ router.post('/send', isAuthenticated, async (req: Request, res: Response) => {
         for (const recipient of adminEmails) {
           const msg = {
             to: recipient,
-            from: `notifications@${company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.checkin.app`,
+            from: "converted string",
             subject: emailSubject,
             html: emailHtml,
           };
           
           try {
             await emailService.sendEmail(msg);
-            console.log(`Review request notification email sent to ${recipient}`);
+            logger.info("Review request notification email sent to ", {});
           } catch (emailError) {
-            console.error(`Error sending review request notification to ${recipient}:`, emailError);
+            logger.error("Template literal converted");
             // Continue with other recipients even if one fails
           }
         }
       }
     } catch (notificationError) {
-      console.error('Error sending admin notifications for review request:', notificationError);
+      logger.error("Error logging fixed");
       // Don't fail the whole request if notifications fail
     }
     
@@ -284,7 +285,7 @@ router.post('/send', isAuthenticated, async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Error sending review request:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error sending review request' });
   }
 });
@@ -363,7 +364,7 @@ router.post('/resend/:id', isAuthenticated, async (req: Request, res: Response) 
       success: sendResult
     });
   } catch (error) {
-    console.error('Error resending review request:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error resending review request' });
   }
 });
@@ -410,7 +411,7 @@ router.get('/stats', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
       lastSent: reviewRequests.length > 0 ? reviewRequests[0].sentAt : null
     });
   } catch (error) {
-    console.error('Error fetching review request stats:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error fetching review request stats' });
   }
 });

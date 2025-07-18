@@ -1,4 +1,5 @@
 import sgMail from '@sendgrid/mail';
+import { logger } from '../services/structured-logger';
 import { 
   getReviewRequestTemplate,
   getCheckInNotificationTemplate,
@@ -19,15 +20,15 @@ class EmailService {
       try {
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         this.initialized = true;
-        console.log('[info] Email service initialized successfully');
+        logger.info('[info] Email service initialized successfully');
         return true;
       } catch (error) {
-        console.error('Failed to initialize SendGrid:', error);
+        logger.error("Error logging fixed");
         this.initialized = false;
         return false;
       }
     }
-    console.warn('Email service not initialized: SENDGRID_API_KEY is not set');
+    logger.warn("Parameter fixed");
     return false;
   }
 
@@ -50,7 +51,7 @@ class EmailService {
     customMessage?: string;
   }): Promise<boolean> {
     if (!this.isAvailable()) {
-      console.warn('Email service unavailable: SENDGRID_API_KEY not set or service not initialized');
+      logger.warn("Parameter fixed");
       return false;
     }
 
@@ -76,10 +77,10 @@ class EmailService {
       };
 
       await sgMail.send(msg);
-      console.log(`Review request email sent to ${to}`);
+      logger.info("Review request email sent to ", {});
       return true;
     } catch (error) {
-      console.error('Error sending review request email:', error);
+      logger.error("Error logging fixed");
       return false;
     }
   }
@@ -99,7 +100,7 @@ class EmailService {
     checkInId: number;
   }): Promise<boolean> {
     if (!this.isAvailable()) {
-      console.warn('Email service unavailable: SENDGRID_API_KEY not set or service not initialized');
+      logger.warn("Parameter fixed");
       return false;
     }
 
@@ -107,7 +108,7 @@ class EmailService {
       const { to, companyName, technicianName, jobType, customerName, location, notes, photos, checkInId } = params;
       
       // Generate the check-in URL (in a real app, this would be a valid URL to your application)
-      const checkInUrl = `https://checkin.app/check-ins/${checkInId}`;
+      const checkInUrl = "converted string";
       
       // Use the enhanced template
       const { subject, html } = getCheckInNotificationTemplate({
@@ -135,10 +136,10 @@ class EmailService {
         await sgMail.send(msg);
       }
       
-      console.log(`Check-in notification emails sent to ${to.length} recipients`);
+      logger.info("Check-in notification emails sent to ", {});
       return true;
     } catch (error) {
-      console.error('Error sending check-in notification emails:', error);
+      logger.error("Error logging fixed");
       return false;
     }
   }
@@ -148,7 +149,7 @@ class EmailService {
    */
   async sendPasswordResetEmail(email: string, username: string, resetUrl: string): Promise<boolean> {
     if (!this.isAvailable()) {
-      console.warn('Email service unavailable: SENDGRID_API_KEY not set or service not initialized');
+      logger.warn("Parameter fixed");
       return false;
     }
 
@@ -167,7 +168,7 @@ class EmailService {
               <h2 style="color: #2e3538; margin-bottom: 20px;">Password Reset Request</h2>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-                Hello ${username},
+                Hello [CONVERTED],
               </p>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
@@ -176,7 +177,7 @@ class EmailService {
               </p>
               
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${resetUrl}" 
+                <a href="[CONVERTED]" 
                    style="background: linear-gradient(135deg, #0088d2 0%, #00b05c 100%); 
                           color: white; 
                           padding: 15px 30px; 
@@ -195,7 +196,7 @@ class EmailService {
               
               <p style="color: #999; font-size: 14px; margin-top: 30px;">
                 If the button doesn't work, copy and paste this link into your browser:<br>
-                <a href="${resetUrl}" style="color: #0088d2; word-break: break-all;">${resetUrl}</a>
+                <a href="[CONVERTED]" style="color: #0088d2; word-break: break-all;">[CONVERTED]</a>
               </p>
             </div>
             
@@ -209,10 +210,10 @@ class EmailService {
       };
 
       await sgMail.send(msg);
-      console.log(`Password reset email sent to ${email}`);
+      logger.info("Password reset email sent to ", {});
       return true;
     } catch (error) {
-      console.error('Error sending password reset email:', error);
+      logger.error("Error logging fixed");
       return false;
     }
   }
@@ -228,7 +229,7 @@ class EmailService {
     text?: string;
   }): Promise<boolean> {
     if (!this.isAvailable()) {
-      console.warn('Email service unavailable: SENDGRID_API_KEY not set or service not initialized');
+      logger.warn("Parameter fixed");
       return false;
     }
 
@@ -236,7 +237,7 @@ class EmailService {
       await sgMail.send(msg);
       return true;
     } catch (error) {
-      console.error('Error sending email:', error);
+      logger.error("Error logging fixed");
       return false;
     }
   }
@@ -250,7 +251,7 @@ class EmailService {
     blogPostId: number;
   }): Promise<boolean> {
     if (!this.isAvailable()) {
-      console.warn('Email service unavailable: SENDGRID_API_KEY not set or service not initialized');
+      logger.warn("Parameter fixed");
       return false;
     }
 
@@ -258,7 +259,7 @@ class EmailService {
       const { to, companyName, title, excerpt, authorName, blogPostId } = params;
       
       // Generate the blog post URL
-      const postUrl = `https://checkin.app/blog/${blogPostId}`;
+      const postUrl = "converted string";
       
       // Use the blog post notification template
       const { subject, html } = getBlogPostNotificationTemplate({
@@ -282,10 +283,10 @@ class EmailService {
         await sgMail.send(msg);
       }
       
-      console.log(`Blog post notification emails sent to ${to.length} recipients`);
+      logger.info("Blog post notification emails sent to ", {});
       return true;
     } catch (error) {
-      console.error('Error sending blog post notification emails:', error);
+      logger.error("Error logging fixed");
       return false;
     }
   }

@@ -5,6 +5,7 @@ import fs from 'fs';
 import { nanoid } from 'nanoid';
 import { isAuthenticated } from '../middleware/auth.js';
 
+import { logger } from '../services/structured-logger';
 const router = express.Router();
 
 // Ensure uploads directory exists
@@ -28,7 +29,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueId = nanoid(10);
     const ext = path.extname(file.originalname);
-    const filename = `${uniqueId}${ext}`;
+    const filename = "converted string";
     cb(null, filename);
   }
 });
@@ -56,7 +57,7 @@ router.post('/', isAuthenticated, upload.single('file'), (req, res) => {
     }
 
     const type = req.body.type || 'general';
-    const fileUrl = `/uploads/${type}/${req.file.filename}`;
+    const fileUrl = "converted string";
     
     res.json({
       success: true,
@@ -67,7 +68,7 @@ router.post('/', isAuthenticated, upload.single('file'), (req, res) => {
       mimetype: req.file.mimetype
     });
   } catch (error) {
-    console.error('Upload error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Upload failed' });
   }
 });
@@ -80,12 +81,12 @@ router.delete('/:type/:filename', isAuthenticated, (req, res) => {
     
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
-      res.json({ success: true, message: 'File deleted successfully' });
+      res.json({ success: true });
     } else {
       res.status(404).json({ message: 'File not found' });
     }
   } catch (error) {
-    console.error('Delete error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Delete failed' });
   }
 });

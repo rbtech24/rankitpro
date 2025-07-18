@@ -4,6 +4,7 @@ import { isAuthenticated, isSuperAdmin } from "../middleware/auth";
 import { insertSupportTicketSchema, insertSupportTicketResponseSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 
+import { logger } from '../services/structured-logger';
 const router = Router();
 
 // Get support tickets (Super admin sees all, company admins see their company's tickets)
@@ -25,7 +26,7 @@ router.get("/tickets", isAuthenticated, async (req, res) => {
     
     res.json(tickets);
   } catch (error) {
-    console.error("Error fetching support tickets:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Failed to fetch support tickets" });
   }
 });
@@ -49,7 +50,7 @@ router.post("/tickets", isAuthenticated, async (req, res) => {
       const validationError = fromZodError(error);
       return res.status(400).json({ message: validationError.message });
     }
-    console.error("Error creating support ticket:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Failed to create support ticket" });
   }
 });
@@ -74,7 +75,7 @@ router.get("/tickets/:id", isAuthenticated, async (req, res) => {
 
     res.json(ticket);
   } catch (error) {
-    console.error("Error fetching support ticket:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Failed to fetch support ticket" });
   }
 });
@@ -99,7 +100,7 @@ router.put("/tickets/:id/status", isAuthenticated, isSuperAdmin, async (req, res
 
     res.json(ticket);
   } catch (error) {
-    console.error("Error updating ticket status:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Failed to update ticket status" });
   }
 });
@@ -138,7 +139,7 @@ router.post("/tickets/:id/responses", isAuthenticated, async (req, res) => {
       const validationError = fromZodError(error);
       return res.status(400).json({ message: validationError.message });
     }
-    console.error("Error creating support response:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Failed to create support response" });
   }
 });
@@ -164,7 +165,7 @@ router.get("/tickets/:id/responses", isAuthenticated, async (req, res) => {
     const responses = await storage.getSupportTicketResponses(ticketId);
     res.json(responses);
   } catch (error) {
-    console.error("Error fetching support responses:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Failed to fetch support responses" });
   }
 });

@@ -5,6 +5,7 @@ import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import Stripe from 'stripe';
 
+import { logger } from '../services/structured-logger';
 const router = express.Router();
 
 // Initialize Stripe
@@ -72,7 +73,7 @@ router.get('/people', isAuthenticated, isSuperAdmin, async (req: Request, res: R
     const salesPeople = await storage.getAllSalesPeople();
     res.json(salesPeople);
   } catch (error: any) {
-    console.error('Error fetching sales people:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch sales people' });
   }
 });
@@ -97,7 +98,7 @@ router.get('/people/:id', isAuthenticated, async (req: Request, res: Response) =
 
     res.json(salesPerson);
   } catch (error: any) {
-    console.error('Error fetching sales person:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch sales person' });
   }
 });
@@ -131,7 +132,7 @@ router.post('/people', isAuthenticated, isSuperAdmin, async (req: Request, res: 
 
     res.json({ user, salesPerson });
   } catch (error: any) {
-    console.error('Error creating sales person:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to create sales person' });
   }
 });
@@ -150,7 +151,7 @@ router.put('/people/:id', isAuthenticated, isSuperAdmin, async (req: Request, re
     
     res.json(updatedSalesPerson);
   } catch (error: any) {
-    console.error('Error updating sales person:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to update sales person' });
   }
 });
@@ -175,7 +176,7 @@ router.delete('/people/:id', isAuthenticated, isSuperAdmin, async (req: Request,
 
     res.json({ message: 'Sales person deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting sales person:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to delete sales person' });
   }
 });
@@ -205,20 +206,20 @@ router.get('/people/:id/financials', isAuthenticated, isSuperAdmin, async (req: 
     try {
       commissions = await storage.getSalesCommissionsBySalesPerson(id) || [];
     } catch (error) {
-      console.log('No commissions found for sales person:', id);
+      logger.info('No commissions found for sales person:', { id });
     }
 
     try {
       customers = await storage.getCompanyAssignmentsBySalesPerson(id) || [];
     } catch (error) {
-      console.log('No customer assignments found for sales person:', id);
+      logger.info('No customer assignments found for sales person:', { id });
     }
 
     try {
       payouts = await storage.getCommissionPayoutsBySalesPerson ? 
         await storage.getCommissionPayoutsBySalesPerson(id) : [];
     } catch (error) {
-      console.log('No payouts found for sales person:', id);
+      logger.info('No payouts found for sales person:', { id });
       payouts = []; // Default to empty array if method doesn't exist
     }
 
@@ -233,7 +234,7 @@ router.get('/people/:id/financials', isAuthenticated, isSuperAdmin, async (req: 
         };
       }
     } catch (error) {
-      console.log('Could not get stats for sales person:', id);
+      logger.info('Could not get stats for sales person:', { id });
     }
 
     const financialDetails = {
@@ -249,7 +250,7 @@ router.get('/people/:id/financials', isAuthenticated, isSuperAdmin, async (req: 
 
     res.json(financialDetails);
   } catch (error: any) {
-    console.error('Error fetching financial details:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch financial details' });
   }
 });
@@ -278,7 +279,7 @@ router.get('/dashboard', isAuthenticated, async (req: Request, res: Response) =>
       pendingCommissions
     });
   } catch (error: any) {
-    console.error('Error fetching sales dashboard:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch sales dashboard' });
   }
 });
@@ -307,7 +308,7 @@ router.get('/customers', isAuthenticated, async (req: Request, res: Response) =>
     const customers = await storage.getCompanyAssignmentsBySalesPerson(salesPersonId);
     res.json(customers);
   } catch (error: any) {
-    console.error('Error fetching customers:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch customers' });
   }
 });
@@ -319,7 +320,7 @@ router.post('/customers/assign', isAuthenticated, isSuperAdmin, async (req: Requ
     const assignment = await storage.createCompanyAssignment(data);
     res.json(assignment);
   } catch (error: any) {
-    console.error('Error assigning customer:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to assign customer' });
   }
 });
@@ -355,7 +356,7 @@ router.get('/commissions', isAuthenticated, async (req: Request, res: Response) 
 
     res.json(commissions);
   } catch (error: any) {
-    console.error('Error fetching commissions:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch commissions' });
   }
 });
@@ -367,7 +368,7 @@ router.post('/commissions', isAuthenticated, async (req: Request, res: Response)
     const commission = await storage.createSalesCommission(data);
     res.json(commission);
   } catch (error: any) {
-    console.error('Error creating commission:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to create commission' });
   }
 });
@@ -379,7 +380,7 @@ router.post('/commissions/approve', isAuthenticated, isSuperAdmin, async (req: R
     await storage.approvePendingCommissions(commissionIds);
     res.json({ message: 'Commissions approved successfully' });
   } catch (error: any) {
-    console.error('Error approving commissions:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to approve commissions' });
   }
 });
@@ -390,7 +391,7 @@ router.get('/commissions/pending', isAuthenticated, isSuperAdmin, async (req: Re
     const pendingCommissions = await storage.getPendingCommissions();
     res.json(pendingCommissions);
   } catch (error: any) {
-    console.error('Error fetching pending commissions:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch pending commissions' });
   }
 });
@@ -416,7 +417,7 @@ router.post('/payouts', isAuthenticated, isSuperAdmin, async (req: Request, res:
       amount: Math.round(totalAmount * 100), // Convert to cents
       currency: 'usd',
       destination: salesPerson.stripeAccountId,
-      description: `Commission payout for ${salesPerson.name}`,
+      description: "converted string",
     });
 
     // Record payout in database
@@ -442,7 +443,7 @@ router.post('/payouts', isAuthenticated, isSuperAdmin, async (req: Request, res:
 
     res.json({ payout, transfer });
   } catch (error: any) {
-    console.error('Error creating payout:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to create payout' });
   }
 });
@@ -474,7 +475,7 @@ router.get('/payouts', isAuthenticated, async (req: Request, res: Response) => {
 
     res.json(payouts);
   } catch (error: any) {
-    console.error('Error fetching payouts:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch payouts' });
   }
 });
@@ -493,7 +494,7 @@ router.get('/subscription-plans', isAuthenticated, async (req: Request, res: Res
     const plans = await storage.getActiveSubscriptionPlans();
     res.json(plans);
   } catch (error: any) {
-    console.error('Error fetching subscription plans:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch subscription plans' });
   }
 });
@@ -515,7 +516,7 @@ router.get('/analytics', isAuthenticated, isSuperAdmin, async (req: Request, res
       activeSalesStaff: salesPeople.filter((sp: any) => sp.isActive).length
     });
   } catch (error: any) {
-    console.error('Error fetching sales analytics:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch sales analytics' });
   }
 });
@@ -532,7 +533,7 @@ router.get('/subscription-plans', isAuthenticated, async (req: Request, res: Res
     const plans = await storage.getActiveSubscriptionPlans();
     res.json(plans);
   } catch (error: any) {
-    console.error('Error fetching subscription plans:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch subscription plans' });
   }
 });
@@ -563,8 +564,8 @@ router.post('/connect-stripe', isAuthenticated, async (req: Request, res: Respon
     // Create account link for onboarding
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: `${req.protocol}://${req.get('host')}/sales/connect-stripe`,
-      return_url: `${req.protocol}://${req.get('host')}/sales/dashboard`,
+      refresh_url: "converted string",
+      return_url: "converted string",
       type: 'account_onboarding',
     });
 
@@ -573,9 +574,9 @@ router.post('/connect-stripe', isAuthenticated, async (req: Request, res: Respon
       stripeAccountId: account.id
     });
 
-    res.json({ accountLink: accountLink.url, accountId: account.id });
+    res.json({ data: "converted" });
   } catch (error: any) {
-    console.error('Error connecting Stripe account:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to connect Stripe account' });
   }
 });
@@ -606,7 +607,7 @@ router.put('/profile', isAuthenticated, async (req: Request, res: Response) => {
 
     res.json(updatedSalesPerson);
   } catch (error: any) {
-    console.error('Error updating profile:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to update profile' });
   }
 });
@@ -681,7 +682,7 @@ router.post('/companies', isAuthenticated, async (req: Request, res: Response) =
       commission: commissionAmount 
     });
   } catch (error: any) {
-    console.error('Error creating company:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: error.message || 'Failed to create company' });
   }
 });

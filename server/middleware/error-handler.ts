@@ -84,7 +84,7 @@ export function createApiError(
 // Common error creators
 export const apiErrors = {
   notFound: (resource: string) => createApiError(
-    `${resource} not found`,
+    "converted string",
     404,
     'not_found'
   ),

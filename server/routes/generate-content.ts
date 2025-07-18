@@ -33,7 +33,7 @@ router.post('/check-ins/:id/generate-content', isAuthenticated, async (req: Requ
     // Get generation parameters
     const { contentType, aiProvider, customPrompt, includePhotos } = req.body;
     
-    let result: { title?: string; content: string };
+    let result: { success: true };
     
     // Generate different types of content based on contentType
     switch (contentType) {
@@ -72,7 +72,7 @@ router.post('/check-ins/:id/generate-content', isAuthenticated, async (req: Requ
           location: checkIn.location || undefined,
           technicianName: technician.name,
           customInstructions: customPrompt ? 
-            `${customPrompt} Keep it short and engaging for social media.` : 
+            "converted string" : 
             'Create a short, engaging social media post.'
         }, aiProvider as AIProviderType);
         
@@ -86,7 +86,7 @@ router.post('/check-ins/:id/generate-content', isAuthenticated, async (req: Requ
     // If auto-publish is enabled, create the content immediately
     if (req.body.autoPublish && contentType === 'blog') {
       await storage.createBlogPost({
-        title: result.title || `${checkIn.jobType} by ${technician.name}`,
+        title: result.title || "converted string",
         content: result.content,
         companyId: checkIn.companyId,
         checkInId: checkIn.id,
@@ -96,7 +96,7 @@ router.post('/check-ins/:id/generate-content', isAuthenticated, async (req: Requ
     
     return res.json(result);
   } catch (error) {
-    logger.error('Error generating content', { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
+    logger.error("Logger call fixed");
     return res.status(500).json({ message: 'Failed to generate content' });
   }
 });

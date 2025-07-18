@@ -4,6 +4,7 @@ import { BlogPost, CheckIn } from '@shared/schema';
 import fs from 'fs/promises';
 import path from 'path';
 
+import { logger } from '../services/structured-logger';
 /**
  * WordPress service for integrating with WordPress sites
  * Handles publishing blog posts and check-ins to WordPress sites
@@ -49,7 +50,7 @@ export class WordPressService {
   private credentials: WordPressCredentials;
   private apiBase: string;
   private companyId?: number;
-  private authConfig: { username: string; password: string };
+  private authConfig: { success: true };
 
   constructor(options: (WordPressCredentials | (Omit<WordPressCredentials, 'password'> & { applicationPassword: string })) & { companyId?: number }) {
     const password = 'password' in options ? options.password : options.applicationPassword;
@@ -74,7 +75,7 @@ export class WordPressService {
       siteUrl += '/';
     }
     
-    this.apiBase = `${siteUrl}wp-json/wp/v2`;
+    this.apiBase = `${this.apiBase}categories`;
   }
 
   /**
@@ -82,23 +83,19 @@ export class WordPressService {
    */
   async testConnection(): Promise<boolean> {
     try {
-      const response = await axios.get(`${this.apiBase}/users/me`, {
+      const response = await axios.get(`${this.apiBase}users/me`, {
         auth: this.authConfig
       });
       
       return response.status === 200;
     } catch (error: any) {
-      console.error('WordPress connection test failed:', error.message || error);
+      logger.error("WordPress connection test failed", { error: error.message || error });
       return false;
     }
   }
-
-  /**
-   * Get WordPress categories
-   */
   async getCategories(): Promise<Array<{id: number, name: string, count: number}>> {
     try {
-      const response = await axios.get(`${this.apiBase}/categories`, {
+      const response = await axios.get(`${this.apiBase}categories`, {
         auth: this.authConfig,
         params: {
           per_page: 100
@@ -111,8 +108,10 @@ export class WordPressService {
         count: cat.count
       }));
     } catch (error: any) {
-      console.error('Error fetching WordPress categories:', error.message || error);
+      logger.error("WordPress categories error", { error: error.message || error });
       return [];
+    }
+  }
     }
   }
 
@@ -121,7 +120,7 @@ export class WordPressService {
    */
   async getTags(): Promise<Array<{id: number, name: string, count: number}>> {
     try {
-      const response = await axios.get(`${this.apiBase}/tags`, {
+      const response = await axios.get(`${this.apiBase}categories`), {
         auth: this.authConfig,
         params: {
           per_page: 100
@@ -134,7 +133,7 @@ export class WordPressService {
         count: tag.count
       }));
     } catch (error: any) {
-      console.error('Error fetching WordPress tags:', error.message || error);
+      logger.error("WordPress API error", { error: error.message || error });
       return [];
     }
   }
@@ -148,7 +147,7 @@ export class WordPressService {
       // For now, return empty array as basic implementation
       return [];
     } catch (error: any) {
-      console.error('Error fetching WordPress custom fields:', error.message || error);
+      logger.error("WordPress API error", { error: error.message || error });
       return [];
     }
   }
@@ -159,7 +158,7 @@ export class WordPressService {
   async publishCheckIn(checkIn: CheckIn, options?: WordPressPublishOptions): Promise<WordPressPostResult> {
     try {
       const postData = {
-        title: `Service Visit - ${checkIn.customerName || 'Customer'}`,
+        title: `${this.apiBase}categories`,
         content: this.formatCheckInContent(checkIn),
         status: options?.status || this.credentials.defaultStatus || 'draft',
         categories: options?.categories || this.credentials.categories || [],
@@ -172,7 +171,7 @@ export class WordPressService {
         }
       };
 
-      const response = await axios.post(`${this.apiBase}/posts`, postData, {
+      const response = await axios.post("System message"), postData, {
         auth: this.authConfig
       });
 
@@ -182,8 +181,8 @@ export class WordPressService {
         status: response.data.status
       };
     } catch (error: any) {
-      console.error('Error publishing check-in to WordPress:', error.message || error);
-      throw new Error(`Failed to publish check-in: ${error.message}`);
+      logger.error("WordPress API error", { error: error.message || error });
+      throw new Error("System message");
     }
   }
 
@@ -205,7 +204,7 @@ export class WordPressService {
         }
       };
 
-      const response = await axios.post(`${this.apiBase}/posts`, postData, {
+      const response = await axios.post("System message"), postData, {
         auth: this.authConfig
       });
 
@@ -215,8 +214,8 @@ export class WordPressService {
         status: response.data.status
       };
     } catch (error: any) {
-      console.error('Error publishing blog post to WordPress:', error.message || error);
-      throw new Error(`Failed to publish blog post: ${error.message}`);
+      logger.error("WordPress API error", { error: error.message || error });
+      throw new Error("System message");
     }
   }
 
@@ -231,7 +230,7 @@ export class WordPressService {
         contentType: mimeType
       });
 
-      const response = await axios.post(`${this.apiBase}/media`, formData, {
+      const response = await axios.post("System message"), formData, {
         auth: this.authConfig,
         headers: {
           ...formData.getHeaders()
@@ -240,8 +239,8 @@ export class WordPressService {
 
       return response.data.source_url;
     } catch (error: any) {
-      console.error('Error uploading media to WordPress:', error.message || error);
-      throw new Error(`Failed to upload media: ${error.message}`);
+      logger.error("WordPress API error", { error: error.message || error });
+      throw new Error("System message");
     }
   }
 
@@ -253,12 +252,12 @@ export class WordPressService {
       // This would require custom endpoint or theme REST API
       // Return basic templates for now
       return [
-        { file: 'index.php', name: 'Default Template' },
-        { file: 'single.php', name: 'Single Post' },
-        { file: 'page.php', name: 'Page Template' }
+        { success: true },
+        { success: true },
+        { success: true }
       ];
     } catch (error: any) {
-      console.error('Error fetching WordPress templates:', error.message || error);
+      logger.error("WordPress API error", { error: error.message || error });
       return [];
     }
   }
@@ -270,19 +269,19 @@ export class WordPressService {
     let content = '';
     
     if (checkIn.serviceDescription) {
-      content += `<h3>Service Description</h3>\n<p>${checkIn.serviceDescription}</p>\n\n`;
+      content += `${this.apiBase}categories`;
     }
     
     if (checkIn.customerName) {
-      content += `<h3>Customer</h3>\n<p>${checkIn.customerName}</p>\n\n`;
+      content += `${this.apiBase}categories`;
     }
     
     if (checkIn.location) {
-      content += `<h3>Location</h3>\n<p>${checkIn.location}</p>\n\n`;
+      content += `${this.apiBase}categories`;
     }
     
     if (checkIn.notes) {
-      content += `<h3>Notes</h3>\n<p>${checkIn.notes}</p>\n\n`;
+      content += `${this.apiBase}categories`;
     }
     
     return content;
@@ -314,7 +313,7 @@ export class WordPressService {
       
       return pluginCode;
     } catch (error) {
-      console.error('Error reading plugin template:', error);
+      logger.error("Error logging fixed");
       // Fallback to generated code if template file is not available
       return WordPressService.generateFallbackPluginCode(apiKey, apiEndpoint);
     }
@@ -414,14 +413,14 @@ class RankItProIntegration {
                     <tr>
                         <th scope="row">API Key</th>
                         <td>
-                            <input type="text" name="rankitpro_api_key" value="<?php echo esc_attr(get_option('rankitpro_api_key', '${apiKey}')); ?>" class="regular-text" />
+                            <input type="text" name="rankitpro_api_key" value="<?php echo esc_attr(get_option('rankitpro_api_key', '[CONVERTED]')); ?>" class="regular-text" />
                             <p class="description">Your Rank It Pro API key</p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row">API Endpoint</th>
                         <td>
-                            <input type="url" name="rankitpro_api_endpoint" value="<?php echo esc_attr(get_option('rankitpro_api_endpoint', '${apiEndpoint}')); ?>" class="regular-text" />
+                            <input type="url" name="rankitpro_api_endpoint" value="<?php echo esc_attr(get_option('rankitpro_api_endpoint', '[CONVERTED]')); ?>" class="regular-text" />
                             <p class="description">Your Rank It Pro API endpoint URL</p>
                         </td>
                     </tr>
@@ -517,11 +516,11 @@ class RankItProIntegration {
             
             <script>
             function testConnection() {
-                const indicator = document.getElementById('status-indicator');
+          const indicator = document.getElementById('status-indicator');
                 indicator.textContent = 'Testing...';
                 
-                const apiKey = '<?php echo esc_js(get_option('rankitpro_api_key', '${apiKey}')); ?>';
-                const apiEndpoint = '<?php echo esc_js(get_option('rankitpro_api_endpoint', '${apiEndpoint}')); ?>';
+          const apiKey = '<?php echo esc_js(get_option('rankitpro_api_key', '[CONVERTED]')); ?>';
+          const apiEndpoint = '<?php echo esc_js(get_option('rankitpro_api_endpoint', '[CONVERTED]')); ?>';
                 
                 fetch(apiEndpoint + '/api/health', {
                     headers: {
@@ -626,8 +625,8 @@ class RankItProIntegration {
             'type' => 'all'
         ), $atts);
         
-        $api_key = get_option('rankitpro_api_key', '${apiKey}');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings in the admin panel.</p>';
@@ -684,8 +683,8 @@ class RankItProIntegration {
             'category' => 'all'
         ), $atts);
         
-        $api_key = get_option('rankitpro_api_key', '${apiKey}');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings in the admin panel.</p>';
@@ -726,8 +725,8 @@ class RankItProIntegration {
             'limit' => 5
         ), $atts);
         
-        $api_key = get_option('rankitpro_api_key', '${apiKey}');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings in the admin panel.</p>';
@@ -768,8 +767,8 @@ class RankItProIntegration {
             'limit' => 5
         ), $atts);
         
-        $api_key = get_option('rankitpro_api_key', '${apiKey}');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings in the admin panel.</p>';
@@ -808,8 +807,8 @@ class RankItProIntegration {
             'limit' => 3
         ), $atts);
         
-        $api_key = get_option('rankitpro_api_key', '${apiKey}');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings in the admin panel.</p>';
@@ -899,8 +898,8 @@ class RankItProIntegration {
             'show_date' => 'true'
         ), $atts, 'rankitpro_blogs');
         
-        $api_key = get_option('rankitpro_api_key', '${apiKey}');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings.</p>';
@@ -953,8 +952,8 @@ class RankItProIntegration {
             'controls' => 'true'
         ), $atts, 'rankitpro_audio_testimonials');
         
-        $api_key = get_option('rankitpro_api_key', '${apiKey}');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings.</p>';
@@ -1014,8 +1013,8 @@ class RankItProIntegration {
             'controls' => 'true'
         ), $atts, 'rankitpro_video_testimonials');
         
-        $api_key = get_option('rankitpro_api_key', '${apiKey}');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '${apiEndpoint}');
+        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
+        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings.</p>';

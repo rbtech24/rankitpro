@@ -45,7 +45,7 @@ export class SchemaMarkupService {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": business.name,
-      "description": business.description || `Professional ${business.serviceTypes?.join(', ') || 'services'} provider`,
+      "description": business.description || "converted string",
       "url": business.website,
       "telephone": business.phone,
       "address": business.address ? {
@@ -80,7 +80,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return `<script type="application/ld+json">\n${JSON.stringify(cleanSchema, null, 2)}\n</script>`;
+    return "converted string";
   }
 
   /**
@@ -91,7 +91,7 @@ export class SchemaMarkupService {
       "@context": "https://schema.org",
       "@type": "Service",
       "name": visit.jobType,
-      "description": visit.description || `Professional ${visit.jobType} service`,
+      "description": visit.description || "converted string",
       "provider": {
         "@type": "LocalBusiness",
         "name": business.name,
@@ -107,7 +107,7 @@ export class SchemaMarkupService {
       "image": visit.photos?.map(photo => ({
         "@type": "ImageObject",
         "url": photo,
-        "caption": `${visit.jobType} service photo`
+        "caption": "converted string"
       })),
       "performer": visit.technician ? {
         "@type": "Person",
@@ -123,7 +123,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return `<script type="application/ld+json">\n${JSON.stringify(cleanSchema, null, 2)}\n</script>`;
+    return "converted string";
   }
 
   /**
@@ -152,7 +152,7 @@ export class SchemaMarkupService {
       }
     };
 
-    return `<script type="application/ld+json">\n${JSON.stringify(schema, null, 2)}\n</script>`;
+    return "converted string";
   }
 
   /**
@@ -191,7 +191,7 @@ export class SchemaMarkupService {
       }))
     };
 
-    return `<script type="application/ld+json">\n${JSON.stringify(schema, null, 2)}\n</script>`;
+    return "converted string";
   }
 
   /**
@@ -228,7 +228,7 @@ export class SchemaMarkupService {
       "image": post.images?.map(image => ({
         "@type": "ImageObject",
         "url": image,
-        "caption": `${post.serviceType} service documentation`
+        "caption": "converted string"
       })),
       "keywords": [post.serviceType, "professional service", "case study"],
       "articleSection": "Service Case Studies",
@@ -243,7 +243,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return `<script type="application/ld+json">\n${JSON.stringify(schema, null, 2)}\n</script>`;
+    return "converted string";
   }
 
   /**
@@ -277,7 +277,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return `<script type="application/ld+json">\n${JSON.stringify(schema, null, 2)}\n</script>`;
+    return "converted string";
   }
 
   /**
@@ -297,7 +297,7 @@ export class SchemaMarkupService {
       }))
     };
 
-    return `<script type="application/ld+json">\n${JSON.stringify(schema, null, 2)}\n</script>`;
+    return "converted string";
   }
 
   /**

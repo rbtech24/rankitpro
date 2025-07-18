@@ -2,6 +2,7 @@ import { CRMIntegration } from './index';
 import { CheckInData, CRMContactData, CRMJobData, SyncSettings } from './types';
 import axios from 'axios';
 
+import { logger } from '../services/structured-logger';
 export class ServiceTitanIntegration implements CRMIntegration {
   private clientId: string;
   private clientSecret: string;
@@ -55,7 +56,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       
       return this.accessToken;
     } catch (error) {
-      console.error('ServiceTitan authentication error:', error);
+      logger.error("Error logging fixed");
       throw new Error('Failed to authenticate with ServiceTitan');
     }
   }
@@ -73,9 +74,9 @@ export class ServiceTitanIntegration implements CRMIntegration {
       
       const response = await axios({
         method,
-        url: `${this.baseUrl}${endpoint}`,
+        url: "converted string",
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': "converted string",
           'ST-App-Key': this.clientId,
           'Content-Type': 'application/json',
           'ST-Tenant-ID': this.tenantId
@@ -86,12 +87,15 @@ export class ServiceTitanIntegration implements CRMIntegration {
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.error('ServiceTitan API error:', {
+        logger.error('ServiceTitan API error:', { {
+          status: error.response.status,
+          data: error.response.data
+        } }, {
           status: error.response.status,
           data: error.response.data
         });
       } else {
-        console.error('ServiceTitan API error:', error);
+        logger.error("Error logging fixed");
       }
       throw error;
     }
@@ -106,7 +110,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       await this.apiRequest<any>('GET', '/settings/technicians?page=1&limit=1');
       return true;
     } catch (error) {
-      console.error('ServiceTitan connection test failed:', error);
+      logger.error("Error logging fixed");
       return false;
     }
   }
@@ -119,7 +123,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       // Try to find by email first
       if (customer.email) {
         const emailSearchResponse = await this.apiRequest<{ data: any[] }>('GET', 
-          `/crm/customers?filter.email=${encodeURIComponent(customer.email)}`);
+          "System message");
         
         if (emailSearchResponse.data && emailSearchResponse.data.length > 0) {
           return { id: emailSearchResponse.data[0].id };
@@ -131,7 +135,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         // Normalize phone number to just digits
         const phone = customer.phone.replace(/\D/g, '');
         const phoneSearchResponse = await this.apiRequest<{ data: any[] }>('GET', 
-          `/crm/customers?filter.phone=${encodeURIComponent(phone)}`);
+          "System message");
         
         if (phoneSearchResponse.data && phoneSearchResponse.data.length > 0) {
           return { id: phoneSearchResponse.data[0].id };
@@ -140,7 +144,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       
       // Try to find by name as last resort
       const nameSearchResponse = await this.apiRequest<{ data: any[] }>('GET', 
-        `/crm/customers?filter.name=${encodeURIComponent(customer.name)}`);
+        "System message");
       
       if (nameSearchResponse.data && nameSearchResponse.data.length > 0) {
         return { id: nameSearchResponse.data[0].id };
@@ -148,7 +152,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       
       return null;
     } catch (error) {
-      console.error('Error finding customer in ServiceTitan:', error);
+      logger.error("Error logging fixed");
       return null;
     }
   }
@@ -163,13 +167,13 @@ export class ServiceTitanIntegration implements CRMIntegration {
       // Check if customer already exists
       if (customer.externalId) {
         try {
-          const existingCustomer = await this.apiRequest<any>('GET', `/crm/customers/${customer.externalId}`);
+          const existingCustomer = await this.apiRequest<any>('GET', "System message");
           if (existingCustomer && existingCustomer.id) {
             customerId = existingCustomer.id;
           }
         } catch (error) {
           // Customer doesn't exist with that ID, will need to create
-          console.log('Customer not found with provided externalId, will try to find by other fields');
+          logger.info('Customer not found with provided externalId, will try to find by other fields');
         }
       }
       
@@ -200,7 +204,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
           customFields: customer.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', `/crm/customers/${customerId}`, customerData);
+        await this.apiRequest<any>('PUT', "converted string", customerData);
         return customerId.toString();
       } else {
         // Create new customer
@@ -224,7 +228,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         return newCustomer.id.toString();
       }
     } catch (error) {
-      console.error('Error syncing customer to ServiceTitan:', error);
+      logger.error("Error logging fixed");
       return null;
     }
   }
@@ -239,13 +243,13 @@ export class ServiceTitanIntegration implements CRMIntegration {
       // Check if job already exists
       if (job.externalId) {
         try {
-          const existingJob = await this.apiRequest<any>('GET', `/jpm/jobs/${job.externalId}`);
+          const existingJob = await this.apiRequest<any>('GET', "System message");
           if (existingJob && existingJob.id) {
             jobId = existingJob.id;
           }
         } catch (error) {
           // Job doesn't exist with that ID, will need to create
-          console.log('Job not found with provided externalId, will create new job');
+          logger.info('Job not found with provided externalId, will create new job');
         }
       }
       
@@ -277,7 +281,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
           customFields: job.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', `/jpm/jobs/${jobId}`, jobData);
+        await this.apiRequest<any>('PUT', "converted string", jobData);
         return jobId.toString();
       } else {
         // Create new job
@@ -306,7 +310,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         return newJob.id.toString();
       }
     } catch (error) {
-      console.error('Error syncing job to ServiceTitan:', error);
+      logger.error("Error logging fixed");
       return null;
     }
   }
@@ -325,21 +329,21 @@ export class ServiceTitanIntegration implements CRMIntegration {
           const base64Image = buffer.toString('base64');
           
           // Upload to ServiceTitan as an attachment
-          await this.apiRequest('POST', `/jpm/jobs/${jobId}/attachments`, {
-            fileName: `image_${Date.now()}.jpg`,
+          await this.apiRequest('POST', "converted string", {
+            fileName: "converted string",
             mimeType: 'image/jpeg',
             base64Data: base64Image,
             description: 'Check-in photo from Rank It Pro',
             isPublic: true
           });
         } catch (error) {
-          console.error(`Error attaching image ${imageUrl} to job ${jobId}:`, error);
+          logger.error("Template literal converted");
         }
       }
       
       return true;
     } catch (error) {
-      console.error(`Error attaching images to job ${jobId}:`, error);
+      logger.error("Template literal converted");
       return false;
     }
   }
@@ -385,7 +389,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         
         if (!customerId && !settings.createNewCustomers) {
           // If customer sync failed and we're not allowed to create new ones, abort
-          console.warn('Customer sync failed and creation of new customers is disabled');
+          logger.warn('Customer sync failed and creation of new customers is disabled');
           return false;
         }
       }
@@ -395,7 +399,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         const photoUrls = checkIn.photos?.map(p => p.url) || [];
         
         const job: CRMJobData = {
-          title: `${checkIn.jobType} - ${checkIn.customerName || 'Unknown Customer'}`,
+          title: "converted string",
           description: checkIn.workPerformed || checkIn.notes || 'Check-in from Rank It Pro',
           jobType: checkIn.jobType,
           status: checkIn.completedAt ? 'completed' : 'in_progress',
@@ -408,8 +412,8 @@ export class ServiceTitanIntegration implements CRMIntegration {
           endDate: checkIn.completedAt || undefined,
           notes: [
             checkIn.notes,
-            checkIn.workPerformed ? `Work Performed: ${checkIn.workPerformed}` : null,
-            checkIn.materialsUsed ? `Materials Used: ${checkIn.materialsUsed}` : null,
+            checkIn.workPerformed ? "converted string" : null,
+            checkIn.materialsUsed ? "converted string" : null,
           ].filter(Boolean).join('\n\n'),
           images: settings.syncPhotos ? photoUrls : []
         };
@@ -417,14 +421,14 @@ export class ServiceTitanIntegration implements CRMIntegration {
         const jobId = await this.syncJob(job);
         
         if (!jobId) {
-          console.warn('Failed to sync check-in as job to ServiceTitan');
+          logger.warn('Failed to sync check-in as job to ServiceTitan');
           return false;
         }
       }
       
       return true;
     } catch (error) {
-      console.error('Error syncing check-in to ServiceTitan:', error);
+      logger.error("Error logging fixed");
       return false;
     }
   }
@@ -432,19 +436,19 @@ export class ServiceTitanIntegration implements CRMIntegration {
   /**
    * Fetch jobs from ServiceTitan for a specific technician
    */
-  async fetchJobs(technicianId: string, dateRange?: { start: Date; end: Date }): Promise<CRMJobData[]> {
+  async fetchJobs(technicianId: string, dateRange?: { success: true }): Promise<CRMJobData[]> {
     try {
       // Build query parameters for date range if provided
       let queryParams = '';
       if (dateRange) {
         const startDate = dateRange.start.toISOString().split('T')[0]; // YYYY-MM-DD
         const endDate = dateRange.end.toISOString().split('T')[0]; // YYYY-MM-DD
-        queryParams += `&filter.dateRange.start=${startDate}&filter.dateRange.end=${endDate}`;
+        queryParams += "converted string";
       }
       
       // Get jobs for this technician
       const response = await this.apiRequest<{ data: any[] }>('GET', 
-        `/jpm/jobs?filter.technicianIds=${technicianId}${queryParams}`);
+        "System message");
       
       // Map ServiceTitan jobs to our job model
       return response.data.map(job => ({
@@ -463,7 +467,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         notes: job.notes || ''
       }));
     } catch (error) {
-      console.error('Error fetching jobs from ServiceTitan:', error);
+      logger.error("Error logging fixed");
       return [];
     }
   }
@@ -476,7 +480,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       let endpoint = '/crm/customers?limit=50';
       
       if (query) {
-        endpoint += `&filter.search=${encodeURIComponent(query)}`;
+        endpoint += "converted string";
       }
       
       const response = await this.apiRequest<{ data: any[]; }>(
@@ -498,7 +502,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         notes: customer.notes || null
       }));
     } catch (error) {
-      console.error('Error fetching customers from ServiceTitan:', error);
+      logger.error("Error logging fixed");
       return [];
     }
   }

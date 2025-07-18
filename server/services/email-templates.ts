@@ -35,11 +35,11 @@ interface CheckInNotificationParams {
 /**
  * Generates a blog post notification email template
  */
-export function getBlogPostNotificationTemplate(params: BlogPostNotificationParams): { subject: string; html: string } {
+export function getBlogPostNotificationTemplate(params: BlogPostNotificationParams): { success: true } {
   const { companyName, title, excerpt, authorName, postUrl, postDate } = params;
 
   // Email subject
-  const subject = `New Blog Post: ${title}`;
+  const subject = "converted string";
 
   // Format date
   const formattedDate = postDate.toLocaleDateString('en-US', { 
@@ -55,7 +55,7 @@ export function getBlogPostNotificationTemplate(params: BlogPostNotificationPara
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${subject}</title>
+      <title>[CONVERTED]</title>
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -116,31 +116,31 @@ export function getBlogPostNotificationTemplate(params: BlogPostNotificationPara
     <body>
       <div class="container">
         <div class="header">
-          <h1>${companyName}</h1>
+          <h1>[CONVERTED]</h1>
         </div>
         
         <div class="content">
-          <h2>${title}</h2>
+          <h2>[CONVERTED]</h2>
           
           <div class="post-meta">
-            <p>Published on ${formattedDate} by ${authorName}</p>
+            <p>Published on [CONVERTED] by [CONVERTED]</p>
           </div>
           
           <div class="post-excerpt">
-            ${excerpt}
+            [CONVERTED]
           </div>
           
           <div style="text-align: center;">
-            <a href="${postUrl}" class="cta-button">Read Full Post</a>
+            <a href="[CONVERTED]" class="cta-button">Read Full Post</a>
           </div>
           
           <p>Thank you for your continued interest in our content.</p>
           
-          <p>Best regards,<br>${companyName} Team</p>
+          <p>Best regards,<br>[CONVERTED] Team</p>
         </div>
         
         <div class="footer">
-          <p>© ${new Date().getFullYear()} ${companyName}. All rights reserved.</p>
+          <p>© [CONVERTED] [CONVERTED]. All rights reserved.</p>
           <p>If you no longer wish to receive these updates, you can unsubscribe at any time.</p>
         </div>
       </div>
@@ -154,11 +154,11 @@ export function getBlogPostNotificationTemplate(params: BlogPostNotificationPara
 /**
  * Generates a check-in notification email template
  */
-export function getCheckInNotificationTemplate(params: CheckInNotificationParams): { subject: string; html: string } {
+export function getCheckInNotificationTemplate(params: CheckInNotificationParams): { success: true } {
   const { companyName, technicianName, jobType, customerName, location, notes, photos, checkInId, checkInUrl, checkInDate } = params;
 
   // Email subject
-  const subject = `New Check-In: ${technicianName} - ${jobType}`;
+  const subject = "converted string";
 
   // Format date
   const formattedDate = checkInDate.toLocaleDateString('en-US', { 
@@ -178,7 +178,7 @@ export function getCheckInNotificationTemplate(params: CheckInNotificationParams
         <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
           ${photos.map(photo => `
             <div style="margin-bottom: 10px;">
-              <img src="${photo.url}" alt="Check-in photo" style="max-width: 200px; max-height: 200px; border-radius: 5px; border: 1px solid #ddd;">
+              <img src="[CONVERTED]" alt="Check-in photo" style="max-width: 200px; max-height: 200px; border-radius: 5px; border: 1px solid #ddd;">
             </div>
           `).join('')}
         </div>
@@ -193,7 +193,7 @@ export function getCheckInNotificationTemplate(params: CheckInNotificationParams
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${subject}</title>
+      <title>[CONVERTED]</title>
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -255,41 +255,41 @@ export function getCheckInNotificationTemplate(params: CheckInNotificationParams
     <body>
       <div class="container">
         <div class="header">
-          <h1>${companyName}</h1>
+          <h1>[CONVERTED]</h1>
         </div>
         
         <div class="content">
           <h2>New Check-In Notification</h2>
           
-          <p>A new check-in has been recorded in the system on ${formattedDate}.</p>
+          <p>A new check-in has been recorded in the system on [CONVERTED].</p>
           
           <div class="checkin-details">
-            <p><strong>Technician:</strong> ${technicianName}</p>
-            <p><strong>Job Type:</strong> ${jobType}</p>
-            ${customerName ? `<p><strong>Customer:</strong> ${customerName}</p>` : ''}
-            ${location ? `<p><strong>Location:</strong> ${location}</p>` : ''}
+            <p><strong>Technician:</strong> [CONVERTED]</p>
+            <p><strong>Job Type:</strong> [CONVERTED]</p>
+            [CONVERTED]</p>` : ''}
+            [CONVERTED]</p>` : ''}
           </div>
           
           ${notes ? `
           <div class="notes">
             <h3>Technician Notes:</h3>
-            <p>${notes}</p>
+            <p>[CONVERTED]</p>
           </div>
           ` : ''}
           
-          ${photosHtml}
+          [CONVERTED]
           
           <div style="text-align: center;">
-            <a href="${checkInUrl}" class="cta-button">View Complete Check-In</a>
+            <a href="[CONVERTED]" class="cta-button">View Complete Check-In</a>
           </div>
           
           <p>Thank you for using our platform to manage your check-ins.</p>
           
-          <p>Best regards,<br>${companyName} Team</p>
+          <p>Best regards,<br>[CONVERTED] Team</p>
         </div>
         
         <div class="footer">
-          <p>© ${new Date().getFullYear()} ${companyName}. All rights reserved.</p>
+          <p>© [CONVERTED] [CONVERTED]. All rights reserved.</p>
           <p>You received this notification because you are an administrator of your company's account.</p>
         </div>
       </div>
@@ -303,14 +303,14 @@ export function getCheckInNotificationTemplate(params: CheckInNotificationParams
 /**
  * Generates a review request email template
  */
-export function getReviewRequestTemplate(params: ReviewRequestTemplateParams): { subject: string; html: string } {
+export function getReviewRequestTemplate(params: ReviewRequestTemplateParams): { success: true } {
   const { customerName, companyName, technicianName, jobType, customMessage } = params;
   
   // Review link (in a real app, this would generate a unique URL with tracking)
-  const reviewLink = `https://review.checkin.app/${encodeURIComponent(companyName.toLowerCase().replace(/\s+/g, '-'))}`;
+  const reviewLink = "converted string";
   
   // Email subject
-  const subject = `Your feedback about our ${jobType} service`;
+  const subject = "converted string";
   
   // Email HTML content
   const html = `
@@ -319,7 +319,7 @@ export function getReviewRequestTemplate(params: ReviewRequestTemplateParams): {
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${subject}</title>
+      <title>[CONVERTED]</title>
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -393,24 +393,24 @@ export function getReviewRequestTemplate(params: ReviewRequestTemplateParams): {
     <body>
       <div class="container">
         <div class="header">
-          <h1>${companyName}</h1>
+          <h1>[CONVERTED]</h1>
         </div>
         
         <div class="content">
-          <p>Hello ${customerName},</p>
+          <p>Hello [CONVERTED],</p>
           
-          <p>Thank you for choosing ${companyName} for your recent ${jobType} service. We hope you were satisfied with the work performed by ${technicianName}.</p>
+          <p>Thank you for choosing [CONVERTED] for your recent [CONVERTED] service. We hope you were satisfied with the work performed by [CONVERTED].</p>
           
           ${customMessage ? `
           <div class="custom-message">
-            "${customMessage}"
+            "[CONVERTED]"
           </div>
           ` : ''}
           
           <div class="service-details">
-            <p><strong>Service:</strong> ${jobType}</p>
-            <p><strong>Technician:</strong> ${technicianName}</p>
-            <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+            <p><strong>Service:</strong> [CONVERTED]</p>
+            <p><strong>Technician:</strong> [CONVERTED]</p>
+            <p><strong>Date:</strong> [CONVERTED]</p>
           </div>
           
           <p>We'd love to hear about your experience. Your feedback is important to us and helps us improve our service.</p>
@@ -419,27 +419,27 @@ export function getReviewRequestTemplate(params: ReviewRequestTemplateParams): {
             <p>How would you rate your experience?</p>
             
             <div class="stars-container">
-              <a href="${reviewLink}/5" class="star">★</a>
-              <a href="${reviewLink}/4" class="star">★</a>
-              <a href="${reviewLink}/3" class="star">★</a>
-              <a href="${reviewLink}/2" class="star">★</a>
-              <a href="${reviewLink}/1" class="star">★</a>
+              <a href="[CONVERTED]/5" class="star">★</a>
+              <a href="[CONVERTED]/4" class="star">★</a>
+              <a href="[CONVERTED]/3" class="star">★</a>
+              <a href="[CONVERTED]/2" class="star">★</a>
+              <a href="[CONVERTED]/1" class="star">★</a>
             </div>
             
             <p>Click a star to rate us (5 = excellent, 1 = poor)</p>
             
             <p>Or use the button below to leave a more detailed review:</p>
             
-            <a href="${reviewLink}" class="cta-button">Leave a Review</a>
+            <a href="[CONVERTED]" class="cta-button">Leave a Review</a>
           </div>
           
           <p>Thank you for your business. We appreciate your trust and look forward to serving you again.</p>
           
-          <p>Best regards,<br>${companyName} Team</p>
+          <p>Best regards,<br>[CONVERTED] Team</p>
         </div>
         
         <div class="footer">
-          <p>© ${new Date().getFullYear()} ${companyName}. All rights reserved.</p>
+          <p>© [CONVERTED] [CONVERTED]. All rights reserved.</p>
           <p>This email was sent to you because you recently used our services. If you did not request this email, please disregard it.</p>
         </div>
       </div>

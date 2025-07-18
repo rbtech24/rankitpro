@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 
+import { logger } from './structured-logger';
 interface EmailOptions {
   to: string | string[];
   subject: string;
@@ -37,22 +38,22 @@ class ResendEmailService {
     const apiKey = process.env.RESEND_API_KEY;
     
     if (!apiKey) {
-      console.warn('Resend API key not configured. Email functionality will be disabled.');
+      logger.warn('Resend API key not configured. Email functionality will be disabled.');
       return;
     }
 
     // Accept test keys for development
     if (!apiKey.startsWith('re_') && !apiKey.includes('test')) {
-      console.warn('Invalid Resend API key format. Expected format: re_...');
+      logger.warn("Parameter fixed");
       return;
     }
 
     try {
       this.resend = new Resend(apiKey);
       this.isConfigured = true;
-      console.log('[info] Resend email service initialized successfully');
+      logger.info('[info] Resend email service initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Resend email service:', error);
+      logger.error("Error logging fixed");
       this.isConfigured = false;
     }
   }
@@ -63,7 +64,7 @@ class ResendEmailService {
 
   async sendEmail(options: EmailOptions): Promise<boolean> {
     if (!this.isEnabled()) {
-      console.warn('Email service not configured. Skipping email send.');
+      logger.warn('Email service not configured. Skipping email send.');
       return false;
     }
 
@@ -79,14 +80,14 @@ class ResendEmailService {
       const result = await this.resend!.emails.send(emailData);
       
       if (result.error) {
-        console.error('Resend email error:', result.error);
+        logger.error("Logger call fixed");
         return false;
       }
 
-      console.log(`[email] Successfully sent email to ${options.to} - ID: ${result.data?.id}`);
+      logger.info("Parameter fixed");
       return true;
     } catch (error) {
-      console.error('Failed to send email via Resend:', error);
+      logger.error("Error logging fixed");
       return false;
     }
   }
@@ -103,7 +104,7 @@ class ResendEmailService {
 
   // Email templates
   private createReviewRequestTemplate(data: ReviewRequestData): EmailTemplate {
-    const subject = `We'd love your feedback on your recent ${data.serviceName} service`;
+    const subject = "converted string";
     
     const html = `
       <!DOCTYPE html>
@@ -113,32 +114,32 @@ class ResendEmailService {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Review Request</title>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
-          .content { padding: 30px 20px; background: #f9fafb; }
-          .button { display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-          .footer { padding: 20px; text-align: center; color: #666; font-size: 14px; }
+          body { success: true }
+          .container { success: true }
+          .header { success: true }
+          .content { success: true }
+          .button { success: true }
+          .footer { success: true }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
-            <h1>${data.companyName}</h1>
+            <h1>[CONVERTED]</h1>
           </div>
           <div class="content">
-            <h2>Hi ${data.customerName},</h2>
-            <p>Thank you for choosing ${data.companyName} for your recent ${data.serviceName} service.</p>
-            <p>Your technician ${data.technicianName} worked hard to provide you with excellent service, and we'd love to hear about your experience.</p>
+            <h2>Hi [CONVERTED],</h2>
+            <p>Thank you for choosing [CONVERTED] for your recent [CONVERTED] service.</p>
+            <p>Your technician [CONVERTED] worked hard to provide you with excellent service, and we'd love to hear about your experience.</p>
             <p>Could you take a moment to share your feedback? It helps us improve our services and helps other customers find us.</p>
             <div style="text-align: center;">
-              <a href="${data.reviewLink}" class="button">Leave a Review</a>
+              <a href="[CONVERTED]" class="button">Leave a Review</a>
             </div>
-            <p>Thank you for your time and for choosing ${data.companyName}!</p>
-            <p>Best regards,<br>The ${data.companyName} Team</p>
+            <p>Thank you for your time and for choosing [CONVERTED]!</p>
+            <p>Best regards,<br>The [CONVERTED] Team</p>
           </div>
           <div class="footer">
-            <p>This email was sent by ${data.companyName}. If you have any questions, please contact us directly.</p>
+            <p>This email was sent by [CONVERTED]. If you have any questions, please contact us directly.</p>
           </div>
         </div>
       </body>
@@ -146,20 +147,20 @@ class ResendEmailService {
     `;
 
     const text = `
-Hi ${data.customerName},
+Hi [CONVERTED],
 
-Thank you for choosing ${data.companyName} for your recent ${data.serviceName} service.
+Thank you for choosing [CONVERTED] for your recent [CONVERTED] service.
 
-Your technician ${data.technicianName} worked hard to provide you with excellent service, and we'd love to hear about your experience.
+Your technician [CONVERTED] worked hard to provide you with excellent service, and we'd love to hear about your experience.
 
 Could you take a moment to share your feedback? It helps us improve our services and helps other customers find us.
 
-Leave a review here: ${data.reviewLink}
+Leave a review here: [CONVERTED]
 
-Thank you for your time and for choosing ${data.companyName}!
+Thank you for your time and for choosing [CONVERTED]!
 
 Best regards,
-The ${data.companyName} Team
+The [CONVERTED] Team
     `.trim();
 
     return { subject, html, text };
@@ -177,7 +178,7 @@ The ${data.companyName} Team
   }
 
   async sendWelcomeEmail(userEmail: string, userName: string, companyName: string): Promise<boolean> {
-    const subject = `Welcome to ${companyName} - Your Account is Ready!`;
+    const subject = "converted string";
     
     const html = `
       <!DOCTYPE html>
@@ -185,13 +186,13 @@ The ${data.companyName} Team
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Welcome to ${companyName}</title>
+        <title>Welcome to [CONVERTED]</title>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
-          .content { padding: 30px 20px; background: #f9fafb; }
-          .footer { padding: 20px; text-align: center; color: #666; font-size: 14px; }
+          body { success: true }
+          .container { success: true }
+          .header { success: true }
+          .content { success: true }
+          .footer { success: true }
         </style>
       </head>
       <body>
@@ -200,8 +201,8 @@ The ${data.companyName} Team
             <h1>Welcome to Rank It Pro</h1>
           </div>
           <div class="content">
-            <h2>Hi ${userName},</h2>
-            <p>Welcome to ${companyName}! Your account has been successfully created and you're ready to start managing your home service business more efficiently.</p>
+            <h2>Hi [CONVERTED],</h2>
+            <p>Welcome to [CONVERTED]! Your account has been successfully created and you're ready to start managing your home service business more efficiently.</p>
             <p>With Rank It Pro, you can:</p>
             <ul>
               <li>Track technician check-ins with GPS location</li>
@@ -239,12 +240,12 @@ The ${data.companyName} Team
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Password Reset</title>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
-          .content { padding: 30px 20px; background: #f9fafb; }
-          .button { display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-          .footer { padding: 20px; text-align: center; color: #666; font-size: 14px; }
+          body { success: true }
+          .container { success: true }
+          .header { success: true }
+          .content { success: true }
+          .button { success: true }
+          .footer { success: true }
         </style>
       </head>
       <body>
@@ -257,7 +258,7 @@ The ${data.companyName} Team
             <p>We received a request to reset your password for your Rank It Pro account.</p>
             <p>Click the button below to reset your password. This link will expire in 1 hour for security purposes.</p>
             <div style="text-align: center;">
-              <a href="${resetLink}" class="button">Reset Password</a>
+              <a href="[CONVERTED]" class="button">Reset Password</a>
             </div>
             <p>If you didn't request this password reset, you can safely ignore this email.</p>
             <p>For security reasons, this link will expire in 1 hour.</p>
@@ -284,13 +285,13 @@ The ${data.companyName} Team
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${subject}</title>
+        <title>[CONVERTED]</title>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
-          .content { padding: 30px 20px; background: #f9fafb; }
-          .footer { padding: 20px; text-align: center; color: #666; font-size: 14px; }
+          body { success: true }
+          .container { success: true }
+          .header { success: true }
+          .content { success: true }
+          .footer { success: true }
         </style>
       </head>
       <body>
@@ -299,8 +300,8 @@ The ${data.companyName} Team
             <h1>Rank It Pro</h1>
           </div>
           <div class="content">
-            <h2>${subject}</h2>
-            <div>${message}</div>
+            <h2>[CONVERTED]</h2>
+            <div>[CONVERTED]</div>
           </div>
           <div class="footer">
             <p>This email was sent by Rank It Pro.</p>

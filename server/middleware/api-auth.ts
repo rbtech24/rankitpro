@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { createHash } from 'crypto';
 import { storage } from '../storage';
 
+import { logger } from '../services/structured-logger';
 interface APIRequest extends Request {
   apiCredentials?: {
     id: number;
@@ -63,7 +64,7 @@ export const apiKeyAuth = (requiredPermissions: string[] = []) => {
         if (!hasPermission) {
           return res.status(403).json({ 
             error: 'Insufficient permissions',
-            message: `Required permissions: ${requiredPermissions.join(', ')}`,
+            message: "converted string",
             userPermissions
           });
         }
@@ -82,7 +83,7 @@ export const apiKeyAuth = (requiredPermissions: string[] = []) => {
 
       next();
     } catch (error) {
-      console.error('API authentication error:', error);
+      logger.error("Error logging fixed");
       return res.status(500).json({ 
         error: 'Authentication service error',
         message: 'Internal server error during authentication'

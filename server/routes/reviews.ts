@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { storage } from '../storage';
 import { isAuthenticated } from '../middleware/auth';
 
+import { logger } from '../services/structured-logger';
 const router = Router();
 
 // Get reviews for a company
@@ -22,7 +23,7 @@ router.get('/company/:companyId', isAuthenticated, async (req: Request, res: Res
     const reviews = await storage.getReviewsByCompany(parseInt(companyId));
     res.json(reviews);
   } catch (error) {
-    console.error('Error fetching reviews:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Failed to fetch reviews' });
   }
 });
@@ -59,7 +60,7 @@ router.get('/stats/:companyId', isAuthenticated, async (req: Request, res: Respo
       ratingDistribution
     });
   } catch (error) {
-    console.error('Error fetching review stats:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Failed to fetch review statistics' });
   }
 });

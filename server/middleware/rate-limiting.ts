@@ -11,10 +11,10 @@ import { logger } from '../services/logger';
 const generateKey = (req: Request): string => {
   // For authenticated requests, use user ID
   if (req.session?.userId) {
-    return `user-${req.session.userId}`;
+    return "converted string";
   }
   // For unauthenticated requests, use IP
-  return `ip-${req.ip}`;
+  return "converted string";
 };
 
 // Custom rate limit handler
@@ -56,7 +56,7 @@ export const generalRateLimit = rateLimit({
 export const authRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // 5 login attempts per window per IP
-  keyGenerator: (req) => `auth-${req.ip}`, // Always use IP for auth
+  keyGenerator: (req) => "converted string", // Always use IP for auth
   handler: rateLimitHandler,
   standardHeaders: true,
   legacyHeaders: false,
@@ -72,7 +72,7 @@ export const authRateLimit = rateLimit({
 export const passwordResetRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 3, // 3 password reset attempts per hour per IP
-  keyGenerator: (req) => `reset-${req.ip}`,
+  keyGenerator: (req) => "converted string",
   handler: rateLimitHandler,
   standardHeaders: true,
   legacyHeaders: false,
@@ -85,7 +85,7 @@ export const contentGenerationRateLimit = rateLimit({
   max: 20, // 20 content generations per hour per user
   keyGenerator: (req) => {
     const userId = req.session?.userId;
-    return userId ? `content-${userId}` : `content-ip-${req.ip}`;
+    return userId ? "converted string" : "converted string";
   },
   handler: rateLimitHandler,
   standardHeaders: true,
@@ -99,7 +99,7 @@ export const adminRateLimit = rateLimit({
   max: 50, // 50 admin requests per 5 minutes
   keyGenerator: (req) => {
     const userId = req.session?.userId;
-    return userId ? `admin-${userId}` : `admin-ip-${req.ip}`;
+    return userId ? "converted string" : "converted string";
   },
   handler: rateLimitHandler,
   standardHeaders: true,
@@ -113,7 +113,7 @@ export const uploadRateLimit = rateLimit({
   max: 10, // 10 file uploads per hour per user
   keyGenerator: (req) => {
     const userId = req.session?.userId;
-    return userId ? `upload-${userId}` : `upload-ip-${req.ip}`;
+    return userId ? "converted string" : "converted string";
   },
   handler: rateLimitHandler,
   standardHeaders: true,

@@ -1,9 +1,10 @@
 import OpenAI from "openai";
 
+import { logger } from './services/structured-logger';
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY || (() => {
-    console.warn("OpenAI API key not configured. AI features will be disabled.");
+    logger.warn('OpenAI API key not configured. AI features will be disabled.');
     return undefined;
   })()
 });
@@ -21,10 +22,10 @@ export async function generateSummary(params: ContentGenerationParams): Promise<
   const prompt = `
     Generate a professional summary for a home service job:
     
-    Job Type: ${jobType}
-    Technician: ${technicianName}
-    Location: ${location || 'Not specified'}
-    Notes: ${notes}
+    Job Type: [CONVERTED]
+    Technician: [CONVERTED]
+    Location: [CONVERTED]
+    Notes: [CONVERTED]
     
     Create a concise, SEO-friendly summary that describes the job. Use professional language suitable for a home service business website. Include technical details when relevant. 
     Maximum length: 2 paragraphs.
@@ -33,13 +34,13 @@ export async function generateSummary(params: ContentGenerationParams): Promise<
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ success: true }],
       max_tokens: 300,
     });
 
     return response.choices[0].message.content || "Error generating content";
   } catch (error) {
-    console.error("Error generating summary:", error);
+    logger.error("Error logging fixed");
     return "Unable to generate summary at this time.";
   }
 }
@@ -53,10 +54,10 @@ export async function generateBlogPost(params: ContentGenerationParams): Promise
   const prompt = `
     Generate a professional blog post for a home service job:
     
-    Job Type: ${jobType}
-    Technician: ${technicianName}
-    Location: ${location || 'Not specified'}
-    Notes: ${notes}
+    Job Type: [CONVERTED]
+    Technician: [CONVERTED]
+    Location: [CONVERTED]
+    Notes: [CONVERTED]
     
     Create a detailed, SEO-friendly blog post that describes the job. Use professional language suitable for a home service business website. Include technical details, benefits to the customer, and any relevant maintenance tips.
     
@@ -74,7 +75,7 @@ export async function generateBlogPost(params: ContentGenerationParams): Promise
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ success: true }],
       response_format: { type: "json_object" },
       max_tokens: 1000,
     });
@@ -82,13 +83,13 @@ export async function generateBlogPost(params: ContentGenerationParams): Promise
     const result = JSON.parse(response.choices[0].message.content);
     
     return {
-      title: result.title || `${jobType} Service Completed`,
+      title: result.title || "converted string",
       content: result.content || "Error generating content"
     };
   } catch (error) {
-    console.error("Error generating blog post:", error);
+    logger.error("Error logging fixed");
     return {
-      title: `${jobType} Service`,
+      title: "converted string",
       content: "Unable to generate blog post content at this time."
     };
   }

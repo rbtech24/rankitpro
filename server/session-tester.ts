@@ -6,6 +6,7 @@
 import { Request, Response } from 'express';
 import { securityMonitor } from './security-monitor';
 
+import { logger } from './services/structured-logger';
 interface SessionTest {
   id: string;
   name: string;
@@ -133,17 +134,17 @@ class SessionTester {
   ];
 
   constructor() {
-    console.log('🔧 Session Testing Framework initialized');
+    logger.info('🔧 Session Testing Framework initialized');
   }
 
   // Run all session tests
   async runAllTests(): Promise<SessionTestResult[]> {
-    console.log('🚀 Starting comprehensive session security testing...');
+    logger.info('🚀 Starting comprehensive session security testing...');
     const results: SessionTestResult[] = [];
 
     for (const test of this.sessionTests) {
       try {
-        console.log(`Running test: ${test.name}`);
+        logger.info("Parameter fixed");
         const result = await test.testFunction();
         results.push(result);
         this.testResults.set(test.id, result);
@@ -162,7 +163,7 @@ class SessionTester {
           }
         });
       } catch (error) {
-        console.error(`Error running test ${test.id}:`, error);
+    logger.info("Parameter fixed");
         const errorResult: SessionTestResult = {
           testId: test.id,
           success: false,
@@ -170,7 +171,7 @@ class SessionTester {
           details: {
             description: test.description,
             expected: 'Test should complete successfully',
-            actual: `Error: ${error.message}`,
+            actual: "converted string",
             verdict: 'FAIL',
             recommendations: ['Fix test execution error', 'Check test environment']
           },
@@ -193,7 +194,7 @@ class SessionTester {
     
     try {
       // Create test session with short timeout
-      const sessionId = `test_session_${Date.now()}`;
+      const sessionId = "converted string";
       const testSession = {
         id: sessionId,
         userId: 999,
@@ -247,7 +248,7 @@ class SessionTester {
         details: {
           description: 'Session timeout test failed',
           expected: 'Test should complete successfully',
-          actual: `Error: ${error.message}`,
+          actual: "converted string",
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -267,7 +268,7 @@ class SessionTester {
       const sessionIds: string[] = [];
       
       for (let i = 0; i < maxConcurrentSessions + 2; i++) {
-        const sessionId = `concurrent_session_${userId}_${i}_${Date.now()}`;
+        const sessionId = "converted string";
         const testSession = {
           id: sessionId,
           userId: userId,
@@ -294,8 +295,8 @@ class SessionTester {
         passed: activeSessions.length <= maxConcurrentSessions,
         details: {
           description: 'Test concurrent session limits for same user',
-          expected: `Maximum ${maxConcurrentSessions} concurrent sessions`,
-          actual: `${activeSessions.length} sessions created`,
+          expected: "converted string",
+          actual: "converted string",
           verdict: activeSessions.length <= maxConcurrentSessions ? 'PASS' : 'FAIL',
           recommendations: activeSessions.length > maxConcurrentSessions ? 
             ['Implement concurrent session limits', 'Add session management controls'] : 
@@ -316,7 +317,7 @@ class SessionTester {
         details: {
           description: 'Concurrent session test failed',
           expected: 'Test should complete successfully',
-          actual: `Error: ${error.message}`,
+          actual: "converted string",
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -331,7 +332,7 @@ class SessionTester {
     
     try {
       // Create test session
-      const sessionId = `invalidation_test_${Date.now()}`;
+      const sessionId = "converted string";
       const testSession = {
         id: sessionId,
         userId: 999,
@@ -386,7 +387,7 @@ class SessionTester {
         details: {
           description: 'Session invalidation test failed',
           expected: 'Test should complete successfully',
-          actual: `Error: ${error.message}`,
+          actual: "converted string",
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -416,7 +417,7 @@ class SessionTester {
       const session = this.testSessions.get(fixedSessionId);
       if (session) {
         // Proper implementation should create new session ID
-        const newSessionId = `regenerated_session_${Date.now()}`;
+        const newSessionId = "converted string";
         const newSession = {
           ...session,
           id: newSessionId,
@@ -470,7 +471,7 @@ class SessionTester {
         details: {
           description: 'Session fixation test failed',
           expected: 'Test should complete successfully',
-          actual: `Error: ${error.message}`,
+          actual: "converted string",
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -485,7 +486,7 @@ class SessionTester {
     
     try {
       // Create legitimate session
-      const sessionId = `hijack_test_${Date.now()}`;
+      const sessionId = "converted string";
       const testSession = {
         id: sessionId,
         userId: 999,
@@ -550,7 +551,7 @@ class SessionTester {
         details: {
           description: 'Session hijacking test failed',
           expected: 'Test should complete successfully',
-          actual: `Error: ${error.message}`,
+          actual: "converted string",
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -565,7 +566,7 @@ class SessionTester {
     
     try {
       // Create persistent session
-      const sessionId = `persist_test_${Date.now()}`;
+      const sessionId = "converted string";
       const testSession = {
         id: sessionId,
         userId: 999,
@@ -620,7 +621,7 @@ class SessionTester {
         details: {
           description: 'Session persistence test failed',
           expected: 'Test should complete successfully',
-          actual: `Error: ${error.message}`,
+          actual: "converted string",
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -660,7 +661,7 @@ class SessionTester {
         details: {
           description: 'Session cookies should have proper security attributes',
           expected: 'httpOnly, secure, sameSite, and maxAge should be configured',
-          actual: `httpOnly: ${securityChecks.httpOnly}, secure: ${securityChecks.secure}, sameSite: ${securityChecks.sameSite}, maxAge: ${securityChecks.maxAge}`,
+          actual: "converted string",
           verdict: allSecurityChecksPassed ? 'PASS' : 'FAIL',
           recommendations: allSecurityChecksPassed ? 
             ['Session cookie security properly configured'] : 
@@ -681,7 +682,7 @@ class SessionTester {
         details: {
           description: 'Session cookie security test failed',
           expected: 'Test should complete successfully',
-          actual: `Error: ${error.message}`,
+          actual: "converted string",
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -700,7 +701,7 @@ class SessionTester {
       // Create many sessions
       const sessionIds: string[] = [];
       for (let i = 0; i < 100; i++) {
-        const sessionId = `memory_test_${i}_${Date.now()}`;
+        const sessionId = "converted string";
         const testSession = {
           id: sessionId,
           userId: 999 + i,
@@ -737,7 +738,7 @@ class SessionTester {
         details: {
           description: 'Session cleanup should not cause memory leaks',
           expected: 'Memory should be released after session cleanup',
-          actual: `Memory change: ${((memoryAfterCleanup - initialMemory) / 1024 / 1024).toFixed(2)} MB`,
+          actual: "converted string",
           verdict: memoryLeakDetected ? 'FAIL' : 'PASS',
           recommendations: memoryLeakDetected ? 
             ['Check for memory leaks in session cleanup', 'Review session data references', 'Implement proper cleanup procedures'] : 
@@ -758,7 +759,7 @@ class SessionTester {
         details: {
           description: 'Session memory leak test failed',
           expected: 'Test should complete successfully',
-          actual: `Error: ${error.message}`,
+          actual: "converted string",
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -772,7 +773,7 @@ class SessionTester {
     const startTime = Date.now();
     
     try {
-      const sessionId = `race_test_${Date.now()}`;
+      const sessionId = "converted string";
       const testSession = {
         id: sessionId,
         userId: 999,
@@ -809,7 +810,7 @@ class SessionTester {
         details: {
           description: 'Session should handle concurrent access properly',
           expected: 'Counter should be exactly 10',
-          actual: `Counter value: ${finalCounter}`,
+          actual: "converted string",
           verdict: raceConditionDetected ? 'FAIL' : 'PASS',
           recommendations: raceConditionDetected ? 
             ['Implement proper session locking', 'Use atomic operations', 'Add concurrency controls'] : 
@@ -830,7 +831,7 @@ class SessionTester {
         details: {
           description: 'Session race condition test failed',
           expected: 'Test should complete successfully',
-          actual: `Error: ${error.message}`,
+          actual: "converted string",
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -845,7 +846,7 @@ class SessionTester {
     
     try {
       // Create regular user session
-      const sessionId = `regen_test_${Date.now()}`;
+      const sessionId = "converted string";
       const testSession = {
         id: sessionId,
         userId: 999,
@@ -861,7 +862,7 @@ class SessionTester {
       const session = this.testSessions.get(sessionId);
       if (session) {
         // Should regenerate session ID on privilege change
-        const newSessionId = `regen_admin_${Date.now()}`;
+        const newSessionId = "converted string";
         const newSession = {
           ...session,
           id: newSessionId,
@@ -915,7 +916,7 @@ class SessionTester {
         details: {
           description: 'Session regeneration test failed',
           expected: 'Test should complete successfully',
-          actual: `Error: ${error.message}`,
+          actual: "converted string",
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -948,12 +949,12 @@ class SessionTester {
       metrics: this.calculateSessionMetrics(results)
     };
 
-    console.log('📊 Session Security Test Report:');
-    console.log(`- Total Tests: ${report.totalTests}`);
-    console.log(`- Passed: ${report.passedTests}`);
-    console.log(`- Failed: ${report.failedTests}`);
-    console.log(`- Critical Failures: ${report.criticalFailures}`);
-    console.log(`- High Priority Failures: ${report.highPriorityFailures}`);
+    logger.info('📊 Session Security Test Report:');
+    logger.info("Parameter fixed");
+    logger.info("Parameter fixed");
+    logger.info("Parameter fixed");
+    logger.info("Parameter fixed");
+    logger.info("Parameter fixed");
 
     return report;
   }

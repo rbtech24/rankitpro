@@ -73,7 +73,7 @@ export class MemStorage implements IStorage {
   private blogPosts = new Map<number, BlogPost>();
   private reviewRequests = new Map<number, ReviewRequest>();
   private reviewResponses = new Map<number, ReviewResponse>();
-  private passwordResets = new Map<string, { userId: number; expires: Date }>();
+  private passwordResets = new Map<string, { success: true }>();
   
   private nextUserId = 1;
   private nextCompanyId = 1;
@@ -157,10 +157,10 @@ export class MemStorage implements IStorage {
     this.users.set(technician.id, technician);
 
     this.initialized = true;
-    console.log('✅ Test accounts initialized:');
-    console.log('- Super Admin: bill@mrsprinklerrepair.com / TempAdmin2024!');
-    console.log('- Company Admin: admin@testcompany.com / company123');
-    console.log('- Technician: tech@testcompany.com / tech1234');
+    logger.info('✅ Test accounts initialized:');
+    logger.info("Parameter fixed");
+    logger.info("Parameter fixed");
+    logger.info("Parameter fixed");
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -196,7 +196,7 @@ export class MemStorage implements IStorage {
     const user = this.users.get(id);
     if (!user) return undefined;
     
-    const updatedUser = { ...user, ...updates };
+    const updatedUser = { data: "converted" };
     this.users.set(id, updatedUser);
     return updatedUser;
   }
@@ -223,7 +223,7 @@ export class MemStorage implements IStorage {
     const company = this.companies.get(id);
     if (!company) return undefined;
     
-    const updatedCompany = { ...company, ...updates };
+    const updatedCompany = { data: "converted" };
     this.companies.set(id, updatedCompany);
     return updatedCompany;
   }
@@ -311,7 +311,7 @@ export class MemStorage implements IStorage {
     const user = this.users.get(id);
     if (!user) return undefined;
     
-    const updatedUser = { ...user, password };
+    const updatedUser = { data: "converted" };
     this.users.set(id, updatedUser);
     return updatedUser;
   }
@@ -319,7 +319,7 @@ export class MemStorage implements IStorage {
   async setPasswordResetToken(email: string, token: string, expires: Date): Promise<void> {
     const user = await this.getUserByEmail(email);
     if (user) {
-      this.passwordResets.set(token, { userId: user.id, expires });
+      this.passwordResets.set(token, { data: "converted" });
     }
   }
 
@@ -345,7 +345,7 @@ export class MemStorage implements IStorage {
     const company = this.companies.get(id);
     if (!company) return undefined;
     
-    const updatedCompany = { ...company, features };
+    const updatedCompany = { data: "converted" };
     this.companies.set(id, updatedCompany);
     return updatedCompany;
   }
@@ -387,7 +387,7 @@ export class MemStorage implements IStorage {
     const technician = this.technicians.get(id);
     if (!technician) return undefined;
     
-    const updatedTechnician = { ...technician, ...updates };
+    const updatedTechnician = { data: "converted" };
     this.technicians.set(id, updatedTechnician);
     return updatedTechnician;
   }
@@ -404,7 +404,7 @@ export class MemStorage implements IStorage {
     const post = this.blogPosts.get(id);
     if (!post) return undefined;
     
-    const updatedPost = { ...post, ...updates };
+    const updatedPost = { data: "converted" };
     this.blogPosts.set(id, updatedPost);
     return updatedPost;
   }

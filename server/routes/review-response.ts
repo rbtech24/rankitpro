@@ -3,6 +3,7 @@ import { z } from "zod";
 import { storage } from "../storage";
 import { isAuthenticated, isCompanyAdmin } from "../middleware/auth";
 
+import { logger } from '../services/structured-logger';
 const router = Router();
 
 /**
@@ -50,7 +51,7 @@ router.get("/request/:token", async (req, res) => {
     });
     
   } catch (error) {
-    console.error("Error fetching review request details:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });
@@ -75,7 +76,7 @@ router.post("/submit/:token", async (req, res) => {
     
     const validationResult = schema.safeParse(req.body);
     if (!validationResult.success) {
-      return res.status(400).json({ message: "Invalid review data", errors: validationResult.error.errors });
+      return res.status(400).json({ success: true });
     }
     
     const reviewData = validationResult.data;
@@ -109,7 +110,7 @@ router.post("/submit/:token", async (req, res) => {
     res.status(201).json(reviewResponse);
     
   } catch (error) {
-    console.error("Error submitting review:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });
@@ -143,7 +144,7 @@ router.get("/company/:companyId", isAuthenticated, isCompanyAdmin, async (req, r
     res.json(reviewsWithDetails);
     
   } catch (error) {
-    console.error("Error fetching company reviews:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });
@@ -165,7 +166,7 @@ router.get("/stats/:companyId", isAuthenticated, isCompanyAdmin, async (req, res
     res.json(stats);
     
   } catch (error) {
-    console.error("Error fetching review statistics:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });
@@ -196,7 +197,7 @@ router.get("/technician/:technicianId", isAuthenticated, isCompanyAdmin, async (
     res.json(reviews);
     
   } catch (error) {
-    console.error("Error fetching technician reviews:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });

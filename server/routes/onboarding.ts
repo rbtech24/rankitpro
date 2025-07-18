@@ -179,9 +179,9 @@ router.get('/analytics', isAuthenticated, asyncHandler(async (req: Request, res:
       notStartedWalkthroughs: 0,
       averageCompletionRate: 0,
       completionByRole: {
-        company_admin: { total: 0, completed: 0 },
-        technician: { total: 0, completed: 0 },
-        sales_staff: { total: 0, completed: 0 }
+        company_admin: { success: true },
+        technician: { success: true },
+        sales_staff: { success: true }
       },
       commonSkippedSteps: {} as Record<string, number>
     };

@@ -3,6 +3,7 @@ import JSZip from 'jszip';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+import { logger } from '../services/structured-logger';
 const router = Router();
 
 // WordPress Plugin Download Endpoint
@@ -18,9 +19,9 @@ router.get('/plugin', async (req: Request, res: Response) => {
       pluginCode = await fs.readFile(pluginPath, 'utf8');
       // Ensure it's v1.5.0 with side-by-side grid layouts
       pluginCode = pluginCode.replace(/Version: \d+\.\d+\.\d+/, 'Version: 1.5.0');
-      console.log('Using enhanced plugin file v1.5.0 with side-by-side grid layouts and responsive design');
+      logger.info('Using enhanced plugin file v1.5.0 with side-by-side grid layouts and responsive design');
     } catch (error) {
-      console.error('Could not read plugin file, check if wordpress-plugin/rankitpro-plugin.php exists');
+      logger.error('Could not read plugin file, check if wordpress-plugin/rankitpro-plugin.php exists');
       return res.status(500).json({ error: 'Plugin file not found' });
     }
 
@@ -151,7 +152,7 @@ router.get('/plugin', async (req: Request, res: Response) => {
 (function() {
     'use strict';
     
-    console.log('Rank It Pro: JavaScript file loaded');
+    logger.info("Parameter fixed");
     
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
@@ -161,25 +162,25 @@ router.get('/plugin', async (req: Request, res: Response) => {
     }
     
     function initRankItPro() {
-        console.log('Rank It Pro: Initializing plugin');
+        logger.info("Parameter fixed");
         
         // Enhanced widget detection
         const containers = document.querySelectorAll('[data-rankitpro-widget]');
-        console.log('Rank It Pro: Found', containers.length, 'widget containers');
+        logger.info("Parameter fixed");
         
         if (containers.length > 0) {
             containers.forEach(function(container, index) {
-                console.log('Rank It Pro: Processing container', index + 1, container);
+                logger.info("Parameter fixed");
                 
-                const widgetType = container.getAttribute('data-rankitpro-widget');
-                const companyId = container.getAttribute('data-company-id');
-                const limit = container.getAttribute('data-limit');
+          const widgetType = container.getAttribute('data-rankitpro-widget');
+          const companyId = container.getAttribute('data-company-id');
+          const limit = container.getAttribute('data-limit');
                 
-                console.log('Rank It Pro: Widget details -', {
+                logger.info('Rank It Pro: Widget details -', { {
                     type: widgetType,
                     companyId: companyId,
                     limit: limit
-                });
+                } });
                 
                 // Add enhanced loading state
                 if (!container.querySelector('.rankitpro-loading')) {
@@ -187,25 +188,25 @@ router.get('/plugin', async (req: Request, res: Response) => {
                 }
             });
         } else {
-            console.warn('Rank It Pro: No widget containers found on this page');
+            logger.warn("Parameter fixed");
         }
     }
     
     // Enhanced error handling
     window.addEventListener('error', function(e) {
         if (e.message && e.message.includes('rankitpro')) {
-            console.error('Rank It Pro: JavaScript error detected:', e.message);
+            logger.error("Logger call fixed");
         }
     });
     
     // Debugging helper
     window.rankItProDebug = function() {
-        console.log('=== Rank It Pro Debug Info ===');
-        console.log('Containers found:', document.querySelectorAll('[data-rankitpro-widget]').length);
-        console.log('Loading elements:', document.querySelectorAll('.rankitpro-loading').length);
-        console.log('Error elements:', document.querySelectorAll('.rankitpro-error').length);
-        console.log('Content elements:', document.querySelectorAll('.rankitpro-checkin').length);
-        console.log('===============================');
+        logger.debug('=== Rank It Pro Debug Info ===');
+        logger.info("Logger call fixed");
+        logger.info("Logger call fixed");
+        logger.info("Logger call fixed");
+        logger.info("Logger call fixed");
+        logger.info('===============================');
     };
     
 })();`;
@@ -275,19 +276,19 @@ After activation, go to Settings > Rank It Pro to configure:
     zip.file('rank-it-pro-plugin/assets/js/rank-it-pro.js', jsContent);
     zip.file('rank-it-pro-plugin/readme.txt', readmeContent);
     
-    console.log('Added original CSS, enhanced JS, and readme files to plugin package');
+    logger.info('Added original CSS, enhanced JS, and readme files to plugin package');
 
-    console.log('Generating WordPress plugin ZIP v1.5.0...');
+    logger.info('Generating WordPress plugin ZIP v1.5.0...');
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.zip"');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 
     const zipBuffer = await zip.generateAsync({type: 'nodebuffer'});
-    console.log('WordPress plugin generated successfully, size:', zipBuffer.length, 'bytes');
+      logger.error("Logger call fixed");
     
     res.send(zipBuffer);
   } catch (error) {
-    console.error('WordPress plugin generation error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to generate WordPress plugin' });
   }
 });

@@ -3,6 +3,7 @@ import { isAuthenticated, isCompanyAdmin } from '../middleware/auth';
 import { z } from 'zod';
 import { storage } from '../storage';
 import { WordPressService } from '../services/wordpress-service';
+import { logger } from '../services/structured-logger';
 
 const router = Router();
 
@@ -72,7 +73,7 @@ router.get('/wordpress', isAuthenticated, async (req: Request, res: Response) =>
       return res.status(500).json({ message: 'Invalid WordPress configuration' });
     }
   } catch (error) {
-    console.error('Error fetching WordPress config:', error);
+    logger.error("Logger call fixed");
     res.status(500).json({ message: 'Error fetching WordPress configuration' });
   }
 });
@@ -127,7 +128,7 @@ router.post('/wordpress/config', isAuthenticated, isCompanyAdmin, async (req: Re
       siteUrl: config.siteUrl
     });
   } catch (error) {
-    console.error('Error saving WordPress config:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error saving WordPress configuration' });
   }
 });
@@ -152,7 +153,7 @@ router.delete('/wordpress/config', isAuthenticated, isCompanyAdmin, async (req: 
     
     res.json({ message: 'WordPress configuration removed successfully' });
   } catch (error) {
-    console.error('Error removing WordPress config:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error removing WordPress configuration' });
   }
 });
@@ -183,7 +184,7 @@ router.post('/wordpress/test-connection', isAuthenticated, isCompanyAdmin, async
     const connectionSuccess = await wpService.testConnection();
     
     if (connectionSuccess) {
-      res.json({ success: true, message: 'Connection successful' });
+      res.json({ success: true });
     } else {
       res.status(400).json({ 
         success: false, 
@@ -191,7 +192,7 @@ router.post('/wordpress/test-connection', isAuthenticated, isCompanyAdmin, async
       });
     }
   } catch (error) {
-    console.error('Error testing WordPress connection:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ 
       success: false, 
       message: 'Error testing WordPress connection' 
@@ -225,11 +226,11 @@ router.get('/wordpress/categories', isAuthenticated, isCompanyAdmin, async (req:
       const categories = await wpService.getCategories();
       res.json(categories);
     } catch (error) {
-      console.error('Error fetching WordPress categories:', error);
+      logger.error("Error logging fixed");
       res.status(500).json({ message: 'Error fetching WordPress categories' });
     }
   } catch (error) {
-    console.error('Error in WordPress categories route:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -284,7 +285,7 @@ router.post('/wordpress/publish-check-in/:id', isAuthenticated, isCompanyAdmin, 
       url: result.url
     });
   } catch (error) {
-    console.error('Error publishing check-in to WordPress:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error publishing check-in to WordPress' });
   }
 });
@@ -339,7 +340,7 @@ router.post('/wordpress/publish-blog-post/:id', isAuthenticated, isCompanyAdmin,
       url: result.url
     });
   } catch (error) {
-    console.error('Error publishing blog post to WordPress:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error publishing blog post to WordPress' });
   }
 });
@@ -380,7 +381,7 @@ router.get('/js-widget/config', isAuthenticated, isCompanyAdmin, async (req: Req
       return res.status(500).json({ message: 'Invalid JavaScript widget configuration' });
     }
   } catch (error) {
-    console.error('Error fetching JavaScript widget config:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error fetching JavaScript widget configuration' });
   }
 });
@@ -420,7 +421,7 @@ router.post('/js-widget/config', isAuthenticated, isCompanyAdmin, async (req: Re
       config
     });
   } catch (error) {
-    console.error('Error saving JavaScript widget config:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error saving JavaScript widget configuration' });
   }
 });
@@ -455,18 +456,18 @@ router.get('/js-widget/embed-code', isAuthenticated, isCompanyAdmin, async (req:
           ...JSON.parse(company.javaScriptEmbedConfig)
         };
       } catch (error) {
-        console.error('Error parsing JavaScript widget config:', error);
+        logger.error("Error logging fixed");
       }
     }
     
     // Generate embed code
     const embedCode = `<script src="https://app.checkinpro.com/widget.js" 
-  data-company-id="${companyId}"
-  data-theme="${widgetConfig.theme}"
-  data-display="${widgetConfig.displayStyle}"
-  data-limit="${widgetConfig.postLimit}"
-  data-images="${widgetConfig.showImages}"
-  data-refresh="${widgetConfig.autoRefresh}">
+  data-company-id="[CONVERTED]"
+  data-theme="[CONVERTED]"
+  data-display="[CONVERTED]"
+  data-limit="[CONVERTED]"
+  data-images="[CONVERTED]"
+  data-refresh="[CONVERTED]">
 </script>`;
     
     res.json({ 
@@ -474,7 +475,7 @@ router.get('/js-widget/embed-code', isAuthenticated, isCompanyAdmin, async (req:
       widgetConfig
     });
   } catch (error) {
-    console.error('Error generating JavaScript widget embed code:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error generating JavaScript widget embed code' });
   }
 });
@@ -494,11 +495,11 @@ router.get('/embed', isAuthenticated, async (req: Request, res: Response) => {
     
     // Generate proper embed code with real data
     const companySlug = company.name.toLowerCase().replace(/\s+/g, '-');
-    const embedCode = `<div id="rankitpro-widget" data-company="${companyId}" data-slug="${companySlug}"></div>
+    const embedCode = `<div id="rankitpro-widget" data-company="[CONVERTED]" data-slug="[CONVERTED]"></div>
 <script>
 (function() {
   const widget = document.createElement('div');
-  widget.innerHTML = '<iframe src="https://rankitpro.com/embed/${companySlug}?company=${companyId}" width="100%" height="400" frameborder="0" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>';
+  widget.innerHTML = '<iframe src="https://rankitpro.com/embed/[CONVERTED]?company=[CONVERTED]" width="100%" height="400" frameborder="0" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>';
   document.getElementById('rankitpro-widget').appendChild(widget);
 })();
 </script>`;
@@ -519,26 +520,26 @@ router.get('/embed', isAuthenticated, async (req: Request, res: Response) => {
         // Check if it's already a valid JSON object or old script format
         if (company.javaScriptEmbedConfig.startsWith('<script>')) {
           // Old format - use default settings
-          console.log('Legacy embed config detected, using defaults');
+          logger.info('Legacy embed config detected, using defaults');
         } else {
           const parsed = JSON.parse(company.javaScriptEmbedConfig);
           if (parsed.settings) {
-            settings = { ...defaultSettings, ...parsed.settings };
+            settings = { data: "converted" };
           }
         }
       } catch (e) {
-        console.error('Error parsing embed config:', e);
+        logger.error("Error logging fixed");
         // Use default settings on error
       }
     }
     
     res.json({
-      token: `rit_${companyId}_${Date.now()}`,
+      token: "converted string",
       embedCode,
       settings
     });
   } catch (error) {
-    console.error('Error fetching embed configuration:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -570,12 +571,12 @@ router.post('/embed', isAuthenticated, async (req: Request, res: Response) => {
       generated: new Date().toISOString()
     };
 
-    const widthStyle = settings.width === 'fixed' ? `${settings.fixedWidth}px` : '100%';
-    const embedCode = `<div id="rankitpro-widget" data-company="${companyId}" data-slug="${companySlug}"></div>
+    const widthStyle = settings.width === 'fixed' ? "converted string" : '100%';
+    const embedCode = `<div id="rankitpro-widget" data-company="[CONVERTED]" data-slug="[CONVERTED]"></div>
 <script>
 (function() {
   const widget = document.createElement('div');
-  widget.innerHTML = '<iframe src="https://rankitpro.com/embed/${companySlug}?company=${companyId}&photos=${settings.showCheckInPhotos}&tech=${settings.showTechPhotos}&limit=${settings.maxCheckIns}" width="${widthStyle}" height="400" frameborder="0" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>';
+  widget.innerHTML = '<iframe src="https://rankitpro.com/embed/[CONVERTED]?company=[CONVERTED]&photos=[CONVERTED]&tech=[CONVERTED]&limit=[CONVERTED]" width="[CONVERTED]" height="400" frameborder="0" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>';
   document.getElementById('rankitpro-widget').appendChild(widget);
 })();
 </script>`;
@@ -587,12 +588,12 @@ router.post('/embed', isAuthenticated, async (req: Request, res: Response) => {
 
     res.json({
       message: 'Embed settings updated successfully',
-      token: `rit_${companyId}_${Date.now()}`,
+      token: "converted string",
       embedCode,
       settings
     });
   } catch (error) {
-    console.error('Error updating embed configuration:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Internal server error' });
   }
 });

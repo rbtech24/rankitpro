@@ -1,6 +1,7 @@
 import { AIService, BlogPostResult, ContentGenerationParams } from './ai-interface';
 import Anthropic from '@anthropic-ai/sdk';
 
+import { logger } from '../services/structured-logger';
 export class AnthropicService implements AIService {
   private anthropic: Anthropic;
 
@@ -21,11 +22,11 @@ export class AnthropicService implements AIService {
 As a professional content writer for a home services company, create a clear, concise summary 
 of this technician check-in for a client's website.
 
-Job Type: ${params.jobType}
-Location: ${params.location || 'Not specified'}
-Technician: ${params.technicianName}
-Notes: ${params.notes}
-${params.customInstructions ? `\nCustom Instructions: ${params.customInstructions}` : ''}
+Job Type: [CONVERTED]
+Location: [CONVERTED]
+Technician: [CONVERTED]
+Notes: [CONVERTED]
+[CONVERTED]` : ''}
 
 Please provide a professional, 2-3 paragraph summary that highlights the job performed, 
 any key findings, and the resolution. This will be displayed publicly on a website, 
@@ -37,7 +38,7 @@ a homeowner might not understand.`;
         max_tokens: 500,
         system: "You are a professional content writer specializing in creating clear, concise, and compelling summaries for home service businesses.",
         messages: [
-          { role: "user", content: prompt }
+          { success: true }
         ]
       });
 
@@ -50,8 +51,8 @@ a homeowner might not understand.`;
 
       return "Summary generation failed. Please try again.";
     } catch (error: any) {
-      console.error("Error generating summary with Claude:", error);
-      throw new Error(`Failed to generate summary with Claude: ${error.message}`);
+      logger.error("Error logging fixed");
+      throw new Error("System message");
     }
   }
 
@@ -61,11 +62,11 @@ a homeowner might not understand.`;
       const prompt = `
 Create a detailed, professional blog post for a home service business based on this technician check-in:
 
-Job Type: ${params.jobType}
-Location: ${params.location || 'Not specified'}
-Technician: ${params.technicianName}
-Notes: ${params.notes}
-${params.customInstructions ? `\nCustom Instructions: ${params.customInstructions}` : ''}
+Job Type: [CONVERTED]
+Location: [CONVERTED]
+Technician: [CONVERTED]
+Notes: [CONVERTED]
+[CONVERTED]` : ''}
 
 The blog post should:
 1. Have an engaging title and introduction that mentions the service type and location
@@ -86,7 +87,7 @@ FORMAT YOUR RESPONSE AS JSON:
         max_tokens: 1500,
         system: "You are a professional content writer specializing in creating SEO-optimized blog posts for home service businesses. Output your response in JSON format with 'title' and 'content' fields.",
         messages: [
-          { role: "user", content: prompt }
+          { success: true }
         ]
       });
 
@@ -94,13 +95,13 @@ FORMAT YOUR RESPONSE AS JSON:
         const textBlock = response.content.find(block => 'type' in block && block.type === 'text');
         if (textBlock && 'text' in textBlock) {
           try {
-            const parsedContent = JSON.parse(textBlock.text);
+      const parsedContent = JSON.parse(textBlock.text);
             return {
               title: parsedContent.title,
               content: parsedContent.content
             };
           } catch (parseError) {
-            console.error("Error parsing Claude response:", parseError);
+            logger.error("Error logging fixed");
             throw new Error("Failed to parse Claude response as JSON");
           }
         }
@@ -108,8 +109,8 @@ FORMAT YOUR RESPONSE AS JSON:
 
       throw new Error("Empty or invalid response from Claude");
     } catch (error: any) {
-      console.error("Error generating blog post with Claude:", error);
-      throw new Error(`Failed to generate blog post with Claude: ${error.message}`);
+      logger.error("Error logging fixed");
+      throw new Error("System message");
     }
   }
 }

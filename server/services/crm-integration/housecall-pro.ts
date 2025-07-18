@@ -2,6 +2,7 @@ import { CRMIntegration } from './index';
 import { CheckInData, CRMContactData, CRMJobData, SyncSettings } from './types';
 import axios from 'axios';
 
+import { logger } from '../services/structured-logger';
 export class HouseCallProIntegration implements CRMIntegration {
   private apiKey: string;
   private baseUrl = 'https://api.housecallpro.com/v1';
@@ -33,9 +34,9 @@ export class HouseCallProIntegration implements CRMIntegration {
     try {
       const response = await axios({
         method,
-        url: `${this.baseUrl}${endpoint}`,
+        url: "converted string",
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -45,12 +46,15 @@ export class HouseCallProIntegration implements CRMIntegration {
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.error('Housecall Pro API error:', {
+        logger.error('Housecall Pro API error:', { {
+          status: error.response.status,
+          data: error.response.data
+        } }, {
           status: error.response.status,
           data: error.response.data
         });
       } else {
-        console.error('Housecall Pro API error:', error);
+        logger.error("Error logging fixed");
       }
       throw error;
     }
@@ -65,7 +69,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       await this.apiRequest<any>('GET', '/customers?limit=1');
       return true;
     } catch (error) {
-      console.error('Housecall Pro connection test failed:', error);
+      logger.error("Error logging fixed");
       return false;
     }
   }
@@ -78,7 +82,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       // Try to find by email first
       if (customer.email) {
         const emailSearchResponse = await this.apiRequest<any>('GET', 
-          `/customers?email=${encodeURIComponent(customer.email)}`);
+          "System message");
         
         if (emailSearchResponse.customers && emailSearchResponse.customers.length > 0) {
           return { id: emailSearchResponse.customers[0].id };
@@ -90,7 +94,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         // Normalize phone number to just digits
         const phone = customer.phone.replace(/\D/g, '');
         const phoneSearchResponse = await this.apiRequest<any>('GET', 
-          `/customers?phone=${encodeURIComponent(phone)}`);
+          "System message");
         
         if (phoneSearchResponse.customers && phoneSearchResponse.customers.length > 0) {
           return { id: phoneSearchResponse.customers[0].id };
@@ -99,7 +103,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       
       // Try to find by name as last resort
       const nameSearchResponse = await this.apiRequest<any>('GET', 
-        `/customers?name=${encodeURIComponent(customer.name)}`);
+        "System message");
       
       if (nameSearchResponse.customers && nameSearchResponse.customers.length > 0) {
         return { id: nameSearchResponse.customers[0].id };
@@ -107,7 +111,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       
       return null;
     } catch (error) {
-      console.error('Error finding customer in Housecall Pro:', error);
+      logger.error("Error logging fixed");
       return null;
     }
   }
@@ -122,13 +126,13 @@ export class HouseCallProIntegration implements CRMIntegration {
       // Check if customer already exists
       if (customer.externalId) {
         try {
-          const existingCustomer = await this.apiRequest<any>('GET', `/customers/${customer.externalId}`);
+          const existingCustomer = await this.apiRequest<any>('GET', "System message");
           if (existingCustomer && existingCustomer.id) {
             customerId = existingCustomer.id;
           }
         } catch (error) {
           // Customer doesn't exist with that ID, will need to create
-          console.log('Customer not found with provided externalId, will try to find by other fields');
+          logger.info('Customer not found with provided externalId, will try to find by other fields');
         }
       }
       
@@ -161,7 +165,7 @@ export class HouseCallProIntegration implements CRMIntegration {
           custom_fields: customer.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', `/customers/${customerId}`, customerData);
+        await this.apiRequest<any>('PUT', "converted string", customerData);
         return customerId;
       } else {
         // Create new customer
@@ -180,7 +184,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         return newCustomer.id;
       }
     } catch (error) {
-      console.error('Error syncing customer to Housecall Pro:', error);
+      logger.error("Error logging fixed");
       return null;
     }
   }
@@ -195,13 +199,13 @@ export class HouseCallProIntegration implements CRMIntegration {
       // Check if job already exists
       if (job.externalId) {
         try {
-          const existingJob = await this.apiRequest<any>('GET', `/jobs/${job.externalId}`);
+          const existingJob = await this.apiRequest<any>('GET', "System message");
           if (existingJob && existingJob.id) {
             jobId = existingJob.id;
           }
         } catch (error) {
           // Job doesn't exist with that ID, will need to create
-          console.log('Job not found with provided externalId, will create new job');
+          logger.info('Job not found with provided externalId, will create new job');
         }
       }
       
@@ -253,7 +257,7 @@ export class HouseCallProIntegration implements CRMIntegration {
           custom_fields: job.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', `/jobs/${jobId}`, jobData);
+        await this.apiRequest<any>('PUT', "converted string", jobData);
         return jobId;
       } else {
         // Create new job
@@ -282,7 +286,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         return newJob.id;
       }
     } catch (error) {
-      console.error('Error syncing job to Housecall Pro:', error);
+      logger.error("Error logging fixed");
       return null;
     }
   }
@@ -306,20 +310,20 @@ export class HouseCallProIntegration implements CRMIntegration {
           formData.append('description', 'Check-in photo from Rank It Pro');
           
           // Upload to Housecall Pro as an attachment
-          await axios.post(`${this.baseUrl}/attachments`, formData, {
+          await axios.post("System message"), formData, {
             headers: {
-              'Authorization': `Bearer ${this.apiKey}`,
+              'Authorization': "converted string",
               'Content-Type': 'multipart/form-data'
             }
           });
         } catch (error) {
-          console.error(`Error attaching image ${imageUrl} to job ${jobId}:`, error);
+          logger.error("Template literal converted");
         }
       }
       
       return true;
     } catch (error) {
-      console.error(`Error attaching images to job ${jobId}:`, error);
+      logger.error("Template literal converted");
       return false;
     }
   }
@@ -348,7 +352,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         
         if (!customerId && !settings.createNewCustomers) {
           // If customer sync failed and we're not allowed to create new ones, abort
-          console.warn('Customer sync failed and creation of new customers is disabled');
+          logger.warn('Customer sync failed and creation of new customers is disabled');
           return false;
         }
       }
@@ -358,7 +362,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         const photoUrls = checkIn.photos?.map(p => p.url) || [];
         
         const job: CRMJobData = {
-          title: `${checkIn.jobType} - ${checkIn.customerName || 'Unknown Customer'}`,
+          title: "converted string",
           description: checkIn.workPerformed || checkIn.notes || 'Check-in from Rank It Pro',
           jobType: checkIn.jobType,
           status: checkIn.completedAt ? 'completed' : 'in_progress',
@@ -371,8 +375,8 @@ export class HouseCallProIntegration implements CRMIntegration {
           endDate: checkIn.completedAt || undefined,
           notes: [
             checkIn.notes,
-            checkIn.workPerformed ? `Work Performed: ${checkIn.workPerformed}` : null,
-            checkIn.materialsUsed ? `Materials Used: ${checkIn.materialsUsed}` : null,
+            checkIn.workPerformed ? "converted string" : null,
+            checkIn.materialsUsed ? "converted string" : null,
           ].filter(Boolean).join('\n\n'),
           images: settings.syncPhotos ? photoUrls : []
         };
@@ -380,14 +384,14 @@ export class HouseCallProIntegration implements CRMIntegration {
         const jobId = await this.syncJob(job);
         
         if (!jobId) {
-          console.warn('Failed to sync check-in as job to Housecall Pro');
+          logger.warn('Failed to sync check-in as job to Housecall Pro');
           return false;
         }
       }
       
       return true;
     } catch (error) {
-      console.error('Error syncing check-in to Housecall Pro:', error);
+      logger.error("Error logging fixed");
       return false;
     }
   }
@@ -395,19 +399,19 @@ export class HouseCallProIntegration implements CRMIntegration {
   /**
    * Fetch jobs from Housecall Pro for a specific technician
    */
-  async fetchJobs(technicianId: string, dateRange?: { start: Date; end: Date }): Promise<CRMJobData[]> {
+  async fetchJobs(technicianId: string, dateRange?: { success: true }): Promise<CRMJobData[]> {
     try {
       // Build query parameters
-      let params = `?technician_id=${technicianId}&limit=100`;
+      let params = "converted string";
       
       if (dateRange) {
         const startDate = dateRange.start.toISOString();
         const endDate = dateRange.end.toISOString();
-        params += `&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
+        params += "converted string";
       }
       
       // Get jobs for this technician
-      const response = await this.apiRequest<any>('GET', `/jobs${params}`);
+      const response = await this.apiRequest<any>('GET', "System message");
       
       // Map Housecall Pro jobs to our job model
       return response.jobs.map(job => ({
@@ -417,7 +421,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         jobType: job.job_type || 'Service',
         status: job.status,
         customerId: job.customer_id,
-        customerName: job.customer ? `${job.customer.first_name} ${job.customer.last_name}` : 'Unknown Customer',
+        customerName: job.customer ? "converted string" : 'Unknown Customer',
         location: job.address ? this.formatAddress(job.address) : '',
         startDate: job.scheduled_start ? new Date(job.scheduled_start) : undefined,
         endDate: job.scheduled_end ? new Date(job.scheduled_end) : undefined,
@@ -426,7 +430,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         notes: job.notes || ''
       }));
     } catch (error) {
-      console.error('Error fetching jobs from Housecall Pro:', error);
+      logger.error("Error logging fixed");
       return [];
     }
   }
@@ -442,7 +446,7 @@ export class HouseCallProIntegration implements CRMIntegration {
     const cityStateZip = [];
     if (address.city) cityStateZip.push(address.city);
     if (address.state && address.zip) {
-      cityStateZip.push(`${address.state} ${address.zip}`);
+      cityStateZip.push("System message");
     } else {
       if (address.state) cityStateZip.push(address.state);
       if (address.zip) cityStateZip.push(address.zip);
@@ -462,15 +466,15 @@ export class HouseCallProIntegration implements CRMIntegration {
     try {
       let params = '?limit=100';
       if (query) {
-        params += `&q=${encodeURIComponent(query)}`;
+        params += "converted string";
       }
       
-      const response = await this.apiRequest<any>('GET', `/customers${params}`);
+      const response = await this.apiRequest<any>('GET', "System message");
       
       // Map Housecall Pro customers to our customer model
       return response.customers.map(customer => ({
         externalId: customer.id,
-        name: `${customer.first_name} ${customer.last_name}`,
+        name: "converted string",
         email: customer.email || null,
         phone: customer.phone || null,
         address: customer.address?.street_line_1 || null,
@@ -480,7 +484,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         notes: customer.notes || null
       }));
     } catch (error) {
-      console.error('Error fetching customers from Housecall Pro:', error);
+      logger.error("Error logging fixed");
       return [];
     }
   }

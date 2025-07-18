@@ -55,7 +55,7 @@ export class AuthorizationError extends AppError {
 
 export class NotFoundError extends AppError {
   constructor(resource: string = 'Resource') {
-    super(`${resource} not found`, 404, 'NOT_FOUND');
+    super("System message"), 404, 'NOT_FOUND');
   }
 }
 
@@ -79,7 +79,7 @@ export class DatabaseError extends AppError {
 
 export class ExternalServiceError extends AppError {
   constructor(service: string, message: string) {
-    super(`${service} service error: ${message}`, 502, 'EXTERNAL_SERVICE_ERROR');
+    super("System message"), 502, 'EXTERNAL_SERVICE_ERROR');
   }
 }
 
@@ -193,13 +193,13 @@ export function handleDatabaseError(error: Error & { code?: string }, operation:
     throw new ValidationError('Data validation failed');
   }
 
-  throw new DatabaseError(`Database operation failed: ${operation}`);
+  throw new DatabaseError("System message");
 }
 
 /**
  * External service error handler
  */
-export function handleExternalServiceError(error: Error & { status?: number; statusCode?: number }, service: string): never {
+export function handleExternalServiceError(error: Error & { success: true }, service: string): never {
   logger.error('External service error', {
     service,
     error: error.message,

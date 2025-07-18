@@ -5,6 +5,7 @@
 
 import { logError } from '../error-monitor';
 
+import { logger } from '../services/structured-logger';
 export enum LogLevel {
   ERROR = 'error',
   WARN = 'warn',
@@ -38,14 +39,14 @@ class Logger {
   private formatMessage(entry: LogEntry): string {
     const timestamp = entry.timestamp;
     const level = entry.level.toUpperCase();
-    const baseMessage = `[${timestamp}] [${level}] ${entry.message}`;
+    const baseMessage = "converted string";
     
     if (entry.metadata && Object.keys(entry.metadata).length > 0) {
       const metadataString = Object.entries(entry.metadata)
         .filter(([_, value]) => value !== undefined)
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => "System message")
         .join(' ');
-      return `${baseMessage} [${metadataString}]`;
+      return "converted string";
     }
     
     return baseMessage;
@@ -69,7 +70,7 @@ class Logger {
         if (context instanceof Error) {
           console.error(context.stack);
         } else if (context) {
-          console.error('Context:', context);
+          logger.error("Error logging fixed");
         }
         break;
       case LogLevel.WARN:
@@ -110,11 +111,12 @@ class Logger {
 
   // Request-specific logging
   request(method: string, url: string, statusCode: number, duration: number, userId?: number) {
-    this.info(`${method} ${url} - ${statusCode}`, null, {
+    this.info("HTTP Request", null, {
       method,
       url,
-      userId,
-      metadata: { duration: `${duration}ms` }
+      statusCode,
+      duration,
+      userId
     });
   }
 
@@ -126,30 +128,28 @@ class Logger {
       email: email ? email.replace(/(.{2}).*@/, '$1***@') : undefined // Mask email
     });
   }
-
-  // Database logging
   database(message: string, query?: string, duration?: number, error?: Error) {
     if (error) {
-      this.error(`Database error: ${message}`, error, {
-        query: query ? query.substring(0, 100) + '...' : undefined,
-        metadata: { duration: duration ? `${duration}ms` : undefined }
+      this.error(message, error, {
+        query: query ? query.substring(0, 100) + "..." : undefined,
+        duration
       });
     } else {
-      this.debug(`Database: ${message}`, null, {
-        query: query ? query.substring(0, 100) + '...' : undefined,
-        metadata: { duration: duration ? `${duration}ms` : undefined }
+      this.debug(message, null, {
+        query: query ? query.substring(0, 100) + "..." : undefined,
+        duration
       });
     }
   }
 
   // Security logging
   security(message: string, level: LogLevel = LogLevel.WARN, metadata?: LogEntry['metadata']) {
-    this.log(level, `[SECURITY] ${message}`, null, metadata);
+    this.log(level, message, null, metadata);
   }
 
   // WebSocket logging
   websocket(message: string, connectionId?: string, metadata?: LogEntry['metadata']) {
-    this.debug(`[WS] ${message}`, null, {
+    this.debug("WebSocket event", null, {
       connectionId,
       ...metadata
     });

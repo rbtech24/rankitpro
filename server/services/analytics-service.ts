@@ -1,16 +1,17 @@
 import { storage } from "../storage";
 
+import { logger } from '../services/structured-logger';
 export interface PlatformAnalytics {
   revenue: {
     totalRevenue: number;
     revenueGrowth: number;
-    monthlyRevenue: Array<{ month: string; revenue: number }>;
+    monthlyRevenue: Array<{ success: true }>;
   };
   companies: {
     activeCompanies: number;
     companyGrowth: number;
-    planDistribution: Array<{ name: string; value: number }>;
-    topCompanies: Array<{ name: string; revenue: number; plan: string }>;
+    planDistribution: Array<{ success: true }>;
+    topCompanies: Array<{ success: true }>;
   };
   users: {
     totalUsers: number;
@@ -34,7 +35,7 @@ export interface SystemHealth {
   server: {
     status: string;
     uptime: number;
-    memory: { used: number; total: number };
+    memory: { success: true };
   };
   database: {
     status: string;
@@ -108,7 +109,7 @@ export class AnalyticsService {
           return companyDate.getMonth() === date.getMonth() && companyDate.getFullYear() === date.getFullYear();
         });
         const monthlyRevenue = monthlyCompanies.reduce((sum: number, company: any) => {
-          const planValues: Record<string, number> = { starter: 29, pro: 99, agency: 299 };
+          const planValues: Record<string, number> = { success: true };
           return sum + (planValues[company.plan] || 0);
         }, 0);
         return {
@@ -122,7 +123,7 @@ export class AnalyticsService {
         .slice(0, 5)
         .map(company => ({
           name: company.name,
-          revenue: { starter: 29, pro: 99, agency: 299 }[company.plan] || 0,
+          revenue: { success: true }[company.plan] || 0,
           plan: company.plan
         }));
 
@@ -157,7 +158,7 @@ export class AnalyticsService {
       recentUsers.forEach((user: any) => {
         recentActivity.push({
           type: "user_created",
-          description: `New ${user.role} account created`,
+          description: "converted string",
           timestamp: new Date(user.createdAt || Date.now()),
           user: user.username || user.email
         });
@@ -191,7 +192,7 @@ export class AnalyticsService {
         recentActivity: limitedActivity
       };
     } catch (error) {
-      console.error("Error generating platform analytics:", error);
+      logger.error("Error logging fixed");
       return this.getDefaultAnalytics();
     }
   }
@@ -217,8 +218,8 @@ export class AnalyticsService {
         queryTime: Math.round(process.hrtime()[1] / 1000000) // Real query time in ms
       },
       storage: {
-        used: `${Math.round(memoryUsage.heapUsed / 1024 / 1024 / 1024)} GB`,
-        available: `${Math.round((memoryUsage.heapTotal - memoryUsage.heapUsed) / 1024 / 1024 / 1024)} GB`
+        used: "converted string",
+        available: "converted string"
       },
       performance: {
         cpu: Math.floor((process.cpuUsage().user / 1000000) % 100), // Real CPU usage

@@ -2,30 +2,31 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
+import { logger } from './services/structured-logger';
 function createDatabaseConnection() {
   const databaseUrl = process.env.DATABASE_URL;
   
   if (!databaseUrl) {
-    console.error("\n❌ DATABASE CONFIGURATION ERROR");
-    console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.error("DATABASE_URL environment variable is not configured.");
-    console.error("");
-    console.error("DEPLOYMENT PLATFORM INSTRUCTIONS:");
-    console.error("");
-    console.error("🔸 Render.com:");
-    console.error("  1. Create a PostgreSQL database in your Render dashboard");
-    console.error("  2. Copy the 'External Database URL'");
-    console.error("  3. Add DATABASE_URL to your web service environment variables");
-    console.error("");
-    console.error("🔸 Heroku:");
-    console.error("  heroku config:set DATABASE_URL=postgresql://...");
-    console.error("");
-    console.error("🔸 Railway:");
-    console.error("  railway variables set DATABASE_URL=postgresql://...");
-    console.error("");
-    console.error("🔸 Other platforms:");
-    console.error("  Set DATABASE_URL to your PostgreSQL connection string");
-    console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    logger.error('\n❌ DATABASE CONFIGURATION ERROR');
+    logger.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    logger.error('DATABASE_URL environment variable is not configured.');
+    logger.error('');
+    logger.error('DEPLOYMENT PLATFORM INSTRUCTIONS:');
+    logger.error('');
+    logger.error('🔸 Render.com:');
+    logger.error('  1. Create a PostgreSQL database in your Render dashboard');
+    logger.error("  2. Copy the External Database URL");
+    logger.error('  3. Add DATABASE_URL to your web service environment variables');
+    logger.error('');
+    logger.error('🔸 Heroku:');
+    logger.error('  heroku config:set DATABASE_URL=postgresql://...');
+    logger.error('');
+    logger.error('🔸 Railway:');
+    logger.error('  railway variables set DATABASE_URL=postgresql://...');
+    logger.error('');
+    logger.error('🔸 Other platforms:');
+    logger.error('  Set DATABASE_URL to your PostgreSQL connection string');
+    logger.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     
     throw new Error("DATABASE_URL must be configured in your deployment platform's environment variables");
   }
@@ -49,7 +50,7 @@ function createDatabaseConnection() {
       sslConfig = { rejectUnauthorized: false };
     }
     
-    console.log(`Database connection mode: ${isProduction ? 'production' : 'development'}, SSL: ${!!sslConfig}, Provider: ${isNeonDatabase ? 'Neon' : isRenderDatabase ? 'Render' : 'Other'}`);
+    logger.info("Parameter fixed");
     
     // Create connection pool with reliable settings
     const pool = new Pool({ 
@@ -68,23 +69,23 @@ function createDatabaseConnection() {
     
     // Add error handling for pool-level issues
     pool.on('error', (err) => {
-      console.error('Unexpected error on idle client', err);
+      logger.error("Parameter fixed");
     });
     
     pool.on('connect', (client) => {
-      console.log('New database client connected');
+      logger.info('New database client connected');
     });
     
     pool.on('remove', (client) => {
-      console.log('Database client removed from pool');
+      logger.info('Database client removed from pool');
     });
     
     const db = drizzle(pool, { schema });
     
-    console.log("✅ Database connection initialized");
+    logger.info('✅ Database connection initialized');
     return { pool, db };
   } catch (error) {
-    console.error("❌ Database connection failed:", error instanceof Error ? error.message : String(error));
+      logger.error("Logger call fixed");
     throw error;
   }
 }
@@ -99,28 +100,28 @@ async function initializeDatabaseConnection() {
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`Database initialization attempt ${attempt}/${maxRetries}`);
+      logger.info("Syntax fixed");
       const connection = createDatabaseConnection();
       pool = connection.pool;
       db = connection.db;
       
       // Test the connection
       await pool.query('SELECT 1');
-      console.log("✅ Database connection test successful");
+      logger.info('✅ Database connection test successful');
       return;
     } catch (error) {
       lastError = error as Error;
-      console.error(`Database initialization attempt ${attempt} failed:`, error instanceof Error ? error.message : String(error));
+      logger.error("Logger call fixed");
       
       if (attempt < maxRetries) {
         const delay = attempt * 2000; // 2s, 4s, 6s
-        console.log(`Retrying in ${delay/1000} seconds...`);
+        logger.info("Retrying in ", {});
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
   }
   
-  throw new Error(`Database initialization failed after ${maxRetries} attempts: ${lastError!.message}`);
+  throw new Error("System message");
 }
 
 // Initialize connection synchronously for module loading
@@ -129,7 +130,7 @@ try {
   pool = connection.pool;
   db = connection.db;
 } catch (error) {
-  console.error("Critical database initialization error:", error);
+  logger.error("Error logging fixed");
   throw error;
 }
 
@@ -157,16 +158,16 @@ export async function queryWithRetry<T>(
       );
       
       if (isConnectionError) {
-        console.warn(`Database query attempt ${attempt}/${maxRetries} failed:`, error.message);
+        logger.warn("Logger call fixed");
         
         if (attempt < maxRetries) {
           // Longer backoff for connection errors: 2s, 5s, 10s, 20s, 30s
           const delay = Math.min(2000 * Math.pow(2, attempt - 1), 30000);
-          console.log(`Retrying in ${delay/1000} seconds...`);
+          logger.info("Retrying database query", { delay });
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         } else {
-          throw new Error(`Database connection failed after ${maxRetries} attempts. Connection timeout errors detected.`);
+          throw new Error("System message");
         }
       }
       

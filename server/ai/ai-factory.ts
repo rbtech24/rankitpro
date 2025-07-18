@@ -5,6 +5,7 @@ import { XAIService } from './xai-service';
 import { AIProviderType } from './types';
 import { BlogPostResult, ContentGenerationParams } from './ai-interface';
 
+import { logger } from '../services/structured-logger';
 /**
  * Factory class for creating AI services
  */
@@ -42,10 +43,10 @@ export class AIFactory {
       if (type === "openai" && this.services.size > 0) {
         // Fall back to any available service if OpenAI not available
         const fallbackType = Array.from(this.services.keys())[0];
-        console.warn(`OpenAI service not available, falling back to ${fallbackType}`);
+        logger.warn("OpenAI service not available, falling back to ", {});
         return this.services.get(fallbackType)!;
       }
-      throw new Error(`AI service of type ${type} not available`);
+      throw new Error("System message");
     }
     return service;
   }

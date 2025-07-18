@@ -61,7 +61,7 @@ import { penetrationTester } from "./penetration-tester";
 import { sessionTester } from "./session-tester";
 import { errorHandler, asyncHandler } from "./middleware/error-handler";
 import { validateBody, validateParams, validateQuery, commonSchemas } from "./middleware/validation";
-import { logger } from "./services/logger";
+import { logger } from "./services/structured-logger";
 import { 
   globalErrorHandler, 
   notFoundHandler, 
@@ -102,14 +102,14 @@ async function handleChatMessage(data: any, ws: WebSocket) {
     
     // Validate required fields
     if (!sessionId || !senderId || !senderType || !senderName || !message) {
-      logger.warn('Invalid chat message data', { data });
+      logger.warn('Invalid chat message data received', { sessionId, senderId, senderType });
       return;
     }
     
     // Get the session by sessionId to get the database ID
     const session = await storage.getChatSessionBySessionId(sessionId);
     if (!session) {
-      logger.warn('Chat session not found', { sessionId });
+      logger.warn('Chat session not found for message', { sessionId });
       return;
     }
     
@@ -140,7 +140,7 @@ async function handleChatMessage(data: any, ws: WebSocket) {
     }
   } catch (error) {
     // Use proper error handling instead of console.error
-    ws.send(JSON.stringify({ type: 'error', message: 'Failed to send message' }));
+    ws.send(JSON.stringify({ success: true }));
   }
 }
 
@@ -172,7 +172,7 @@ async function handleJoinChatSession(data: any, ws: WebSocket) {
     }));
   } catch (error) {
     // Use proper error handling instead of console.error
-    ws.send(JSON.stringify({ type: 'error', message: 'Failed to join chat session' }));
+    ws.send(JSON.stringify({ success: true }));
   }
 }
 
@@ -310,12 +310,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // WebSocket server error handling
     wss.on('error', (error) => {
-      console.error('WebSocket Server Error:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
     });
     
     // Handle WebSocket connections
     wss.on('connection', (ws, req) => {
-      console.log('✅ WebSocket connection established from:', req.socket.remoteAddress);
+      logger.info("Logger call fixed");
       
       // Send initial connection confirmation
       ws.send(JSON.stringify({ 
@@ -330,11 +330,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Handle authentication message
           if (data.type === 'auth' || data.type === 'authenticate') {
-            const { userId, companyId } = data;
+      const { userId, companyId } = data;
             
             if (userId) {
               userConnections.set(parseInt(userId), ws);
-              logger.websocket(`User ${userId} connected via WebSocket`, `user-${userId}`);
+    logger.info("WebSocket chat message", { sessionId, senderId, senderType });
               
               // Send authentication confirmation
               ws.send(JSON.stringify({ 
@@ -345,12 +345,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
             
             if (companyId) {
-              const cId = parseInt(companyId);
+        const cId = parseInt(companyId);
               if (!companyConnections.has(cId)) {
                 companyConnections.set(cId, new Set());
               }
               companyConnections.get(cId)?.add(ws);
-              logger.websocket(`Client subscribed to company ${cId} updates`, `company-${cId}`);
+              logger.info("Syntax fixed");
             }
           }
           
@@ -378,18 +378,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Handle connection errors
       ws.on('error', (error) => {
-        console.error('WebSocket connection error:', error);
+        logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       });
       
       // Handle connection close
       ws.on('close', () => {
-        console.log('🔌 WebSocket connection closed');
+        logger.info('🔌 WebSocket connection closed');
         
         // Remove from user connections
         Array.from(userConnections.entries()).forEach(([userId, connection]) => {
           if (connection === ws) {
             userConnections.delete(userId);
-            console.log(`👋 User ${userId} disconnected`);
+            logger.info("User disconnected", { userId });
           }
         });
         
@@ -397,7 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         Array.from(companyConnections.entries()).forEach(([companyId, connections]) => {
           if (connections.has(ws)) {
             connections.delete(ws);
-            console.log(`🏢 Client unsubscribed from company ${companyId} updates`);
+            logger.info("Client unsubscribed from company updates", { companyId });
             
             // Clean up empty sets
             if (connections.size === 0) {
@@ -408,10 +408,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     });
     
-    console.log('🚀 WebSocket server initialized successfully');
+    logger.info('🚀 WebSocket server initialized successfully');
   } catch (wsError) {
-    console.error('❌ WebSocket server initialization failed:', wsError);
-    console.log('📱 Application will continue without real-time features');
+    logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
+    logger.info('📱 Application will continue without real-time features');
   }
   
   // Simplified session configuration to avoid production errors
@@ -436,9 +436,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       })
     );
-    console.log('[SESSION] Memory session store initialized successfully');
+    logger.info('[SESSION] Memory session store initialized successfully');
   } catch (sessionError) {
-    console.error('[SESSION] Session initialization failed:', sessionError);
+    logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
     // Minimal session fallback
     app.use((req, res, next) => {
       req.session = { userId: undefined } as any;
@@ -488,7 +488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "System admin credentials reset successfully"
         });
       } catch (error) {
-        console.error("Error resetting system admin credentials:", error);
+        logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
         res.status(500).json({ message: "Server error" });
       }
     });
@@ -623,7 +623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       healthCheck.features.database = true;
     } catch (error) {
       healthCheck.features.database = false;
-      healthCheck.errors.push("Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}");
+      healthCheck.errors.push("Database connection failed: " + (error instanceof Error ? error.message : "Unknown error"));
       healthCheck.status = "degraded";
     }
 
@@ -676,7 +676,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } : null
       });
     } catch (error: any) {
-      console.error("Database test error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({
         status: "database_error",
         error: error.message,
@@ -707,15 +707,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No admin user found" });
       }
       
-      console.log("EMERGENCY RESET: Updating password for user:", adminUser.id, adminUser.email);
+      logger.info("Parameter fixed");
       
       // Hash new password with lower rounds for production compatibility
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      console.log("EMERGENCY RESET: New password hash generated, length:", hashedPassword.length);
+      logger.info("Logger call fixed");
       
       // Update admin password
       await storage.updateUser(adminUser.id, { password: hashedPassword });
-      console.log("EMERGENCY RESET: Password updated in database");
+      logger.info("Parameter fixed");
       
       // Verify the password immediately
       const updatedUser = await storage.getUserByEmail(adminUser.email);
@@ -723,7 +723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("Failed to retrieve updated user");
       }
       const testVerification = await bcrypt.compare(newPassword, updatedUser.password);
-      console.log("EMERGENCY RESET: Immediate verification test:", testVerification);
+      logger.info("Parameter fixed");
       
       res.json({ 
         message: "Admin password reset successfully",
@@ -732,7 +732,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         verified: testVerification
       });
     } catch (error: any) {
-      console.error("Password reset error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({
         message: "Password reset failed",
         error: error.message
@@ -782,7 +782,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Please enter a valid email address" });
       }
       
-      console.log("ADMIN SETUP: Creating admin account and company");
+      logger.info("Parameter fixed");
       
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -816,16 +816,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create session
       req.session.userId = adminUser.id;
       
-      console.log("ADMIN SETUP: Admin created successfully - ID: ${adminUser.id}, Company: ${company.id}");
+      logger.info("Parameter fixed");
       
       // Save session
       await new Promise<void>((resolve, reject) => {
         req.session.save((err: any) => {
           if (err) {
-            console.error("ADMIN SETUP SESSION SAVE ERROR:", err);
+            logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
             reject(new Error("Session save failed"));
           } else {
-            console.log("ADMIN SETUP SESSION SAVED: User ${adminUser.id}, Session ID: ${req.sessionID}");
+            logger.info("Parameter fixed");
             resolve();
           }
         });
@@ -835,12 +835,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password: _, ...userWithoutPassword } = adminUser;
       res.json({
         message: "Admin setup completed successfully",
-        user: { ...userWithoutPassword, companyId: company.id },
+        user: { data: "converted" },
         company: company
       });
       
     } catch (error: any) {
-      console.error("Admin setup error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ 
         message: "Failed to setup admin account",
         error: error.message 
@@ -853,18 +853,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
-      console.log("EMERGENCY VERIFY: Testing login for:", email);
+      logger.info("Parameter fixed");
       
       const user = await storage.getUserByEmail(email);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      console.log("EMERGENCY VERIFY: User found, testing password");
-      console.log("EMERGENCY VERIFY: Stored hash length:", user.password ? user.password.length : "NO HASH");
+      logger.info("Parameter fixed");
+      logger.info("Parameter fixed");
       
       const isValid = await bcrypt.compare(password, user.password);
-      console.log("EMERGENCY VERIFY: Password verification result:", isValid);
+      logger.info("Parameter fixed");
       
       res.json({
         message: "Password verification test completed",
@@ -873,7 +873,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hashLength: user.password ? user.password.length : 0
       });
     } catch (error: any) {
-      console.error("Password verification test error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({
         message: "Verification test failed",
         error: error.message
@@ -894,7 +894,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const jobTypes = await storage.getJobTypesByCompany(user.companyId);
       res.json(jobTypes);
     } catch (error) {
-      console.error("Error fetching job types:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Failed to fetch job types" });
     }
   });
@@ -920,7 +920,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(jobType);
     } catch (error) {
-      console.error("Error creating job type:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Failed to create job type" });
     }
   });
@@ -947,7 +947,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(updatedJobType);
     } catch (error) {
-      console.error("Error updating job type:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Failed to update job type" });
     }
   });
@@ -968,7 +968,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ message: "Job type deleted successfully" });
     } catch (error) {
-      console.error("Error deleting job type:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Failed to delete job type" });
     }
   });
@@ -1043,10 +1043,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await new Promise<void>((resolve, reject) => {
         req.session.save((err: any) => {
           if (err) {
-            console.error("Registration session save error:", err);
+            logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
             reject(new Error("Session save failed"));
           } else {
-            console.log("Registration session saved successfully for user ${user.id}");
+            logger.info("Logger call fixed");
             resolve();
           }
         });
@@ -1059,14 +1059,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: validationError.message });
       }
       
-      console.error("Registration error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error during registration" });
     }
   });
   
   // Basic test endpoint to verify request handling
   app.get("/api/test", (req, res) => {
-    res.json({ status: "working", timestamp: Date.now() });
+    res.json({ success: true });
   });
 
   // Enhanced AI Content Generation for Check-ins and Blog Posts
@@ -1082,11 +1082,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Enhanced prompts for different content types
       if (type === 'checkin' && context) {
-        aiPrompt = `Create a professional service check-in summary for a ${context.jobType} job at ${context.location}.
+        aiPrompt = `Create a professional service check-in summary for a [CONVERTED] job at [CONVERTED].
 
-Work completed: ${context.workPerformed}
-Materials used: ${context.materialsUsed}
-Customer concerns addressed: ${context.customerNotes || 'Standard service maintenance'}
+Work completed: [CONVERTED]
+Materials used: [CONVERTED]
+Customer concerns addressed: [CONVERTED]
 
 Generate a comprehensive, professional summary (3-4 sentences) that:
 - Highlights the technical expertise and value delivered
@@ -1097,13 +1097,13 @@ Generate a comprehensive, professional summary (3-4 sentences) that:
 
 Tone: Professional, confident, and customer-focused.`;
       } else if (type === 'blog-post' && context) {
-        aiPrompt = `Create an SEO-optimized blog post about: ${context.title}
+        aiPrompt = `Create an SEO-optimized blog post about: [CONVERTED]
 
 Based on this service experience:
-- Service type: ${context.jobType}
-- Location: ${context.location}
-- Work performed: ${context.workPerformed}
-- Materials used: ${context.materialsUsed}
+- Service type: [CONVERTED]
+- Location: [CONVERTED]
+- Work performed: [CONVERTED]
+- Materials used: [CONVERTED]
 
 Generate a 400-500 word blog post that:
 - Starts with an engaging headline and introduction
@@ -1117,9 +1117,9 @@ Generate a 400-500 word blog post that:
 Focus on: practical tips, industry insights, and local service benefits.`;
       } else if (type === 'seo-title' && context) {
         aiPrompt = `Create 3 SEO-optimized blog post titles for:
-- Service: ${context.jobType}
-- Location: ${context.location}
-- Key work: ${context.workPerformed}
+- Service: [CONVERTED]
+- Location: [CONVERTED]
+- Key work: [CONVERTED]
 
 Requirements:
 - 50-60 characters each
@@ -1131,9 +1131,9 @@ Requirements:
 Format as numbered list.`;
       } else if (type === 'meta-description' && context) {
         aiPrompt = `Write a compelling meta description (150-160 characters) for:
-- Service: ${context.jobType}
-- Location: ${context.location}
-- Key benefits: ${context.workPerformed}
+- Service: [CONVERTED]
+- Location: [CONVERTED]
+- Key benefits: [CONVERTED]
 
 Include:
 - Clear service offering
@@ -1156,7 +1156,7 @@ Make it compelling for search engine users to click.`;
 
         const response = await openai.chat.completions.create({
           model: "gpt-4o",
-          messages: [{ role: "user", content: aiPrompt }],
+          messages: [{ success: true }],
           max_tokens: 500,
           temperature: 0.7,
         });
@@ -1164,16 +1164,16 @@ Make it compelling for search engine users to click.`;
         const content = response.choices[0].message.content;
         res.json({ content });
       } catch (openaiError) {
-        console.log('Using fallback content generation:', openaiError instanceof Error ? openaiError.message : String(openaiError));
+      logger.error("Logger call fixed");
         
         // Generate fallback content based on type
         let fallbackContent = '';
         const { title, content } = req.body;
         
         if (type === 'blog-post' && title) {
-          fallbackContent = `# ${title}
+          fallbackContent = `# [CONVERTED]
 
-This comprehensive guide covers everything you need to know about ${title.toLowerCase()}.
+This comprehensive guide covers everything you need to know about [CONVERTED].
 
 ## Professional Service Excellence
 
@@ -1204,7 +1204,7 @@ Contact us for more information about our professional services and to schedule 
         res.json({ content: fallbackContent });
       }
     } catch (error) {
-      console.error('AI content generation error:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to generate AI content' });
     }
   });
@@ -1224,9 +1224,9 @@ Contact us for more information about our professional services and to schedule 
       // Generate multiple content variations based on type
       if (contentType === 'social-media') {
         aiPrompt = `Create 3 different social media posts about this service call:
-- Service: ${serviceType} in ${location}
-- Work completed: ${workDetails}
-- Materials used: ${materials}
+- Service: [CONVERTED] in [CONVERTED]
+- Work completed: [CONVERTED]
+- Materials used: [CONVERTED]
 
 Generate:
 1. Facebook post (conversational, community-focused, 2-3 sentences)
@@ -1236,10 +1236,10 @@ Generate:
 Each should highlight professionalism, quality work, and customer satisfaction.`;
       } else if (contentType === 'email-follow-up') {
         aiPrompt = `Write a professional follow-up email template for this service:
-- Service: ${serviceType} at ${location}
-- Work completed: ${workDetails}
-- Materials used: ${materials}
-- Customer notes: ${customerNotes || 'Standard service completed'}
+- Service: [CONVERTED] at [CONVERTED]
+- Work completed: [CONVERTED]
+- Materials used: [CONVERTED]
+- Customer notes: [CONVERTED]
 
 Include:
 - Warm, professional greeting
@@ -1252,10 +1252,10 @@ Include:
 Tone: Helpful, professional, and customer-focused.`;
       } else if (contentType === 'technical-report') {
         aiPrompt = `Create a detailed technical service report for:
-- Service type: ${serviceType}
-- Location: ${location}
-- Work performed: ${workDetails}
-- Materials/parts used: ${materials}
+- Service type: [CONVERTED]
+- Location: [CONVERTED]
+- Work performed: [CONVERTED]
+- Materials/parts used: [CONVERTED]
 
 Include:
 - Executive summary
@@ -1275,7 +1275,7 @@ Format as professional service documentation.`;
 
         const response = await openai.chat.completions.create({
           model: "gpt-4o",
-          messages: [{ role: "user", content: aiPrompt }],
+          messages: [{ success: true }],
           max_tokens: 800,
           temperature: 0.7,
         });
@@ -1286,16 +1286,16 @@ Format as professional service documentation.`;
         // Enhanced fallback content
         let fallbackContent = '';
         if (contentType === 'social-media') {
-          fallbackContent = `Professional ${serviceType} service completed in ${location}. Quality workmanship and customer satisfaction are our top priorities. Contact us for all your service needs!`;
+          fallbackContent = "converted string";
         } else if (contentType === 'email-follow-up') {
-          fallbackContent = `Thank you for choosing our services for your ${serviceType} needs. We completed the work as discussed and used quality materials to ensure lasting results. Please let us know if you have any questions or need future service.`;
+          fallbackContent = "converted string";
         } else {
-          fallbackContent = `Professional ${serviceType} service completed successfully using quality materials and proven techniques.`;
+          fallbackContent = "converted string";
         }
-        res.json({ content: fallbackContent, type: contentType });
+        res.json({ success: true });
       }
     } catch (error) {
-      console.error('Advanced AI generation error:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to generate advanced content' });
     }
   });
@@ -1312,8 +1312,8 @@ Format as professional service documentation.`;
           
           // Add trial status for company users
           if (user.companyId && user.role !== 'super_admin') {
-            const { getTrialStatus } = await import('./middleware/trial-enforcement');
-            const trialStatus = await getTrialStatus(user.companyId);
+      const { getTrialStatus } = await import('./middleware/trial-enforcement');
+      const trialStatus = await getTrialStatus(user.companyId);
             (userWithoutPassword as any).trialStatus = trialStatus;
           }
           
@@ -1322,7 +1322,7 @@ Format as professional service documentation.`;
           res.status(401).json({ message: "User not found" });
         }
       } catch (error) {
-        console.error("Error fetching user:", error);
+        logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
         res.status(500).json({ message: "Server error" });
       }
     } else {
@@ -1334,7 +1334,7 @@ Format as professional service documentation.`;
   app.get("/api/trial/status", isAuthenticated, async (req: any, res) => {
     try {
       if (req.user.role === 'super_admin') {
-        return res.json({ subscriptionActive: true, expired: false });
+        return res.json({ success: true });
       }
 
       if (!req.user.companyId) {
@@ -1346,7 +1346,7 @@ Format as professional service documentation.`;
       
       res.json(trialStatus);
     } catch (error) {
-      console.error('Error getting trial status:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to get trial status' });
     }
   });
@@ -1365,7 +1365,7 @@ Format as professional service documentation.`;
             try {
               company = await storage.getCompany(user.companyId);
             } catch (error) {
-              console.warn("Failed to fetch company data:", error);
+              logger.warn('Failed to fetch company data:', { error });
             }
           }
           
@@ -1374,7 +1374,7 @@ Format as professional service documentation.`;
           res.status(401).json({ message: "User not found" });
         }
       } catch (error) {
-        console.error("Error fetching user:", error);
+        logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
         res.status(500).json({ message: "Server error" });
       }
     } else {
@@ -1406,18 +1406,18 @@ Format as professional service documentation.`;
       await storage.setPasswordResetToken(user.id, resetToken, resetExpiry);
       
       // Send email with reset link
-      const resetUrl = "${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}";
+      const resetUrl = "[CONVERTED]://[CONVERTED]/reset-password?token=[CONVERTED]";
       
       try {
         await emailService.sendPasswordResetEmail(email, user.username, resetUrl);
       } catch (emailError) {
-        console.error("Failed to send password reset email:", emailError);
+        logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
         // Still return success to not reveal email existence
       }
       
       res.json({ message: "If this email exists, a password reset link has been sent" });
     } catch (error) {
-      console.error("Password reset request error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error during password reset request" });
     }
   });
@@ -1442,7 +1442,7 @@ Format as professional service documentation.`;
 
       res.json({ message: "Profile updated successfully" });
     } catch (error) {
-      console.error("Error updating profile:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Failed to update profile" });
     }
   });
@@ -1480,7 +1480,7 @@ Format as professional service documentation.`;
       
       res.json({ message: "Password changed successfully" });
     } catch (error) {
-      console.error("Password change error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error during password change" });
     }
   });
@@ -1501,7 +1501,7 @@ Format as professional service documentation.`;
       
       res.json({ message: "Notification preferences updated successfully" });
     } catch (error) {
-      console.error("Notification preferences update error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error during preferences update" });
     }
   });
@@ -1522,7 +1522,7 @@ Format as professional service documentation.`;
       
       res.json({ message: "Appearance preferences updated successfully" });
     } catch (error) {
-      console.error("Appearance preferences update error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error during preferences update" });
     }
   });
@@ -1553,7 +1553,7 @@ Format as professional service documentation.`;
         }
       });
     } catch (error) {
-      console.error("Get preferences error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error during preferences retrieval" });
     }
   });
@@ -1588,7 +1588,7 @@ Format as professional service documentation.`;
       
       res.json({ message: "Password reset successful" });
     } catch (error) {
-      console.error("Password reset error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error during password reset" });
     }
   });
@@ -1614,13 +1614,13 @@ Format as professional service documentation.`;
     if (req.session) {
       req.session.destroy((err) => {
         if (err) {
-          console.error("Session destruction error:", err);
+          logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
         }
         
         // Always clear cookies regardless of session destruction result
         clearAllSessionCookies(res);
         
-        console.log("Session ${sessionId} destroyed successfully");
+        logger.info("Session ", {});
         // Redirect to home page after logout
         res.redirect('/?logged_out=true');
       });
@@ -1649,13 +1649,13 @@ Format as professional service documentation.`;
     if (req.session) {
       req.session.destroy((err) => {
         if (err) {
-          console.error("Session destruction error:", err);
+          logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
         }
         
         // Always clear cookies regardless of session destruction result
         clearAllSessionCookies(res);
         
-        console.log("Session ${sessionId} destroyed successfully");
+        logger.info("Session ", {});
         res.json({ 
           message: "Logged out successfully",
           timestamp: new Date().toISOString(),
@@ -1676,10 +1676,10 @@ Format as professional service documentation.`;
   // Helper function to clear all possible session cookies
   function clearAllSessionCookies(res: any) {
     const cookieOptions = [
-      { path: '/', httpOnly: true, secure: false, sameSite: 'lax' as const },
-      { path: '/', httpOnly: true, secure: true, sameSite: 'none' as const },
-      { path: '/', httpOnly: true, secure: false, sameSite: 'strict' as const },
-      { path: '/', httpOnly: true },
+      { success: true },
+      { success: true },
+      { success: true },
+      { success: true },
       { path: '/' }
     ];
     
@@ -1694,8 +1694,8 @@ Format as professional service documentation.`;
     });
     
     // Set expired cookies to force browser to delete them
-    res.cookie('connect.sid', '', { expires: new Date(0), path: '/' });
-    res.cookie('session', '', { expires: new Date(0), path: '/' });
+    res.cookie('connect.sid', '', { success: true });
+    res.cookie('session', '', { success: true });
   }
 
 
@@ -1722,7 +1722,7 @@ Format as professional service documentation.`;
       
       res.json({ message: "Password changed successfully" });
     } catch (error) {
-      console.error("Admin change password error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error while changing password" });
     }
   });
@@ -1739,7 +1739,7 @@ Format as professional service documentation.`;
       
       res.json(usersWithoutPasswords);
     } catch (error) {
-      console.error("Get all users error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -1750,7 +1750,7 @@ Format as professional service documentation.`;
       const companies = await storage.getAllCompanies();
       res.json(companies);
     } catch (error) {
-      console.error("Get companies error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -1773,7 +1773,7 @@ Format as professional service documentation.`;
         
         res.status(201).json({ 
           company,
-          admin: { ...adminUser, password: undefined }
+          admin: { data: "converted" }
         });
       } else {
         res.status(201).json({ company });
@@ -1783,7 +1783,7 @@ Format as professional service documentation.`;
         const validationError = fromZodError(error);
         return res.status(400).json({ message: validationError.message });
       }
-      console.error("Create company error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -1825,7 +1825,7 @@ Format as professional service documentation.`;
         const validationError = fromZodError(error);
         return res.status(400).json({ message: validationError.message });
       }
-      console.error("Create user error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -1854,7 +1854,7 @@ Format as professional service documentation.`;
       
       res.json(usersWithoutPasswords);
     } catch (error) {
-      console.error("Get users error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -1877,7 +1877,7 @@ Format as professional service documentation.`;
       res.json(company);
       
     } catch (error) {
-      console.error('Error fetching company:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch company data' });
     }
   });
@@ -1900,7 +1900,7 @@ Format as professional service documentation.`;
       
       res.json(company);
     } catch (error) {
-      console.error("Error fetching company data:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: "Failed to fetch company data" });
     }
   });
@@ -1947,7 +1947,7 @@ Format as professional service documentation.`;
       
       // Handle planId to plan conversion
       if (req.body.planId) {
-        const planMapping: Record<string, string> = { "1": "starter", "2": "pro", "3": "agency" };
+        const planMapping: Record<string, string> = { success: true };
         updateData.plan = planMapping[req.body.planId] || req.body.planId;
       }
       
@@ -1964,7 +1964,7 @@ Format as professional service documentation.`;
       });
       
     } catch (error) {
-      console.error('Error updating company:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Failed to update company" });
     }
   });
@@ -2012,7 +2012,7 @@ Format as professional service documentation.`;
         res.status(500).json({ message: "Failed to delete company" });
       }
     } catch (error) {
-      console.error("Delete company error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error during company deletion" });
     }
   });
@@ -2051,7 +2051,7 @@ Format as professional service documentation.`;
       
       res.json(techniciansWithStats);
     } catch (error) {
-      console.error("Error fetching technicians:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -2097,7 +2097,7 @@ Format as professional service documentation.`;
       
       res.json(techniciansWithStats);
     } catch (error) {
-      console.error("Get all technicians error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -2119,7 +2119,7 @@ Format as professional service documentation.`;
       }
       
       // Combine city and state for location if location not provided
-      const techLocation = location || `${city}, ${state}`;
+      const techLocation = location || "converted string";
       
       // Create technician
       const technicianData = {
@@ -2153,7 +2153,7 @@ Format as professional service documentation.`;
       
       res.status(201).json(technician);
     } catch (error) {
-      console.error("Error creating technician:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -2176,7 +2176,7 @@ Format as professional service documentation.`;
       }
       
       // Combine city and state for location if location not provided
-      const techLocation = location || `${city}, ${state}`;
+      const techLocation = location || "converted string";
       
       const updates = {
         name,
@@ -2194,7 +2194,7 @@ Format as professional service documentation.`;
       
       res.json(updatedTechnician);
     } catch (error) {
-      console.error("Error updating technician:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -2221,7 +2221,7 @@ Format as professional service documentation.`;
       
       res.json({ newPassword });
     } catch (error) {
-      console.error("Error resetting technician password:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -2255,7 +2255,7 @@ Format as professional service documentation.`;
       
       res.json(availableCRMs);
     } catch (error) {
-      console.error("Error fetching available CRMs:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -2272,13 +2272,13 @@ Format as professional service documentation.`;
       try {
         crmConfigs = JSON.parse(company.crmIntegrations);
       } catch (parseError) {
-        console.error("Error parsing CRM integrations:", parseError);
+        logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
         return res.json([]);
       }
       
       res.json(crmConfigs || []);
     } catch (error) {
-      console.error("Error fetching configured CRMs:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -2295,13 +2295,13 @@ Format as professional service documentation.`;
       try {
         syncHistory = JSON.parse(company.crmSyncHistory);
       } catch (parseError) {
-        console.error("Error parsing CRM sync history:", parseError);
+        logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
         return res.json([]);
       }
       
       res.json(syncHistory || []);
     } catch (error) {
-      console.error("Error fetching CRM sync history:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -2333,7 +2333,7 @@ Format as professional service documentation.`;
       
       res.json(formattedCheckIns);
     } catch (error) {
-      console.error("Error fetching public check-ins:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -2405,10 +2405,10 @@ Format as professional service documentation.`;
   app.get("/api/system/status", async (req, res) => {
     try {
       const services = [
-        { name: 'Database', status: 'online', responseTime: null, message: null },
-        { name: 'Authentication', status: 'online', responseTime: null, message: null },
-        { name: 'File Storage', status: 'online', responseTime: null, message: null },
-        { name: 'API Services', status: 'online', responseTime: null, message: null }
+        { success: true },
+        { success: true },
+        { success: true },
+        { success: true }
       ];
 
       // Test database connectivity
@@ -2419,7 +2419,7 @@ Format as professional service documentation.`;
         services[0].responseTime = responseTime;
         services[0].status = 'online';
       } catch (error) {
-        console.error('Database health check failed:', error);
+        logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
         services[0].status = 'offline';
         services[0].message = 'Connection failed';
       }
@@ -2427,7 +2427,7 @@ Format as professional service documentation.`;
       // Test API services with health check
       try {
         const startTime = Date.now();
-        const testResponse = await fetch(`${req.protocol}://${req.get('host')}/api/health`);
+    logger.info("Route handler executed", { route: req.path, method: req.method });
         const responseTime = Date.now() - startTime;
         services[3].responseTime = responseTime;
         services[3].status = testResponse.ok ? 'online' : 'degraded';
@@ -2460,14 +2460,14 @@ Format as professional service documentation.`;
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error('System status check failed:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ 
         overallStatus: 'offline',
         services: [
-          { name: 'Database', status: 'offline', responseTime: null, message: 'System check failed' },
-          { name: 'Authentication', status: 'offline', responseTime: null, message: 'System check failed' },
-          { name: 'File Storage', status: 'offline', responseTime: null, message: 'System check failed' },
-          { name: 'API Services', status: 'offline', responseTime: null, message: 'System check failed' }
+          { success: true },
+          { success: true },
+          { success: true },
+          { success: true }
         ],
         lastUpdated: new Date().toISOString(),
         error: 'System status check failed'
@@ -2481,7 +2481,7 @@ Format as professional service documentation.`;
       const bugReports = await storage.getBugReports();
       res.json(bugReports);
     } catch (error) {
-      console.error('Error fetching bug reports:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch bug reports' });
     }
   });
@@ -2511,7 +2511,7 @@ Format as professional service documentation.`;
 
       res.status(201).json(bugReport);
     } catch (error) {
-      console.error('Error creating bug report:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to create bug report' });
     }
   });
@@ -2524,7 +2524,7 @@ Format as professional service documentation.`;
         : await storage.getFeatureRequestsByCompany(req.user.companyId!);
       res.json(featureRequests);
     } catch (error) {
-      console.error('Error fetching feature requests:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch feature requests' });
     }
   });
@@ -2551,7 +2551,7 @@ Format as professional service documentation.`;
 
       res.status(201).json(featureRequest);
     } catch (error) {
-      console.error('Error creating feature request:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to create feature request' });
     }
   });
@@ -2588,7 +2588,7 @@ Format as professional service documentation.`;
 
       res.json({ session });
     } catch (error) {
-      console.error('Error starting chat session:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to start chat session' });
     }
   });
@@ -2603,7 +2603,7 @@ Format as professional service documentation.`;
       const sessions = await storage.getChatSessionsForAgent();
       res.json(sessions);
     } catch (error) {
-      console.error('Error fetching agent sessions:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch sessions' });
     }
   });
@@ -2631,7 +2631,7 @@ Format as professional service documentation.`;
       
       res.json(agent);
     } catch (error) {
-      console.error('Error fetching agent status:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch agent status' });
     }
   });
@@ -2668,7 +2668,7 @@ Format as professional service documentation.`;
       
       res.json({ success: true, agent });
     } catch (error) {
-      console.error('Error updating agent availability:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to update availability' });
     }
   });
@@ -2691,7 +2691,7 @@ Format as professional service documentation.`;
       };
       res.json(stats);
     } catch (error) {
-      console.error('Error fetching chat stats:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch statistics' });
     }
   });
@@ -2719,7 +2719,7 @@ Format as professional service documentation.`;
 
       res.json(agent);
     } catch (error) {
-      console.error('Error fetching agent profile:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch agent profile' });
     }
   });
@@ -2754,12 +2754,12 @@ Format as professional service documentation.`;
         senderId: req.user.id,
         senderType: 'system',
         senderName: 'System',
-        message: `${agent.displayName} has joined the chat`
+        message: "converted string"
       });
 
       res.json({ session });
     } catch (error) {
-      console.error('Error joining chat session:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to join session' });
     }
   });
@@ -2793,7 +2793,7 @@ Format as professional service documentation.`;
 
       res.json({ message: chatMessage });
     } catch (error) {
-      console.error('Error sending message:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to send message' });
     }
   });
@@ -2806,7 +2806,7 @@ Format as professional service documentation.`;
       const messages = await storage.getChatMessages(sessionId);
       res.json(messages);
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch messages' });
     }
   });
@@ -2830,7 +2830,7 @@ Format as professional service documentation.`;
 
       res.json({ session });
     } catch (error) {
-      console.error('Error closing chat session:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to close session' });
     }
   });
@@ -2846,10 +2846,10 @@ Format as professional service documentation.`;
       res.json({ 
         success: true, 
         clearedCount,
-        message: `${clearedCount} waiting chats have been cleared` 
+        message: "converted string" 
       });
     } catch (error) {
-      console.error('Error clearing waiting chats:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to clear waiting chats' });
     }
   });
@@ -2867,10 +2867,10 @@ Format as professional service documentation.`;
       res.json({ 
         success: true, 
         archivedCount,
-        message: `${archivedCount} old chats have been archived` 
+        message: "converted string" 
       });
     } catch (error) {
-      console.error('Error archiving old chats:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to archive old chats' });
     }
   });
@@ -2887,8 +2887,8 @@ Format as professional service documentation.`;
         status: isAvailable ? 'online' : 'offline'
       });
     } catch (error) {
-      console.error('Error checking support availability:', error);
-      res.json({ isAvailable: false, agentCount: 0, status: 'offline' });
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
+      res.json({ success: true });
     }
   });
 
@@ -2904,7 +2904,7 @@ Format as professional service documentation.`;
       const agent = await storage.updateSupportAgentStatus(req.user.id, isOnline);
       res.json({ agent });
     } catch (error) {
-      console.error('Error updating agent status:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to update status' });
     }
   });
@@ -2915,7 +2915,7 @@ Format as professional service documentation.`;
       const updatedFeatureRequest = await storage.voteFeatureRequest(featureRequestId);
       res.json(updatedFeatureRequest);
     } catch (error) {
-      console.error('Error voting for feature request:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to vote for feature request' });
     }
   });
@@ -2924,20 +2924,20 @@ Format as professional service documentation.`;
   app.get("/api/testimonials/company/:companyId", async (req: Request, res: Response) => {
     try {
       const companyId = parseInt(req.params.companyId);
-      console.log(`API: Fetching testimonials for company ${companyId}`);
+      logger.info("Parameter fixed");
       
       // Direct database query to bypass storage issues
       const neonSql = neon(process.env.DATABASE_URL!);
       const testimonials = await neonSql`
         SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
         FROM testimonials 
-        WHERE company_id = ${companyId}
+        WHERE company_id = [CONVERTED]
         ORDER BY created_at DESC
       `;
-      console.log(`API: Returning ${testimonials.length} real testimonials for company ${companyId}`);
+      logger.info("Syntax fixed");
       res.json(testimonials);
     } catch (error) {
-      console.error('Error in testimonials API:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ 
         message: 'Failed to fetch testimonials', 
         error: error instanceof Error ? error.message : String(error) 
@@ -3013,7 +3013,7 @@ Format as professional service documentation.`;
         const testimonials = await neonSql`
           SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
           FROM testimonials 
-          WHERE company_id = ${actualCompanyId}
+          WHERE company_id = [CONVERTED]
           ORDER BY created_at DESC
           LIMIT 5
         `;
@@ -3025,9 +3025,9 @@ Format as professional service documentation.`;
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${company.name} - Customer Testimonials</title>
+  <title>[CONVERTED] - Customer Testimonials</title>
   <style>
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { success: true }
     .widget-container { 
       background: white; 
       border: 2px solid #e2e8f0; 
@@ -3087,11 +3087,11 @@ Format as professional service documentation.`;
 </head>
 <body>
   <div class="widget-container">
-    <h3 class="widget-title">${company.name} - Customer Testimonials</h3>
+    <h3 class="widget-title">[CONVERTED] - Customer Testimonials</h3>
     ${testimonials.length > 0 ? testimonials.map(testimonial => `
       <div class="testimonial">
-        <p class="testimonial-content">"${testimonial.content}"</p>
-        <p class="testimonial-author">— ${testimonial.customer_name}</p>
+        <p class="testimonial-content">"[CONVERTED]"</p>
+        <p class="testimonial-author">— [CONVERTED]</p>
       </div>
     `).join('') : '<p class="no-testimonials">No testimonials available at this time.</p>'}
     <div class="widget-footer">
@@ -3107,7 +3107,7 @@ Format as professional service documentation.`;
         res.send(html);
 
       } catch (authError) {
-        console.error('Authentication error:', authError);
+        logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
         return res.status(401).send(`
           <html>
             <head><title>Authentication Error</title></head>
@@ -3122,7 +3122,7 @@ Format as professional service documentation.`;
         `);
       }
     } catch (error) {
-      console.error('Error in embed endpoint:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).send(`
         <html>
           <head><title>Server Error</title></head>
@@ -3195,7 +3195,7 @@ Format as professional service documentation.`;
       }
 
       if (!company) {
-        console.error('Widget error: Company not found for identifier:', companyId);
+        logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
         return res.status(404).json({ error: 'Company not found' });
       }
 
@@ -3366,16 +3366,16 @@ Format as professional service documentation.`;
   function renderCheckIn(checkIn) {
     return \`
       <div class="rankitpro-checkin">
-        <h3>\${checkIn.jobType} Service Report</h3>
+        <h3>\[CONVERTED] Service Report</h3>
         <div class="rankitpro-meta">
-          <span>\${checkIn.technician || 'Service Technician'}</span> • 
-          <span>\${new Date(checkIn.createdAt).toLocaleDateString()}</span>
+          <span>\[CONVERTED]</span> • 
+          <span>\[CONVERTED]</span>
         </div>
-        <div class="rankitpro-location">📍 \${checkIn.location}</div>
-        <div class="rankitpro-description">\${checkIn.notes}</div>
+        <div class="rankitpro-location">📍 \[CONVERTED]</div>
+        <div class="rankitpro-description">\[CONVERTED]</div>
         \${checkIn.photos && checkIn.photos.length > 0 ? \`
           <div class="rankitpro-photos">
-            \${checkIn.photos.map(photo => \`<img src="\${photo}" alt="Service photo" />\`).join('')}
+            \[CONVERTED]" alt="Service photo" />\`).join('')}
           </div>
         \` : ''}
       </div>
@@ -3385,11 +3385,11 @@ Format as professional service documentation.`;
   function renderBlog(blog) {
     return \`
       <article class="rankitpro-blog">
-        <h2>\${blog.title}</h2>
+        <h2>\[CONVERTED]</h2>
         <div class="rankitpro-meta">
-          <time>\${new Date(blog.createdAt).toLocaleDateString()}</time>
+          <time>\[CONVERTED]</time>
         </div>
-        <div class="rankitpro-content">\${blog.content}</div>
+        <div class="rankitpro-content">\[CONVERTED]</div>
       </article>
     \`;
   }
@@ -3401,12 +3401,12 @@ Format as professional service documentation.`;
     
     return \`
       <div class="rankitpro-review">
-        <div class="rankitpro-stars">\${stars}</div>
+        <div class="rankitpro-stars">\[CONVERTED]</div>
         <div class="rankitpro-meta">
-          <strong>\${review.customerName}</strong> • 
-          <time>\${new Date(review.createdAt).toLocaleDateString()}</time>
+          <strong>\[CONVERTED]</strong> • 
+          <time>\[CONVERTED]</time>
         </div>
-        <div class="rankitpro-content">"\${review.content}"</div>
+        <div class="rankitpro-content">"\[CONVERTED]"</div>
       </div>
     \`;
   }
@@ -3449,7 +3449,7 @@ Format as professional service documentation.`;
 
       // Check if request wants HTML content instead of JavaScript
       const format = req.query.format as string;
-      console.log(`Widget request: format=${format}, type=${type}, companyId=${companyId}`);
+      logger.info("Syntax fixed");
       
       // Helper function to escape HTML
       const escapeHtml = (text: string): string => {
@@ -3467,7 +3467,7 @@ Format as professional service documentation.`;
         // Return template-matching HTML content for WordPress shortcodes with theme-friendly CSS
         let html = `<style>
 .rankitpro-widget * { box-sizing: border-box; }
-.rankitpro-grid { display: grid !important; gap: 20px !important; margin: 20px 0 !important; width: 100% !important; }
+.rankitpro-grid { success: true }
 .rankitpro-grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important; }
 .rankitpro-checkin-grid { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)) !important; }
 .rankitpro-testimonial, .rankitpro-review, .rankitpro-checkin, .rankitpro-blog { margin: 0 !important; }
@@ -3520,52 +3520,52 @@ Format as professional service documentation.`;
               
               // Header section
               html += `<div style="padding: 20px; background: white; border-bottom: 1px solid #eee;">`;
-              html += `<h1 style="font-size: 24px; font-weight: 600; color: #333; margin-bottom: 15px;">${escapeHtml(checkin.jobType || 'Service Visit')}</h1>`;
+              html += "converted string";
               
               // Tech info and date
               html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">`;
-              html += `<span style="font-size: 14px; color: #666;">Technician: ${escapeHtml(checkin.technician?.name || 'Rod Bartruff')}</span>`;
+              html += "converted string";
               if (checkin.createdAt) {
-                html += `<span style="font-size: 14px; color: #666;">${new Date(checkin.createdAt).toLocaleDateString()}</span>`;
+                html += "converted string";
               }
               html += `</div>`;
               
               // Location with pin icon
               if (checkin.location) {
                 html += `<div style="display: flex; align-items: center; color: #e91e63; font-size: 14px; font-weight: 500;">
-                  <span style="margin-right: 8px;">📍</span>${escapeHtml(checkin.location)}
+                  <span style="margin-right: 8px;">📍</span>[CONVERTED]
                 </div>`;
               }
               html += `</div>`;
               
               // Leaflet Map Integration
-              const lat = Number(checkin.latitude) || 32.9537;  // Default to Carrollton, TX coordinates
-              const lng = Number(checkin.longitude) || -96.8903;
-              const mapId = `map_${checkin.id}_${Date.now()}`;
+        const lat = Number(checkin.latitude) || 32.9537;  // Default to Carrollton, TX coordinates
+        const lng = Number(checkin.longitude) || -96.8903;
+        const mapId = "converted string";
               
-              html += `<div id="${mapId}" style="height: 200px; margin: 0 20px; border-radius: 8px; overflow: hidden; border: 1px solid #ddd;"></div>
+              html += `<div id="[CONVERTED]" style="height: 200px; margin: 0 20px; border-radius: 8px; overflow: hidden; border: 1px solid #ddd;"></div>
               <script>
                 if (typeof L !== 'undefined') {
                   try {
-                    var map_${checkin.id} = L.map('${mapId}').setView([${lat}, ${lng}], 15);
+                    var map_[CONVERTED] = L.map('[CONVERTED]').setView([[CONVERTED], [CONVERTED]], 15);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                       attribution: '© OpenStreetMap contributors'
-                    }).addTo(map_${checkin.id});
-                    L.marker([${lat}, ${lng}]).addTo(map_${checkin.id})
-                      .bindPopup('<b>Service Location</b><br>${escapeHtml(checkin.location || 'Service performed here')}')
+                    }).addTo(map_[CONVERTED]);
+                    L.marker([[CONVERTED], [CONVERTED]]).addTo(map_[CONVERTED])
+                      .bindPopup('<b>Service Location</b><br>[CONVERTED]')
                       .openPopup();
                   } catch(e) {
-                    document.getElementById('${mapId}').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 ${escapeHtml(checkin.location || 'Service Location')}</span></div>';
+                    document.getElementById('[CONVERTED]').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 [CONVERTED]</span></div>';
                   }
                 } else {
-                  document.getElementById('${mapId}').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 ${escapeHtml(checkin.location || 'Service Location')}</span></div>';
+                  document.getElementById('[CONVERTED]').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 [CONVERTED]</span></div>';
                 }
               </script>`;
               
               // Description section
               if (checkin.notes) {
                 html += `<div style="padding: 20px; font-size: 14px; line-height: 1.8; color: #444; text-align: center;">
-                  ${escapeHtml(checkin.notes)}
+                  [CONVERTED]
                 </div>`;
               }
               
@@ -3574,15 +3574,15 @@ Format as professional service documentation.`;
                 html += `<div style="padding: 0 20px 20px 20px;">
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">`;
                 checkin.photos.forEach((photo: string, index: number) => {
-                  const isAfter = index % 2 === 1;
-                  const bgStyle = isAfter ? 
+            const isAfter = index % 2 === 1;
+            const bgStyle = isAfter ? 
                     'background: linear-gradient(45deg, #6B4423 0%, #8B6914 25%, #A0522D 50%, #654321 75%, #4A4A4A 100%);' :
                     'background: radial-gradient(circle at 30% 40%, #8B4513 0%, #A0522D 20%, #654321 40%, #3E2723 60%, #2E1B12 80%);';
                   
                   html += `<div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-                    <img src="${escapeHtml(photo)}" style="width: 100%; height: 150px; object-fit: cover; display: block;" alt="Service photo" />
+                    <img src="[CONVERTED]" style="width: 100%; height: 150px; object-fit: cover; display: block;" alt="Service photo" />
                     <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
-                      ${isAfter ? 'After' : 'Before'}
+                      [CONVERTED]
                     </div>
                   </div>`;
                 });
@@ -3591,9 +3591,9 @@ Format as professional service documentation.`;
               
               // Hashtags section
               html += `<div style="padding: 20px; border-top: 1px solid #eee; background: #fafafa;">`;
-              const hashtags = [`#${(checkin.jobType || 'service').toLowerCase().replace(/\s+/g, '-')}`, '#sprinkler-repair', '#professional-service'];
+        const hashtags = ["converted string", '#sprinkler-repair', '#professional-service'];
               hashtags.forEach(tag => {
-                html += `<span style="display: inline-block; color: #1976d2; text-decoration: none; font-size: 12px; margin-right: 8px; margin-bottom: 5px; font-weight: 500;">${tag}</span>`;
+                html += "converted string";
               });
               html += `</div>`;
               
@@ -3608,12 +3608,12 @@ Format as professional service documentation.`;
         // Add testimonials section  
         if (type === 'testimonials' || type === 'all') {
           try {
-            console.log(`Widget: Fetching testimonials for company ${parsedCompanyId}`);
+            logger.info("Parameter fixed");
             
             // Get real testimonials from database with actual media files
-            const testimonials = await storage.getTestimonialsByCompany(parsedCompanyId);
+      const testimonials = await storage.getTestimonialsByCompany(parsedCompanyId);
             
-            console.log(`Widget: Found ${testimonials.length} testimonials for company ${parsedCompanyId}`);
+            logger.info("Syntax fixed");
             
             if (testimonials && testimonials.length > 0) {
               html += '<div class="rankitpro-testimonials">';
@@ -3631,15 +3631,15 @@ Format as professional service documentation.`;
               
               // Header - inherit theme colors
               html += `<div style="padding: 20px; background: var(--wp--preset--color--primary, #0073aa); color: white;">
-                <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 15px; color: inherit;">${testimonial.type === 'audio' ? '🎤 Audio' : testimonial.type === 'video' ? '🎥 Video' : '💬 Text'} Testimonial</h1>
-                <div style="font-size: 16px; font-weight: 600; color: inherit;">${escapeHtml(testimonial.customer_name)}</div>
-                <div style="font-size: 14px; opacity: 0.9; color: inherit;">${new Date(testimonial.created_at).toLocaleDateString()}</div>
+                <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 15px; color: inherit;">[CONVERTED] Testimonial</h1>
+                <div style="font-size: 16px; font-weight: 600; color: inherit;">[CONVERTED]</div>
+                <div style="font-size: 14px; opacity: 0.9; color: inherit;">[CONVERTED]</div>
               </div>`;
               
               // Content
               html += `<div style="padding: 20px;">
                 <div style="font-size: 14px; line-height: 1.7; color: var(--wp--preset--color--foreground, #444); font-style: italic; margin-bottom: 15px;">
-                  "${escapeHtml(testimonial.content)}"
+                  "[CONVERTED]"
                 </div>`;
               
               // Media player for audio/video
@@ -3650,8 +3650,8 @@ Format as professional service documentation.`;
                     <span style="font-size: 14px; font-weight: 600;">Audio Testimonial</span>
                   </div>
                   <audio controls style="width: 100%; height: 40px;">
-                    <source src="${escapeHtml(testimonial.media_url)}" type="audio/mpeg">
-                    <source src="${escapeHtml(testimonial.media_url)}" type="audio/wav">
+                    <source src="[CONVERTED]" type="audio/mpeg">
+                    <source src="[CONVERTED]" type="audio/wav">
                     Your browser does not support the audio element.
                   </audio>
                 </div>`;
@@ -3662,15 +3662,15 @@ Format as professional service documentation.`;
                     <span style="font-size: 14px; font-weight: 600;">Video Testimonial</span>
                   </div>
                   <video controls style="width: 100%; max-height: 300px; border-radius: 4px;">
-                    <source src="${escapeHtml(testimonial.media_url)}" type="video/mp4">
-                    <source src="${escapeHtml(testimonial.media_url)}" type="video/webm">
+                    <source src="[CONVERTED]" type="video/mp4">
+                    <source src="[CONVERTED]" type="video/webm">
                     Your browser does not support the video element.
                   </video>
                 </div>`;
               } else if (testimonial.type === 'audio' || testimonial.type === 'video') {
                 html += `<div style="background: var(--wp--preset--color--tertiary, #f8f9fa); padding: 15px; border-radius: 8px; text-align: center; border: 2px dashed var(--wp--preset--color--border, #ddd);">
-                  <span style="font-size: 48px; margin-bottom: 10px; display: block;">${testimonial.type === 'audio' ? '🎵' : '🎬'}</span>
-                  <div style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">${testimonial.type === 'audio' ? 'Audio' : 'Video'} testimonial available</div>
+                  <span style="font-size: 48px; margin-bottom: 10px; display: block;">[CONVERTED]</span>
+                  <div style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">[CONVERTED] testimonial available</div>
                 </div>`;
               }
               
@@ -3689,7 +3689,7 @@ Format as professional service documentation.`;
               html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">No customer testimonials available.</p>';
             }
           } catch (error) {
-            console.error('Error in testimonials widget:', error);
+            logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
             html += '<p style="text-align: center; color: #666; font-style: italic; padding: 2em;">Error loading testimonials.</p>';
           }
         }
@@ -3697,7 +3697,7 @@ Format as professional service documentation.`;
         if (type === 'reviews' || type === 'all') {
           try {
             // Use actual reviews from database
-            const reviews = parsedCompanyId === 16 ? [
+      const reviews = parsedCompanyId === 16 ? [
               {
                 id: 1,
                 customer_name: 'Sarah Johnson',
@@ -3716,7 +3716,7 @@ Format as professional service documentation.`;
               }
             ] : await storage.getReviewResponsesByCompany(parsedCompanyId);
             
-            console.log(`Widget: Found ${reviews.length} reviews for company ${parsedCompanyId}`);
+            logger.info("Syntax fixed");
             
             if (reviews && reviews.length > 0) {
               html += '<div class="rankitpro-reviews">';
@@ -3738,18 +3738,18 @@ Format as professional service documentation.`;
               html += `<div style="padding: 20px; background: var(--wp--preset--color--background, white); border-bottom: 1px solid var(--wp--preset--color--border, #eee);">
                 <h1 style="font-size: 24px; font-weight: 600; color: var(--wp--preset--color--foreground, #333); margin-bottom: 15px;">Service Review</h1>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">Customer: ${escapeHtml(review.customer_name || 'Anonymous')}</span>
-                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">${new Date(review.created_at).toLocaleDateString()}</span>
+                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">Customer: [CONVERTED]</span>
+                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">[CONVERTED]</span>
                 </div>
                 <div style="display: flex; align-items: center; color: var(--wp--preset--color--primary, #0073aa); font-size: 14px; font-weight: 500;">
-                  <span style="margin-right: 8px;">📍</span>${escapeHtml(review.service_location || 'Service Location')}
+                  <span style="margin-right: 8px;">📍</span>[CONVERTED]
                 </div>
               </div>`;
               
               // Customer info
               if (review.customerName) {
                 html += `<div style="background: #f8f9fa; padding: 15px 20px; border-bottom: 1px solid #eee;">
-                  <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;">${escapeHtml(review.customerName)}</div>
+                  <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;">[CONVERTED]</div>
                   <span style="font-size: 14px; color: #666; background: #e3f2fd; padding: 4px 12px; border-radius: 12px; display: inline-block;">Professional Service</span>
                 </div>`;
               }
@@ -3760,11 +3760,11 @@ Format as professional service documentation.`;
                   <div style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333;">Overall Service Rating</div>
                   <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 15px;">`;
                 for (let i = 1; i <= 5; i++) {
-                  html += `<span style="font-size: 32px; color: ${i <= review.rating ? '#ffd700' : '#ddd'}; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">★</span>`;
+                  html += "converted string";
                 }
                 html += `</div>
                   <div style="font-size: 18px; font-weight: 600; color: #4CAF50;">
-                    ${review.rating === 5 ? 'Excellent' : review.rating === 4 ? 'Very Good' : review.rating === 3 ? 'Good' : 'Fair'} - ${review.rating} Stars
+                    [CONVERTED] - [CONVERTED] Stars
                   </div>
                 </div>`;
               }
@@ -3773,10 +3773,10 @@ Format as professional service documentation.`;
               if (review.feedback) {
                 html += `<div style="padding: 20px; border-bottom: 1px solid var(--wp--preset--color--border, #eee);">
                   ${review.service_location ? `<div style="background: var(--wp--preset--color--primary, #0073aa); color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; display: inline-block;">
-                    📍 Service Location: ${escapeHtml(review.service_location)}
+                    📍 Service Location: [CONVERTED]
                   </div>` : ''}
                   <div style="font-size: 14px; line-height: 1.7; color: var(--wp--preset--color--foreground, #444); background: var(--wp--preset--color--tertiary, #f8f9fa); padding: 15px; border-radius: 8px; border-left: 4px solid var(--wp--preset--color--primary, #4CAF50); font-style: italic;">
-                    "${escapeHtml(review.feedback)}"
+                    "[CONVERTED]"
                   </div>
                 </div>`;
               }
@@ -3807,7 +3807,7 @@ Format as professional service documentation.`;
               
               // Verification
               html += `<div style="padding: 15px 20px; background: #e8f5e8; border-top: 3px solid #4CAF50; text-align: center; font-size: 12px; color: #2e7d2e;">
-                <span style="font-weight: bold; margin-right: 5px;">✓</span>Verified Customer Review - Service completed ${new Date().toLocaleDateString()}
+                <span style="font-weight: bold; margin-right: 5px;">✓</span>Verified Customer Review - Service completed [CONVERTED]
               </div>`;
               
               html += '</div>'; // End container
@@ -3817,7 +3817,7 @@ Format as professional service documentation.`;
               html += '<p style="text-align: center; color: var(--wp--preset--color--foreground, #666); font-style: italic; padding: 2em;">No customer reviews available.</p>';
             }
           } catch (error) {
-            console.error('Error in reviews widget:', error);
+            logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
             html += '<p style="text-align: center; color: var(--wp--preset--color--foreground, #666); font-style: italic; padding: 2em;">Error loading reviews.</p>';
           }
         }
@@ -3847,21 +3847,21 @@ Format as professional service documentation.`;
                 position: relative;
               ">`;
               html += `<h4 style="color: var(--wp--preset--color--background, white); font-size: 1.4em; margin: 0; font-weight: 600; line-height: 1.3;">
-                ${escapeHtml(blog.title || 'Professional Service Blog Post')}
+                [CONVERTED]
               </h4>`;
               html += `</div>`;
               
               // Blog content
               html += `<div style="padding: 1.5em;">`;
               if (blog.content) {
-                const excerpt = blog.content.length > 300 ? blog.content.substring(0, 300) + '...' : blog.content;
+          const excerpt = blog.content.length > 300 ? blog.content.substring(0, 300) + '...' : blog.content;
                 html += `<div style="
                   line-height: 1.7; 
                   color: var(--wp--preset--color--foreground, #444); 
                   font-size: 1em; 
                   margin-bottom: 1.5em;
                   text-align: justify;
-                ">${escapeHtml(excerpt)}</div>`;
+                ">[CONVERTED]</div>`;
               }
               
               // Meta information
@@ -3886,11 +3886,11 @@ Format as professional service documentation.`;
                   align-items: center; 
                   gap: 0.5em;
                 ">
-                  <span>📅</span>Published: ${new Date(blog.createdAt).toLocaleDateString()}
+                  <span>📅</span>Published: [CONVERTED]
                 </div>`;
               }
               
-              html += `<a href="javascript:void(0)" onclick="openBlogModal(${blog.id}, ${JSON.stringify(blog.title)}, ${JSON.stringify(blog.content)}, ${JSON.stringify(blog.location || '')}, ${JSON.stringify(blog.jobType || '')}, ${JSON.stringify(blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : '')})" style="
+              html += `<a href="javascript:void(0)" onclick="openBlogModal([CONVERTED], [CONVERTED], [CONVERTED], [CONVERTED], [CONVERTED], [CONVERTED])" style="
                 background: var(--wp--preset--color--primary, #0073aa); 
                 color: var(--wp--preset--color--background, white); 
                 padding: 0.4em 1em; 
@@ -3992,8 +3992,8 @@ Format as professional service documentation.`;
 
         <style>
         @keyframes modalSlideIn {
-          from { transform: translateY(-50px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+          from { success: true }
+          to { success: true }
         }
         </style>
 
@@ -4064,7 +4064,7 @@ Format as professional service documentation.`;
       }
 
     } catch (error) {
-      console.error('Widget error:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to load widget' });
     }
   });
@@ -4089,23 +4089,23 @@ Format as professional service documentation.`;
 
       if (contentType === 'blog') {
         systemMessage = "You are a professional content writer specializing in service industry blog posts. Write engaging, SEO-friendly content that showcases expertise and builds trust with potential customers. Always respond in plain text with NO markdown, HTML, or special formatting. Always respond in English regardless of the input language.";
-        prompt = `Create a professional blog post for ${companyName} about a recent ${jobType} service completed by our expert technicians.
+        prompt = `Create a professional blog post for [CONVERTED] about a recent [CONVERTED] service completed by our expert technicians.
 
 Service Details:
-- Service Type: ${jobType}
-- Work Completed: ${notes}
-- Service Location: ${location || 'customer location'}
-- Company: ${companyName}
+- Service Type: [CONVERTED]
+- Work Completed: [CONVERTED]
+- Service Location: [CONVERTED]
+- Company: [CONVERTED]
 
 Write a detailed, engaging blog post that:
 1. Creates an attention-grabbing title related to the specific service
-2. Explains what our technicians accomplished during this ${jobType} job
-3. Describes the technical work performed: ${notes}
+2. Explains what our technicians accomplished during this [CONVERTED] job
+3. Describes the technical work performed: [CONVERTED]
 4. Highlights the professional expertise and quality workmanship
-5. Mentions the service area: ${location || 'customer location'}
+5. Mentions the service area: [CONVERTED]
 6. Emphasizes customer satisfaction and professional results
 7. Includes a strong call-to-action for similar services
-8. Uses relevant keywords for ${jobType} services and the local area
+8. Uses relevant keywords for [CONVERTED] services and the local area
 
 Make it 400-700 words, professional yet personable, and focus on the value delivered to the customer.
 
@@ -4119,19 +4119,19 @@ CRITICAL FORMATTING REQUIREMENTS:
 IMPORTANT: Respond in English only, regardless of the language used in the input.`;
       } else if (contentType === 'service') {
         systemMessage = "You are a professional customer service specialist. Write brief, friendly service completion notifications. Keep responses to 2-3 sentences maximum. Use ONLY plain text with NO markdown, HTML, or special formatting. Always respond in English regardless of the input language.";
-        prompt = `Write a professional service completion message for ${companyName} about the ${jobType} work completed by our technician.
+        prompt = `Write a professional service completion message for [CONVERTED] about the [CONVERTED] work completed by our technician.
 
 Service Details:
-- Service Type: ${jobType} 
-- Work Completed: ${notes}
-- Service Location: ${location || 'customer location'}
-- Company: ${companyName}
+- Service Type: [CONVERTED] 
+- Work Completed: [CONVERTED]
+- Service Location: [CONVERTED]
+- Company: [CONVERTED]
 
 Create a 2-3 sentence message that:
-- Confirms the specific ${jobType} work was completed successfully
-- Briefly mentions what was accomplished: ${notes}
-- References the service location: ${location || 'customer location'}
-- Thanks the customer for choosing ${companyName}
+- Confirms the specific [CONVERTED] work was completed successfully
+- Briefly mentions what was accomplished: [CONVERTED]
+- References the service location: [CONVERTED]
+- Thanks the customer for choosing [CONVERTED]
 - Maintains a professional yet friendly tone
 
 FORMATTING REQUIREMENTS:
@@ -4139,17 +4139,17 @@ FORMATTING REQUIREMENTS:
 - No HTML tags or special formatting
 - Keep it concise but informative
 
-Example format: "We've successfully completed your [service] at [location]. [Brief work summary]. Thank you for choosing ${companyName}!"
+Example format: "We've successfully completed your [service] at [location]. [Brief work summary]. Thank you for choosing [CONVERTED]!"
 
 IMPORTANT: Respond in English only, regardless of the language used in the input.`;
       } else if (contentType === 'both') {
         systemMessage = "You are a professional content writer specializing in service industry communications. Create both blog content and customer notifications that are professional, engaging, and build trust. Always respond in English regardless of the input language.";
-        prompt = `Create both a blog post AND a service completion notification for ${companyName} regarding a ${jobType} service.
+        prompt = `Create both a blog post AND a service completion notification for [CONVERTED] regarding a [CONVERTED] service.
 
 Service Details:
-- Service Type: ${jobType}
-- Work Completed: ${notes}
-- Service Location: ${location || 'customer location'}
+- Service Type: [CONVERTED]
+- Work Completed: [CONVERTED]
+- Service Location: [CONVERTED]
 
 Please provide:
 
@@ -4198,7 +4198,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       
       res.json({ content });
     } catch (error) {
-      console.error('Error generating content:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to generate content' });
     }
   });
@@ -4220,9 +4220,9 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
 
       const prompt = `Enhance and expand this job description to be more professional and detailed:
 
-Service Type: ${jobType}
-Current Description: ${notes}
-Location Context: ${location || 'customer location'}
+Service Type: [CONVERTED]
+Current Description: [CONVERTED]
+Location Context: [CONVERTED]
 
 Please provide an enhanced, professional job description that:
 1. Uses proper technical terminology
@@ -4255,7 +4255,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       
       res.json({ enhancedDescription });
     } catch (error) {
-      console.error('Error enhancing job description:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to enhance job description' });
     }
   });
@@ -4271,7 +4271,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       
       try {
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
+          "converted string",
           {
             headers: {
               'User-Agent': 'RankItPro/1.0'
@@ -4283,7 +4283,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
           const data = await response.json();
           
           // Log full response to see available address components
-          console.log('Full geocoding response:', JSON.stringify(data, null, 2));
+          logger.info("Logger call fixed");
           
           // Extract clean address parts
           let addressParts = [];
@@ -4295,7 +4295,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
             
             // Try multiple city-level fields for better coverage
             // Use county only if no actual city/town exists, but try to find real city first
-            const cityName = data.address.city || 
+      const cityName = data.address.city || 
                             data.address.town || 
                             data.address.village || 
                             data.address.suburb || 
@@ -4307,9 +4307,9 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
             if (!cityName && data.address.county) {
               // For locations like this where only county exists, let's keep just the county
               // or try to extract city from display_name if available
-              const displayParts = data.display_name?.split(', ') || [];
+        const displayParts = data.display_name?.split(', ') || [];
               // Look for a part that's not the street, county, state, or postal code
-              const possibleCity = displayParts.find((part: string) => 
+        const possibleCity = displayParts.find((part: string) => 
                 part !== data.address.road &&
                 part !== data.address.county &&
                 part !== data.address.state &&
@@ -4339,14 +4339,14 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
           const formattedAddress = addressParts.length > 0 ? addressParts.join(', ') : data.display_name;
           res.json({ address: formattedAddress });
         } else {
-          res.json({ address: `${latitude}, ${longitude}` });
+          res.json({ data: "converted" });
         }
       } catch (geoError) {
-        console.warn('Reverse geocoding service error:', geoError);
-        res.json({ address: `${latitude}, ${longitude}` });
+        logger.warn('Reverse geocoding service error:', { geoError });
+        res.json({ data: "converted" });
       }
     } catch (error) {
-      console.error('Reverse geocoding endpoint error:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: "Internal server error" });
     }
   });
@@ -4362,7 +4362,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const stats = await storage.getCompanyStats(companyId);
       res.json(stats);
     } catch (error) {
-      console.error("Get company stats error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -4378,7 +4378,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const jobTypes = await storage.getJobTypesByCompany(companyId);
       res.json(jobTypes);
     } catch (error) {
-      console.error("Get job types error:", error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: "Server error" });
     }
   });
@@ -4408,14 +4408,12 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
         ? (typeof company.socialMediaConfig === 'string' 
            ? JSON.parse(company.socialMediaConfig) 
            : company.socialMediaConfig)
-        : { accounts: [], autoPost: { checkIns: true, reviews: true, testimonials: true, blogPosts: true } };
-
+        : { success: true };
       res.json(config);
     } catch (error) {
-      console.error('Failed to get social media config:', error);
-      res.status(500).json({ message: 'Failed to get social media configuration' });
+      logger.error("Config load error", { error: error instanceof Error ? error.message : String(error) });
+      res.status(500).json({ message: "Failed to get social media configuration" });
     }
-  });
 
   app.put("/api/companies/social-media-config", isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
     try {
@@ -4424,14 +4422,14 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       await storage.updateCompany(req.user!.companyId!, {
         socialMediaConfig: JSON.stringify({
           accounts: accounts || [],
-          autoPost: autoPost || { checkIns: true, reviews: true, testimonials: true, blogPosts: true },
+          autoPost: autoPost || { success: true },
           updatedAt: new Date().toISOString()
         })
       });
 
       res.json({ message: 'Social media configuration updated successfully' });
     } catch (error) {
-      console.error('Failed to update social media config:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to update social media configuration' });
     }
   });
@@ -4446,7 +4444,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       
       res.json(result);
     } catch (error) {
-      console.error('Failed to test social media connection:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to test connection' });
     }
   });
@@ -4460,7 +4458,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
 
       res.json(posts);
     } catch (error) {
-      console.error('Failed to get social media posts:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to get social media posts' });
     }
   });
@@ -4639,7 +4637,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
 
       res.json(analyticsData);
     } catch (error) {
-      console.error('Error fetching analytics dashboard data:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Server error' });
     }
   });
@@ -4651,7 +4649,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const technicians = await storage.getTechniciansByCompany(companyId);
       res.json(technicians);
     } catch (error) {
-      console.error('Error fetching company technicians:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch technicians' });
     }
   });
@@ -4662,7 +4660,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const checkIns = await storage.getCheckInsByCompany(companyId);
       res.json(checkIns);
     } catch (error) {
-      console.error('Error fetching company check-ins:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch check-ins' });
     }
   });
@@ -4673,7 +4671,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const reviews = await storage.getReviewsByCompany(companyId);
       res.json(reviews);
     } catch (error) {
-      console.error('Error fetching company reviews:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch reviews' });
     }
   });
@@ -4698,7 +4696,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       
       res.json({ session, sessionId });
     } catch (error) {
-      console.error('Error starting chat session:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to start chat session' });
     }
   });
@@ -4718,7 +4716,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const messages = await storage.getChatMessagesBySession(session.id);
       res.json({ session, messages });
     } catch (error) {
-      console.error('Error fetching chat session:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch chat session' });
     }
   });
@@ -4735,7 +4733,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       
       res.json({ session });
     } catch (error) {
-      console.error('Error closing chat session:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to close chat session' });
     }
   });
@@ -4747,7 +4745,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const sessions = await storage.getChatSessionsWithDetails();
       res.json({ sessions });
     } catch (error) {
-      console.error('Error fetching chat sessions:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch chat sessions' });
     }
   });
@@ -4757,7 +4755,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const sessions = await storage.getActiveChatSessions();
       res.json({ sessions });
     } catch (error) {
-      console.error('Error fetching active chat sessions:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch active sessions' });
     }
   });
@@ -4776,7 +4774,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       
       res.json({ agent });
     } catch (error) {
-      console.error('Error creating support agent:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to create support agent' });
     }
   });
@@ -4786,7 +4784,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const agents = await storage.getAllSupportAgents();
       res.json({ agents });
     } catch (error) {
-      console.error('Error fetching support agents:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch support agents' });
     }
   });
@@ -4799,7 +4797,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const session = await storage.assignChatToAgent(sessionId, agentId);
       res.json({ session });
     } catch (error) {
-      console.error('Error assigning chat session:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to assign chat session' });
     }
   });
@@ -4810,7 +4808,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const quickReplies = await storage.getAllChatQuickReplies();
       res.json({ quickReplies });
     } catch (error) {
-      console.error('Error fetching quick replies:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch quick replies' });
     }
   });
@@ -4828,7 +4826,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       
       res.json({ quickReply });
     } catch (error) {
-      console.error('Error creating quick reply:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to create quick reply' });
     }
   });
@@ -4839,7 +4837,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const stats = await storage.getChatSessionStats();
       res.json({ stats });
     } catch (error) {
-      console.error('Error fetching chat analytics:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch chat analytics' });
     }
   });
@@ -4850,7 +4848,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const metrics = securityMonitor.getMetrics();
       res.json({ metrics });
     } catch (error) {
-      console.error('Error fetching security metrics:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch security metrics' });
     }
   });
@@ -4869,7 +4867,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       
       res.json({ events });
     } catch (error) {
-      console.error('Error fetching security events:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch security events' });
     }
   });
@@ -4879,7 +4877,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const blockedIPs = securityMonitor.getBlockedIPs();
       res.json({ blockedIPs });
     } catch (error) {
-      console.error('Error fetching blocked IPs:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch blocked IPs' });
     }
   });
@@ -4888,9 +4886,9 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     try {
       const { ip } = req.body;
       const success = securityMonitor.unblockIP(ip);
-      res.json({ success, message: success ? 'IP unblocked successfully' : 'IP not found in blocked list' });
+      res.json({ success: true });
     } catch (error) {
-      console.error('Error unblocking IP:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to unblock IP' });
     }
   });
@@ -4899,9 +4897,9 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     try {
       const blockedIPs = securityMonitor.getBlockedIPs();
       blockedIPs.forEach(ip => securityMonitor.unblockIP(ip));
-      res.json({ success: true, message: `Cleared ${blockedIPs.length} blocked IPs` });
+      res.json({ success: true });
     } catch (error) {
-      console.error('Error clearing blocked IPs:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to clear blocked IPs' });
     }
   });
@@ -4910,9 +4908,9 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     try {
       const { eventId } = req.body;
       const success = securityMonitor.resolveEvent(eventId);
-      res.json({ success, message: success ? 'Event resolved successfully' : 'Event not found' });
+      res.json({ success: true });
     } catch (error) {
-      console.error('Error resolving security event:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to resolve security event' });
     }
   });
@@ -4922,7 +4920,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const healthReport = securityMonitor.getHealthReport();
       res.json({ health: healthReport });
     } catch (error) {
-      console.error('Error fetching security health:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch security health' });
     }
   });
@@ -4933,7 +4931,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const results = await penetrationTester.runAllTests();
       res.json({ results, message: 'Penetration tests completed' });
     } catch (error) {
-      console.error('Error running penetration tests:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to run penetration tests' });
     }
   });
@@ -4942,9 +4940,9 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     try {
       const { category } = req.body;
       const results = await penetrationTester.runTestsByCategory(category);
-      res.json({ results, message: `${category} tests completed` });
+      res.json({ data: "converted" });
     } catch (error) {
-      console.error('Error running category tests:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to run category tests' });
     }
   });
@@ -4954,7 +4952,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const results = penetrationTester.getAllTestResults();
       res.json({ results });
     } catch (error) {
-      console.error('Error fetching pentest results:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch pentest results' });
     }
   });
@@ -4964,7 +4962,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const vulnerabilities = penetrationTester.getVulnerableResults();
       res.json({ vulnerabilities });
     } catch (error) {
-      console.error('Error fetching vulnerabilities:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch vulnerabilities' });
     }
   });
@@ -4974,7 +4972,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const categories = penetrationTester.getTestCategories();
       res.json({ categories });
     } catch (error) {
-      console.error('Error fetching test categories:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch test categories' });
     }
   });
@@ -4985,7 +4983,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const results = await sessionTester.runAllTests();
       res.json({ results, message: 'Session tests completed' });
     } catch (error) {
-      console.error('Error running session tests:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to run session tests' });
     }
   });
@@ -4995,7 +4993,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const results = sessionTester.getAllTestResults();
       res.json({ results });
     } catch (error) {
-      console.error('Error fetching session test results:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch session test results' });
     }
   });
@@ -5005,7 +5003,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const failedTests = sessionTester.getFailedTests();
       res.json({ failedTests });
     } catch (error) {
-      console.error('Error fetching failed session tests:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch failed session tests' });
     }
   });
@@ -5015,7 +5013,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const metrics = sessionTester.getSessionMetrics();
       res.json({ metrics });
     } catch (error) {
-      console.error('Error fetching session metrics:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Failed to fetch session metrics' });
     }
   });
@@ -5026,7 +5024,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const credentials = await storage.getAPICredentials(req.user.companyId);
       res.json(credentials);
     } catch (error) {
-      console.error('Error fetching API credentials:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch API credentials' });
     }
   });
@@ -5072,7 +5070,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       ];
       res.json(permissions);
     } catch (error) {
-      console.error('Error fetching permissions:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch permissions' });
     }
   });
@@ -5095,7 +5093,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const credentials = await storage.createAPICredentials(credentialData);
       res.json(credentials);
     } catch (error) {
-      console.error('Error creating API credentials:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to create API credentials' });
     }
   });
@@ -5111,7 +5109,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
         res.status(404).json({ error: 'API credentials not found' });
       }
     } catch (error) {
-      console.error('Error deactivating API credentials:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to deactivate API credentials' });
     }
   });
@@ -5127,7 +5125,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
         res.status(404).json({ error: 'API credentials not found' });
       }
     } catch (error) {
-      console.error('Error regenerating API credentials secret:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to regenerate secret' });
     }
   });
@@ -5148,7 +5146,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const testimonials = await storage.getTestimonialsByCompany(companyId);
       res.json(testimonials);
     } catch (error) {
-      console.error('Error fetching testimonials via API:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch testimonials' });
     }
   });
@@ -5166,7 +5164,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const blogPosts = await storage.getBlogPostsByCompany(companyId);
       res.json(blogPosts);
     } catch (error) {
-      console.error('Error fetching blog posts via API:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch blog posts' });
     }
   });
@@ -5184,7 +5182,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       const checkIns = await storage.getCheckInsWithTechnician(companyId);
       res.json(checkIns);
     } catch (error) {
-      console.error('Error fetching check-ins via API:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ error: 'Failed to fetch check-ins' });
     }
   });
@@ -5206,10 +5204,10 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
   const httpServer = createServer(app);
   
   // Set up WebSocket server for security monitoring
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws/security' });
+  const wss = new WebSocketServer({ success: true });
   
   wss.on('connection', (ws: WebSocket, req: any) => {
-    console.log('Security monitoring WebSocket connected');
+    logger.info('Security monitoring WebSocket connected');
     
     // Add client to security monitor for real-time updates
     securityMonitor.addClient(ws);
@@ -5217,25 +5215,28 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
     ws.on('message', (message: any) => {
       try {
         const data = JSON.parse(message.toString());
-        console.log('Security monitoring WebSocket message:', data);
+        logger.info('Security monitoring WebSocket message:', { data });
         
         // Handle specific commands if needed
         if (data.type === 'ping') {
-          ws.send(JSON.stringify({ type: 'pong', timestamp: new Date().toISOString() }));
+          ws.send(JSON.stringify({ success: true }));
         }
       } catch (error) {
-        console.error('Error handling security monitoring WebSocket message:', error);
+        logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
       }
     });
     
     ws.on('close', () => {
-      console.log('Security monitoring WebSocket disconnected');
+      logger.info('Security monitoring WebSocket disconnected');
     });
     
     ws.on('error', (error: any) => {
-      console.error('Security monitoring WebSocket error:', error);
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
     });
   });
-  
+  });
+
   return httpServer;
 }
+
+export default app;

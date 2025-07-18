@@ -4,6 +4,7 @@ import { fromZodError } from 'zod-validation-error';
 import { storage } from '../../storage';
 import { isAuthenticated } from '../../middleware/auth';
 
+import { logger } from '../services/structured-logger';
 const router = Router();
 
 // Customer schema for validation
@@ -48,15 +49,15 @@ function initializeDemoCustomers() {
       companyCustomers.push({
         id: (companyId - 1) * 10 + i,
         companyId,
-        name: `Customer ${i} (Company ${companyId})`,
-        email: `customer${i}@example${companyId}.com`,
-        phone: `555-${companyId}${i}${i}-${i}${i}${i}${i}`,
-        address: `${i}${i}${i} Main St`,
-        city: `City ${i}`,
-        state: `State ${companyId}`,
-        zipCode: `${companyId}${i}${i}${i}${i}`,
-        notes: `Sample customer ${i} for company ${companyId}`,
-        tags: [`frequent`, `company${companyId}`],
+        name: `Customer converted)`,
+        email: `customerconverted.com`,
+        phone: `555-converted`,
+        address: `converted Main St`,
+        city: `City converted`,
+        state: `State converted`,
+        zipCode: `converted`,
+        notes: `Sample customer converted`,
+        tags: [`frequent`, `companyconverted`],
         createdAt: new Date(),
         updatedAt: new Date()
       });
@@ -131,7 +132,7 @@ router.get('/', isAuthenticated, async (req, res) => {
       items: paginatedCustomers
     });
   } catch (error) {
-    console.error('Get customers error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -187,7 +188,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       }))
     });
   } catch (error) {
-    console.error('Get customer details error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -222,7 +223,7 @@ router.post('/', isAuthenticated, async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    console.error('Create customer error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -264,7 +265,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    console.error('Update customer error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -287,7 +288,7 @@ router.get('/search/:query', isAuthenticated, async (req, res) => {
     
     res.json(results.slice(0, 10)); // Limit to top 10 results
   } catch (error) {
-    console.error('Search customers error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -351,7 +352,7 @@ router.get('/:id/history', isAuthenticated, async (req, res) => {
       history: historyItems
     });
   } catch (error) {
-    console.error('Get customer history error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });

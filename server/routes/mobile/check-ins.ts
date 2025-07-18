@@ -7,6 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
 
+import { logger } from '../services/structured-logger';
 const router = Router();
 
 // Setup multer for file uploads
@@ -143,7 +144,7 @@ router.get('/', isAuthenticated, async (req, res) => {
           ...checkIn,
           photos: Array.isArray(photos) ? photos.map((photo: any) => {
             if (typeof photo === 'string') {
-              return { url: `/uploads/checkins/${photo}` };
+              return { url: `/uploads/checkins/converted;
             }
             return photo;
           }) : []
@@ -151,7 +152,7 @@ router.get('/', isAuthenticated, async (req, res) => {
       })
     });
   } catch (error) {
-    console.error('Get check-ins error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -186,7 +187,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     // Add full URLs to photos
     const photosWithUrls = Array.isArray(photos) ? photos.map((photo: any) => {
       if (typeof photo === 'string') {
-        return { url: `/uploads/checkins/${photo}` };
+        return { url: `/uploads/checkins/converted;
       }
       return photo;
     }) : [];
@@ -197,7 +198,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       photos: photosWithUrls
     });
   } catch (error) {
-    console.error('Get check-in details error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -265,7 +266,7 @@ router.post('/', isAuthenticated, async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    console.error('Create check-in error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -317,11 +318,11 @@ router.post('/:id/photos', isAuthenticated, upload.array('photos', 10), async (r
       message: "Photos uploaded successfully",
       checkIn: updatedCheckIn,
       photos: updatedPhotos.map(photo => ({
-        url: `/uploads/checkins/${photo}`
+        url: `/uploads/checkins/converted`
       }))
     });
   } catch (error) {
-    console.error('Upload photos error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -386,7 +387,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
       ...updatedCheckIn,
       photos: Array.isArray(photos) ? photos.map((photo: any) => {
         if (typeof photo === 'string') {
-          return { url: `/uploads/checkins/${photo}` };
+          return { url: `/uploads/checkins/converted;
         }
         return photo;
       }) : []
@@ -397,7 +398,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    console.error('Update check-in error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -451,7 +452,7 @@ router.delete('/:id/photos/:photoName', isAuthenticated, async (req, res) => {
         fs.unlinkSync(photoPath);
       }
     } catch (err) {
-      console.warn('Could not delete photo file:', err);
+      logger.warn('Could not delete photo file:', { err });
       // Continue even if file deletion fails
     }
     
@@ -459,11 +460,11 @@ router.delete('/:id/photos/:photoName', isAuthenticated, async (req, res) => {
     res.status(200).json({
       message: "Photo deleted successfully",
       remainingPhotos: updatedPhotos.map((photo: string) => ({
-        url: `/uploads/checkins/${photo}`
+        url: `/uploads/checkins/converted`
       }))
     });
   } catch (error) {
-    console.error('Delete photo error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -505,13 +506,13 @@ router.patch('/:id/complete', isAuthenticated, async (req, res) => {
       ...updatedCheckIn,
       photos: Array.isArray(photos) ? photos.map((photo: any) => {
         if (typeof photo === 'string') {
-          return { url: `/uploads/checkins/${photo}` };
+          return { url: `/uploads/checkins/converted;
         }
         return photo;
       }) : []
     });
   } catch (error) {
-    console.error('Complete check-in error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -546,14 +547,14 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
         const photos = JSON.parse(checkIn.photos as string);
         if (Array.isArray(photos)) {
           photos.forEach((photo: string) => {
-            const photoPath = path.join(uploadDir, photo);
+      const photoPath = path.join(uploadDir, photo);
             if (fs.existsSync(photoPath)) {
               fs.unlinkSync(photoPath);
             }
           });
         }
       } catch (err) {
-        console.warn('Could not delete photo files:', err);
+        logger.warn('Could not delete photo files:', { err });
         // Continue even if file deletion fails
       }
     }
@@ -568,7 +569,7 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
     // Return success
     res.status(204).send();
   } catch (error) {
-    console.error('Delete check-in error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -701,7 +702,7 @@ router.post('/sync', isAuthenticated, async (req, res) => {
       results
     });
   } catch (error) {
-    console.error('Sync check-ins error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });

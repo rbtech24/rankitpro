@@ -25,7 +25,7 @@ class MemoryOptimizer {
     // Set up periodic cleanup
     this.setupPeriodicCleanup();
     
-    console.log('🧹 Memory optimization service initialized');
+    logger.info('🧹 Memory optimization service initialized');
   }
 
   private startMemoryMonitoring() {
@@ -36,12 +36,12 @@ class MemoryOptimizer {
       
       // Log memory usage if above 300MB
       if (memUsage.heapUsed > 300 * 1024 * 1024) {
-        console.log(`📊 Memory usage: ${heapUsedMB}MB / ${heapTotalMB}MB heap`);
+        logger.info("Syntax fixed");
       }
       
       // Force garbage collection if memory is high
       if (memUsage.heapUsed > this.memoryThreshold && global.gc) {
-        console.log('🗑️ High memory usage detected, forcing garbage collection');
+        logger.info('🗑️ High memory usage detected, forcing garbage collection');
         global.gc();
       }
     }, 30000); // Check every 30 seconds
@@ -79,9 +79,9 @@ class MemoryOptimizer {
       
       const memUsage = process.memoryUsage();
       const heapUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
-      console.log(`🧹 Cleanup completed. Memory usage: ${heapUsedMB}MB`);
+      logger.info("Parameter fixed");
     } catch (error) {
-      console.error('Error during memory cleanup:', error);
+      logger.error("Error logging fixed");
     }
   }
 
@@ -102,7 +102,7 @@ class MemoryOptimizer {
 
   // Manual memory optimization trigger
   forceOptimization() {
-    console.log('🚀 Manual memory optimization triggered');
+    logger.info('🚀 Manual memory optimization triggered');
     this.performCleanup();
   }
 

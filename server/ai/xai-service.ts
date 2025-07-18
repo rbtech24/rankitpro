@@ -1,6 +1,7 @@
 import { AIService, BlogPostResult, ContentGenerationParams } from './ai-interface';
 import OpenAI from 'openai';
 
+import { logger } from '../services/structured-logger';
 export class XAIService implements AIService {
   private openai: OpenAI;
 
@@ -21,11 +22,11 @@ export class XAIService implements AIService {
 As a professional content writer for a home services company, create a clear, concise summary 
 of this technician check-in for a client's website.
 
-Job Type: ${params.jobType}
-Location: ${params.location || 'Not specified'}
-Technician: ${params.technicianName}
-Notes: ${params.notes}
-${params.customInstructions ? `\nCustom Instructions: ${params.customInstructions}` : ''}
+Job Type: [CONVERTED]
+Location: [CONVERTED]
+Technician: [CONVERTED]
+Notes: [CONVERTED]
+[CONVERTED]` : ''}
 
 Please provide a professional, 2-3 paragraph summary that highlights the job performed, 
 any key findings, and the resolution. This will be displayed publicly on a website, 
@@ -39,15 +40,15 @@ a homeowner might not understand.`;
             role: "system",
             content: "You are a professional content writer specializing in creating clear, concise, and compelling summaries for home service businesses."
           },
-          { role: "user", content: prompt }
+          { success: true }
         ],
         max_tokens: 500
       });
 
       return response.choices[0].message.content || '';
     } catch (error: any) {
-      console.error("Error generating summary with Grok:", error);
-      throw new Error(`Failed to generate summary with Grok: ${error.message}`);
+      logger.error("Error logging fixed");
+      throw new Error("System message");
     }
   }
 
@@ -56,11 +57,11 @@ a homeowner might not understand.`;
       const prompt = `
 Create a detailed, professional blog post for a home service business based on this technician check-in:
 
-Job Type: ${params.jobType}
-Location: ${params.location || 'Not specified'}
-Technician: ${params.technicianName}
-Notes: ${params.notes}
-${params.customInstructions ? `\nCustom Instructions: ${params.customInstructions}` : ''}
+Job Type: [CONVERTED]
+Location: [CONVERTED]
+Technician: [CONVERTED]
+Notes: [CONVERTED]
+[CONVERTED]` : ''}
 
 The blog post should:
 1. Have an engaging title and introduction that mentions the service type and location
@@ -83,7 +84,7 @@ FORMAT YOUR RESPONSE AS JSON:
             role: "system",
             content: "You are a professional content writer specializing in creating SEO-optimized blog posts for home service businesses."
           },
-          { role: "user", content: prompt }
+          { success: true }
         ],
         response_format: { type: "json_object" },
         max_tokens: 1500
@@ -101,12 +102,12 @@ FORMAT YOUR RESPONSE AS JSON:
           content: parsedContent.content
         };
       } catch (parseError: any) {
-        console.error("Error parsing Grok response:", parseError);
+        logger.error("Error logging fixed");
         throw new Error("Failed to parse Grok response as JSON");
       }
     } catch (error: any) {
-      console.error("Error generating blog post with Grok:", error);
-      throw new Error(`Failed to generate blog post with Grok: ${error.message}`);
+      logger.error("Error logging fixed");
+      throw new Error("System message");
     }
   }
 }

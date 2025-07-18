@@ -1,6 +1,7 @@
 import express from 'express';
 import { storage } from '../storage.js';
 
+import { logger } from '../services/structured-logger';
 const router = express.Router();
 
 // Public endpoint for website widget to fetch company info
@@ -30,7 +31,7 @@ router.get('/:id', async (req, res) => {
       company: publicCompanyInfo
     });
   } catch (error) {
-    console.error("Error fetching public company info:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Failed to fetch company information" });
   }
 });

@@ -3,6 +3,7 @@ import { isAuthenticated, isCompanyAdmin } from '../middleware/auth';
 import { stripeService } from '../services/stripe-service';
 import { storage } from '../storage';
 
+import { logger } from '../services/structured-logger';
 const router = express.Router();
 
 /**
@@ -19,7 +20,7 @@ router.get('/subscription', isAuthenticated, isCompanyAdmin, async (req: Request
     // Return subscription data
     res.json(subscriptionData);
   } catch (error: any) {
-    console.error('Error getting subscription data:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ 
       error: 'Failed to retrieve subscription information',
       message: error.message
@@ -70,7 +71,7 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
       subscriptionId: result.subscriptionId
     });
   } catch (error: any) {
-    console.error('Error creating subscription:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ 
       error: 'Failed to create or update subscription',
       message: error.message
@@ -94,7 +95,7 @@ router.post('/subscription/cancel', isAuthenticated, isCompanyAdmin, async (req:
       cancelDate: result.cancelDate
     });
   } catch (error: any) {
-    console.error('Error canceling subscription:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ 
       error: 'Failed to cancel subscription',
       message: error.message
@@ -126,7 +127,7 @@ router.post('/payment-intent', isAuthenticated, async (req: Request, res: Respon
     
     res.json({ clientSecret });
   } catch (error: any) {
-    console.error('Error creating payment intent:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ 
       error: 'Failed to create payment intent',
       message: error.message
@@ -152,7 +153,7 @@ router.get('/usage', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
     
     res.json(stats);
   } catch (error: any) {
-    console.error('Error getting usage stats:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ 
       error: 'Failed to retrieve usage statistics',
       message: error.message

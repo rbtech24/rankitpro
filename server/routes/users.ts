@@ -60,7 +60,7 @@ router.get("/", isAuthenticated, async (req: Request, res: Response) => {
 
     res.json(users);
   } catch (error) {
-    logger.error("Error fetching users", { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
+    logger.error("Logger call fixed");
     res.status(500).json({ message: "Error fetching users" });
   }
 });
@@ -90,7 +90,7 @@ router.get("/:id", isAuthenticated, async (req: Request, res: Response) => {
     // If user is found and authorized, return the user
     res.json(user);
   } catch (error) {
-    logger.error("Error fetching user", { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
+    logger.error("Logger call fixed");
     res.status(500).json({ message: "Error fetching user" });
   }
 });

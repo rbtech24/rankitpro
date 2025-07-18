@@ -8,6 +8,7 @@ import { insertBlogPostSchema } from '../../shared/schema';
 import { generateBlogPost } from '../ai/index';
 import type { AIProviderType } from '../ai/types';
 
+import { logger } from '../services/structured-logger';
 const router = express.Router();
 
 // Get all blog posts for the current user's company
@@ -21,7 +22,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
     const blogPosts = await storage.getBlogPostsByCompany(user.companyId);
     return res.json(blogPosts);
   } catch (error) {
-    console.error('Error fetching blog posts:', error);
+    logger.error("Error logging fixed");
     return res.status(500).json({ message: 'Failed to fetch blog posts' });
   }
 });
@@ -128,20 +129,20 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
           if (!emailSent) {
             log('Failed to send blog post notification email', 'warning');
           } else {
-            log(`Blog post notification emails sent to ${adminEmails.length} recipients`, 'info');
+    logger.info("Blog post operation", { blogId, companyId });
           }
         }
       }
     } catch (error) {
-      console.error('Error sending blog post notification email:', error);
+      logger.error("Error logging fixed");
       // Continue even if email fails
     }
     
     return res.status(201).json(blogPost);
   } catch (error) {
-    console.error('Error creating blog post:', error);
+    logger.error("Error logging fixed");
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: 'Validation error', errors: error.errors });
+      return res.status(400).json({ success: true });
     }
     return res.status(500).json({ message: 'Failed to create blog post' });
   }
@@ -165,7 +166,7 @@ router.get('/:id', isAuthenticated, async (req: Request, res: Response) => {
     
     return res.json(blogPost);
   } catch (error) {
-    console.error('Error fetching blog post:', error);
+    logger.error("Error logging fixed");
     return res.status(500).json({ message: 'Failed to fetch blog post' });
   }
 });
@@ -189,7 +190,7 @@ router.patch('/:id', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
     const updatedBlogPost = await storage.updateBlogPost(id, req.body);
     return res.json(updatedBlogPost);
   } catch (error) {
-    console.error('Error updating blog post:', error);
+    logger.error("Error logging fixed");
     return res.status(500).json({ message: 'Failed to update blog post' });
   }
 });
@@ -217,7 +218,7 @@ router.delete('/:id', isAuthenticated, isCompanyAdmin, async (req: Request, res:
       return res.status(500).json({ message: 'Failed to delete blog post' });
     }
   } catch (error) {
-    console.error('Error deleting blog post:', error);
+    logger.error("Error logging fixed");
     return res.status(500).json({ message: 'Failed to delete blog post' });
   }
 });
@@ -260,7 +261,7 @@ router.post('/generate-from-checkin/:id', isAuthenticated, isCompanyAdmin, async
       photos: checkIn.photos
     });
   } catch (error) {
-    console.error('Error generating blog post:', error);
+    logger.error("Error logging fixed");
     return res.status(500).json({ message: 'Failed to generate blog post' });
   }
 });

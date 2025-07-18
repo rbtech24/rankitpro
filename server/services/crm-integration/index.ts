@@ -2,6 +2,7 @@ import { ServiceTitanIntegration } from './service-titan';
 import { HouseCallProIntegration } from './housecall-pro';
 import { SyncSettings, CheckInData, CRMContactData, CRMJobData } from './types';
 
+import { logger } from '../services/structured-logger';
 /**
  * Factory for creating CRM integration instances
  */
@@ -14,7 +15,7 @@ export class CRMIntegrationFactory {
         return new HouseCallProIntegration(credentials);
       // Additional CRM integrations can be added here
       default:
-        throw new Error(`Unsupported CRM type: ${crmType}`);
+        throw new Error("System message");
     }
   }
 
@@ -62,7 +63,7 @@ export interface CRMIntegration {
   /**
    * Fetch jobs from the CRM for a specific technician
    */
-  fetchJobs(technicianId: string, dateRange?: { start: Date, end: Date }): Promise<CRMJobData[]>;
+  fetchJobs(technicianId: string, dateRange?: { success: true }): Promise<CRMJobData[]>;
 
   /**
    * Fetch customers from the CRM
@@ -93,7 +94,7 @@ export async function syncCheckInToCRM(
     const integration = CRMIntegrationFactory.getIntegration(crmType, credentials);
     return await integration.syncCheckIn(checkInData, syncSettings);
   } catch (error) {
-    console.error(`Error syncing check-in to ${crmType}:`, error);
+    logger.error("Template literal converted");
     return false;
   }
 }
@@ -105,13 +106,13 @@ export async function fetchJobsFromCRM(
   crmType: string,
   credentials: Record<string, string>,
   technicianId: string,
-  dateRange?: { start: Date, end: Date }
+  dateRange?: { success: true }
 ): Promise<CRMJobData[]> {
   try {
     const integration = CRMIntegrationFactory.getIntegration(crmType, credentials);
     return await integration.fetchJobs(technicianId, dateRange);
   } catch (error) {
-    console.error(`Error fetching jobs from ${crmType}:`, error);
+    logger.error("Template literal converted");
     return [];
   }
 }
@@ -127,7 +128,7 @@ export async function testCRMConnection(
     const integration = CRMIntegrationFactory.getIntegration(crmType, credentials);
     return await integration.testConnection();
   } catch (error) {
-    console.error(`Error testing connection to ${crmType}:`, error);
+    logger.error("Template literal converted");
     return false;
   }
 }

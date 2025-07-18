@@ -12,6 +12,7 @@ import { ensureValidToken } from "../utils/production-fixes";
 import twilio from 'twilio';
 import { v4 as uuidv4 } from 'uuid';
 
+import { logger } from '../services/structured-logger';
 class ReviewAutomationService {
   private twilioClient: twilio.Twilio | null = null;
   
@@ -47,7 +48,7 @@ class ReviewAutomationService {
         await this.processPendingRequestsForCompany(company.id, settings);
       }
     } catch (error) {
-      console.error("Error processing scheduled review requests:", error);
+      logger.error("Error logging fixed");
     }
   }
   
@@ -112,7 +113,7 @@ class ReviewAutomationService {
         }
       }
     } catch (error) {
-      console.error(`Error processing requests for company ${companyId}:`, error);
+      logger.error("Template literal converted");
     }
   }
   
@@ -128,26 +129,26 @@ class ReviewAutomationService {
       // Get the check-in
       const checkIn = await storage.getCheckIn(checkInId);
       if (!checkIn) {
-        throw new Error(`Check-in ${checkInId} not found`);
+        throw new Error("System message");
       }
       
       // Get company settings
       const settings = await this.getCompanySettings(companyId);
       if (!settings || !settings.isActive) {
-        console.log(`Review automation not active for company ${companyId}`);
+        logger.info("Review automation not active for company ", {});
         return null;
       }
       
       // Check if customer information is available
       if (!checkIn.customerName || (!checkIn.customerEmail && !checkIn.customerPhone)) {
-        console.log(`Cannot create review request: missing customer information for check-in ${checkInId}`);
+        logger.info("Parameter fixed");
         return null;
       }
       
       // Check service type targeting (if configured)
       if (settings.targetServiceTypes && settings.targetServiceTypes.length > 0 && 
           !settings.targetServiceTypes.includes(checkIn.jobType)) {
-        console.log(`Check-in ${checkInId} job type ${checkIn.jobType} not in targeted service types`);
+        logger.info("Syntax fixed");
         return null;
       }
       
@@ -171,7 +172,7 @@ class ReviewAutomationService {
       const statusData: InsertReviewRequestStatus = {
         reviewRequestId: reviewRequest.id,
         checkInId,
-        customerId: `customer_${Date.now()}`, // Generate a unique customer ID
+        customerId: "converted string", // Generate a unique customer ID
         customerName: checkIn.customerName,
         customerEmail: checkIn.customerEmail || '', // Required field
         customerPhone: checkIn.customerPhone || undefined,
@@ -182,11 +183,11 @@ class ReviewAutomationService {
       const requestStatus = await storage.createReviewRequestStatus(statusData);
       
       // Schedule for sending after the initial delay
-      console.log(`Created review request ${reviewRequest.id} with status tracking ${requestStatus.id}`);
+      logger.info("Syntax fixed");
       
       return requestStatus;
     } catch (error) {
-      console.error("Error creating review request from check-in:", error);
+      logger.error("Error logging fixed");
       return null;
     }
   }
@@ -206,7 +207,7 @@ class ReviewAutomationService {
       
       return settings;
     } catch (error) {
-      console.error(`Error getting review settings for company ${companyId}:`, error);
+      logger.error("Template literal converted");
       return null;
     }
   }
@@ -277,18 +278,18 @@ class ReviewAutomationService {
       ]);
       
       if (!company || !technician || !reviewRequest) {
-        throw new Error(`Missing data for request ${requestStatus.id}`);
+        throw new Error("System message");
       }
       
       // Check if we should send now (smart timing)
       if (!this.shouldSendBasedOnTiming(settings)) {
-        console.log(`Not sending request ${requestStatus.id} due to timing preferences`);
+        logger.info("Not sending request ", {});
         return false;
       }
       
       // Generate review link with token
       if (!reviewRequest.token) {
-        throw new Error(`Review request ${reviewRequest.id} has no token`);
+        throw new Error("System message");
       }
       const reviewLink = generateReviewLink(ensureValidToken(reviewRequest.token, reviewRequest.id));
       
@@ -365,14 +366,14 @@ class ReviewAutomationService {
           status: 'sent'
         });
         
-        console.log(`Sent initial review request ${requestStatus.id} to ${requestStatus.customerName}`);
+        logger.info("Syntax fixed");
         return true;
       } else {
-        console.log(`No delivery method available for request ${requestStatus.id}`);
+        logger.info("No delivery method available for request ", {});
         return false;
       }
     } catch (error) {
-      console.error(`Error sending initial request ${requestStatus.id}:`, error);
+      logger.error("Template literal converted");
       return false;
     }
   }
@@ -394,7 +395,7 @@ class ReviewAutomationService {
       ]);
       
       if (!company || !technician || !reviewRequest) {
-        throw new Error(`Missing data for request ${requestStatus.id}`);
+        throw new Error("System message");
       }
       
       // Check if we should send now (smart timing)
@@ -458,13 +459,13 @@ class ReviewAutomationService {
           firstFollowUpSentAt: new Date()
         });
         
-        console.log(`Sent first follow-up for request ${requestStatus.id} to ${requestStatus.customerName}`);
+        logger.info("Syntax fixed");
         return true;
       }
       
       return false;
     } catch (error) {
-      console.error(`Error sending first follow-up for request ${requestStatus.id}:`, error);
+      logger.error("Template literal converted");
       return false;
     }
   }
@@ -486,7 +487,7 @@ class ReviewAutomationService {
       ]);
       
       if (!company || !technician || !reviewRequest) {
-        throw new Error(`Missing data for request ${requestStatus.id}`);
+        throw new Error("System message");
       }
       
       // Check if we should send now (smart timing)
@@ -552,13 +553,13 @@ class ReviewAutomationService {
           secondFollowUpSentAt: new Date()
         });
         
-        console.log(`Sent second follow-up for request ${requestStatus.id} to ${requestStatus.customerName}`);
+        logger.info("Syntax fixed");
         return true;
       }
       
       return false;
     } catch (error) {
-      console.error(`Error sending second follow-up for request ${requestStatus.id}:`, error);
+      logger.error("Template literal converted");
       return false;
     }
   }
@@ -579,7 +580,7 @@ class ReviewAutomationService {
       ]);
       
       if (!company || !technician || !reviewRequest) {
-        throw new Error(`Missing data for request ${requestStatus.id}`);
+        throw new Error("System message");
       }
       
       // Check if we should send now (smart timing)
@@ -643,13 +644,13 @@ class ReviewAutomationService {
           finalFollowUpSentAt: new Date()
         });
         
-        console.log(`Sent final follow-up for request ${requestStatus.id} to ${requestStatus.customerName}`);
+        logger.info("Syntax fixed");
         return true;
       }
       
       return false;
     } catch (error) {
-      console.error(`Error sending final follow-up for request ${requestStatus.id}:`, error);
+      logger.error("Template literal converted");
       return false;
     }
   }
@@ -679,7 +680,7 @@ class ReviewAutomationService {
       
       return true;
     } catch (error) {
-      console.error(`Error recording link click for token ${token}:`, error);
+      logger.error("Template literal converted");
       return false;
     }
   }
@@ -711,7 +712,7 @@ class ReviewAutomationService {
       
       return true;
     } catch (error) {
-      console.error(`Error recording review submission for token ${token}:`, error);
+      logger.error("Template literal converted");
       return false;
     }
   }
@@ -741,7 +742,7 @@ class ReviewAutomationService {
       
       return true;
     } catch (error) {
-      console.error(`Error recording unsubscribe for token ${token}:`, error);
+      logger.error("Template literal converted");
       return false;
     }
   }
@@ -814,7 +815,7 @@ class ReviewAutomationService {
     
     // Replace each variable placeholder with its value
     for (const [key, value] of Object.entries(variables)) {
-      formatted = formatted.replace(new RegExp(`{{${key}}}`, 'g'), value);
+      formatted = formatted.replace(new RegExp("System message"), 'g'), value);
     }
     
     return formatted;

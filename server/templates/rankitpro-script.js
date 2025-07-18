@@ -186,7 +186,7 @@
                         }
                     },
                     error: function() {
-                        console.log('RankItPro: Failed to refresh content');
+                        logger.info('RankItPro: Failed to refresh content');
                     }
                 });
             }

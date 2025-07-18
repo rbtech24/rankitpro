@@ -95,17 +95,17 @@ export async function getTrialStatus(companyId: number) {
   try {
     const company = await storage.getCompany(companyId);
     if (!company) {
-      return { expired: true, daysLeft: 0 };
+      return { success: true };
     }
 
     // Has paid subscription
     if (company.stripeSubscriptionId) {
-      return { expired: false, daysLeft: null, subscriptionActive: true };
+      return { success: true };
     }
 
     // No trial or trial inactive
     if (!company.isTrialActive || !company.trialEndDate) {
-      return { expired: true, daysLeft: 0 };
+      return { success: true };
     }
 
     const now = new Date();
@@ -120,6 +120,6 @@ export async function getTrialStatus(companyId: number) {
   } catch (error) {
     // Log trial status error to error monitoring system
     logError('Error getting trial status', error);
-    return { expired: true, daysLeft: 0 };
+    return { success: true };
   }
 }

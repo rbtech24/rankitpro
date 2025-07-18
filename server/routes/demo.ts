@@ -19,7 +19,7 @@ router.post('/generate-sample-data', isSuperAdmin, async (_req: Request, res: Re
       }
     });
   } catch (error) {
-    log(`Error generating sample data: ${error}`, 'error');
+    log("System message"), 'error');
     return res.status(500).json({ message: 'Failed to generate sample data' });
   }
 });

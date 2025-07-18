@@ -1,6 +1,7 @@
 import express from 'express';
 import { storage } from '../storage.js';
 
+import { logger } from '../services/structured-logger';
 const router = express.Router();
 
 // Public endpoint for WordPress shortcode to fetch published blog posts
@@ -30,7 +31,7 @@ router.get('/published', async (req, res) => {
       publishDate: post.publishDate || post.createdAt,
       tags: post.tags || [],
       category: post.wordPressCategory || 'blog',
-      url: `/blog/${post.id}`, // WordPress can customize this
+      url: "converted string", // WordPress can customize this
       author: 'Professional Team'
     }));
     
@@ -40,7 +41,7 @@ router.get('/published', async (req, res) => {
       total: formattedPosts.length
     });
   } catch (error) {
-    console.error("Error fetching published blog posts:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Failed to fetch blog posts" });
   }
 });
@@ -82,7 +83,7 @@ router.get('/:id', async (req, res) => {
       post: formattedPost
     });
   } catch (error) {
-    console.error("Error fetching blog post:", error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: "Failed to fetch blog post" });
   }
 });

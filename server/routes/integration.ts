@@ -6,6 +6,7 @@ import { AIProviderType } from "../ai/types";
 import { escapeHtml, sanitizeText, sanitizeUrl, createSafeTextContent } from "../utils/html-sanitizer";
 import { logger } from "../services/logger";
 
+import { logger } from '../services/structured-logger';
 const router = express.Router();
 
 // WordPress integration settings
@@ -48,7 +49,7 @@ router.get("/wordpress", isAuthenticated, isCompanyAdmin, async (req: Request, r
     const wordpressConfig = company.wordpressConfig ? JSON.parse(company.wordpressConfig) : null;
     
     if (!wordpressConfig) {
-      return res.json({ configured: false, message: "WordPress integration not configured" });
+      return res.json({ success: true });
     }
     
     const wordpressIntegration: WordPressIntegration = {
@@ -59,7 +60,7 @@ router.get("/wordpress", isAuthenticated, isCompanyAdmin, async (req: Request, r
 
     return res.json(wordpressIntegration);
   } catch (error) {
-    logger.error("Error fetching WordPress integration", { error: error instanceof Error ? error.message : 'Unknown error' });
+    logger.error("Logger call fixed");
     return res.status(500).json({ message: "Error fetching WordPress integration" });
   }
 });
@@ -107,7 +108,7 @@ router.post("/wordpress", isAuthenticated, isCompanyAdmin, async (req: Request, 
 
     return res.json(wordpressIntegration);
   } catch (error) {
-    console.error("Error updating WordPress integration:", error);
+    logger.error("Error logging fixed");
     return res.status(500).json({ message: "Error updating WordPress integration" });
   }
 });
@@ -144,22 +145,22 @@ router.get("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res: 
     const baseUrl = getBaseUrl();
     
     const scriptCode = `
-<div id="checkin-widget-${company.id}" class="checkin-widget"></div>
+<div id="checkin-widget-[CONVERTED]" class="checkin-widget"></div>
 <script>
   (function() {
     var script = document.createElement('script');
-    script.src = '${baseUrl}/api/integration/embed/widget.js';
+    script.src = '[CONVERTED]/api/integration/embed/widget.js';
     script.async = true;
     script.onload = function() {
       CheckInWidget.init({
-        targetSelector: '#checkin-widget-${company.id}',
-        companyId: ${company.id},
-        theme: '${settings.theme}',
-        style: '${settings.style}',
-        showTechPhotos: ${settings.showTechPhotos},
-        showCheckInPhotos: ${settings.showCheckInPhotos},
-        autoRefresh: ${settings.autoRefresh},
-        refreshInterval: ${settings.refreshInterval}
+        targetSelector: '#checkin-widget-[CONVERTED]',
+        companyId: [CONVERTED],
+        theme: '[CONVERTED]',
+        style: '[CONVERTED]',
+        showTechPhotos: [CONVERTED],
+        showCheckInPhotos: [CONVERTED],
+        autoRefresh: [CONVERTED],
+        refreshInterval: [CONVERTED]
       });
     };
     document.head.appendChild(script);
@@ -203,7 +204,7 @@ router.get("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res: 
 
     return res.json(embedIntegration);
   } catch (error) {
-    console.error("Error fetching embed integration:", error);
+    logger.error("Error logging fixed");
     return res.status(500).json({ message: "Error fetching embed integration" });
   }
 });
@@ -229,22 +230,22 @@ router.post("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res:
 
     // Update the script code with the new settings
     const scriptCode = `
-<div id="checkin-widget-${company.id}" class="checkin-widget"></div>
+<div id="checkin-widget-[CONVERTED]" class="checkin-widget"></div>
 <script>
   (function() {
     var script = document.createElement('script');
-    script.src = '${req.protocol}://${req.get('host')}/api/integration/embed/widget.js';
+    script.src = '[CONVERTED]://[CONVERTED]/api/integration/embed/widget.js';
     script.async = true;
     script.onload = function() {
       CheckInWidget.init({
-        targetSelector: '#checkin-widget-${company.id}',
-        companyId: ${company.id},
-        theme: '${settings.theme}',
-        style: '${settings.style}',
-        showTechPhotos: ${settings.showTechPhotos},
-        showCheckInPhotos: ${settings.showCheckInPhotos},
-        autoRefresh: ${settings.autoRefresh},
-        refreshInterval: ${settings.refreshInterval}
+        targetSelector: '#checkin-widget-[CONVERTED]',
+        companyId: [CONVERTED],
+        theme: '[CONVERTED]',
+        style: '[CONVERTED]',
+        showTechPhotos: [CONVERTED],
+        showCheckInPhotos: [CONVERTED],
+        autoRefresh: [CONVERTED],
+        refreshInterval: [CONVERTED]
       });
     };
     document.head.appendChild(script);
@@ -299,7 +300,7 @@ router.post("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res:
 
     return res.json(embedIntegration);
   } catch (error) {
-    logger.error("Error updating embed integration", { error: error instanceof Error ? error.message : 'Unknown error' });
+    logger.error("Logger call fixed");
     return res.status(500).json({ message: "Error updating embed integration" });
   }
 });
@@ -327,7 +328,7 @@ const CheckInWidget = (function() {
         renderWidget(data);
       })
       .catch(error => {
-        console.error('Error fetching check-ins:', error);
+        logger.error("Error logging fixed");
       });
   }
   
@@ -386,7 +387,7 @@ const CheckInWidget = (function() {
         
         if (config.showCheckInPhotos && checkIn.photos && checkIn.photos.length > 0) {
           checkIn.photos.forEach(photo => {
-            const photoImg = document.createElement('img');
+      const photoImg = document.createElement('img');
             photoImg.src = sanitizeUrl(photo);
             photoImg.alt = 'Check-in photo';
             photoImg.className = 'checkin-photo';
@@ -626,7 +627,7 @@ router.get("/embed/data", async (req: Request, res: Response) => {
 
     return res.json({ checkIns: formattedCheckIns });
   } catch (error) {
-    logger.error("Error fetching embed data", { error: error instanceof Error ? error.message : 'Unknown error' });
+    logger.error("Logger call fixed");
     return res.status(500).json({ message: "Error fetching embed data" });
   }
 });
@@ -639,7 +640,7 @@ router.get("/ai/providers", isAuthenticated, isCompanyAdmin, async (_req: Reques
     const providers = getAvailableAIProviders();
     return res.json({ providers });
   } catch (error) {
-    logger.error("Error fetching AI providers", { error: error instanceof Error ? error.message : 'Unknown error' });
+    logger.error("Logger call fixed");
     return res.status(500).json({ message: "Error fetching AI providers" });
   }
 });
@@ -662,7 +663,7 @@ router.post("/ai/generate-summary", isAuthenticated, async (req: Request, res: R
 
     return res.json({ summary });
   } catch (error) {
-    logger.error("Error generating summary", { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
+    logger.error("Logger call fixed");
     return res.status(500).json({ message: "Error generating summary" });
   }
 });
@@ -685,7 +686,7 @@ router.post("/ai/generate-blog-post", isAuthenticated, async (req: Request, res:
 
     return res.json(blogPost);
   } catch (error) {
-    logger.error("Error generating blog post", { error: error instanceof Error ? error.message : 'Unknown error', userId: req.user?.id });
+    logger.error("Logger call fixed");
     return res.status(500).json({ message: "Error generating blog post" });
   }
 });

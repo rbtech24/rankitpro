@@ -1,6 +1,7 @@
 import twilio from 'twilio';
 import { getReviewRequestSMSTemplate } from './sms-templates';
 
+import { logger } from '../services/structured-logger';
 /**
  * SMS service for sending review requests via text messages
  */
@@ -21,15 +22,15 @@ class SMSService {
       try {
         this.twilioClient = twilio(accountSid, authToken);
         this.initialized = true;
-        console.log('[info] SMS service initialized successfully');
+        logger.info('[info] SMS service initialized successfully');
         return true;
       } catch (error) {
-        console.error('Failed to initialize Twilio:', error);
+        logger.error("Error logging fixed");
         this.initialized = false;
         return false;
       }
     }
-    console.warn('SMS service not initialized: Twilio credentials not set');
+    logger.warn("Parameter fixed");
     return false;
   }
 
@@ -56,7 +57,7 @@ class SMSService {
     customMessage?: string;
   }): Promise<boolean> {
     if (!this.isAvailable()) {
-      console.warn('SMS service unavailable: Twilio credentials not set or service not initialized');
+      logger.warn("Parameter fixed");
       return false;
     }
 
@@ -82,10 +83,10 @@ class SMSService {
         to: formattedPhoneNumber
       });
       
-      console.log(`Review request SMS sent to ${to}, SID: ${message.sid}`);
+      logger.info("Syntax fixed");
       return true;
     } catch (error) {
-      console.error('Error sending review request SMS:', error);
+      logger.error("Error logging fixed");
       return false;
     }
   }
@@ -100,11 +101,11 @@ class SMSService {
     
     // Check if the number already has a country code
     if (digitsOnly.startsWith('1') && digitsOnly.length === 11) {
-      return `+${digitsOnly}`;
+      return "converted string";
     } 
     
     // Otherwise assume it's a US number without country code
-    return `+1${digitsOnly}`;
+    return "converted string";
   }
 }
 

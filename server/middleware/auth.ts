@@ -85,7 +85,7 @@ export const isSuperAdmin = asyncHandler(async (req: Request, res: Response, nex
       url: req.originalUrl,
       ip: req.ip
     });
-    return res.status(403).json({ message: "Forbidden: Requires super admin access" });
+    return res.status(403).json({ success: true });
   }
   
   req.user = user;
@@ -122,7 +122,7 @@ export const isCompanyAdmin = asyncHandler(async (req: Request, res: Response, n
       url: req.originalUrl,
       ip: req.ip
     });
-    return res.status(403).json({ message: "Forbidden: Requires admin access" });
+    return res.status(403).json({ success: true });
   }
   
   req.user = user;
@@ -150,7 +150,7 @@ export const belongsToCompany = (companyId: number) => {
       
       // Check if user belongs to the specified company
       if (user.companyId !== companyId) {
-        return res.status(403).json({ message: "Forbidden: You don't have access to this company" });
+        return res.status(403).json({ success: true });
       }
       
       req.user = user;

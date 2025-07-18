@@ -3,6 +3,7 @@ import JSZip from 'jszip';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+import { logger } from '../services/structured-logger';
 const router = Router();
 
 // WordPress Plugin Download Endpoint
@@ -50,8 +51,8 @@ if (!defined('ABSPATH')) {
 }
 
 class RankItProPlugin {
-    private $default_api_key = '${apiKey}';
-    private $api_endpoint = '${apiEndpoint}';
+    private $default_api_key = '[CONVERTED]';
+    private $api_endpoint = '[CONVERTED]';
     
     public function __construct() {
         add_action('init', array($this, 'plugin_init'));
@@ -1068,17 +1069,17 @@ Make sure you've configured your API key in the plugin settings and run the diag
     // Create ZIP file structure using the actual enhanced plugin
     zip.file('rankitpro-plugin.php', pluginCode);
 
-    console.log('Generating WordPress plugin ZIP v1.2.1...');
+    logger.info('Generating WordPress plugin ZIP v1.2.1...');
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', 'attachment; filename="rankitpro-plugin-v1.2.1.zip"');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 
     const zipBuffer = await zip.generateAsync({type: 'nodebuffer'});
-    console.log('WordPress plugin generated successfully, size:', zipBuffer.length, 'bytes');
+    logger.info("Parameter fixed");
     
     res.send(zipBuffer);
   } catch (error) {
-    console.error('WordPress plugin generation error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to generate WordPress plugin' });
   }
 });

@@ -6,6 +6,7 @@ import emailService from '../services/email-service';
 import { log } from '../vite';
 import { insertReviewRequestSchema } from '../../shared/schema';
 
+import { logger } from '../services/structured-logger';
 const router = express.Router();
 
 // Get all review requests for the current user's company
@@ -36,7 +37,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
     
     return res.json(enrichedRequests);
   } catch (error) {
-    console.error('Error fetching review requests:', error);
+    logger.error("Error logging fixed");
     return res.status(500).json({ message: 'Failed to fetch review requests' });
   }
 });
@@ -90,8 +91,8 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         // Generate review link/URL
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         const host = req.headers['x-forwarded-host'] || req.get('host');
-        const baseUrl = `${protocol}://${host}`;
-        const reviewLink = `${baseUrl}/review/${reviewRequest.id}/${Buffer.from(reviewRequest.customerName).toString('base64')}`;
+        const baseUrl = "converted string";
+        const reviewLink = "converted string";
         
         const emailSent = await emailService.sendReviewRequest(
           reviewRequest,
@@ -104,22 +105,22 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         if (!emailSent) {
           log('Failed to send review request email', 'warning');
         } else {
-          log(`Review request email sent to ${reviewRequest.email}`, 'info');
+          log("System message"), 'info');
         }
       } catch (error) {
-        console.error('Error sending review request email:', error);
+        logger.error("Error logging fixed");
         // Continue even if email fails
       }
     } else if (method === 'sms') {
       // SMS functionality would be implemented here
-      log(`[SMS] Review request would be sent to ${reviewRequest.customerName} at ${reviewRequest.phone}`);
+      log("System message");
     }
     
     return res.status(201).json(reviewRequest);
   } catch (error) {
-    console.error('Error creating review request:', error);
+    logger.error("Error logging fixed");
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: 'Validation error', errors: error.errors });
+      return res.status(400).json({ success: true });
     }
     return res.status(500).json({ message: 'Failed to create review request' });
   }
@@ -154,7 +155,7 @@ router.get('/:id', isAuthenticated, async (req: Request, res: Response) => {
       } : null
     });
   } catch (error) {
-    console.error('Error fetching review request:', error);
+    logger.error("Error logging fixed");
     return res.status(500).json({ message: 'Failed to fetch review request' });
   }
 });
@@ -175,13 +176,13 @@ router.get('/link/:id', async (req: Request, res: Response) => {
     // Get the server's base URL
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const host = req.headers['x-forwarded-host'] || req.get('host');
-    const baseUrl = `${protocol}://${host}`;
+    const baseUrl = "converted string";
     
-    const reviewUrl = `${baseUrl}/review/${id}/${Buffer.from(reviewRequest.customerName).toString('base64')}`;
+    const reviewUrl = "converted string";
     
     return res.json({ reviewUrl });
   } catch (error) {
-    console.error('Error generating review link:', error);
+    logger.error("Error logging fixed");
     return res.status(500).json({ message: 'Failed to generate review link' });
   }
 });

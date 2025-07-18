@@ -99,10 +99,10 @@ export async function testCRMConnection(crmType: string, credentials: any): Prom
       case 'salesforce':
         return await testSalesforceConnection(credentials);
       default:
-        throw new Error(`Unsupported CRM type: ${crmType}`);
+        throw new Error("System message");
     }
   } catch (error) {
-    console.error(`CRM connection test failed for ${crmType}:`, error);
+    logger.error("Template literal converted");
     return false;
   }
 }
@@ -131,10 +131,10 @@ export async function syncCheckInToCRM(
       case 'salesforce':
         return await syncToSalesforce(checkIn, credentials, settings);
       default:
-        throw new Error(`Unsupported CRM type: ${crmType}`);
+        throw new Error("System message");
     }
   } catch (error) {
-    console.error(`CRM sync failed for ${crmType}:`, error);
+    logger.error("Template literal converted");
     return false;
   }
 }
@@ -148,10 +148,10 @@ async function testServiceTitanConnection(credentials: any): Promise<boolean> {
   try {
     // Get OAuth token
     const tokenResponse = await fetch('https://auth.servicetitan.io/connect/token', {
-      method: 'POST',
+      method: "POST",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(`${credentials.clientId}:${credentials.clientSecret}`).toString('base64')}`
+        'Authorization': "System message").toString('base64')}`
       },
       body: new URLSearchParams({
         grant_type: 'client_credentials',
@@ -160,23 +160,23 @@ async function testServiceTitanConnection(credentials: any): Promise<boolean> {
     });
 
     if (!tokenResponse.ok) {
-      console.error('ServiceTitan token request failed:', await tokenResponse.text());
+      logger.error("Syntax fixed");
       return false;
     }
 
     const tokenData = await tokenResponse.json();
     
     // Test API access with a simple customers query
-    const testResponse = await fetch(`https://api.servicetitan.io/customers/v2/${credentials.tenantId}/customers?page=1&pageSize=1`, {
+    const testResponse = await fetch("System message"), {
       headers: {
-        'Authorization': `Bearer ${tokenData.access_token}`,
+        'Authorization': "converted string",
         'Content-Type': 'application/json'
       }
     });
 
     return testResponse.ok;
   } catch (error) {
-    console.error('ServiceTitan connection test failed:', error);
+    logger.error("Error logging fixed");
     return false;
   }
 }
@@ -189,10 +189,10 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
   try {
     // Get OAuth token
     const tokenResponse = await fetch('https://auth.servicetitan.io/connect/token', {
-      method: 'POST',
+      method: "POST",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(`${credentials.clientId}:${credentials.clientSecret}`).toString('base64')}`
+        'Authorization': "System message").toString('base64')}`
       },
       body: new URLSearchParams({
         grant_type: 'client_credentials',
@@ -220,9 +220,9 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
         searchParams.append('email', checkIn.customerEmail);
       }
 
-      const searchResponse = await fetch(`https://api.servicetitan.io/customers/v2/${credentials.tenantId}/customers?${searchParams}`, {
+      const searchResponse = await fetch("System message"), {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         }
       });
@@ -250,10 +250,10 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
         }] : []
       };
 
-      const createResponse = await fetch(`https://api.servicetitan.io/customers/v2/${credentials.tenantId}/customers`, {
-        method: 'POST',
+      const createResponse = await fetch("System message"), {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(customerData)
@@ -271,8 +271,8 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
         customerId: customerId,
         jobTypeId: 1, // Default job type - should be configurable
         priority: 'Normal',
-        summary: `Service Visit - ${checkIn.jobType || 'General Service'}`,
-        description: `Service completed via Rank It Pro\n\nDetails:\n${checkIn.notes || 'Service completed successfully'}`,
+        summary: "converted string",
+        description: "converted string",
         address: {
           street: checkIn.address || '',
           city: checkIn.city || '',
@@ -282,10 +282,10 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
         }
       };
 
-      const jobResponse = await fetch(`https://api.servicetitan.io/jpm/v2/${credentials.tenantId}/jobs`, {
-        method: 'POST',
+      const jobResponse = await fetch("System message"), {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(jobData)
@@ -296,7 +296,7 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
 
     return true;
   } catch (error) {
-    console.error('ServiceTitan sync failed:', error);
+    logger.error("Error logging fixed");
     throw error;
   }
 }
@@ -311,14 +311,14 @@ async function testHousecallProConnection(credentials: any): Promise<boolean> {
     // Test API access with a simple customers query
     const testResponse = await fetch('https://api.housecallpro.com/customers?page=1&per_page=1', {
       headers: {
-        'Authorization': `Token ${credentials.apiKey}`,
+        'Authorization': "converted string",
         'Content-Type': 'application/json'
       }
     });
 
     return testResponse.ok;
   } catch (error) {
-    console.error('Housecall Pro connection test failed:', error);
+    logger.error("Error logging fixed");
     return false;
   }
 }
@@ -342,9 +342,9 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
         searchParams.append('email', checkIn.customerEmail);
       }
 
-      const searchResponse = await fetch(`https://api.housecallpro.com/customers?${searchParams}`, {
+      const searchResponse = await fetch("System message"), {
         headers: {
-          'Authorization': `Token ${credentials.apiKey}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         }
       });
@@ -388,9 +388,9 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
       }
 
       const createResponse = await fetch('https://api.housecallpro.com/customers', {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Token ${credentials.apiKey}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ customer: customerData })
@@ -406,7 +406,7 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
     if (customerId) {
       const jobData = {
         customer_id: customerId,
-        description: `Service Visit - ${checkIn.jobType || 'General Service'}`,
+        description: "converted string",
         note_to_customer: checkIn.notes || 'Service completed successfully',
         work_status: 'completed',
         assigned_employee_ids: [], // Could be mapped from technician
@@ -421,9 +421,9 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
       };
 
       const jobResponse = await fetch('https://api.housecallpro.com/jobs', {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Token ${credentials.apiKey}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ job: jobData })
@@ -434,7 +434,7 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
 
     return true;
   } catch (error) {
-    console.error('Housecall Pro sync failed:', error);
+    logger.error("Error logging fixed");
     throw error;
   }
 }
@@ -449,14 +449,14 @@ async function testJobberConnection(credentials: any): Promise<boolean> {
     // Test API access with a simple user info query
     const testResponse = await fetch('https://api.getjobber.com/api/me', {
       headers: {
-        'Authorization': `Bearer ${credentials.apiKey}`,
+        'Authorization': "converted string",
         'Content-Type': 'application/json'
       }
     });
 
     return testResponse.ok;
   } catch (error) {
-    console.error('Jobber connection test failed:', error);
+    logger.error("Error logging fixed");
     return false;
   }
 }
@@ -471,9 +471,9 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
 
     // Find existing client by email
     if (checkIn.customerEmail) {
-      const searchResponse = await fetch(`https://api.getjobber.com/api/clients?email=${encodeURIComponent(checkIn.customerEmail)}`, {
+      const searchResponse = await fetch("System message"), {
         headers: {
-          'Authorization': `Bearer ${credentials.apiKey}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         }
       });
@@ -511,9 +511,9 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
       }
 
       const createResponse = await fetch('https://api.getjobber.com/api/clients', {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${credentials.apiKey}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ client: clientData })
@@ -529,10 +529,10 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
     if (clientId) {
       const jobData: any = {
         client_id: clientId,
-        title: `Service Visit - ${checkIn.jobType || 'General Service'}`,
-        description: `Service completed via Rank It Pro\n\nDetails:\n${checkIn.notes || 'Service completed successfully'}`,
+        title: "converted string",
+        description: "converted string",
         status: 'completed',
-        job_number: `RIP-${Date.now()}`, // Generate unique job number
+        job_number: "converted string", // Generate unique job number
         start_date: new Date(checkIn.createdAt).toISOString().split('T')[0],
         end_date: new Date(checkIn.createdAt).toISOString().split('T')[0]
       };
@@ -549,9 +549,9 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
       }
 
       const jobResponse = await fetch('https://api.getjobber.com/api/jobs', {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${credentials.apiKey}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ job: jobData })
@@ -562,7 +562,7 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
 
     return true;
   } catch (error) {
-    console.error('Jobber sync failed:', error);
+    logger.error("Error logging fixed");
     throw error;
   }
 }
@@ -575,12 +575,12 @@ async function testFieldEdgeConnection(credentials: any): Promise<boolean> {
 
   try {
     // FieldEdge uses basic auth with username/password
-    const authString = Buffer.from(`${credentials.username}:${credentials.password}`).toString('base64');
+    const authString = Buffer.from("System message")).toString('base64');
     
     // Test API access with a simple customers query
     const testResponse = await fetch('https://app.fieldedge.com/api/v2/customers', {
       headers: {
-        'Authorization': `Basic ${authString}`,
+        'Authorization': "converted string",
         'Content-Type': 'application/json',
         'API-Key': credentials.apiKey
       }
@@ -588,7 +588,7 @@ async function testFieldEdgeConnection(credentials: any): Promise<boolean> {
 
     return testResponse.ok;
   } catch (error) {
-    console.error('FieldEdge connection test failed:', error);
+    logger.error("Error logging fixed");
     return false;
   }
 }
@@ -599,7 +599,7 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
   }
 
   try {
-    const authString = Buffer.from(`${credentials.username}:${credentials.password}`).toString('base64');
+    const authString = Buffer.from("System message")).toString('base64');
     let customerId = null;
 
     // Find existing customer by email or phone
@@ -612,9 +612,9 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
         searchParams.append('phone', checkIn.customerPhone);
       }
 
-      const searchResponse = await fetch(`https://app.fieldedge.com/api/v2/customers?${searchParams}`, {
+      const searchResponse = await fetch("System message"), {
         headers: {
-          'Authorization': `Basic ${authString}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json',
           'API-Key': credentials.apiKey
         }
@@ -650,9 +650,9 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
       }
 
       const createResponse = await fetch('https://app.fieldedge.com/api/v2/customers', {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Basic ${authString}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json',
           'API-Key': credentials.apiKey
         },
@@ -669,8 +669,8 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
     if (customerId) {
       const workOrderData: any = {
         customer_id: customerId,
-        title: `Service Visit - ${checkIn.jobType || 'General Service'}`,
-        description: `Service completed via Rank It Pro\n\nDetails:\n${checkIn.notes || 'Service completed successfully'}`,
+        title: "converted string",
+        description: "converted string",
         status: 'completed',
         priority: 'normal',
         scheduled_date: new Date(checkIn.createdAt).toISOString(),
@@ -689,9 +689,9 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
       }
 
       const workOrderResponse = await fetch('https://app.fieldedge.com/api/v2/work-orders', {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Basic ${authString}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json',
           'API-Key': credentials.apiKey
         },
@@ -703,7 +703,7 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
 
     return true;
   } catch (error) {
-    console.error('FieldEdge sync failed:', error);
+    logger.error("Error logging fixed");
     throw error;
   }
 }
@@ -717,14 +717,14 @@ async function testHubSpotConnection(credentials: any): Promise<boolean> {
   try {
     const response = await fetch('https://api.hubapi.com/crm/v3/objects/contacts?limit=1', {
       headers: {
-        'Authorization': `Bearer ${credentials.accessToken}`,
+        'Authorization': "converted string",
         'Content-Type': 'application/json'
       }
     });
 
     return response.ok;
   } catch (error) {
-    console.error('HubSpot connection test failed:', error);
+    logger.error("Error logging fixed");
     return false;
   }
 }
@@ -740,9 +740,9 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
     // First, try to find existing contact by email
     if (checkIn.customerEmail) {
       const searchResponse = await fetch(`https://api.hubapi.com/crm/v3/objects/contacts/search`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${credentials.accessToken}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -782,9 +782,9 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
       };
 
       const createResponse = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${credentials.accessToken}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(contactData)
@@ -800,7 +800,7 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
     if (contactId) {
       const noteData = {
         properties: {
-          hs_note_body: `Service Visit Completed\n\nJob Type: ${checkIn.jobType}\nLocation: ${checkIn.location || 'On-site'}\nNotes: ${checkIn.notes || 'Service completed successfully'}\n\nCompleted via Rank It Pro`,
+          hs_note_body: "converted string",
           hs_timestamp: new Date(checkIn.createdAt).getTime()
         },
         associations: [
@@ -819,9 +819,9 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
       };
 
       const noteResponse = await fetch('https://api.hubapi.com/crm/v3/objects/notes', {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${credentials.accessToken}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(noteData)
@@ -832,7 +832,7 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
 
     return true;
   } catch (error) {
-    console.error('HubSpot sync failed:', error);
+    logger.error("Error logging fixed");
     throw error;
   }
 }
@@ -845,8 +845,8 @@ async function testSalesforceConnection(credentials: any): Promise<boolean> {
 
   try {
     // Get OAuth token using username/password flow
-    const tokenResponse = await fetch(`https://${credentials.instanceUrl || 'login'}.salesforce.com/services/oauth2/token`, {
-      method: 'POST',
+    const tokenResponse = await fetch("System message"), {
+      method: "POST",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
@@ -860,23 +860,23 @@ async function testSalesforceConnection(credentials: any): Promise<boolean> {
     });
 
     if (!tokenResponse.ok) {
-      console.error('Salesforce token request failed:', await tokenResponse.text());
+      logger.error("Syntax fixed");
       return false;
     }
 
     const tokenData = await tokenResponse.json();
     
     // Test API access with a simple query
-    const testResponse = await fetch(`${tokenData.instance_url}/services/data/v58.0/sobjects/Account/describe`, {
+    const testResponse = await fetch("System message"), {
       headers: {
-        'Authorization': `Bearer ${tokenData.access_token}`,
+        'Authorization': "converted string",
         'Content-Type': 'application/json'
       }
     });
 
     return testResponse.ok;
   } catch (error) {
-    console.error('Salesforce connection test failed:', error);
+    logger.error("Error logging fixed");
     return false;
   }
 }
@@ -888,8 +888,8 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
 
   try {
     // Get OAuth token
-    const tokenResponse = await fetch(`https://${credentials.instanceUrl || 'login'}.salesforce.com/services/oauth2/token`, {
-      method: 'POST',
+    const tokenResponse = await fetch("System message"), {
+      method: "POST",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
@@ -915,10 +915,10 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
     // Find or create Account
     if (checkIn.customerName || checkIn.customerEmail) {
       // Search for existing account
-      const searchQuery = `SELECT Id FROM Account WHERE Name = '${(checkIn.customerName || 'Rank It Pro Customer').replace(/'/g, "\\'")}' LIMIT 1`;
-      const searchResponse = await fetch(`${instanceUrl}/services/data/v58.0/query?q=${encodeURIComponent(searchQuery)}`, {
+      const searchQuery = "converted string";
+      const searchResponse = await fetch("System message"), {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         }
       });
@@ -947,10 +947,10 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
           accountData.BillingCountry = 'United States';
         }
 
-        const createResponse = await fetch(`${instanceUrl}/services/data/v58.0/sobjects/Account`, {
-          method: 'POST',
+        const createResponse = await fetch("System message"), {
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            'Authorization': "converted string",
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(accountData)
@@ -975,10 +975,10 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
         Description: 'Contact created via Rank It Pro integration'
       };
 
-      const contactResponse = await fetch(`${instanceUrl}/services/data/v58.0/sobjects/Contact`, {
-        method: 'POST',
+      const contactResponse = await fetch("System message"), {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(contactData)
@@ -994,8 +994,8 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
     if (accountId) {
       const caseData: any = {
         AccountId: accountId,
-        Subject: `Service Visit - ${checkIn.jobType || 'General Service'}`,
-        Description: `Service completed via Rank It Pro\n\nDetails:\n${checkIn.notes || 'Service completed successfully'}\n\nLocation: ${checkIn.address || 'On-site'}`,
+        Subject: "converted string",
+        Description: "converted string",
         Status: 'Closed',
         Origin: 'Rank It Pro',
         Priority: 'Medium',
@@ -1006,10 +1006,10 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
         caseData.ContactId = contactId;
       }
 
-      const caseResponse = await fetch(`${instanceUrl}/services/data/v58.0/sobjects/Case`, {
-        method: 'POST',
+      const caseResponse = await fetch("System message"), {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': "converted string",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(caseData)
@@ -1020,7 +1020,7 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
 
     return true;
   } catch (error) {
-    console.error('Salesforce sync failed:', error);
+    logger.error("Error logging fixed");
     throw error;
   }
 }

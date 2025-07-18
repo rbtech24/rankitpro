@@ -1,5 +1,6 @@
 import express from 'express';
 
+import { logger } from './services/structured-logger';
 const app = express();
 app.use(express.json());
 
@@ -19,7 +20,7 @@ app.use((req, res, next) => {
 
 // Test endpoint
 app.get('/test', (req, res) => {
-  res.json({ status: 'working', timestamp: Date.now() });
+  res.json({ success: true });
 });
 
 // Simple login endpoint
@@ -53,5 +54,5 @@ app.get('/me', (req, res) => {
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
-  console.log(`Auth test server running on port ${PORT}`);
+  logger.info("Auth test server running on port ", {});
 });

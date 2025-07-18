@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { log } from '../vite';
 import { storage } from '../storage';
 import { isAuthenticated, isCompanyAdmin } from '../middleware/auth';
+import { logger } from '../services/structured-logger';
 import { 
   getSupportedCRMs, 
   testCRMConnection, 
@@ -16,7 +17,7 @@ router.get('/available', isAuthenticated, async (req, res) => {
     const availableCRMs = getSupportedCRMs();
     res.json(availableCRMs);
   } catch (error: any) {
-    log(`Error fetching available CRMs: ${error?.message || 'Unknown error'}`);
+    log("System message");
     res.status(500).json({ 
       message: 'Error fetching available CRMs',
       error: error?.message || 'Unknown error occurred'
@@ -46,7 +47,7 @@ router.get('/configured', isAuthenticated, async (req, res) => {
     try {
       parsedIntegrations = JSON.parse(crmIntegrations);
     } catch (parseError) {
-      console.warn('Failed to parse CRM integrations JSON, using empty object:', parseError);
+      logger.warn('Failed to parse CRM integrations JSON, using empty object:', { parseError });
       parsedIntegrations = {};
     }
     
@@ -61,7 +62,7 @@ router.get('/configured', isAuthenticated, async (req, res) => {
     
     res.json(configuredCRMs);
   } catch (error: any) {
-    console.error('Error fetching configured CRMs:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Error fetching configured CRMs' });
   }
 });
@@ -120,7 +121,7 @@ router.post('/configure', isAuthenticated, isCompanyAdmin, async (req, res) => {
     
     res.json({ success: true });
   } catch (error: any) {
-    log(`Error configuring CRM: ${error?.message || 'Unknown error'}`);
+    log("System message");
     res.status(500).json({ 
       message: 'Error configuring CRM integration',
       error: error?.message || 'Unknown error occurred'
@@ -145,7 +146,7 @@ router.post('/test-connection', isAuthenticated, isCompanyAdmin, async (req, res
       res.status(400).json({ message: 'Connection test failed' });
     }
   } catch (error: any) {
-    log(`Error testing CRM connection: ${error?.message || 'Unknown error'}`);
+    log("System message");
     res.status(500).json({ 
       message: 'Error testing CRM connection',
       error: error?.message || 'Unknown error occurred'
@@ -184,7 +185,7 @@ router.delete('/:crmType', isAuthenticated, isCompanyAdmin, async (req, res) => 
     
     res.json({ success: true });
   } catch (error: any) {
-    log(`Error deleting CRM integration: ${error?.message || 'Unknown error'}`);
+    log("System message");
     res.status(500).json({ 
       message: 'Error deleting CRM integration',
       error: error?.message || 'Unknown error occurred'
@@ -283,7 +284,7 @@ router.post('/:crmType/sync', isAuthenticated, isCompanyAdmin, async (req, res) 
     
     res.json({ success: true });
   } catch (error: any) {
-    log(`Error syncing with CRM: ${error?.message || 'Unknown error'}`);
+    log("System message");
     res.status(500).json({ 
       message: 'Error syncing with CRM',
       error: error?.message || 'Unknown error occurred'
@@ -311,7 +312,7 @@ router.get('/sync-history', isAuthenticated, async (req, res) => {
     
     res.json(syncHistory);
   } catch (error: any) {
-    log(`Error fetching CRM sync history: ${error?.message || 'Unknown error'}`);
+    log("System message");
     res.status(500).json({ 
       message: 'Error fetching CRM sync history',
       error: error?.message || 'Unknown error occurred'

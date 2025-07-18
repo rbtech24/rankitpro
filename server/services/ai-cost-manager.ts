@@ -1,19 +1,20 @@
 import { storage } from "../storage";
 import { AiUsageTracking, InsertAiUsageTracking, MonthlyAiUsage, InsertMonthlyAiUsage } from "@shared/schema";
 
+import { logger } from '../services/structured-logger';
 // AI Provider Cost Configuration (approximate costs per 1K tokens)
 const AI_COSTS = {
   openai: {
-    "gpt-4o": { input: 0.005, output: 0.015 }, // $5 per 1M input tokens, $15 per 1M output tokens
-    "gpt-4": { input: 0.03, output: 0.06 }
+    "gpt-4o": { success: true }, // $5 per 1M input tokens, $15 per 1M output tokens
+    "gpt-4": { success: true }
   },
   anthropic: {
-    "claude-3-7-sonnet-20250219": { input: 0.003, output: 0.015 }, // $3 per 1M input tokens, $15 per 1M output tokens
-    "claude-3-sonnet-20240229": { input: 0.003, output: 0.015 }
+    "claude-3-7-sonnet-20250219": { success: true }, // $3 per 1M input tokens, $15 per 1M output tokens
+    "claude-3-sonnet-20240229": { success: true }
   },
   xai: {
-    "grok-2-1212": { input: 0.002, output: 0.010 }, // $2 per 1M input tokens, $10 per 1M output tokens
-    "grok-2-vision-1212": { input: 0.002, output: 0.010 }
+    "grok-2-1212": { success: true }, // $2 per 1M input tokens, $10 per 1M output tokens
+    "grok-2-vision-1212": { success: true }
   }
 };
 
@@ -69,7 +70,7 @@ export class AiCostManager {
       // Get company details to check plan
       const company = await storage.getCompany(companyId);
       if (!company) {
-        return { allowed: false, reason: "Company not found" };
+        return { success: true };
       }
 
       const planLimits = PLAN_AI_LIMITS[company.plan as keyof typeof PLAN_AI_LIMITS];
@@ -95,7 +96,7 @@ export class AiCostManager {
       if (currentUsage.monthlyCost + estimatedCost > planLimits.monthlyCostLimit) {
         return {
           allowed: false,
-          reason: `Monthly cost limit exceeded. Current: $${currentUsage.monthlyCost.toFixed(2)}, Limit: $${planLimits.monthlyCostLimit}`,
+          reason: "converted string",
           currentUsage
         };
       }
@@ -104,7 +105,7 @@ export class AiCostManager {
       if (currentUsage.monthlyRequests >= planLimits.requestsLimit) {
         return {
           allowed: false,
-          reason: `Monthly request limit exceeded. Current: ${currentUsage.monthlyRequests}, Limit: ${planLimits.requestsLimit}`,
+          reason: "converted string",
           currentUsage
         };
       }
@@ -113,15 +114,15 @@ export class AiCostManager {
       if (currentUsage.dailyRequests >= planLimits.dailyLimit) {
         return {
           allowed: false,
-          reason: `Daily request limit exceeded. Current: ${currentUsage.dailyRequests}, Limit: ${planLimits.dailyLimit}`,
+          reason: "converted string",
           currentUsage
         };
       }
 
       return { allowed: true, currentUsage };
     } catch (error) {
-      console.error('Error checking AI request limits:', error);
-      return { allowed: false, reason: "Error checking limits" };
+      logger.error("Error logging fixed");
+      return { success: true };
     }
   }
 
@@ -160,12 +161,12 @@ export class AiCostManager {
         totalRequests: 1,
         totalTokens: data.tokensUsed,
         totalCost: data.estimatedCost,
-        [`${data.provider}Requests`]: 1,
-        [`${data.provider}Cost`]: data.estimatedCost
+        ["converted string"]: 1,
+        ["converted string"]: data.estimatedCost
       });
 
     } catch (error) {
-      console.error('Error tracking AI usage:', error);
+      logger.error("Error logging fixed");
       // Don't throw error to avoid breaking the main AI request
     }
   }
@@ -177,7 +178,7 @@ export class AiCostManager {
     currentMonth: {
       requests: number;
       cost: number;
-      breakdown: { [provider: string]: { requests: number; cost: number } };
+      breakdown: { success: true };
     };
     limits: {
       monthlyRequests: number;

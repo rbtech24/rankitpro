@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 
+import { logger } from './services/structured-logger';
 interface ErrorInfo {
   id: string;
   timestamp: string;
@@ -72,7 +73,7 @@ class ErrorMonitor {
         this.stats = data.stats || this.stats;
       }
     } catch (error) {
-      console.warn('Failed to load existing error logs:', error);
+      logger.warn('Failed to load existing error logs:', { error });
     }
   }
 
@@ -85,7 +86,7 @@ class ErrorMonitor {
       };
       fs.writeFileSync(this.logFile, JSON.stringify(data, null, 2));
     } catch (error) {
-      console.error('Failed to save error logs:', error);
+      logger.error("Error logging fixed");
     }
   }
 
@@ -150,7 +151,7 @@ class ErrorMonitor {
   private async sendAlert(errorInfo: ErrorInfo) {
     try {
       // Log critical alerts to console
-      console.error('🚨 CRITICAL ERROR ALERT:', {
+      logger.error("Critical error alert", {
         id: errorInfo.id,
         message: errorInfo.message,
         count: errorInfo.count,
@@ -164,7 +165,7 @@ class ErrorMonitor {
         // Example: await this.sendEmailAlert(errorInfo);
       }
     } catch (error) {
-      console.error('Failed to send error alert:', error);
+      logger.error("Error logging fixed");
     }
   }
 
@@ -259,11 +260,11 @@ class ErrorMonitor {
 
     if (criticalErrors > 0) {
       status = 'critical';
-      summary = `${criticalErrors} critical errors detected`;
+      summary = "converted string";
       recommendations.push('Address critical errors immediately');
     } else if (hourlyErrors > this.alertThresholds.hourlyLimit / 2) {
       status = 'warning';
-      summary = `High error rate detected (${hourlyErrors} errors this hour)`;
+      summary = "converted string";
       recommendations.push('Monitor error patterns closely');
     }
 
@@ -272,14 +273,14 @@ class ErrorMonitor {
       .sort(([,a], [,b]) => b - a)[0];
     
     if (topErrorType && topErrorType[1] > 10) {
-      recommendations.push(`Focus on ${topErrorType[0]} errors (${topErrorType[1]} occurrences)`);
+      recommendations.push("System message");
     }
 
     const topErrorEndpoint = Object.entries(this.stats.errorsByEndpoint)
       .sort(([,a], [,b]) => b - a)[0];
     
     if (topErrorEndpoint && topErrorEndpoint[1] > 5) {
-      recommendations.push(`Review ${topErrorEndpoint[0]} endpoint (${topErrorEndpoint[1]} errors)`);
+      recommendations.push("System message");
     }
 
     return {

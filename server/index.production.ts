@@ -51,7 +51,7 @@ app.use(cors({
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.urlencoded({ success: true }));
 
 // Session configuration
 app.use(session({
@@ -87,9 +87,9 @@ app.use(errorMiddleware);
 
 // Create HTTP server
 const server = app.listen(PORT, '0.0.0.0', () => {
-  logger.info(`🚀 Production server running on port ${PORT}`);
-  logger.info(`📊 Environment: ${process.env.NODE_ENV}`);
-  logger.info(`🔗 Database connected: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
+  logger.info("Template literal converted");`);
+  logger.info("Template literal converted");`);
+  logger.info("Template literal converted");`);
 });
 
 // Initialize WebSocket server

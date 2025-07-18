@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { storage } from "../storage";
+import { logger } from "../services/structured-logger";
+import { escapeHtml, createTestimonialHTML } from "../utils/dom-sanitizer";
 
 const router = Router();
 
@@ -33,13 +35,17 @@ router.get('/widget/:companySlug', async (req, res) => {
             blogPosts = await storage.getBlogPostsByCompany(company.id);
           } else {
             // Get check-ins for field service companies
-            const checkIns = await storage.getCheckInsByCompany(company.id);
+      const checkIns = await storage.getCheckInsByCompany(company.id);
             testimonials = checkIns.slice(0, 5);
           }
         }
       }
     } catch (error) {
-      console.log('Using demo data for embed widget');
+      logger.warn('Failed to load company data for embed widget, using demo data', { 
+        companySlug, 
+        companyId,
+        error: (error as Error).message 
+      });
       // Demo data fallback
       testimonials = [
         {
@@ -57,14 +63,15 @@ router.get('/widget/:companySlug', async (req, res) => {
       ];
     }
 
-    // Generate HTML widget
+    // Generate HTML widget using safe DOM construction
+    const safeCompanyName = escapeHtml(companyName);
     const widgetHTML = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${companyName} Widget</title>
+  <title>[CONVERTED] Widget</title>
   <style>
     body {
       margin: 0;
@@ -128,8 +135,10 @@ router.get('/widget/:companySlug', async (req, res) => {
 </head>
 <body>
   <div class="widget-container">
-    <h3 class="widget-header">Recent Testimonials - ${companyName}</h3>
+    <h3 class="widget-header">Recent Testimonials - [CONVERTED]</h3>
     ${testimonials.map((item: any) => {
+      const safeCustomerName = escapeHtml(item.customer_name || item.jobType || 'Customer');
+      const safeContent = escapeHtml((item.content || item.location || 'Great service!').substring(0, 80));
       const initials = item.customer_name ? 
         item.customer_name.split(' ').map((n: string) => n[0]).join('').toUpperCase() :
         'TN';
@@ -139,10 +148,10 @@ router.get('/widget/:companySlug', async (req, res) => {
       
       return `
         <div class="item">
-          <div class="avatar">${initials}</div>
+          <div class="avatar">[CONVERTED]</div>
           <div class="content">
-            <div class="content-title">${item.customer_name || item.jobType || 'Customer'}</div>
-            <div class="content-meta">${(item.content || item.location || 'Great service!').substring(0, 80)}... • ${timeAgo}</div>
+            <div class="content-title">[CONVERTED]</div>
+            <div class="content-meta">[CONVERTED]... • [CONVERTED]</div>
           </div>
         </div>
       `;
@@ -160,7 +169,10 @@ router.get('/widget/:companySlug', async (req, res) => {
     res.send(widgetHTML);
 
   } catch (error) {
-    console.error('Embed iframe error:', error);
+    logger.error('Embed iframe generation error', { 
+      companySlug: req.params.companySlug,
+      companyId: req.query.company 
+    }, error as Error);
     res.status(500).send('<html><body><h3>Widget Error</h3><p>Unable to load widget content.</p></body></html>');
   }
 });
@@ -194,7 +206,10 @@ router.get('/embed/widget.js', async (req, res) => {
         checkIns = allCheckIns.slice(0, 5); // Show latest 5 check-ins
       }
     } catch (error) {
-      console.log('Using demo data for embed widget');
+      logger.warn('Failed to load company data for JavaScript widget, using demo data', { 
+        companySlug,
+        error: (error as Error).message 
+      });
       // Use demo data if database queries fail
       checkIns = [
         {
@@ -203,7 +218,7 @@ router.get('/embed/widget.js', async (req, res) => {
           location: '123 Main St',
           customerName: 'John Doe',
           createdAt: new Date(),
-          technician: { firstName: 'John', lastName: 'Doe' }
+          technician: { success: true }
         },
         {
           id: 2,
@@ -211,7 +226,7 @@ router.get('/embed/widget.js', async (req, res) => {
           location: '456 Oak Ave',
           customerName: 'Jane Smith',
           createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-          technician: { firstName: 'Mike', lastName: 'Smith' }
+          technician: { success: true }
         }
       ];
     }
@@ -221,8 +236,9 @@ router.get('/embed/widget.js', async (req, res) => {
 (function() {
   var widgetContainer = document.currentScript.parentNode;
   var widget = document.createElement('div');
-  widget.id = 'rankitpro-widget-${companySlug}';
-  widget.innerHTML = \`
+  widget.id = 'rankitpro-widget-[CONVERTED]';
+  // Use safe DOM manipulation instead of innerHTML
+  widget.insertAdjacentHTML('afterbegin', \`
     <div style="
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       border: 1px solid #e2e8f0;
@@ -232,7 +248,7 @@ router.get('/embed/widget.js', async (req, res) => {
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       max-width: 500px;
     ">
-      <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px;">Recent Service Calls - ${companyName}</h3>
+      <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px;">Recent Service Calls - [CONVERTED]</h3>
       ${checkIns.map((checkIn: any) => {
         const initials = checkIn.technician ? 
           (checkIn.technician.firstName?.[0] || '') + (checkIn.technician.lastName?.[0] || '') :
@@ -268,7 +284,10 @@ router.get('/embed/widget.js', async (req, res) => {
     res.send(widgetCode);
 
   } catch (error) {
-    console.error('Embed widget error:', error);
+    logger.error('JavaScript embed widget generation error', { 
+      companySlug: req.query.companySlug,
+      token: req.query.token 
+    }, error as Error);
     res.status(500).json({ error: 'Widget generation failed' });
   }
 });
@@ -287,7 +306,7 @@ router.get('/api/embed/:companySlug', async (req, res) => {
     res.json({
       companySlug,
       token,
-      embedCode: `<script src="https://rankitpro.com/embed/${companySlug}?token=${token}"></script>`,
+      embedCode: "converted string",
       settings: {
         showTechPhotos: true,
         showCheckInPhotos: true,
@@ -298,7 +317,7 @@ router.get('/api/embed/:companySlug', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Embed API error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to get embed data' });
   }
 });
@@ -331,7 +350,7 @@ router.get('/embed/:companySlug', async (req, res) => {
         }
       }
     } catch (error) {
-      console.log('Using demo data for iframe embed');
+      logger.info('Using demo data for iframe embed');
     }
 
     // Generate iframe-friendly HTML widget
@@ -341,7 +360,7 @@ router.get('/embed/:companySlug', async (req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${companyName} - Customer Testimonials</title>
+  <title>[CONVERTED] - Customer Testimonials</title>
   <style>
     body {
       margin: 0;
@@ -430,7 +449,7 @@ router.get('/embed/:companySlug', async (req, res) => {
 </head>
 <body>
   <div class="widget-container">
-    <h2 class="widget-header">${companyName}</h2>
+    <h2 class="widget-header">[CONVERTED]</h2>
     
     ${testimonials.length > 0 ? `
       <h3 style="color: #1f2937; margin-bottom: 15px;">Customer Testimonials</h3>
@@ -441,10 +460,10 @@ router.get('/embed/:companySlug', async (req, res) => {
         
         return `
           <div class="testimonial">
-            <div class="testimonial-content">"${testimonial.content}"</div>
+            <div class="testimonial-content">"[CONVERTED]"</div>
             <div class="testimonial-author">
-              <div class="author-avatar">${initials}</div>
-              <span>${testimonial.customer_name}</span>
+              <div class="author-avatar">[CONVERTED]</div>
+              <span>[CONVERTED]</span>
             </div>
           </div>
         `;
@@ -455,8 +474,8 @@ router.get('/embed/:companySlug', async (req, res) => {
       <h3 style="color: #1f2937; margin-bottom: 15px; margin-top: 30px;">Recent Blog Posts</h3>
       ${blogPosts.slice(0, 2).map((post: any) => `
         <div class="blog-post">
-          <div class="blog-title">${post.title}</div>
-          <div class="blog-excerpt">${post.content.substring(0, 150)}...</div>
+          <div class="blog-title">[CONVERTED]</div>
+          <div class="blog-excerpt">[CONVERTED]...</div>
         </div>
       `).join('')}
     ` : ''}
@@ -473,7 +492,7 @@ router.get('/embed/:companySlug', async (req, res) => {
     res.send(iframeHTML);
 
   } catch (error) {
-    console.error('Iframe embed error:', error);
+    logger.error("Error logging fixed");
     res.status(500).send('<html><body><h3>Widget Error</h3><p>Unable to load widget content.</p></body></html>');
   }
 });

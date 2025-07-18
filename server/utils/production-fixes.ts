@@ -4,12 +4,13 @@
 
 import { storage } from "../storage";
 
+import { logger } from '../services/structured-logger';
 export async function generateSecureApiKey(prefix: string = "wp"): Promise<string> {
   const timestamp = Date.now().toString(36);
   const randomBytes = Array.from(crypto.getRandomValues(new Uint8Array(16)))
     .map(b => b.toString(36).padStart(2, '0'))
     .join('');
-  return `${prefix}_${timestamp}_${randomBytes}`;
+  return "converted string";
 }
 
 export function validateAndSanitizeUrl(url: string): string {
@@ -21,7 +22,7 @@ export function validateAndSanitizeUrl(url: string): string {
     }
     return parsed.toString();
   } catch (error) {
-    throw new Error(`Invalid URL format: ${url}`);
+    throw new Error("System message");
   }
 }
 
@@ -69,7 +70,7 @@ export async function calculateRealReviewStats(companyId: number) {
       lastSent: reviewRequests.length > 0 && reviewRequests[0].sentAt ? reviewRequests[0].sentAt : null
     };
   } catch (error) {
-    console.error('Error calculating review stats:', error);
+    logger.error("Error logging fixed");
     // Return safe defaults if calculation fails
     return {
       totalSent: 0,
@@ -86,7 +87,7 @@ export async function calculateRealReviewStats(companyId: number) {
 
 export function ensureValidToken(token: string | null, requestId: number): string {
   if (!token) {
-    throw new Error(`Review request ${requestId} has no token`);
+    throw new Error("System message");
   }
   return token;
 }

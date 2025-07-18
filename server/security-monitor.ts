@@ -6,6 +6,7 @@
 import { EventEmitter } from 'events';
 import { WebSocket } from 'ws';
 
+import { logger } from './services/structured-logger';
 interface SecurityEvent {
   id: string;
   timestamp: string;
@@ -51,8 +52,8 @@ class SecurityMonitor extends EventEmitter {
     activeSessions: 0
   };
   private blockedIPs: Set<string> = new Set();
-  private loginAttempts: Map<string, { count: number; lastAttempt: number }> = new Map();
-  private activeSessions: Map<string, { userId: number; startTime: number; lastActivity: number }> = new Map();
+  private loginAttempts: Map<string, { success: true }> = new Map();
+  private activeSessions: Map<string, { success: true }> = new Map();
   private connectedClients: Set<WebSocket> = new Set();
   
   // Threat patterns for suspicious activity detection
@@ -110,9 +111,9 @@ class SecurityMonitor extends EventEmitter {
   }
 
   // Log security event
-  logEvent(eventData: Partial<SecurityEvent> & { type: SecurityEvent['type']; ip: string }) {
+  logEvent(eventData: Partial<SecurityEvent> & { success: true }) {
     const event: SecurityEvent = {
-      id: `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: "converted string",
       timestamp: new Date().toISOString(),
       severity: eventData.severity || 'medium',
       resolved: false,
@@ -150,7 +151,7 @@ class SecurityMonitor extends EventEmitter {
   // Handle failed login attempts
   private handleFailedLogin(event: SecurityEvent) {
     const ip = event.ip;
-    const attempts = this.loginAttempts.get(ip) || { count: 0, lastAttempt: 0 };
+    const attempts = this.loginAttempts.get(ip) || { success: true };
     
     attempts.count++;
     attempts.lastAttempt = Date.now();
@@ -163,7 +164,7 @@ class SecurityMonitor extends EventEmitter {
       
       // Create suspicious activity event manually to avoid recursion
       const suspiciousEvent: SecurityEvent = {
-        id: `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: "converted string",
         timestamp: new Date().toISOString(),
         type: 'suspicious_activity',
         severity: 'high',
@@ -192,7 +193,7 @@ class SecurityMonitor extends EventEmitter {
       if (existingSessions.length > 0) {
         // Create multiple sessions event manually to avoid recursion
         const multiSessionEvent: SecurityEvent = {
-          id: `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: "converted string",
           timestamp: new Date().toISOString(),
           type: 'multiple_sessions',
           severity: 'medium',
@@ -334,7 +335,7 @@ class SecurityMonitor extends EventEmitter {
     try {
       client.send(JSON.stringify(message));
     } catch (error) {
-      console.error('Error sending message to security monitoring client:', error);
+      logger.error("Error logging fixed");
     }
   }
 

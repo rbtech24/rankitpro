@@ -4,6 +4,7 @@ import { fromZodError } from 'zod-validation-error';
 import { storage } from '../../storage';
 import { isAuthenticated } from '../../middleware/auth';
 
+import { logger } from '../services/structured-logger';
 const router = Router();
 
 // Notification schema for validation
@@ -46,7 +47,7 @@ async function createRealNotifications(technicianId: number) {
           id: nextNotificationId++,
           technicianId,
           title: 'Check-in Completed',
-          message: `Your check-in at ${checkIn.location || 'customer location'} has been recorded successfully.`,
+          message: `Your check-in at converted has been recorded successfully.`,
           type: 'success' as const,
           priority: 'normal' as const,
           read: false,
@@ -62,14 +63,14 @@ async function createRealNotifications(technicianId: number) {
     for (const review of recentReviews.slice(0, 3)) {
       if (review.createdAt && new Date(review.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) {
         const rating = review.rating || 0;
-        const ratingText = rating >= 4 ? `${rating}-Star Review` : 'Customer Review';
+        const ratingText = rating >= 4 ? `converted-Star Review` : 'Customer Review';
         
         techNotifications.push({
           id: nextNotificationId++,
           technicianId,
-          title: `New ${ratingText}`,
+          title: `New converted`,
           message: review.rating >= 4 ? 
-            `You received a ${rating}-star review! Keep up the excellent work.` : 
+            `You received a converted-star review! Keep up the excellent work.` : 
             'You received feedback from a customer.',
           type: rating >= 4 ? 'success' as const : 'info' as const,
           priority: 'normal' as const,
@@ -102,7 +103,7 @@ async function createRealNotifications(technicianId: number) {
     notifications.set(technicianId, techNotifications);
     return techNotifications;
   } catch (error) {
-    console.error('Error creating real notifications:', error);
+    logger.error("Error logging fixed");
     return [];
   }
 }
@@ -158,7 +159,7 @@ router.get('/', isAuthenticated, async (req, res) => {
       items: paginatedNotifications
     });
   } catch (error) {
-    console.error('Get notifications error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -192,7 +193,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     // Return the notification
     res.json(notification);
   } catch (error) {
-    console.error('Get notification error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -229,7 +230,7 @@ router.patch('/:id/read', isAuthenticated, async (req, res) => {
     // Return the updated notification
     res.json(technicianNotifications[notificationIndex]);
   } catch (error) {
-    console.error('Mark notification as read error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -254,9 +255,9 @@ router.post('/mark-all-read', isAuthenticated, async (req, res) => {
     });
     
     // Return success
-    res.json({ success: true, message: 'All notifications marked as read' });
+    res.json({ success: true });
   } catch (error) {
-    console.error('Mark all notifications as read error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -293,7 +294,7 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
     // Return success
     res.status(204).send();
   } catch (error) {
-    console.error('Delete notification error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -318,7 +319,7 @@ router.get('/unread/count', isAuthenticated, async (req, res) => {
     // Return the count
     res.json({ count: unreadCount });
   } catch (error) {
-    console.error('Get unread count error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -347,11 +348,11 @@ router.post('/register-device', isAuthenticated, async (req, res) => {
     
     // In a real application, we would store the device token in the database
     // For now, just return success
-    console.log(`Registered device token for technician ${technician.id}: ${token} (${platform})`);
+    logger.info("Syntax fixed");
     
     res.json({ success: true });
   } catch (error) {
-    console.error('Register device error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });

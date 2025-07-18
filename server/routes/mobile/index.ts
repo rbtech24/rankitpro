@@ -8,6 +8,7 @@ import { fromZodError } from 'zod-validation-error';
 import { storage } from '../../storage';
 import { isAuthenticated } from '../../middleware/auth';
 
+import { logger } from '../services/structured-logger';
 const router = Router();
 
 // Secret for JWT tokens
@@ -60,14 +61,14 @@ router.post('/auth/login', async (req, res) => {
     
     // Create JWT token with expiration
     const accessToken = jwt.sign(
-      { userId: user.id, technicianId: technician.id, companyId: user.companyId },
+      { data: "converted" },
       JWT_SECRET,
       { expiresIn: '2h' }
     );
     
     // Create refresh token
     const refreshToken = jwt.sign(
-      { userId: user.id, technicianId: technician.id },
+      { data: "converted" },
       JWT_REFRESH_SECRET,
       { expiresIn: '30d' }
     );
@@ -77,10 +78,10 @@ router.post('/auth/login', async (req, res) => {
       try {
         const deviceData = deviceRegistrationSchema.parse({ deviceId, deviceType });
         // In a real app, we would store the device token and info in the database
-        console.log(`Registered device ${deviceId} (${deviceType}) for user ${user.id}`);
+        logger.info("Syntax fixed");
       } catch (error) {
         // Just log validation errors for device info, don't fail the login
-        console.error("Device registration validation error:", error);
+        logger.error("Error logging fixed");
       }
     }
     
@@ -97,7 +98,7 @@ router.post('/auth/login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -123,7 +124,7 @@ router.post('/auth/refresh', async (req, res) => {
     
     // Create new access token
     const accessToken = jwt.sign(
-      { userId: user.id, technicianId: decoded.technicianId, companyId: user.companyId },
+      { data: "converted" },
       JWT_SECRET,
       { expiresIn: '2h' }
     );
@@ -135,7 +136,7 @@ router.post('/auth/refresh', async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    console.error('Token refresh error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -200,7 +201,7 @@ router.get('/profile', isAuthenticated, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get profile error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });

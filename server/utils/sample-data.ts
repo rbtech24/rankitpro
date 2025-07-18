@@ -17,7 +17,7 @@ export async function createSampleData() {
       usageLimit: 100,
     });
     
-    log(`Created demo company: ${demoCompany.name} (ID: ${demoCompany.id})`, 'info');
+    log("System message"), 'info');
 
     // Create an admin user for the demo company
     const salt = await bcrypt.genSalt(10);
@@ -31,7 +31,7 @@ export async function createSampleData() {
       companyId: demoCompany.id,
     });
 
-    log(`Created demo admin user: ${demoAdmin.email}`, 'info');
+    log("System message"), 'info');
     
     // Create some technicians
     const technicians = [
@@ -61,7 +61,7 @@ export async function createSampleData() {
     const createdTechnicians = await Promise.all(
       technicians.map(async (tech) => {
         const technician = await storage.createTechnician(tech);
-        log(`Created demo technician: ${technician.name}`, 'info');
+        log("System message"), 'info');
         return technician;
       })
     );
@@ -136,7 +136,7 @@ export async function createSampleData() {
         isBlog: false
       });
       
-      log(`Created demo check-in: ${checkIn.jobType} by ${technician.name}`, 'info');
+      log("System message"), 'info');
       
       // Create blog post for selected check-ins
       if (template.createBlog) {
@@ -158,12 +158,12 @@ export async function createSampleData() {
             photos: checkIn.photos || []
           });
           
-          log(`Created demo blog post: "${blogPost.title}"`, 'info');
+          log("System message"), 'info');
           
           // Mark check-in as having been made into a blog post
           await storage.updateCheckIn(checkIn.id, { isBlog: true });
         } catch (error) {
-          log(`Failed to create blog post for check-in ${checkIn.id}: ${error}`, 'error');
+          log("System message"), 'error');
         }
       }
       
@@ -178,7 +178,7 @@ export async function createSampleData() {
           phone: null
         });
         
-        log(`Created demo review request for ${reviewRequest.customerName}`, 'info');
+        log("System message"), 'info');
       }
     }
     
@@ -190,7 +190,7 @@ export async function createSampleData() {
       message: 'Sample data created successfully'
     };
   } catch (error) {
-    log(`Error creating sample data: ${error}`, 'error');
+    log("System message"), 'error');
     throw error;
   }
 }

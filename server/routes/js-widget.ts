@@ -3,6 +3,7 @@ import { storage } from '../storage';
 import { CheckInWithTechnician } from '@shared/schema';
 import crypto from 'crypto';
 
+import { logger } from '../services/structured-logger';
 const router = Router();
 
 // Schema for JS widget configuration 
@@ -142,7 +143,7 @@ router.get('/js-widget/config', async (req: Request, res: Response) => {
     
     res.json(widgetConfig);
   } catch (error) {
-    console.error('Error getting JS widget configuration:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -213,7 +214,7 @@ router.post('/js-widget/config', async (req: Request, res: Response) => {
       config: updatedConfig
     });
   } catch (error) {
-    console.error('Error updating JS widget configuration:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -242,13 +243,13 @@ router.get('/js-widget/embed-code', async (req: Request, res: Response) => {
 <script>
 (function() {
   var script = document.createElement('script');
-  script.src = "${req.protocol}://${req.get('host')}/api/public/js/checkin-widget.js";
+  script.src = "[CONVERTED]://[CONVERTED]/api/public/js/checkin-widget.js";
   script.async = true;
   script.onload = function() {
     CheckInWidget.init({
       selector: '#checkin-widget',
-      apiKey: '${apiKey}',
-      apiUrl: '${req.protocol}://${req.get('host')}/api/public/check-ins'
+      apiKey: '[CONVERTED]',
+      apiUrl: '[CONVERTED]://[CONVERTED]/api/public/check-ins'
     });
   };
   document.head.appendChild(script);
@@ -258,7 +259,7 @@ router.get('/js-widget/embed-code', async (req: Request, res: Response) => {
     
     res.json({ embedCode });
   } catch (error) {
-    console.error('Error generating JS widget embed code:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -331,7 +332,7 @@ router.get('/public/check-ins', async (req: Request, res: Response) => {
       checkIns: processedCheckIns
     });
   } catch (error) {
-    console.error('Error getting check-ins for widget:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Server error' });
   }
 });

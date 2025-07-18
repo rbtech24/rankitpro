@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { storage } from '../storage';
 import { isAuthenticated } from '../middleware/auth';
 
+import { logger } from '../services/structured-logger';
 const router = Router();
 
 // Help documentation content
@@ -508,7 +509,7 @@ router.get('/download/:guide', async (req, res) => {
 
     // Set headers for PDF download
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${guide}-guide.pdf"`);
+    res.setHeader('Content-Disposition', "System message");
     
     // Return PDF content (placeholder)
     const pdfContent = `
@@ -550,7 +551,7 @@ stream
 BT
 /F1 12 Tf
 100 700 Td
-(${content.title}) Tj
+([CONVERTED]) Tj
 ET
 endstream
 endobj
@@ -583,7 +584,7 @@ startxref
     
     res.send(Buffer.from(pdfContent));
   } catch (error) {
-    console.error('PDF generation error:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to generate PDF' });
   }
 });
@@ -618,7 +619,7 @@ router.get('/community/topics', isAuthenticated, async (req, res) => {
     
     res.json(formattedTopics);
   } catch (error) {
-    console.error('Error fetching community topics:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch community topics' });
   }
 });
@@ -648,7 +649,7 @@ router.post('/community/topics', isAuthenticated, async (req, res) => {
       topic: newTopic
     });
   } catch (error) {
-    console.error('Error creating community topic:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to create topic' });
   }
 });
@@ -670,7 +671,7 @@ router.get('/community/topics/:id', isAuthenticated, async (req, res) => {
       replies
     });
   } catch (error) {
-    console.error('Error fetching topic:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to fetch topic' });
   }
 });
@@ -698,7 +699,7 @@ router.post('/community/topics/:id/replies', isAuthenticated, async (req, res) =
       reply
     });
   } catch (error) {
-    console.error('Error creating reply:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to create reply' });
   }
 });
@@ -720,7 +721,7 @@ router.post('/community/topics/:id/like', isAuthenticated, async (req, res) => {
       liked
     });
   } catch (error) {
-    console.error('Error liking topic:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to like topic' });
   }
 });
@@ -742,7 +743,7 @@ router.delete('/community/topics/:id/like', isAuthenticated, async (req, res) =>
       unliked
     });
   } catch (error) {
-    console.error('Error unliking topic:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to unlike topic' });
   }
 });
@@ -782,7 +783,7 @@ router.post('/support/ticket', isAuthenticated, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error creating support ticket:', error);
+    logger.error("Error logging fixed");
     res.status(500).json({ error: 'Failed to create support ticket' });
   }
 });

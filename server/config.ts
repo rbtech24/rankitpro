@@ -37,9 +37,9 @@ export interface AppConfig {
 
 function validateRequiredEnvVar(name: string, value: string | undefined): string {
   if (!value) {
-    console.error(`❌ Missing required environment variable: ${name}`);
-    console.error(`Please set ${name} in your deployment platform's environment variables`);
-    throw new Error(`Required environment variable ${name} is not set`);
+    logger.error("Parameter fixed");
+    logger.error("Template literal converted");
+    throw new Error("System message");
   }
   return value;
 }
@@ -54,7 +54,7 @@ function generateSessionSecret(): string {
 }
 
 export function loadConfig(): AppConfig {
-  console.log('🔧 Loading application configuration...');
+  logger.info('🔧 Loading application configuration...');
 
   // Database configuration (required)
   const databaseUrl = validateRequiredEnvVar('DATABASE_URL', process.env.DATABASE_URL);
@@ -62,14 +62,14 @@ export function loadConfig(): AppConfig {
   // Session secret (generate if not provided)
   let sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret) {
-    console.warn('⚠️  SESSION_SECRET not provided, generating one (not recommended for production)');
+    logger.warn('⚠️  SESSION_SECRET not provided, generating one (not recommended for production)');
     sessionSecret = generateSessionSecret();
   }
 
   // Email configuration
   const emailEnabled = !!process.env.SENDGRID_API_KEY;
   if (!emailEnabled) {
-    console.warn('⚠️  SENDGRID_API_KEY not set - email features will be disabled');
+    logger.warn('⚠️  SENDGRID_API_KEY not set - email features will be disabled');
   }
 
   // Stripe configuration
@@ -80,7 +80,7 @@ export function loadConfig(): AppConfig {
     process.env.STRIPE_AGENCY_PRICE_ID
   );
   if (!stripeEnabled) {
-    console.warn('⚠️  Stripe configuration incomplete - payment features will be disabled');
+    logger.warn('⚠️  Stripe configuration incomplete - payment features will be disabled');
   }
 
   // AI configuration
@@ -90,7 +90,7 @@ export function loadConfig(): AppConfig {
     process.env.XAI_API_KEY
   );
   if (!aiEnabled) {
-    console.warn('⚠️  No AI API keys found - content generation will be disabled');
+    logger.warn('⚠️  No AI API keys found - content generation will be disabled');
   }
 
   const config: AppConfig = {
@@ -125,8 +125,8 @@ export function loadConfig(): AppConfig {
     },
   };
 
-  console.log('✅ Configuration loaded successfully');
-  console.log(`📊 Features: Email=${emailEnabled}, Payments=${stripeEnabled}, AI=${aiEnabled}`);
+  logger.info('✅ Configuration loaded successfully');
+  logger.info("Syntax fixed");
 
   return config;
 }
