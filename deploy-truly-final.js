@@ -24,6 +24,9 @@ try {
   // Build server with extra safety
   console.log('🏗️ Building server...');
   execSync('npx esbuild server/index.ts --platform=node --outfile=dist/server.js --bundle --format=cjs --target=node18 --external:pg-native --external:bcrypt --external:@babel/core --external:lightningcss --external:typescript --external:@swc/core --external:esbuild --external:*.node', { stdio: 'inherit' });
+  
+  // Also copy server.js to root for different path scenarios
+  execSync('cp dist/server.js server.js', { stdio: 'inherit' });
 
   // Create package.json in dist
   const packageJson = {

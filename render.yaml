@@ -4,7 +4,7 @@ services:
     env: node
     plan: starter
     buildCommand: rm -rf node_modules && npm install && node deploy-truly-final.js
-    startCommand: node dist/server.js
+    startCommand: node server.js
     envVars:
       - key: NODE_ENV
         value: production
