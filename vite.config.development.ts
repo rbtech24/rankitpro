@@ -2,17 +2,20 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
-export default defineConfig(async () => {
-  // Dynamically import the runtime error overlay plugin to handle ES module compatibility
-  let runtimeErrorPlugin = null;
-  
+// Dynamically import the runtime error overlay plugin to handle ES module compatibility
+const loadRuntimeErrorOverlay = async () => {
   try {
     const { default: runtimeErrorOverlay } = await import("@replit/vite-plugin-runtime-error-modal");
-    runtimeErrorPlugin = runtimeErrorOverlay();
+    return runtimeErrorOverlay();
   } catch (error) {
     console.warn("Runtime error overlay plugin not available, proceeding without it");
+    return null;
   }
+};
 
+export default defineConfig(async () => {
+  const runtimeErrorPlugin = await loadRuntimeErrorOverlay();
+  
   return {
     plugins: [
       react(),
