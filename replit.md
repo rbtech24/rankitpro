@@ -19,22 +19,22 @@ Rank It Pro is a comprehensive SaaS platform designed for customer-facing busine
   - ✅ **Fix 4**: Fixed server build to exclude all Vite and build-tool dependencies
   - ✅ **Fix 5**: Removed all references to setupVite in production build
   - ✅ **Fix 6**: Optimized client build with manual chunking and production settings
-- **Final Working Solution**: `deploy-manual-build.js` deployment script
-  - Completely avoids all Vite configuration files and dependencies
-  - Uses esbuild directly for both client and server builds
-  - Builds client JavaScript and CSS separately with esbuild
-  - Creates simple HTML template without Vite dependencies
+- **Final Working Solution**: `deploy-rename-vite.js` deployment script
+  - Temporarily renames problematic vite.config.ts with @replit plugin
+  - Creates clean vite.config.ts without problematic dependencies
+  - Builds client with Vite using clean configuration
+  - Restores original vite.config.ts after successful build
   - Server built from clean production entry point with comprehensive externals
   - Creates deployment package.json with `"type": "commonjs"`
   - Includes all necessary dependencies for production deployment
 - **Build Results**:
-  - Client: esbuild → `dist/public/` (2.3MB JS + 2.2KB CSS, no Vite)
+  - Client: Vite build → `dist/public/` (2.3MB JS + 127KB CSS, optimized)
   - Server: esbuild → `dist/index.js` (2.2MB CommonJS bundle, minified)
   - Config: `dist/package.json` with `"type": "commonjs"`
   - Deployment: `dist/README.md` with deployment instructions
-- **Verification**: ✅ Complete build script tested - no Vite conflicts, database connection working
+- **Verification**: ✅ Complete build script tested - no ESM conflicts, database connection working
 - **Status**: 🚀 **PRODUCTION DEPLOYMENT READY - ALL ISSUES RESOLVED**
-- **Usage**: Run `node deploy-manual-build.js` to create production build, then deploy `dist/` directory
+- **Usage**: Run `node deploy-rename-vite.js` to create production build, then deploy `dist/` directory
 
 ## System Architecture
 
