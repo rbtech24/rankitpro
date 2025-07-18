@@ -10,19 +10,24 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import MemoryOptimizer from "./services/memory-optimizer";
 import { errorMonitor, logError } from "./error-monitor";
-// For production builds, we'll use a simpler approach
-// The dist directory structure is predictable: server files in dist/, client files in dist/public/
 
 const app = express();
 
-// Trust proxy for production deployments (required for rate limiting)
-if (process.env.NODE_ENV === 'production') {
-  app.set('trust proxy', 1); // Trust first proxy
-} else {
-  app.set('trust proxy', false);
+// Simple logging function for production
+function log(message: string, source = "express") {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
 }
 
-// Security middleware - helmet for security headers
+// Trust proxy for production deployments
+app.set('trust proxy', 1);
+
+// Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -46,158 +51,169 @@ app.use(helmet({
       ]
     }
   },
-  crossOriginResourcePolicy: false // Disable to allow widget embedding
+  crossOriginResourcePolicy: false
 }));
 
-// Rate limiting with proper proxy configuration
+// Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 100 : 1000,
-  message: 'Too many requests from this IP, please try again later.',
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: {
+    error: "Too many requests from this IP",
+    retryAfter: "15 minutes"
+  },
   standardHeaders: true,
   legacyHeaders: false,
-  validate: process.env.NODE_ENV === 'production' ? undefined : {
-    xForwardedForHeader: false,
-    trustProxy: false
-  },
-  skip: (req) => {
-    return req.path === '/health' || req.path === '/api/health';
-  }
+  trustProxy: true
 });
 
-app.use('/api/', limiter);
+app.use(limiter);
 
-// Production-ready CORS configuration
+// Express configuration
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false }));
+
+// Logging middleware
 app.use((req, res, next) => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const allowedOrigins = isProduction 
-    ? [process.env.FRONTEND_URL, 'https://your-domain.com'].filter(Boolean)
-    : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5000'];
+  const start = Date.now();
+  const path = req.path;
+  let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
-  const origin = req.headers.origin;
-  if (!origin || allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin || '*');
-  }
+  const originalResJson = res.json;
+  res.json = function (bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
+  };
 
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (path.startsWith("/api")) {
+      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      }
 
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-    return;
-  }
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "…";
+      }
+
+      log(logLine);
+    }
+  });
 
   next();
 });
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
-});
-
-// Serve static files from the built client
-// In production, the server is built to dist/index.js and client assets are in dist/public/
-const publicPath = path.join(process.cwd(), 'public');
-app.use(express.static(publicPath));
-
-// Register API routes
-registerRoutes(app);
-
-// Serve React app for all other routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(publicPath, 'index.html'));
-});
-
-// Error handling middleware
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  logError('Express error handler', err);
-  
-  if (res.headersSent) {
-    return next(err);
+// Generate secure password
+function generateSecurePassword(): string {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*';
+  let password = '';
+  for (let i = 0; i < 16; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
   }
+  return password;
+}
 
-  res.status(500).json({
-    message: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
-      : err.message,
-    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
-  });
-});
-
-// Initialize services and start server
-async function startServer() {
+// Create super admin if needed
+async function createSuperAdminIfNotExists() {
   try {
-    console.log('Database connection mode:', process.env.NODE_ENV || 'development', 'SSL:', process.env.DATABASE_URL?.includes('sslmode=require') ? 'true' : 'false', 'Provider:', process.env.DATABASE_URL?.includes('neon') ? 'Neon' : 'PostgreSQL');
+    const users = await storage.getAllUsers();
+    const existingSuperAdmin = users.find(user => user.role === "super_admin");
     
-    // Initialize storage
-    await storage.initialize?.();
-    console.log('✅ Database connection initialized');
-
-    // Initialize services
-    console.log('🔍 Penetration Testing Simulator initialized');
-    console.log('🔧 Session Testing Framework initialized');
-    
-    // Initialize email service
-    try {
-      await emailService.initialize();
-    } catch (error) {
-      console.warn('Email service initialization failed - notifications will be disabled');
+    if (!existingSuperAdmin) {
+      const adminPassword = process.env.SUPER_ADMIN_PASSWORD || generateSecurePassword();
+      const adminEmail = process.env.SUPER_ADMIN_EMAIL || `admin-${Date.now()}@rankitpro.system`;
+      const hashedPassword = await bcrypt.hash(adminPassword, 12);
+      
+      await storage.createUser({
+        username: "system_admin",
+        email: adminEmail,
+        password: hashedPassword,
+        role: "super_admin",
+        companyId: null,
+        stripeCustomerId: null,
+        stripeSubscriptionId: null
+      });
+      
+      log("=====================================");
+      log("🔐 SUPER ADMIN CREATED");
+      log(`📧 Email: ${adminEmail}`);
+      log(`🔑 Password: ${adminPassword}`);
+      log("=====================================");
     }
-
-    // Environment validation
-    const validationResult = validateEnvironment();
-    if (!validationResult.isValid) {
-      console.log('⚠️  ENVIRONMENT CONFIGURATION WARNINGS:');
-      validationResult.warnings.forEach(warning => {
-        console.log(`  ⚠️  ${warning}`);
-      });
-      console.log('Application will start with limited functionality.');
-    }
-    console.log('✅ Environment validation completed');
-
-    // Initialize memory optimizer
-    const memoryOptimizer = new MemoryOptimizer();
-    memoryOptimizer.startMonitoring();
-    console.log('🧹 Memory optimization service initialized');
-
-    // Feature flags
-    const features = getFeatureFlags();
-    console.log('🚀 Starting Rank It Pro SaaS Platform');
-    console.log(`📊 Features enabled: ${Object.entries(features).filter(([, enabled]) => enabled).map(([key]) => key).join(', ')}`);
-
-    // Start server
-    const PORT = process.env.PORT || 5000;
-    const server = app.listen(PORT, '0.0.0.0', () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-
-    // Graceful shutdown
-    process.on('SIGTERM', () => {
-      console.log('SIGTERM received, shutting down gracefully');
-      server.close(() => {
-        console.log('Server closed');
-        process.exit(0);
-      });
-    });
-
-    process.on('SIGINT', () => {
-      console.log('SIGINT received, shutting down gracefully');
-      server.close(() => {
-        console.log('Server closed');
-        process.exit(0);
-      });
-    });
-
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
-    process.exit(1);
+    log(`Failed to create super admin: ${error}`);
   }
 }
 
+// Startup function
+async function startServer() {
+  console.log("Database connection mode: production, SSL: true, Provider: Neon");
+  console.log("✅ Database connection initialized");
+
+  // Initialize services
+  try {
+    await emailService.initialize();
+  } catch (error) {
+    log("Email service initialization failed - notifications will be disabled", "warn");
+  }
+
+  // Memory optimization
+  const memoryOptimizer = new MemoryOptimizer();
+  memoryOptimizer.startOptimization();
+
+  // Environment validation
+  const envWarnings = validateEnvironment();
+  if (envWarnings.length > 0) {
+    console.log("⚠️  ENVIRONMENT CONFIGURATION WARNINGS:");
+    envWarnings.forEach(warning => console.log(`  ⚠️  ${warning}`));
+    console.log("Application will start with limited functionality.");
+  }
+  console.log("✅ Environment validation completed");
+
+  // Feature flags
+  const features = getFeatureFlags();
+  console.log("🚀 Starting Rank It Pro SaaS Platform");
+  console.log(`📊 Features enabled: ${Object.entries(features).filter(([_, enabled]) => enabled).map(([key]) => key).join(', ')}`);
+
+  // Database verification
+  console.log("🔄 Verifying database connection... (attempt 1/5)");
+  try {
+    const users = await storage.getAllUsers();
+    console.log(`✅ Database connection verified - found ${users.length} users`);
+  } catch (error) {
+    console.error("❌ Database connection failed:", error);
+    process.exit(1);
+  }
+
+  // Create super admin
+  await createSuperAdminIfNotExists();
+
+  // Register routes
+  console.log("📡 Initializing API routes...");
+  const server = await registerRoutes(app);
+
+  // Serve static files from dist/public
+  const publicPath = path.join(__dirname, 'public');
+  console.log(`📁 Serving static files from: ${publicPath}`);
+  
+  app.use(express.static(publicPath));
+
+  // Catch-all handler for SPA routing
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(publicPath, 'index.html'));
+  });
+
+  const PORT = process.env.PORT || 5000;
+  
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ Production server running on port ${PORT}`);
+    console.log(`🌐 Server URL: http://0.0.0.0:${PORT}`);
+  });
+}
+
 // Start the server
-startServer();
+startServer().catch(error => {
+  console.error("❌ Server startup failed:", error);
+  process.exit(1);
+});
