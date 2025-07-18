@@ -1,17 +1,42 @@
 #!/bin/bash
 
-echo "🚀 Starting Render.com build process..."
+# Production build script for Render.com deployment
+set -e
 
-# Clean up
-rm -rf dist
-rm -rf node_modules
+echo "🔨 Starting production build with custom configuration..."
 
-# Install dependencies
-npm install
+# Create dist directory if it doesn't exist
+mkdir -p dist
 
-# Run our deployment script
-node render-deploy.mjs
+# Build client first using Vite
+echo "📦 Building client application..."
+npx vite build client
 
-echo "✅ Build completed successfully!"
-echo "📁 Files ready in dist/ directory"
-echo "🚀 Starting with: cd dist && node server.js"
+# Build server with comprehensive external dependencies to avoid babel/lightningcss issues
+echo "🚀 Building server application with enhanced exclusions..."
+npx esbuild server/index.ts \
+  --platform=node \
+  --outfile=dist/index.js \
+  --bundle \
+  --external:pg-native \
+  --external:bcrypt \
+  --external:@babel/preset-typescript/package.json \
+  --external:@babel/preset-typescript \
+  --external:@babel/core \
+  --external:lightningcss \
+  --external:../pkg \
+  --external:@swc/core \
+  --external:esbuild \
+  --external:typescript \
+  --external:*.node \
+  --format=esm \
+  --target=node18 \
+  --log-level=info \
+  --minify=false
+
+echo "✅ Production build completed successfully!"
+echo "📊 Client assets: $(ls -la dist/assets/ | wc -l) files"
+echo "🖥️  Server bundle: $(ls -lh dist/index.js)"
+echo ""
+echo "📁 Final build structure:"
+ls -la dist/
