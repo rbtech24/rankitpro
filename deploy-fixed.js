@@ -18,9 +18,9 @@ try {
     fs.rmSync('dist', { recursive: true, force: true });
   }
 
-  // Build client using deployment-specific config
-  console.log('📦 Building client with deployment config...');
-  execSync('npx vite build --config vite.config.deployment.ts', { stdio: 'inherit' });
+  // Build client using fixed config
+  console.log('📦 Building client with fixed config...');
+  execSync('npx vite build --config vite.config.fixed.ts', { stdio: 'inherit' });
 
   // Build server with CommonJS format
   console.log('⚙️  Building server (CommonJS)...');
