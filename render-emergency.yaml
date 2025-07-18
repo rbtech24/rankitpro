@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: rankitpro-fixed
+    env: node
+    plan: starter
+    buildCommand: node deploy-truly-final.js
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
