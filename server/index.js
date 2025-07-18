@@ -5,10 +5,10 @@ const fs = require('fs');
 const url = require('url');
 
 // Parse request body
-function parseBody(req: any) {
+function parseBody(req) {
   return new Promise((resolve) => {
     let body = '';
-    req.on('data', (chunk: any) => {
+    req.on('data', (chunk) => {
       body += chunk.toString();
     });
     req.on('end', () => {
@@ -22,7 +22,7 @@ function parseBody(req: any) {
 }
 
 // Create server
-const server = http.createServer(async (req: any, res: any) => {
+const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
   
@@ -44,7 +44,7 @@ const server = http.createServer(async (req: any, res: any) => {
   // API endpoints
   if (pathname === '/api/auth/login' && req.method === 'POST') {
     const body = await parseBody(req);
-    const { email, password } = body as any;
+    const { email, password } = body;
     
     console.log('Login attempt:', email);
     
