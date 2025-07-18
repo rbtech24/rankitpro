@@ -19,21 +19,21 @@ Rank It Pro is a comprehensive SaaS platform designed for customer-facing busine
   - ✅ **Fix 4**: Fixed server build to exclude all Vite and build-tool dependencies
   - ✅ **Fix 5**: Removed all references to setupVite in production build
   - ✅ **Fix 6**: Created esbuild-based client build with CSS processing
-- **Final Working Solution**: `deploy-production-clean.js` deployment script
-  - Comprehensive exclusion of all Vite and development dependencies from production build
-  - Uses esbuild for both client and server builds with maximum externals configuration
-  - Builds CSS separately using Tailwind CLI
-  - Server built from clean production entry point with comprehensive externals
+- **Final Working Solution**: `deploy-bypass-all-vite.js` deployment script
+  - Complete bypass of all Vite configuration and dependencies including @replit plugin
+  - Uses pure esbuild for both client and server builds with comprehensive externals
+  - Builds CSS separately using Tailwind CLI (no Vite involvement)
+  - Server built from clean production entry point with maximum externals
   - Creates deployment package.json with `"type": "commonjs"`
-  - Eliminates all Vite bundling issues, Invalid URL errors, and package.json path conflicts
+  - Eliminates all @replit/vite-plugin-runtime-error-modal ES module conflicts
 - **Build Results**:
   - Client: esbuild → `dist/public/` (2.32MB JS + 121KB CSS, optimized)
   - Server: esbuild → `dist/index.js` (2.26MB CommonJS bundle, minified)
   - Config: `dist/package.json` with `"type": "commonjs"`
-  - No Vite dependencies, Invalid URL errors, or ES module conflicts
-- **Verification**: ✅ Complete build script tested - database connection working, no Vite bundling issues
+  - No Vite dependencies, ES module conflicts, or @replit plugin issues
+- **Verification**: ✅ Complete build script tested - database connection working, no Vite conflicts
 - **Status**: 🚀 **PRODUCTION DEPLOYMENT READY - ALL ISSUES RESOLVED**
-- **Usage**: Run `node deploy-production-clean.js` to create production build, then deploy `dist/` directory
+- **Usage**: Run `node deploy-bypass-all-vite.js` to create production build, then deploy `dist/` directory
 
 ## System Architecture
 
