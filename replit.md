@@ -35,8 +35,13 @@ Rank It Pro is a comprehensive SaaS platform designed for customer-facing busine
   - Maintains development functionality with runtime error overlay
 - **Verification**: ✅ Complete build tested successfully - all ES module issues resolved
 - **Status**: 🚀 **PRODUCTION DEPLOYMENT READY - ULTIMATE FIX COMPLETE**
-- **Usage**: Run `node deploy-fixed.mjs` to create production build, then deploy `dist/` directory
-- **Documentation**: Complete deployment guide in `DEPLOYMENT.md`
+- **Usage**: 
+  - Local deployment: `node deploy-fixed.mjs`
+  - Render.com deployment: `node render-deploy.mjs`
+- **Documentation**: Complete deployment guides in `DEPLOYMENT.md` and `RENDER_DEPLOYMENT.md`
+- **Render.com Fix**: Fixed "use client" directive in tooltip.tsx causing build failures
+- **Build Command**: `rm -rf node_modules && npm install && node render-deploy.mjs`
+- **Start Command**: `cd dist && node server.js`
 
 ## System Architecture
 
