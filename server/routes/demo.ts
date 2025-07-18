@@ -1,16 +1,7 @@
 import express, { Request, Response } from 'express';
 import { createSampleData } from '../utils/sample-data';
 import { isSuperAdmin } from '../middleware/auth';
-// Simple logging function for production
-function log(message: string, source = "express") {
-  const formattedTime = new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-  console.log(`${formattedTime} [${source}] ${message}`);
-}
+import { log } from '../vite';
 
 const router = express.Router();
 

@@ -7,19 +7,9 @@ import { type Server } from "http";
 import { nanoid } from "nanoid";
 
 
-// Get __dirname equivalent for ESM/CJS compatibility
-let __filename: string;
-let __dirname: string;
-
-try {
-  // ESM environment
-  __filename = fileURLToPath(import.meta.url);
-  __dirname = path.dirname(__filename);
-} catch (error) {
-  // CJS environment - use Node.js globals
-  __filename = (globalThis as any).__filename || __filename;
-  __dirname = (globalThis as any).__dirname || __dirname;
-}
+// Get __dirname equivalent for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const viteLogger = createLogger();
 
