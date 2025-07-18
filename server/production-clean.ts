@@ -1,177 +1,209 @@
-import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-import { createServer } from "http";
-import fs from "fs";
-import { storage } from "./storage.js";
-import session from "express-session";
-import bcrypt from "bcrypt";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-import { db } from "./db.js";
-import { isAuthenticated, isCompanyAdmin, isSuperAdmin } from "./middleware/auth.js";
-import { WebSocketServer } from 'ws';
+import express from 'express';
+import path from 'path';
+import session from 'express-session';
+import MemoryStore from 'memorystore';
+import helmet from 'helmet';
+import { db } from './db';
+import { isAuthenticated } from './middleware/auth';
+import { users, companies, blogPosts, reviewRequests, apiCredentials, technicians, checkIns, companyLocations } from '@shared/schema';
+import { eq, and, desc, asc, count } from 'drizzle-orm';
+import bcrypt from 'bcrypt';
 
-// Get __dirname equivalent for ESM/CJS compatibility
-let __filename: string;
-let __dirname: string;
+const app = express();
 
-try {
-  __filename = fileURLToPath(import.meta.url);
-  __dirname = path.dirname(__filename);
-} catch (error) {
-  __filename = (globalThis as any).__filename || __filename;
-  __dirname = (globalThis as any).__dirname || __dirname;
-}
+// Basic middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      connectSrc: ["'self'", "https:", "http:", "ws:", "wss:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Session configuration
+const MemoryStoreSession = MemoryStore(session);
+app.use(session({
+  store: new MemoryStoreSession({
+    checkPeriod: 86400000, // 24 hours
+  }),
+  secret: process.env.SESSION_SECRET || 'default-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  },
+}));
+
+// Basic auth routes
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    // Find user
+    const user = await db.select().from(users).where(eq(users.email, email)).then(rows => rows[0]);
+    
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Set session
+    req.session.userId = user.id;
+    
+    // Get user with company info
+    const userWithCompany = await db.select({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      role: users.role,
+      companyId: users.companyId,
+      companyName: companies.name,
+      companySlug: companies.slug,
+    })
+    .from(users)
+    .leftJoin(companies, eq(users.companyId, companies.id))
+    .where(eq(users.id, user.id))
+    .then(rows => rows[0]);
+
+    res.json({
+      user: userWithCompany,
+      message: 'Login successful'
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Logout error:', err);
+      return res.status(500).json({ message: 'Logout failed' });
+    }
+    res.json({ message: 'Logout successful' });
+  });
+});
+
+app.get('/api/auth/me', isAuthenticated, async (req, res) => {
+  try {
+    const userWithCompany = await db.select({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      role: users.role,
+      companyId: users.companyId,
+      companyName: companies.name,
+      companySlug: companies.slug,
+    })
+    .from(users)
+    .leftJoin(companies, eq(users.companyId, companies.id))
+    .where(eq(users.id, req.session.userId!))
+    .then(rows => rows[0]);
+
+    res.json({ user: userWithCompany });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Basic dashboard routes
+app.get('/api/dashboard/stats', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.userId!;
+    
+    // Get user's company
+    const user = await db.select().from(users).where(eq(users.id, userId)).then(rows => rows[0]);
+    if (!user?.companyId) {
+      return res.status(400).json({ message: 'User not associated with a company' });
+    }
+
+    // Get basic stats
+    const reviewCount = await db.select({ count: count() }).from(reviewRequests).where(eq(reviewRequests.companyId, user.companyId)).then(rows => rows[0].count);
+    const blogPostCount = await db.select({ count: count() }).from(blogPosts).where(eq(blogPosts.companyId, user.companyId)).then(rows => rows[0].count);
+    const technicianCount = await db.select({ count: count() }).from(technicians).where(eq(technicians.companyId, user.companyId)).then(rows => rows[0].count);
+
+    res.json({
+      stats: {
+        reviews: reviewCount,
+        blogPosts: blogPostCount,
+        technicians: technicianCount,
+      }
+    });
+  } catch (error) {
+    console.error('Dashboard stats error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Basic reviews route
+app.get('/api/reviews', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.userId!;
+    
+    // Get user's company
+    const user = await db.select().from(users).where(eq(users.id, userId)).then(rows => rows[0]);
+    if (!user?.companyId) {
+      return res.status(400).json({ message: 'User not associated with a company' });
+    }
+
+    // Get review requests
+    const reviewsList = await db.select()
+      .from(reviewRequests)
+      .where(eq(reviewRequests.companyId, user.companyId))
+      .orderBy(desc(reviewRequests.sentAt))
+      .limit(50);
+
+    res.json({ reviews: reviewsList });
+  } catch (error) {
+    console.error('Get reviews error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 async function startServer() {
-  const app = express();
-  const server = createServer(app);
+  try {
+    console.log("✅ Database connection ready");
 
-  // Security middleware
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "https:"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        connectSrc: ["'self'"]
-      }
-    }
-  }));
-
-  // Trust proxy for production deployments
-  app.set('trust proxy', 1);
-
-  // Rate limiting
-  const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    message: 'Too many requests from this IP, please try again later.',
-    standardHeaders: true,
-    legacyHeaders: false
-  });
-  app.use('/api/', limiter);
-
-  // Body parsing
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-  // Session setup
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
-  }));
-
-  // Basic API routes for authentication
-  app.post('/api/auth/login', async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      const user = await storage.getUserByEmail(email);
-      
-      if (!user) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-
-      const isValid = await bcrypt.compare(password, user.password);
-      if (!isValid) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-
-      req.session.userId = user.id;
-      res.json({ 
-        message: 'Login successful',
-        user: { id: user.id, email: user.email, role: user.role }
-      });
-    } catch (error) {
-      res.status(500).json({ message: 'Server error' });
-    }
-  });
-
-  app.post('/api/auth/logout', (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Logout failed' });
-      }
-      res.json({ message: 'Logout successful' });
-    });
-  });
-
-  app.get('/api/auth/me', isAuthenticated, async (req, res) => {
-    try {
-      const user = await storage.getUserById(req.session.userId!);
-      if (!user) {
-        return res.status(401).json({ message: 'User not found' });
-      }
-      res.json({ user: { id: user.id, email: user.email, role: user.role } });
-    } catch (error) {
-      res.status(500).json({ message: 'Server error' });
-    }
-  });
-
-  // Health check endpoint
-  app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-  });
-
-  // Setup static file serving for production
-  const publicPath = path.resolve(__dirname, "public");
-  console.log("🔍 Looking for static files in:", publicPath);
-
-  if (fs.existsSync(publicPath)) {
+    // Serve static files from public directory
+    const publicPath = path.join(process.cwd(), 'dist', 'public');
     app.use(express.static(publicPath));
-    console.log("✅ Static files middleware set up successfully");
-  } else {
-    console.error("❌ Public directory not found:", publicPath);
+
+    // Serve index.html for all other routes (SPA)
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(publicPath, 'index.html'));
+    });
+
+    const port = process.env.PORT || 5000;
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`🚀 Production server running on port ${port}`);
+    });
+  } catch (error) {
+    console.error('Failed to start production server:', error);
+    process.exit(1);
   }
-
-  // WebSocket setup for real-time features
-  const wss = new WebSocketServer({ server });
-  
-  wss.on('connection', (ws) => {
-    console.log('New WebSocket connection');
-    
-    ws.on('message', (message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        console.log('Received message:', data);
-        
-        // Echo message back for testing
-        ws.send(JSON.stringify({ type: 'echo', data }));
-      } catch (error) {
-        console.error('WebSocket message error:', error);
-      }
-    });
-    
-    ws.on('close', () => {
-      console.log('WebSocket connection closed');
-    });
-  });
-
-  // Serve React app for all other routes
-  app.get("*", (req, res) => {
-    const indexPath = path.join(publicPath, "index.html");
-    if (fs.existsSync(indexPath)) {
-      res.sendFile(indexPath);
-    } else {
-      res.status(404).send("Application not found. Please ensure the client is built.");
-    }
-  });
-
-  const PORT = process.env.PORT || 5000;
-
-  server.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Production server started on port ${PORT}`);
-  });
 }
 
-// Start the server
-startServer().catch(console.error);
+startServer();

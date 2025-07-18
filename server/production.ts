@@ -1,58 +1,38 @@
-import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-import { createServer } from "http";
-import { WebSocketServer } from 'ws';
-import fs from "fs";
-import { registerRoutes } from "./routes.js";
+import express from 'express';
+import path from 'path';
+import { registerRoutes } from './routes';
+import { db } from './db';
 
-// Get __dirname equivalent for ESM/CJS compatibility
-let __filename: string;
-let __dirname: string;
+const app = express();
 
-try {
-  // ESM environment
-  __filename = fileURLToPath(import.meta.url);
-  __dirname = path.dirname(__filename);
-} catch (error) {
-  // CJS environment - use Node.js globals
-  __filename = (globalThis as any).__filename || __filename;
-  __dirname = (globalThis as any).__dirname || __dirname;
-}
+// For production, we know the structure - dist/index.js and dist/public/
+const __dirname = process.cwd();
 
 async function startServer() {
-  const app = express();
+  try {
+    // The database connection is already initialized in db.ts
+    console.log("✅ Database connection ready");
 
-  // Setup static file serving for production
-  const publicPath = path.resolve(__dirname, "public");
-  console.log("🔍 Looking for static files in:", publicPath);
+    // Register API routes
+    await registerRoutes(app);
 
-  if (fs.existsSync(publicPath)) {
+    // Serve static files from public directory
+    const publicPath = path.join(__dirname, 'public');
     app.use(express.static(publicPath));
-    console.log("✅ Static files middleware set up successfully");
-  } else {
-    console.error("❌ Public directory not found:", publicPath);
+
+    // Serve index.html for all other routes (SPA)
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(publicPath, 'index.html'));
+    });
+
+    const port = process.env.PORT || 5000;
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`🚀 Production server running on port ${port}`);
+    });
+  } catch (error) {
+    console.error('Failed to start production server:', error);
+    process.exit(1);
   }
-
-  // Register all routes using the existing routes setup
-  const server = await registerRoutes(app);
-
-  // Serve React app for all other routes
-  app.get("*", (req, res) => {
-    const indexPath = path.join(publicPath, "index.html");
-    if (fs.existsSync(indexPath)) {
-      res.sendFile(indexPath);
-    } else {
-      res.status(404).send("Application not found. Please ensure the client is built.");
-    }
-  });
-
-  const PORT = process.env.PORT || 5000;
-
-  server.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Production server started on port ${PORT}`);
-  });
 }
 
-// Start the server
-startServer().catch(console.error);
+startServer();
