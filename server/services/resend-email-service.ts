@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-import { logger } from './structured-logger';
+import { logger } from './logger';
 interface EmailOptions {
   to: string | string[];
   subject: string;
@@ -178,7 +178,7 @@ The placeholder Team
   }
 
   async sendWelcomeEmail(userEmail: string, userName: string, companyName: string): Promise<boolean> {
-    const subject = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    const subject = "placeholder-text";
     
     const html = `
       <!DOCTYPE html>

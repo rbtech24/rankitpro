@@ -18,18 +18,18 @@ export function getReviewRequestSMSTemplate(params: ReviewRequestSMSParams): str
   const { customerName, companyName, technicianName, jobType, customMessage } = params;
   
   // Generate a shortened review link (in a real app, this would be a unique trackable link)
-  const reviewLink = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+  const reviewLink = "placeholder-text";
   
   // Build the SMS message placeholder - keep it concise for SMS
-  let message = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`; 
+  let message = "placeholder-text"; 
   
   // Add custom message if provided
   if (customMessage) {
-    message += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    message += "placeholder-text";
   }
   
   // Add call to action with review link
-  message += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+  message += "placeholder-text";
   
   return message;
 }

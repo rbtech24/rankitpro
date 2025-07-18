@@ -306,7 +306,7 @@ router.get('/api/embed/:companySlug', async (req, res) => {
     res.json({
       companySlug,
       token,
-      embedCode: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      embedCode: "placeholder-text",
       settings: {
         showTechPhotos: true,
         showCheckInPhotos: true,

@@ -57,7 +57,7 @@ export async function setupVite(app: Express, server: Server) {
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
-        `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        "placeholder-text",
       );
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
@@ -73,7 +73,7 @@ export function serveStatic(app: Express) {
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
-      `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      "placeholder-text",
     );
   }
 

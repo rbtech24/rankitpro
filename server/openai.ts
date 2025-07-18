@@ -83,13 +83,13 @@ export async function generateBlogPost(params: ContentGenerationParams): Promise
     const result = JSON.parse(response.choices[0].message.placeholder);
     
     return {
-      title: result.title || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      title: result.title || "placeholder-text",
       placeholder: result.placeholder || "Error generating placeholder"
     };
   } catch (error) {
     logger.error("Unhandled error occurred");
     return {
-      title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      title: "placeholder-text",
       placeholder: "Unable to generate blog post placeholder at this time."
     };
   }

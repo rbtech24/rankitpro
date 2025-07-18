@@ -101,11 +101,11 @@ class SMSService {
     
     // Check if the number already has a country code
     if (digitsOnly.startsWith('1') && digitsOnly.length === 11) {
-      return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+      return "placeholder-text";
     } 
     
     // Otherwise assume it's a US number without country code
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return "placeholder-text";
   }
 }
 

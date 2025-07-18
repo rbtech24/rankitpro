@@ -57,31 +57,35 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Security middleware - helmet for security headers
-app.use(helmet({
-  placeholderSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      scriptSrc: [
-        "'self'", 
-        "'unsafe-inline'", 
-        "'unsafe-eval'",
-        "https://js.stripe.com",
-        "https://replit.com"
-      ],
-      connectSrc: [
-        "'self'", 
-        "https://api.openai.com", 
-        "https://api.anthropic.com",
-        "https://api.stripe.com",
-        "wss:"
-      ]
-    }
-  },
-  crossOriginResourcePolicy: false // Disable to allow widget embedding
-}));
+if (process.env.NODE_ENV === 'production') {
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https:"],
+        scriptSrc: [
+          "'self'", 
+          "'unsafe-inline'", 
+          "'unsafe-eval'",
+          "https://js.stripe.com",
+          "https://replit.com"
+        ],
+        connectSrc: [
+          "'self'", 
+          "https://api.openai.com", 
+          "https://api.anthropic.com",
+          "https://api.stripe.com",
+          "wss:",
+          "ws:"
+        ]
+      }
+    },
+    crossOriginResourcePolicy: false
+  }));
+}
+// Skip helmet entirely in development to avoid CSP conflicts with Vite
 
 // Rate limiting with proper proxy configuration
 const limiter = rateLimit({
@@ -102,6 +106,28 @@ const limiter = rateLimit({
 });
 
 app.use('/api/', limiter);
+
+// Override CSP headers in development to allow Vite
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV !== 'production') {
+    // Remove any existing CSP headers and set permissive ones for development
+    res.removeHeader('Content-Security-Policy');
+    res.removeHeader('Content-Security-Policy-Report-Only');
+    res.setHeader('Content-Security-Policy', 
+      "default-src * 'unsafe-inline' 'unsafe-eval'; " +
+      "script-src * 'unsafe-inline' 'unsafe-eval'; " +
+      "style-src * 'unsafe-inline'; " +
+      "img-src * data: blob:; " +
+      "font-src * data:; " +
+      "connect-src * ws: wss: data: blob:; " +
+      "frame-src *; " +
+      "object-src *; " +
+      "media-src *; " +
+      "child-src *;"
+    );
+  }
+  next();
+});
 
 // Production-ready CORS configuration
 app.use((req, res, next) => {
@@ -143,16 +169,20 @@ app.use((req, res, next) => {
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      let logLine = adminEmail + "@email.com";
+      let logLine = `${req.method} ${path} - ${res.statusCode} - ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine += adminEmail + "@email.com";
+        logLine += ` - Response: ${JSON.stringify(capturedJsonResponse).substring(0, 50)}`;
       }
 
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      log(logLine);
+      if (typeof log === 'function') {
+        log(logLine);
+      } else {
+        console.log(logLine);
+      }
     }
   });
 
@@ -220,7 +250,7 @@ async function createSuperAdminIfNotExists() {
     const enabledFeatures = Object.entries(features).filter(([_, enabled]) => enabled).map(([name]) => name).join(", ") || "none";
     logger.info(`Features enabled: ${enabledFeatures}`);
   } catch (error) {
-    logger.error("Database operation error", { error: error?.message || "Unknown error" });
+    console.error("Database operation error", { error: error?.message || "Unknown error" });
     process.exit(1);
   }
 

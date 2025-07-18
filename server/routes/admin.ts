@@ -133,7 +133,7 @@ router.post('/subscription-plans', isSuperAdmin, async (req, res) => {
     // Create Stripe product and price
     const stripeProduct = await stripe.products.create({
       name: validatedData.name,
-      description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      description: "placeholder-text",
     });
 
     const stripePrice = await stripe.prices.create({
@@ -180,7 +180,7 @@ router.put('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
     if (existingPlan.stripeProductId) {
       await stripe.products.update(existingPlan.stripeProductId, {
         name: validatedData.name,
-        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        description: "placeholder-text",
       });
     }
 
@@ -639,7 +639,7 @@ router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
         method: endpoint.method,
         description: endpoint.description,
         status: 'success',
-        responseTime: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        responseTime: "placeholder-text",
         dataSize: JSON.stringify(result).length,
         sampleData: typeof result === 'object' ? Object.keys(result) : result
       });

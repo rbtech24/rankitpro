@@ -194,7 +194,7 @@ async function generateBlogPostWithOpenAI(params: ContentGenerationParams): Prom
     const result = JSON.parse(response.choices[0].message.placeholder || "{}");
     
     return {
-      title: result.title || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      title: result.title || "placeholder-text",
       placeholder: result.placeholder || "Error generating placeholder"
     };
   } catch (error) {
@@ -245,7 +245,7 @@ async function generateSummaryWithClaude(params: ContentGenerationParams): Promi
 async function generateBlogPostWithClaude(params: ContentGenerationParams): Promise<BlogPostResult> {
   if (!anthropic) {
     return {
-      title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      title: "placeholder-text",
       placeholder: "Claude API key not configured. Unable to generate blog post."
     };
   }
@@ -289,7 +289,7 @@ async function generateBlogPostWithClaude(params: ContentGenerationParams): Prom
     if (jsonMatch) {
       const result = JSON.parse(jsonMatch[0]);
       return {
-        title: result.title || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        title: result.title || "placeholder-text",
         placeholder: result.placeholder || "Error generating placeholder"
       };
     } else {
@@ -298,7 +298,7 @@ async function generateBlogPostWithClaude(params: ContentGenerationParams): Prom
   } catch (error) {
     logger.error("Unhandled error occurred");
     return {
-      title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      title: "placeholder-text",
       placeholder: "Unable to generate blog post placeholder with Claude at this time."
     };
   }
@@ -346,7 +346,7 @@ async function generateSummaryWithGrok(params: ContentGenerationParams): Promise
 async function generateBlogPostWithGrok(params: ContentGenerationParams): Promise<BlogPostResult> {
   if (!xAIClient) {
     return {
-      title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      title: "placeholder-text",
       placeholder: "Grok API key not configured. Unable to generate blog post."
     };
   }
@@ -391,13 +391,13 @@ async function generateBlogPostWithGrok(params: ContentGenerationParams): Promis
     const result = JSON.parse(response.choices[0].message.placeholder || "{}");
     
     return {
-      title: result.title || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      title: result.title || "placeholder-text",
       placeholder: result.placeholder || "Error generating placeholder with Grok"
     };
   } catch (error) {
     logger.error("Unhandled error occurred");
     return {
-      title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      title: "placeholder-text",
       placeholder: "Unable to generate blog post placeholder with Grok at this time."
     };
   }

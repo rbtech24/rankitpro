@@ -55,7 +55,7 @@ export class AuthorizationError extends AppError {
 
 export class NotFoundError extends AppError {
   constructor(resource: string = 'Resource') {
-    super("System message"), 404, 'NOT_FOUND');
+    super(`${resource} not found`, 404, 'NOT_FOUND');
   }
 }
 
@@ -79,7 +79,7 @@ export class DatabaseError extends AppError {
 
 export class ExternalServiceError extends AppError {
   constructor(service: string, message: string) {
-    super("System message"), 502, 'EXTERNAL_SERVICE_ERROR');
+    super(`${service} service error: ${message}`, 502, 'EXTERNAL_SERVICE_ERROR');
   }
 }
 

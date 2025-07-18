@@ -64,7 +64,7 @@ export const apiKeyAuth = (requiredPermissions: string[] = []) => {
         if (!hasPermission) {
           return res.status(403).json({ 
             error: 'Insufficient permissions',
-            message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+            message: "placeholder-text",
             userPermissions
           });
         }

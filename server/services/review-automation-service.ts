@@ -172,7 +172,7 @@ class ReviewAutomationService {
       const statusData: InsertReviewRequestStatus = {
         reviewRequestId: reviewRequest.id,
         checkInId,
-        customerId: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, // Generate a unique customer ID
+        customerId: "placeholder-text", // Generate a unique customer ID
         customerName: checkIn.customerName,
         customerEmail: checkIn.customerEmail || '', // Required field
         customerPhone: checkIn.customerPhone || undefined,

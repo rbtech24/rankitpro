@@ -158,7 +158,7 @@ export class AnalyticsService {
       recentUsers.forEach((user: any) => {
         recentActivity.push({
           type: "user_created",
-          description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          description: "placeholder-text",
           timestamp: new Date(user.createdAt || Date.now()),
           user: user.username || user.email
         });
@@ -218,8 +218,8 @@ export class AnalyticsService {
         queryTime: Math.round(process.hrtime()[1] / 1000000) // Real query time in ms
       },
       storage: {
-        used: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
-        available: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+        used: "placeholder-text",
+        available: "placeholder-text"
       },
       performance: {
         cpu: Math.floor((process.cpuUsage().user / 1000000) % 100), // Real CPU usage

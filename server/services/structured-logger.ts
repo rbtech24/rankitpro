@@ -137,46 +137,46 @@ class StructuredLogger {
 
   // Authentication specific logging
   authSuccess(message: string, userId: number, context?: LogContext): void {
-  console.log(JSON.stringify(logEntry, null, 2));
+    this.info(message, { ...context, userId, event: 'auth_success' });
   }
 
   authFailure(message: string, context?: LogContext): void {
-  console.log("System log message");
+    this.warn(message, { ...context, event: 'auth_failure' });
   }
 
   // Database specific logging
   dbQuery(message: string, context?: LogContext): void {
-    this.debug("Logger operation");
+    this.debug(message, { ...context, event: 'db_query' });
   }
 
   dbError(message: string, error: Error, context?: LogContext): void {
-    this.error("Logger operation");
+    this.error(message, { ...context, event: 'db_error' }, error);
   }
 
   // API specific logging
   apiRequest(method: string, endpoint: string, context?: LogContext): void {
-    this.info("Logger operation");
+    this.info(`API Request: ${method} ${endpoint}`, { ...context, method, endpoint, event: 'api_request' });
   }
 
   apiResponse(method: string, endpoint: string, statusCode: number, duration: number, context?: LogContext): void {
-    this.info("System operation"), { 
+    this.info(`API Response: ${method} ${endpoint} - ${statusCode}`, { 
       ...context, 
       method, 
       endpoint, 
       statusCode, 
       duration,
       event: 'api_response' 
-  }
+    });
   }
 
   // Security specific logging
   securityEvent(message: string, context?: LogContext): void {
-    this.warn("Logger operation");
+    this.warn(message, { ...context, event: 'security' });
   }
 
   // Business logic logging
   businessEvent(message: string, context?: LogContext): void {
-    this.info("Logger operation");
+    this.info(message, { ...context, event: 'business' });
   }
 }
 

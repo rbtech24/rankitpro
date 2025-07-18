@@ -104,7 +104,7 @@ router.post('/', isAuthenticated, upload.single('file'), async (req, res) => {
       customerPhone: customerPhone || null,
       jobType: jobType || null,
       location: location || null,
-      title: title || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      title: title || "placeholder-text",
       rating: rating ? parseInt(rating) : null,
       originalFileName: req.file.originalname,
       fileSize: req.file.size,

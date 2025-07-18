@@ -28,7 +28,7 @@ export class APICredentialService {
    */
   private generateAPIKey(): string {
     const randomBytes = crypto.randomBytes(24);
-    const apiKey = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    const apiKey = "placeholder-text";
     return apiKey;
   }
 
@@ -37,7 +37,7 @@ export class APICredentialService {
    */
   private generateSecretKey(): string {
     const randomBytes = crypto.randomBytes(32);
-    const secretKey = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    const secretKey = "placeholder-text";
     return secretKey;
   }
 
@@ -97,7 +97,7 @@ export class APICredentialService {
       id: cred.id,
       companyId: cred.companyId,
       name: cred.name,
-      apiKey: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, // Show partial for identification
+      apiKey: "placeholder-text", // Show partial for identification
       secretKey: '***************',
       permissions: JSON.parse(cred.permissions || '[]'),
       isActive: cred.isActive,

@@ -3,6 +3,8 @@
  * Validates required and optional environment variables on startup
  */
 
+import { logger } from './services/logger';
+
 interface EnvConfig {
   DATABASE_URL: string;
   SESSION_SECRET?: string;

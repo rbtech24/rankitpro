@@ -45,7 +45,7 @@ export class SchemaMarkupService {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": business.name,
-      "description": business.description || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      "description": business.description || "placeholder-text",
       "url": business.website,
       "telephone": business.phone,
       "address": business.address ? {
@@ -80,7 +80,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return "placeholder-text";
   }
 
   /**
@@ -91,7 +91,7 @@ export class SchemaMarkupService {
       "@context": "https://schema.org",
       "@type": "Service",
       "name": visit.jobType,
-      "description": visit.description || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      "description": visit.description || "placeholder-text",
       "provider": {
         "@type": "LocalBusiness",
         "name": business.name,
@@ -107,7 +107,7 @@ export class SchemaMarkupService {
       "image": visit.photos?.map(photo => ({
         "@type": "ImageObject",
         "url": photo,
-        "caption": `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+        "caption": "placeholder-text"
       })),
       "performer": visit.technician ? {
         "@type": "Person",
@@ -123,7 +123,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return "placeholder-text";
   }
 
   /**
@@ -152,7 +152,7 @@ export class SchemaMarkupService {
       }
     };
 
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return "placeholder-text";
   }
 
   /**
@@ -191,7 +191,7 @@ export class SchemaMarkupService {
       }))
     };
 
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return "placeholder-text";
   }
 
   /**
@@ -228,7 +228,7 @@ export class SchemaMarkupService {
       "image": post.images?.map(image => ({
         "@type": "ImageObject",
         "url": image,
-        "caption": `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+        "caption": "placeholder-text"
       })),
       "keywords": [post.serviceType, "professional service", "case study"],
       "articleSection": "Service Case Studies",
@@ -243,7 +243,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return "placeholder-text";
   }
 
   /**
@@ -277,7 +277,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return "placeholder-text";
   }
 
   /**
@@ -297,7 +297,7 @@ export class SchemaMarkupService {
       }))
     };
 
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return "placeholder-text";
   }
 
   /**

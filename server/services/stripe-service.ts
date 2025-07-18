@@ -88,8 +88,8 @@ export class StripeService {
           interval: interval
         },
         product_data: {
-          name: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
-          description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+          name: "placeholder-text",
+          description: "placeholder-text"
         },
         metadata: {
           plan: planName.toLowerCase(),

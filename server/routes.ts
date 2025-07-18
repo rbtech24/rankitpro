@@ -1286,11 +1286,11 @@ Format as professional service documentation.`;
         // Enhanced fallback placeholder
         let fallbackContent = '';
         if (placeholderType === 'social-media') {
-          fallbackContent = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          fallbackContent = "placeholder-text";
         } else if (placeholderType === 'email-follow-up') {
-          fallbackContent = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          fallbackContent = "placeholder-text";
         } else {
-          fallbackContent = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          fallbackContent = "placeholder-text";
         }
         res.json({ success: true });
       }
@@ -2119,7 +2119,7 @@ Format as professional service documentation.`;
       }
       
       // Combine city and state for location if location not provided
-      const techLocation = location || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+      const techLocation = location || "placeholder-text";
       
       // Create technician
       const technicianData = {
@@ -2176,7 +2176,7 @@ Format as professional service documentation.`;
       }
       
       // Combine city and state for location if location not provided
-      const techLocation = location || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+      const techLocation = location || "placeholder-text";
       
       const updates = {
         name,
@@ -2754,7 +2754,7 @@ Format as professional service documentation.`;
         senderId: req.user.id,
         senderType: 'system',
         senderName: 'System',
-        message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+        message: "placeholder-text"
       });
 
       res.json({ session });
@@ -2846,7 +2846,7 @@ Format as professional service documentation.`;
       res.json({ 
         success: true, 
         clearedCount,
-        message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` 
+        message: "placeholder-text" 
       });
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
@@ -2867,7 +2867,7 @@ Format as professional service documentation.`;
       res.json({ 
         success: true, 
         archivedCount,
-        message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` 
+        message: "placeholder-text" 
       });
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
@@ -3520,13 +3520,13 @@ Format as professional service documentation.`;
               
               // Header section
               html += `<div style="padding: 20px; background: white; border-bottom: 1px solid #eee;">`;
-              html += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+              html += "placeholder-text";
               
               // Tech info and date
               html += `<div style="display: flex; justify-placeholder: space-between; align-items: center; margin-bottom: 15px;">`;
-              html += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+              html += "placeholder-text";
               if (checkin.createdAt) {
-                html += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+                html += "placeholder-text";
               }
               html += `</div>`;
               
@@ -3541,7 +3541,7 @@ Format as professional service documentation.`;
               // Leaflet Map Integration
         const lat = Number(checkin.latitude) || 32.9537;  // Default to Carrollton, TX coordinates
         const lng = Number(checkin.longitude) || -96.8903;
-        const mapId = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+        const mapId = "placeholder-text";
               
               html += `<div id="placeholder" style="height: 200px; margin: 0 20px; border-radius: 8px; overflow: hidden; border: 1px solid #ddd;"></div>
               <script>
@@ -3591,9 +3591,9 @@ Format as professional service documentation.`;
               
               // Hashtags section
               html += `<div style="padding: 20px; border-top: 1px solid #eee; background: #fafafa;">`;
-        const hashtags = [`<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, '#sprinkler-repair', '#professional-service'];
+        const hashtags = ["placeholder-text", '#sprinkler-repair', '#professional-service'];
               hashtags.forEach(tag => {
-                html += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+                html += "placeholder-text";
               });
               html += `</div>`;
               
@@ -3760,7 +3760,7 @@ Format as professional service documentation.`;
                   <div style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333;">Overall Service Rating</div>
                   <div style="display: flex; justify-placeholder: center; gap: 8px; margin-bottom: 15px;">`;
                 for (let i = 1; i <= 5; i++) {
-                  html += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+                  html += "placeholder-text";
                 }
                 html += `</div>
                   <div style="font-size: 18px; font-weight: 600; color: #4CAF50;">
@@ -4271,7 +4271,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       
       try {
         const response = await fetch(
-          `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          "placeholder-text",
           {
             headers: {
               'User-Agent': 'RankItPro/1.0'
@@ -5236,7 +5236,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
   });
   });
 
-  return httpServer;
+  return server;
 }
 
 

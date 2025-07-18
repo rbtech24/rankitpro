@@ -6,7 +6,7 @@ export async function reverseGeocode(latitude: number, longitude: number): Promi
   try {
     // Use OpenStreetMap Nominatim for reverse geocoding (free, no API key required)
     const response = await fetch(
-      `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      "placeholder-text",
       {
         headers: {
           'User-Agent': 'RankItPro/1.0 (support@rankitpro.com)'
@@ -57,10 +57,10 @@ export async function reverseGeocode(latitude: number, longitude: number): Promi
     }
     
     // Final fallback to coordinates
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return "placeholder-text";
   } catch (error) {
     logger.error("Unhandled error occurred");
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return "placeholder-text";
   }
 }
 
@@ -72,7 +72,7 @@ export function formatLocationAddress(location: string, latitude?: number, longi
   
   // If we have coordinates but no proper address, indicate we need geocoding
   if (latitude && longitude) {
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return "placeholder-text";
   }
   
   return location || 'Location not specified';

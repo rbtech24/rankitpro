@@ -91,8 +91,8 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         // Generate review link/URL
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         const host = req.headers['x-forwarded-host'] || req.get('host');
-        const baseUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
-        const reviewLink = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+        const baseUrl = "placeholder-text";
+        const reviewLink = "placeholder-text";
         
         const emailSent = await emailService.sendReviewRequest(
           reviewRequest,
@@ -176,9 +176,9 @@ router.get('/link/:id', async (req: Request, res: Response) => {
     // Get the server's base URL
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const host = req.headers['x-forwarded-host'] || req.get('host');
-    const baseUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    const baseUrl = "placeholder-text";
     
-    const reviewUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    const reviewUrl = "placeholder-text";
     
     return res.json({ reviewUrl });
   } catch (error) {

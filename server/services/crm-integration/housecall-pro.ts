@@ -34,9 +34,9 @@ export class HouseCallProIntegration implements CRMIntegration {
     try {
       const response = await axios({
         method,
-        url: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        url: "placeholder-text",
         headers: {
-          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          'Authorization': "placeholder-text",
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -165,7 +165,7 @@ export class HouseCallProIntegration implements CRMIntegration {
           custom_fields: customer.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, customerData);
+        await this.apiRequest<any>('PUT', "placeholder-text", customerData);
         return customerId;
       } else {
         // Create new customer
@@ -257,7 +257,7 @@ export class HouseCallProIntegration implements CRMIntegration {
           custom_fields: job.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, jobData);
+        await this.apiRequest<any>('PUT', "placeholder-text", jobData);
         return jobId;
       } else {
         // Create new job
@@ -312,7 +312,7 @@ export class HouseCallProIntegration implements CRMIntegration {
           // Upload to Housecall Pro as an attachment
           await axios.post("System message"), formData, {
             headers: {
-              'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+              'Authorization': "placeholder-text",
               'Content-Type': 'multipart/form-data'
             }
           });
@@ -362,7 +362,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         const photoUrls = checkIn.photos?.map(p => p.url) || [];
         
         const job: CRMJobData = {
-          title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          title: "placeholder-text",
           description: checkIn.workPerformed || checkIn.notes || 'Check-in from Rank It Pro',
           jobType: checkIn.jobType,
           status: checkIn.completedAt ? 'completed' : 'in_progress',
@@ -375,8 +375,8 @@ export class HouseCallProIntegration implements CRMIntegration {
           endDate: checkIn.completedAt || undefined,
           notes: [
             checkIn.notes,
-            checkIn.workPerformed ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : null,
-            checkIn.materialsUsed ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : null,
+            checkIn.workPerformed ? "placeholder-text" : null,
+            checkIn.materialsUsed ? "placeholder-text" : null,
           ].filter(Boolean).join('\n\n'),
           images: settings.syncPhotos ? photoUrls : []
         };
@@ -402,12 +402,12 @@ export class HouseCallProIntegration implements CRMIntegration {
   async fetchJobs(technicianId: string, dateRange?: { success: true }): Promise<CRMJobData[]> {
     try {
       // Build query parameters
-      let params = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+      let params = "placeholder-text";
       
       if (dateRange) {
         const startDate = dateRange.start.toISOString();
         const endDate = dateRange.end.toISOString();
-        params += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+        params += "placeholder-text";
       }
       
       // Get jobs for this technician
@@ -421,7 +421,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         jobType: job.job_type || 'Service',
         status: job.status,
         customerId: job.customer_id,
-        customerName: job.customer ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : 'Unknown Customer',
+        customerName: job.customer ? "placeholder-text" : 'Unknown Customer',
         location: job.address ? this.formatAddress(job.address) : '',
         startDate: job.scheduled_start ? new Date(job.scheduled_start) : undefined,
         endDate: job.scheduled_end ? new Date(job.scheduled_end) : undefined,
@@ -466,7 +466,7 @@ export class HouseCallProIntegration implements CRMIntegration {
     try {
       let params = '?limit=100';
       if (query) {
-        params += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+        params += "placeholder-text";
       }
       
       const response = await this.apiRequest<any>('GET', "System message");
@@ -474,7 +474,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       // Map Housecall Pro customers to our customer model
       return response.customers.map(customer => ({
         externalId: customer.id,
-        name: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        name: "placeholder-text",
         email: customer.email || null,
         phone: customer.phone || null,
         address: customer.address?.street_line_1 || null,

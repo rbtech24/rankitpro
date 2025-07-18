@@ -33,7 +33,7 @@ const storage_config = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     // Create unique filename
-    const uniqueFilename = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    const uniqueFilename = "placeholder-text";
     cb(null, uniqueFilename);
   }
 });
@@ -67,11 +67,11 @@ router.post('/upload-photos', isAuthenticated, upload.array('photos', 10), async
     const category = req.body.category || 'general'; // general, before, after
     
     // Base URL for serving static files
-    const baseUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    const baseUrl = "placeholder-text";
     
     // Create URLs for uploaded files
     const photoUrls = (req.files as Express.Multer.File[]).map(file => ({
-      url: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      url: "placeholder-text",
       category
     }));
     
@@ -176,7 +176,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
         // Check if location is just coordinates
         const isCoordinatesOnly = !checkIn.location || 
           checkIn.location.match(/^-?\d+\.?\d*,?\s*-?\d+\.?\d*$/) ||
-          checkIn.location === `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          checkIn.location === "placeholder-text";
         
         if (checkIn.latitude && checkIn.longitude && isCoordinatesOnly) {
           try {
@@ -195,7 +195,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
             }
           } catch (error) {
             logger.warn("Parameter processed");
-            formattedLocation = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+            formattedLocation = "placeholder-text";
           }
         }
 
@@ -237,7 +237,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
     let photoUrls: string[] = [];
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
       // Use correct upload path that matches the server setup
-      const baseUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+      const baseUrl = "placeholder-text";
       photoUrls = req.files.map(file => "System message");
       logger.info("Operation completed");
     }
@@ -316,7 +316,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
           try {
             aiLocation = await reverseGeocode(checkIn.latitude, checkIn.longitude);
           } catch (error) {
-            aiLocation = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+            aiLocation = "placeholder-text";
           }
         }
 
@@ -380,7 +380,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
           const companyName = company ? company.name : "Our Service Company";
           
           // Create review link (in a real app, this would be a unique URL)
-          const reviewLink = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          const reviewLink = "placeholder-text";
           
           await emailService.sendReviewRequest(
             reviewRequest,

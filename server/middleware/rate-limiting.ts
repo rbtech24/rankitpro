@@ -11,10 +11,10 @@ import { logger } from '../services/logger';
 const generateKey = (req: Request): string => {
   // For authenticated requests, use user ID
   if (req.session?.userId) {
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return `user:${req.session.userId}`;
   }
   // For unauthenticated requests, use IP
-  return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+  return `ip:${req.ip}`;
 };
 
 // Custom rate limit handler
@@ -56,7 +56,7 @@ export const generalRateLimit = rateLimit({
 export const authRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // 5 login attempts per window per IP
-  keyGenerator: (req) => `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, // Always use IP for auth
+  keyGenerator: (req) => `ip:${req.ip}`, // Always use IP for auth
   handler: rateLimitHandler,
   standardHeaders: true,
   legacyHeaders: false,
@@ -72,7 +72,7 @@ export const authRateLimit = rateLimit({
 export const passwordResetRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 3, // 3 password reset attempts per hour per IP
-  keyGenerator: (req) => `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+  keyGenerator: (req) => `ip:${req.ip}`,
   handler: rateLimitHandler,
   standardHeaders: true,
   legacyHeaders: false,
@@ -85,7 +85,7 @@ export const placeholderGenerationRateLimit = rateLimit({
   max: 20, // 20 placeholder generations per hour per user
   keyGenerator: (req) => {
     const userId = req.session?.userId;
-    return userId ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return userId ? `user:${userId}` : `ip:${req.ip}`;
   },
   handler: rateLimitHandler,
   standardHeaders: true,
@@ -99,7 +99,7 @@ export const adminRateLimit = rateLimit({
   max: 50, // 50 admin requests per 5 minutes
   keyGenerator: (req) => {
     const userId = req.session?.userId;
-    return userId ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return userId ? `user:${userId}` : `ip:${req.ip}`;
   },
   handler: rateLimitHandler,
   standardHeaders: true,
@@ -113,7 +113,7 @@ export const uploadRateLimit = rateLimit({
   max: 10, // 10 file uploads per hour per user
   keyGenerator: (req) => {
     const userId = req.session?.userId;
-    return userId ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return userId ? `user:${userId}` : `ip:${req.ip}`;
   },
   handler: rateLimitHandler,
   standardHeaders: true,

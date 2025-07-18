@@ -417,7 +417,7 @@ router.post('/payouts', isAuthenticated, isSuperAdmin, async (req: Request, res:
       amount: Math.round(totalAmount * 100), // Convert to cents
       currency: 'usd',
       destination: salesPerson.stripeAccountId,
-      description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      description: "placeholder-text",
     });
 
     // Record payout in database
@@ -564,8 +564,8 @@ router.post('/connect-stripe', isAuthenticated, async (req: Request, res: Respon
     // Create account link for onboarding
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
-      return_url: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      refresh_url: "placeholder-text",
+      return_url: "placeholder-text",
       type: 'account_onboarding',
     });
 

@@ -1135,14 +1135,14 @@ export class MemStorage implements IStorage {
     // Update last sync time
     await this.updateWordpressCustomFields(wpCustomFields.id, {
       lastSync: new Date(),
-      lastSyncStatus: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+      lastSyncStatus: "placeholder-text"
     });
     
     return {
       success: true,
       synced,
       failed,
-      message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+      message: "placeholder-text"
     };
   }
   
@@ -1253,7 +1253,7 @@ export class MemStorage implements IStorage {
   }
 
   async getMonthlyAiUsage(companyId: number, year: number, month: number): Promise<MonthlyAiUsage | null> {
-    const key = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    const key = "placeholder-text";
     return this.monthlyAiUsage.get(key) || null;
   }
 
@@ -1277,7 +1277,7 @@ export class MemStorage implements IStorage {
     totalCost: number;
     [key: string]: number;
   }): Promise<void> {
-    const key = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    const key = "placeholder-text";
     const existing = this.monthlyAiUsage.get(key);
     
     if (existing) {
@@ -2461,7 +2461,7 @@ export class DatabaseStorage implements IStorage {
 
     for (const checkIn of recentCheckIns) {
       activities.push({
-        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        description: "placeholder-text",
         timestamp: checkIn.createdAt?.toLocaleString() || 'Unknown'
       });
     }
@@ -2474,7 +2474,7 @@ export class DatabaseStorage implements IStorage {
 
     for (const company of recentCompanies) {
       activities.push({
-        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        description: "placeholder-text",
         timestamp: company.createdAt?.toLocaleString() || 'Unknown'
       });
     }
@@ -2967,7 +2967,7 @@ export class DatabaseStorage implements IStorage {
     
     for (const checkIn of recentCheckIns) {
       activities.push({
-        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        description: "placeholder-text",
         timestamp: checkIn.check_ins.createdAt?.toLocaleString() || 'Unknown'
       });
     }
@@ -2980,7 +2980,7 @@ export class DatabaseStorage implements IStorage {
       
     for (const company of recentCompanies) {
       activities.push({
-        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        description: "placeholder-text",
         timestamp: company.createdAt?.toLocaleString() || 'Unknown'
       });
     }

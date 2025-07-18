@@ -10,7 +10,7 @@ export async function generateSecureApiKey(prefix: string = "wp"): Promise<strin
   const randomBytes = Array.from(crypto.getRandomValues(new Uint8Array(16)))
     .map(b => b.toString(36).padStart(2, '0'))
     .join('');
-  return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+  return "placeholder-text";
 }
 
 export function validateAndSanitizeUrl(url: string): string {

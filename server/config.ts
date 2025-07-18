@@ -3,6 +3,8 @@
  * Centralized configuration management with environment validation
  */
 
+import { logger } from './services/logger';
+
 export interface AppConfig {
   database: {
     url: string;

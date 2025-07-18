@@ -152,6 +152,20 @@ class Logger {
       ...metadata
     });
   }
+
+  // Database logging methods
+  dbQuery(message: string, metadata?: LogEntry['metadata']) {
+    this.debug(message, null, metadata);
+  }
+
+  dbError(message: string, error: Error, metadata?: LogEntry['metadata']) {
+    this.error(message, error, metadata);
+  }
+
+  // Business event logging
+  businessEvent(message: string, metadata?: LogEntry['metadata']) {
+    this.info(message, null, metadata);
+  }
 }
 
 // Export singleton instance

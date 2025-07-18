@@ -7,7 +7,7 @@ import { db, queryWithRetry } from "../db";
 import { eq, and, or, desc, asc, gte, lt, lte, sql, not, like, ilike } from "drizzle-orm";
 import * as schema from "@shared/schema";
 import { Company, InsertCompany } from "@shared/schema";
-import { logger } from "../structured-logger";
+import { logger } from "../logger";
 
 const { companies } = schema;
 

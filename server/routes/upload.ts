@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueId = nanoid(10);
     const ext = path.extname(file.originalname);
-    const filename = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    const filename = "placeholder-text";
     cb(null, filename);
   }
 });
@@ -57,7 +57,7 @@ router.post('/', isAuthenticated, upload.single('file'), (req, res) => {
     }
 
     const type = req.body.type || 'general';
-    const fileUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    const fileUrl = "placeholder-text";
     
     res.json({
       success: true,

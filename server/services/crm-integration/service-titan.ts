@@ -74,9 +74,9 @@ export class ServiceTitanIntegration implements CRMIntegration {
       
       const response = await axios({
         method,
-        url: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        url: "placeholder-text",
         headers: {
-          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          'Authorization': "placeholder-text",
           'ST-App-Key': this.clientId,
           'Content-Type': 'application/json',
           'ST-Tenant-ID': this.tenantId
@@ -204,7 +204,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
           customFields: customer.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, customerData);
+        await this.apiRequest<any>('PUT', "placeholder-text", customerData);
         return customerId.toString();
       } else {
         // Create new customer
@@ -281,7 +281,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
           customFields: job.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, jobData);
+        await this.apiRequest<any>('PUT', "placeholder-text", jobData);
         return jobId.toString();
       } else {
         // Create new job
@@ -329,8 +329,8 @@ export class ServiceTitanIntegration implements CRMIntegration {
           const base64Image = buffer.toString('base64');
           
           // Upload to ServiceTitan as an attachment
-          await this.apiRequest('POST', `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, {
-            fileName: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          await this.apiRequest('POST', "placeholder-text", {
+            fileName: "placeholder-text",
             mimeType: 'image/jpeg',
             base64Data: base64Image,
             description: 'Check-in photo from Rank It Pro',
@@ -399,7 +399,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         const photoUrls = checkIn.photos?.map(p => p.url) || [];
         
         const job: CRMJobData = {
-          title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          title: "placeholder-text",
           description: checkIn.workPerformed || checkIn.notes || 'Check-in from Rank It Pro',
           jobType: checkIn.jobType,
           status: checkIn.completedAt ? 'completed' : 'in_progress',
@@ -412,8 +412,8 @@ export class ServiceTitanIntegration implements CRMIntegration {
           endDate: checkIn.completedAt || undefined,
           notes: [
             checkIn.notes,
-            checkIn.workPerformed ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : null,
-            checkIn.materialsUsed ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : null,
+            checkIn.workPerformed ? "placeholder-text" : null,
+            checkIn.materialsUsed ? "placeholder-text" : null,
           ].filter(Boolean).join('\n\n'),
           images: settings.syncPhotos ? photoUrls : []
         };
@@ -443,7 +443,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       if (dateRange) {
         const startDate = dateRange.start.toISOString().split('T')[0]; // YYYY-MM-DD
         const endDate = dateRange.end.toISOString().split('T')[0]; // YYYY-MM-DD
-        queryParams += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+        queryParams += "placeholder-text";
       }
       
       // Get jobs for this technician
@@ -480,7 +480,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       let endpoint = '/crm/customers?limit=50';
       
       if (query) {
-        endpoint += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+        endpoint += "placeholder-text";
       }
       
       const response = await this.apiRequest<{ data: any[]; }>(

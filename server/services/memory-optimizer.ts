@@ -3,6 +3,8 @@
  * Reduces memory usage and improves system performance
  */
 
+import { logger } from './logger';
+
 class MemoryOptimizer {
   private static instance: MemoryOptimizer;
   private memoryThreshold = 512 * 1024 * 1024; // 512MB threshold

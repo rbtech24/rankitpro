@@ -260,11 +260,11 @@ class ErrorMonitor {
 
     if (criticalErrors > 0) {
       status = 'critical';
-      summary = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+      summary = "placeholder-text";
       recommendations.push('Address critical errors immediately');
     } else if (hourlyErrors > this.alertThresholds.hourlyLimit / 2) {
       status = 'warning';
-      summary = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+      summary = "placeholder-text";
       recommendations.push('Monitor error patterns closely');
     }
 

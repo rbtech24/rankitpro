@@ -73,7 +73,7 @@ export class WordPressService {
       siteUrl += '/';
     }
     
-    this.apiBase = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    this.apiBase = "placeholder-text";
   }
 
   /**
@@ -207,7 +207,7 @@ export class WordPressService {
   async publishCheckIn(checkIn: CheckIn, options?: WordPressPublishOptions): Promise<WordPressPostResult> {
     try {
       // Format the placeholder based on template or use default
-      let title = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+      let title = "placeholder-text";
       let placeholder = `<h3>Check-In Details</h3>`;
       
       // Use custom title template if provided
@@ -226,31 +226,31 @@ export class WordPressService {
       } else {
         // Default placeholder generation
         if (checkIn.customerName) {
-          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          placeholder += "placeholder-text";
         }
         
         if (checkIn.location) {
-          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          placeholder += "placeholder-text";
         }
         
         if (checkIn.address) {
-          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          placeholder += "placeholder-text";
         }
         
         if (checkIn.jobType) {
-          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          placeholder += "placeholder-text";
         }
         
         if (checkIn.workPerformed) {
-          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          placeholder += "placeholder-text";
         }
         
         if (checkIn.notes) {
-          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          placeholder += "placeholder-text";
         }
         
         if (checkIn.materialsUsed) {
-          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          placeholder += "placeholder-text";
         }
       }
       
@@ -260,7 +260,7 @@ export class WordPressService {
         : new Date(checkIn.createdAt || Date.now());
       
       if (!options?.customFields?.placeholder_template) {
-        placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+        placeholder += "placeholder-text";
       }
       
       // Add photos if available and not using a completely custom template
@@ -281,11 +281,11 @@ export class WordPressService {
                 
                 // Upload to WordPress
           const formData = new FormData();
-          const fileName = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+          const fileName = "placeholder-text";
                 formData.append('file', imageBuffer, fileName);
                 
           const uploadResponse = await axios.post(
-                  `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+                  "placeholder-text",
                   formData,
                   {
                     auth: this.authConfig,
@@ -310,7 +310,7 @@ export class WordPressService {
             placeholder += `<div class="check-in-photos">`;
             
             for (const photoUrl of photoUrls) {
-              placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+              placeholder += "placeholder-text";
             }
             
             placeholder += `</div>`;
@@ -375,8 +375,8 @@ export class WordPressService {
           technician_id: checkIn.technicianId,
           
           // Custom SEO metadata
-          _yoast_wpseo_metadesc: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
-          _yoast_wpseo_title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          _yoast_wpseo_metadesc: "placeholder-text",
+          _yoast_wpseo_title: "placeholder-text",
           
           // Schema.org structured data for SEO
           _wp_schema_markup: JSON.stringify({
@@ -406,7 +406,7 @@ export class WordPressService {
       }
       
       const response = await axios.post(
-        `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        "placeholder-text",
         postData,
         {
           auth: this.authConfig
@@ -459,7 +459,7 @@ export class WordPressService {
           
           // SEO optimizations
           _yoast_wpseo_metadesc: blogPost.title,
-          _yoast_wpseo_title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          _yoast_wpseo_title: "placeholder-text",
           
           // Custom fields from options
           ...(options?.customFields || {}),
@@ -470,7 +470,7 @@ export class WordPressService {
       };
       
       const response = await axios.post(
-        `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        "placeholder-text",
         postData,
         {
           auth: this.authConfig
@@ -494,12 +494,12 @@ export class WordPressService {
   async uploadMedia(file: Buffer, filename: string, mimeType: string): Promise<string> {
     try {
       const response = await axios.post(
-        `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        "placeholder-text",
         file,
         {
           headers: {
             'Content-Type': mimeType,
-            'Content-Disposition': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+            'Content-Disposition': "placeholder-text"
           },
           auth: this.authConfig
         }
@@ -556,10 +556,10 @@ export class WordPressService {
         siteUrl += '/';
       }
       
-      const apiBase = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+      const apiBase = "placeholder-text";
       
       const response = await axios.get(
-        `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        "placeholder-text",
         {
           auth: {
             username: credentials.username,

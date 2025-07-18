@@ -933,8 +933,8 @@ router.get('/schema/:placeholderType/:placeholderId', async (req: Request, res: 
     const businessInfo: BusinessInfo = {
       name: company.name,
       serviceTypes: ["HVAC", "Plumbing", "Electrical", "General Maintenance"],
-      description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
-      website: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+      description: "placeholder-text",
+      website: "placeholder-text"
     };
 
     let schemaMarkup = '';

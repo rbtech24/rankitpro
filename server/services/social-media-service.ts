@@ -93,7 +93,7 @@ class SocialMediaService {
     switch (type) {
       case 'check_in':
         return {
-          text: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          text: "placeholder-text",
           mediaUrls: data.images || [],
           location: data.gpsLocation ? {
             name: data.location || 'Service Location',
@@ -104,7 +104,7 @@ class SocialMediaService {
 
       case 'review':
         return {
-          text: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          text: "placeholder-text",
           mediaUrls: data.images || []
         };
 
@@ -113,19 +113,19 @@ class SocialMediaService {
         const isAudio = data.type === 'audio';
         
         return {
-          text: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          text: "placeholder-text",
           mediaUrls: data.mediaUrl ? [data.mediaUrl] : []
         };
 
       case 'blog_post':
         return {
-          text: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          text: "placeholder-text",
           mediaUrls: data.featuredImage ? [data.featuredImage] : []
         };
 
       default:
         return {
-          text: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          text: "placeholder-text",
           mediaUrls: []
         };
     }
@@ -184,7 +184,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+        error: "placeholder-text"
       };
     }
   }
@@ -254,7 +254,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+        error: "placeholder-text"
       };
     }
   }
@@ -274,7 +274,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+        error: "placeholder-text"
       };
     }
   }
@@ -294,7 +294,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+        error: "placeholder-text"
       };
     }
   }

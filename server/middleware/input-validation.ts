@@ -272,20 +272,20 @@ export function validateFileUpload(options: {
     
     if (files.length > maxFiles) {
       return res.status(400).json({
-        message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+        message: `Too many files. Maximum ${maxFiles} files allowed.`
       });
     }
     
     for (const file of files) {
       if (file.size > maxSize) {
         return res.status(400).json({
-          message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+          message: `File too large. Maximum ${Math.round(maxSize / 1024 / 1024)}MB allowed.`
         });
       }
       
       if (!allowedTypes.includes(file.mimetype)) {
         return res.status(400).json({
-          message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
+          message: `Invalid file type. Allowed types: ${allowedTypes.join(', ')}`
         });
       }
     }

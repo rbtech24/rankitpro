@@ -130,7 +130,7 @@ try {
   pool = connection.pool;
   db = connection.db;
 } catch (error) {
-  logger.error("Database initialization failed", { error: (error as Error).message });
+  console.error("Database initialization failed", { error: (error as Error).message });
   throw error;
 }
 

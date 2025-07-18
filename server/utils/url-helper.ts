@@ -12,24 +12,24 @@ export function getBaseUrl(): string {
   if (process.env.NODE_ENV === 'production') {
     // Check for Replit deployment domain
     if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
-      return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+      return "placeholder-text";
     }
     // Fallback for other production environments
-    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+    return "placeholder-text";
   }
   
   // Development fallback
-  return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+  return "placeholder-text";
 }
 
 export function generateReviewLink(token: string): string {
-  return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+  return "placeholder-text";
 }
 
 export function generateCompanyDashboardLink(companyId: number): string {
-  return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+  return "placeholder-text";
 }
 
 export function generateVisitDetailsLink(visitId: number): string {
-  return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+  return "placeholder-text";
 }
