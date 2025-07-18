@@ -1,11 +1,13 @@
 {
   "name": "workspace",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "dev": "tsx server/index.ts",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
-    "build:server": "esbuild server/index.ts --platform=node --outfile=dist/index.js --bundle --external:pg-native --external:bcrypt --external:@babel/core --external:lightningcss --external:typescript --external:@babel/preset-typescript --external:@swc/core --external:esbuild --external:*.node --external:fs --external:path --external:os --external:crypto --external:util --external:stream --external:http --external:https --external:url --external:querystring --external:zlib --external:events --external:buffer --external:net --external:tls --external:child_process --external:cluster --external:dns --external:readline --external:repl --external:tty --external:vm --external:worker_threads --format=cjs --target=node18",
+    "build:server": "esbuild server/index.ts --platform=node --outfile=dist/index.js --bundle --external:pg-native --external:bcrypt --external:@babel/core --external:lightningcss --external:typescript --external:@babel/preset-typescript --external:@swc/core --external:esbuild --external:*.node --format=esm --target=node18",
+    "build:production": "node build-production.js",
     "start": "node dist/index.js",
     "db:push": "drizzle-kit push:pg"
   },

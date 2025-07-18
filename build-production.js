@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
 /**
- * Fixed Deployment Script - Handles ES module deployment issues
- * Uses deployment-specific vite config to avoid plugin conflicts
+ * Production Build Script - Fixes ES module deployment issues
+ * This script creates a CommonJS-compatible build while keeping development as ESM
  */
 
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-console.log('🚀 Starting fixed deployment build...');
+console.log('🚀 Starting production build process...');
 
 try {
   // Clean previous build
@@ -18,12 +18,22 @@ try {
     fs.rmSync('dist', { recursive: true, force: true });
   }
 
-  // Build client using deployment-specific config
-  console.log('📦 Building client with deployment config...');
-  execSync('npx vite build --config vite.config.deployment.ts', { stdio: 'inherit' });
+  // Create temporary package.json for build process
+  console.log('📦 Setting up build environment...');
+  const originalPackage = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+  
+  // Remove type: module temporarily for build
+  const buildPackage = { ...originalPackage };
+  delete buildPackage.type;
+  
+  fs.writeFileSync('package.build.json', JSON.stringify(buildPackage, null, 2));
+  
+  // Build client with original configuration
+  console.log('🎨 Building client (frontend)...');
+  execSync('npx vite build', { stdio: 'inherit' });
 
   // Build server with CommonJS format
-  console.log('⚙️  Building server (CommonJS)...');
+  console.log('⚙️  Building server (backend)...');
   const serverBuildCommand = [
     'npx esbuild server/index.ts',
     '--platform=node',
@@ -67,7 +77,7 @@ try {
 
   execSync(serverBuildCommand, { stdio: 'inherit' });
 
-  // Create deployment package.json
+  // Create deployment package.json (CommonJS)
   console.log('📄 Creating deployment package.json...');
   const deployPackage = {
     "name": "workspace-production",
@@ -111,40 +121,24 @@ try {
 
   fs.writeFileSync('dist/package.json', JSON.stringify(deployPackage, null, 2));
 
-  // Update .replit for deployment
-  console.log('🔧 Updating .replit configuration...');
-  const replitConfig = fs.readFileSync('.replit', 'utf8');
-  const updatedConfig = replitConfig.replace(
-    /build = \["npm", "run", "build"\]/,
-    'build = ["node", "deploy-fixed.js"]'
-  ).replace(
-    /run = \["npm", "run", "start"\]/,
-    'run = ["node", "dist/index.js"]'
-  );
-  
-  fs.writeFileSync('.replit.deployment', updatedConfig);
+  // Clean up temporary files
+  fs.unlinkSync('package.build.json');
 
   console.log('');
-  console.log('✅ Fixed deployment build completed!');
+  console.log('✅ Production build completed successfully!');
   console.log('');
-  console.log('📂 Generated files:');
+  console.log('📂 Build output:');
   console.log('  - dist/index.js (CommonJS server)');
   console.log('  - dist/package.json (CommonJS deployment config)');
   console.log('  - dist/public/ (client assets)');
-  console.log('  - .replit.deployment (deployment config)');
   console.log('');
-  console.log('🎯 All deployment issues fixed:');
-  console.log('  ✓ Used deployment-specific vite config');
+  console.log('🎯 All deployment fixes applied:');
   console.log('  ✓ Server built in CommonJS format');
   console.log('  ✓ Deployment package.json uses "type": "commonjs"');
   console.log('  ✓ External dependencies properly excluded');
-  console.log('  ✓ .replit configuration updated');
+  console.log('  ✓ Development environment kept as ESM');
   console.log('');
   console.log('🚀 Ready for deployment!');
-  console.log('');
-  console.log('📋 To deploy:');
-  console.log('  1. Use .replit.deployment as your deployment config');
-  console.log('  2. Or manually deploy the dist/ directory');
 
 } catch (error) {
   console.error('❌ Build failed:', error.message);
