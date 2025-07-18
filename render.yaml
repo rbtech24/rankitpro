@@ -3,7 +3,7 @@ services:
     name: rankitpro
     env: node
     plan: starter
-    buildCommand: node deploy-truly-final.js
+    buildCommand: node render-universal-build.js
     startCommand: node server.js
     envVars:
       - key: NODE_ENV
