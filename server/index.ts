@@ -1,6 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./custom-vite";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import emailService from "./services/resend-email-service";
@@ -11,6 +10,28 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import MemoryOptimizer from "./services/memory-optimizer";
 import { errorMonitor, logError } from "./error-monitor";
+
+// Conditional imports for Vite (development only)
+let setupVite: any, serveStatic: any, log: any;
+
+async function initializeViteOrStatic() {
+  if (process.env.NODE_ENV !== "production") {
+    const viteModule = await import("./custom-vite");
+    setupVite = viteModule.setupVite;
+    serveStatic = viteModule.serveStatic;
+    log = viteModule.log;
+  } else {
+    // Production static serving
+    setupVite = () => Promise.resolve();
+    serveStatic = (app: express.Application) => {
+      app.use(express.static(path.join(__dirname, 'public')));
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+      });
+    };
+    log = console.log;
+  }
+}
 
 // Global error handling for unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
@@ -252,6 +273,9 @@ async function createSuperAdminIfNotExists() {
   
   // Admin setup is now handled via one-time setup page
   // await createSuperAdminIfNotExists();
+  
+  // Initialize Vite or static serving
+  await initializeViteOrStatic();
   
   // Email service is automatically initialized in the Resend service
   if (emailService.isEnabled()) {

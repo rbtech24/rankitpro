@@ -1,0 +1,50 @@
+2025-07-18T17:09:47.239595343Z ==> Uploading build...
+2025-07-18T17:10:27.485353575Z ==> Uploaded in 6.9s. Compression took 33.4s
+2025-07-18T17:10:27.531857849Z ==> Build successful 🎉
+2025-07-18T17:10:32.613565546Z ==> Deploying...
+2025-07-18T17:10:49.273577945Z ==> Running 'npm start'
+2025-07-18T17:10:49.609221525Z 
+2025-07-18T17:10:49.609250667Z > workspace@1.0.0 start
+2025-07-18T17:10:49.609253347Z > node dist/index.js
+2025-07-18T17:10:49.609255308Z 
+2025-07-18T17:10:50.38320731Z file:///opt/render/project/src/dist/index.js:11
+2025-07-18T17:10:50.383232112Z   throw Error('Dynamic require of "' + x3 + '" is not supported');
+2025-07-18T17:10:50.383235433Z         ^
+2025-07-18T17:10:50.383238083Z 
+2025-07-18T17:10:50.383241273Z Error: Dynamic require of "path" is not supported
+2025-07-18T17:10:50.383243893Z     at file:///opt/render/project/src/dist/index.js:11:9
+2025-07-18T17:10:50.383247124Z     at node_modules/depd/index.js (file:///opt/render/project/src/dist/index.js:43:21)
+2025-07-18T17:10:50.383250454Z     at __require4 (file:///opt/render/project/src/dist/index.js:17:50)
+2025-07-18T17:10:50.383253344Z     at node_modules/body-parser/index.js (file:///opt/render/project/src/dist/index.js:17042:21)
+2025-07-18T17:10:50.383257254Z     at __require4 (file:///opt/render/project/src/dist/index.js:17:50)
+2025-07-18T17:10:50.383260735Z     at node_modules/express/lib/express.js (file:///opt/render/project/src/dist/index.js:22403:22)
+2025-07-18T17:10:50.383263425Z     at __require4 (file:///opt/render/project/src/dist/index.js:17:50)
+2025-07-18T17:10:50.383266055Z     at node_modules/express/index.js (file:///opt/render/project/src/dist/index.js:22472:23)
+2025-07-18T17:10:50.383268695Z     at __require4 (file:///opt/render/project/src/dist/index.js:17:50)
+2025-07-18T17:10:50.383271146Z     at file:///opt/render/project/src/dist/index.js:281267:32
+2025-07-18T17:10:50.383273346Z 
+2025-07-18T17:10:50.383275766Z Node.js v22.14.0
+2025-07-18T17:10:55.313300004Z ==> Exited with status 1
+2025-07-18T17:10:55.336892992Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-07-18T17:10:56.745258402Z ==> Running 'npm start'
+2025-07-18T17:10:57.016912224Z 
+2025-07-18T17:10:57.016933396Z > workspace@1.0.0 start
+2025-07-18T17:10:57.016936717Z > node dist/index.js
+2025-07-18T17:10:57.016939097Z 
+2025-07-18T17:10:57.710504662Z file:///opt/render/project/src/dist/index.js:11
+2025-07-18T17:10:57.710524644Z   throw Error('Dynamic require of "' + x3 + '" is not supported');
+2025-07-18T17:10:57.710528184Z         ^
+2025-07-18T17:10:57.710530874Z 
+2025-07-18T17:10:57.710534024Z Error: Dynamic require of "path" is not supported
+2025-07-18T17:10:57.710536705Z     at file:///opt/render/project/src/dist/index.js:11:9
+2025-07-18T17:10:57.710539805Z     at node_modules/depd/index.js (file:///opt/render/project/src/dist/index.js:43:21)
+2025-07-18T17:10:57.710542675Z     at __require4 (file:///opt/render/project/src/dist/index.js:17:50)
+2025-07-18T17:10:57.710545645Z     at node_modules/body-parser/index.js (file:///opt/render/project/src/dist/index.js:17042:21)
+2025-07-18T17:10:57.710550716Z     at __require4 (file:///opt/render/project/src/dist/index.js:17:50)
+2025-07-18T17:10:57.710554146Z     at node_modules/express/lib/express.js (file:///opt/render/project/src/dist/index.js:22403:22)
+2025-07-18T17:10:57.710556956Z     at __require4 (file:///opt/render/project/src/dist/index.js:17:50)
+2025-07-18T17:10:57.710559576Z     at node_modules/express/index.js (file:///opt/render/project/src/dist/index.js:22472:23)
+2025-07-18T17:10:57.710562207Z     at __require4 (file:///opt/render/project/src/dist/index.js:17:50)
+2025-07-18T17:10:57.710564627Z     at file:///opt/render/project/src/dist/index.js:281267:32
+2025-07-18T17:10:57.710566947Z 
+2025-07-18T17:10:57.710569427Z Node.js v22.14.0

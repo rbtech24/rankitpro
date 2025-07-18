@@ -33,10 +33,18 @@ npx esbuild server/index.ts \
   --external:esbuild \
   --external:typescript \
   --external:*.node \
-  --format=esm \
+  --external:vite \
+  --external:@vitejs/plugin-react \
+  --external:@replit/vite-plugin-runtime-error-modal \
+  --external:./custom-vite \
+  --external:./vite \
+  --external:vite.config.ts \
+  --external:vite.config.production.ts \
+  --format=cjs \
   --target=node18 \
   --log-level=info \
-  --minify=false
+  --minify=false \
+  --define:process.env.NODE_ENV='"production"'
 
 echo "✅ Production build completed successfully!"
 echo "📊 Client assets: $(ls -la dist/assets/ | wc -l) files"

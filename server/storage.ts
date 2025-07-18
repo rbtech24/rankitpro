@@ -2546,7 +2546,7 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getAPICredentials(companyId: number): Promise<APICredentials | undefined> { return undefined; }
+
   async getAPICredentialsByCompany(companyId: number): Promise<APICredentials[]> {
     const results = await db.select().from(apiCredentials)
       .where(eq(apiCredentials.companyId, companyId))
@@ -2554,10 +2554,7 @@ export class DatabaseStorage implements IStorage {
     return results;
   }
 
-  async createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials> {
-    const [newCredentials] = await db.insert(apiCredentials).values(credentials).returning();
-    return newCredentials;
-  }
+
   async updateAPICredentials(companyId: number, updates: Partial<APICredentials>): Promise<APICredentials | undefined> { return undefined; }
 
   // Reviews operations (new table)
