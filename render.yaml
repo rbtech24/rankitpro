@@ -3,7 +3,7 @@ services:
     name: rankitpro
     env: node
     plan: starter
-    buildCommand: node render-universal-build.js
+    buildCommand: node render-bypass-npm.js
     startCommand: node server.js
     envVars:
       - key: NODE_ENV
