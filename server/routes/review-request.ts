@@ -6,7 +6,7 @@ import { insertReviewRequestSchema } from '../../shared/schema';
 import emailService from '../services/email-service';
 import smsService from '../services/sms-service';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // Validation schema for sending review requests
@@ -54,7 +54,7 @@ router.get('/settings', isAuthenticated, isCompanyAdmin, async (req: Request, re
 
     res.json(reviewSettings);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error fetching review settings' });
   }
 });
@@ -103,7 +103,7 @@ router.post('/settings', isAuthenticated, isCompanyAdmin, async (req: Request, r
       settings
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error saving review settings' });
   }
 });
@@ -129,7 +129,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
     
     res.json(enrichedRequests);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error fetching review requests' });
   }
 });
@@ -230,22 +230,22 @@ router.post('/send', isAuthenticated, async (req: Request, res: Response) => {
       
       if (adminEmails.length > 0) {
         // Create a custom notification email for admins about the review request
-        const emailSubject = "converted string";
+        const emailSubject = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
         const emailHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>New Review Request Notification</h2>
-            <p>A new review request has been sent in the [CONVERTED] system.</p>
+            <p>A new review request has been sent in the placeholder system.</p>
             
             <div style="background-color: #f7f7f7; padding: 15px; border-radius: 5px; margin: 15px 0;">
-              <p><strong>Customer:</strong> [CONVERTED]</p>
-              <p><strong>Technician:</strong> [CONVERTED]</p>
-              <p><strong>Job Type:</strong> [CONVERTED]</p>
-              <p><strong>Contact Method:</strong> [CONVERTED]</p>
-              <p><strong>Status:</strong> [CONVERTED]</p>
+              <p><strong>Customer:</strong> placeholder</p>
+              <p><strong>Technician:</strong> placeholder</p>
+              <p><strong>Job Type:</strong> placeholder</p>
+              <p><strong>Contact Method:</strong> placeholder</p>
+              <p><strong>Status:</strong> placeholder</p>
             </div>
             
             <p>
-              <a href="https://checkin.app/review-requests/[CONVERTED]" 
+              <a href="https://checkin.app/review-requests/placeholder" 
                  style="background-color: #4a7aff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block;">
                 View Review Request Details
               </a>
@@ -257,7 +257,7 @@ router.post('/send', isAuthenticated, async (req: Request, res: Response) => {
         for (const recipient of adminEmails) {
           const msg = {
             to: recipient,
-            from: "converted string",
+            from: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
             subject: emailSubject,
             html: emailHtml,
           };
@@ -266,13 +266,13 @@ router.post('/send', isAuthenticated, async (req: Request, res: Response) => {
             await emailService.sendEmail(msg);
             logger.info("Review request notification email sent to ", {});
           } catch (emailError) {
-            logger.error("Template literal converted");
+            logger.error("Template literal processed");
             // Continue with other recipients even if one fails
           }
         }
       }
     } catch (notificationError) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       // Don't fail the whole request if notifications fail
     }
     
@@ -285,7 +285,7 @@ router.post('/send', isAuthenticated, async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error sending review request' });
   }
 });
@@ -364,7 +364,7 @@ router.post('/resend/:id', isAuthenticated, async (req: Request, res: Response) 
       success: sendResult
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error resending review request' });
   }
 });
@@ -411,7 +411,7 @@ router.get('/stats', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
       lastSent: reviewRequests.length > 0 ? reviewRequests[0].sentAt : null
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error fetching review request stats' });
   }
 });

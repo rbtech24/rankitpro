@@ -102,7 +102,7 @@ export async function testCRMConnection(crmType: string, credentials: any): Prom
         throw new Error("System message");
     }
   } catch (error) {
-    logger.error("Template literal converted");
+    logger.error("Template literal processed");
     return false;
   }
 }
@@ -134,7 +134,7 @@ export async function syncCheckInToCRM(
         throw new Error("System message");
     }
   } catch (error) {
-    logger.error("Template literal converted");
+    logger.error("Template literal processed");
     return false;
   }
 }
@@ -160,7 +160,7 @@ async function testServiceTitanConnection(credentials: any): Promise<boolean> {
     });
 
     if (!tokenResponse.ok) {
-      logger.error("Syntax fixed");
+      logger.error("Syntax processed");
       return false;
     }
 
@@ -169,14 +169,14 @@ async function testServiceTitanConnection(credentials: any): Promise<boolean> {
     // Test API access with a simple customers query
     const testResponse = await fetch("System message"), {
       headers: {
-        'Authorization': "converted string",
+        'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         'Content-Type': 'application/json'
       }
     });
 
     return testResponse.ok;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return false;
   }
 }
@@ -222,7 +222,7 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
 
       const searchResponse = await fetch("System message"), {
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         }
       });
@@ -253,7 +253,7 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
       const createResponse = await fetch("System message"), {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(customerData)
@@ -271,8 +271,8 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
         customerId: customerId,
         jobTypeId: 1, // Default job type - should be configurable
         priority: 'Normal',
-        summary: "converted string",
-        description: "converted string",
+        summary: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         address: {
           street: checkIn.address || '',
           city: checkIn.city || '',
@@ -285,7 +285,7 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
       const jobResponse = await fetch("System message"), {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(jobData)
@@ -296,7 +296,7 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
 
     return true;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     throw error;
   }
 }
@@ -311,14 +311,14 @@ async function testHousecallProConnection(credentials: any): Promise<boolean> {
     // Test API access with a simple customers query
     const testResponse = await fetch('https://api.housecallpro.com/customers?page=1&per_page=1', {
       headers: {
-        'Authorization': "converted string",
+        'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         'Content-Type': 'application/json'
       }
     });
 
     return testResponse.ok;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return false;
   }
 }
@@ -344,7 +344,7 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
 
       const searchResponse = await fetch("System message"), {
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         }
       });
@@ -390,7 +390,7 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
       const createResponse = await fetch('https://api.housecallpro.com/customers', {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ customer: customerData })
@@ -406,7 +406,7 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
     if (customerId) {
       const jobData = {
         customer_id: customerId,
-        description: "converted string",
+        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         note_to_customer: checkIn.notes || 'Service completed successfully',
         work_status: 'completed',
         assigned_employee_ids: [], // Could be mapped from technician
@@ -423,7 +423,7 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
       const jobResponse = await fetch('https://api.housecallpro.com/jobs', {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ job: jobData })
@@ -434,7 +434,7 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
 
     return true;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     throw error;
   }
 }
@@ -449,14 +449,14 @@ async function testJobberConnection(credentials: any): Promise<boolean> {
     // Test API access with a simple user info query
     const testResponse = await fetch('https://api.getjobber.com/api/me', {
       headers: {
-        'Authorization': "converted string",
+        'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         'Content-Type': 'application/json'
       }
     });
 
     return testResponse.ok;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return false;
   }
 }
@@ -473,7 +473,7 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
     if (checkIn.customerEmail) {
       const searchResponse = await fetch("System message"), {
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         }
       });
@@ -513,7 +513,7 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
       const createResponse = await fetch('https://api.getjobber.com/api/clients', {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ client: clientData })
@@ -529,10 +529,10 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
     if (clientId) {
       const jobData: any = {
         client_id: clientId,
-        title: "converted string",
-        description: "converted string",
+        title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         status: 'completed',
-        job_number: "converted string", // Generate unique job number
+        job_number: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, // Generate unique job number
         start_date: new Date(checkIn.createdAt).toISOString().split('T')[0],
         end_date: new Date(checkIn.createdAt).toISOString().split('T')[0]
       };
@@ -551,7 +551,7 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
       const jobResponse = await fetch('https://api.getjobber.com/api/jobs', {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ job: jobData })
@@ -562,7 +562,7 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
 
     return true;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     throw error;
   }
 }
@@ -580,7 +580,7 @@ async function testFieldEdgeConnection(credentials: any): Promise<boolean> {
     // Test API access with a simple customers query
     const testResponse = await fetch('https://app.fieldedge.com/api/v2/customers', {
       headers: {
-        'Authorization': "converted string",
+        'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         'Content-Type': 'application/json',
         'API-Key': credentials.apiKey
       }
@@ -588,7 +588,7 @@ async function testFieldEdgeConnection(credentials: any): Promise<boolean> {
 
     return testResponse.ok;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return false;
   }
 }
@@ -614,7 +614,7 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
 
       const searchResponse = await fetch("System message"), {
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json',
           'API-Key': credentials.apiKey
         }
@@ -652,7 +652,7 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
       const createResponse = await fetch('https://app.fieldedge.com/api/v2/customers', {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json',
           'API-Key': credentials.apiKey
         },
@@ -669,8 +669,8 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
     if (customerId) {
       const workOrderData: any = {
         customer_id: customerId,
-        title: "converted string",
-        description: "converted string",
+        title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         status: 'completed',
         priority: 'normal',
         scheduled_date: new Date(checkIn.createdAt).toISOString(),
@@ -691,7 +691,7 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
       const workOrderResponse = await fetch('https://app.fieldedge.com/api/v2/work-orders', {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json',
           'API-Key': credentials.apiKey
         },
@@ -703,7 +703,7 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
 
     return true;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     throw error;
   }
 }
@@ -717,14 +717,14 @@ async function testHubSpotConnection(credentials: any): Promise<boolean> {
   try {
     const response = await fetch('https://api.hubapi.com/crm/v3/objects/contacts?limit=1', {
       headers: {
-        'Authorization': "converted string",
+        'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         'Content-Type': 'application/json'
       }
     });
 
     return response.ok;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return false;
   }
 }
@@ -742,7 +742,7 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
       const searchResponse = await fetch(`https://api.hubapi.com/crm/v3/objects/contacts/search`, {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -784,7 +784,7 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
       const createResponse = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(contactData)
@@ -800,7 +800,7 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
     if (contactId) {
       const noteData = {
         properties: {
-          hs_note_body: "converted string",
+          hs_note_body: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           hs_timestamp: new Date(checkIn.createdAt).getTime()
         },
         associations: [
@@ -821,7 +821,7 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
       const noteResponse = await fetch('https://api.hubapi.com/crm/v3/objects/notes', {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(noteData)
@@ -832,7 +832,7 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
 
     return true;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     throw error;
   }
 }
@@ -860,7 +860,7 @@ async function testSalesforceConnection(credentials: any): Promise<boolean> {
     });
 
     if (!tokenResponse.ok) {
-      logger.error("Syntax fixed");
+      logger.error("Syntax processed");
       return false;
     }
 
@@ -869,14 +869,14 @@ async function testSalesforceConnection(credentials: any): Promise<boolean> {
     // Test API access with a simple query
     const testResponse = await fetch("System message"), {
       headers: {
-        'Authorization': "converted string",
+        'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         'Content-Type': 'application/json'
       }
     });
 
     return testResponse.ok;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return false;
   }
 }
@@ -915,10 +915,10 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
     // Find or create Account
     if (checkIn.customerName || checkIn.customerEmail) {
       // Search for existing account
-      const searchQuery = "converted string";
+      const searchQuery = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       const searchResponse = await fetch("System message"), {
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         }
       });
@@ -950,7 +950,7 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
         const createResponse = await fetch("System message"), {
           method: "POST",
           headers: {
-            'Authorization': "converted string",
+            'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(accountData)
@@ -978,7 +978,7 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
       const contactResponse = await fetch("System message"), {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(contactData)
@@ -994,8 +994,8 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
     if (accountId) {
       const caseData: any = {
         AccountId: accountId,
-        Subject: "converted string",
-        Description: "converted string",
+        Subject: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        Description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         Status: 'Closed',
         Origin: 'Rank It Pro',
         Priority: 'Medium',
@@ -1009,7 +1009,7 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
       const caseResponse = await fetch("System message"), {
         method: "POST",
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(caseData)
@@ -1020,7 +1020,7 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
 
     return true;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     throw error;
   }
 }

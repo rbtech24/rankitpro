@@ -39,7 +39,7 @@ export function getBlogPostNotificationTemplate(params: BlogPostNotificationPara
   const { companyName, title, excerpt, authorName, postUrl, postDate } = params;
 
   // Email subject
-  const subject = "converted string";
+  const subject = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
 
   // Format date
   const formattedDate = postDate.toLocaleDateString('en-US', { 
@@ -48,14 +48,14 @@ export function getBlogPostNotificationTemplate(params: BlogPostNotificationPara
     day: 'numeric' 
   });
 
-  // Email HTML content
+  // Email HTML ${companyName}
   const html = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>[CONVERTED]</title>
+      <meta name="viewport" ${companyName}="width=device-width, initial-scale=1.0">
+      <title>${companyName}</title>
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -78,7 +78,7 @@ export function getBlogPostNotificationTemplate(params: BlogPostNotificationPara
           color: #4a7aff;
           margin-top: 0;
         }
-        .content {
+        .${companyName} {
           background-color: #ffffff;
           padding: 20px;
         }
@@ -116,31 +116,31 @@ export function getBlogPostNotificationTemplate(params: BlogPostNotificationPara
     <body>
       <div class="container">
         <div class="header">
-          <h1>[CONVERTED]</h1>
+          <h1>${companyName}</h1>
         </div>
         
-        <div class="content">
-          <h2>[CONVERTED]</h2>
+        <div class="${companyName}">
+          <h2>${companyName}</h2>
           
           <div class="post-meta">
-            <p>Published on [CONVERTED] by [CONVERTED]</p>
+            <p>Published on ${companyName} by ${companyName}</p>
           </div>
           
           <div class="post-excerpt">
-            [CONVERTED]
+            ${companyName}
           </div>
           
           <div style="text-align: center;">
-            <a href="[CONVERTED]" class="cta-button">Read Full Post</a>
+            <a href="${companyName}" class="cta-button">Read Full Post</a>
           </div>
           
-          <p>Thank you for your continued interest in our content.</p>
+          <p>Thank you for your continued interest in our ${companyName}.</p>
           
-          <p>Best regards,<br>[CONVERTED] Team</p>
+          <p>Best regards,<br>${companyName} Team</p>
         </div>
         
         <div class="footer">
-          <p>© [CONVERTED] [CONVERTED]. All rights reserved.</p>
+          <p>© ${companyName}. All rights reserved.</p>
           <p>If you no longer wish to receive these updates, you can unsubscribe at any time.</p>
         </div>
       </div>
@@ -158,7 +158,7 @@ export function getCheckInNotificationTemplate(params: CheckInNotificationParams
   const { companyName, technicianName, jobType, customerName, location, notes, photos, checkInId, checkInUrl, checkInDate } = params;
 
   // Email subject
-  const subject = "converted string";
+  const subject = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
 
   // Format date
   const formattedDate = checkInDate.toLocaleDateString('en-US', { 
@@ -175,10 +175,10 @@ export function getCheckInNotificationTemplate(params: CheckInNotificationParams
     photosHtml = `
       <div style="margin: 20px 0;">
         <h3>Photos from Check-In:</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-${companyName}: center;">
           ${photos.map(photo => `
             <div style="margin-bottom: 10px;">
-              <img src="[CONVERTED]" alt="Check-in photo" style="max-width: 200px; max-height: 200px; border-radius: 5px; border: 1px solid #ddd;">
+              <img src="${companyName}" alt="Check-in photo" style="max-width: 200px; max-height: 200px; border-radius: 5px; border: 1px solid #ddd;">
             </div>
           `).join('')}
         </div>
@@ -186,14 +186,14 @@ export function getCheckInNotificationTemplate(params: CheckInNotificationParams
     `;
   }
 
-  // Email HTML content
+  // Email HTML ${companyName}
   const html = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>[CONVERTED]</title>
+      <meta name="viewport" ${companyName}="width=device-width, initial-scale=1.0">
+      <title>${companyName}</title>
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -216,7 +216,7 @@ export function getCheckInNotificationTemplate(params: CheckInNotificationParams
           color: #4a7aff;
           margin-top: 0;
         }
-        .content {
+        .${companyName} {
           background-color: #ffffff;
           padding: 20px;
         }
@@ -255,41 +255,41 @@ export function getCheckInNotificationTemplate(params: CheckInNotificationParams
     <body>
       <div class="container">
         <div class="header">
-          <h1>[CONVERTED]</h1>
+          <h1>${companyName}</h1>
         </div>
         
-        <div class="content">
+        <div class="${companyName}">
           <h2>New Check-In Notification</h2>
           
-          <p>A new check-in has been recorded in the system on [CONVERTED].</p>
+          <p>A new check-in has been recorded in the system on ${companyName}.</p>
           
           <div class="checkin-details">
-            <p><strong>Technician:</strong> [CONVERTED]</p>
-            <p><strong>Job Type:</strong> [CONVERTED]</p>
-            [CONVERTED]</p>` : ''}
-            [CONVERTED]</p>` : ''}
+            <p><strong>Technician:</strong> ${technicianName}</p>
+            <p><strong>Job Type:</strong> ${jobType}</p>
+            ${location ? `<p><strong>Location:</strong> ${location}</p>` : ''}
+            ${customerInfo ? `<p><strong>Customer:</strong> ${customerInfo}</p>` : ''}
           </div>
           
           ${notes ? `
           <div class="notes">
             <h3>Technician Notes:</h3>
-            <p>[CONVERTED]</p>
+            <p>${companyName}</p>
           </div>
           ` : ''}
           
-          [CONVERTED]
+          ${companyName}
           
           <div style="text-align: center;">
-            <a href="[CONVERTED]" class="cta-button">View Complete Check-In</a>
+            <a href="${companyName}" class="cta-button">View Complete Check-In</a>
           </div>
           
           <p>Thank you for using our platform to manage your check-ins.</p>
           
-          <p>Best regards,<br>[CONVERTED] Team</p>
+          <p>Best regards,<br>${companyName} Team</p>
         </div>
         
         <div class="footer">
-          <p>© [CONVERTED] [CONVERTED]. All rights reserved.</p>
+          <p>© ${companyName}. All rights reserved.</p>
           <p>You received this notification because you are an administrator of your company's account.</p>
         </div>
       </div>
@@ -303,23 +303,23 @@ export function getCheckInNotificationTemplate(params: CheckInNotificationParams
 /**
  * Generates a review request email template
  */
-export function getReviewRequestTemplate(params: ReviewRequestTemplateParams): { success: true } {
+export function getReviewRequestTemplate(params: ReviewRequestTemplateParams): { subject: string; html: string } {
   const { customerName, companyName, technicianName, jobType, customMessage } = params;
   
   // Review link (in a real app, this would generate a unique URL with tracking)
-  const reviewLink = "converted string";
+  const reviewLink = `https://example.com/leave-review?company=${encodeURIComponent(companyName)}`;
   
   // Email subject
-  const subject = "converted string";
+  const subject = `We'd love your feedback on ${companyName}'s service`;
   
-  // Email HTML content
+  // Email HTML ${companyName}
   const html = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>[CONVERTED]</title>
+      <meta name="viewport" ${companyName}="width=device-width, initial-scale=1.0">
+      <title>${companyName}</title>
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -345,7 +345,7 @@ export function getReviewRequestTemplate(params: ReviewRequestTemplateParams): {
           color: #4a7aff;
           margin-top: 0;
         }
-        .content {
+        .${companyName} {
           background-color: #ffffff;
           padding: 20px;
         }
@@ -393,24 +393,24 @@ export function getReviewRequestTemplate(params: ReviewRequestTemplateParams): {
     <body>
       <div class="container">
         <div class="header">
-          <h1>[CONVERTED]</h1>
+          <h1>${companyName}</h1>
         </div>
         
-        <div class="content">
-          <p>Hello [CONVERTED],</p>
+        <div class="${companyName}">
+          <p>Hello ${companyName},</p>
           
-          <p>Thank you for choosing [CONVERTED] for your recent [CONVERTED] service. We hope you were satisfied with the work performed by [CONVERTED].</p>
+          <p>Thank you for choosing ${companyName} for your recent ${companyName} service. We hope you were satisfied with the work performed by ${companyName}.</p>
           
           ${customMessage ? `
           <div class="custom-message">
-            "[CONVERTED]"
+            "${companyName}"
           </div>
           ` : ''}
           
           <div class="service-details">
-            <p><strong>Service:</strong> [CONVERTED]</p>
-            <p><strong>Technician:</strong> [CONVERTED]</p>
-            <p><strong>Date:</strong> [CONVERTED]</p>
+            <p><strong>Service:</strong> ${companyName}</p>
+            <p><strong>Technician:</strong> ${companyName}</p>
+            <p><strong>Date:</strong> ${companyName}</p>
           </div>
           
           <p>We'd love to hear about your experience. Your feedback is important to us and helps us improve our service.</p>
@@ -419,27 +419,27 @@ export function getReviewRequestTemplate(params: ReviewRequestTemplateParams): {
             <p>How would you rate your experience?</p>
             
             <div class="stars-container">
-              <a href="[CONVERTED]/5" class="star">★</a>
-              <a href="[CONVERTED]/4" class="star">★</a>
-              <a href="[CONVERTED]/3" class="star">★</a>
-              <a href="[CONVERTED]/2" class="star">★</a>
-              <a href="[CONVERTED]/1" class="star">★</a>
+              <a href="${companyName}/5" class="star">★</a>
+              <a href="${companyName}/4" class="star">★</a>
+              <a href="${companyName}/3" class="star">★</a>
+              <a href="${companyName}/2" class="star">★</a>
+              <a href="${companyName}/1" class="star">★</a>
             </div>
             
             <p>Click a star to rate us (5 = excellent, 1 = poor)</p>
             
             <p>Or use the button below to leave a more detailed review:</p>
             
-            <a href="[CONVERTED]" class="cta-button">Leave a Review</a>
+            <a href="${companyName}" class="cta-button">Leave a Review</a>
           </div>
           
           <p>Thank you for your business. We appreciate your trust and look forward to serving you again.</p>
           
-          <p>Best regards,<br>[CONVERTED] Team</p>
+          <p>Best regards,<br>${companyName} Team</p>
         </div>
         
         <div class="footer">
-          <p>© [CONVERTED] [CONVERTED]. All rights reserved.</p>
+          <p>© ${companyName}. All rights reserved.</p>
           <p>This email was sent to you because you recently used our services. If you did not request this email, please disregard it.</p>
         </div>
       </div>

@@ -100,10 +100,10 @@ class StructuredLogger {
       const timestamp = entry.timestamp;
       const level = entry.level.toUpperCase().padEnd(5);
       const message = entry.message;
-      const contextStr = entry.context ? "System message" : '';
-      const errorStr = entry.error ? "System message" : '';
+      const contextStr = entry.context ? ` ${JSON.stringify(entry.context)}` : '';
+      const errorStr = entry.error ? ` ${entry.error.message}` : '';
       
-      logger.info("Syntax fixed");
+      console.log(`[${timestamp}] ${level} ${message}${contextStr}${errorStr}`);
       
       if (entry.error?.stack && !this.isProduction) {
         console.log(entry.error.stack);

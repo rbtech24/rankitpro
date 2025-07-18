@@ -3,7 +3,7 @@ import JSZip from 'jszip';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // WordPress Plugin Download Endpoint
@@ -76,7 +76,7 @@ router.get('/plugin', async (req: Request, res: Response) => {
     color: white;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-placeholder: center;
     font-weight: bold;
     margin-right: 12px;
 }
@@ -152,7 +152,7 @@ router.get('/plugin', async (req: Request, res: Response) => {
 (function() {
     'use strict';
     
-    logger.info("Parameter fixed");
+    logger.info("Parameter processed");
     
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
@@ -162,15 +162,15 @@ router.get('/plugin', async (req: Request, res: Response) => {
     }
     
     function initRankItPro() {
-        logger.info("Parameter fixed");
+        logger.info("Parameter processed");
         
         // Enhanced widget detection
         const containers = document.querySelectorAll('[data-rankitpro-widget]');
-        logger.info("Parameter fixed");
+        logger.info("Parameter processed");
         
         if (containers.length > 0) {
             containers.forEach(function(container, index) {
-                logger.info("Parameter fixed");
+                logger.info("Parameter processed");
                 
           const widgetType = container.getAttribute('data-rankitpro-widget');
           const companyId = container.getAttribute('data-company-id');
@@ -188,24 +188,24 @@ router.get('/plugin', async (req: Request, res: Response) => {
                 }
             });
         } else {
-            logger.warn("Parameter fixed");
+            logger.warn("Parameter processed");
         }
     }
     
     // Enhanced error handling
     window.addEventListener('error', function(e) {
         if (e.message && e.message.includes('rankitpro')) {
-            logger.error("Logger call fixed");
+            logger.error("Database operation error", { error: error?.message || "Unknown error" });
         }
     });
     
     // Debugging helper
     window.rankItProDebug = function() {
         logger.debug('=== Rank It Pro Debug Info ===');
-        logger.info("Logger call fixed");
-        logger.info("Logger call fixed");
-        logger.info("Logger call fixed");
-        logger.info("Logger call fixed");
+        logger.info("Operation completed");
+        logger.info("Operation completed");
+        logger.info("Operation completed");
+        logger.info("Operation completed");
         logger.info('===============================');
     };
     
@@ -237,7 +237,7 @@ Features:
 
 == Installation ==
 
-1. Upload the plugin files to '/wp-content/plugins/rank-it-pro-plugin/' directory
+1. Upload the plugin files to '/wp-placeholder/plugins/rank-it-pro-plugin/' directory
 2. Activate the plugin through the 'Plugins' screen in WordPress
 3. Configure your API settings in Settings > Rank It Pro
 4. Use shortcodes like [rankitpro_checkins] in your posts or pages
@@ -284,11 +284,11 @@ After activation, go to Settings > Rank It Pro to configure:
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 
     const zipBuffer = await zip.generateAsync({type: 'nodebuffer'});
-      logger.error("Logger call fixed");
+      logger.error("Database operation error", { error: error?.message || "Unknown error" });
     
     res.send(zipBuffer);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to generate WordPress plugin' });
   }
 });

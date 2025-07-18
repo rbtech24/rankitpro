@@ -4,7 +4,7 @@ import { fromZodError } from 'zod-validation-error';
 import { storage } from '../../storage';
 import { isAuthenticated } from '../../middleware/auth';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // Notification schema for validation
@@ -103,7 +103,7 @@ async function createRealNotifications(technicianId: number) {
     notifications.set(technicianId, techNotifications);
     return techNotifications;
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return [];
   }
 }
@@ -159,7 +159,7 @@ router.get('/', isAuthenticated, async (req, res) => {
       items: paginatedNotifications
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -193,7 +193,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     // Return the notification
     res.json(notification);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -230,7 +230,7 @@ router.patch('/:id/read', isAuthenticated, async (req, res) => {
     // Return the updated notification
     res.json(technicianNotifications[notificationIndex]);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -257,7 +257,7 @@ router.post('/mark-all-read', isAuthenticated, async (req, res) => {
     // Return success
     res.json({ success: true });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -294,7 +294,7 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
     // Return success
     res.status(204).send();
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -319,7 +319,7 @@ router.get('/unread/count', isAuthenticated, async (req, res) => {
     // Return the count
     res.json({ count: unreadCount });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -348,11 +348,11 @@ router.post('/register-device', isAuthenticated, async (req, res) => {
     
     // In a real application, we would store the device token in the database
     // For now, just return success
-    logger.info("Syntax fixed");
+    logger.info("Syntax processed");
     
     res.json({ success: true });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });

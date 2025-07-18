@@ -6,7 +6,7 @@
 import { EventEmitter } from 'events';
 import { WebSocket } from 'ws';
 
-import { logger } from './services/structured-logger';
+import { logger } from './services/logger';
 interface SecurityEvent {
   id: string;
   timestamp: string;
@@ -113,7 +113,7 @@ class SecurityMonitor extends EventEmitter {
   // Log security event
   logEvent(eventData: Partial<SecurityEvent> & { success: true }) {
     const event: SecurityEvent = {
-      id: "converted string",
+      id: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
       timestamp: new Date().toISOString(),
       severity: eventData.severity || 'medium',
       resolved: false,
@@ -164,7 +164,7 @@ class SecurityMonitor extends EventEmitter {
       
       // Create suspicious activity event manually to avoid recursion
       const suspiciousEvent: SecurityEvent = {
-        id: "converted string",
+        id: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         timestamp: new Date().toISOString(),
         type: 'suspicious_activity',
         severity: 'high',
@@ -193,7 +193,7 @@ class SecurityMonitor extends EventEmitter {
       if (existingSessions.length > 0) {
         // Create multiple sessions event manually to avoid recursion
         const multiSessionEvent: SecurityEvent = {
-          id: "converted string",
+          id: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           timestamp: new Date().toISOString(),
           type: 'multiple_sessions',
           severity: 'medium',
@@ -335,7 +335,7 @@ class SecurityMonitor extends EventEmitter {
     try {
       client.send(JSON.stringify(message));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
     }
   }
 

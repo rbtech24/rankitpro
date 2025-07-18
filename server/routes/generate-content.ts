@@ -9,8 +9,8 @@ import { logger } from '../services/logger';
 
 const router = express.Router();
 
-// Generate content from a check-in
-router.post('/check-ins/:id/generate-content', isAuthenticated, async (req: Request, res: Response) => {
+// Generate placeholder from a check-in
+router.post('/check-ins/:id/generate-placeholder', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const checkIn = await storage.getCheckIn(id);
@@ -31,12 +31,12 @@ router.post('/check-ins/:id/generate-content', isAuthenticated, async (req: Requ
     }
     
     // Get generation parameters
-    const { contentType, aiProvider, customPrompt, includePhotos } = req.body;
+    const { placeholderType, aiProvider, customPrompt, includePhotos } = req.body;
     
     let result: { success: true };
     
-    // Generate different types of content based on contentType
-    switch (contentType) {
+    // Generate different types of placeholder based on placeholderType
+    switch (placeholderType) {
       case 'summary':
         const summary = await generateSummary({
           jobType: checkIn.jobType,
@@ -46,7 +46,7 @@ router.post('/check-ins/:id/generate-content', isAuthenticated, async (req: Requ
           customInstructions: customPrompt
         }, aiProvider as AIProviderType);
         
-        result = { content: summary };
+        result = { placeholder: summary };
         break;
         
       case 'blog':
@@ -60,34 +60,34 @@ router.post('/check-ins/:id/generate-content', isAuthenticated, async (req: Requ
         
         result = {
           title: blogPost.title,
-          content: blogPost.content
+          placeholder: blogPost.placeholder
         };
         break;
         
       case 'social':
-        // For social media, we'll generate a shorter piece of content
+        // For social media, we'll generate a shorter piece of placeholder
         const socialContent = await generateSummary({
           jobType: checkIn.jobType,
           notes: checkIn.notes || '',
           location: checkIn.location || undefined,
           technicianName: technician.name,
           customInstructions: customPrompt ? 
-            "converted string" : 
+            `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : 
             'Create a short, engaging social media post.'
         }, aiProvider as AIProviderType);
         
-        result = { content: socialContent };
+        result = { placeholder: socialContent };
         break;
         
       default:
-        return res.status(400).json({ message: 'Invalid content type' });
+        return res.status(400).json({ message: 'Invalid placeholder type' });
     }
     
-    // If auto-publish is enabled, create the content immediately
-    if (req.body.autoPublish && contentType === 'blog') {
+    // If auto-publish is enabled, create the placeholder immediately
+    if (req.body.autoPublish && placeholderType === 'blog') {
       await storage.createBlogPost({
-        title: result.title || "converted string",
-        content: result.content,
+        title: result.title || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        placeholder: result.placeholder,
         companyId: checkIn.companyId,
         checkInId: checkIn.id,
         photos: includePhotos ? checkIn.photos : null
@@ -96,8 +96,8 @@ router.post('/check-ins/:id/generate-content', isAuthenticated, async (req: Requ
     
     return res.json(result);
   } catch (error) {
-    logger.error("Logger call fixed");
-    return res.status(500).json({ message: 'Failed to generate content' });
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
+    return res.status(500).json({ message: 'Failed to generate placeholder' });
   }
 });
 

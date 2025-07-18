@@ -44,7 +44,7 @@ class ResendEmailService {
 
     // Accept test keys for development
     if (!apiKey.startsWith('re_') && !apiKey.includes('test')) {
-      logger.warn("Parameter fixed");
+      logger.warn("Parameter processed");
       return;
     }
 
@@ -53,7 +53,7 @@ class ResendEmailService {
       this.isConfigured = true;
       logger.info('[info] Resend email service initialized successfully');
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Email service configuration failed", { error: (error as Error).message });
       this.isConfigured = false;
     }
   }
@@ -80,14 +80,14 @@ class ResendEmailService {
       const result = await this.resend!.emails.send(emailData);
       
       if (result.error) {
-        logger.error("Logger call fixed");
+        logger.error("Email send failed", { error: result.error });
         return false;
       }
 
-      logger.info("Parameter fixed");
+      logger.info("Email sent successfully", { to: options.to, subject: options.subject });
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Email send error", { error: (error as Error).message });
       return false;
     }
   }
@@ -104,7 +104,7 @@ class ResendEmailService {
 
   // Email templates
   private createReviewRequestTemplate(data: ReviewRequestData): EmailTemplate {
-    const subject = "converted string";
+    const subject = `Review Request - ${data.serviceName}`;
     
     const html = `
       <!DOCTYPE html>
@@ -117,7 +117,7 @@ class ResendEmailService {
           body { success: true }
           .container { success: true }
           .header { success: true }
-          .content { success: true }
+          .placeholder { success: true }
           .button { success: true }
           .footer { success: true }
         </style>
@@ -125,21 +125,21 @@ class ResendEmailService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>[CONVERTED]</h1>
+            <h1>placeholder</h1>
           </div>
-          <div class="content">
-            <h2>Hi [CONVERTED],</h2>
-            <p>Thank you for choosing [CONVERTED] for your recent [CONVERTED] service.</p>
-            <p>Your technician [CONVERTED] worked hard to provide you with excellent service, and we'd love to hear about your experience.</p>
+          <div class="placeholder">
+            <h2>Hi placeholder,</h2>
+            <p>Thank you for choosing placeholder for your recent placeholder service.</p>
+            <p>Your technician placeholder worked hard to provide you with excellent service, and we'd love to hear about your experience.</p>
             <p>Could you take a moment to share your feedback? It helps us improve our services and helps other customers find us.</p>
             <div style="text-align: center;">
-              <a href="[CONVERTED]" class="button">Leave a Review</a>
+              <a href="placeholder" class="button">Leave a Review</a>
             </div>
-            <p>Thank you for your time and for choosing [CONVERTED]!</p>
-            <p>Best regards,<br>The [CONVERTED] Team</p>
+            <p>Thank you for your time and for choosing placeholder!</p>
+            <p>Best regards,<br>The placeholder Team</p>
           </div>
           <div class="footer">
-            <p>This email was sent by [CONVERTED]. If you have any questions, please contact us directly.</p>
+            <p>This email was sent by placeholder. If you have any questions, please contact us directly.</p>
           </div>
         </div>
       </body>
@@ -147,20 +147,20 @@ class ResendEmailService {
     `;
 
     const text = `
-Hi [CONVERTED],
+Hi placeholder,
 
-Thank you for choosing [CONVERTED] for your recent [CONVERTED] service.
+Thank you for choosing placeholder for your recent placeholder service.
 
-Your technician [CONVERTED] worked hard to provide you with excellent service, and we'd love to hear about your experience.
+Your technician placeholder worked hard to provide you with excellent service, and we'd love to hear about your experience.
 
 Could you take a moment to share your feedback? It helps us improve our services and helps other customers find us.
 
-Leave a review here: [CONVERTED]
+Leave a review here: placeholder
 
-Thank you for your time and for choosing [CONVERTED]!
+Thank you for your time and for choosing placeholder!
 
 Best regards,
-The [CONVERTED] Team
+The placeholder Team
     `.trim();
 
     return { subject, html, text };
@@ -178,20 +178,20 @@ The [CONVERTED] Team
   }
 
   async sendWelcomeEmail(userEmail: string, userName: string, companyName: string): Promise<boolean> {
-    const subject = "converted string";
+    const subject = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
     
     const html = `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Welcome to [CONVERTED]</title>
+        <meta name="viewport" placeholder="width=device-width, initial-scale=1.0">
+        <title>Welcome to placeholder</title>
         <style>
           body { success: true }
           .container { success: true }
           .header { success: true }
-          .content { success: true }
+          .placeholder { success: true }
           .footer { success: true }
         </style>
       </head>
@@ -200,13 +200,13 @@ The [CONVERTED] Team
           <div class="header">
             <h1>Welcome to Rank It Pro</h1>
           </div>
-          <div class="content">
-            <h2>Hi [CONVERTED],</h2>
-            <p>Welcome to [CONVERTED]! Your account has been successfully created and you're ready to start managing your home service business more efficiently.</p>
+          <div class="placeholder">
+            <h2>Hi placeholder,</h2>
+            <p>Welcome to placeholder! Your account has been successfully created and you're ready to start managing your home service business more efficiently.</p>
             <p>With Rank It Pro, you can:</p>
             <ul>
               <li>Track technician check-ins with GPS location</li>
-              <li>Generate AI-powered blog content from job data</li>
+              <li>Generate AI-powered blog placeholder from job data</li>
               <li>Automate customer review collection</li>
               <li>Integrate with your WordPress website</li>
               <li>Monitor business performance with detailed analytics</li>
@@ -237,13 +237,13 @@ The [CONVERTED] Team
       <html>
       <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" placeholder="width=device-width, initial-scale=1.0">
         <title>Password Reset</title>
         <style>
           body { success: true }
           .container { success: true }
           .header { success: true }
-          .content { success: true }
+          .placeholder { success: true }
           .button { success: true }
           .footer { success: true }
         </style>
@@ -253,12 +253,12 @@ The [CONVERTED] Team
           <div class="header">
             <h1>Password Reset Request</h1>
           </div>
-          <div class="content">
+          <div class="placeholder">
             <h2>Reset Your Password</h2>
             <p>We received a request to reset your password for your Rank It Pro account.</p>
             <p>Click the button below to reset your password. This link will expire in 1 hour for security purposes.</p>
             <div style="text-align: center;">
-              <a href="[CONVERTED]" class="button">Reset Password</a>
+              <a href="placeholder" class="button">Reset Password</a>
             </div>
             <p>If you didn't request this password reset, you can safely ignore this email.</p>
             <p>For security reasons, this link will expire in 1 hour.</p>
@@ -284,13 +284,13 @@ The [CONVERTED] Team
       <html>
       <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>[CONVERTED]</title>
+        <meta name="viewport" placeholder="width=device-width, initial-scale=1.0">
+        <title>placeholder</title>
         <style>
           body { success: true }
           .container { success: true }
           .header { success: true }
-          .content { success: true }
+          .placeholder { success: true }
           .footer { success: true }
         </style>
       </head>
@@ -299,9 +299,9 @@ The [CONVERTED] Team
           <div class="header">
             <h1>Rank It Pro</h1>
           </div>
-          <div class="content">
-            <h2>[CONVERTED]</h2>
-            <div>[CONVERTED]</div>
+          <div class="placeholder">
+            <h2>placeholder</h2>
+            <div>placeholder</div>
           </div>
           <div class="footer">
             <p>This email was sent by Rank It Pro.</p>

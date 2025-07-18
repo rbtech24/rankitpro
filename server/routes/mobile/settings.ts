@@ -4,7 +4,7 @@ import { fromZodError } from 'zod-validation-error';
 import { storage } from '../../storage';
 import { isAuthenticated } from '../../middleware/auth';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // Settings schema for validation
@@ -77,7 +77,7 @@ router.get('/', isAuthenticated, async (req, res) => {
     
     res.json(settings);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -132,7 +132,7 @@ router.put('/', isAuthenticated, async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -170,7 +170,7 @@ router.post('/reset', isAuthenticated, async (req, res) => {
     
     res.json(defaultSettings);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -210,7 +210,7 @@ router.get('/job-types', isAuthenticated, async (req, res) => {
     
     res.json(jobTypes);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -247,7 +247,7 @@ router.get('/sync-status', isAuthenticated, async (req, res) => {
       ]
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });

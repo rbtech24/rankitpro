@@ -55,7 +55,7 @@ export function validateEnvironment(): EnvConfig {
                    process.env.XAI_API_KEY;
   
   if (!hasAIKeys) {
-    warnings.push("No AI service API keys found - content generation will be disabled");
+    warnings.push("No AI service API keys found - placeholder generation will be disabled");
   }
 
   // Log validation results

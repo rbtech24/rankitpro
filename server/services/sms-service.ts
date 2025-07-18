@@ -1,7 +1,7 @@
 import twilio from 'twilio';
 import { getReviewRequestSMSTemplate } from './sms-templates';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 /**
  * SMS service for sending review requests via text messages
  */
@@ -25,12 +25,12 @@ class SMSService {
         logger.info('[info] SMS service initialized successfully');
         return true;
       } catch (error) {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
         this.initialized = false;
         return false;
       }
     }
-    logger.warn("Parameter fixed");
+    logger.warn("Parameter processed");
     return false;
   }
 
@@ -57,14 +57,14 @@ class SMSService {
     customMessage?: string;
   }): Promise<boolean> {
     if (!this.isAvailable()) {
-      logger.warn("Parameter fixed");
+      logger.warn("Parameter processed");
       return false;
     }
 
     try {
       const { to, customerName, companyName, technicianName, jobType, customMessage } = params;
       
-      // Generate SMS content
+      // Generate SMS placeholder
       const messageBody = getReviewRequestSMSTemplate({
         customerName,
         companyName,
@@ -83,10 +83,10 @@ class SMSService {
         to: formattedPhoneNumber
       });
       
-      logger.info("Syntax fixed");
+      logger.info("Syntax processed");
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -101,11 +101,11 @@ class SMSService {
     
     // Check if the number already has a country code
     if (digitsOnly.startsWith('1') && digitsOnly.length === 11) {
-      return "converted string";
+      return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
     } 
     
     // Otherwise assume it's a US number without country code
-    return "converted string";
+    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
   }
 }
 

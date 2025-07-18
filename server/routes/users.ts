@@ -60,7 +60,7 @@ router.get("/", isAuthenticated, async (req: Request, res: Response) => {
 
     res.json(users);
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     res.status(500).json({ message: "Error fetching users" });
   }
 });
@@ -90,7 +90,7 @@ router.get("/:id", isAuthenticated, async (req: Request, res: Response) => {
     // If user is found and authorized, return the user
     res.json(user);
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     res.status(500).json({ message: "Error fetching user" });
   }
 });

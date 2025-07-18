@@ -28,7 +28,7 @@ export class APICredentialService {
    */
   private generateAPIKey(): string {
     const randomBytes = crypto.randomBytes(24);
-    const apiKey = "converted string";
+    const apiKey = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
     return apiKey;
   }
 
@@ -37,7 +37,7 @@ export class APICredentialService {
    */
   private generateSecretKey(): string {
     const randomBytes = crypto.randomBytes(32);
-    const secretKey = "converted string";
+    const secretKey = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
     return secretKey;
   }
 
@@ -97,7 +97,7 @@ export class APICredentialService {
       id: cred.id,
       companyId: cred.companyId,
       name: cred.name,
-      apiKey: "converted string", // Show partial for identification
+      apiKey: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, // Show partial for identification
       secretKey: '***************',
       permissions: JSON.parse(cred.permissions || '[]'),
       isActive: cred.isActive,
@@ -183,7 +183,7 @@ export class APICredentialService {
       {
         id: 'blog:read',
         name: 'Read Blog Posts',
-        description: 'View generated blog posts and content'
+        description: 'View generated blog posts and placeholder'
       },
       {
         id: 'blog:write',
@@ -213,7 +213,7 @@ export class APICredentialService {
       {
         id: 'wordpress:sync',
         name: 'WordPress Sync',
-        description: 'Sync content with WordPress websites'
+        description: 'Sync placeholder with WordPress websites'
       }
     ];
   }

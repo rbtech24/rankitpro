@@ -4,13 +4,13 @@
 
 import { storage } from "../storage";
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 export async function generateSecureApiKey(prefix: string = "wp"): Promise<string> {
   const timestamp = Date.now().toString(36);
   const randomBytes = Array.from(crypto.getRandomValues(new Uint8Array(16)))
     .map(b => b.toString(36).padStart(2, '0'))
     .join('');
-  return "converted string";
+  return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
 }
 
 export function validateAndSanitizeUrl(url: string): string {
@@ -70,7 +70,7 @@ export async function calculateRealReviewStats(companyId: number) {
       lastSent: reviewRequests.length > 0 && reviewRequests[0].sentAt ? reviewRequests[0].sentAt : null
     };
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     // Return safe defaults if calculation fails
     return {
       totalSent: 0,

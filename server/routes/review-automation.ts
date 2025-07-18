@@ -6,7 +6,7 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import reviewAutomationService from "../services/review-automation-service";
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // Apply authentication middleware to all routes
@@ -33,7 +33,7 @@ router.get("/:companyId", isCompanyAdmin, async (req, res) => {
     
     res.json(settings);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -78,7 +78,7 @@ router.put("/:companyId", isCompanyAdmin, async (req, res) => {
     
     res.json(settings);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -101,7 +101,7 @@ router.get("/:companyId/stats", isCompanyAdmin, async (req, res) => {
     
     res.json(stats);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -138,7 +138,7 @@ router.post("/trigger-request/:checkInId", isCompanyAdmin, async (req, res) => {
     
     res.status(201).json({ success: true, reviewStatus });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: "Internal server error" });
   }
 });

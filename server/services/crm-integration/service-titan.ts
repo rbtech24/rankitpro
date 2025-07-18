@@ -2,7 +2,7 @@ import { CRMIntegration } from './index';
 import { CheckInData, CRMContactData, CRMJobData, SyncSettings } from './types';
 import axios from 'axios';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 export class ServiceTitanIntegration implements CRMIntegration {
   private clientId: string;
   private clientSecret: string;
@@ -56,7 +56,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       
       return this.accessToken;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       throw new Error('Failed to authenticate with ServiceTitan');
     }
   }
@@ -74,9 +74,9 @@ export class ServiceTitanIntegration implements CRMIntegration {
       
       const response = await axios({
         method,
-        url: "converted string",
+        url: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'ST-App-Key': this.clientId,
           'Content-Type': 'application/json',
           'ST-Tenant-ID': this.tenantId
@@ -95,7 +95,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
           data: error.response.data
         });
       } else {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
       }
       throw error;
     }
@@ -110,7 +110,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       await this.apiRequest<any>('GET', '/settings/technicians?page=1&limit=1');
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -152,7 +152,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       
       return null;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return null;
     }
   }
@@ -204,7 +204,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
           customFields: customer.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', "converted string", customerData);
+        await this.apiRequest<any>('PUT', `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, customerData);
         return customerId.toString();
       } else {
         // Create new customer
@@ -228,7 +228,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         return newCustomer.id.toString();
       }
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return null;
     }
   }
@@ -281,7 +281,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
           customFields: job.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', "converted string", jobData);
+        await this.apiRequest<any>('PUT', `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, jobData);
         return jobId.toString();
       } else {
         // Create new job
@@ -310,7 +310,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         return newJob.id.toString();
       }
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return null;
     }
   }
@@ -329,21 +329,21 @@ export class ServiceTitanIntegration implements CRMIntegration {
           const base64Image = buffer.toString('base64');
           
           // Upload to ServiceTitan as an attachment
-          await this.apiRequest('POST', "converted string", {
-            fileName: "converted string",
+          await this.apiRequest('POST', `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, {
+            fileName: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
             mimeType: 'image/jpeg',
             base64Data: base64Image,
             description: 'Check-in photo from Rank It Pro',
             isPublic: true
           });
         } catch (error) {
-          logger.error("Template literal converted");
+          logger.error("Template literal processed");
         }
       }
       
       return true;
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
       return false;
     }
   }
@@ -399,7 +399,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         const photoUrls = checkIn.photos?.map(p => p.url) || [];
         
         const job: CRMJobData = {
-          title: "converted string",
+          title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           description: checkIn.workPerformed || checkIn.notes || 'Check-in from Rank It Pro',
           jobType: checkIn.jobType,
           status: checkIn.completedAt ? 'completed' : 'in_progress',
@@ -412,8 +412,8 @@ export class ServiceTitanIntegration implements CRMIntegration {
           endDate: checkIn.completedAt || undefined,
           notes: [
             checkIn.notes,
-            checkIn.workPerformed ? "converted string" : null,
-            checkIn.materialsUsed ? "converted string" : null,
+            checkIn.workPerformed ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : null,
+            checkIn.materialsUsed ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : null,
           ].filter(Boolean).join('\n\n'),
           images: settings.syncPhotos ? photoUrls : []
         };
@@ -428,7 +428,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -443,7 +443,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       if (dateRange) {
         const startDate = dateRange.start.toISOString().split('T')[0]; // YYYY-MM-DD
         const endDate = dateRange.end.toISOString().split('T')[0]; // YYYY-MM-DD
-        queryParams += "converted string";
+        queryParams += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       }
       
       // Get jobs for this technician
@@ -467,7 +467,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         notes: job.notes || ''
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }
@@ -480,7 +480,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       let endpoint = '/crm/customers?limit=50';
       
       if (query) {
-        endpoint += "converted string";
+        endpoint += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       }
       
       const response = await this.apiRequest<{ data: any[]; }>(
@@ -502,7 +502,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         notes: customer.notes || null
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }

@@ -6,7 +6,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import { storage } from "../storage";
-import { logger } from "../services/structured-logger";
+import { logger } from "../services/logger";
 import { isAuthenticated, isCompanyAdmin, isSuperAdmin } from "../middleware/auth";
 import { validateBody } from "../middleware/validation";
 import { insertUserSchema } from "@shared/schema";
@@ -41,7 +41,7 @@ router.get('/profile',
       // Return user without sensitive data
       const { password, ...userProfile } = user;
 
-      logger.info("Logger call fixed");
+      logger.info("Operation completed");
 
       res.json(userProfile);
 
@@ -217,7 +217,7 @@ router.post('/',
       // Set company ID from creator's company
       const creator = await storage.getUser(userId);
       if (!creator || !creator.companyId) {
-        logger.error("Parameter fixed");
+        logger.error("Parameter processed");
         return res.status(400).json({ message: "Unable to determine company" });
       }
 

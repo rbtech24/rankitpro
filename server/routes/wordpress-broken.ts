@@ -3,7 +3,7 @@ import JSZip from 'jszip';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // WordPress Plugin Download Endpoint
@@ -51,8 +51,8 @@ if (!defined('ABSPATH')) {
 }
 
 class RankItProPlugin {
-    private $default_api_key = '[CONVERTED]';
-    private $api_endpoint = '[CONVERTED]';
+    private $default_api_key = 'placeholder';
+    private $api_endpoint = 'placeholder';
     
     public function __construct() {
         add_action('init', array($this, 'plugin_init'));
@@ -376,11 +376,11 @@ class RankItProPlugin {
         
         foreach ($checkins_data as $checkin) {
             $output .= '<div class="rankitpro-checkin" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">';
-            $output .= '<div class="checkin-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">';
+            $output .= '<div class="checkin-header" style="display: flex; justify-placeholder: space-between; align-items: center; margin-bottom: 10px;">';
             $output .= '<h3 style="margin: 0; color: #2271b1;">' . esc_html($checkin['jobType']) . '</h3>';
             $output .= '<span class="checkin-date" style="color: #666; font-size: 14px;">' . date('M j, Y', strtotime($checkin['createdAt'])) . '</span>';
             $output .= '</div>';
-            $output .= '<div class="checkin-content">';
+            $output .= '<div class="checkin-placeholder">';
             if (!empty($checkin['technicianName'])) {
                 $output .= '<p style="margin: 5px 0;"><strong>Technician:</strong> ' . esc_html($checkin['technicianName']) . '</p>';
             }
@@ -435,9 +435,9 @@ class RankItProPlugin {
             $stars = str_repeat('★', $rating) . str_repeat('☆', 5 - $rating);
             $output .= '<div class="review-rating" style="margin-bottom: 10px;"><span class="stars" style="color: #ffa500; font-size: 18px;">' . $stars . '</span> (' . $rating . '/5)</div>';
             
-            $output .= '<div class="review-content">';
-            if (!empty($review['content'])) {
-                $output .= '<p style="margin: 0 0 10px 0; font-style: italic;">"' . esc_html($review['content']) . '"</p>';
+            $output .= '<div class="review-placeholder">';
+            if (!empty($review['placeholder'])) {
+                $output .= '<p style="margin: 0 0 10px 0; font-style: italic;">"' . esc_html($review['placeholder']) . '"</p>';
             }
             
             $author_name = !empty($review['customerName']) ? $review['customerName'] : 'Anonymous';
@@ -491,8 +491,8 @@ class RankItProPlugin {
             
             $output .= '</div>';
             
-            if (!empty($post['content'])) {
-                $excerpt = substr(strip_tags($post['content']), 0, 200) . '...';
+            if (!empty($post['placeholder'])) {
+                $excerpt = substr(strip_tags($post['placeholder']), 0, 200) . '...';
                 $output .= '<div class="post-excerpt" style="color: #333; line-height: 1.5;">' . esc_html($excerpt) . '</div>';
             }
             
@@ -541,9 +541,9 @@ class RankItProPlugin {
                 $output .= '<div class="testimonial-rating" style="margin-bottom: 15px;"><span class="stars" style="color: #ffa500; font-size: 20px;">' . $stars . '</span></div>';
             }
             
-            // Testimonial content
-            if (!empty($testimonial['content'])) {
-                $output .= '<blockquote style="font-style: italic; font-size: 16px; line-height: 1.6; margin: 0 0 15px 0; color: #333;">"' . esc_html($testimonial['content']) . '"</blockquote>';
+            // Testimonial placeholder
+            if (!empty($testimonial['placeholder'])) {
+                $output .= '<blockquote style="font-style: italic; font-size: 16px; line-height: 1.6; margin: 0 0 15px 0; color: #333;">"' . esc_html($testimonial['placeholder']) . '"</blockquote>';
             }
             
             // Author information
@@ -628,7 +628,7 @@ class RankItProPlugin {
             // Avatar with initials
             $name = !empty($member['name']) ? $member['name'] : 'Team Member';
             $initials = strtoupper(substr($name, 0, 1) . (strpos($name, ' ') ? substr($name, strpos($name, ' ') + 1, 1) : ''));
-            $output .= '<div class="member-avatar" style="width: 80px; height: 80px; border-radius: 50%; background: #2271b1; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto 15px auto; font-size: 24px;">';
+            $output .= '<div class="member-avatar" style="width: 80px; height: 80px; border-radius: 50%; background: #2271b1; color: white; display: flex; align-items: center; justify-placeholder: center; font-weight: bold; margin: 0 auto 15px auto; font-size: 24px;">';
             $output .= $initials;
             $output .= '</div>';
             
@@ -906,7 +906,7 @@ function rankitpro_activation_notice() {
     color: white;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-placeholder: center;
     font-weight: bold;
     margin-right: 12px;
 }
@@ -1008,7 +1008,7 @@ WordPress integration for Rank It Pro SaaS platform with comprehensive field ser
 
 == Description ==
 
-Rank It Pro Integration connects your WordPress website to the Rank It Pro field service management platform. Display service check-ins, customer reviews, and blog content directly on your website.
+Rank It Pro Integration connects your WordPress website to the Rank It Pro field service management platform. Display service check-ins, customer reviews, and blog placeholder directly on your website.
 
 = Features =
 
@@ -1075,11 +1075,11 @@ Make sure you've configured your API key in the plugin settings and run the diag
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 
     const zipBuffer = await zip.generateAsync({type: 'nodebuffer'});
-    logger.info("Parameter fixed");
+    logger.info("Parameter processed");
     
     res.send(zipBuffer);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to generate WordPress plugin' });
   }
 });

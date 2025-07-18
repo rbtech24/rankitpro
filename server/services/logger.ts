@@ -4,8 +4,6 @@
  */
 
 import { logError } from '../error-monitor';
-
-import { logger } from '../services/structured-logger';
 export enum LogLevel {
   ERROR = 'error',
   WARN = 'warn',
@@ -39,14 +37,14 @@ class Logger {
   private formatMessage(entry: LogEntry): string {
     const timestamp = entry.timestamp;
     const level = entry.level.toUpperCase();
-    const baseMessage = "converted string";
+    const baseMessage = `[${timestamp}] ${level}  ${entry.message}`;
     
     if (entry.metadata && Object.keys(entry.metadata).length > 0) {
       const metadataString = Object.entries(entry.metadata)
         .filter(([_, value]) => value !== undefined)
-        .map(([key, value]) => "System message")
+        .map(([key, value]) => `${key}=${value}`)
         .join(' ');
-      return "converted string";
+      return `${baseMessage} ${metadataString}`;
     }
     
     return baseMessage;
@@ -70,7 +68,7 @@ class Logger {
         if (context instanceof Error) {
           console.error(context.stack);
         } else if (context) {
-          logger.error("Error logging fixed");
+          console.error(JSON.stringify(context));
         }
         break;
       case LogLevel.WARN:

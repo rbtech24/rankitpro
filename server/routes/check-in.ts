@@ -16,7 +16,7 @@ import { validateCheckIn, validateParams, validateFileUpload, sanitizeAllInputs 
 import { asyncHandler, successResponse, createdResponse, updatedResponse, notFoundError, validationError } from '../middleware/error-handling';
 import { logger } from '../services/logger';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = express.Router();
 
 // Configure multer storage for file uploads
@@ -33,7 +33,7 @@ const storage_config = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     // Create unique filename
-    const uniqueFilename = "converted string";
+    const uniqueFilename = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
     cb(null, uniqueFilename);
   }
 });
@@ -67,11 +67,11 @@ router.post('/upload-photos', isAuthenticated, upload.array('photos', 10), async
     const category = req.body.category || 'general'; // general, before, after
     
     // Base URL for serving static files
-    const baseUrl = "converted string";
+    const baseUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
     
     // Create URLs for uploaded files
     const photoUrls = (req.files as Express.Multer.File[]).map(file => ({
-      url: "converted string",
+      url: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
       category
     }));
     
@@ -84,7 +84,7 @@ router.post('/upload-photos', isAuthenticated, upload.array('photos', 10), async
     
     res.json(photosByCategory);
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     res.status(500).json({ message: 'Failed to upload photos' });
   }
 });
@@ -124,7 +124,7 @@ router.put('/:id', isAuthenticated, async (req: Request, res: Response) => {
 
     res.json(updatedCheckIn);
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     res.status(500).json({ message: 'Failed to update check-in' });
   }
 });
@@ -176,7 +176,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
         // Check if location is just coordinates
         const isCoordinatesOnly = !checkIn.location || 
           checkIn.location.match(/^-?\d+\.?\d*,?\s*-?\d+\.?\d*$/) ||
-          checkIn.location === "converted string";
+          checkIn.location === `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
         
         if (checkIn.latitude && checkIn.longitude && isCoordinatesOnly) {
           try {
@@ -194,8 +194,8 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
               formattedLocation = fullAddress;
             }
           } catch (error) {
-            logger.warn("Parameter fixed");
-            formattedLocation = "converted string";
+            logger.warn("Parameter processed");
+            formattedLocation = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
           }
         }
 
@@ -222,7 +222,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'application/json');
     return res.json(enrichedCheckIns);
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     res.setHeader('Content-Type', 'application/json');
     return res.status(500).json({ message: 'Failed to fetch check-ins' });
   }
@@ -237,9 +237,9 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
     let photoUrls: string[] = [];
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
       // Use correct upload path that matches the server setup
-      const baseUrl = "converted string";
+      const baseUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       photoUrls = req.files.map(file => "System message");
-      logger.info("Logger call fixed");
+      logger.info("Operation completed");
     }
     
     // Prepare check-in data with photos
@@ -257,7 +257,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
       generatedContent: req.body.generatedContent || null,
     };
 
-    logger.info("Logger call fixed");
+    logger.info("Operation completed");
 
     // Create the check-in
     const checkIn = await storage.createCheckIn(checkInData);
@@ -303,7 +303,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
         }
       }
     } catch (error) {
-      logger.error("Logger call fixed");
+      logger.error("Database operation error", { error: error?.message || "Unknown error" });
       // Don't fail the check-in creation if notification fails
     }
 
@@ -316,11 +316,11 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
           try {
             aiLocation = await reverseGeocode(checkIn.latitude, checkIn.longitude);
           } catch (error) {
-            aiLocation = "converted string";
+            aiLocation = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
           }
         }
 
-        // Generate blog post content using AI
+        // Generate blog post placeholder using AI
         const aiProvider: AIProviderType = req.body.aiProvider || 'openai';
         const blogPostResult = await generateBlogPost({
           jobType: checkIn.jobType,
@@ -332,14 +332,14 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
         // Create the blog post
         const blogPost = await storage.createBlogPost({
           title: blogPostResult.title,
-          content: blogPostResult.content,
+          placeholder: blogPostResult.placeholder,
           companyId: user.companyId!,
           checkInId: checkIn.id,
           photos: checkIn.photos,
           published: true
         });
 
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
 
         // Send blog post notification
         try {
@@ -351,7 +351,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
         // Mark the check-in as having been made into a blog post
         await storage.updateCheckIn(checkIn.id, { isBlog: true });
       } catch (error) {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
         // Don't fail the whole request if blog post creation fails
       }
     }
@@ -380,7 +380,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
           const companyName = company ? company.name : "Our Service Company";
           
           // Create review link (in a real app, this would be a unique URL)
-          const reviewLink = "converted string";
+          const reviewLink = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
           
           await emailService.sendReviewRequest(
             reviewRequest,
@@ -391,14 +391,14 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
           );
         }
       } catch (error) {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
         // Don't fail the whole request if review request creation fails
       }
     }
 
     return res.status(201).json(checkIn);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     if (error instanceof z.ZodError) {
       return res.status(400).json({ success: true });
     }
@@ -424,7 +424,7 @@ router.get('/:id', isAuthenticated, async (req: Request, res: Response) => {
     
     return res.json(checkIn);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Failed to fetch check-in' });
   }
 });
@@ -448,7 +448,7 @@ router.patch('/:id', isAuthenticated, async (req: Request, res: Response) => {
     const updatedCheckIn = await storage.updateCheckIn(id, req.body);
     return res.json(updatedCheckIn);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Failed to update check-in' });
   }
 });
@@ -486,7 +486,7 @@ router.delete('/:id', isAuthenticated, async (req: Request, res: Response) => {
       return res.status(500).json({ message: 'Failed to delete check-in' });
     }
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Failed to delete check-in' });
   }
 });
@@ -523,7 +523,7 @@ router.post('/:id/summary', isAuthenticated, async (req: Request, res: Response)
     
     return res.json({ summary });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Failed to generate summary' });
   }
 });
@@ -553,7 +553,7 @@ router.post('/convert-coordinates', isAuthenticated, async (req: Request, res: R
       error: result.error
     });
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ 
       message: 'Failed to convert coordinates',
       error: error.message 
@@ -577,7 +577,7 @@ router.post('/format-location', isAuthenticated, async (req: Request, res: Respo
       formattedAddress
     });
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ 
       message: 'Failed to format location',
       error: error.message 

@@ -5,7 +5,7 @@ import { XAIService } from './xai-service';
 import { AIProviderType } from './types';
 import { BlogPostResult, ContentGenerationParams } from './ai-interface';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 /**
  * Factory class for creating AI services
  */

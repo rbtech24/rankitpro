@@ -12,7 +12,7 @@ import { ensureValidToken } from "../utils/production-fixes";
 import twilio from 'twilio';
 import { v4 as uuidv4 } from 'uuid';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 class ReviewAutomationService {
   private twilioClient: twilio.Twilio | null = null;
   
@@ -48,7 +48,7 @@ class ReviewAutomationService {
         await this.processPendingRequestsForCompany(company.id, settings);
       }
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
     }
   }
   
@@ -113,7 +113,7 @@ class ReviewAutomationService {
         }
       }
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
     }
   }
   
@@ -141,14 +141,14 @@ class ReviewAutomationService {
       
       // Check if customer information is available
       if (!checkIn.customerName || (!checkIn.customerEmail && !checkIn.customerPhone)) {
-        logger.info("Parameter fixed");
+        logger.info("Parameter processed");
         return null;
       }
       
       // Check service type targeting (if configured)
       if (settings.targetServiceTypes && settings.targetServiceTypes.length > 0 && 
           !settings.targetServiceTypes.includes(checkIn.jobType)) {
-        logger.info("Syntax fixed");
+        logger.info("Syntax processed");
         return null;
       }
       
@@ -172,7 +172,7 @@ class ReviewAutomationService {
       const statusData: InsertReviewRequestStatus = {
         reviewRequestId: reviewRequest.id,
         checkInId,
-        customerId: "converted string", // Generate a unique customer ID
+        customerId: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, // Generate a unique customer ID
         customerName: checkIn.customerName,
         customerEmail: checkIn.customerEmail || '', // Required field
         customerPhone: checkIn.customerPhone || undefined,
@@ -183,11 +183,11 @@ class ReviewAutomationService {
       const requestStatus = await storage.createReviewRequestStatus(statusData);
       
       // Schedule for sending after the initial delay
-      logger.info("Syntax fixed");
+      logger.info("Syntax processed");
       
       return requestStatus;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return null;
     }
   }
@@ -207,7 +207,7 @@ class ReviewAutomationService {
       
       return settings;
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
       return null;
     }
   }
@@ -366,14 +366,14 @@ class ReviewAutomationService {
           status: 'sent'
         });
         
-        logger.info("Syntax fixed");
+        logger.info("Syntax processed");
         return true;
       } else {
         logger.info("No delivery method available for request ", {});
         return false;
       }
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
       return false;
     }
   }
@@ -459,13 +459,13 @@ class ReviewAutomationService {
           firstFollowUpSentAt: new Date()
         });
         
-        logger.info("Syntax fixed");
+        logger.info("Syntax processed");
         return true;
       }
       
       return false;
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
       return false;
     }
   }
@@ -553,13 +553,13 @@ class ReviewAutomationService {
           secondFollowUpSentAt: new Date()
         });
         
-        logger.info("Syntax fixed");
+        logger.info("Syntax processed");
         return true;
       }
       
       return false;
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
       return false;
     }
   }
@@ -644,13 +644,13 @@ class ReviewAutomationService {
           finalFollowUpSentAt: new Date()
         });
         
-        logger.info("Syntax fixed");
+        logger.info("Syntax processed");
         return true;
       }
       
       return false;
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
       return false;
     }
   }
@@ -680,7 +680,7 @@ class ReviewAutomationService {
       
       return true;
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
       return false;
     }
   }
@@ -712,7 +712,7 @@ class ReviewAutomationService {
       
       return true;
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
       return false;
     }
   }
@@ -742,7 +742,7 @@ class ReviewAutomationService {
       
       return true;
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
       return false;
     }
   }

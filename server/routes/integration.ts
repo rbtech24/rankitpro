@@ -6,7 +6,7 @@ import { AIProviderType } from "../ai/types";
 import { escapeHtml, sanitizeText, sanitizeUrl, createSafeTextContent } from "../utils/html-sanitizer";
 import { logger } from "../services/logger";
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = express.Router();
 
 // WordPress integration settings
@@ -60,7 +60,7 @@ router.get("/wordpress", isAuthenticated, isCompanyAdmin, async (req: Request, r
 
     return res.json(wordpressIntegration);
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     return res.status(500).json({ message: "Error fetching WordPress integration" });
   }
 });
@@ -108,7 +108,7 @@ router.post("/wordpress", isAuthenticated, isCompanyAdmin, async (req: Request, 
 
     return res.json(wordpressIntegration);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: "Error updating WordPress integration" });
   }
 });
@@ -145,22 +145,22 @@ router.get("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res: 
     const baseUrl = getBaseUrl();
     
     const scriptCode = `
-<div id="checkin-widget-[CONVERTED]" class="checkin-widget"></div>
+<div id="checkin-widget-placeholder" class="checkin-widget"></div>
 <script>
   (function() {
     var script = document.createElement('script');
-    script.src = '[CONVERTED]/api/integration/embed/widget.js';
+    script.src = 'placeholder/api/integration/embed/widget.js';
     script.async = true;
     script.onload = function() {
       CheckInWidget.init({
-        targetSelector: '#checkin-widget-[CONVERTED]',
-        companyId: [CONVERTED],
-        theme: '[CONVERTED]',
-        style: '[CONVERTED]',
-        showTechPhotos: [CONVERTED],
-        showCheckInPhotos: [CONVERTED],
-        autoRefresh: [CONVERTED],
-        refreshInterval: [CONVERTED]
+        targetSelector: '#checkin-widget-placeholder',
+        companyId: placeholder,
+        theme: 'placeholder',
+        style: 'placeholder',
+        showTechPhotos: placeholder,
+        showCheckInPhotos: placeholder,
+        autoRefresh: placeholder,
+        refreshInterval: placeholder
       });
     };
     document.head.appendChild(script);
@@ -204,7 +204,7 @@ router.get("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res: 
 
     return res.json(embedIntegration);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: "Error fetching embed integration" });
   }
 });
@@ -230,22 +230,22 @@ router.post("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res:
 
     // Update the script code with the new settings
     const scriptCode = `
-<div id="checkin-widget-[CONVERTED]" class="checkin-widget"></div>
+<div id="checkin-widget-placeholder" class="checkin-widget"></div>
 <script>
   (function() {
     var script = document.createElement('script');
-    script.src = '[CONVERTED]://[CONVERTED]/api/integration/embed/widget.js';
+    script.src = 'placeholder://placeholder/api/integration/embed/widget.js';
     script.async = true;
     script.onload = function() {
       CheckInWidget.init({
-        targetSelector: '#checkin-widget-[CONVERTED]',
-        companyId: [CONVERTED],
-        theme: '[CONVERTED]',
-        style: '[CONVERTED]',
-        showTechPhotos: [CONVERTED],
-        showCheckInPhotos: [CONVERTED],
-        autoRefresh: [CONVERTED],
-        refreshInterval: [CONVERTED]
+        targetSelector: '#checkin-widget-placeholder',
+        companyId: placeholder,
+        theme: 'placeholder',
+        style: 'placeholder',
+        showTechPhotos: placeholder,
+        showCheckInPhotos: placeholder,
+        autoRefresh: placeholder,
+        refreshInterval: placeholder
       });
     };
     document.head.appendChild(script);
@@ -300,7 +300,7 @@ router.post("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res:
 
     return res.json(embedIntegration);
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     return res.status(500).json({ message: "Error updating embed integration" });
   }
 });
@@ -328,7 +328,7 @@ const CheckInWidget = (function() {
         renderWidget(data);
       })
       .catch(error => {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
       });
   }
   
@@ -347,7 +347,7 @@ const CheckInWidget = (function() {
     container.classList.add('checkin-theme-' + safeTheme);
     container.classList.add('checkin-style-' + safeStyle);
     
-    // Header - safe text content
+    // Header - safe text placeholder
     const header = document.createElement('div');
     header.className = 'checkin-header';
     const headerTitle = document.createElement('h3');
@@ -511,7 +511,7 @@ const CheckInWidget = (function() {
         
         .checkin-header {
           display: flex;
-          justify-content: space-between;
+          justify-placeholder: space-between;
           margin-bottom: 0.5rem;
         }
         
@@ -593,7 +593,7 @@ const CheckInWidget = (function() {
   };
 })();`;
 
-  // Set the appropriate content type and send the JavaScript
+  // Set the appropriate placeholder type and send the JavaScript
   res.setHeader('Content-Type', 'application/javascript');
   res.send(widgetJs);
 });
@@ -627,7 +627,7 @@ router.get("/embed/data", async (req: Request, res: Response) => {
 
     return res.json({ checkIns: formattedCheckIns });
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     return res.status(500).json({ message: "Error fetching embed data" });
   }
 });
@@ -640,7 +640,7 @@ router.get("/ai/providers", isAuthenticated, isCompanyAdmin, async (_req: Reques
     const providers = getAvailableAIProviders();
     return res.json({ providers });
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     return res.status(500).json({ message: "Error fetching AI providers" });
   }
 });
@@ -663,7 +663,7 @@ router.post("/ai/generate-summary", isAuthenticated, async (req: Request, res: R
 
     return res.json({ summary });
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     return res.status(500).json({ message: "Error generating summary" });
   }
 });
@@ -686,7 +686,7 @@ router.post("/ai/generate-blog-post", isAuthenticated, async (req: Request, res:
 
     return res.json(blogPost);
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     return res.status(500).json({ message: "Error generating blog post" });
   }
 });

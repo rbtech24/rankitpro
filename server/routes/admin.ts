@@ -4,7 +4,7 @@ import { isSuperAdmin } from '../middleware/auth';
 import { insertSubscriptionPlanSchema } from '@shared/schema';
 import Stripe from 'stripe';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -88,7 +88,7 @@ router.post('/initialize-plans', isSuperAdmin, async (req, res) => {
       plans: createdPlans 
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -112,7 +112,7 @@ router.get('/subscription-plans', isSuperAdmin, async (req, res) => {
     
     res.json(plansWithStats);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -133,7 +133,7 @@ router.post('/subscription-plans', isSuperAdmin, async (req, res) => {
     // Create Stripe product and price
     const stripeProduct = await stripe.products.create({
       name: validatedData.name,
-      description: "converted string",
+      description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
     });
 
     const stripePrice = await stripe.prices.create({
@@ -156,7 +156,7 @@ router.post('/subscription-plans', isSuperAdmin, async (req, res) => {
     logger.info('Created plan:', { plan });
     res.json(plan);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     if (error instanceof Error) {
       res.status(400).json({ message: error.message });
     } else {
@@ -180,7 +180,7 @@ router.put('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
     if (existingPlan.stripeProductId) {
       await stripe.products.update(existingPlan.stripeProductId, {
         name: validatedData.name,
-        description: "converted string",
+        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
       });
     }
 
@@ -188,7 +188,7 @@ router.put('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
     const updatedPlan = await storage.updateSubscriptionPlan(planId, validatedData);
     res.json(updatedPlan);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -221,7 +221,7 @@ router.delete('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
     await storage.deleteSubscriptionPlan(planId);
     res.json({ message: 'Subscription plan deleted successfully' });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -234,7 +234,7 @@ router.get('/financial/metrics', isSuperAdmin, async (req, res) => {
     const metrics = await storage.getFinancialMetrics();
     res.json(metrics);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -246,7 +246,7 @@ router.get('/financial/revenue-trends', isSuperAdmin, async (req, res) => {
     const trends = await storage.getRevenueTrends(period);
     res.json(trends);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -258,7 +258,7 @@ router.get('/financial/payments', isSuperAdmin, async (req, res) => {
     const payments = await storage.getPaymentHistory(limit);
     res.json(payments);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -270,7 +270,7 @@ router.get('/signup-metrics', isSuperAdmin, async (req, res) => {
     const signups = await storage.getSignupMetrics(period);
     res.json(signups);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -281,7 +281,7 @@ router.get('/financial/subscription-breakdown', isSuperAdmin, async (req, res) =
     const breakdown = await storage.getSubscriptionBreakdown();
     res.json(breakdown);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -308,7 +308,7 @@ router.get('/financial/export', isSuperAdmin, async (req, res) => {
       res.json(data);
     }
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -342,7 +342,7 @@ router.post('/stripe/webhook', async (req, res) => {
     
     res.json({ received: true });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(400).send("System message");
   }
 });
@@ -371,7 +371,7 @@ router.get('/system-stats', isSuperAdmin, async (req, res) => {
 
     res.json(stats);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -393,7 +393,7 @@ router.get('/chart-data', isSuperAdmin, async (req, res) => {
 
     res.json(chartData);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -404,7 +404,7 @@ router.get('/system-health', isSuperAdmin, async (req, res) => {
     const healthMetrics = await storage.getSystemHealthMetrics();
     res.json(healthMetrics);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -415,7 +415,7 @@ router.get('/recent-activities', isSuperAdmin, async (req, res) => {
     const activities = await storage.getRecentActivities();
     res.json(activities);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -446,7 +446,7 @@ router.get('/companies', isSuperAdmin, async (req, res) => {
     
     res.json(companiesWithStatus);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -457,7 +457,7 @@ router.get('/recent-activity', isSuperAdmin, async (req, res) => {
     const activities = await storage.getRecentActivity();
     res.json(activities);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -498,7 +498,7 @@ router.get('/analytics/dashboard', isSuperAdmin, async (req, res) => {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -519,7 +519,7 @@ router.get('/users', isSuperAdmin, async (req, res) => {
 
     res.json(usersWithStats);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -553,7 +553,7 @@ router.get('/companies/detailed', isSuperAdmin, async (req, res) => {
 
     res.json(companiesWithMetrics);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -639,7 +639,7 @@ router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
         method: endpoint.method,
         description: endpoint.description,
         status: 'success',
-        responseTime: "converted string",
+        responseTime: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         dataSize: JSON.stringify(result).length,
         sampleData: typeof result === 'object' ? Object.keys(result) : result
       });

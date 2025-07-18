@@ -37,8 +37,8 @@ export interface AppConfig {
 
 function validateRequiredEnvVar(name: string, value: string | undefined): string {
   if (!value) {
-    logger.error("Parameter fixed");
-    logger.error("Template literal converted");
+    logger.error("Parameter processed");
+    logger.error("Template literal processed");
     throw new Error("System message");
   }
   return value;
@@ -90,7 +90,7 @@ export function loadConfig(): AppConfig {
     process.env.XAI_API_KEY
   );
   if (!aiEnabled) {
-    logger.warn('⚠️  No AI API keys found - content generation will be disabled');
+    logger.warn('⚠️  No AI API keys found - placeholder generation will be disabled');
   }
 
   const config: AppConfig = {
@@ -126,7 +126,7 @@ export function loadConfig(): AppConfig {
   };
 
   logger.info('✅ Configuration loaded successfully');
-  logger.info("Syntax fixed");
+  logger.info("Syntax processed");
 
   return config;
 }

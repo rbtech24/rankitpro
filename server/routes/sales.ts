@@ -5,7 +5,7 @@ import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import Stripe from 'stripe';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = express.Router();
 
 // Initialize Stripe
@@ -73,7 +73,7 @@ router.get('/people', isAuthenticated, isSuperAdmin, async (req: Request, res: R
     const salesPeople = await storage.getAllSalesPeople();
     res.json(salesPeople);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch sales people' });
   }
 });
@@ -98,7 +98,7 @@ router.get('/people/:id', isAuthenticated, async (req: Request, res: Response) =
 
     res.json(salesPerson);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch sales person' });
   }
 });
@@ -132,7 +132,7 @@ router.post('/people', isAuthenticated, isSuperAdmin, async (req: Request, res: 
 
     res.json({ user, salesPerson });
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to create sales person' });
   }
 });
@@ -151,7 +151,7 @@ router.put('/people/:id', isAuthenticated, isSuperAdmin, async (req: Request, re
     
     res.json(updatedSalesPerson);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to update sales person' });
   }
 });
@@ -176,7 +176,7 @@ router.delete('/people/:id', isAuthenticated, isSuperAdmin, async (req: Request,
 
     res.json({ message: 'Sales person deleted successfully' });
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to delete sales person' });
   }
 });
@@ -250,7 +250,7 @@ router.get('/people/:id/financials', isAuthenticated, isSuperAdmin, async (req: 
 
     res.json(financialDetails);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch financial details' });
   }
 });
@@ -279,7 +279,7 @@ router.get('/dashboard', isAuthenticated, async (req: Request, res: Response) =>
       pendingCommissions
     });
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch sales dashboard' });
   }
 });
@@ -308,7 +308,7 @@ router.get('/customers', isAuthenticated, async (req: Request, res: Response) =>
     const customers = await storage.getCompanyAssignmentsBySalesPerson(salesPersonId);
     res.json(customers);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch customers' });
   }
 });
@@ -320,7 +320,7 @@ router.post('/customers/assign', isAuthenticated, isSuperAdmin, async (req: Requ
     const assignment = await storage.createCompanyAssignment(data);
     res.json(assignment);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to assign customer' });
   }
 });
@@ -356,7 +356,7 @@ router.get('/commissions', isAuthenticated, async (req: Request, res: Response) 
 
     res.json(commissions);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch commissions' });
   }
 });
@@ -368,7 +368,7 @@ router.post('/commissions', isAuthenticated, async (req: Request, res: Response)
     const commission = await storage.createSalesCommission(data);
     res.json(commission);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to create commission' });
   }
 });
@@ -380,7 +380,7 @@ router.post('/commissions/approve', isAuthenticated, isSuperAdmin, async (req: R
     await storage.approvePendingCommissions(commissionIds);
     res.json({ message: 'Commissions approved successfully' });
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to approve commissions' });
   }
 });
@@ -391,7 +391,7 @@ router.get('/commissions/pending', isAuthenticated, isSuperAdmin, async (req: Re
     const pendingCommissions = await storage.getPendingCommissions();
     res.json(pendingCommissions);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch pending commissions' });
   }
 });
@@ -417,7 +417,7 @@ router.post('/payouts', isAuthenticated, isSuperAdmin, async (req: Request, res:
       amount: Math.round(totalAmount * 100), // Convert to cents
       currency: 'usd',
       destination: salesPerson.stripeAccountId,
-      description: "converted string",
+      description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
     });
 
     // Record payout in database
@@ -443,7 +443,7 @@ router.post('/payouts', isAuthenticated, isSuperAdmin, async (req: Request, res:
 
     res.json({ payout, transfer });
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to create payout' });
   }
 });
@@ -475,7 +475,7 @@ router.get('/payouts', isAuthenticated, async (req: Request, res: Response) => {
 
     res.json(payouts);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch payouts' });
   }
 });
@@ -494,7 +494,7 @@ router.get('/subscription-plans', isAuthenticated, async (req: Request, res: Res
     const plans = await storage.getActiveSubscriptionPlans();
     res.json(plans);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch subscription plans' });
   }
 });
@@ -516,7 +516,7 @@ router.get('/analytics', isAuthenticated, isSuperAdmin, async (req: Request, res
       activeSalesStaff: salesPeople.filter((sp: any) => sp.isActive).length
     });
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch sales analytics' });
   }
 });
@@ -533,7 +533,7 @@ router.get('/subscription-plans', isAuthenticated, async (req: Request, res: Res
     const plans = await storage.getActiveSubscriptionPlans();
     res.json(plans);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch subscription plans' });
   }
 });
@@ -564,8 +564,8 @@ router.post('/connect-stripe', isAuthenticated, async (req: Request, res: Respon
     // Create account link for onboarding
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: "converted string",
-      return_url: "converted string",
+      refresh_url: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      return_url: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
       type: 'account_onboarding',
     });
 
@@ -576,7 +576,7 @@ router.post('/connect-stripe', isAuthenticated, async (req: Request, res: Respon
 
     res.json({ data: "converted" });
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to connect Stripe account' });
   }
 });
@@ -607,7 +607,7 @@ router.put('/profile', isAuthenticated, async (req: Request, res: Response) => {
 
     res.json(updatedSalesPerson);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to update profile' });
   }
 });
@@ -682,7 +682,7 @@ router.post('/companies', isAuthenticated, async (req: Request, res: Response) =
       commission: commissionAmount 
     });
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: error.message || 'Failed to create company' });
   }
 });

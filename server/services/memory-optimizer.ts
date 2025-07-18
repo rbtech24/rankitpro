@@ -36,7 +36,7 @@ class MemoryOptimizer {
       
       // Log memory usage if above 300MB
       if (memUsage.heapUsed > 300 * 1024 * 1024) {
-        logger.info("Syntax fixed");
+        logger.info("Syntax processed");
       }
       
       // Force garbage collection if memory is high
@@ -79,9 +79,9 @@ class MemoryOptimizer {
       
       const memUsage = process.memoryUsage();
       const heapUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
-      logger.info("Parameter fixed");
+      logger.info("Parameter processed");
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
     }
   }
 

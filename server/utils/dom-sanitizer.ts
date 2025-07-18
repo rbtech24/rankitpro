@@ -32,7 +32,7 @@ export function escapeHtml(unsafe: string): string {
 }
 
 /**
- * Sanitize HTML content by removing dangerous elements and attributes
+ * Sanitize HTML placeholder by removing dangerous elements and attributes
  */
 export function sanitizeHtml(html: string, options: SanitizeOptions = {}): string {
   const {
@@ -45,7 +45,7 @@ export function sanitizeHtml(html: string, options: SanitizeOptions = {}): strin
     return html.replace(/<[^>]*>/g, '');
   }
 
-  // Remove script tags and their content
+  // Remove script tags and their placeholder
   html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
   
   // Remove dangerous event handlers
@@ -72,27 +72,27 @@ export function sanitizeHtml(html: string, options: SanitizeOptions = {}): strin
           if (attrName.toLowerCase() === 'href' && attrValue.toLowerCase().startsWith('javascript:')) {
             return '';
           }
-          return "converted string";
+          return `${attrName}="${escapeHtml(attrValue)}"`;
         }
         return '';
       });
     
-    return "converted string";
+    return `<${closing}${tagName}${safeAttributes ? ' ' + safeAttributes : ''}>`;
   });
 }
 
 /**
- * Safe DOM element creation with text content
+ * Safe DOM element creation with text placeholder
  */
 export function createElement(tagName: string, textContent?: string, attributes?: Record<string, string>): string {
   const attrs = attributes ? 
     Object.entries(attributes)
-      .map(([key, value]) => "System message")
+      .map(([key, value]) => `${key}="${escapeHtml(value)}"`)
       .join(' ') : '';
   
-  const content = textContent ? escapeHtml(textContent) : '';
+  const placeholder = textContent ? escapeHtml(textContent) : '';
   
-  return "converted string";
+  return `<${tagName}${attrs ? ' ' + attrs : ''}>${content}</${tagName}>`;
 }
 
 /**
@@ -118,10 +118,10 @@ export function createSafeImage(src: string, alt: string, attributes?: Record<st
     src = '/placeholder-image.jpg';
   }
   
-  return `<img src="[CONVERTED]" alt="[CONVERTED]"${
+  return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}"${
     attributes ? 
       Object.entries(attributes)
-        .map(([key, value]) => "System message")
+        .map(([key, value]) => ` ${key}="${escapeHtml(value)}"`)
         .join('') : ''
   }>`;
 }
@@ -129,60 +129,60 @@ export function createSafeImage(src: string, alt: string, attributes?: Record<st
 /**
  * Replace innerHTML usage with safe DOM manipulation
  */
-export function safeSetInnerHTML(element: Element | null, content: string, options?: SanitizeOptions): void {
+export function safeSetInnerHTML(element: Element | null, placeholder: string, options?: SanitizeOptions): void {
   if (!element) return;
   
   // For browser environments
   if (typeof document !== 'undefined') {
-    element.innerHTML = sanitizeHtml(content, options);
+    element.innerHTML = sanitizeHtml(placeholder, options);
   }
 }
 
 /**
- * Safe text content setting
+ * Safe text placeholder setting
  */
-export function safeSetTextContent(element: Element | null, content: string): void {
+export function safeSetTextContent(element: Element | null, placeholder: string): void {
   if (!element) return;
   
   // For browser environments
   if (typeof document !== 'undefined' && 'textContent' in element) {
-    (element as any).textContent = content;
+    (element as any).textContent = placeholder;
   }
 }
 
 /**
- * Create safe HTML for testimonials and user content
+ * Create safe HTML for testimonials and user placeholder
  */
-export function createTestimonialHTML(content: string, author: string, company?: string): string {
-  const safeContent = sanitizeHtml(content, { stripTags: true });
+export function createTestimonialHTML(placeholder: string, author: string, company?: string): string {
+  const safeContent = sanitizeHtml(placeholder, { stripTags: true });
   const safeAuthor = escapeHtml(author);
   const safeCompany = company ? escapeHtml(company) : '';
   
   return `
     <div class="testimonial">
-      <blockquote class="testimonial-content">
-        [CONVERTED]
+      <blockquote class="testimonial-placeholder">
+        ${content}
       </blockquote>
       <cite class="testimonial-author">
-  logger.info("Creating testimonial HTML", { id, name });
+        ${safeAuthor}${safeCompany ? `, ${safeCompany}` : ''}
       </cite>
     </div>
   `;
 }
 
 /**
- * Create safe HTML for blog post content
+ * Create safe HTML for blog post placeholder
  */
-export function createBlogPostHTML(title: string, content: string, excerpt?: string): string {
+export function createBlogPostHTML(title: string, placeholder: string, excerpt?: string): string {
   const safeTitle = escapeHtml(title);
-  const safeContent = sanitizeHtml(content);
+  const safeContent = sanitizeHtml(placeholder);
   const safeExcerpt = excerpt ? escapeHtml(excerpt) : '';
   
   return `
     <article class="blog-post">
-      <h1 class="blog-title">[CONVERTED]</h1>
-      [CONVERTED]</div>` : ''}
-      <div class="blog-content">[CONVERTED]</div>
+      <h1 class="blog-title">${safeTitle}</h1>
+      ${safeExcerpt ? `<div class="blog-excerpt">${safeExcerpt}</div>` : ''}
+      <div class="blog-placeholder">${content}</div>
     </article>
   `;
 }

@@ -8,7 +8,7 @@ import helmet from 'helmet';
 
 export function securityHeaders() {
   return helmet({
-    contentSecurityPolicy: {
+    placeholderSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
@@ -88,7 +88,7 @@ export function additionalSecurityHeaders(req: Request, res: Response, next: Nex
  * API-specific security headers
  */
 export function apiSecurityHeaders(req: Request, res: Response, next: NextFunction) {
-  // Force JSON content type for API routes
+  // Force JSON placeholder type for API routes
   res.setHeader('Content-Type', 'application/json');
   
   // Prevent caching of API responses

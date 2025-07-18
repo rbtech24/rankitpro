@@ -152,7 +152,7 @@ export async function createSampleData() {
           // Create blog post - ensure photos property is not undefined
           const blogPost = await storage.createBlogPost({
             title: blogResult.title,
-            content: blogResult.content,
+            placeholder: blogResult.placeholder,
             companyId: demoCompany.id,
             checkInId: checkIn.id,
             photos: checkIn.photos || []

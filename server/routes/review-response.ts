@@ -3,7 +3,7 @@ import { z } from "zod";
 import { storage } from "../storage";
 import { isAuthenticated, isCompanyAdmin } from "../middleware/auth";
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 /**
@@ -51,7 +51,7 @@ router.get("/request/:token", async (req, res) => {
     });
     
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });
@@ -110,7 +110,7 @@ router.post("/submit/:token", async (req, res) => {
     res.status(201).json(reviewResponse);
     
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });
@@ -144,7 +144,7 @@ router.get("/company/:companyId", isAuthenticated, isCompanyAdmin, async (req, r
     res.json(reviewsWithDetails);
     
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });
@@ -166,7 +166,7 @@ router.get("/stats/:companyId", isAuthenticated, isCompanyAdmin, async (req, res
     res.json(stats);
     
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });
@@ -197,7 +197,7 @@ router.get("/technician/:technicianId", isAuthenticated, isCompanyAdmin, async (
     res.json(reviews);
     
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: "Server error occurred. Please try again later." });
   }
 });

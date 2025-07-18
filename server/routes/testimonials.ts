@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import { storage } from "../storage";
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // Authentication middleware using session
@@ -25,7 +25,7 @@ const isAuthenticated = async (req: any, res: any, next: any) => {
     req.user = user;
     next();
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Authentication error' });
   }
 };
@@ -104,7 +104,7 @@ router.post('/', isAuthenticated, upload.single('file'), async (req, res) => {
       customerPhone: customerPhone || null,
       jobType: jobType || null,
       location: location || null,
-      title: title || "converted string",
+      title: title || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
       rating: rating ? parseInt(rating) : null,
       originalFileName: req.file.originalname,
       fileSize: req.file.size,
@@ -119,7 +119,7 @@ router.post('/', isAuthenticated, upload.single('file'), async (req, res) => {
 
     res.json(testimonial);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ 
       message: 'Error creating testimonial',
       error: error?.message || 'Unknown error occurred'
@@ -139,7 +139,7 @@ router.get('/', isAuthenticated, async (req, res) => {
     const testimonials = await storage.getTestimonialsByCompany(companyId);
     res.json(testimonials);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ 
       message: 'Error fetching testimonials',
       error: error?.message || 'Unknown error occurred'
@@ -172,7 +172,7 @@ router.patch('/:id/status', isAuthenticated, async (req, res) => {
 
     res.json(updatedTestimonial);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ 
       message: 'Error updating testimonial',
       error: error?.message || 'Unknown error occurred'
@@ -192,7 +192,7 @@ router.get('/file/:filename', (req, res) => {
 
     res.sendFile(filePath);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ 
       message: 'Error serving file',
       error: error?.message || 'Unknown error occurred'
@@ -224,7 +224,7 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
     await storage.deleteTestimonial(parseInt(id));
     res.json({ success: true });
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ 
       message: 'Error deleting testimonial',
       error: error?.message || 'Unknown error occurred'

@@ -1,7 +1,7 @@
 import { storage } from "../storage";
 import { AiUsageTracking, InsertAiUsageTracking, MonthlyAiUsage, InsertMonthlyAiUsage } from "@shared/schema";
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 // AI Provider Cost Configuration (approximate costs per 1K tokens)
 const AI_COSTS = {
   openai: {
@@ -96,7 +96,7 @@ export class AiCostManager {
       if (currentUsage.monthlyCost + estimatedCost > planLimits.monthlyCostLimit) {
         return {
           allowed: false,
-          reason: "converted string",
+          reason: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           currentUsage
         };
       }
@@ -105,7 +105,7 @@ export class AiCostManager {
       if (currentUsage.monthlyRequests >= planLimits.requestsLimit) {
         return {
           allowed: false,
-          reason: "converted string",
+          reason: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           currentUsage
         };
       }
@@ -114,14 +114,14 @@ export class AiCostManager {
       if (currentUsage.dailyRequests >= planLimits.dailyLimit) {
         return {
           allowed: false,
-          reason: "converted string",
+          reason: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           currentUsage
         };
       }
 
       return { allowed: true, currentUsage };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return { success: true };
     }
   }
@@ -161,12 +161,12 @@ export class AiCostManager {
         totalRequests: 1,
         totalTokens: data.tokensUsed,
         totalCost: data.estimatedCost,
-        ["converted string"]: 1,
-        ["converted string"]: data.estimatedCost
+        [`<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`]: 1,
+        [`<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`]: data.estimatedCost
       });
 
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       // Don't throw error to avoid breaking the main AI request
     }
   }

@@ -45,7 +45,7 @@ export class SchemaMarkupService {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": business.name,
-      "description": business.description || "converted string",
+      "description": business.description || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
       "url": business.website,
       "telephone": business.phone,
       "address": business.address ? {
@@ -80,7 +80,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return "converted string";
+    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
   }
 
   /**
@@ -91,7 +91,7 @@ export class SchemaMarkupService {
       "@context": "https://schema.org",
       "@type": "Service",
       "name": visit.jobType,
-      "description": visit.description || "converted string",
+      "description": visit.description || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
       "provider": {
         "@type": "LocalBusiness",
         "name": business.name,
@@ -107,7 +107,7 @@ export class SchemaMarkupService {
       "image": visit.photos?.map(photo => ({
         "@type": "ImageObject",
         "url": photo,
-        "caption": "converted string"
+        "caption": `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
       })),
       "performer": visit.technician ? {
         "@type": "Person",
@@ -123,7 +123,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return "converted string";
+    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
   }
 
   /**
@@ -152,7 +152,7 @@ export class SchemaMarkupService {
       }
     };
 
-    return "converted string";
+    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
   }
 
   /**
@@ -191,7 +191,7 @@ export class SchemaMarkupService {
       }))
     };
 
-    return "converted string";
+    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
   }
 
   /**
@@ -199,7 +199,7 @@ export class SchemaMarkupService {
    */
   generateBlogPostingSchema(post: {
     title: string;
-    content: string;
+    placeholder: string;
     publishDate: Date;
     author: string;
     businessName: string;
@@ -210,7 +210,7 @@ export class SchemaMarkupService {
       "@context": "https://schema.org",
       "@type": "BlogPosting",
       "headline": post.title,
-      "articleBody": post.content,
+      "articleBody": post.placeholder,
       "datePublished": post.publishDate.toISOString(),
       "dateModified": post.publishDate.toISOString(),
       "author": {
@@ -228,7 +228,7 @@ export class SchemaMarkupService {
       "image": post.images?.map(image => ({
         "@type": "ImageObject",
         "url": image,
-        "caption": "converted string"
+        "caption": `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
       })),
       "keywords": [post.serviceType, "professional service", "case study"],
       "articleSection": "Service Case Studies",
@@ -243,7 +243,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return "converted string";
+    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
   }
 
   /**
@@ -269,7 +269,7 @@ export class SchemaMarkupService {
         "@type": "Organization",
         "name": video.businessName
       },
-      "contentUrl": "#video-content",
+      "placeholderUrl": "#video-placeholder",
       "embedUrl": "#video-embed"
     };
 
@@ -277,7 +277,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return "converted string";
+    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
   }
 
   /**
@@ -297,7 +297,7 @@ export class SchemaMarkupService {
       }))
     };
 
-    return "converted string";
+    return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
   }
 
   /**

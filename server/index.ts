@@ -11,7 +11,7 @@ import helmet from "helmet";
 import MemoryOptimizer from "./services/memory-optimizer";
 import { errorMonitor, logError } from "./error-monitor";
 
-import { logger } from './services/structured-logger';
+import { logger } from './services/logger';
 // Conditional imports for Vite (development only)
 let setupVite: any, serveStatic: any, log: any;
 
@@ -36,12 +36,12 @@ async function initializeViteOrStatic() {
 
 // Global error handling for unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error("Error logging fixed");
+  logger.error("Unhandled Promise Rejection", { reason: reason instanceof Error ? reason.message : String(reason) });
   logError('Unhandled Promise Rejection', reason instanceof Error ? reason : new Error(String(reason)));
 });
 
 process.on('uncaughtException', (error) => {
-  logger.error("Error logging fixed");
+  logger.error("Uncaught Exception", { error: error.message, stack: error.stack });
   logError('Uncaught Exception', error);
   process.exit(1);
 });
@@ -58,7 +58,7 @@ if (process.env.NODE_ENV === 'production') {
 
 // Security middleware - helmet for security headers
 app.use(helmet({
-  contentSecurityPolicy: {
+  placeholderSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
@@ -174,15 +174,15 @@ async function createSuperAdminIfNotExists() {
   try {
     // Check if any super admin exists
     const users = await storage.getAllUsers();
-    logger.info("Logger call fixed");
+    logger.info(`Found ${users.length} users in database`);
     const existingSuperAdmin = users.find(user => user.role === "super_admin");
-    logger.info("Parameter fixed");
+    logger.info("Checking for existing super admin account");
     
     if (!existingSuperAdmin) {
       logger.info('Creating new secure super admin account...');
       // Use environment variables if provided, otherwise generate secure credentials
       const adminPassword = process.env.SUPER_ADMIN_PASSWORD || generateSecurePassword();
-      const adminEmail = process.env.SUPER_ADMIN_EMAIL || adminEmail + "@email.com";
+      const adminEmail = process.env.SUPER_ADMIN_EMAIL || "admin@rankitpro.com";
       const hashedPassword = await bcrypt.hash(adminPassword, 12);
       
       await storage.createUser({
@@ -206,7 +206,7 @@ async function createSuperAdminIfNotExists() {
       log("=====================================");
     }
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Super admin setup failed", { error: (error as Error).message });
   }
 }
 
@@ -218,9 +218,9 @@ async function createSuperAdminIfNotExists() {
     
     logger.info('🚀 Starting Rank It Pro SaaS Platform');
     const enabledFeatures = Object.entries(features).filter(([_, enabled]) => enabled).map(([name]) => name).join(", ") || "none";
-    logger.info("Parameter fixed");
+    logger.info(`Features enabled: ${enabledFeatures}`);
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     process.exit(1);
   }
 
@@ -231,19 +231,19 @@ async function createSuperAdminIfNotExists() {
   
   while (!dbConnected && retryCount < maxRetries) {
     try {
-      logger.info("Parameter fixed");
+      logger.info(`Database connection attempt ${retryCount + 1}/${maxRetries}`);
       
       // Import storage to trigger connection initialization
       const { storage } = await import("./storage");
       
       // Test the connection with a simple query
       const users = await storage.getAllUsers();
-      logger.info("Logger call fixed");
+      logger.info("✅ Database connection test successful");
       dbConnected = true;
     } catch (error) {
       retryCount++;
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error("Error logging fixed");
+      logger.error(`Database connection attempt ${retryCount}/${maxRetries} failed`, { error: errorMessage });
       
       // Check if it's a connection-related error
       const isConnectionError = errorMessage.includes('connect') || 
@@ -254,7 +254,7 @@ async function createSuperAdminIfNotExists() {
       
       if (retryCount < maxRetries && isConnectionError) {
         const delay = Math.min(retryCount * 3000, 15000); // 3s, 6s, 9s, 12s, 15s
-        logger.info("🔄 Connection error detected. Retrying in ", {});
+        logger.info(`🔄 Connection error detected. Retrying in ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       } else if (retryCount >= maxRetries) {
         logger.error('❌ Database connection failed after all retries.');
@@ -267,7 +267,7 @@ async function createSuperAdminIfNotExists() {
         break;
       } else {
         // Non-connection error, don't retry
-        logger.error("Error logging fixed");
+        logger.error("Database connection failed with non-connection error", { error: errorMessage });
         break;
       }
     }
@@ -310,7 +310,7 @@ async function createSuperAdminIfNotExists() {
     if (req.path.startsWith('/api/')) {
       // Skip Vite middleware for API routes
       const originalUrl = req.originalUrl;
-    logger.info("Converted logger call");
+      logger.info(`API request received: ${req.method} ${originalUrl}`);
       
       // If no route matched, send 404 JSON response
       const timer = setTimeout(() => {
@@ -372,17 +372,17 @@ async function createSuperAdminIfNotExists() {
   // Add error handling for port conflicts
   server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
-      logger.error("Port ", {});
+      logger.error(`Port ${port} is already in use`, { port, error: err.message });
       // Try alternative ports
       const alternativePort = parseInt(port.toString()) + 1;
       server.listen({
         port: alternativePort,
         host: "0.0.0.0",
       }, () => {
-    logger.info("WebSocket and HTTP server initialized", { wsPort, httpPort });
+    logger.info("Server started on alternative port", { port: alternativePort });
       });
     } else {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       process.exit(1);
     }
   });
@@ -391,6 +391,7 @@ async function createSuperAdminIfNotExists() {
     port,
     host: "0.0.0.0",
   }, () => {
-    log("Admin credentials: " + adminEmail + " / " + adminPassword);
+    logger.info("🚀 Server is running", { port, host: "0.0.0.0" });
+    logger.info("📱 Ready to accept connections");
   });
 })();

@@ -1,5 +1,5 @@
 /**
- * Common interface for all AI content generation services
+ * Common interface for all AI placeholder generation services
  */
 
 export interface ContentGenerationParams {
@@ -12,7 +12,7 @@ export interface ContentGenerationParams {
 
 export interface BlogPostResult {
   title: string;
-  content: string;
+  placeholder: string;
 }
 
 export interface AIService {

@@ -1,5 +1,5 @@
 /**
- * SMS template service for generating text message content
+ * SMS template service for generating text message placeholder
  */
 
 interface ReviewRequestSMSParams {
@@ -18,18 +18,18 @@ export function getReviewRequestSMSTemplate(params: ReviewRequestSMSParams): str
   const { customerName, companyName, technicianName, jobType, customMessage } = params;
   
   // Generate a shortened review link (in a real app, this would be a unique trackable link)
-  const reviewLink = "converted string";
+  const reviewLink = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
   
-  // Build the SMS message content - keep it concise for SMS
-  let message = "converted string"; 
+  // Build the SMS message placeholder - keep it concise for SMS
+  let message = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`; 
   
   // Add custom message if provided
   if (customMessage) {
-    message += "converted string";
+    message += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
   }
   
   // Add call to action with review link
-  message += "converted string";
+  message += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
   
   return message;
 }

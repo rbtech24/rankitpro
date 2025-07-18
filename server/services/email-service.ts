@@ -1,5 +1,5 @@
 import sgMail from '@sendgrid/mail';
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 import { 
   getReviewRequestTemplate,
   getCheckInNotificationTemplate,
@@ -23,12 +23,12 @@ class EmailService {
         logger.info('[info] Email service initialized successfully');
         return true;
       } catch (error) {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
         this.initialized = false;
         return false;
       }
     }
-    logger.warn("Parameter fixed");
+    logger.warn("Parameter processed");
     return false;
   }
 
@@ -51,14 +51,14 @@ class EmailService {
     customMessage?: string;
   }): Promise<boolean> {
     if (!this.isAvailable()) {
-      logger.warn("Parameter fixed");
+      logger.warn("Parameter processed");
       return false;
     }
 
     try {
       const { to, customerName, companyName, technicianName, jobType, customMessage } = params;
       
-      // Generate email content
+      // Generate email placeholder
       const { subject, html } = getReviewRequestTemplate({
         customerName,
         companyName,
@@ -80,7 +80,7 @@ class EmailService {
       logger.info("Review request email sent to ", {});
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -100,7 +100,7 @@ class EmailService {
     checkInId: number;
   }): Promise<boolean> {
     if (!this.isAvailable()) {
-      logger.warn("Parameter fixed");
+      logger.warn("Parameter processed");
       return false;
     }
 
@@ -108,7 +108,7 @@ class EmailService {
       const { to, companyName, technicianName, jobType, customerName, location, notes, photos, checkInId } = params;
       
       // Generate the check-in URL (in a real app, this would be a valid URL to your application)
-      const checkInUrl = "converted string";
+      const checkInUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       
       // Use the enhanced template
       const { subject, html } = getCheckInNotificationTemplate({
@@ -139,7 +139,7 @@ class EmailService {
       logger.info("Check-in notification emails sent to ", {});
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -149,7 +149,7 @@ class EmailService {
    */
   async sendPasswordResetEmail(email: string, username: string, resetUrl: string): Promise<boolean> {
     if (!this.isAvailable()) {
-      logger.warn("Parameter fixed");
+      logger.warn("Parameter processed");
       return false;
     }
 
@@ -168,7 +168,7 @@ class EmailService {
               <h2 style="color: #2e3538; margin-bottom: 20px;">Password Reset Request</h2>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-                Hello [CONVERTED],
+                Hello placeholder,
               </p>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
@@ -177,7 +177,7 @@ class EmailService {
               </p>
               
               <div style="text-align: center; margin: 30px 0;">
-                <a href="[CONVERTED]" 
+                <a href="placeholder" 
                    style="background: linear-gradient(135deg, #0088d2 0%, #00b05c 100%); 
                           color: white; 
                           padding: 15px 30px; 
@@ -196,7 +196,7 @@ class EmailService {
               
               <p style="color: #999; font-size: 14px; margin-top: 30px;">
                 If the button doesn't work, copy and paste this link into your browser:<br>
-                <a href="[CONVERTED]" style="color: #0088d2; word-break: break-all;">[CONVERTED]</a>
+                <a href="placeholder" style="color: #0088d2; word-break: break-all;">placeholder</a>
               </p>
             </div>
             
@@ -213,7 +213,7 @@ class EmailService {
       logger.info("Password reset email sent to ", {});
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -229,7 +229,7 @@ class EmailService {
     text?: string;
   }): Promise<boolean> {
     if (!this.isAvailable()) {
-      logger.warn("Parameter fixed");
+      logger.warn("Parameter processed");
       return false;
     }
 
@@ -237,7 +237,7 @@ class EmailService {
       await sgMail.send(msg);
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -251,7 +251,7 @@ class EmailService {
     blogPostId: number;
   }): Promise<boolean> {
     if (!this.isAvailable()) {
-      logger.warn("Parameter fixed");
+      logger.warn("Parameter processed");
       return false;
     }
 
@@ -259,7 +259,7 @@ class EmailService {
       const { to, companyName, title, excerpt, authorName, blogPostId } = params;
       
       // Generate the blog post URL
-      const postUrl = "converted string";
+      const postUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       
       // Use the blog post notification template
       const { subject, html } = getBlogPostNotificationTemplate({
@@ -286,7 +286,7 @@ class EmailService {
       logger.info("Blog post notification emails sent to ", {});
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }

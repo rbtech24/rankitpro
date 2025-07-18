@@ -2,7 +2,7 @@ import { CRMIntegration } from './index';
 import { CheckInData, CRMContactData, CRMJobData, SyncSettings } from './types';
 import axios from 'axios';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 export class HouseCallProIntegration implements CRMIntegration {
   private apiKey: string;
   private baseUrl = 'https://api.housecallpro.com/v1';
@@ -34,9 +34,9 @@ export class HouseCallProIntegration implements CRMIntegration {
     try {
       const response = await axios({
         method,
-        url: "converted string",
+        url: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         headers: {
-          'Authorization': "converted string",
+          'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -54,7 +54,7 @@ export class HouseCallProIntegration implements CRMIntegration {
           data: error.response.data
         });
       } else {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
       }
       throw error;
     }
@@ -69,7 +69,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       await this.apiRequest<any>('GET', '/customers?limit=1');
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -111,7 +111,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       
       return null;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return null;
     }
   }
@@ -165,7 +165,7 @@ export class HouseCallProIntegration implements CRMIntegration {
           custom_fields: customer.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', "converted string", customerData);
+        await this.apiRequest<any>('PUT', `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, customerData);
         return customerId;
       } else {
         // Create new customer
@@ -184,7 +184,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         return newCustomer.id;
       }
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return null;
     }
   }
@@ -257,7 +257,7 @@ export class HouseCallProIntegration implements CRMIntegration {
           custom_fields: job.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', "converted string", jobData);
+        await this.apiRequest<any>('PUT', `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, jobData);
         return jobId;
       } else {
         // Create new job
@@ -286,7 +286,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         return newJob.id;
       }
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return null;
     }
   }
@@ -312,18 +312,18 @@ export class HouseCallProIntegration implements CRMIntegration {
           // Upload to Housecall Pro as an attachment
           await axios.post("System message"), formData, {
             headers: {
-              'Authorization': "converted string",
+              'Authorization': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
               'Content-Type': 'multipart/form-data'
             }
           });
         } catch (error) {
-          logger.error("Template literal converted");
+          logger.error("Template literal processed");
         }
       }
       
       return true;
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
       return false;
     }
   }
@@ -362,7 +362,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         const photoUrls = checkIn.photos?.map(p => p.url) || [];
         
         const job: CRMJobData = {
-          title: "converted string",
+          title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           description: checkIn.workPerformed || checkIn.notes || 'Check-in from Rank It Pro',
           jobType: checkIn.jobType,
           status: checkIn.completedAt ? 'completed' : 'in_progress',
@@ -375,8 +375,8 @@ export class HouseCallProIntegration implements CRMIntegration {
           endDate: checkIn.completedAt || undefined,
           notes: [
             checkIn.notes,
-            checkIn.workPerformed ? "converted string" : null,
-            checkIn.materialsUsed ? "converted string" : null,
+            checkIn.workPerformed ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : null,
+            checkIn.materialsUsed ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : null,
           ].filter(Boolean).join('\n\n'),
           images: settings.syncPhotos ? photoUrls : []
         };
@@ -391,7 +391,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -402,12 +402,12 @@ export class HouseCallProIntegration implements CRMIntegration {
   async fetchJobs(technicianId: string, dateRange?: { success: true }): Promise<CRMJobData[]> {
     try {
       // Build query parameters
-      let params = "converted string";
+      let params = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       
       if (dateRange) {
         const startDate = dateRange.start.toISOString();
         const endDate = dateRange.end.toISOString();
-        params += "converted string";
+        params += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       }
       
       // Get jobs for this technician
@@ -421,7 +421,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         jobType: job.job_type || 'Service',
         status: job.status,
         customerId: job.customer_id,
-        customerName: job.customer ? "converted string" : 'Unknown Customer',
+        customerName: job.customer ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : 'Unknown Customer',
         location: job.address ? this.formatAddress(job.address) : '',
         startDate: job.scheduled_start ? new Date(job.scheduled_start) : undefined,
         endDate: job.scheduled_end ? new Date(job.scheduled_end) : undefined,
@@ -430,7 +430,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         notes: job.notes || ''
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }
@@ -466,7 +466,7 @@ export class HouseCallProIntegration implements CRMIntegration {
     try {
       let params = '?limit=100';
       if (query) {
-        params += "converted string";
+        params += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       }
       
       const response = await this.apiRequest<any>('GET', "System message");
@@ -474,7 +474,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       // Map Housecall Pro customers to our customer model
       return response.customers.map(customer => ({
         externalId: customer.id,
-        name: "converted string",
+        name: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         email: customer.email || null,
         phone: customer.phone || null,
         address: customer.address?.street_line_1 || null,
@@ -484,7 +484,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         notes: customer.notes || null
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }

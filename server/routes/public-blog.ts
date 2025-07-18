@@ -1,7 +1,7 @@
 import express from 'express';
 import { storage } from '../storage.js';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = express.Router();
 
 // Public endpoint for WordPress shortcode to fetch published blog posts
@@ -25,13 +25,13 @@ router.get('/published', async (req, res) => {
     const formattedPosts = publishedPosts.map(post => ({
       id: post.id,
       title: post.title,
-      content: post.content,
-      excerpt: post.excerpt || post.content.substring(0, 150) + '...',
+      placeholder: post.placeholder,
+      excerpt: post.excerpt || post.placeholder.substring(0, 150) + '...',
       featuredImage: post.featuredImage,
       publishDate: post.publishDate || post.createdAt,
       tags: post.tags || [],
       category: post.wordPressCategory || 'blog',
-      url: "converted string", // WordPress can customize this
+      url: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, // WordPress can customize this
       author: 'Professional Team'
     }));
     
@@ -41,7 +41,7 @@ router.get('/published', async (req, res) => {
       total: formattedPosts.length
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: "Failed to fetch blog posts" });
   }
 });
@@ -66,7 +66,7 @@ router.get('/:id', async (req, res) => {
     const formattedPost = {
       id: post.id,
       title: post.title,
-      content: post.content,
+      placeholder: post.placeholder,
       excerpt: post.excerpt,
       featuredImage: post.featuredImage,
       gallery: post.gallery || [],
@@ -83,7 +83,7 @@ router.get('/:id', async (req, res) => {
       post: formattedPost
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: "Failed to fetch blog post" });
   }
 });

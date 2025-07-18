@@ -1,6 +1,6 @@
 import { storage } from "../storage";
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 export interface PlatformAnalytics {
   revenue: {
     totalRevenue: number;
@@ -158,7 +158,7 @@ export class AnalyticsService {
       recentUsers.forEach((user: any) => {
         recentActivity.push({
           type: "user_created",
-          description: "converted string",
+          description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           timestamp: new Date(user.createdAt || Date.now()),
           user: user.username || user.email
         });
@@ -192,7 +192,7 @@ export class AnalyticsService {
         recentActivity: limitedActivity
       };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return this.getDefaultAnalytics();
     }
   }
@@ -218,8 +218,8 @@ export class AnalyticsService {
         queryTime: Math.round(process.hrtime()[1] / 1000000) // Real query time in ms
       },
       storage: {
-        used: "converted string",
-        available: "converted string"
+        used: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        available: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
       },
       performance: {
         cpu: Math.floor((process.cpuUsage().user / 1000000) % 100), // Real CPU usage

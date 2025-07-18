@@ -5,7 +5,7 @@
 
 import { Router } from "express";
 import { storage } from "../storage";
-import { logger } from "../services/structured-logger";
+import { logger } from "../services/logger";
 import { isAuthenticated, isCompanyAdmin, isSuperAdmin } from "../middleware/auth";
 import { validateBody } from "../middleware/validation";
 import { insertCompanySchema } from "@shared/schema";

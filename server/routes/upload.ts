@@ -5,7 +5,7 @@ import fs from 'fs';
 import { nanoid } from 'nanoid';
 import { isAuthenticated } from '../middleware/auth.js';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = express.Router();
 
 // Ensure uploads directory exists
@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueId = nanoid(10);
     const ext = path.extname(file.originalname);
-    const filename = "converted string";
+    const filename = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
     cb(null, filename);
   }
 });
@@ -57,7 +57,7 @@ router.post('/', isAuthenticated, upload.single('file'), (req, res) => {
     }
 
     const type = req.body.type || 'general';
-    const fileUrl = "converted string";
+    const fileUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
     
     res.json({
       success: true,
@@ -68,7 +68,7 @@ router.post('/', isAuthenticated, upload.single('file'), (req, res) => {
       mimetype: req.file.mimetype
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Upload failed' });
   }
 });
@@ -86,7 +86,7 @@ router.delete('/:type/:filename', isAuthenticated, (req, res) => {
       res.status(404).json({ message: 'File not found' });
     }
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Delete failed' });
   }
 });

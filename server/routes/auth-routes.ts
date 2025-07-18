@@ -6,7 +6,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import { storage } from "../storage";
-import { logger } from "../services/structured-logger";
+import { logger } from "../services/logger";
 import { authRateLimit } from "../middleware/rate-limiting";
 import { validateBody } from "../middleware/validation";
 import { z } from "zod";
@@ -205,19 +205,19 @@ router.post('/logout', async (req, res) => {
     const userId = req.session.userId;
     
     if (userId) {
-      logger.info("Logger call fixed");
+      logger.info("Operation completed");
     }
 
     req.session.destroy((err) => {
       if (err) {
-        logger.error("Logger call fixed");
+        logger.error("Database operation error", { error: error?.message || "Unknown error" });
         return res.status(500).json({ message: "Could not log out" });
       }
       
       res.clearCookie('connect.sid');
       
       if (userId) {
-        logger.info("Logger call fixed");
+        logger.info("Operation completed");
       }
       
       res.json({ message: "Logged out successfully" });

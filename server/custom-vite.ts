@@ -7,7 +7,7 @@ import { type Server } from "http";
 import { nanoid } from "nanoid";
 
 
-import { logger } from './services/structured-logger';
+import { logger } from './services/logger';
 // Get __dirname equivalent for ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,7 +22,7 @@ export function log(message: string, source = "express") {
     hour12: true,
   });
 
-  logger.info("Syntax fixed");
+  logger.info("Syntax processed");
 }
 
 export async function setupVite(app: Express, server: Server) {
@@ -85,7 +85,7 @@ export async function setupVite(app: Express, server: Server) {
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
-        "converted string",
+        `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
       );
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
@@ -101,7 +101,7 @@ export function serveStatic(app: Express) {
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
-      "converted string",
+      `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
     );
   }
 

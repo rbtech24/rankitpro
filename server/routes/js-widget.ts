@@ -3,7 +3,7 @@ import { storage } from '../storage';
 import { CheckInWithTechnician } from '@shared/schema';
 import crypto from 'crypto';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // Schema for JS widget configuration 
@@ -143,7 +143,7 @@ router.get('/js-widget/config', async (req: Request, res: Response) => {
     
     res.json(widgetConfig);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -214,7 +214,7 @@ router.post('/js-widget/config', async (req: Request, res: Response) => {
       config: updatedConfig
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -243,13 +243,13 @@ router.get('/js-widget/embed-code', async (req: Request, res: Response) => {
 <script>
 (function() {
   var script = document.createElement('script');
-  script.src = "[CONVERTED]://[CONVERTED]/api/public/js/checkin-widget.js";
+  script.src = "placeholder://placeholder/api/public/js/checkin-widget.js";
   script.async = true;
   script.onload = function() {
     CheckInWidget.init({
       selector: '#checkin-widget',
-      apiKey: '[CONVERTED]',
-      apiUrl: '[CONVERTED]://[CONVERTED]/api/public/check-ins'
+      apiKey: 'placeholder',
+      apiUrl: 'placeholder://placeholder/api/public/check-ins'
     });
   };
   document.head.appendChild(script);
@@ -259,7 +259,7 @@ router.get('/js-widget/embed-code', async (req: Request, res: Response) => {
     
     res.json({ embedCode });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -332,7 +332,7 @@ router.get('/public/check-ins', async (req: Request, res: Response) => {
       checkIns: processedCheckIns
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Server error' });
   }
 });

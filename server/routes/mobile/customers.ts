@@ -4,7 +4,7 @@ import { fromZodError } from 'zod-validation-error';
 import { storage } from '../../storage';
 import { isAuthenticated } from '../../middleware/auth';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // Customer schema for validation
@@ -132,7 +132,7 @@ router.get('/', isAuthenticated, async (req, res) => {
       items: paginatedCustomers
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -188,7 +188,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       }))
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -223,7 +223,7 @@ router.post('/', isAuthenticated, async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -265,7 +265,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -288,7 +288,7 @@ router.get('/search/:query', isAuthenticated, async (req, res) => {
     
     res.json(results.slice(0, 10)); // Limit to top 10 results
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -352,7 +352,7 @@ router.get('/:id/history', isAuthenticated, async (req, res) => {
       history: historyItems
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });

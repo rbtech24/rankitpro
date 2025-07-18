@@ -3,13 +3,13 @@ import { z } from "zod";
 import { storage } from "../storage";
 import { isAuthenticated, isCompanyAdmin } from "../middleware/auth";
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // WordPress field mapping schema
 const fieldMappingSchema = z.object({
   titlePrefix: z.string().optional(),
-  contentFieldMapping: z.string(),
+  placeholderFieldMapping: z.string(),
   includePhotos: z.boolean().default(true),
   includeLocation: z.boolean().default(true),
   customFields: z.array(
@@ -39,7 +39,7 @@ router.get("/:companyId", isCompanyAdmin, async (req, res) => {
     // In a real implementation, these would be fetched from the database
     res.json({
       titlePrefix: "[Check-in] ",
-      contentFieldMapping: "notes",
+      placeholderFieldMapping: "notes",
       includePhotos: true,
       includeLocation: true,
       customFields: [
@@ -53,7 +53,7 @@ router.get("/:companyId", isCompanyAdmin, async (req, res) => {
       advancedMapping: "// Add custom JavaScript mapping function here\nfunction mapFields(checkIn) {\n  return {\n    // your custom mapping logic\n  };\n}"
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: "Failed to fetch field mappings" });
   }
 });
@@ -71,7 +71,7 @@ router.post("/", isCompanyAdmin, async (req, res) => {
       data
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors });
     }
@@ -115,7 +115,7 @@ router.get("/fields/:companyId", isCompanyAdmin, async (req, res) => {
       ]
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: "Failed to fetch field options" });
   }
 });

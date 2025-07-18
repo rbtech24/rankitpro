@@ -2,14 +2,14 @@ import { Router } from 'express';
 import { storage } from '../storage';
 import { isAuthenticated } from '../middleware/auth';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
-// Help documentation content
+// Help documentation placeholder
 const helpContent = {
   'platform-overview': {
     title: 'Platform Overview',
-    content: `
+    placeholder: `
 # Rank It Pro Platform Overview
 
 ## Welcome to Rank It Pro
@@ -31,7 +31,7 @@ Rank It Pro is a comprehensive SaaS platform designed specifically for home serv
 
 ### 3. WordPress Integration
 - **Plugin Installation**: Easy WordPress plugin setup
-- **Auto-Publishing**: Automatic content creation on your site
+- **Auto-Publishing**: Automatic placeholder creation on your site
 - **SEO Optimization**: Local search optimization
 - **Custom Shortcodes**: Display service visits anywhere on your site
 
@@ -57,7 +57,7 @@ Rank It Pro is a comprehensive SaaS platform designed specifically for home serv
   },
   'account-setup': {
     title: 'Account Setup Guide',
-    content: `
+    placeholder: `
 # Account Setup Guide
 
 ## Initial Configuration
@@ -73,7 +73,7 @@ Rank It Pro is a comprehensive SaaS platform designed specifically for home serv
    - Upload company logo
    - Set brand colors
    - Customize email templates
-   - Configure public-facing content
+   - Configure public-facing placeholder
 
 ### User Management
 1. **Admin Account Setup**
@@ -118,7 +118,7 @@ After completing your account setup:
   },
   'adding-technicians': {
     title: 'Adding Technicians Guide',
-    content: `
+    placeholder: `
 # Adding Technicians Guide
 
 ## Creating Technician Accounts
@@ -215,7 +215,7 @@ After completing your account setup:
   },
   'wordpress-plugin-guide': {
     title: 'WordPress Plugin Installation Guide',
-    content: `
+    placeholder: `
 # WordPress Plugin Installation Guide
 
 ## Prerequisites
@@ -242,7 +242,7 @@ After completing your account setup:
 ### Method 2: FTP Installation
 1. **Extract Plugin Files**
    - Unzip downloaded plugin file
-   - Upload folder to /wp-content/plugins/
+   - Upload folder to /wp-placeholder/plugins/
    - Activate plugin in WordPress admin
 
 ## Configuration
@@ -330,7 +330,7 @@ After completing your account setup:
   },
   'mobile-app-guide': {
     title: 'Mobile App Installation Guide',
-    content: `
+    placeholder: `
 # Mobile App Installation Guide
 
 ## Progressive Web App (PWA) Installation
@@ -482,16 +482,16 @@ After completing your account setup:
   }
 };
 
-// Get help content
-router.get('/content/:id', (req, res) => {
+// Get help placeholder
+router.get('/placeholder/:id', (req, res) => {
   const { id } = req.params;
-  const content = helpContent[id as keyof typeof helpContent];
+  const placeholder = helpContent[id as keyof typeof helpContent];
   
-  if (!content) {
-    return res.status(404).json({ error: 'Help content not found' });
+  if (!placeholder) {
+    return res.status(404).json({ error: 'Help placeholder not found' });
   }
   
-  res.json(content);
+  res.json(placeholder);
 });
 
 // Generate and download PDF guides
@@ -499,11 +499,11 @@ router.get('/download/:guide', async (req, res) => {
   const { guide } = req.params;
   
   try {
-    // In a real implementation, you would generate PDF from the content
+    // In a real implementation, you would generate PDF from the placeholder
     // For now, we'll return a placeholder response
-    const content = helpContent[guide as keyof typeof helpContent];
+    const placeholder = helpContent[guide as keyof typeof helpContent];
     
-    if (!content) {
+    if (!placeholder) {
       return res.status(404).json({ error: 'Guide not found' });
     }
 
@@ -511,7 +511,7 @@ router.get('/download/:guide', async (req, res) => {
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', "System message");
     
-    // Return PDF content (placeholder)
+    // Return PDF placeholder (placeholder)
     const pdfContent = `
 %PDF-1.4
 1 0 obj
@@ -551,7 +551,7 @@ stream
 BT
 /F1 12 Tf
 100 700 Td
-([CONVERTED]) Tj
+(placeholder) Tj
 ET
 endstream
 endobj
@@ -584,7 +584,7 @@ startxref
     
     res.send(Buffer.from(pdfContent));
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to generate PDF' });
   }
 });
@@ -609,7 +609,7 @@ router.get('/community/topics', isAuthenticated, async (req, res) => {
       lastActivity: topic.lastActivity,
       category: topic.category,
       tags: topic.tags,
-      content: topic.content,
+      placeholder: topic.placeholder,
       likes: topic.likes,
       views: topic.views,
       isResolved: topic.isResolved,
@@ -619,7 +619,7 @@ router.get('/community/topics', isAuthenticated, async (req, res) => {
     
     res.json(formattedTopics);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch community topics' });
   }
 });
@@ -627,7 +627,7 @@ router.get('/community/topics', isAuthenticated, async (req, res) => {
 // Create new community topic
 router.post('/community/topics', isAuthenticated, async (req, res) => {
   try {
-    const { title, content, category, tags } = req.body;
+    const { title, placeholder, category, tags } = req.body;
     const userId = req.user?.id;
     
     if (!userId) {
@@ -637,7 +637,7 @@ router.post('/community/topics', isAuthenticated, async (req, res) => {
     // Create a real topic in the database
     const newTopic = await storage.createHelpTopic({
       title,
-      content,
+      placeholder,
       category,
       tags: tags ? tags.split(',').map((tag: string) => tag.trim()) : [],
       authorId: req.user?.id || 1,
@@ -649,7 +649,7 @@ router.post('/community/topics', isAuthenticated, async (req, res) => {
       topic: newTopic
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to create topic' });
   }
 });
@@ -671,7 +671,7 @@ router.get('/community/topics/:id', isAuthenticated, async (req, res) => {
       replies
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to fetch topic' });
   }
 });
@@ -680,7 +680,7 @@ router.get('/community/topics/:id', isAuthenticated, async (req, res) => {
 router.post('/community/topics/:id/replies', isAuthenticated, async (req, res) => {
   try {
     const topicId = parseInt(req.params.id);
-    const { content } = req.body;
+    const { placeholder } = req.body;
     const userId = req.user?.id;
     
     if (!userId) {
@@ -689,7 +689,7 @@ router.post('/community/topics/:id/replies', isAuthenticated, async (req, res) =
     
     const reply = await storage.createHelpTopicReply({
       topicId,
-      content,
+      placeholder,
       authorId: userId,
       authorName: req.user?.username || 'Anonymous'
     });
@@ -699,7 +699,7 @@ router.post('/community/topics/:id/replies', isAuthenticated, async (req, res) =
       reply
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to create reply' });
   }
 });
@@ -721,7 +721,7 @@ router.post('/community/topics/:id/like', isAuthenticated, async (req, res) => {
       liked
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to like topic' });
   }
 });
@@ -743,7 +743,7 @@ router.delete('/community/topics/:id/like', isAuthenticated, async (req, res) =>
       unliked
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to unlike topic' });
   }
 });
@@ -783,12 +783,12 @@ router.post('/support/ticket', isAuthenticated, async (req, res) => {
       }
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to create support ticket' });
   }
 });
 
-// Search help content
+// Search help placeholder
 router.get('/search', (req, res) => {
   const { q } = req.query;
   
@@ -799,14 +799,14 @@ router.get('/search', (req, res) => {
   const searchTerm = q.toLowerCase();
   const results = [];
   
-  for (const [id, content] of Object.entries(helpContent)) {
-    if (content.title.toLowerCase().includes(searchTerm) || 
-        content.content.toLowerCase().includes(searchTerm)) {
+  for (const [id, placeholder] of Object.entries(helpContent)) {
+    if (placeholder.title.toLowerCase().includes(searchTerm) || 
+        placeholder.placeholder.toLowerCase().includes(searchTerm)) {
       results.push({
         id,
-        title: content.title,
-        excerpt: content.content.substring(0, 200) + '...',
-        relevance: calculateRelevance(content, searchTerm)
+        title: placeholder.title,
+        excerpt: placeholder.placeholder.substring(0, 200) + '...',
+        relevance: calculateRelevance(placeholder, searchTerm)
       });
     }
   }
@@ -817,13 +817,13 @@ router.get('/search', (req, res) => {
   res.json(results);
 });
 
-function calculateRelevance(content: any, searchTerm: string): number {
+function calculateRelevance(placeholder: any, searchTerm: string): number {
   let score = 0;
-  const titleMatches = (content.title.toLowerCase().match(new RegExp(searchTerm, 'g')) || []).length;
-  const contentMatches = (content.content.toLowerCase().match(new RegExp(searchTerm, 'g')) || []).length;
+  const titleMatches = (placeholder.title.toLowerCase().match(new RegExp(searchTerm, 'g')) || []).length;
+  const placeholderMatches = (placeholder.placeholder.toLowerCase().match(new RegExp(searchTerm, 'g')) || []).length;
   
   score += titleMatches * 10; // Title matches are worth more
-  score += contentMatches * 1;
+  score += placeholderMatches * 1;
   
   return score;
 }

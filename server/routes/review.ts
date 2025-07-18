@@ -6,7 +6,7 @@ import emailService from '../services/email-service';
 import { log } from '../vite';
 import { insertReviewRequestSchema } from '../../shared/schema';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = express.Router();
 
 // Get all review requests for the current user's company
@@ -37,7 +37,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
     
     return res.json(enrichedRequests);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Failed to fetch review requests' });
   }
 });
@@ -91,8 +91,8 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         // Generate review link/URL
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         const host = req.headers['x-forwarded-host'] || req.get('host');
-        const baseUrl = "converted string";
-        const reviewLink = "converted string";
+        const baseUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+        const reviewLink = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
         
         const emailSent = await emailService.sendReviewRequest(
           reviewRequest,
@@ -108,7 +108,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
           log("System message"), 'info');
         }
       } catch (error) {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
         // Continue even if email fails
       }
     } else if (method === 'sms') {
@@ -118,7 +118,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
     
     return res.status(201).json(reviewRequest);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     if (error instanceof z.ZodError) {
       return res.status(400).json({ success: true });
     }
@@ -155,7 +155,7 @@ router.get('/:id', isAuthenticated, async (req: Request, res: Response) => {
       } : null
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Failed to fetch review request' });
   }
 });
@@ -176,13 +176,13 @@ router.get('/link/:id', async (req: Request, res: Response) => {
     // Get the server's base URL
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const host = req.headers['x-forwarded-host'] || req.get('host');
-    const baseUrl = "converted string";
+    const baseUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
     
-    const reviewUrl = "converted string";
+    const reviewUrl = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
     
     return res.json({ reviewUrl });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Failed to generate review link' });
   }
 });

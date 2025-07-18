@@ -84,7 +84,7 @@ export function createApiError(
 // Common error creators
 export const apiErrors = {
   notFound: (resource: string) => createApiError(
-    "converted string",
+    `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
     404,
     'not_found'
   ),

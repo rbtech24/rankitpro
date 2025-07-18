@@ -60,11 +60,11 @@ export function sanitizeUrl(url: string): string {
 export function createSafeAttribute(name: string, value: string): string {
   const safeName = name.replace(/[^a-zA-Z0-9-]/g, '');
   const safeValue = escapeHtml(value);
-  return "converted string";
+  return `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
 }
 
 /**
- * Creates safe text content for DOM insertion
+ * Creates safe text placeholder for DOM insertion
  */
 export function createSafeTextContent(text: string): string {
   return sanitizeText(text);

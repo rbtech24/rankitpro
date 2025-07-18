@@ -6,7 +6,7 @@
 import { Request, Response } from 'express';
 import { securityMonitor } from './security-monitor';
 
-import { logger } from './services/structured-logger';
+import { logger } from './services/logger';
 interface VulnerabilityTest {
   id: string;
   name: string;
@@ -109,7 +109,7 @@ class PenetrationTester {
       endpoint: '/api/testimonials',
       method: "POST",
       body: {
-        content: '<img src=x onerror=alert("XSS")>',
+        placeholder: '<img src=x onerror=alert("XSS")>',
         customerName: 'Test User'
       }
     },
@@ -216,7 +216,7 @@ class PenetrationTester {
       method: "POST",
       body: {
         filename: '../../../malicious.txt',
-        content: 'malicious content'
+        placeholder: 'malicious placeholder'
       }
     },
 
@@ -268,7 +268,7 @@ class PenetrationTester {
         results.push(result);
         this.testResults.set(test.id, result);
       } catch (error) {
-    logger.info("Logger call fixed");
+    logger.info("Operation completed");
         results.push({
           testId: test.id,
           success: false,
@@ -425,7 +425,7 @@ class PenetrationTester {
         
       case 'xss':
         // Vulnerable if script tags are not escaped
-        return response.body.content && response.body.content.includes('<script>');
+        return response.body.placeholder && response.body.placeholder.includes('<script>');
         
       case 'csrf':
         // Vulnerable if request succeeds without CSRF token
@@ -437,7 +437,7 @@ class PenetrationTester {
         
       case 'directory_traversal':
         // Vulnerable if system files are accessible
-        return response.status === 200 && response.body.content;
+        return response.status === 200 && response.body.placeholder;
         
       case 'command_injection':
         // Vulnerable if command execution is successful
@@ -500,12 +500,12 @@ class PenetrationTester {
     };
 
     logger.info('📊 Penetration Test Report Generated:');
-    logger.info("Parameter fixed");
-    logger.info("Parameter fixed");
-    logger.info("Parameter fixed");
-    logger.info("Parameter fixed");
-    logger.info("Parameter fixed");
-    logger.info("Parameter fixed");
+    logger.info("Parameter processed");
+    logger.info("Parameter processed");
+    logger.info("Parameter processed");
+    logger.info("Parameter processed");
+    logger.info("Parameter processed");
+    logger.info("Parameter processed");
 
     return report;
   }

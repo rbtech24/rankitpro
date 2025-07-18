@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { logger } from './services/structured-logger';
+import { logger } from './services/logger';
 const app = express();
 app.use(express.json());
 

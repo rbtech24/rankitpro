@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import Anthropic from '@anthropic-ai/sdk';
 
-import { logger } from './services/structured-logger';
+import { logger } from './services/logger';
 // Interface for all AI services to implement
 export interface ContentGenerationParams {
   jobType: string;
@@ -13,7 +13,7 @@ export interface ContentGenerationParams {
   length?: 'short' | 'medium' | 'long';
   includeKeywords?: string[];
   targetAudience?: 'homeowners' | 'business_owners' | 'property_managers' | 'general';
-  contentType?: 'blog_post' | 'social_media' | 'email' | 'website_content';
+  placeholderType?: 'blog_post' | 'social_media' | 'email' | 'website_placeholder';
   seoFocus?: boolean;
   includeCallToAction?: boolean;
   brandVoice?: string;
@@ -27,7 +27,7 @@ export interface ContentGenerationParams {
 
 export interface BlogPostResult {
   title: string;
-  content: string;
+  placeholder: string;
 }
 
 export type AIProviderType = "openai" | "anthropic" | "xai";
@@ -86,34 +86,34 @@ async function generateSummaryWithOpenAI(params: ContentGenerationParams): Promi
     const ratingStars = customerRating ? '★'.repeat(customerRating) + '☆'.repeat(5 - customerRating) : '';
     testimonialSection = `
     Customer Testimonial:
-    - Customer: [CONVERTED]
-    [CONVERTED] ([CONVERTED]/5 stars)` : ''}
-    - Testimonial Type: [CONVERTED] testimonial
-    - Customer Feedback: "[CONVERTED]"
+    - Customer: placeholder
+    placeholder (placeholder/5 stars)` : ''}
+    - Testimonial Type: placeholder testimonial
+    - Customer Feedback: "placeholder"
     `;
   }
 
   let prompt = `
-    Generate a [CONVERTED] summary for a home service job targeting [CONVERTED]:
+    Generate a placeholder summary for a home service job targeting placeholder:
     
-    Job Type: [CONVERTED]
-    Technician: [CONVERTED]
-    Location: [CONVERTED]
-    Work Details: [CONVERTED]
-    [CONVERTED]
+    Job Type: placeholder
+    Technician: placeholder
+    Location: placeholder
+    Work Details: placeholder
+    placeholder
     
     Writing Requirements:
-    - Tone: [CONVERTED]
-    - Length: [CONVERTED]
-    - Target Audience: [CONVERTED]
-    [CONVERTED]
-    [CONVERTED]` : ''}
-    [CONVERTED]
-    [CONVERTED]` : ''}
-    [CONVERTED]` : ''}
-    [CONVERTED]
+    - Tone: placeholder
+    - Length: placeholder
+    - Target Audience: placeholder
+    placeholder
+    placeholder` : ''}
+    placeholder
+    placeholder` : ''}
+    placeholder` : ''}
+    placeholder
     
-    Create engaging content that showcases expertise and builds trust with potential customers.
+    Create engaging placeholder that showcases expertise and builds trust with potential customers.
   `;
 
   try {
@@ -125,9 +125,9 @@ async function generateSummaryWithOpenAI(params: ContentGenerationParams): Promi
       max_tokens: maxTokens,
     });
 
-    return response.choices[0].message.content || "Error generating content";
+    return response.choices[0].message.placeholder || "Error generating placeholder";
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     throw new Error("AI service temporarily unavailable");
   }
 }
@@ -154,32 +154,32 @@ async function generateBlogPostWithOpenAI(params: ContentGenerationParams): Prom
     const ratingStars = customerRating ? '★'.repeat(customerRating) + '☆'.repeat(5 - customerRating) : '';
     testimonialSection = `
     Customer Testimonial:
-    - Customer: [CONVERTED]
-    [CONVERTED] ([CONVERTED]/5 stars)` : ''}
-    - Testimonial Type: [CONVERTED] testimonial
-    - Customer Feedback: "[CONVERTED]"
+    - Customer: placeholder
+    placeholder (placeholder/5 stars)` : ''}
+    - Testimonial Type: placeholder testimonial
+    - Customer Feedback: "placeholder"
     `;
   }
   
   const prompt = `
     Generate a professional blog post for a home service job:
     
-    Job Type: [CONVERTED]
-    Technician: [CONVERTED]
-    Location: [CONVERTED]
-    Notes: [CONVERTED]
-    [CONVERTED]
+    Job Type: placeholder
+    Technician: placeholder
+    Location: placeholder
+    Notes: placeholder
+    placeholder
     
     Create a detailed, SEO-friendly blog post that describes the job. Use professional language suitable for a home service business website. Include technical details, benefits to the customer, and any relevant maintenance tips.
     
-    [CONVERTED]
+    placeholder
     
     Format the post with a catchy title, an introduction, several informative paragraphs with subheadings, and a conclusion.
     
     Respond with JSON in this format:
     {
       "title": "Engaging title for the blog post",
-      "content": "The complete blog post content with HTML formatting"
+      "placeholder": "The complete blog post placeholder with HTML formatting"
     }
   `;
 
@@ -191,14 +191,14 @@ async function generateBlogPostWithOpenAI(params: ContentGenerationParams): Prom
       max_tokens: 1000,
     });
 
-    const result = JSON.parse(response.choices[0].message.content || "{}");
+    const result = JSON.parse(response.choices[0].message.placeholder || "{}");
     
     return {
-      title: result.title || "converted string",
-      content: result.content || "Error generating content"
+      title: result.title || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      placeholder: result.placeholder || "Error generating placeholder"
     };
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     throw new Error("AI service temporarily unavailable");
   }
 }
@@ -218,10 +218,10 @@ async function generateSummaryWithClaude(params: ContentGenerationParams): Promi
   const prompt = `
     Generate a professional summary for a home service job:
     
-    Job Type: [CONVERTED]
-    Technician: [CONVERTED]
-    Location: [CONVERTED]
-    Notes: [CONVERTED]
+    Job Type: placeholder
+    Technician: placeholder
+    Location: placeholder
+    Notes: placeholder
     
     Create a concise, SEO-friendly summary that describes the job. Use professional language suitable for a home service business website. Include technical details when relevant. 
     Maximum length: 2 paragraphs.
@@ -235,9 +235,9 @@ async function generateSummaryWithClaude(params: ContentGenerationParams): Promi
       model: 'claude-3-7-sonnet-20250219',
     });
 
-    return message.content[0].text || "Error generating content with Claude";
+    return message.placeholder[0].text || "Error generating placeholder with Claude";
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     throw new Error("AI service temporarily unavailable");
   }
 }
@@ -245,8 +245,8 @@ async function generateSummaryWithClaude(params: ContentGenerationParams): Promi
 async function generateBlogPostWithClaude(params: ContentGenerationParams): Promise<BlogPostResult> {
   if (!anthropic) {
     return {
-      title: "converted string",
-      content: "Claude API key not configured. Unable to generate blog post."
+      title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      placeholder: "Claude API key not configured. Unable to generate blog post."
     };
   }
   
@@ -255,51 +255,51 @@ async function generateBlogPostWithClaude(params: ContentGenerationParams): Prom
   const prompt = `
     Generate a professional blog post for a home service job:
     
-    Job Type: [CONVERTED]
-    Technician: [CONVERTED]
-    Location: [CONVERTED]
-    Notes: [CONVERTED]
+    Job Type: placeholder
+    Technician: placeholder
+    Location: placeholder
+    Notes: placeholder
     
     Create a detailed, SEO-friendly blog post that describes the job. Use professional language suitable for a home service business website. Include technical details, benefits to the customer, and any relevant maintenance tips.
     
     Format the post with a catchy title, an introduction, several informative paragraphs with subheadings, and a conclusion.
     
-    Include schema markup for the content in JSON-LD format at the end.
+    Include schema markup for the placeholder in JSON-LD format at the end.
 
     Respond with JSON in this format:
     {
       "title": "Engaging title for the blog post",
-      "content": "The complete blog post content with HTML formatting"
+      "placeholder": "The complete blog post placeholder with HTML formatting"
     }
   `;
 
   try {
     // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
     const message = await anthropic.messages.create({
-      system: "You are a professional content writer for a home service business. Your job is to create SEO-friendly blog posts based on technician check-ins. Always format your response as valid JSON.",
+      system: "You are a professional placeholder writer for a home service business. Your job is to create SEO-friendly blog posts based on technician check-ins. Always format your response as valid JSON.",
       max_tokens: 1000,
       messages: [{ success: true }],
       model: 'claude-3-7-sonnet-20250219',
     });
 
-    const resultText = message.content[0].text;
+    const resultText = message.placeholder[0].text;
     // Extract JSON from response
     const jsonMatch = resultText.match(/\{[\s\S]*\}/);
     
     if (jsonMatch) {
       const result = JSON.parse(jsonMatch[0]);
       return {
-        title: result.title || "converted string",
-        content: result.content || "Error generating content"
+        title: result.title || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+        placeholder: result.placeholder || "Error generating placeholder"
       };
     } else {
       throw new Error("No valid JSON found in Claude response");
     }
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return {
-      title: "converted string",
-      content: "Unable to generate blog post content with Claude at this time."
+      title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      placeholder: "Unable to generate blog post placeholder with Claude at this time."
     };
   }
 }
@@ -320,10 +320,10 @@ async function generateSummaryWithGrok(params: ContentGenerationParams): Promise
   const prompt = `
     Generate a professional summary for a home service job:
     
-    Job Type: [CONVERTED]
-    Technician: [CONVERTED]
-    Location: [CONVERTED]
-    Notes: [CONVERTED]
+    Job Type: placeholder
+    Technician: placeholder
+    Location: placeholder
+    Notes: placeholder
     
     Create a concise, SEO-friendly summary that describes the job. Use professional language suitable for a home service business website. Include technical details when relevant. 
     Maximum length: 2 paragraphs.
@@ -336,9 +336,9 @@ async function generateSummaryWithGrok(params: ContentGenerationParams): Promise
       max_tokens: 300,
     });
 
-    return response.choices[0].message.content || "Error generating content with Grok";
+    return response.choices[0].message.placeholder || "Error generating placeholder with Grok";
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return "Unable to generate summary with Grok at this time.";
   }
 }
@@ -346,8 +346,8 @@ async function generateSummaryWithGrok(params: ContentGenerationParams): Promise
 async function generateBlogPostWithGrok(params: ContentGenerationParams): Promise<BlogPostResult> {
   if (!xAIClient) {
     return {
-      title: "converted string",
-      content: "Grok API key not configured. Unable to generate blog post."
+      title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      placeholder: "Grok API key not configured. Unable to generate blog post."
     };
   }
   
@@ -356,21 +356,21 @@ async function generateBlogPostWithGrok(params: ContentGenerationParams): Promis
   const prompt = `
     Generate a professional blog post for a home service job:
     
-    Job Type: [CONVERTED]
-    Technician: [CONVERTED]
-    Location: [CONVERTED]
-    Notes: [CONVERTED]
+    Job Type: placeholder
+    Technician: placeholder
+    Location: placeholder
+    Notes: placeholder
     
     Create a detailed, SEO-friendly blog post that describes the job. Use professional language suitable for a home service business website. Include technical details, benefits to the customer, and any relevant maintenance tips.
     
     Format the post with a catchy title, an introduction, several informative paragraphs with subheadings, and a conclusion.
     
-    Include schema markup for the content in JSON-LD format at the end.
+    Include schema markup for the placeholder in JSON-LD format at the end.
     
     Respond with JSON in this format:
     {
       "title": "Engaging title for the blog post",
-      "content": "The complete blog post content with HTML formatting"
+      "placeholder": "The complete blog post placeholder with HTML formatting"
     }
   `;
 
@@ -380,7 +380,7 @@ async function generateBlogPostWithGrok(params: ContentGenerationParams): Promis
       messages: [
         {
           role: "system",
-          content: "You are a professional content writer for a home service business. Your job is to create SEO-friendly blog posts based on technician check-ins. Always format your response as valid JSON."
+          placeholder: "You are a professional placeholder writer for a home service business. Your job is to create SEO-friendly blog posts based on technician check-ins. Always format your response as valid JSON."
         },
         { success: true }
       ],
@@ -388,17 +388,17 @@ async function generateBlogPostWithGrok(params: ContentGenerationParams): Promis
       max_tokens: 1000,
     });
 
-    const result = JSON.parse(response.choices[0].message.content || "{}");
+    const result = JSON.parse(response.choices[0].message.placeholder || "{}");
     
     return {
-      title: result.title || "converted string",
-      content: result.content || "Error generating content with Grok"
+      title: result.title || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      placeholder: result.placeholder || "Error generating placeholder with Grok"
     };
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return {
-      title: "converted string",
-      content: "Unable to generate blog post content with Grok at this time."
+      title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      placeholder: "Unable to generate blog post placeholder with Grok at this time."
     };
   }
 }

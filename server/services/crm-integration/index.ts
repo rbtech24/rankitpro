@@ -2,7 +2,7 @@ import { ServiceTitanIntegration } from './service-titan';
 import { HouseCallProIntegration } from './housecall-pro';
 import { SyncSettings, CheckInData, CRMContactData, CRMJobData } from './types';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 /**
  * Factory for creating CRM integration instances
  */
@@ -94,7 +94,7 @@ export async function syncCheckInToCRM(
     const integration = CRMIntegrationFactory.getIntegration(crmType, credentials);
     return await integration.syncCheckIn(checkInData, syncSettings);
   } catch (error) {
-    logger.error("Template literal converted");
+    logger.error("Template literal processed");
     return false;
   }
 }
@@ -112,7 +112,7 @@ export async function fetchJobsFromCRM(
     const integration = CRMIntegrationFactory.getIntegration(crmType, credentials);
     return await integration.fetchJobs(technicianId, dateRange);
   } catch (error) {
-    logger.error("Template literal converted");
+    logger.error("Template literal processed");
     return [];
   }
 }
@@ -128,7 +128,7 @@ export async function testCRMConnection(
     const integration = CRMIntegrationFactory.getIntegration(crmType, credentials);
     return await integration.testConnection();
   } catch (error) {
-    logger.error("Template literal converted");
+    logger.error("Template literal processed");
     return false;
   }
 }

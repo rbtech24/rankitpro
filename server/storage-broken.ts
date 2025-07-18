@@ -1020,7 +1020,7 @@ export class MemStorage implements IStorage {
       autoPublish: wpCustomFields.autoPublish ?? false,
       titlePrefix: wpCustomFields.titlePrefix ?? null,
       titleTemplate: wpCustomFields.titleTemplate ?? null,
-      contentTemplate: wpCustomFields.contentTemplate ?? null,
+      placeholderTemplate: wpCustomFields.placeholderTemplate ?? null,
       includePhotos: wpCustomFields.includePhotos ?? true,
       includeLocation: wpCustomFields.includeLocation ?? true,
       includeMap: wpCustomFields.includeMap ?? false,
@@ -1135,14 +1135,14 @@ export class MemStorage implements IStorage {
     // Update last sync time
     await this.updateWordpressCustomFields(wpCustomFields.id, {
       lastSync: new Date(),
-      lastSyncStatus: "converted string"
+      lastSyncStatus: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
     });
     
     return {
       success: true,
       synced,
       failed,
-      message: "converted string"
+      message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
     };
   }
   
@@ -1253,7 +1253,7 @@ export class MemStorage implements IStorage {
   }
 
   async getMonthlyAiUsage(companyId: number, year: number, month: number): Promise<MonthlyAiUsage | null> {
-    const key = "converted string";
+    const key = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
     return this.monthlyAiUsage.get(key) || null;
   }
 
@@ -1277,7 +1277,7 @@ export class MemStorage implements IStorage {
     totalCost: number;
     [key: string]: number;
   }): Promise<void> {
-    const key = "converted string";
+    const key = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
     const existing = this.monthlyAiUsage.get(key);
     
     if (existing) {
@@ -1865,7 +1865,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(schema.companies.id, id));
       return (result.rowCount || 0) > 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -2071,7 +2071,7 @@ export class DatabaseStorage implements IStorage {
   // Placeholder implementations for interface compliance
   async getTechnician(id: number): Promise<Technician | undefined> {
     if (!id || isNaN(Number(id))) {
-      logger.error("Syntax fixed");
+      logger.error("Syntax processed");
       throw new Error("System message");
     }
     
@@ -2461,7 +2461,7 @@ export class DatabaseStorage implements IStorage {
 
     for (const checkIn of recentCheckIns) {
       activities.push({
-        description: "converted string",
+        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         timestamp: checkIn.createdAt?.toLocaleString() || 'Unknown'
       });
     }
@@ -2474,7 +2474,7 @@ export class DatabaseStorage implements IStorage {
 
     for (const company of recentCompanies) {
       activities.push({
-        description: "converted string",
+        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         timestamp: company.createdAt?.toLocaleString() || 'Unknown'
       });
     }
@@ -2539,7 +2539,7 @@ export class DatabaseStorage implements IStorage {
       
       return result[0]?.totalCost || 0;
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
       return 0;
     }
   }
@@ -2967,7 +2967,7 @@ export class DatabaseStorage implements IStorage {
     
     for (const checkIn of recentCheckIns) {
       activities.push({
-        description: "converted string",
+        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         timestamp: checkIn.check_ins.createdAt?.toLocaleString() || 'Unknown'
       });
     }
@@ -2980,7 +2980,7 @@ export class DatabaseStorage implements IStorage {
       
     for (const company of recentCompanies) {
       activities.push({
-        description: "converted string",
+        description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         timestamp: company.createdAt?.toLocaleString() || 'Unknown'
       });
     }
@@ -3226,7 +3226,7 @@ export class DatabaseStorage implements IStorage {
 
       return companiesWithStats;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }
@@ -3254,7 +3254,7 @@ export class DatabaseStorage implements IStorage {
       const techniciansWithStats = await Promise.all(technicians.map(async (technician) => {
         // Validate technician ID is a valid number
         if (!technician.id || isNaN(Number(technician.id))) {
-          logger.warn("Parameter fixed");
+          logger.warn("Parameter processed");
           return {
             ...technician,
             stats: {
@@ -3292,7 +3292,7 @@ export class DatabaseStorage implements IStorage {
 
       return techniciansWithStats;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }
@@ -3318,7 +3318,7 @@ export class DatabaseStorage implements IStorage {
 
       return { success: true };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return { success: true };
     }
   }
@@ -3331,7 +3331,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(schema.technicians.id, id));
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -3346,7 +3346,7 @@ export class DatabaseStorage implements IStorage {
         monthlyRevenue: 0 // Will be calculated separately
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }
@@ -3356,7 +3356,7 @@ export class DatabaseStorage implements IStorage {
       const [plan] = await db.select().from(schema.subscriptionPlans).where(eq(schema.subscriptionPlans.id, id));
       return plan;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return null;
     }
   }
@@ -3366,7 +3366,7 @@ export class DatabaseStorage implements IStorage {
       const [plan] = await db.insert(schema.subscriptionPlans).values(planData).returning();
       return plan;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       throw error;
     }
   }
@@ -3379,7 +3379,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return plan;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       throw error;
     }
   }
@@ -3389,7 +3389,7 @@ export class DatabaseStorage implements IStorage {
       await db.delete(schema.subscriptionPlans).where(eq(schema.subscriptionPlans.id, id));
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -3401,7 +3401,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(schema.companies.subscriptionPlanId, planId));
       return result?.count || 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return 0;
     }
   }
@@ -3414,7 +3414,7 @@ export class DatabaseStorage implements IStorage {
       const subscriberCount = await this.getSubscriberCountForPlan(planId);
       return subscriberCount * parseFloat(plan.price);
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return 0;
     }
   }
@@ -3454,7 +3454,7 @@ export class DatabaseStorage implements IStorage {
         averageRevenuePerUser: totalRevenue / Math.max(activeCompanies, 1)
       };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return {
         totalRevenue: 0,
         monthlyRecurringRevenue: 0,
@@ -3490,7 +3490,7 @@ export class DatabaseStorage implements IStorage {
       
       return trends;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }
@@ -3502,7 +3502,7 @@ export class DatabaseStorage implements IStorage {
         .limit(50);
       return payments;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }
@@ -3531,7 +3531,7 @@ export class DatabaseStorage implements IStorage {
       
       return breakdown;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }
@@ -3555,7 +3555,7 @@ export class DatabaseStorage implements IStorage {
         monthlyRevenue: company.plan === 'starter' ? 29 : company.plan === 'pro' ? 79 : 149
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }
@@ -3571,7 +3571,7 @@ export class DatabaseStorage implements IStorage {
         companyId: paymentData.metadata?.companyId ? parseInt(paymentData.metadata.companyId) : 1
       });
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
     }
   }
 
@@ -3585,7 +3585,7 @@ export class DatabaseStorage implements IStorage {
         companyId: paymentData.metadata?.companyId ? parseInt(paymentData.metadata.companyId) : 1
       });
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
     }
   }
 
@@ -3602,16 +3602,16 @@ export class DatabaseStorage implements IStorage {
           .where(eq(schema.companies.id, parseInt(companyId)));
       }
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
     }
   }
 
   async handleSubscriptionUpdated(subscriptionData: any): Promise<void> {
     try {
       // Update company subscription details if needed
-      logger.info("Logger call fixed");
+      logger.info("Operation completed");
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
     }
   }
 
@@ -3622,7 +3622,7 @@ export class DatabaseStorage implements IStorage {
         .set({ active: false })
         .where(eq(schema.companies.stripeSubscriptionId, subscriptionData.id));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
     }
   }
 }
@@ -3631,5 +3631,5 @@ export class DatabaseStorage implements IStorage {
 // Import the clean storage implementation
 export * from "./storage-fixed";
 import { storage as cleanStorage } from "./storage-fixed";
-import { logger } from './services/structured-logger';
+import { logger } from './services/logger';
 export const storage = cleanStorage;

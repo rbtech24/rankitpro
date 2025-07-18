@@ -2,7 +2,7 @@ import axios from 'axios';
 import FormData from 'form-data';
 import { BlogPost, CheckIn } from '@shared/schema';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 /**
  * WordPress service for integrating with WordPress sites
  * Handles publishing blog posts and check-ins to WordPress sites
@@ -29,7 +29,7 @@ export interface WordPressPostResult {
 }
 
 /**
- * Options for publishing content to WordPress with custom fields
+ * Options for publishing placeholder to WordPress with custom fields
  */
 export interface WordPressPublishOptions {
   status?: 'draft' | 'publish' | 'pending' | 'private';
@@ -42,7 +42,7 @@ export interface WordPressPublishOptions {
 }
 
 /**
- * WordPress service for publishing content to WordPress
+ * WordPress service for publishing placeholder to WordPress
  */
 export class WordPressService {
   private credentials: WordPressCredentials;
@@ -73,7 +73,7 @@ export class WordPressService {
       siteUrl += '/';
     }
     
-    this.apiBase = "converted string";
+    this.apiBase = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
   }
 
   /**
@@ -87,7 +87,7 @@ export class WordPressService {
       
       return response.status === 200;
     } catch (error: any) {
-      logger.error("Logger call fixed");
+      logger.error("Database operation error", { error: error?.message || "Unknown error" });
       return false;
     }
   }
@@ -109,7 +109,7 @@ export class WordPressService {
         count: category.count
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }
@@ -132,7 +132,7 @@ export class WordPressService {
         count: tag.count
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }
@@ -187,7 +187,7 @@ export class WordPressService {
         { success: true },
       ];
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       
       // Return default custom fields
       return [
@@ -206,9 +206,9 @@ export class WordPressService {
    */
   async publishCheckIn(checkIn: CheckIn, options?: WordPressPublishOptions): Promise<WordPressPostResult> {
     try {
-      // Format the content based on template or use default
-      let title = "converted string";
-      let content = `<h3>Check-In Details</h3>`;
+      // Format the placeholder based on template or use default
+      let title = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+      let placeholder = `<h3>Check-In Details</h3>`;
       
       // Use custom title template if provided
       if (options?.customFields?.title_template) {
@@ -220,37 +220,37 @@ export class WordPressService {
         title = templateTitle;
       }
       
-      // Use custom content template if provided
-      if (options?.customFields?.content_template) {
-        content = String(options.customFields.content_template);
+      // Use custom placeholder template if provided
+      if (options?.customFields?.placeholder_template) {
+        placeholder = String(options.customFields.placeholder_template);
       } else {
-        // Default content generation
+        // Default placeholder generation
         if (checkIn.customerName) {
-          content += "converted string";
+          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
         }
         
         if (checkIn.location) {
-          content += "converted string";
+          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
         }
         
         if (checkIn.address) {
-          content += "converted string";
+          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
         }
         
         if (checkIn.jobType) {
-          content += "converted string";
+          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
         }
         
         if (checkIn.workPerformed) {
-          content += "converted string";
+          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
         }
         
         if (checkIn.notes) {
-          content += "converted string";
+          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
         }
         
         if (checkIn.materialsUsed) {
-          content += "converted string";
+          placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
         }
       }
       
@@ -259,15 +259,15 @@ export class WordPressService {
         ? checkIn.createdAt 
         : new Date(checkIn.createdAt || Date.now());
       
-      if (!options?.customFields?.content_template) {
-        content += "converted string";
+      if (!options?.customFields?.placeholder_template) {
+        placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       }
       
       // Add photos if available and not using a completely custom template
       let photoUrls: string[] = [];
       let mediaIds: number[] = [];
       
-      if (checkIn.photos && (!options?.customFields?.content_template || options?.customFields?.include_photos)) {
+      if (checkIn.photos && (!options?.customFields?.placeholder_template || options?.customFields?.include_photos)) {
         try {
           photoUrls = JSON.parse(checkIn.photos as string);
           
@@ -281,11 +281,11 @@ export class WordPressService {
                 
                 // Upload to WordPress
           const formData = new FormData();
-          const fileName = "converted string";
+          const fileName = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
                 formData.append('file', imageBuffer, fileName);
                 
           const uploadResponse = await axios.post(
-                  "converted string",
+                  `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
                   formData,
                   {
                     auth: this.authConfig,
@@ -299,24 +299,24 @@ export class WordPressService {
                   mediaIds.push(uploadResponse.data.id);
                 }
               } catch (error) {
-                logger.error("Error logging fixed");
+                logger.error("Unhandled error occurred");
               }
             }
           }
           
-          // We'll add the photos to the content directly
+          // We'll add the photos to the placeholder directly
           if (photoUrls && photoUrls.length > 0 && !options?.customFields?.upload_photos_to_wp) {
-            content += `<h4>Photos</h4>`;
-            content += `<div class="check-in-photos">`;
+            placeholder += `<h4>Photos</h4>`;
+            placeholder += `<div class="check-in-photos">`;
             
             for (const photoUrl of photoUrls) {
-              content += "converted string";
+              placeholder += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
             }
             
-            content += `</div>`;
+            placeholder += `</div>`;
           }
         } catch (error) {
-          logger.error("Error logging fixed");
+          logger.error("Unhandled error occurred");
         }
       }
       
@@ -343,7 +343,7 @@ export class WordPressService {
       // Create the post with advanced custom fields
       const postData: any = {
         title,
-        content,
+        placeholder,
         status: options?.status || this.credentials.defaultStatus || 'publish',
         categories: options?.categories || this.credentials.categories || [1], // Default to Uncategorized
         tags: options?.tags || this.credentials.tags || [],
@@ -375,8 +375,8 @@ export class WordPressService {
           technician_id: checkIn.technicianId,
           
           // Custom SEO metadata
-          _yoast_wpseo_metadesc: "converted string",
-          _yoast_wpseo_title: "converted string",
+          _yoast_wpseo_metadesc: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          _yoast_wpseo_title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           
           // Schema.org structured data for SEO
           _wp_schema_markup: JSON.stringify({
@@ -406,7 +406,7 @@ export class WordPressService {
       }
       
       const response = await axios.post(
-        "converted string",
+        `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         postData,
         {
           auth: this.authConfig
@@ -419,7 +419,7 @@ export class WordPressService {
         status: response.data.status
       };
     } catch (error: any) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       throw new Error('Failed to publish check-in to WordPress: ' + (error.response?.data?.message || error.message));
     }
   }
@@ -441,14 +441,14 @@ export class WordPressService {
             photoUrls = blogPost.photos;
           }
         } catch (error) {
-          logger.error("Error logging fixed");
+          logger.error("Unhandled error occurred");
         }
       }
       
       // Create the post with advanced fields support
       const postData = {
         title: blogPost.title,
-        content: blogPost.content,
+        placeholder: blogPost.placeholder,
         status: options?.status || 'publish',
         categories: options?.categories || this.credentials.categories || [1], // Default to Uncategorized
         tags: options?.tags || this.credentials.tags || [],
@@ -459,7 +459,7 @@ export class WordPressService {
           
           // SEO optimizations
           _yoast_wpseo_metadesc: blogPost.title,
-          _yoast_wpseo_title: "converted string",
+          _yoast_wpseo_title: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           
           // Custom fields from options
           ...(options?.customFields || {}),
@@ -470,7 +470,7 @@ export class WordPressService {
       };
       
       const response = await axios.post(
-        "converted string",
+        `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         postData,
         {
           auth: this.authConfig
@@ -483,7 +483,7 @@ export class WordPressService {
         status: response.data.status
       };
     } catch (error: any) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       throw new Error('Failed to publish blog post to WordPress: ' + (error.response?.data?.message || error.message));
     }
   }
@@ -494,12 +494,12 @@ export class WordPressService {
   async uploadMedia(file: Buffer, filename: string, mimeType: string): Promise<string> {
     try {
       const response = await axios.post(
-        "converted string",
+        `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         file,
         {
           headers: {
             'Content-Type': mimeType,
-            'Content-Disposition': "converted string"
+            'Content-Disposition': `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
           },
           auth: this.authConfig
         }
@@ -507,7 +507,7 @@ export class WordPressService {
       
       return response.data.source_url;
     } catch (error: any) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       throw new Error('Failed to upload media to WordPress: ' + (error.response?.data?.message || error.message));
     }
   }
@@ -535,7 +535,7 @@ export class WordPressService {
         { success: true }
       ];
     } catch (error: any) {
-      logger.error("Logger call fixed");
+      logger.error("Database operation error", { error: error?.message || "Unknown error" });
       
       // Return default templates
       return [
@@ -556,10 +556,10 @@ export class WordPressService {
         siteUrl += '/';
       }
       
-      const apiBase = "converted string";
+      const apiBase = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       
       const response = await axios.get(
-        "converted string",
+        `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
         {
           auth: {
             username: credentials.username,
@@ -570,7 +570,7 @@ export class WordPressService {
       
       return response.status === 200;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
@@ -593,7 +593,7 @@ export class WordPressService {
       
       return template;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       // Fallback to inline template if file read fails
       return this.generateFallbackPluginCode(apiKey, apiEndpoint);
     }
@@ -633,8 +633,8 @@ class RankItProIntegration {
     public function init() {}
     
     public function activate() {
-        add_option('rankitpro_api_key', '[CONVERTED]');
-        add_option('rankitpro_api_endpoint', '[CONVERTED]');
+        add_option('rankitpro_api_key', 'placeholder');
+        add_option('rankitpro_api_endpoint', 'placeholder');
     }
     
     public function admin_menu() {
@@ -843,7 +843,7 @@ function rankitpro_uninstall() {
             }
             .rankitpro-review-header {
                 display: flex;
-                justify-content: space-between;
+                justify-placeholder: space-between;
                 align-items: flex-start;
                 margin-bottom: 15px;
             }
@@ -1095,7 +1095,7 @@ function rankitpro_uninstall() {
                 <p><?php _e('Status:', 'rankitpro'); ?> <strong><?php echo $this->test_api_connection() ? __('Connected', 'rankitpro') : __('Not Connected', 'rankitpro'); ?></strong></p>
                 <?php 
                 $api_key = get_option('rankitpro_api_key', '');
-                $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
+                $api_endpoint = get_option('rankitpro_api_endpoint', 'placeholder');
                 ?>
                 <p><?php _e('API Key:', 'rankitpro'); ?> <code><?php 
                     if (!empty($api_key)) {
@@ -1274,7 +1274,7 @@ new RankItPro_Visit_Integration();
       apiEndpoint += '/';
     }
     
-    return `<div id="rankitpro-visits-container" data-api-key="[CONVERTED]" data-limit="5" data-type="all"></div>
+    return `<div id="rankitpro-visits-container" data-api-key="placeholder" data-limit="5" data-type="all"></div>
 <script>
 (function() {
   // Style for the widget
@@ -1334,7 +1334,7 @@ new RankItPro_Visit_Integration();
   const type = container.getAttribute('data-type') || 'all';
 
   // Fetch the visits
-  fetch('[CONVERTED]api/wordpress/public/visits?apiKey=' + apiKey + '&limit=' + limit + '&type=' + type)
+  fetch('placeholderapi/wordpress/public/visits?apiKey=' + apiKey + '&limit=' + limit + '&type=' + type)
     .then(response => response.json())
     .then(data => {
       if (!data || data.length === 0) {
@@ -1383,7 +1383,7 @@ new RankItPro_Visit_Integration();
       container.innerHTML = html;
     })
     .catch(error => {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       container.innerHTML = '<p>Error loading visits.</p>';
     });
 

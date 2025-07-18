@@ -2,7 +2,7 @@ import { db } from "../db.js";
 import * as schemas from "../../shared/schema.js";
 import { eq, and } from "drizzle-orm";
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 interface SocialMediaAccount {
   platform: string;
   accessToken: string;
@@ -51,7 +51,7 @@ class SocialMediaService {
 
       return config.accounts || [];
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }
@@ -79,13 +79,13 @@ class SocialMediaService {
 
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return false;
     }
   }
 
   /**
-   * Generate post content for different content types
+   * Generate post placeholder for different placeholder types
    */
   generatePostContent(type: string, data: any, companyName: string): PostContent {
     const baseHashtags = ['#HomeServices', '#CustomerService', '#QualityWork'];
@@ -93,7 +93,7 @@ class SocialMediaService {
     switch (type) {
       case 'check_in':
         return {
-          text: "converted string",
+          text: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           mediaUrls: data.images || [],
           location: data.gpsLocation ? {
             name: data.location || 'Service Location',
@@ -104,7 +104,7 @@ class SocialMediaService {
 
       case 'review':
         return {
-          text: "converted string",
+          text: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           mediaUrls: data.images || []
         };
 
@@ -113,19 +113,19 @@ class SocialMediaService {
         const isAudio = data.type === 'audio';
         
         return {
-          text: "converted string",
+          text: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           mediaUrls: data.mediaUrl ? [data.mediaUrl] : []
         };
 
       case 'blog_post':
         return {
-          text: "converted string",
+          text: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           mediaUrls: data.featuredImage ? [data.featuredImage] : []
         };
 
       default:
         return {
-          text: "converted string",
+          text: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           mediaUrls: []
         };
     }
@@ -134,21 +134,21 @@ class SocialMediaService {
   /**
    * Post to Facebook
    */
-  async postToFacebook(account: SocialMediaAccount, content: PostContent): Promise<PostResult> {
+  async postToFacebook(account: SocialMediaAccount, placeholder: PostContent): Promise<PostResult> {
     try {
       const { accessToken, accountId } = account;
       
       // Prepare the post data
       const postData: any = {
-        message: content.text,
+        message: placeholder.text,
         access_token: accessToken
       };
 
       // Add media if present
-      if (content.mediaUrls && content.mediaUrls.length > 0) {
+      if (placeholder.mediaUrls && placeholder.mediaUrls.length > 0) {
         // For single image
-        if (content.mediaUrls.length === 1) {
-          postData.link = content.mediaUrls[0];
+        if (placeholder.mediaUrls.length === 1) {
+          postData.link = placeholder.mediaUrls[0];
         } else {
           // For multiple images, would need to use Facebook's batch upload API
           postData.message += `\n\nView all photos on our website!`;
@@ -156,8 +156,8 @@ class SocialMediaService {
       }
 
       // Add location if present
-      if (content.location) {
-        postData.place = content.location.name;
+      if (placeholder.location) {
+        postData.place = placeholder.location.name;
       }
 
       const response = await fetch("System message"), {
@@ -184,7 +184,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: "converted string"
+        error: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
       };
     }
   }
@@ -192,12 +192,12 @@ class SocialMediaService {
   /**
    * Post to Instagram (requires Facebook Business API)
    */
-  async postToInstagram(account: SocialMediaAccount, content: PostContent): Promise<PostResult> {
+  async postToInstagram(account: SocialMediaAccount, placeholder: PostContent): Promise<PostResult> {
     try {
       const { accessToken, accountId } = account;
 
       // Instagram requires media for posts
-      if (!content.mediaUrls || content.mediaUrls.length === 0) {
+      if (!placeholder.mediaUrls || placeholder.mediaUrls.length === 0) {
         return {
           success: false,
           error: 'Instagram posts require at least one image or video'
@@ -211,8 +211,8 @@ class SocialMediaService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          image_url: content.mediaUrls[0],
-          caption: content.text,
+          image_url: placeholder.mediaUrls[0],
+          caption: placeholder.text,
           access_token: accessToken
         })
       });
@@ -254,7 +254,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: "converted string"
+        error: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
       };
     }
   }
@@ -262,7 +262,7 @@ class SocialMediaService {
   /**
    * Post to Twitter/X
    */
-  async postToTwitter(account: SocialMediaAccount, content: PostContent): Promise<PostResult> {
+  async postToTwitter(account: SocialMediaAccount, placeholder: PostContent): Promise<PostResult> {
     try {
       // Note: Twitter API v2 requires OAuth 2.0 and specific implementation
       // This is a placeholder for the actual Twitter API implementation
@@ -274,7 +274,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: "converted string"
+        error: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
       };
     }
   }
@@ -282,7 +282,7 @@ class SocialMediaService {
   /**
    * Post to LinkedIn
    */
-  async postToLinkedIn(account: SocialMediaAccount, content: PostContent): Promise<PostResult> {
+  async postToLinkedIn(account: SocialMediaAccount, placeholder: PostContent): Promise<PostResult> {
     try {
       // Note: LinkedIn API requires specific implementation
       // This is a placeholder for the actual LinkedIn API implementation
@@ -294,13 +294,13 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: "converted string"
+        error: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
       };
     }
   }
 
   /**
-   * Main method to post content to all configured platforms
+   * Main method to post placeholder to all configured platforms
    */
   async postToSocialMedia(companyId: number, type: string, data: any): Promise<void> {
     try {
@@ -363,13 +363,13 @@ class SocialMediaService {
         });
 
         if (result.success) {
-          logger.info("Syntax fixed");
+          logger.info("Syntax processed");
         } else {
-          logger.error("Template literal converted");, result.error);
+          logger.error("Template literal processed");, result.error);
         }
       }
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
     }
   }
 
@@ -387,7 +387,7 @@ class SocialMediaService {
 
       return posts;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return [];
     }
   }

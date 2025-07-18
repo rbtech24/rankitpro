@@ -11,7 +11,7 @@ import mobileScheduleRouter from './mobile/schedule';
 import mobileCustomersRouter from './mobile/customers';
 import mobileSettingsRouter from './mobile/settings';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // Secret for JWT tokens
@@ -83,10 +83,10 @@ router.post('/auth/login', async (req, res) => {
       try {
         const deviceData = deviceRegistrationSchema.parse({ deviceId, deviceType });
         // In a real app, we would store the device token and info in the database
-        logger.info("Syntax fixed");
+        logger.info("Syntax processed");
       } catch (error) {
         // Just log validation errors for device info, don't fail the login
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
       }
     }
     
@@ -103,7 +103,7 @@ router.post('/auth/login', async (req, res) => {
       }
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -141,7 +141,7 @@ router.post('/auth/refresh', async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -210,7 +210,7 @@ router.get('/profile', isAuthenticated, async (req, res) => {
       }
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });

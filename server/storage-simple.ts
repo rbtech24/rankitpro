@@ -158,9 +158,9 @@ export class MemStorage implements IStorage {
 
     this.initialized = true;
     logger.info('✅ Test accounts initialized:');
-    logger.info("Parameter fixed");
-    logger.info("Parameter fixed");
-    logger.info("Parameter fixed");
+    logger.info("Parameter processed");
+    logger.info("Parameter processed");
+    logger.info("Parameter processed");
   }
 
   async getUser(id: number): Promise<User | undefined> {

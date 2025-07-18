@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { log } from '../vite';
 import { storage } from '../storage';
 import { isAuthenticated, isCompanyAdmin } from '../middleware/auth';
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 import { 
   getSupportedCRMs, 
   testCRMConnection, 
@@ -62,7 +62,7 @@ router.get('/configured', isAuthenticated, async (req, res) => {
     
     res.json(configuredCRMs);
   } catch (error: any) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error fetching configured CRMs' });
   }
 });

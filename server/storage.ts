@@ -19,7 +19,7 @@ import * as schema from "@shared/schema";
 import { neon } from "@neondatabase/serverless";
 import { createHash } from "crypto";
 
-import { logger } from './services/structured-logger';
+import { logger } from './services/logger';
 const {
   users, companies, companyLocations, technicians, checkIns, blogPosts, reviewRequests, reviewResponses,
   reviewFollowUpSettings, reviewRequestStatuses, apiCredentials, aiUsageLogs, 
@@ -469,12 +469,12 @@ export class DatabaseStorage implements IStorage {
 
   async setPasswordResetToken(userId: number, token: string, expiry: Date): Promise<void> {
     // In a real implementation, this would store the token in a password_reset_tokens table
-    logger.info("Syntax fixed");
+    logger.info("Syntax processed");
   }
 
   async verifyPasswordResetToken(token: string): Promise<number | null> {
     // In a real implementation, this would verify the token from the database
-    logger.info("Parameter fixed");
+    logger.info("Parameter processed");
     return null; // Mock implementation
   }
 
@@ -519,7 +519,7 @@ export class DatabaseStorage implements IStorage {
         .set({ isTrialActive: false })
         .where(eq(companies.id, companyId));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -572,7 +572,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(companies).where(eq(companies.id, id));
       return result.rowCount ? result.rowCount > 0 : false;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -630,7 +630,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(companyLocations).where(eq(companyLocations.id, id));
       return result.rowCount ? result.rowCount > 0 : false;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -738,7 +738,7 @@ export class DatabaseStorage implements IStorage {
         lastBackup: new Date()
       };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return {
         status: "down",
         uptime: Math.floor(process.uptime()),
@@ -844,7 +844,7 @@ export class DatabaseStorage implements IStorage {
           COUNT(*) as totalServices,
           MAX(created_at) as lastService
         FROM check_ins 
-        WHERE company_id = [CONVERTED]
+        WHERE company_id = placeholder
           AND customer_name IS NOT NULL
         GROUP BY customer_name, customer_email, customer_phone, address
         ORDER BY MAX(created_at) DESC
@@ -852,7 +852,7 @@ export class DatabaseStorage implements IStorage {
       
       return customers.rows || [];
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -884,7 +884,7 @@ export class DatabaseStorage implements IStorage {
             reviewsCount: Number(reviewResult?.count) || 0
           };
         } catch (error) {
-          logger.warn("Syntax fixed");
+          logger.warn("Syntax processed");
           return {
             ...tech,
             checkinsCount: 0,
@@ -1414,7 +1414,7 @@ export class DatabaseStorage implements IStorage {
         { success: true }
       ];
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [{ success: true }];
     }
   }
@@ -1479,7 +1479,7 @@ export class DatabaseStorage implements IStorage {
         new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()
       );
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [
         { success: true }
       ];
@@ -1520,7 +1520,7 @@ export class DatabaseStorage implements IStorage {
         averageRating: Number(result[0]?.averageRating || 0)
       };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return { success: true };
     }
   }
@@ -1541,7 +1541,7 @@ export class DatabaseStorage implements IStorage {
       
       return result;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -1584,7 +1584,7 @@ export class DatabaseStorage implements IStorage {
 
       return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 10);
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -1712,7 +1712,7 @@ export class DatabaseStorage implements IStorage {
         .slice(0, 20);
         
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -1736,7 +1736,7 @@ export class DatabaseStorage implements IStorage {
         totalReviews: reviewStats.totalReviews || 0
       };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return {
         totalCompanies: 0,
         activeCompanies: 0,
@@ -1886,7 +1886,7 @@ export class DatabaseStorage implements IStorage {
         dataSource: 'database'
       };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return {
         totalRevenue: 0,
         monthlyRecurringRevenue: 0,
@@ -1947,7 +1947,7 @@ export class DatabaseStorage implements IStorage {
 
       return Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -1970,7 +1970,7 @@ export class DatabaseStorage implements IStorage {
         percentage: 0 // Will be calculated on frontend
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -1983,9 +1983,9 @@ export class DatabaseStorage implements IStorage {
         companyName: companies.name,
         plan: companies.plan,
         amount: sql<number>`CASE 
-          WHEN [CONVERTED] = 'starter' THEN 29
-          WHEN [CONVERTED] = 'pro' THEN 79
-          WHEN [CONVERTED] = 'agency' THEN 149
+          WHEN placeholder = 'starter' THEN 29
+          WHEN placeholder = 'pro' THEN 79
+          WHEN placeholder = 'agency' THEN 149
           ELSE 29
         END`,
         status: sql<string>`'completed'`,
@@ -2007,7 +2007,7 @@ export class DatabaseStorage implements IStorage {
         transactionId: transaction.id
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -2042,7 +2042,7 @@ export class DatabaseStorage implements IStorage {
         status: 'completed'
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -2099,7 +2099,7 @@ export class DatabaseStorage implements IStorage {
         }
       };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return {
         status: 'critical',
         uptime: '0s',
@@ -2124,9 +2124,9 @@ export class DatabaseStorage implements IStorage {
         count: sql<number>`count(*)`,
         totalRevenue: sql<number>`
           CASE 
-            WHEN [CONVERTED] = 'starter' THEN count(*) * 29
-            WHEN [CONVERTED] = 'pro' THEN count(*) * 79
-            WHEN [CONVERTED] = 'agency' THEN count(*) * 149
+            WHEN placeholder = 'starter' THEN count(*) * 29
+            WHEN placeholder = 'pro' THEN count(*) * 79
+            WHEN placeholder = 'agency' THEN count(*) * 149
             ELSE count(*) * 29
           END
         `
@@ -2144,7 +2144,7 @@ export class DatabaseStorage implements IStorage {
         growthRate: 0 // TODO: Calculate based on historical plan changes
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [
         { success: true },
         { success: true },
@@ -2165,9 +2165,9 @@ export class DatabaseStorage implements IStorage {
         createdAt: companies.createdAt,
         revenue: sql<number>`
           CASE 
-            WHEN [CONVERTED] = 'starter' THEN 29
-            WHEN [CONVERTED] = 'pro' THEN 79
-            WHEN [CONVERTED] = 'agency' THEN 149
+            WHEN placeholder = 'starter' THEN 29
+            WHEN placeholder = 'pro' THEN 79
+            WHEN placeholder = 'agency' THEN 149
             ELSE 29
           END
         `
@@ -2194,7 +2194,7 @@ export class DatabaseStorage implements IStorage {
         .map(([month, revenue]) => ({ month, revenue }))
         .sort((a, b) => a.month.localeCompare(b.month));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -2206,7 +2206,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(checkIns.companyId, companyId));
       return result[0]?.count || 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return 0;
     }
   }
@@ -2218,7 +2218,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(reviewResponses.companyId, companyId));
       return result[0]?.count || 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return 0;
     }
   }
@@ -2230,7 +2230,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(users.companyId, companyId));
       return result[0]?.count || 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return 0;
     }
   }
@@ -2242,7 +2242,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(reviewResponses.companyId, companyId));
       return Math.round((result[0]?.avg || 0) * 10) / 10;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return 0;
     }
   }
@@ -2261,7 +2261,7 @@ export class DatabaseStorage implements IStorage {
 
       return 'No activity';
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return 'Unknown';
     }
   }
@@ -2413,33 +2413,32 @@ export class DatabaseStorage implements IStorage {
           
           const postData = {
             title: "WordPress API test successful",
-            content: `
+            placeholder: `
               <div class="service-post">
-                <h2>Professional [CONVERTED] Service</h2>
+                <h2>Professional placeholder Service</h2>
                 
                 <div class="service-details">
-                  <p><strong>Service Type:</strong> [CONVERTED]</p>
-                  <p><strong>Location:</strong> [CONVERTED]</p>
-                  <p><strong>Technician:</strong> [CONVERTED]</p>
-                  <p><strong>Date:</strong> [CONVERTED]</p>
+                  <p><strong>Service Type:</strong> placeholder</p>
+                  <p><strong>Location:</strong> placeholder</p>
+                  <p><strong>Technician:</strong> placeholder</p>
+                  <p><strong>Date:</strong> placeholder</p>
                 </div>
 
                 <div class="service-description">
                   <h3>Service Details</h3>
-                  <p>[CONVERTED]</p>
+                  <p>placeholder</p>
                 </div>
 
                 ${(checkIn.beforePhotos as string[])?.length > 0 ? `
                   <div class="service-photos">
                     <h3>Service Documentation</h3>
-                    <img src="[CONVERTED]" alt="Service documentation" class="service-photo" />
-                    [CONVERTED]" alt="Completed service" class="service-photo" />` : ''}
+                    <img src="placeholder" alt="Service documentation" class="service-photo" />
+                    placeholder" alt="Completed service" class="service-photo" />` : ''}
                   </div>
-      logger.error("Logger call fixed");
 
                 <div class="call-to-action">
                   <h3>Need Similar Service?</h3>
-                  <p>Contact us today for professional [CONVERTED] service in your area. Our experienced technicians are ready to help!</p>
+                  <p>Contact us today for professional placeholder service in your area. Our experienced technicians are ready to help!</p>
                 </div>
               </div>
             `,
@@ -2475,14 +2474,14 @@ export class DatabaseStorage implements IStorage {
             
             synced++;
           } else {
-      const errorText = await postResponse.text(); logger.error("Parameter fixed");
+      const errorText = await postResponse.text(); logger.error("Parameter processed");
             await db.update(checkIns)
               .set({ wordpressSyncStatus: 'failed' })
               .where(eq(checkIns.id, checkIn.id));
             failed++;
           }
         } catch (error) {
-          logger.error("Error logging fixed");
+          logger.error("Storage operation error", { error: error?.message || "Unknown error" });
           await db.update(checkIns)
             .set({ wordpressSyncStatus: 'failed' })
             .where(eq(checkIns.id, checkIn.id));
@@ -2497,7 +2496,7 @@ export class DatabaseStorage implements IStorage {
         message: "WordPress API test successful"
       };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return {
         success: false,
         synced: 0,
@@ -2563,12 +2562,12 @@ export class DatabaseStorage implements IStorage {
     try {
       const result = await db.execute(sql`
         SELECT * FROM reviews 
-        WHERE company_id = [CONVERTED] AND status = 'approved'
+        WHERE company_id = placeholder AND status = 'approved'
         ORDER BY created_at DESC
       `);
       return result.rows;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -2576,26 +2575,26 @@ export class DatabaseStorage implements IStorage {
   // Testimonials operations (new table)
   async getTestimonialsByCompany(companyId: number): Promise<any[]> {
     try {
-      logger.info("Parameter fixed");
+      logger.info("Parameter processed");
       
       // Use direct SQL query since table structure doesn't match drizzle schema
       const neonSql = neon(process.env.DATABASE_URL!);
       const result = await neonSql`
-        SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
+        SELECT id, customer_name, customer_email, placeholder, type, media_url, status, created_at 
         FROM testimonials 
-        WHERE company_id = [CONVERTED]
+        WHERE company_id = placeholder
         ORDER BY created_at DESC
       `;
       
-      logger.info("Parameter fixed");
+      logger.info("Parameter processed");
       
       if (result.length > 0) {
-      logger.info("Logger call fixed");
+      logger.info("Operation completed");
       }
       
       return result;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -2618,7 +2617,7 @@ export class DatabaseStorage implements IStorage {
       const [salesPerson] = await db.select().from(salesPeople).where(eq(salesPeople.id, id));
       return salesPerson;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -2628,7 +2627,7 @@ export class DatabaseStorage implements IStorage {
       const [salesPerson] = await db.select().from(salesPeople).where(eq(salesPeople.userId, userId));
       return salesPerson;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -2638,7 +2637,7 @@ export class DatabaseStorage implements IStorage {
       const [salesPerson] = await db.select().from(salesPeople).where(eq(salesPeople.email, email));
       return salesPerson;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -2662,17 +2661,17 @@ export class DatabaseStorage implements IStorage {
           updatedAt: salesPeople.updatedAt,
           totalCustomers: sql<number>`(
             SELECT COUNT(*) FROM company_assignments 
-            WHERE sales_person_id = [CONVERTED]
+            WHERE sales_person_id = placeholder
           )`,
           monthlyEarnings: sql<number>`(
             SELECT COALESCE(SUM(amount), 0) FROM sales_commissions 
-            WHERE sales_person_id = [CONVERTED] 
+            WHERE sales_person_id = placeholder 
             AND payment_date >= DATE_TRUNC('month', CURRENT_DATE)
             AND status = 'paid'
           )`,
           pendingPayouts: sql<number>`(
             SELECT COALESCE(SUM(amount), 0) FROM sales_commissions 
-            WHERE sales_person_id = [CONVERTED] 
+            WHERE sales_person_id = placeholder 
             AND status = 'approved'
             AND is_paid = false
           )`
@@ -2682,7 +2681,7 @@ export class DatabaseStorage implements IStorage {
 
       return salesPeopleWithStats;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -2691,7 +2690,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(salesPeople).where(eq(salesPeople.isActive, true));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -2710,7 +2709,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedSalesPerson;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -2734,7 +2733,7 @@ export class DatabaseStorage implements IStorage {
       
       return result.rowCount > 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -2745,7 +2744,7 @@ export class DatabaseStorage implements IStorage {
       const [commission] = await db.select().from(salesCommissions).where(eq(salesCommissions.id, id));
       return commission;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -2782,7 +2781,7 @@ export class DatabaseStorage implements IStorage {
         .where(whereCondition)
         .orderBy(desc(salesCommissions.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -2793,7 +2792,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(salesCommissions.companyId, companyId))
         .orderBy(desc(salesCommissions.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -2819,7 +2818,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(salesCommissions.status, 'pending'))
         .orderBy(desc(salesCommissions.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -2833,7 +2832,7 @@ export class DatabaseStorage implements IStorage {
         ))
         .orderBy(desc(salesCommissions.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -2852,7 +2851,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedCommission;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -2864,7 +2863,7 @@ export class DatabaseStorage implements IStorage {
         .set({ success: true })
         .where(sql`created_at >= ${startOfMonth}`);
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -2875,7 +2874,7 @@ export class DatabaseStorage implements IStorage {
       const [assignment] = await db.select().from(companyAssignments).where(eq(companyAssignments.id, id));
       return assignment;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -2904,7 +2903,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(companyAssignments.salesPersonId, salesPersonId))
         .orderBy(desc(companyAssignments.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -2915,7 +2914,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(companyAssignments.companyId, companyId));
       return assignment;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -2934,7 +2933,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedAssignment;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -3033,7 +3032,7 @@ export class DatabaseStorage implements IStorage {
         averageRevenuePerUser: 0
       };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return {
         totalRevenue: 0,
         monthlyRecurringRevenue: 0,
@@ -3108,7 +3107,7 @@ export class DatabaseStorage implements IStorage {
         yearToDate: yearToDateRevenue
       };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return {
         thisMonth: 0,
         lastMonth: 0,
@@ -3149,7 +3148,7 @@ export class DatabaseStorage implements IStorage {
         count: row.count
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3174,7 +3173,7 @@ export class DatabaseStorage implements IStorage {
         reviews: row.reviews
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3199,7 +3198,7 @@ export class DatabaseStorage implements IStorage {
         companies: row.companies
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3240,7 +3239,7 @@ export class DatabaseStorage implements IStorage {
         revenue
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3253,7 +3252,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(companies).orderBy(desc(companies.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3355,7 +3354,7 @@ export class DatabaseStorage implements IStorage {
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
         .slice(0, 10);
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3386,7 +3385,7 @@ export class DatabaseStorage implements IStorage {
       
       return plansWithMetrics;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3411,7 +3410,7 @@ export class DatabaseStorage implements IStorage {
         stripePriceId: plan.stripePriceId
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3468,7 +3467,7 @@ export class DatabaseStorage implements IStorage {
 
       return result[0]?.count || 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return 0;
     }
   }
@@ -3478,7 +3477,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(checkIns).where(eq(checkIns.id, id));
       return (result.rowCount || 0) > 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return false;
     }
   }
@@ -3488,7 +3487,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(blogPosts).where(eq(blogPosts.id, id));
       return (result.rowCount || 0) > 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return false;
     }
   }
@@ -3498,7 +3497,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(reviewResponses).where(eq(reviewResponses.id, id));
       return (result.rowCount || 0) > 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return false;
     }
   }
@@ -3516,7 +3515,7 @@ export class DatabaseStorage implements IStorage {
       
       return updatedPlan || null;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return null;
     }
   }
@@ -3536,7 +3535,7 @@ export class DatabaseStorage implements IStorage {
       
       return result[0]?.revenue || 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return 0;
     }
   }
@@ -3585,7 +3584,7 @@ export class DatabaseStorage implements IStorage {
       const [newPayout] = await db.insert(schema.commissionPayouts).values(payout).returning();
       return newPayout;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -3596,7 +3595,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(schema.commissionPayouts.salesPersonId, salesPersonId))
         .orderBy(desc(schema.commissionPayouts.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3620,7 +3619,7 @@ export class DatabaseStorage implements IStorage {
         .leftJoin(salesPeople, eq(schema.commissionPayouts.salesPersonId, salesPeople.id))
         .orderBy(desc(schema.commissionPayouts.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3634,7 +3633,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedPayout;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -3700,7 +3699,7 @@ export class DatabaseStorage implements IStorage {
         lastSale: lastSaleResult[0]?.lastSale || null
       };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return {
         totalCustomers: 0,
         monthlyEarnings: 0,
@@ -3720,7 +3719,7 @@ export class DatabaseStorage implements IStorage {
 
       return result[0]?.total || 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return 0;
     }
   }
@@ -3747,7 +3746,7 @@ export class DatabaseStorage implements IStorage {
         paid: row.paidAmount
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3757,7 +3756,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(checkIns).orderBy(desc(checkIns.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3766,7 +3765,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(reviewResponses).orderBy(desc(reviewResponses.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3775,7 +3774,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(blogPosts).orderBy(desc(blogPosts.publishDate));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3809,19 +3808,19 @@ export class DatabaseStorage implements IStorage {
           isTrialActive: companies.isTrialActive,
           revenue: sql<number>`
             CASE 
-              WHEN [CONVERTED] = 'starter' THEN 49
-              WHEN [CONVERTED] = 'pro' THEN 79
-              WHEN [CONVERTED] = 'agency' THEN 149
+              WHEN placeholder = 'starter' THEN 49
+              WHEN placeholder = 'pro' THEN 79
+              WHEN placeholder = 'agency' THEN 149
               ELSE 0
             END
           `,
           mrr: sql<number>`
             CASE 
-              WHEN [CONVERTED] = false THEN
+              WHEN placeholder = false THEN
                 CASE 
-                  WHEN [CONVERTED] = 'starter' THEN 49
-                  WHEN [CONVERTED] = 'pro' THEN 79
-                  WHEN [CONVERTED] = 'agency' THEN 149
+                  WHEN placeholder = 'starter' THEN 49
+                  WHEN placeholder = 'pro' THEN 79
+                  WHEN placeholder = 'agency' THEN 149
                   ELSE 0
                 END
               ELSE 0
@@ -3829,7 +3828,7 @@ export class DatabaseStorage implements IStorage {
           `,
           status: sql<string>`
             CASE 
-              WHEN [CONVERTED] = true THEN 'trial'
+              WHEN placeholder = true THEN 'trial'
               ELSE 'active'
             END
           `
@@ -3848,7 +3847,7 @@ export class DatabaseStorage implements IStorage {
         isTrialActive: row.isTrialActive
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3874,7 +3873,7 @@ export class DatabaseStorage implements IStorage {
         return await query.orderBy(desc(helpTopics.lastActivity));
       }
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -3892,7 +3891,7 @@ export class DatabaseStorage implements IStorage {
       
       return topic[0];
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -3902,7 +3901,7 @@ export class DatabaseStorage implements IStorage {
       const [newTopic] = await db.insert(helpTopics).values(topic).returning();
       return newTopic;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -3915,7 +3914,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedTopic;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -3929,7 +3928,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(helpTopics).where(eq(helpTopics.id, id));
       return (result.rowCount || 0) > 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return false;
     }
   }
@@ -3956,7 +3955,7 @@ export class DatabaseStorage implements IStorage {
       
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return false;
     }
   }
@@ -3975,7 +3974,7 @@ export class DatabaseStorage implements IStorage {
       }
       return false;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return false;
     }
   }
@@ -3988,7 +3987,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(helpTopicReplies.topicId, topicId))
         .orderBy(asc(helpTopicReplies.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -4007,7 +4006,7 @@ export class DatabaseStorage implements IStorage {
       
       return newReply;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -4020,7 +4019,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedReply;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -4049,7 +4048,7 @@ export class DatabaseStorage implements IStorage {
       
       return (result.rowCount || 0) > 0;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return false;
     }
   }
@@ -4076,7 +4075,7 @@ export class DatabaseStorage implements IStorage {
       
       return true;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return false;
     }
   }
@@ -4095,7 +4094,7 @@ export class DatabaseStorage implements IStorage {
       }
       return false;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return false;
     }
   }
@@ -4106,7 +4105,7 @@ export class DatabaseStorage implements IStorage {
       const [bugReport] = await db.select().from(schema.bugReports).where(eq(schema.bugReports.id, id));
       return bugReport;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -4115,7 +4114,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(schema.bugReports).orderBy(desc(schema.bugReports.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -4126,7 +4125,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(schema.bugReports.companyId, companyId))
         .orderBy(desc(schema.bugReports.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -4139,7 +4138,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return newBugReport;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -4152,7 +4151,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedBugReport;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -4165,7 +4164,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return assignedBugReport;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -4184,7 +4183,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return resolvedBugReport;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -4195,7 +4194,7 @@ export class DatabaseStorage implements IStorage {
       const [featureRequest] = await db.select().from(schema.featureRequests).where(eq(schema.featureRequests.id, id));
       return featureRequest;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -4204,7 +4203,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(schema.featureRequests).orderBy(desc(schema.featureRequests.votes), desc(schema.featureRequests.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -4215,7 +4214,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(schema.featureRequests.companyId, companyId))
         .orderBy(desc(schema.featureRequests.votes), desc(schema.featureRequests.createdAt));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -4228,7 +4227,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return newFeatureRequest;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -4241,7 +4240,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedFeatureRequest;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return undefined;
     }
   }
@@ -4254,7 +4253,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return votedFeatureRequest;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -4267,7 +4266,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return assignedFeatureRequest;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -4285,7 +4284,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return completedFeatureRequest;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -4862,7 +4861,7 @@ export class DatabaseStorage implements IStorage {
         secretKey: '••••••••••••••••' // Hide secret completely
       }));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -4875,7 +4874,7 @@ export class DatabaseStorage implements IStorage {
       
       return credentials;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
     }
   }
@@ -4886,7 +4885,7 @@ export class DatabaseStorage implements IStorage {
         .set({ lastUsedAt: new Date() })
         .where(eq(apiCredentials.id, id));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
     }
   }
 
@@ -4920,7 +4919,7 @@ export class DatabaseStorage implements IStorage {
         permissions: credentials.permissions // Return as array
       };
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       throw error;
     }
   }
@@ -4940,7 +4939,7 @@ export class DatabaseStorage implements IStorage {
       
       return !!result;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return false;
     }
   }
@@ -4965,7 +4964,7 @@ export class DatabaseStorage implements IStorage {
       
       return result ? newSecret : null;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return null;
     }
   }

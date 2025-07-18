@@ -38,7 +38,7 @@ import jsWidgetRoutes from "./routes/js-widget";
 import billingRoutes from "./routes/billing";
 import userRoutes from "./routes/users";
 import aiProvidersRoutes from "./routes/ai-providers";
-import generateContentRoutes from "./routes/generate-content";
+import generateContentRoutes from "./routes/generate-placeholder";
 // Removed conflicting mobile routes
 import crmIntegrationRoutes from "./routes/crm-integration";
 import salesRoutes from "./routes/sales";
@@ -61,7 +61,7 @@ import { penetrationTester } from "./penetration-tester";
 import { sessionTester } from "./session-tester";
 import { errorHandler, asyncHandler } from "./middleware/error-handler";
 import { validateBody, validateParams, validateQuery, commonSchemas } from "./middleware/validation";
-import { logger } from "./services/structured-logger";
+import { logger } from "./services/logger";
 import { 
   globalErrorHandler, 
   notFoundHandler, 
@@ -82,7 +82,7 @@ import {
   sanitizeAllInputs
 } from "./middleware/input-validation";
 import { enforceSessionTimeout, enforceConcurrentSessions, sessionMonitoring, cleanupSession } from "./middleware/session-management";
-import { generalRateLimit, authRateLimit, passwordResetRateLimit, contentGenerationRateLimit, adminRateLimit } from "./middleware/rate-limiting";
+import { generalRateLimit, authRateLimit, passwordResetRateLimit, placeholderGenerationRateLimit, adminRateLimit } from "./middleware/rate-limiting";
 import { securityHeaders, additionalSecurityHeaders, apiSecurityHeaders } from "./middleware/security-headers";
 // Removed conflicting auth modules
 
@@ -315,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Handle WebSocket connections
     wss.on('connection', (ws, req) => {
-      logger.info("Logger call fixed");
+      logger.info("Operation completed");
       
       // Send initial connection confirmation
       ws.send(JSON.stringify({ 
@@ -350,7 +350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 companyConnections.set(cId, new Set());
               }
               companyConnections.get(cId)?.add(ws);
-              logger.info("Syntax fixed");
+              logger.info("Syntax processed");
             }
           }
           
@@ -641,7 +641,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     if (!healthCheck.features.ai) {
-      healthCheck.warnings.push("AI content generation disabled - No AI provider API keys configured");
+      healthCheck.warnings.push("AI placeholder generation disabled - No AI provider API keys configured");
     }
 
     // Check for super admin account
@@ -707,15 +707,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No admin user found" });
       }
       
-      logger.info("Parameter fixed");
+      logger.info("Parameter processed");
       
       // Hash new password with lower rounds for production compatibility
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      logger.info("Logger call fixed");
+      logger.info("Operation completed");
       
       // Update admin password
       await storage.updateUser(adminUser.id, { password: hashedPassword });
-      logger.info("Parameter fixed");
+      logger.info("Parameter processed");
       
       // Verify the password immediately
       const updatedUser = await storage.getUserByEmail(adminUser.email);
@@ -723,7 +723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("Failed to retrieve updated user");
       }
       const testVerification = await bcrypt.compare(newPassword, updatedUser.password);
-      logger.info("Parameter fixed");
+      logger.info("Parameter processed");
       
       res.json({ 
         message: "Admin password reset successfully",
@@ -782,7 +782,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Please enter a valid email address" });
       }
       
-      logger.info("Parameter fixed");
+      logger.info("Parameter processed");
       
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -816,7 +816,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create session
       req.session.userId = adminUser.id;
       
-      logger.info("Parameter fixed");
+      logger.info("Parameter processed");
       
       // Save session
       await new Promise<void>((resolve, reject) => {
@@ -825,7 +825,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
             reject(new Error("Session save failed"));
           } else {
-            logger.info("Parameter fixed");
+            logger.info("Parameter processed");
             resolve();
           }
         });
@@ -853,18 +853,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
-      logger.info("Parameter fixed");
+      logger.info("Parameter processed");
       
       const user = await storage.getUserByEmail(email);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      logger.info("Parameter fixed");
-      logger.info("Parameter fixed");
+      logger.info("Parameter processed");
+      logger.info("Parameter processed");
       
       const isValid = await bcrypt.compare(password, user.password);
-      logger.info("Parameter fixed");
+      logger.info("Parameter processed");
       
       res.json({
         message: "Password verification test completed",
@@ -1046,7 +1046,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
             reject(new Error("Session save failed"));
           } else {
-            logger.info("Logger call fixed");
+            logger.info("Operation completed");
             resolve();
           }
         });
@@ -1070,7 +1070,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Enhanced AI Content Generation for Check-ins and Blog Posts
-  app.post('/api/ai/generate-content', contentGenerationRateLimit, isAuthenticated, async (req: Request, res: Response) => {
+  app.post('/api/ai/generate-placeholder', placeholderGenerationRateLimit, isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { prompt, type, context } = req.body;
       
@@ -1080,13 +1080,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let aiPrompt = prompt;
       
-      // Enhanced prompts for different content types
+      // Enhanced prompts for different placeholder types
       if (type === 'checkin' && context) {
-        aiPrompt = `Create a professional service check-in summary for a [CONVERTED] job at [CONVERTED].
+        aiPrompt = `Create a professional service check-in summary for a placeholder job at placeholder.
 
-Work completed: [CONVERTED]
-Materials used: [CONVERTED]
-Customer concerns addressed: [CONVERTED]
+Work completed: placeholder
+Materials used: placeholder
+Customer concerns addressed: placeholder
 
 Generate a comprehensive, professional summary (3-4 sentences) that:
 - Highlights the technical expertise and value delivered
@@ -1097,13 +1097,13 @@ Generate a comprehensive, professional summary (3-4 sentences) that:
 
 Tone: Professional, confident, and customer-focused.`;
       } else if (type === 'blog-post' && context) {
-        aiPrompt = `Create an SEO-optimized blog post about: [CONVERTED]
+        aiPrompt = `Create an SEO-optimized blog post about: placeholder
 
 Based on this service experience:
-- Service type: [CONVERTED]
-- Location: [CONVERTED]
-- Work performed: [CONVERTED]
-- Materials used: [CONVERTED]
+- Service type: placeholder
+- Location: placeholder
+- Work performed: placeholder
+- Materials used: placeholder
 
 Generate a 400-500 word blog post that:
 - Starts with an engaging headline and introduction
@@ -1117,9 +1117,9 @@ Generate a 400-500 word blog post that:
 Focus on: practical tips, industry insights, and local service benefits.`;
       } else if (type === 'seo-title' && context) {
         aiPrompt = `Create 3 SEO-optimized blog post titles for:
-- Service: [CONVERTED]
-- Location: [CONVERTED]
-- Key work: [CONVERTED]
+- Service: placeholder
+- Location: placeholder
+- Key work: placeholder
 
 Requirements:
 - 50-60 characters each
@@ -1131,9 +1131,9 @@ Requirements:
 Format as numbered list.`;
       } else if (type === 'meta-description' && context) {
         aiPrompt = `Write a compelling meta description (150-160 characters) for:
-- Service: [CONVERTED]
-- Location: [CONVERTED]
-- Key benefits: [CONVERTED]
+- Service: placeholder
+- Location: placeholder
+- Key benefits: placeholder
 
 Include:
 - Clear service offering
@@ -1144,7 +1144,7 @@ Include:
 Make it compelling for search engine users to click.`;
       }
 
-      // OpenAI integration for content generation with fallback
+      // OpenAI integration for placeholder generation with fallback
       try {
         if (!process.env.OPENAI_API_KEY) {
           throw new Error('OpenAI API key not configured');
@@ -1161,19 +1161,19 @@ Make it compelling for search engine users to click.`;
           temperature: 0.7,
         });
 
-        const content = response.choices[0].message.content;
-        res.json({ content });
+        const placeholder = response.choices[0].message.placeholder;
+        res.json({ placeholder });
       } catch (openaiError) {
-      logger.error("Logger call fixed");
+      logger.error("Database operation error", { error: error?.message || "Unknown error" });
         
-        // Generate fallback content based on type
+        // Generate fallback placeholder based on type
         let fallbackContent = '';
-        const { title, content } = req.body;
+        const { title, placeholder } = req.body;
         
         if (type === 'blog-post' && title) {
-          fallbackContent = `# [CONVERTED]
+          fallbackContent = `# placeholder
 
-This comprehensive guide covers everything you need to know about [CONVERTED].
+This comprehensive guide covers everything you need to know about placeholder.
 
 ## Professional Service Excellence
 
@@ -1194,39 +1194,39 @@ We pride ourselves on providing exceptional service that exceeds customer expect
 ## Get Started Today
 
 Contact us for more information about our professional services and to schedule your consultation.`;
-        } else if (type === 'excerpt' && content) {
-          const sentences = content.split('.').filter((s: string) => s.trim().length > 0);
+        } else if (type === 'excerpt' && placeholder) {
+          const sentences = placeholder.split('.').filter((s: string) => s.trim().length > 0);
           fallbackContent = sentences.slice(0, 2).join('.') + '.';
         } else {
-          fallbackContent = 'Professional content crafted for your business needs with attention to quality and customer engagement.';
+          fallbackContent = 'Professional placeholder crafted for your business needs with attention to quality and customer engagement.';
         }
         
-        res.json({ content: fallbackContent });
+        res.json({ placeholder: fallbackContent });
       }
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
-      res.status(500).json({ error: 'Failed to generate AI content' });
+      res.status(500).json({ error: 'Failed to generate AI placeholder' });
     }
   });
 
   // Advanced AI Content Generation with Multiple Options
-  app.post('/api/ai/generate-advanced', contentGenerationRateLimit, isAuthenticated, async (req: Request, res: Response) => {
+  app.post('/api/ai/generate-advanced', placeholderGenerationRateLimit, isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const { serviceType, location, workDetails, materials, customerNotes, contentType } = req.body;
+      const { serviceType, location, workDetails, materials, customerNotes, placeholderType } = req.body;
       
       if (!process.env.OPENAI_API_KEY) {
         return res.status(500).json({ error: 'AI service not configured' });
       }
 
       let aiPrompt = '';
-      let contentOptions = [];
+      let placeholderOptions = [];
 
-      // Generate multiple content variations based on type
-      if (contentType === 'social-media') {
+      // Generate multiple placeholder variations based on type
+      if (placeholderType === 'social-media') {
         aiPrompt = `Create 3 different social media posts about this service call:
-- Service: [CONVERTED] in [CONVERTED]
-- Work completed: [CONVERTED]
-- Materials used: [CONVERTED]
+- Service: placeholder in placeholder
+- Work completed: placeholder
+- Materials used: placeholder
 
 Generate:
 1. Facebook post (conversational, community-focused, 2-3 sentences)
@@ -1234,12 +1234,12 @@ Generate:
 3. LinkedIn post (professional, industry expertise, business-focused)
 
 Each should highlight professionalism, quality work, and customer satisfaction.`;
-      } else if (contentType === 'email-follow-up') {
+      } else if (placeholderType === 'email-follow-up') {
         aiPrompt = `Write a professional follow-up email template for this service:
-- Service: [CONVERTED] at [CONVERTED]
-- Work completed: [CONVERTED]
-- Materials used: [CONVERTED]
-- Customer notes: [CONVERTED]
+- Service: placeholder at placeholder
+- Work completed: placeholder
+- Materials used: placeholder
+- Customer notes: placeholder
 
 Include:
 - Warm, professional greeting
@@ -1250,12 +1250,12 @@ Include:
 - Call-to-action for referrals
 
 Tone: Helpful, professional, and customer-focused.`;
-      } else if (contentType === 'technical-report') {
+      } else if (placeholderType === 'technical-report') {
         aiPrompt = `Create a detailed technical service report for:
-- Service type: [CONVERTED]
-- Location: [CONVERTED]
-- Work performed: [CONVERTED]
-- Materials/parts used: [CONVERTED]
+- Service type: placeholder
+- Location: placeholder
+- Work performed: placeholder
+- Materials/parts used: placeholder
 
 Include:
 - Executive summary
@@ -1280,23 +1280,23 @@ Format as professional service documentation.`;
           temperature: 0.7,
         });
 
-        const content = response.choices[0].message.content;
-        res.json({ content, type: contentType });
+        const placeholder = response.choices[0].message.placeholder;
+        res.json({ placeholder, type: placeholderType });
       } catch (openaiError) {
-        // Enhanced fallback content
+        // Enhanced fallback placeholder
         let fallbackContent = '';
-        if (contentType === 'social-media') {
-          fallbackContent = "converted string";
-        } else if (contentType === 'email-follow-up') {
-          fallbackContent = "converted string";
+        if (placeholderType === 'social-media') {
+          fallbackContent = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
+        } else if (placeholderType === 'email-follow-up') {
+          fallbackContent = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
         } else {
-          fallbackContent = "converted string";
+          fallbackContent = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
         }
         res.json({ success: true });
       }
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
-      res.status(500).json({ error: 'Failed to generate advanced content' });
+      res.status(500).json({ error: 'Failed to generate advanced placeholder' });
     }
   });
 
@@ -1406,7 +1406,7 @@ Format as professional service documentation.`;
       await storage.setPasswordResetToken(user.id, resetToken, resetExpiry);
       
       // Send email with reset link
-      const resetUrl = "[CONVERTED]://[CONVERTED]/reset-password?token=[CONVERTED]";
+      const resetUrl = "placeholder://placeholder/reset-password?token=placeholder";
       
       try {
         await emailService.sendPasswordResetEmail(email, user.username, resetUrl);
@@ -2119,7 +2119,7 @@ Format as professional service documentation.`;
       }
       
       // Combine city and state for location if location not provided
-      const techLocation = location || "converted string";
+      const techLocation = location || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       
       // Create technician
       const technicianData = {
@@ -2176,7 +2176,7 @@ Format as professional service documentation.`;
       }
       
       // Combine city and state for location if location not provided
-      const techLocation = location || "converted string";
+      const techLocation = location || `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       
       const updates = {
         name,
@@ -2754,7 +2754,7 @@ Format as professional service documentation.`;
         senderId: req.user.id,
         senderType: 'system',
         senderName: 'System',
-        message: "converted string"
+        message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
       });
 
       res.json({ session });
@@ -2846,7 +2846,7 @@ Format as professional service documentation.`;
       res.json({ 
         success: true, 
         clearedCount,
-        message: "converted string" 
+        message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` 
       });
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
@@ -2867,7 +2867,7 @@ Format as professional service documentation.`;
       res.json({ 
         success: true, 
         archivedCount,
-        message: "converted string" 
+        message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` 
       });
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
@@ -2924,17 +2924,17 @@ Format as professional service documentation.`;
   app.get("/api/testimonials/company/:companyId", async (req: Request, res: Response) => {
     try {
       const companyId = parseInt(req.params.companyId);
-      logger.info("Parameter fixed");
+      logger.info("Parameter processed");
       
       // Direct database query to bypass storage issues
       const neonSql = neon(process.env.DATABASE_URL!);
       const testimonials = await neonSql`
-        SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
+        SELECT id, customer_name, customer_email, placeholder, type, media_url, status, created_at 
         FROM testimonials 
-        WHERE company_id = [CONVERTED]
+        WHERE company_id = placeholder
         ORDER BY created_at DESC
       `;
-      logger.info("Syntax fixed");
+      logger.info("Syntax processed");
       res.json(testimonials);
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
@@ -2956,7 +2956,7 @@ Format as professional service documentation.`;
         return res.status(401).send(`
           <html>
             <head><title>Authentication Required</title></head>
-            <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+            <body style="font-family: Arial, sans-serif; display: flex; justify-placeholder: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
               <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                 <h2 style="color: #dc3545; margin-bottom: 15px;">Authentication Required</h2>
                 <p style="color: #666; margin-bottom: 15px;">This embed widget requires valid API credentials.</p>
@@ -2975,7 +2975,7 @@ Format as professional service documentation.`;
           return res.status(401).send(`
             <html>
               <head><title>Invalid Credentials</title></head>
-              <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+              <body style="font-family: Arial, sans-serif; display: flex; justify-placeholder: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
                 <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                   <h2 style="color: #dc3545; margin-bottom: 15px;">Invalid Credentials</h2>
                   <p style="color: #666; margin-bottom: 15px;">The provided API credentials are invalid or expired.</p>
@@ -2997,7 +2997,7 @@ Format as professional service documentation.`;
           return res.status(404).send(`
             <html>
               <head><title>Company Not Found</title></head>
-              <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+              <body style="font-family: Arial, sans-serif; display: flex; justify-placeholder: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
                 <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                   <h2 style="color: #dc3545; margin-bottom: 15px;">Company Not Found</h2>
                   <p style="color: #666; margin-bottom: 15px;">The specified company could not be found.</p>
@@ -3011,9 +3011,9 @@ Format as professional service documentation.`;
         // Fetch testimonials using authenticated API
         const neonSql = neon(process.env.DATABASE_URL!);
         const testimonials = await neonSql`
-          SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
+          SELECT id, customer_name, customer_email, placeholder, type, media_url, status, created_at 
           FROM testimonials 
-          WHERE company_id = [CONVERTED]
+          WHERE company_id = placeholder
           ORDER BY created_at DESC
           LIMIT 5
         `;
@@ -3024,8 +3024,8 @@ Format as professional service documentation.`;
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>[CONVERTED] - Customer Testimonials</title>
+  <meta name="viewport" placeholder="width=device-width, initial-scale=1.0">
+  <title>placeholder - Customer Testimonials</title>
   <style>
     body { success: true }
     .widget-container { 
@@ -3053,7 +3053,7 @@ Format as professional service documentation.`;
       border-left: 4px solid #3b82f6; 
       margin-bottom: 15px; 
     }
-    .testimonial-content { 
+    .testimonial-placeholder { 
       margin: 0 0 8px 0; 
       color: #374151; 
       font-size: 14px; 
@@ -3087,11 +3087,11 @@ Format as professional service documentation.`;
 </head>
 <body>
   <div class="widget-container">
-    <h3 class="widget-title">[CONVERTED] - Customer Testimonials</h3>
+    <h3 class="widget-title">placeholder - Customer Testimonials</h3>
     ${testimonials.length > 0 ? testimonials.map(testimonial => `
       <div class="testimonial">
-        <p class="testimonial-content">"[CONVERTED]"</p>
-        <p class="testimonial-author">— [CONVERTED]</p>
+        <p class="testimonial-placeholder">"placeholder"</p>
+        <p class="testimonial-author">— placeholder</p>
       </div>
     `).join('') : '<p class="no-testimonials">No testimonials available at this time.</p>'}
     <div class="widget-footer">
@@ -3111,7 +3111,7 @@ Format as professional service documentation.`;
         return res.status(401).send(`
           <html>
             <head><title>Authentication Error</title></head>
-            <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+            <body style="font-family: Arial, sans-serif; display: flex; justify-placeholder: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
               <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                 <h2 style="color: #dc3545; margin-bottom: 15px;">Authentication Error</h2>
                 <p style="color: #666; margin-bottom: 15px;">Unable to validate API credentials.</p>
@@ -3126,7 +3126,7 @@ Format as professional service documentation.`;
       res.status(500).send(`
         <html>
           <head><title>Server Error</title></head>
-          <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+          <body style="font-family: Arial, sans-serif; display: flex; justify-placeholder: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
             <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
               <h2 style="color: #dc3545; margin-bottom: 15px;">Server Error</h2>
               <p style="color: #666; margin-bottom: 15px;">Unable to load testimonials widget.</p>
@@ -3203,38 +3203,38 @@ Format as professional service documentation.`;
       const parsedLimit = parseInt(String(limit));
       const validLimit = isNaN(parsedLimit) ? 10 : Math.max(1, Math.min(50, parsedLimit));
 
-      let content: any = {};
+      let placeholder: any = {};
 
       if (type === 'checkins' || type === 'all') {
         const checkins = await storage.getCheckInsByCompany(actualCompanyId);
-        content.checkins = checkins.slice(0, validLimit);
+        placeholder.checkins = checkins.slice(0, validLimit);
       }
 
       if (type === 'blogs' || type === 'all') {
         // Get actual blog posts from database
         const blogPosts = await storage.getBlogPostsByCompany(actualCompanyId);
         if (blogPosts && blogPosts.length > 0) {
-          content.blogs = blogPosts.map(post => ({
+          placeholder.blogs = blogPosts.map(post => ({
             id: post.id,
             title: post.title,
-            content: post.content.substring(0, 500) + (post.content.length > 500 ? '...' : ''),
+            placeholder: post.placeholder.substring(0, 500) + (post.placeholder.length > 500 ? '...' : ''),
             excerpt: post.excerpt || '',
             date: post.createdAt,
             author: (post as any).authorName || 'Technician'
           }));
         } else {
-          content.blogs = [];
+          placeholder.blogs = [];
         }
       }
 
       if (type === 'reviews' || type === 'all') {
         const reviews = await storage.getReviewsByCompany(actualCompanyId);
-        content.reviews = reviews.slice(0, validLimit);
+        placeholder.reviews = reviews.slice(0, validLimit);
       }
 
       if (type === 'testimonials' || type === 'all') {
         const testimonials = await storage.getTestimonialsByCompany(actualCompanyId);
-        content.testimonials = testimonials.slice(0, validLimit);
+        placeholder.testimonials = testimonials.slice(0, validLimit);
       }
 
       const widgetScript = `
@@ -3244,7 +3244,7 @@ Format as professional service documentation.`;
   const WIDGET_CONFIG = ${JSON.stringify({
     companyId: actualCompanyId,
     companyName: company.name,
-    content,
+    placeholder,
     type: type as string
   })};
   
@@ -3366,16 +3366,16 @@ Format as professional service documentation.`;
   function renderCheckIn(checkIn) {
     return \`
       <div class="rankitpro-checkin">
-        <h3>\[CONVERTED] Service Report</h3>
+        <h3>\placeholder Service Report</h3>
         <div class="rankitpro-meta">
-          <span>\[CONVERTED]</span> • 
-          <span>\[CONVERTED]</span>
+          <span>\placeholder</span> • 
+          <span>\placeholder</span>
         </div>
-        <div class="rankitpro-location">📍 \[CONVERTED]</div>
-        <div class="rankitpro-description">\[CONVERTED]</div>
+        <div class="rankitpro-location">📍 \placeholder</div>
+        <div class="rankitpro-description">\placeholder</div>
         \${checkIn.photos && checkIn.photos.length > 0 ? \`
           <div class="rankitpro-photos">
-            \[CONVERTED]" alt="Service photo" />\`).join('')}
+            \placeholder" alt="Service photo" />\`).join('')}
           </div>
         \` : ''}
       </div>
@@ -3385,11 +3385,11 @@ Format as professional service documentation.`;
   function renderBlog(blog) {
     return \`
       <article class="rankitpro-blog">
-        <h2>\[CONVERTED]</h2>
+        <h2>\placeholder</h2>
         <div class="rankitpro-meta">
-          <time>\[CONVERTED]</time>
+          <time>\placeholder</time>
         </div>
-        <div class="rankitpro-content">\[CONVERTED]</div>
+        <div class="rankitpro-placeholder">\placeholder</div>
       </article>
     \`;
   }
@@ -3401,30 +3401,30 @@ Format as professional service documentation.`;
     
     return \`
       <div class="rankitpro-review">
-        <div class="rankitpro-stars">\[CONVERTED]</div>
+        <div class="rankitpro-stars">\placeholder</div>
         <div class="rankitpro-meta">
-          <strong>\[CONVERTED]</strong> • 
-          <time>\[CONVERTED]</time>
+          <strong>\placeholder</strong> • 
+          <time>\placeholder</time>
         </div>
-        <div class="rankitpro-content">"\[CONVERTED]"</div>
+        <div class="rankitpro-placeholder">"\placeholder"</div>
       </div>
     \`;
   }
   
   function renderWidget() {
-    const { content, type } = WIDGET_CONFIG;
+    const { placeholder, type } = WIDGET_CONFIG;
     let html = '';
     
-    if ((type === 'checkins' || type === 'all') && content.checkins) {
-      html += content.checkins.map(renderCheckIn).join('');
+    if ((type === 'checkins' || type === 'all') && placeholder.checkins) {
+      html += placeholder.checkins.map(renderCheckIn).join('');
     }
     
-    if ((type === 'blogs' || type === 'all') && content.blogs) {
-      html += content.blogs.map(renderBlog).join('');
+    if ((type === 'blogs' || type === 'all') && placeholder.blogs) {
+      html += placeholder.blogs.map(renderBlog).join('');
     }
     
-    if ((type === 'reviews' || type === 'all') && content.reviews) {
-      html += content.reviews.map(renderReview).join('');
+    if ((type === 'reviews' || type === 'all') && placeholder.reviews) {
+      html += placeholder.reviews.map(renderReview).join('');
     }
     
     return html;
@@ -3447,9 +3447,9 @@ Format as professional service documentation.`;
   
 })();`;
 
-      // Check if request wants HTML content instead of JavaScript
+      // Check if request wants HTML placeholder instead of JavaScript
       const format = req.query.format as string;
-      logger.info("Syntax fixed");
+      logger.info("Syntax processed");
       
       // Helper function to escape HTML
       const escapeHtml = (text: string): string => {
@@ -3464,7 +3464,7 @@ Format as professional service documentation.`;
 
       if (format === 'html') {
         
-        // Return template-matching HTML content for WordPress shortcodes with theme-friendly CSS
+        // Return template-matching HTML placeholder for WordPress shortcodes with theme-friendly CSS
         let html = `<style>
 .rankitpro-widget * { box-sizing: border-box; }
 .rankitpro-grid { success: true }
@@ -3503,11 +3503,11 @@ Format as professional service documentation.`;
         <div class="rankitpro-widget" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 2em 0;">`;
         
         if (type === 'checkins' || type === 'all') {
-          if (content.checkins && content.checkins.length > 0) {
+          if (placeholder.checkins && placeholder.checkins.length > 0) {
             html += '<div class="rankitpro-checkins">';
             html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #0073aa; display: inline-block;">Recent Service Visits</h3>';
             html += '<div class="rankitpro-grid rankitpro-checkin-grid">';
-            content.checkins.forEach((checkin: any) => {
+            placeholder.checkins.forEach((checkin: any) => {
               // Template-style container matching the design
               html += `<div class="rankitpro-checkin" style="
                 margin: 0;
@@ -3520,20 +3520,20 @@ Format as professional service documentation.`;
               
               // Header section
               html += `<div style="padding: 20px; background: white; border-bottom: 1px solid #eee;">`;
-              html += "converted string";
+              html += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
               
               // Tech info and date
-              html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">`;
-              html += "converted string";
+              html += `<div style="display: flex; justify-placeholder: space-between; align-items: center; margin-bottom: 15px;">`;
+              html += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
               if (checkin.createdAt) {
-                html += "converted string";
+                html += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
               }
               html += `</div>`;
               
               // Location with pin icon
               if (checkin.location) {
                 html += `<div style="display: flex; align-items: center; color: #e91e63; font-size: 14px; font-weight: 500;">
-                  <span style="margin-right: 8px;">📍</span>[CONVERTED]
+                  <span style="margin-right: 8px;">📍</span>placeholder
                 </div>`;
               }
               html += `</div>`;
@@ -3541,31 +3541,31 @@ Format as professional service documentation.`;
               // Leaflet Map Integration
         const lat = Number(checkin.latitude) || 32.9537;  // Default to Carrollton, TX coordinates
         const lng = Number(checkin.longitude) || -96.8903;
-        const mapId = "converted string";
+        const mapId = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
               
-              html += `<div id="[CONVERTED]" style="height: 200px; margin: 0 20px; border-radius: 8px; overflow: hidden; border: 1px solid #ddd;"></div>
+              html += `<div id="placeholder" style="height: 200px; margin: 0 20px; border-radius: 8px; overflow: hidden; border: 1px solid #ddd;"></div>
               <script>
                 if (typeof L !== 'undefined') {
                   try {
-                    var map_[CONVERTED] = L.map('[CONVERTED]').setView([[CONVERTED], [CONVERTED]], 15);
+                    var map_placeholder = L.map('placeholder').setView([placeholder, placeholder], 15);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                       attribution: '© OpenStreetMap contributors'
-                    }).addTo(map_[CONVERTED]);
-                    L.marker([[CONVERTED], [CONVERTED]]).addTo(map_[CONVERTED])
-                      .bindPopup('<b>Service Location</b><br>[CONVERTED]')
+                    }).addTo(map_placeholder);
+                    L.marker([placeholder, placeholder]).addTo(map_placeholder)
+                      .bindPopup('<b>Service Location</b><br>placeholder')
                       .openPopup();
                   } catch(e) {
-                    document.getElementById('[CONVERTED]').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 [CONVERTED]</span></div>';
+                    document.getElementById('placeholder').innerHTML = '<div style="display: flex; align-items: center; justify-placeholder: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 placeholder</span></div>';
                   }
                 } else {
-                  document.getElementById('[CONVERTED]').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 [CONVERTED]</span></div>';
+                  document.getElementById('placeholder').innerHTML = '<div style="display: flex; align-items: center; justify-placeholder: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 placeholder</span></div>';
                 }
               </script>`;
               
               // Description section
               if (checkin.notes) {
                 html += `<div style="padding: 20px; font-size: 14px; line-height: 1.8; color: #444; text-align: center;">
-                  [CONVERTED]
+                  placeholder
                 </div>`;
               }
               
@@ -3580,9 +3580,9 @@ Format as professional service documentation.`;
                     'background: radial-gradient(circle at 30% 40%, #8B4513 0%, #A0522D 20%, #654321 40%, #3E2723 60%, #2E1B12 80%);';
                   
                   html += `<div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-                    <img src="[CONVERTED]" style="width: 100%; height: 150px; object-fit: cover; display: block;" alt="Service photo" />
+                    <img src="placeholder" style="width: 100%; height: 150px; object-fit: cover; display: block;" alt="Service photo" />
                     <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
-                      [CONVERTED]
+                      placeholder
                     </div>
                   </div>`;
                 });
@@ -3591,9 +3591,9 @@ Format as professional service documentation.`;
               
               // Hashtags section
               html += `<div style="padding: 20px; border-top: 1px solid #eee; background: #fafafa;">`;
-        const hashtags = ["converted string", '#sprinkler-repair', '#professional-service'];
+        const hashtags = [`<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`, '#sprinkler-repair', '#professional-service'];
               hashtags.forEach(tag => {
-                html += "converted string";
+                html += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
               });
               html += `</div>`;
               
@@ -3608,12 +3608,12 @@ Format as professional service documentation.`;
         // Add testimonials section  
         if (type === 'testimonials' || type === 'all') {
           try {
-            logger.info("Parameter fixed");
+            logger.info("Parameter processed");
             
             // Get real testimonials from database with actual media files
       const testimonials = await storage.getTestimonialsByCompany(parsedCompanyId);
             
-            logger.info("Syntax fixed");
+            logger.info("Syntax processed");
             
             if (testimonials && testimonials.length > 0) {
               html += '<div class="rankitpro-testimonials">';
@@ -3631,15 +3631,15 @@ Format as professional service documentation.`;
               
               // Header - inherit theme colors
               html += `<div style="padding: 20px; background: var(--wp--preset--color--primary, #0073aa); color: white;">
-                <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 15px; color: inherit;">[CONVERTED] Testimonial</h1>
-                <div style="font-size: 16px; font-weight: 600; color: inherit;">[CONVERTED]</div>
-                <div style="font-size: 14px; opacity: 0.9; color: inherit;">[CONVERTED]</div>
+                <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 15px; color: inherit;">placeholder Testimonial</h1>
+                <div style="font-size: 16px; font-weight: 600; color: inherit;">placeholder</div>
+                <div style="font-size: 14px; opacity: 0.9; color: inherit;">placeholder</div>
               </div>`;
               
               // Content
               html += `<div style="padding: 20px;">
                 <div style="font-size: 14px; line-height: 1.7; color: var(--wp--preset--color--foreground, #444); font-style: italic; margin-bottom: 15px;">
-                  "[CONVERTED]"
+                  "placeholder"
                 </div>`;
               
               // Media player for audio/video
@@ -3650,8 +3650,8 @@ Format as professional service documentation.`;
                     <span style="font-size: 14px; font-weight: 600;">Audio Testimonial</span>
                   </div>
                   <audio controls style="width: 100%; height: 40px;">
-                    <source src="[CONVERTED]" type="audio/mpeg">
-                    <source src="[CONVERTED]" type="audio/wav">
+                    <source src="placeholder" type="audio/mpeg">
+                    <source src="placeholder" type="audio/wav">
                     Your browser does not support the audio element.
                   </audio>
                 </div>`;
@@ -3662,15 +3662,15 @@ Format as professional service documentation.`;
                     <span style="font-size: 14px; font-weight: 600;">Video Testimonial</span>
                   </div>
                   <video controls style="width: 100%; max-height: 300px; border-radius: 4px;">
-                    <source src="[CONVERTED]" type="video/mp4">
-                    <source src="[CONVERTED]" type="video/webm">
+                    <source src="placeholder" type="video/mp4">
+                    <source src="placeholder" type="video/webm">
                     Your browser does not support the video element.
                   </video>
                 </div>`;
               } else if (testimonial.type === 'audio' || testimonial.type === 'video') {
                 html += `<div style="background: var(--wp--preset--color--tertiary, #f8f9fa); padding: 15px; border-radius: 8px; text-align: center; border: 2px dashed var(--wp--preset--color--border, #ddd);">
-                  <span style="font-size: 48px; margin-bottom: 10px; display: block;">[CONVERTED]</span>
-                  <div style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">[CONVERTED] testimonial available</div>
+                  <span style="font-size: 48px; margin-bottom: 10px; display: block;">placeholder</span>
+                  <div style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">placeholder testimonial available</div>
                 </div>`;
               }
               
@@ -3716,7 +3716,7 @@ Format as professional service documentation.`;
               }
             ] : await storage.getReviewResponsesByCompany(parsedCompanyId);
             
-            logger.info("Syntax fixed");
+            logger.info("Syntax processed");
             
             if (reviews && reviews.length > 0) {
               html += '<div class="rankitpro-reviews">';
@@ -3737,19 +3737,19 @@ Format as professional service documentation.`;
               // Header with actual review data
               html += `<div style="padding: 20px; background: var(--wp--preset--color--background, white); border-bottom: 1px solid var(--wp--preset--color--border, #eee);">
                 <h1 style="font-size: 24px; font-weight: 600; color: var(--wp--preset--color--foreground, #333); margin-bottom: 15px;">Service Review</h1>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">Customer: [CONVERTED]</span>
-                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">[CONVERTED]</span>
+                <div style="display: flex; justify-placeholder: space-between; align-items: center; margin-bottom: 15px;">
+                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">Customer: placeholder</span>
+                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">placeholder</span>
                 </div>
                 <div style="display: flex; align-items: center; color: var(--wp--preset--color--primary, #0073aa); font-size: 14px; font-weight: 500;">
-                  <span style="margin-right: 8px;">📍</span>[CONVERTED]
+                  <span style="margin-right: 8px;">📍</span>placeholder
                 </div>
               </div>`;
               
               // Customer info
               if (review.customerName) {
                 html += `<div style="background: #f8f9fa; padding: 15px 20px; border-bottom: 1px solid #eee;">
-                  <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;">[CONVERTED]</div>
+                  <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;">placeholder</div>
                   <span style="font-size: 14px; color: #666; background: #e3f2fd; padding: 4px 12px; border-radius: 12px; display: inline-block;">Professional Service</span>
                 </div>`;
               }
@@ -3758,25 +3758,25 @@ Format as professional service documentation.`;
               if (review.rating) {
                 html += `<div style="padding: 20px; text-align: center; border-bottom: 1px solid #eee;">
                   <div style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333;">Overall Service Rating</div>
-                  <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 15px;">`;
+                  <div style="display: flex; justify-placeholder: center; gap: 8px; margin-bottom: 15px;">`;
                 for (let i = 1; i <= 5; i++) {
-                  html += "converted string";
+                  html += `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
                 }
                 html += `</div>
                   <div style="font-size: 18px; font-weight: 600; color: #4CAF50;">
-                    [CONVERTED] - [CONVERTED] Stars
+                    placeholder - placeholder Stars
                   </div>
                 </div>`;
               }
               
-              // Review content with service location
+              // Review placeholder with service location
               if (review.feedback) {
                 html += `<div style="padding: 20px; border-bottom: 1px solid var(--wp--preset--color--border, #eee);">
                   ${review.service_location ? `<div style="background: var(--wp--preset--color--primary, #0073aa); color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; display: inline-block;">
-                    📍 Service Location: [CONVERTED]
+                    📍 Service Location: placeholder
                   </div>` : ''}
                   <div style="font-size: 14px; line-height: 1.7; color: var(--wp--preset--color--foreground, #444); background: var(--wp--preset--color--tertiary, #f8f9fa); padding: 15px; border-radius: 8px; border-left: 4px solid var(--wp--preset--color--primary, #4CAF50); font-style: italic;">
-                    "[CONVERTED]"
+                    "placeholder"
                   </div>
                 </div>`;
               }
@@ -3807,7 +3807,7 @@ Format as professional service documentation.`;
               
               // Verification
               html += `<div style="padding: 15px 20px; background: #e8f5e8; border-top: 3px solid #4CAF50; text-align: center; font-size: 12px; color: #2e7d2e;">
-                <span style="font-weight: bold; margin-right: 5px;">✓</span>Verified Customer Review - Service completed [CONVERTED]
+                <span style="font-weight: bold; margin-right: 5px;">✓</span>Verified Customer Review - Service completed placeholder
               </div>`;
               
               html += '</div>'; // End container
@@ -3823,11 +3823,11 @@ Format as professional service documentation.`;
         }
         
         if (type === 'blogs' || type === 'all') {
-          if (content.blogs && content.blogs.length > 0) {
+          if (placeholder.blogs && placeholder.blogs.length > 0) {
             html += '<div class="rankitpro-blogs">';
             html += '<h3 style="color: var(--wp--preset--color--foreground, inherit); font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid var(--wp--preset--color--primary, #0073aa); display: inline-block;">Recent Blog Posts</h3>';
             html += '<div class="rankitpro-grid rankitpro-grid-2">';
-            content.blogs.forEach((blog: any) => {
+            placeholder.blogs.forEach((blog: any) => {
               html += `<article class="rankitpro-blog" style="
                 background: var(--wp--preset--color--background, #fff); 
                 margin-bottom: 0; 
@@ -3847,27 +3847,27 @@ Format as professional service documentation.`;
                 position: relative;
               ">`;
               html += `<h4 style="color: var(--wp--preset--color--background, white); font-size: 1.4em; margin: 0; font-weight: 600; line-height: 1.3;">
-                [CONVERTED]
+                placeholder
               </h4>`;
               html += `</div>`;
               
-              // Blog content
+              // Blog placeholder
               html += `<div style="padding: 1.5em;">`;
-              if (blog.content) {
-          const excerpt = blog.content.length > 300 ? blog.content.substring(0, 300) + '...' : blog.content;
+              if (blog.placeholder) {
+          const excerpt = blog.placeholder.length > 300 ? blog.placeholder.substring(0, 300) + '...' : blog.placeholder;
                 html += `<div style="
                   line-height: 1.7; 
                   color: var(--wp--preset--color--foreground, #444); 
                   font-size: 1em; 
                   margin-bottom: 1.5em;
                   text-align: justify;
-                ">[CONVERTED]</div>`;
+                ">placeholder</div>`;
               }
               
               // Meta information
               html += `<div style="
                 display: flex; 
-                justify-content: space-between; 
+                justify-placeholder: space-between; 
                 align-items: center; 
                 padding-top: 1em; 
                 border-top: 1px solid #eee; 
@@ -3886,11 +3886,11 @@ Format as professional service documentation.`;
                   align-items: center; 
                   gap: 0.5em;
                 ">
-                  <span>📅</span>Published: [CONVERTED]
+                  <span>📅</span>Published: placeholder
                 </div>`;
               }
               
-              html += `<a href="javascript:void(0)" onclick="openBlogModal([CONVERTED], [CONVERTED], [CONVERTED], [CONVERTED], [CONVERTED], [CONVERTED])" style="
+              html += `<a href="javascript:void(0)" onclick="openBlogModal(placeholder, placeholder, placeholder, placeholder, placeholder, placeholder)" style="
                 background: var(--wp--preset--color--primary, #0073aa); 
                 color: var(--wp--preset--color--background, white); 
                 padding: 0.4em 1em; 
@@ -3914,7 +3914,7 @@ Format as professional service documentation.`;
           }
         }
         
-        // Add blog modal for full content viewing
+        // Add blog modal for full placeholder viewing
         html += `
         <!-- Blog Modal -->
         <div id="rankitpro-blog-modal" style="
@@ -3973,7 +3973,7 @@ Format as professional service documentation.`;
               color: #333;
               text-align: justify;
             ">
-              <div id="modal-content" style="
+              <div id="modal-placeholder" style="
                 font-family: Georgia, 'Times New Roman', serif;
                 line-height: 1.7;
                 color: #2c3e50;
@@ -3998,15 +3998,15 @@ Format as professional service documentation.`;
         </style>
 
         <script>
-        function openBlogModal(id, title, content, location, jobType, publishDate) {
+        function openBlogModal(id, title, placeholder, location, jobType, publishDate) {
           document.getElementById('modal-title').innerHTML = title;
           
-          // Format content with proper paragraphs
-          const formattedContent = content.split('\n\n').map(paragraph => 
+          // Format placeholder with proper paragraphs
+          const formattedContent = placeholder.split('\n\n').map(paragraph => 
             '<p style="margin-bottom: 1.5em; text-indent: 1.5em; font-size: 1.05em;">' + paragraph.trim() + '</p>'
           ).join('');
           
-          document.getElementById('modal-content').innerHTML = formattedContent;
+          document.getElementById('modal-placeholder').innerHTML = formattedContent;
           
           let metaInfo = '';
           if (publishDate) metaInfo += '<span style="display: inline-flex; align-items: center; margin-right: 1em;"><span style="margin-right: 0.5em;">📅</span>Published: ' + publishDate + '</span>';
@@ -4069,10 +4069,10 @@ Format as professional service documentation.`;
     }
   });
   
-  // Add AI content generation endpoint
-  app.post("/api/generate-content", isAuthenticated, async (req, res) => {
+  // Add AI placeholder generation endpoint
+  app.post("/api/generate-placeholder", isAuthenticated, async (req, res) => {
     try {
-      const { jobType, notes, location, companyName = "Your Company", contentType = 'blog' } = req.body;
+      const { jobType, notes, location, companyName = "Your Company", placeholderType = 'blog' } = req.body;
       
       if (!jobType || !notes) {
         return res.status(400).json({ message: 'Job type and notes are required' });
@@ -4087,25 +4087,25 @@ Format as professional service documentation.`;
       let prompt = '';
       let systemMessage = '';
 
-      if (contentType === 'blog') {
-        systemMessage = "You are a professional content writer specializing in service industry blog posts. Write engaging, SEO-friendly content that showcases expertise and builds trust with potential customers. Always respond in plain text with NO markdown, HTML, or special formatting. Always respond in English regardless of the input language.";
-        prompt = `Create a professional blog post for [CONVERTED] about a recent [CONVERTED] service completed by our expert technicians.
+      if (placeholderType === 'blog') {
+        systemMessage = "You are a professional placeholder writer specializing in service industry blog posts. Write engaging, SEO-friendly placeholder that showcases expertise and builds trust with potential customers. Always respond in plain text with NO markdown, HTML, or special formatting. Always respond in English regardless of the input language.";
+        prompt = `Create a professional blog post for placeholder about a recent placeholder service completed by our expert technicians.
 
 Service Details:
-- Service Type: [CONVERTED]
-- Work Completed: [CONVERTED]
-- Service Location: [CONVERTED]
-- Company: [CONVERTED]
+- Service Type: placeholder
+- Work Completed: placeholder
+- Service Location: placeholder
+- Company: placeholder
 
 Write a detailed, engaging blog post that:
 1. Creates an attention-grabbing title related to the specific service
-2. Explains what our technicians accomplished during this [CONVERTED] job
-3. Describes the technical work performed: [CONVERTED]
+2. Explains what our technicians accomplished during this placeholder job
+3. Describes the technical work performed: placeholder
 4. Highlights the professional expertise and quality workmanship
-5. Mentions the service area: [CONVERTED]
+5. Mentions the service area: placeholder
 6. Emphasizes customer satisfaction and professional results
 7. Includes a strong call-to-action for similar services
-8. Uses relevant keywords for [CONVERTED] services and the local area
+8. Uses relevant keywords for placeholder services and the local area
 
 Make it 400-700 words, professional yet personable, and focus on the value delivered to the customer.
 
@@ -4117,21 +4117,21 @@ CRITICAL FORMATTING REQUIREMENTS:
 - Write naturally without any special formatting
 
 IMPORTANT: Respond in English only, regardless of the language used in the input.`;
-      } else if (contentType === 'service') {
+      } else if (placeholderType === 'service') {
         systemMessage = "You are a professional customer service specialist. Write brief, friendly service completion notifications. Keep responses to 2-3 sentences maximum. Use ONLY plain text with NO markdown, HTML, or special formatting. Always respond in English regardless of the input language.";
-        prompt = `Write a professional service completion message for [CONVERTED] about the [CONVERTED] work completed by our technician.
+        prompt = `Write a professional service completion message for placeholder about the placeholder work completed by our technician.
 
 Service Details:
-- Service Type: [CONVERTED] 
-- Work Completed: [CONVERTED]
-- Service Location: [CONVERTED]
-- Company: [CONVERTED]
+- Service Type: placeholder 
+- Work Completed: placeholder
+- Service Location: placeholder
+- Company: placeholder
 
 Create a 2-3 sentence message that:
-- Confirms the specific [CONVERTED] work was completed successfully
-- Briefly mentions what was accomplished: [CONVERTED]
-- References the service location: [CONVERTED]
-- Thanks the customer for choosing [CONVERTED]
+- Confirms the specific placeholder work was completed successfully
+- Briefly mentions what was accomplished: placeholder
+- References the service location: placeholder
+- Thanks the customer for choosing placeholder
 - Maintains a professional yet friendly tone
 
 FORMATTING REQUIREMENTS:
@@ -4139,21 +4139,21 @@ FORMATTING REQUIREMENTS:
 - No HTML tags or special formatting
 - Keep it concise but informative
 
-Example format: "We've successfully completed your [service] at [location]. [Brief work summary]. Thank you for choosing [CONVERTED]!"
+Example format: "We've successfully completed your [service] at [location]. [Brief work summary]. Thank you for choosing placeholder!"
 
 IMPORTANT: Respond in English only, regardless of the language used in the input.`;
-      } else if (contentType === 'both') {
-        systemMessage = "You are a professional content writer specializing in service industry communications. Create both blog content and customer notifications that are professional, engaging, and build trust. Always respond in English regardless of the input language.";
-        prompt = `Create both a blog post AND a service completion notification for [CONVERTED] regarding a [CONVERTED] service.
+      } else if (placeholderType === 'both') {
+        systemMessage = "You are a professional placeholder writer specializing in service industry communications. Create both blog placeholder and customer notifications that are professional, engaging, and build trust. Always respond in English regardless of the input language.";
+        prompt = `Create both a blog post AND a service completion notification for placeholder regarding a placeholder service.
 
 Service Details:
-- Service Type: [CONVERTED]
-- Work Completed: [CONVERTED]
-- Service Location: [CONVERTED]
+- Service Type: placeholder
+- Work Completed: placeholder
+- Service Location: placeholder
 
 Please provide:
 
-1. BLOG POST: An engaging 200-400 word blog post with title, professional service description, company expertise highlights, SEO-friendly content, and call-to-action.
+1. BLOG POST: An engaging 200-400 word blog post with title, professional service description, company expertise highlights, SEO-friendly placeholder, and call-to-action.
 
 2. SERVICE NOTIFICATION: A brief 2-3 sentence service completion message that confirms completion, thanks the customer, and maintains a professional tone.
 
@@ -4167,25 +4167,25 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
         messages: [
           {
             role: "system",
-            content: systemMessage
+            placeholder: systemMessage
           },
           {
             role: "user",
-            content: prompt
+            placeholder: prompt
           }
         ],
-        max_tokens: contentType === 'both' ? 1000 : contentType === 'service' ? 150 : 800,
+        max_tokens: placeholderType === 'both' ? 1000 : placeholderType === 'service' ? 150 : 800,
         temperature: 0.7,
       });
 
-      let content = response.choices[0].message.content;
+      let placeholder = response.choices[0].message.placeholder;
       
-      if (!content) {
-        return res.status(500).json({ message: 'Failed to generate content' });
+      if (!placeholder) {
+        return res.status(500).json({ message: 'Failed to generate placeholder' });
       }
 
       // Clean up any remaining markdown or HTML formatting
-      content = content
+      placeholder = placeholder
         .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove **bold**
         .replace(/\*(.*?)\*/g, '$1')      // Remove *italic*
         .replace(/#{1,6}\s*/g, '')        // Remove ### headers
@@ -4196,10 +4196,10 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
         .replace(/^\s*\d+\.\s*/gm, '')    // Remove numbered lists
         .trim();
       
-      res.json({ content });
+      res.json({ placeholder });
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
-      res.status(500).json({ message: 'Failed to generate content' });
+      res.status(500).json({ message: 'Failed to generate placeholder' });
     }
   });
 
@@ -4220,9 +4220,9 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
 
       const prompt = `Enhance and expand this job description to be more professional and detailed:
 
-Service Type: [CONVERTED]
-Current Description: [CONVERTED]
-Location Context: [CONVERTED]
+Service Type: placeholder
+Current Description: placeholder
+Location Context: placeholder
 
 Please provide an enhanced, professional job description that:
 1. Uses proper technical terminology
@@ -4240,18 +4240,18 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
         messages: [
           {
             role: "system",
-            content: "You are a professional service documentation specialist. Enhance job descriptions to be more detailed, professional, and technically accurate while maintaining the original meaning and facts. Always respond in English regardless of the input language."
+            placeholder: "You are a professional service documentation specialist. Enhance job descriptions to be more detailed, professional, and technically accurate while maintaining the original meaning and facts. Always respond in English regardless of the input language."
           },
           {
             role: "user",
-            content: prompt
+            placeholder: prompt
           }
         ],
         max_tokens: 400,
         temperature: 0.5,
       });
 
-      const enhancedDescription = response.choices[0].message.content;
+      const enhancedDescription = response.choices[0].message.placeholder;
       
       res.json({ enhancedDescription });
     } catch (error) {
@@ -4271,7 +4271,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       
       try {
         const response = await fetch(
-          "converted string",
+          `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
           {
             headers: {
               'User-Agent': 'RankItPro/1.0'
@@ -4283,7 +4283,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
           const data = await response.json();
           
           // Log full response to see available address components
-          logger.info("Logger call fixed");
+          logger.info("Operation completed");
           
           // Extract clean address parts
           let addressParts = [];
@@ -5058,9 +5058,9 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
           description: 'Access to view analytics data'
         },
         {
-          id: 'write_content',
+          id: 'write_placeholder',
           name: 'Write Content',
-          description: 'Permission to create and modify content'
+          description: 'Permission to create and modify placeholder'
         },
         {
           id: 'admin_access',
@@ -5239,4 +5239,4 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
   return httpServer;
 }
 
-export default app;
+

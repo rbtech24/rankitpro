@@ -1,7 +1,7 @@
 import express from 'express';
 import { storage } from '../storage.js';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = express.Router();
 
 // Public endpoint for website widget to fetch reviews
@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
       total: formattedReviews.length
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: "Failed to fetch reviews" });
   }
 });

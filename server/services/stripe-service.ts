@@ -2,10 +2,10 @@ import Stripe from "stripe";
 import { storage } from "../storage";
 import { User, Company } from "@shared/schema";
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 // Check if Stripe API key is available
 if (!process.env.STRIPE_SECRET_KEY) {
-  logger.warn("Parameter fixed");
+  logger.warn("Parameter processed");
 }
 
 // Initialize Stripe client conditionally based on API key availability
@@ -34,7 +34,7 @@ function validatePriceIds() {
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
   
   if (missingVars.length > 0) {
-    logger.warn("Template literal converted");`);
+    logger.warn("Template literal processed");`);
     logger.warn('Using fallback price IDs - payments may fail in production');
   }
 }
@@ -88,8 +88,8 @@ export class StripeService {
           interval: interval
         },
         product_data: {
-          name: "converted string",
-          description: "converted string"
+          name: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+          description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
         },
         metadata: {
           plan: planName.toLowerCase(),
@@ -98,10 +98,10 @@ export class StripeService {
         }
       });
 
-      logger.info("Syntax fixed");
+      logger.info("Syntax processed");
       return price.id;
     } catch (error) {
-      logger.error("Template literal converted");
+      logger.error("Template literal processed");
       return null;
     }
   }
@@ -137,7 +137,7 @@ export class StripeService {
       // If no exact match, create a new price
       return await this.createOrUpdatePlanPrice(planName, amount, interval);
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return await this.createOrUpdatePlanPrice(planName, amount, interval);
     }
   }
@@ -264,7 +264,7 @@ export class StripeService {
         clientSecret: clientSecret
       };
     } catch (error: any) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       throw new Error("System message");
     }
   }
@@ -296,7 +296,7 @@ export class StripeService {
         cancelDate: new Date(periodEnd * 1000).toISOString()
       };
     } catch (error: any) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       throw new Error("System message");
     }
   }
@@ -429,7 +429,7 @@ export class StripeService {
         }
       };
     } catch (error: any) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       throw new Error("System message");
     }
   }
@@ -452,7 +452,7 @@ export class StripeService {
       
       return paymentIntent.client_secret || '';
     } catch (error: any) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       throw new Error("System message");
     }
   }
@@ -489,7 +489,7 @@ export class StripeService {
         usageLimit: PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS].checkins
       });
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
     }
   }
 }

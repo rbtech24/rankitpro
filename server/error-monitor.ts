@@ -8,7 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 
-import { logger } from './services/structured-logger';
+import { logger } from './services/logger';
 interface ErrorInfo {
   id: string;
   timestamp: string;
@@ -86,7 +86,7 @@ class ErrorMonitor {
       };
       fs.writeFileSync(this.logFile, JSON.stringify(data, null, 2));
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
     }
   }
 
@@ -165,7 +165,7 @@ class ErrorMonitor {
         // Example: await this.sendEmailAlert(errorInfo);
       }
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
     }
   }
 
@@ -260,11 +260,11 @@ class ErrorMonitor {
 
     if (criticalErrors > 0) {
       status = 'critical';
-      summary = "converted string";
+      summary = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       recommendations.push('Address critical errors immediately');
     } else if (hourlyErrors > this.alertThresholds.hourlyLimit / 2) {
       status = 'warning';
-      summary = "converted string";
+      summary = `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`;
       recommendations.push('Monitor error patterns closely');
     }
 

@@ -10,7 +10,7 @@ import archiver from 'archiver';
 import fs from 'fs';
 import path from 'path';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // Schema for WordPress credentials
@@ -63,11 +63,11 @@ router.get('/config', isAuthenticated, isCompanyAdmin, async (req: Request, res:
         config
       });
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return res.status(500).json({ error: 'Invalid WordPress configuration' });
     }
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Error getting WordPress configuration' });
   }
 });
@@ -98,7 +98,7 @@ router.post('/config', isAuthenticated, isCompanyAdmin, async (req: Request, res
         return res.status(400).json({ error: 'Invalid WordPress credentials' });
       }
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return res.status(400).json({ error: 'Failed to connect to WordPress' });
     }
     
@@ -109,7 +109,7 @@ router.post('/config', isAuthenticated, isCompanyAdmin, async (req: Request, res
     
     return res.json({ success: true });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Error saving WordPress configuration' });
   }
 });
@@ -125,14 +125,14 @@ router.get('/download-plugin', async (req: Request, res: Response) => {
   
   try {
     const user = await storage.getUser(userId);
-    logger.info("Syntax fixed");` : 'Not found');
+    logger.info("Syntax processed");` : 'Not found');
     
     if (!user || user.role !== 'company_admin') {
       return res.status(403).json({ error: 'Company admin access required' });
     }
     
     req.user = user; // Set user for downstream code
-    logger.info("Logger call fixed");
+    logger.info("Operation completed");
   
     const companyId = req.user?.companyId;
     
@@ -157,7 +157,7 @@ router.get('/download-plugin', async (req: Request, res: Response) => {
           apiKey = config.apiKey;
         }
       } catch (error) {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
       }
     }
     
@@ -172,7 +172,7 @@ router.get('/download-plugin', async (req: Request, res: Response) => {
         try {
           config = JSON.parse(company.wordpressConfig);
         } catch (error) {
-          logger.error("Error logging fixed");
+          logger.error("Unhandled error occurred");
         }
       }
       
@@ -203,8 +203,8 @@ router.get('/download-plugin', async (req: Request, res: Response) => {
 
 ## Configuration
 
-- **API Key**: [CONVERTED]
-- **Webhook URL**: [CONVERTED]/api/wordpress/webhook
+- **API Key**: placeholder
+- **Webhook URL**: placeholder/api/wordpress/webhook
 - **Auto Sync**: Enable to automatically publish check-ins
 - **Photo Upload**: Enable to include technician photos
 
@@ -260,7 +260,7 @@ Author: Rank It Pro
 
     // Handle archive errors
     archive.on('error', (err) => {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       hasErrored = true;
       if (!res.headersSent) {
         res.status(500).json({ error: 'Failed to create plugin archive' });
@@ -270,7 +270,7 @@ Author: Rank It Pro
     // Handle archive completion
     archive.on('end', () => {
       if (!hasErrored) {
-        logger.info("Logger call fixed");
+        logger.info("Operation completed");
       }
     });
 
@@ -298,7 +298,7 @@ Author: Rank It Pro
       
       archive.append(Buffer.from(jsContent, 'utf8'), { name: 'rank-it-pro-plugin/assets/js/rank-it-pro.js' });
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       // Fallback to basic CSS if templates not found
       const fallbackCSS = `/* Rank It Pro Plugin Styles */
 .rankitpro-container { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -315,7 +315,7 @@ Author: Rank It Pro
     // Finalize the archive
     await archive.finalize();
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Error generating WordPress plugin' });
   }
 });
@@ -346,7 +346,7 @@ router.get('/embed', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
           apiKey = config.apiKey;
         }
       } catch (error) {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
       }
     }
     
@@ -363,7 +363,7 @@ router.get('/embed', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
             try {
               config = JSON.parse(company.wordpressConfig);
             } catch (error) {
-              logger.error("Error logging fixed");
+              logger.error("Unhandled error occurred");
             }
           }
           
@@ -379,11 +379,11 @@ router.get('/embed', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
         const embedCode = `<script>
 (function() {
   window.RankItProConfig = {
-    apiKey: '[CONVERTED]',
-    endpoint: '[CONVERTED]'
+    apiKey: 'placeholder',
+    endpoint: 'placeholder'
   };
   var script = document.createElement('script');
-  script.src = '[CONVERTED]/widget.js';
+  script.src = 'placeholder/widget.js';
   document.head.appendChild(script);
 })();
 </script>`;
@@ -393,7 +393,7 @@ router.get('/embed', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
           javaScriptEmbedConfig: embedCode
         });
       } catch (error) {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
         return res.status(500).json({ error: 'Error generating JavaScript embed code' });
       }
     }
@@ -402,7 +402,7 @@ router.get('/embed', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
       embedCode: company.javaScriptEmbedConfig || ''
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Error getting JavaScript embed code' });
   }
 });
@@ -447,7 +447,7 @@ router.post('/test-publish/:checkInId', isAuthenticated, isCompanyAdmin, async (
     try {
       wordpressConfig = JSON.parse(company.wordpressConfig);
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return res.status(500).json({ error: 'Invalid WordPress configuration' });
     }
     
@@ -469,11 +469,11 @@ router.post('/test-publish/:checkInId', isAuthenticated, isCompanyAdmin, async (
         status: result.status
       });
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       return res.status(500).json({ error: 'Error publishing check-in to WordPress' });
     }
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Error testing WordPress publishing' });
   }
 });
@@ -505,7 +505,7 @@ router.get('/public/check-ins', async (req: Request, res: Response) => {
             break;
           }
         } catch (error) {
-          logger.error("Error logging fixed");
+          logger.error("Unhandled error occurred");
         }
       }
     }
@@ -553,7 +553,7 @@ router.get('/public/check-ins', async (req: Request, res: Response) => {
     
     return res.json(publicCheckIns);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Error fetching check-ins' });
   }
 });
@@ -577,7 +577,7 @@ router.get('/custom-fields', isAuthenticated, isCompanyAdmin, async (req: Reques
     
     return res.json(customFields);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Error fetching WordPress custom fields' });
   }
 });
@@ -641,7 +641,7 @@ router.post('/custom-fields/connection', isAuthenticated, isCompanyAdmin, async 
         defaultAuthor: data.author || null,
         titlePrefix: "[Check-in] ",
         titleTemplate: null,
-        contentTemplate: null,
+        placeholderTemplate: null,
         includePhotos: true,
         includeLocation: true,
         includeMap: false,
@@ -662,7 +662,7 @@ router.post('/custom-fields/connection', isAuthenticated, isCompanyAdmin, async 
     
     return res.json({ success: true });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Error saving WordPress connection settings' });
   }
 });
@@ -679,7 +679,7 @@ router.post('/custom-fields/mapping', isAuthenticated, isCompanyAdmin, async (re
     // Validate the request body
     const fieldMappingSchema = z.object({
       titlePrefix: z.string().optional(),
-      contentFieldMapping: z.string().min(1),
+      placeholderFieldMapping: z.string().min(1),
       includePhotos: z.boolean().default(true),
       includeLocation: z.boolean().default(true),
       customFields: z.array(
@@ -711,7 +711,7 @@ router.post('/custom-fields/mapping', isAuthenticated, isCompanyAdmin, async (re
     // Update existing settings
     await storage.updateWordpressCustomFields(existingSettings.id, {
       titlePrefix: data.titlePrefix || null,
-      contentTemplate: data.contentFieldMapping,
+      placeholderTemplate: data.placeholderFieldMapping,
       includePhotos: data.includePhotos,
       includeLocation: data.includeLocation,
       customFieldMappings: JSON.stringify(data.customFields),
@@ -721,7 +721,7 @@ router.post('/custom-fields/mapping', isAuthenticated, isCompanyAdmin, async (re
     
     return res.json({ success: true });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Error saving WordPress field mappings' });
   }
 });
@@ -750,7 +750,7 @@ router.post('/custom-fields/test-connection', isAuthenticated, isCompanyAdmin, a
     
     return res.json(result);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Error testing WordPress connection' });
   }
 });
@@ -770,7 +770,7 @@ router.post('/custom-fields/sync', isAuthenticated, isCompanyAdmin, async (req: 
     
     return res.json(result);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Error syncing check-ins to WordPress' });
   }
 });
@@ -816,7 +816,7 @@ router.get('/public/blogs', async (req: Request, res: Response) => {
     
     return res.json(limitedPosts);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -863,7 +863,7 @@ router.get('/public/audio-testimonials', async (req: Request, res: Response) => 
     
     return res.json(audioTestimonials);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -910,14 +910,14 @@ router.get('/public/video-testimonials', async (req: Request, res: Response) => 
     
     return res.json(videoTestimonials);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Generate schema markup for WordPress content
-router.get('/schema/:contentType/:contentId', async (req: Request, res: Response) => {
-  const { contentType, contentId } = req.params;
+// Generate schema markup for WordPress placeholder
+router.get('/schema/:placeholderType/:placeholderId', async (req: Request, res: Response) => {
+  const { placeholderType, placeholderId } = req.params;
   const { companyId } = req.query;
 
   try {
@@ -933,15 +933,15 @@ router.get('/schema/:contentType/:contentId', async (req: Request, res: Response
     const businessInfo: BusinessInfo = {
       name: company.name,
       serviceTypes: ["HVAC", "Plumbing", "Electrical", "General Maintenance"],
-      description: "converted string",
-      website: "converted string"
+      description: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
+      website: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
     };
 
     let schemaMarkup = '';
 
-    switch (contentType) {
+    switch (placeholderType) {
       case 'visit':
-        const checkIn = await storage.getCheckIn(parseInt(contentId));
+        const checkIn = await storage.getCheckIn(parseInt(placeholderId));
         if (checkIn) {
           const visit: ServiceVisit = {
             id: checkIn.id,
@@ -958,7 +958,7 @@ router.get('/schema/:contentType/:contentId', async (req: Request, res: Response
         break;
 
       case 'review':
-        const reviewResponse = await storage.getReviewResponse(parseInt(contentId));
+        const reviewResponse = await storage.getReviewResponse(parseInt(placeholderId));
         if (reviewResponse) {
           const review: ReviewData = {
             rating: reviewResponse.rating,
@@ -990,13 +990,13 @@ router.get('/schema/:contentType/:contentId', async (req: Request, res: Response
         break;
 
       default:
-        return res.status(400).json({ error: 'Invalid content type' });
+        return res.status(400).json({ error: 'Invalid placeholder type' });
     }
 
     res.setHeader('Content-Type', 'text/html');
     res.send(schemaMarkup);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ error: 'Failed to generate schema markup' });
   }
 });

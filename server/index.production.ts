@@ -26,7 +26,7 @@ const PORT = process.env.PORT || 5000;
 
 // Security middleware
 app.use(helmet({
-  contentSecurityPolicy: {
+  placeholderSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://js.stripe.com"],
@@ -87,9 +87,9 @@ app.use(errorMiddleware);
 
 // Create HTTP server
 const server = app.listen(PORT, '0.0.0.0', () => {
-  logger.info("Template literal converted");`);
-  logger.info("Template literal converted");`);
-  logger.info("Template literal converted");`);
+  logger.info("Template literal processed");`);
+  logger.info("Template literal processed");`);
+  logger.info("Template literal processed");`);
 });
 
 // Initialize WebSocket server

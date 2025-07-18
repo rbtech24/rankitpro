@@ -140,7 +140,7 @@ export const checkInValidationSchemas = {
 };
 
 /**
- * AI content validation schemas
+ * AI placeholder validation schemas
  */
 export const aiContentValidationSchemas = {
   generateContent: z.object({
@@ -150,7 +150,7 @@ export const aiContentValidationSchemas = {
     technicianName: commonValidationSchemas.shortText,
     tone: z.enum(['professional', 'friendly', 'technical', 'casual']).optional(),
     length: z.enum(['short', 'medium', 'long']).optional(),
-    contentType: z.enum(['blog_post', 'social_media', 'email', 'website_content']).optional(),
+    placeholderType: z.enum(['blog_post', 'social_media', 'email', 'website_placeholder']).optional(),
     targetAudience: z.enum(['homeowners', 'business_owners', 'property_managers', 'general']).optional(),
     includeKeywords: z.array(z.string().max(50)).optional(),
     seoFocus: commonValidationSchemas.boolean.optional(),
@@ -272,20 +272,20 @@ export function validateFileUpload(options: {
     
     if (files.length > maxFiles) {
       return res.status(400).json({
-        message: "converted string"
+        message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
       });
     }
     
     for (const file of files) {
       if (file.size > maxSize) {
         return res.status(400).json({
-          message: "converted string"
+          message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
         });
       }
       
       if (!allowedTypes.includes(file.mimetype)) {
         return res.status(400).json({
-          message: "converted string"
+          message: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`
         });
       }
     }

@@ -3,7 +3,7 @@ import { isAuthenticated, isCompanyAdmin } from '../middleware/auth';
 import { z } from 'zod';
 import { storage } from '../storage';
 import { WordPressService } from '../services/wordpress-service';
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 
 const router = Router();
 
@@ -73,7 +73,7 @@ router.get('/wordpress', isAuthenticated, async (req: Request, res: Response) =>
       return res.status(500).json({ message: 'Invalid WordPress configuration' });
     }
   } catch (error) {
-    logger.error("Logger call fixed");
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
     res.status(500).json({ message: 'Error fetching WordPress configuration' });
   }
 });
@@ -128,7 +128,7 @@ router.post('/wordpress/config', isAuthenticated, isCompanyAdmin, async (req: Re
       siteUrl: config.siteUrl
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error saving WordPress configuration' });
   }
 });
@@ -153,7 +153,7 @@ router.delete('/wordpress/config', isAuthenticated, isCompanyAdmin, async (req: 
     
     res.json({ message: 'WordPress configuration removed successfully' });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error removing WordPress configuration' });
   }
 });
@@ -192,7 +192,7 @@ router.post('/wordpress/test-connection', isAuthenticated, isCompanyAdmin, async
       });
     }
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ 
       success: false, 
       message: 'Error testing WordPress connection' 
@@ -226,11 +226,11 @@ router.get('/wordpress/categories', isAuthenticated, isCompanyAdmin, async (req:
       const categories = await wpService.getCategories();
       res.json(categories);
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       res.status(500).json({ message: 'Error fetching WordPress categories' });
     }
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -285,7 +285,7 @@ router.post('/wordpress/publish-check-in/:id', isAuthenticated, isCompanyAdmin, 
       url: result.url
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error publishing check-in to WordPress' });
   }
 });
@@ -340,7 +340,7 @@ router.post('/wordpress/publish-blog-post/:id', isAuthenticated, isCompanyAdmin,
       url: result.url
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error publishing blog post to WordPress' });
   }
 });
@@ -381,7 +381,7 @@ router.get('/js-widget/config', isAuthenticated, isCompanyAdmin, async (req: Req
       return res.status(500).json({ message: 'Invalid JavaScript widget configuration' });
     }
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error fetching JavaScript widget configuration' });
   }
 });
@@ -421,7 +421,7 @@ router.post('/js-widget/config', isAuthenticated, isCompanyAdmin, async (req: Re
       config
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error saving JavaScript widget configuration' });
   }
 });
@@ -456,18 +456,18 @@ router.get('/js-widget/embed-code', isAuthenticated, isCompanyAdmin, async (req:
           ...JSON.parse(company.javaScriptEmbedConfig)
         };
       } catch (error) {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
       }
     }
     
     // Generate embed code
     const embedCode = `<script src="https://app.checkinpro.com/widget.js" 
-  data-company-id="[CONVERTED]"
-  data-theme="[CONVERTED]"
-  data-display="[CONVERTED]"
-  data-limit="[CONVERTED]"
-  data-images="[CONVERTED]"
-  data-refresh="[CONVERTED]">
+  data-company-id="placeholder"
+  data-theme="placeholder"
+  data-display="placeholder"
+  data-limit="placeholder"
+  data-images="placeholder"
+  data-refresh="placeholder">
 </script>`;
     
     res.json({ 
@@ -475,7 +475,7 @@ router.get('/js-widget/embed-code', isAuthenticated, isCompanyAdmin, async (req:
       widgetConfig
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Error generating JavaScript widget embed code' });
   }
 });
@@ -495,11 +495,11 @@ router.get('/embed', isAuthenticated, async (req: Request, res: Response) => {
     
     // Generate proper embed code with real data
     const companySlug = company.name.toLowerCase().replace(/\s+/g, '-');
-    const embedCode = `<div id="rankitpro-widget" data-company="[CONVERTED]" data-slug="[CONVERTED]"></div>
+    const embedCode = `<div id="rankitpro-widget" data-company="placeholder" data-slug="placeholder"></div>
 <script>
 (function() {
   const widget = document.createElement('div');
-  widget.innerHTML = '<iframe src="https://rankitpro.com/embed/[CONVERTED]?company=[CONVERTED]" width="100%" height="400" frameborder="0" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>';
+  widget.innerHTML = '<iframe src="https://rankitpro.com/embed/placeholder?company=placeholder" width="100%" height="400" frameborder="0" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>';
   document.getElementById('rankitpro-widget').appendChild(widget);
 })();
 </script>`;
@@ -528,18 +528,18 @@ router.get('/embed', isAuthenticated, async (req: Request, res: Response) => {
           }
         }
       } catch (e) {
-        logger.error("Error logging fixed");
+        logger.error("Unhandled error occurred");
         // Use default settings on error
       }
     }
     
     res.json({
-      token: "converted string",
+      token: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
       embedCode,
       settings
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -571,12 +571,12 @@ router.post('/embed', isAuthenticated, async (req: Request, res: Response) => {
       generated: new Date().toISOString()
     };
 
-    const widthStyle = settings.width === 'fixed' ? "converted string" : '100%';
-    const embedCode = `<div id="rankitpro-widget" data-company="[CONVERTED]" data-slug="[CONVERTED]"></div>
+    const widthStyle = settings.width === 'fixed' ? `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>` : '100%';
+    const embedCode = `<div id="rankitpro-widget" data-company="placeholder" data-slug="placeholder"></div>
 <script>
 (function() {
   const widget = document.createElement('div');
-  widget.innerHTML = '<iframe src="https://rankitpro.com/embed/[CONVERTED]?company=[CONVERTED]&photos=[CONVERTED]&tech=[CONVERTED]&limit=[CONVERTED]" width="[CONVERTED]" height="400" frameborder="0" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>';
+  widget.innerHTML = '<iframe src="https://rankitpro.com/embed/placeholder?company=placeholder&photos=placeholder&tech=placeholder&limit=placeholder" width="placeholder" height="400" frameborder="0" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>';
   document.getElementById('rankitpro-widget').appendChild(widget);
 })();
 </script>`;
@@ -588,12 +588,12 @@ router.post('/embed', isAuthenticated, async (req: Request, res: Response) => {
 
     res.json({
       message: 'Embed settings updated successfully',
-      token: "converted string",
+      token: `<${closing}${tagName}${safeAttributes ? " " + safeAttributes : ""}>`,
       embedCode,
       settings
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Internal server error' });
   }
 });

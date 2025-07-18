@@ -8,7 +8,7 @@ import { insertBlogPostSchema } from '../../shared/schema';
 import { generateBlogPost } from '../ai/index';
 import type { AIProviderType } from '../ai/types';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = express.Router();
 
 // Get all blog posts for the current user's company
@@ -22,7 +22,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
     const blogPosts = await storage.getBlogPostsByCompany(user.companyId);
     return res.json(blogPosts);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Failed to fetch blog posts' });
   }
 });
@@ -48,14 +48,14 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         return res.status(403).json({ message: 'Access denied' });
       }
       
-      // If content is not provided, generate it
-      if (!req.body.title || !req.body.content) {
+      // If placeholder is not provided, generate it
+      if (!req.body.title || !req.body.placeholder) {
         const technician = await storage.getTechnician(checkIn.technicianId);
         if (!technician) {
           return res.status(404).json({ message: 'Technician not found' });
         }
         
-        // Generate blog post content using AI
+        // Generate blog post placeholder using AI
         const aiProvider: AIProviderType = req.body.aiProvider || 'openai';
         const blogPostResult = await generateBlogPost({
           jobType: checkIn.jobType,
@@ -66,7 +66,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         
         blogPostData = insertBlogPostSchema.parse({
           title: blogPostResult.title,
-          content: blogPostResult.content,
+          placeholder: blogPostResult.placeholder,
           companyId: user.companyId,
           checkInId: checkIn.id,
           photos: checkIn.photos
@@ -74,7 +74,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
       } else {
         blogPostData = insertBlogPostSchema.parse({
           title: req.body.title,
-          content: req.body.content,
+          placeholder: req.body.placeholder,
           companyId: user.companyId,
           checkInId: checkIn.id,
           photos: checkIn.photos || req.body.photos
@@ -87,7 +87,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
       // Regular blog post creation
       blogPostData = insertBlogPostSchema.parse({
         title: req.body.title,
-        content: req.body.content,
+        placeholder: req.body.placeholder,
         companyId: user.companyId,
         photos: req.body.photos
       });
@@ -110,10 +110,10 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
           adminEmails.push(user.email);
         }
         
-        // Generate a short excerpt from the content for the email
-        const excerpt = blogPost.content.length > 300 
-          ? blogPost.content.substring(0, 297) + '...' 
-          : blogPost.content;
+        // Generate a short excerpt from the placeholder for the email
+        const excerpt = blogPost.placeholder.length > 300 
+          ? blogPost.placeholder.substring(0, 297) + '...' 
+          : blogPost.placeholder;
         
         if (adminEmails.length > 0) {
           // Send the notification email
@@ -134,13 +134,13 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         }
       }
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       // Continue even if email fails
     }
     
     return res.status(201).json(blogPost);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     if (error instanceof z.ZodError) {
       return res.status(400).json({ success: true });
     }
@@ -166,7 +166,7 @@ router.get('/:id', isAuthenticated, async (req: Request, res: Response) => {
     
     return res.json(blogPost);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Failed to fetch blog post' });
   }
 });
@@ -190,7 +190,7 @@ router.patch('/:id', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
     const updatedBlogPost = await storage.updateBlogPost(id, req.body);
     return res.json(updatedBlogPost);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Failed to update blog post' });
   }
 });
@@ -218,7 +218,7 @@ router.delete('/:id', isAuthenticated, isCompanyAdmin, async (req: Request, res:
       return res.status(500).json({ message: 'Failed to delete blog post' });
     }
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Failed to delete blog post' });
   }
 });
@@ -244,7 +244,7 @@ router.post('/generate-from-checkin/:id', isAuthenticated, isCompanyAdmin, async
       return res.status(404).json({ message: 'Technician not found' });
     }
     
-    // Generate blog post content using AI
+    // Generate blog post placeholder using AI
     const aiProvider: AIProviderType = req.body.aiProvider || 'openai';
     const blogPostResult = await generateBlogPost({
       jobType: checkIn.jobType,
@@ -253,15 +253,15 @@ router.post('/generate-from-checkin/:id', isAuthenticated, isCompanyAdmin, async
       technicianName: technician.name
     }, aiProvider);
     
-    // Return the generated content without saving
+    // Return the generated placeholder without saving
     return res.json({
       title: blogPostResult.title,
-      content: blogPostResult.content,
+      placeholder: blogPostResult.placeholder,
       checkInId: checkIn.id,
       photos: checkIn.photos
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     return res.status(500).json({ message: 'Failed to generate blog post' });
   }
 });

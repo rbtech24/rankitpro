@@ -4,7 +4,7 @@ import { fromZodError } from 'zod-validation-error';
 import { storage } from '../../storage';
 import { isAuthenticated } from '../../middleware/auth';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 const router = Router();
 
 // Schedule item schema for validation
@@ -79,7 +79,7 @@ router.get('/today', isAuthenticated, async (req, res) => {
       items: todaysSchedule
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -138,7 +138,7 @@ router.get('/', isAuthenticated, async (req, res) => {
       schedule: groupedSchedule
     });
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -171,7 +171,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     
     res.json(item);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -212,7 +212,7 @@ router.post('/', isAuthenticated, async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -260,7 +260,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -307,7 +307,7 @@ router.patch('/:id/status', isAuthenticated, async (req, res) => {
     
     res.json(technicianSchedule[itemIndex]);
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -343,7 +343,7 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
     
     res.status(204).send();
   } catch (error) {
-    logger.error("Error logging fixed");
+    logger.error("Unhandled error occurred");
     res.status(500).json({ message: 'Server error' });
   }
 });

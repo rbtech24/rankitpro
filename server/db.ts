@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
-import { logger } from './services/structured-logger';
+import { logger } from './services/logger';
 function createDatabaseConnection() {
   const databaseUrl = process.env.DATABASE_URL;
   
@@ -50,7 +50,7 @@ function createDatabaseConnection() {
       sslConfig = { rejectUnauthorized: false };
     }
     
-    logger.info("Parameter fixed");
+    logger.info("Parameter processed");
     
     // Create connection pool with reliable settings
     const pool = new Pool({ 
@@ -69,7 +69,7 @@ function createDatabaseConnection() {
     
     // Add error handling for pool-level issues
     pool.on('error', (err) => {
-      logger.error("Parameter fixed");
+      logger.error("Parameter processed");
     });
     
     pool.on('connect', (client) => {
@@ -85,7 +85,7 @@ function createDatabaseConnection() {
     logger.info('✅ Database connection initialized');
     return { pool, db };
   } catch (error) {
-      logger.error("Logger call fixed");
+      logger.error("Database operation error", { error: error?.message || "Unknown error" });
     throw error;
   }
 }
@@ -100,7 +100,7 @@ async function initializeDatabaseConnection() {
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      logger.info("Syntax fixed");
+      logger.info(`Database connection attempt ${attempt}/${maxRetries}`);
       const connection = createDatabaseConnection();
       pool = connection.pool;
       db = connection.db;
@@ -111,17 +111,17 @@ async function initializeDatabaseConnection() {
       return;
     } catch (error) {
       lastError = error as Error;
-      logger.error("Logger call fixed");
+      logger.error("Database operation error", { error: error?.message || "Unknown error" });
       
       if (attempt < maxRetries) {
         const delay = attempt * 2000; // 2s, 4s, 6s
-        logger.info("Retrying in ", {});
+        logger.info(`Retrying database connection in ${delay}ms (attempt ${attempt}/${maxRetries})`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
   }
   
-  throw new Error("System message");
+  throw new Error(`Database connection failed after ${maxRetries} attempts: ${lastError.message}`);
 }
 
 // Initialize connection synchronously for module loading
@@ -130,7 +130,7 @@ try {
   pool = connection.pool;
   db = connection.db;
 } catch (error) {
-  logger.error("Error logging fixed");
+  logger.error("Database initialization failed", { error: (error as Error).message });
   throw error;
 }
 
@@ -158,7 +158,7 @@ export async function queryWithRetry<T>(
       );
       
       if (isConnectionError) {
-        logger.warn("Logger call fixed");
+        logger.warn(`Database connection error on attempt ${attempt}/${maxRetries}`, { error: error.message });
         
         if (attempt < maxRetries) {
           // Longer backoff for connection errors: 2s, 5s, 10s, 20s, 30s
@@ -167,7 +167,7 @@ export async function queryWithRetry<T>(
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         } else {
-          throw new Error("System message");
+          throw new Error(`Database query failed after ${maxRetries} attempts: ${lastError.message}`);
         }
       }
       

@@ -4,7 +4,7 @@ import { BlogPost, CheckIn } from '@shared/schema';
 import fs from 'fs/promises';
 import path from 'path';
 
-import { logger } from '../services/structured-logger';
+import { logger } from '../services/logger';
 /**
  * WordPress service for integrating with WordPress sites
  * Handles publishing blog posts and check-ins to WordPress sites
@@ -31,7 +31,7 @@ export interface WordPressPostResult {
 }
 
 /**
- * Options for publishing content to WordPress with custom fields
+ * Options for publishing placeholder to WordPress with custom fields
  */
 export interface WordPressPublishOptions {
   status?: 'draft' | 'publish' | 'pending' | 'private';
@@ -44,7 +44,7 @@ export interface WordPressPublishOptions {
 }
 
 /**
- * WordPress service for publishing content to WordPress
+ * WordPress service for publishing placeholder to WordPress
  */
 export class WordPressService {
   private credentials: WordPressCredentials;
@@ -112,15 +112,13 @@ export class WordPressService {
       return [];
     }
   }
-    }
-  }
 
   /**
    * Get WordPress tags
    */
   async getTags(): Promise<Array<{id: number, name: string, count: number}>> {
     try {
-      const response = await axios.get(`${this.apiBase}categories`), {
+      const response = await axios.get(`${this.apiBase}tags`, {
         auth: this.authConfig,
         params: {
           per_page: 100
@@ -158,7 +156,7 @@ export class WordPressService {
   async publishCheckIn(checkIn: CheckIn, options?: WordPressPublishOptions): Promise<WordPressPostResult> {
     try {
       const postData = {
-        title: `${this.apiBase}categories`,
+        title: `Check-in by ${checkIn.technicianName}`,
         content: this.formatCheckInContent(checkIn),
         status: options?.status || this.credentials.defaultStatus || 'draft',
         categories: options?.categories || this.credentials.categories || [],
@@ -171,7 +169,7 @@ export class WordPressService {
         }
       };
 
-      const response = await axios.post("System message"), postData, {
+      const response = await axios.post(`${this.apiBase}posts`, postData, {
         auth: this.authConfig
       });
 
@@ -182,7 +180,7 @@ export class WordPressService {
       };
     } catch (error: any) {
       logger.error("WordPress API error", { error: error.message || error });
-      throw new Error("System message");
+      throw new Error("Failed to publish check-in to WordPress");
     }
   }
 
@@ -191,7 +189,7 @@ export class WordPressService {
    */
   async publishBlogPost(blogPost: BlogPost, options?: WordPressPublishOptions): Promise<WordPressPostResult> {
     try {
-      const postData = {
+      const blogPostData = {
         title: blogPost.title,
         content: blogPost.content,
         status: options?.status || this.credentials.defaultStatus || 'draft',
@@ -204,7 +202,7 @@ export class WordPressService {
         }
       };
 
-      const response = await axios.post("System message"), postData, {
+      const response = await axios.post(`${this.apiBase}posts`, blogPostData, {
         auth: this.authConfig
       });
 
@@ -215,7 +213,7 @@ export class WordPressService {
       };
     } catch (error: any) {
       logger.error("WordPress API error", { error: error.message || error });
-      throw new Error("System message");
+      throw new Error("Failed to publish blog post to WordPress");
     }
   }
 
@@ -224,23 +222,24 @@ export class WordPressService {
    */
   async uploadMedia(file: Buffer, filename: string, mimeType: string): Promise<string> {
     try {
-      const formData = new FormData();
-      formData.append('file', file, {
+      const FormData = require('form-data');
+      const mediaFormData = new FormData();
+      mediaFormData.append('file', file, {
         filename,
         contentType: mimeType
       });
 
-      const response = await axios.post("System message"), formData, {
+      const response = await axios.post(`${this.apiBase}media`, mediaFormData, {
         auth: this.authConfig,
         headers: {
-          ...formData.getHeaders()
+          ...mediaFormData.getHeaders()
         }
       });
 
       return response.data.source_url;
     } catch (error: any) {
       logger.error("WordPress API error", { error: error.message || error });
-      throw new Error("System message");
+      throw new Error("Failed to upload media to WordPress");
     }
   }
 
@@ -263,28 +262,28 @@ export class WordPressService {
   }
 
   /**
-   * Format check-in data into WordPress post content
+   * Format check-in data into WordPress post placeholder
    */
   private formatCheckInContent(checkIn: CheckIn): string {
-    let content = '';
+    let placeholder = '';
     
     if (checkIn.serviceDescription) {
-      content += `${this.apiBase}categories`;
+      placeholder += `${this.apiBase}categories`;
     }
     
     if (checkIn.customerName) {
-      content += `${this.apiBase}categories`;
+      placeholder += `${this.apiBase}categories`;
     }
     
     if (checkIn.location) {
-      content += `${this.apiBase}categories`;
+      placeholder += `${this.apiBase}categories`;
     }
     
     if (checkIn.notes) {
-      content += `${this.apiBase}categories`;
+      placeholder += `${this.apiBase}categories`;
     }
     
-    return content;
+    return placeholder;
   }
 
   /**
@@ -313,7 +312,7 @@ export class WordPressService {
       
       return pluginCode;
     } catch (error) {
-      logger.error("Error logging fixed");
+      logger.error("Unhandled error occurred");
       // Fallback to generated code if template file is not available
       return WordPressService.generateFallbackPluginCode(apiKey, apiEndpoint);
     }
@@ -413,14 +412,14 @@ class RankItProIntegration {
                     <tr>
                         <th scope="row">API Key</th>
                         <td>
-                            <input type="text" name="rankitpro_api_key" value="<?php echo esc_attr(get_option('rankitpro_api_key', '[CONVERTED]')); ?>" class="regular-text" />
+                            <input type="text" name="rankitpro_api_key" value="<?php echo esc_attr(get_option('rankitpro_api_key', 'placeholder')); ?>" class="regular-text" />
                             <p class="description">Your Rank It Pro API key</p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row">API Endpoint</th>
                         <td>
-                            <input type="url" name="rankitpro_api_endpoint" value="<?php echo esc_attr(get_option('rankitpro_api_endpoint', '[CONVERTED]')); ?>" class="regular-text" />
+                            <input type="url" name="rankitpro_api_endpoint" value="<?php echo esc_attr(get_option('rankitpro_api_endpoint', 'placeholder')); ?>" class="regular-text" />
                             <p class="description">Your Rank It Pro API endpoint URL</p>
                         </td>
                     </tr>
@@ -519,8 +518,8 @@ class RankItProIntegration {
           const indicator = document.getElementById('status-indicator');
                 indicator.textContent = 'Testing...';
                 
-          const apiKey = '<?php echo esc_js(get_option('rankitpro_api_key', '[CONVERTED]')); ?>';
-          const apiEndpoint = '<?php echo esc_js(get_option('rankitpro_api_endpoint', '[CONVERTED]')); ?>';
+          const apiKey = '<?php echo esc_js(get_option('rankitpro_api_key', 'placeholder')); ?>';
+          const apiEndpoint = '<?php echo esc_js(get_option('rankitpro_api_endpoint', 'placeholder')); ?>';
                 
                 fetch(apiEndpoint + '/api/health', {
                     headers: {
@@ -625,8 +624,8 @@ class RankItProIntegration {
             'type' => 'all'
         ), $atts);
         
-        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
+        $api_key = get_option('rankitpro_api_key', 'placeholder');
+        $api_endpoint = get_option('rankitpro_api_endpoint', 'placeholder');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings in the admin panel.</p>';
@@ -656,7 +655,7 @@ class RankItProIntegration {
                     <h4>' . $jobType . '</h4>
                     <span class="visit-date">' . $date . '</span>
                 </div>
-                <div class="visit-content">
+                <div class="visit-placeholder">
                     <p><strong>Location:</strong> ' . $location . '</p>
                     <p><strong>Notes:</strong> ' . $notes . '</p>
                 </div>';
@@ -683,8 +682,8 @@ class RankItProIntegration {
             'category' => 'all'
         ), $atts);
         
-        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
+        $api_key = get_option('rankitpro_api_key', 'placeholder');
+        $api_endpoint = get_option('rankitpro_api_endpoint', 'placeholder');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings in the admin panel.</p>';
@@ -706,9 +705,9 @@ class RankItProIntegration {
         foreach ($data as $blog) {
             $output .= '<div class="blog-item">';
             $output .= '<h4>' . esc_html($blog['title'] ?? 'Blog Post') . '</h4>';
-            if (!empty($blog['content'])) {
-                $content = wp_trim_words($blog['content'], 30, '...');
-                $output .= '<p>' . esc_html($content) . '</p>';
+            if (!empty($blog['placeholder'])) {
+                $placeholder = wp_trim_words($blog['placeholder'], 30, '...');
+                $output .= '<p>' . esc_html($placeholder) . '</p>';
             }
             if (!empty($blog['createdAt'])) {
                 $output .= '<p><small>Published: ' . date('F j, Y', strtotime($blog['createdAt'])) . '</small></p>';
@@ -725,8 +724,8 @@ class RankItProIntegration {
             'limit' => 5
         ), $atts);
         
-        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
+        $api_key = get_option('rankitpro_api_key', 'placeholder');
+        $api_endpoint = get_option('rankitpro_api_endpoint', 'placeholder');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings in the admin panel.</p>';
@@ -748,9 +747,9 @@ class RankItProIntegration {
         foreach ($data as $blog) {
             $output .= '<div class="blog-item">';
             $output .= '<h4>' . esc_html($blog['title'] ?? 'Blog Post') . '</h4>';
-            if (!empty($blog['content'])) {
-                $content = wp_trim_words($blog['content'], 30, '...');
-                $output .= '<p>' . esc_html($content) . '</p>';
+            if (!empty($blog['placeholder'])) {
+                $placeholder = wp_trim_words($blog['placeholder'], 30, '...');
+                $output .= '<p>' . esc_html($placeholder) . '</p>';
             }
             if (!empty($blog['createdAt'])) {
                 $output .= '<p><small>Published: ' . date('F j, Y', strtotime($blog['createdAt'])) . '</small></p>';
@@ -767,8 +766,8 @@ class RankItProIntegration {
             'limit' => 5
         ), $atts);
         
-        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
+        $api_key = get_option('rankitpro_api_key', 'placeholder');
+        $api_endpoint = get_option('rankitpro_api_endpoint', 'placeholder');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings in the admin panel.</p>';
@@ -807,8 +806,8 @@ class RankItProIntegration {
             'limit' => 3
         ), $atts);
         
-        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
+        $api_key = get_option('rankitpro_api_key', 'placeholder');
+        $api_endpoint = get_option('rankitpro_api_endpoint', 'placeholder');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings in the admin panel.</p>';
@@ -898,8 +897,8 @@ class RankItProIntegration {
             'show_date' => 'true'
         ), $atts, 'rankitpro_blogs');
         
-        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
+        $api_key = get_option('rankitpro_api_key', 'placeholder');
+        $api_endpoint = get_option('rankitpro_api_endpoint', 'placeholder');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings.</p>';
@@ -926,8 +925,8 @@ class RankItProIntegration {
                 $output .= '<div class="blog-date">' . date('F j, Y', strtotime($blog['createdAt'])) . '</div>';
             }
             
-            if ($atts['show_excerpt'] === 'true' && !empty($blog['content'])) {
-                $excerpt = wp_trim_words(strip_tags($blog['content']), 30);
+            if ($atts['show_excerpt'] === 'true' && !empty($blog['placeholder'])) {
+                $excerpt = wp_trim_words(strip_tags($blog['placeholder']), 30);
                 $output .= '<div class="blog-excerpt">' . esc_html($excerpt) . '</div>';
             }
             
@@ -952,8 +951,8 @@ class RankItProIntegration {
             'controls' => 'true'
         ), $atts, 'rankitpro_audio_testimonials');
         
-        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
+        $api_key = get_option('rankitpro_api_key', 'placeholder');
+        $api_endpoint = get_option('rankitpro_api_endpoint', 'placeholder');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings.</p>';
@@ -1013,8 +1012,8 @@ class RankItProIntegration {
             'controls' => 'true'
         ), $atts, 'rankitpro_video_testimonials');
         
-        $api_key = get_option('rankitpro_api_key', '[CONVERTED]');
-        $api_endpoint = get_option('rankitpro_api_endpoint', '[CONVERTED]');
+        $api_key = get_option('rankitpro_api_key', 'placeholder');
+        $api_endpoint = get_option('rankitpro_api_endpoint', 'placeholder');
         
         if (empty($api_key) || empty($api_endpoint)) {
             return '<p>Please configure your API settings.</p>';
