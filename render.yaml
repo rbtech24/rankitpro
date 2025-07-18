@@ -3,8 +3,8 @@ services:
     name: rankitpro
     env: node
     plan: starter
-    buildCommand: rm -rf node_modules && npm install && node build-render-final.js
-    startCommand: cd dist && node server.js
+    buildCommand: rm -rf node_modules && npm install && node deploy-truly-final.js
+    startCommand: node dist/server.js
     envVars:
       - key: NODE_ENV
         value: production
