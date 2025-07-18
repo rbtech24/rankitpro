@@ -1,8 +1,8 @@
-// Development server bypass - using Node.js built-in modules
-const http = require('http');
-const path = require('path');
-const fs = require('fs');
-const url = require('url');
+// Development server using Node.js built-in modules for dependency-free operation
+import { createServer } from 'http';
+import { readFileSync, existsSync, createReadStream } from 'fs';
+import { join, extname } from 'path';
+import { parse } from 'url';
 
 // Parse request body
 function parseBody(req: any) {
@@ -22,8 +22,8 @@ function parseBody(req: any) {
 }
 
 // Create server
-const server = http.createServer(async (req: any, res: any) => {
-  const parsedUrl = url.parse(req.url, true);
+const server = createServer(async (req: any, res: any) => {
+  const parsedUrl = parse(req.url, true);
   const pathname = parsedUrl.pathname;
   
   // Set security headers
@@ -104,18 +104,18 @@ const server = http.createServer(async (req: any, res: any) => {
   
   // Try to serve static files from multiple locations
   const staticPaths = [
-    path.join(__dirname, '..', 'dist', 'public'),
-    path.join(__dirname, '..', 'client', 'dist'),
-    path.join(__dirname, '..', 'public')
+    join(process.cwd(), 'dist', 'public'),
+    join(process.cwd(), 'client', 'dist'),
+    join(process.cwd(), 'public')
   ];
   
   const filePath = pathname === '/' ? '/index.html' : pathname;
   let fileServed = false;
   
   for (const staticPath of staticPaths) {
-    const fullPath = path.join(staticPath, filePath);
-    if (fs.existsSync(fullPath)) {
-      const ext = path.extname(fullPath);
+    const fullPath = join(staticPath, filePath);
+    if (existsSync(fullPath)) {
+      const ext = extname(fullPath);
       const contentType = {
         '.html': 'text/html',
         '.js': 'text/javascript',
@@ -128,7 +128,7 @@ const server = http.createServer(async (req: any, res: any) => {
       }[ext] || 'text/plain';
       
       res.writeHead(200, { 'Content-Type': contentType });
-      fs.createReadStream(fullPath).pipe(res);
+      createReadStream(fullPath).pipe(res);
       fileServed = true;
       break;
     }

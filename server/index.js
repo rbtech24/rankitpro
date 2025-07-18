@@ -1,8 +1,8 @@
-// Development server bypass - using Node.js built-in modules
-const http = require('http');
-const path = require('path');
-const fs = require('fs');
-const url = require('url');
+// Development server using Node.js built-in modules for dependency-free operation
+const { createServer } = require('http');
+const { readFileSync, existsSync, createReadStream } = require('fs');
+const { join, extname } = require('path');
+const { parse } = require('url');
 
 // Parse request body
 function parseBody(req) {
@@ -22,8 +22,8 @@ function parseBody(req) {
 }
 
 // Create server
-const server = http.createServer(async (req, res) => {
-  const parsedUrl = url.parse(req.url, true);
+const server = createServer(async (req, res) => {
+  const parsedUrl = parse(req.url, true);
   const pathname = parsedUrl.pathname;
   
   // Set security headers
@@ -104,18 +104,18 @@ const server = http.createServer(async (req, res) => {
   
   // Try to serve static files from multiple locations
   const staticPaths = [
-    path.join(__dirname, '..', 'dist', 'public'),
-    path.join(__dirname, '..', 'client', 'dist'),
-    path.join(__dirname, '..', 'public')
+    join(process.cwd(), 'dist', 'public'),
+    join(process.cwd(), 'client', 'dist'),
+    join(process.cwd(), 'public')
   ];
   
   const filePath = pathname === '/' ? '/index.html' : pathname;
   let fileServed = false;
   
   for (const staticPath of staticPaths) {
-    const fullPath = path.join(staticPath, filePath);
-    if (fs.existsSync(fullPath)) {
-      const ext = path.extname(fullPath);
+    const fullPath = join(staticPath, filePath);
+    if (existsSync(fullPath)) {
+      const ext = extname(fullPath);
       const contentType = {
         '.html': 'text/html',
         '.js': 'text/javascript',
@@ -124,11 +124,12 @@ const server = http.createServer(async (req, res) => {
         '.png': 'image/png',
         '.jpg': 'image/jpeg',
         '.gif': 'image/gif',
-        '.svg': 'image/svg+xml'
+        '.svg': 'image/svg+xml',
+        '.ico': 'image/x-icon'
       }[ext] || 'text/plain';
       
       res.writeHead(200, { 'Content-Type': contentType });
-      fs.createReadStream(fullPath).pipe(res);
+      createReadStream(fullPath).pipe(res);
       fileServed = true;
       break;
     }
@@ -177,7 +178,7 @@ const server = http.createServer(async (req, res) => {
             <p><strong>Test Admin:</strong> admin@test.com / admin123</p>
         </div>
         
-        <p>The server is running without dependencies and is ready for development.</p>
+        <p>The server is running with zero dependencies and serving the React client from client/dist/</p>
     </div>
 </body>
 </html>`);
@@ -194,5 +195,5 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`🌍 Health check: http://localhost:${PORT}/health`);
   console.log(`🔧 API health: http://localhost:${PORT}/api/health`);
   console.log(`📱 Application: http://localhost:${PORT}/`);
-  console.log(`✅ Development server ready without dependencies!`);
+  console.log(`✅ Development server ready and serving client from client/dist/`);
 });
