@@ -1,25 +1,16 @@
 services:
   - type: web
-    name: rankitpro-saas
+    name: rankitpro
     env: node
     plan: starter
-    buildCommand: npm install --ignore-optional --no-optional && ./build.sh
-    startCommand: npm start
+    buildCommand: node render-bypass-npm.js
+    startCommand: node server.js
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: rankitpro-db
-          property: connectionString
-      - key: SESSION_SECRET
-        generateValue: true
-      - key: PORT
-        value: 10000
-    healthCheckPath: /api/health
 
 databases:
   - name: rankitpro-db
     databaseName: rankitpro
-    user: rankitpro_user
+    user: rankitpro
     plan: starter

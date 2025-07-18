@@ -1,0 +1,48 @@
+2025-07-18T02:14:50.007120955Z ==> Cloning from https://github.com/rbtech24/rankitpro
+2025-07-18T02:14:50.956741182Z ==> Checking out commit 2497bc9cfdfc9f61a2998de29f179dc4879ded3b in branch main
+2025-07-18T02:14:52.227920165Z ==> Downloading cache...
+2025-07-18T02:15:08.058020947Z ==> Transferred 315MB in 8s. Extraction took 7s.
+2025-07-18T02:15:17.446010388Z ==> Using Node.js version 22.14.0 (default)
+2025-07-18T02:15:17.480781752Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-07-18T02:15:17.650363171Z ==> Using Bun version 1.1.0 (default)
+2025-07-18T02:15:17.650424033Z ==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+2025-07-18T02:15:17.721233748Z ==> Running build command 'rm -rf package-lock.json node_modules && npm install --ignore-optional --no-optional && npm install @rollup/rollup-linux-x64-gnu --save-dev --ignore-optional && npm install rollup --save-dev --ignore-optional && mkdir -p dist && npx vite build client --outDir dist && npx esbuild server/index.ts --platform=node --outfile=dist/server.cjs --bundle --external:@babel/preset-typescript/package.json --external:@babel/preset-typescript --external:@babel/core --external:lightningcss --external:../pkg --external:@swc/core --external:esbuild --external:typescript --external:*.node --external:pg-native --external:bcrypt --format=cjs && echo 'import("./server.cjs");' > dist/index.js'...
+2025-07-18T02:15:32.737785006Z 
+2025-07-18T02:15:32.737814957Z added 464 packages, and audited 465 packages in 14s
+2025-07-18T02:15:32.737827557Z 
+2025-07-18T02:15:32.737868328Z 78 packages are looking for funding
+2025-07-18T02:15:32.737881859Z   run `npm fund` for details
+2025-07-18T02:15:32.739757012Z 
+2025-07-18T02:15:32.739770283Z found 0 vulnerabilities
+2025-07-18T02:15:33.819291573Z 
+2025-07-18T02:15:33.819313844Z added 5 packages, and audited 470 packages in 878ms
+2025-07-18T02:15:33.819348255Z 
+2025-07-18T02:15:33.819355845Z 78 packages are looking for funding
+2025-07-18T02:15:33.819442678Z   run `npm fund` for details
+2025-07-18T02:15:33.820506348Z 
+2025-07-18T02:15:33.820521449Z found 0 vulnerabilities
+2025-07-18T02:15:34.834740742Z 
+2025-07-18T02:15:34.834771383Z up to date, audited 470 packages in 938ms
+2025-07-18T02:15:34.834783433Z 
+2025-07-18T02:15:34.834787924Z 78 packages are looking for funding
+2025-07-18T02:15:34.834796234Z   run `npm fund` for details
+2025-07-18T02:15:34.836288086Z 
+2025-07-18T02:15:34.836306547Z found 0 vulnerabilities
+2025-07-18T02:15:35.433996469Z vite v6.3.5 building for production...
+2025-07-18T02:15:35.519464373Z transforming...
+2025-07-18T02:15:38.207551633Z ✓ 49 modules transformed.
+2025-07-18T02:15:38.211198858Z ✗ Build failed in 2.75s
+2025-07-18T02:15:38.21128769Z error during build:
+2025-07-18T02:15:38.21129689Z [vite]: Rollup failed to resolve import "@/components/ui/button" from "/opt/render/project/src/client/src/pages/roi-calculator-fresh.tsx".
+2025-07-18T02:15:38.21130149Z This is most likely unintended because it can break your application at runtime.
+2025-07-18T02:15:38.211305741Z If you do want to externalize this module explicitly add it to
+2025-07-18T02:15:38.211309451Z `build.rollupOptions.external`
+2025-07-18T02:15:38.211314031Z     at viteLog (file:///opt/render/project/src/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46345:15)
+2025-07-18T02:15:38.211317521Z     at onRollupLog (file:///opt/render/project/src/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46395:5)
+2025-07-18T02:15:38.211320911Z     at onLog (file:///opt/render/project/src/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46043:7)
+2025-07-18T02:15:38.211324981Z     at file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:20818:32
+2025-07-18T02:15:38.211329381Z     at Object.logger [as onLog] (file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:22698:9)
+2025-07-18T02:15:38.211332921Z     at ModuleLoader.handleInvalidResolvedId (file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:21444:26)
+2025-07-18T02:15:38.211349772Z     at file:///opt/render/project/src/node_modules/rollup/dist/es/shared/node-entry.js:21402:26
+2025-07-18T02:15:38.303736964Z ==> Build failed 😞
+2025-07-18T02:15:38.303759365Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys

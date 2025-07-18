@@ -4,31 +4,38 @@
 
 /* TinyMCE WYSIWYG Editor Styles */
 .tox-tinymce {
-  @apply border border-gray-300 rounded-md;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
 }
 
 .tox .tox-toolbar {
-  @apply border-b border-gray-300;
+  border-bottom: 1px solid #d1d5db;
 }
 
 .tox .tox-edit-area {
-  @apply bg-white;
+  background-color: white;
 }
 
 .tox .tox-menubar {
-  @apply border-b border-gray-300;
+  border-bottom: 1px solid #d1d5db;
 }
 
 .tox .tox-statusbar {
-  @apply border-t border-gray-300;
+  border-top: 1px solid #d1d5db;
 }
 
 .tox-tinymce-aux {
-  @apply bg-white border border-gray-300 rounded shadow-lg z-50;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 50;
 }
 
 .ql-snow .ql-tooltip input {
-  @apply border border-gray-300 rounded px-2 py-1;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
 }
 
 :root {
@@ -78,11 +85,15 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     overflow-x: hidden;
   }
 
