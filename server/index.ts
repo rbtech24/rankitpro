@@ -12,6 +12,17 @@ import helmet from "helmet";
 import MemoryOptimizer from "./services/memory-optimizer";
 import { errorMonitor, logError } from "./error-monitor";
 
+// Global error handling for unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Promise Rejection:', reason);
+  logError('Unhandled Promise Rejection', reason instanceof Error ? reason : new Error(String(reason)));
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  logError('Uncaught Exception', error);
+  process.exit(1);
+});
 
 const app = express();
 
