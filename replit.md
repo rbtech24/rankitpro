@@ -19,10 +19,11 @@ Rank It Pro is a comprehensive SaaS platform designed for customer-facing busine
   - ✅ **Fix 4**: Fixed server build to exclude all Vite and build-tool dependencies
   - ✅ **Fix 5**: Removed all references to setupVite in production build
   - ✅ **Fix 6**: Optimized client build with manual chunking and production settings
-- **Final Working Solution**: `deploy-clean-final.js` deployment script
-  - Creates production-specific vite config without @replit/vite-plugin-runtime-error-modal
+- **Final Working Solution**: `deploy-bypass-vite.js` deployment script
+  - Completely bypasses problematic vite.config.ts file with inline configuration
+  - Creates temporary vite config (.mjs format) to avoid ESM/CommonJS conflicts
   - Builds client with optimized chunking (vendor/utils separation)
-  - Server built from clean production entry point with CommonJS format
+  - Server built from clean production entry point with comprehensive externals
   - Creates deployment package.json with `"type": "commonjs"`
   - Includes all necessary dependencies and deployment scripts
 - **Build Results**:
@@ -30,9 +31,9 @@ Rank It Pro is a comprehensive SaaS platform designed for customer-facing busine
   - Server: esbuild → `dist/index.js` (2.2MB CommonJS bundle, minified)
   - Config: `dist/package.json` with `"type": "commonjs"`
   - Deployment: `dist/README.md`, `dist/start.sh` with complete instructions
-- **Verification**: ✅ Complete build script tested - no ESM errors, production ready
+- **Verification**: ✅ Complete build script tested - no ESM errors, database connection working
 - **Status**: 🚀 **PRODUCTION DEPLOYMENT READY - ALL ISSUES RESOLVED**
-- **Usage**: Run `node deploy-clean-final.js` to create production build, then deploy `dist/` directory
+- **Usage**: Run `node deploy-bypass-vite.js` to create production build, then deploy `dist/` directory
 
 ## System Architecture
 
