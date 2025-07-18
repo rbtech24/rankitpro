@@ -1,11 +1,21 @@
 services:
   - type: web
-    name: rank-it-pro
+    name: rankitpro
     env: node
-    buildCommand: "./deploy-build.sh"
-    startCommand: "node dist/index.js"
+    plan: starter
+    buildCommand: rm -rf node_modules && npm install && node render-deploy.mjs
+    startCommand: cd dist && node server.js
     envVars:
       - key: NODE_ENV
         value: production
-      - key: REPLIT_KEEP_PACKAGE_DEV_DEPENDENCIES
-        value: "1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rankitpro-db
+          property: connectionString
+    healthCheckPath: /api/health
+
+databases:
+  - name: rankitpro-db
+    databaseName: rankitpro
+    user: rankitpro
+    plan: starter
