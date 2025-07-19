@@ -34,9 +34,9 @@ export class HouseCallProIntegration implements CRMIntegration {
     try {
       const response = await axios({
         method,
-        url: error instanceof Error ? error.message : String(error),
+        url: `${this.baseUrl}${endpoint}`,
         headers: {
-          'Authorization': error instanceof Error ? error.message : String(error),
+          'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -46,10 +46,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        logger.error('Housecall Pro API error:', { {
-          status: error.response.status,
-          data: error.response.data
-        } }, {
+        logger.error('Housecall Pro API error:', {
           status: error.response.status,
           data: error.response.data
         });
@@ -82,7 +79,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       // Try to find by email first
       if (customer.email) {
         const emailSearchResponse = await this.apiRequest<any>('GET', 
-          `${apiBase}/${endpoint}`;
+          `/customers?email=${encodeURIComponent(customer.email)}`);
         
         if (emailSearchResponse.customers && emailSearchResponse.customers.length > 0) {
           return { id: emailSearchResponse.customers[0].id };
@@ -94,7 +91,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         // Normalize phone number to just digits
         const phone = customer.phone.replace(/\D/g, '');
         const phoneSearchResponse = await this.apiRequest<any>('GET', 
-          `${apiBase}/${endpoint}`;
+          `/customers?phone=${phone}`);
         
         if (phoneSearchResponse.customers && phoneSearchResponse.customers.length > 0) {
           return { id: phoneSearchResponse.customers[0].id };
@@ -103,7 +100,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       
       // Try to find by name as last resort
       const nameSearchResponse = await this.apiRequest<any>('GET', 
-        `${apiBase}/${endpoint}`;
+        `/customers?name=${encodeURIComponent(customer.firstName + ' ' + customer.lastName)}`);
       
       if (nameSearchResponse.customers && nameSearchResponse.customers.length > 0) {
         return { id: nameSearchResponse.customers[0].id };
@@ -126,7 +123,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       // Check if customer already exists
       if (customer.externalId) {
         try {
-          const existingCustomer = await this.apiRequest<any>('GET', `${apiBase}/${endpoint}`;
+          const existingCustomer = await this.apiRequest<any>('GET', `/customers/${customer.externalId}`);
           if (existingCustomer && existingCustomer.id) {
             customerId = existingCustomer.id;
           }
@@ -199,7 +196,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       // Check if job already exists
       if (job.externalId) {
         try {
-          const existingJob = await this.apiRequest<any>('GET', `${apiBase}/${endpoint}`;
+          const existingJob = await this.apiRequest<any>('GET', `/customers?email=${encodeURIComponent(customer.email)}`;
           if (existingJob && existingJob.id) {
             jobId = existingJob.id;
           }
@@ -411,7 +408,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       }
       
       // Get jobs for this technician
-      const response = await this.apiRequest<any>('GET', `${apiBase}/${endpoint}`;
+      const response = await this.apiRequest<any>('GET', `/customers?email=${encodeURIComponent(customer.email)}`;
       
       // Map Housecall Pro jobs to our job model
       return response.jobs.map(job => ({
@@ -446,7 +443,7 @@ export class HouseCallProIntegration implements CRMIntegration {
     const cityStateZip = [];
     if (address.city) cityStateZip.push(address.city);
     if (address.state && address.zip) {
-      cityStateZip.push(`${apiBase}/${endpoint}`;
+      cityStateZip.push(`/customers?email=${encodeURIComponent(customer.email)}`;
     } else {
       if (address.state) cityStateZip.push(address.state);
       if (address.zip) cityStateZip.push(address.zip);
@@ -469,7 +466,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         params += error instanceof Error ? error.message : String(error);
       }
       
-      const response = await this.apiRequest<any>('GET', `${apiBase}/${endpoint}`;
+      const response = await this.apiRequest<any>('GET', `/customers?email=${encodeURIComponent(customer.email)}`;
       
       // Map Housecall Pro customers to our customer model
       return response.customers.map(customer => ({

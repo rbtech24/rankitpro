@@ -74,9 +74,9 @@ export class ServiceTitanIntegration implements CRMIntegration {
       
       const response = await axios({
         method,
-        url: error instanceof Error ? error.message : String(error),
+        url: `${this.baseUrl}${endpoint}`,
         headers: {
-          'Authorization': error instanceof Error ? error.message : String(error),
+          'Authorization': `Bearer ${token}`,
           'ST-App-Key': this.clientId,
           'Content-Type': 'application/json',
           'ST-Tenant-ID': this.tenantId
@@ -87,11 +87,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        logger.error('ServiceTitan API error:', { {
-          status: error.response.status,
-          data: error.response.data
-        } }, {
-          status: error.response.status,
+        logger.error('ServiceTitan API error:', {
           data: error.response.data
         });
       } else {
@@ -329,21 +325,21 @@ export class ServiceTitanIntegration implements CRMIntegration {
           const base64Image = buffer.toString('base64');
           
           // Upload to ServiceTitan as an attachment
-          await this.apiRequest('POST', error instanceof Error ? error.message : String(error), {
-            fileName: error instanceof Error ? error.message : String(error),
+          await this.apiRequest('POST', `/jobs/${jobId}/attachments`, {
+            fileName: `checkin-photo-${Date.now()}.jpg`,
             mimeType: 'image/jpeg',
             base64Data: base64Image,
             description: 'Check-in photo from Rank It Pro',
             isPublic: true
           });
         } catch (error) {
-          logger.error("Template literal processed");
+          logger.error("Failed to attach image to ServiceTitan job:", error);
         }
       }
       
       return true;
     } catch (error) {
-      logger.error("Template literal processed");
+      logger.error("Failed to attach images to ServiceTitan job:", error);
       return false;
     }
   }

@@ -5,7 +5,7 @@ import { User, Company } from "@shared/schema";
 import { logger } from '../services/logger';
 // Check if Stripe API key is available
 if (!process.env.STRIPE_SECRET_KEY) {
-  logger.warn("Parameter processed");
+  logger.warn("Stripe secret key not configured - payment functionality will be disabled");
 }
 
 // Initialize Stripe client conditionally based on API key availability
@@ -34,7 +34,7 @@ function validatePriceIds() {
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
   
   if (missingVars.length > 0) {
-    logger.warn("Template literal processed");`);
+    logger.warn(`Missing Stripe price environment variables: ${missingVars.join(', ')}`);
     logger.warn('Using fallback price IDs - payments may fail in production');
   }
 }

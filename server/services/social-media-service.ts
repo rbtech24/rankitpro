@@ -363,9 +363,9 @@ class SocialMediaService {
         });
 
         if (result.success) {
-          logger.info("Syntax processed");
+          logger.info("Social media post successful");
         } else {
-          logger.error("Template literal processed");, result.error);
+          logger.error("Social media post failed:", result.error);
         }
       }
     } catch (error) {
