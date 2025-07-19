@@ -4,12 +4,14 @@ import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import CheckinCard from "../components/checkin/checkin-card";
 import CheckinModal from "../components/modals/checkin-modal";
 import EditCheckinModal from "../components/modals/edit-checkin-modal";
 import { apiRequest } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
 import { Trash2 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 interface Technician {
   id: number;
@@ -33,6 +35,7 @@ interface CheckIn {
 export default function CheckIns() {
   const [checkInModalOpen, setCheckInModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedCheckIn, setSelectedCheckIn] = useState<CheckIn | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -209,6 +212,11 @@ export default function CheckIns() {
                         setSelectedCheckIn(checkIn);
                         setEditModalOpen(true);
                       }}
+                      onViewDetails={() => {
+                        setSelectedCheckIn(checkIn);
+                        setDetailsModalOpen(true);
+                        setEditModalOpen(false); // Close edit modal if open
+                      }}
                     />
                     <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
@@ -282,6 +290,105 @@ export default function CheckIns() {
             setSelectedCheckIn(null);
           }}
         />
+        
+        {/* Visit Details Modal */}
+        <Dialog open={detailsModalOpen} onOpenChange={setDetailsModalOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Visit Details</DialogTitle>
+            </DialogHeader>
+            {selectedCheckIn && (
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-center space-x-4">
+                  <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-700">
+                    {selectedCheckIn.technician?.name ? selectedCheckIn.technician.name.charAt(0).toUpperCase() : 'T'}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900">{selectedCheckIn.technician?.name || 'Unknown Technician'}</h3>
+                    <p className="text-sm text-gray-500">{selectedCheckIn.technician?.email}</p>
+                    <p className="text-xs text-gray-400">{formatDistanceToNow(new Date(selectedCheckIn.createdAt), { addSuffix: true })}</p>
+                  </div>
+                </div>
+                
+                {/* Job Information */}
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Job Type</h4>
+                    <p className="text-gray-600">{selectedCheckIn.jobType}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Job Description</h4>
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-gray-700 whitespace-pre-wrap">
+                        {selectedCheckIn.notes && selectedCheckIn.notes.trim() 
+                          ? selectedCheckIn.notes 
+                          : "No job description provided."
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Location</h4>
+                    <p className="text-gray-600">
+                      {selectedCheckIn.location || 
+                       (selectedCheckIn.latitude && selectedCheckIn.longitude ? 
+                         `${parseFloat(selectedCheckIn.latitude).toFixed(4)}, ${parseFloat(selectedCheckIn.longitude).toFixed(4)}` : 
+                         'Location not available')}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Photos */}
+                {selectedCheckIn.photos && selectedCheckIn.photos.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-3">Photos</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {(() => {
+                        let photoUrls = [];
+                        if (typeof selectedCheckIn.photos === 'string') {
+                          try {
+                            const parsed = JSON.parse(selectedCheckIn.photos);
+                            if (Array.isArray(parsed)) {
+                              photoUrls = parsed;
+                            } else {
+                              photoUrls = [parsed];
+                            }
+                          } catch {
+                            if (selectedCheckIn.photos.includes(',')) {
+                              photoUrls = selectedCheckIn.photos.split(',').map(url => url.trim());
+                            } else {
+                              photoUrls = [selectedCheckIn.photos];
+                            }
+                          }
+                        } else if (Array.isArray(selectedCheckIn.photos)) {
+                          photoUrls = selectedCheckIn.photos.map(p => typeof p === 'string' ? p : p.url);
+                        }
+                        
+                        return photoUrls.map((photoUrl: string, index: number) => (
+                          <div key={index} className="aspect-square rounded-lg border overflow-hidden bg-gray-100">
+                            <img 
+                              src={photoUrl} 
+                              alt={`Visit photo ${index + 1}`} 
+                              className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => window.open(photoUrl, '_blank')}
+                              onError={(e) => {
+                                console.error('Photo failed to load:', photoUrl);
+                                e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMiA5VjEzTTEyIDE3SDE2VjEzSDhWMTdIMTJaIiBzdHJva2U9IiM5Q0E0QUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
+                              }}
+                            />
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

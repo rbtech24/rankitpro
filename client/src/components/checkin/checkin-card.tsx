@@ -27,9 +27,10 @@ interface CheckinCardProps {
   onCreatePost?: () => void;
   onRequestReview?: () => void;
   onEdit?: () => void;
+  onViewDetails?: () => void;
 }
 
-export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, onEdit }: CheckinCardProps) {
+export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, onEdit, onViewDetails }: CheckinCardProps) {
   // Format the date as "X time ago"
   const timeAgo = formatDistanceToNow(new Date(checkIn.createdAt), { addSuffix: true });
   
@@ -51,7 +52,17 @@ export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, on
       </div>
       
       <div className="mt-4 text-sm text-gray-500">
-        <p>{checkIn.notes || "No notes provided."}</p>
+        <div className="space-y-1">
+          <div className="font-medium text-gray-700">Job Description:</div>
+          <p className="text-gray-600">
+            {checkIn.notes && checkIn.notes.trim() 
+              ? (checkIn.notes.length > 150 
+                  ? `${checkIn.notes.substring(0, 150)}...` 
+                  : checkIn.notes)
+              : "No job description provided."
+            }
+          </p>
+        </div>
       </div>
       
       {checkIn.photos && checkIn.photos.length > 0 && (
@@ -126,6 +137,16 @@ export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, on
         </div>
         
         <div className="flex space-x-3">
+          {onViewDetails && (
+            <Button variant="outline" size="sm" className="text-xs" onClick={onViewDetails}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              View Details
+            </Button>
+          )}
+          
           {onEdit && (
             <Button variant="link" size="sm" className="text-xs text-primary-600" onClick={onEdit}>
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
