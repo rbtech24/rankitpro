@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getCurrentUser } from '../../lib/auth';
 import { OnboardingWalkthrough } from './OnboardingWalkthrough';
 
@@ -30,6 +30,8 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
   const [showWalkthrough, setShowWalkthrough] = useState(false);
   const [hasSeenWalkthrough, setHasSeenWalkthrough] = useState(false);
   const [shouldAutoStart, setShouldAutoStart] = useState(false);
+  
+  const queryClient = useQueryClient();
 
   // Get current user and company info
   const { data: auth } = useQuery({
@@ -83,9 +85,27 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
     setShowWalkthrough(true);
   };
 
-  const completeWalkthrough = () => {
-    setShowWalkthrough(false);
-    setHasSeenWalkthrough(true);
+  const completeWalkthrough = async () => {
+    try {
+      // Save completion status to backend
+      await fetch('/api/onboarding/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ hasSeenWalkthrough: true })
+      });
+      
+      // Invalidate onboarding progress query to refresh UI
+      queryClient.invalidateQueries({ queryKey: ['/api/onboarding/progress'] });
+      
+      setShowWalkthrough(false);
+      setHasSeenWalkthrough(true);
+    } catch (error) {
+      console.error('Failed to save walkthrough completion:', error);
+      // Still close walkthrough locally even if save fails
+      setShowWalkthrough(false);
+      setHasSeenWalkthrough(true);
+    }
   };
 
   const resetWalkthrough = () => {

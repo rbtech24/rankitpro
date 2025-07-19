@@ -106,6 +106,56 @@ router.post('/progress', isAuthenticated, asyncHandler(async (req: Request, res:
   }
 }));
 
+// Complete walkthrough - dedicated endpoint
+router.post('/complete', isAuthenticated, asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user!;
+  
+  try {
+    // Get current user data
+    const userData = await storage.getUser(user.id);
+    if (!userData) {
+      return validationError('User not found');
+    }
+
+    // Get current appearance preferences
+    const currentPreferences = userData.appearancePreferences as any || {};
+    const currentProgress = currentPreferences.onboardingProgress || {};
+
+    // Mark walkthrough as completed
+    const updatedProgress = {
+      ...currentProgress,
+      hasSeenWalkthrough: true,
+      completedSteps: [...(currentProgress.completedSteps || []), 'completion'],
+      currentStep: 'completed',
+      lastActiveDate: new Date().toISOString()
+    };
+
+    // Update user preferences with completion status
+    const updatedPreferences = {
+      ...currentPreferences,
+      onboardingProgress: updatedProgress
+    };
+
+    await storage.updateUser(user.id, {
+      appearancePreferences: updatedPreferences
+    });
+
+    logger.info('Walkthrough completed', { 
+      userId: user.id, 
+      email: user.email,
+      completedAt: new Date().toISOString()
+    });
+
+    successResponse(res, updatedProgress, 'Walkthrough completed successfully');
+  } catch (error) {
+    logger.error('Error completing walkthrough', { 
+      error: error instanceof Error ? error.message : 'Unknown error',
+      userId: user.id 
+    });
+    throw error;
+  }
+}));
+
 // Reset onboarding progress (admin only)
 router.post('/reset', isAuthenticated, asyncHandler(async (req: Request, res: Response) => {
   const user = req.user!;
