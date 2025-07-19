@@ -20,7 +20,9 @@ export function securityHeaders() {
           "https://js.stripe.com",
           "https://replit.com",
           "https://*.replit.com",
-          "https://basil.stripe.com"
+          "https://basil.stripe.com",
+          "https://*.replit.dev",
+          "data:"
         ],
         imgSrc: ["'self'", "data:", "https:", "blob:"],
         connectSrc: [
@@ -29,7 +31,9 @@ export function securityHeaders() {
           "wss:",
           "https://api.stripe.com",
           "https://basil.stripe.com",
-          "https://*.stripe.com"
+          "https://*.stripe.com",
+          "https://*.replit.dev",
+          "https://replit.com"
         ],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
@@ -41,9 +45,9 @@ export function securityHeaders() {
         upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
       },
     },
-    crossOriginEmbedderPolicy: false, // Allow iframe embedding
-    crossOriginOpenerPolicy: false,
-    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginEmbedderPolicy: false, // Disabled to allow external resources
+    crossOriginOpenerPolicy: false,   // Disabled to allow external resources  
+    crossOriginResourcePolicy: false, // Disabled to allow external resources
     dnsPrefetchControl: true,
     frameguard: { action: 'deny' },
     hidePoweredBy: true,
@@ -89,11 +93,10 @@ export function additionalSecurityHeaders(req: Request, res: Response, next: Nex
   // Feature policy / permissions policy
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
   
-  // Content type options - disabled in development for Stripe.js compatibility
-  if (process.env.NODE_ENV === 'production') {
-    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-  }
+  // Content type options - disabled for Stripe.js compatibility
+  // Cross-Origin policies disabled to allow external resources
+  // res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  // res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
   
   // Cache control for sensitive pages
   if (req.path.startsWith('/api/') || req.path.includes('admin') || req.path.includes('auth')) {
