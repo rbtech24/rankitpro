@@ -25,8 +25,8 @@ router.get('/published', async (req, res) => {
     const formattedPosts = publishedPosts.map(post => ({
       id: post.id,
       title: post.title,
-      placeholder: post.placeholder,
-      excerpt: post.excerpt || post.placeholder.substring(0, 150) + '...',
+      content: post.content,
+      excerpt: post.excerpt || post.content.substring(0, 150) + '...',
       featuredImage: post.featuredImage,
       publishDate: post.publishDate || post.createdAt,
       tags: post.tags || [],
@@ -66,7 +66,7 @@ router.get('/:id', async (req, res) => {
     const formattedPost = {
       id: post.id,
       title: post.title,
-      placeholder: post.placeholder,
+      content: post.content,
       excerpt: post.excerpt,
       featuredImage: post.featuredImage,
       gallery: post.gallery || [],
