@@ -259,12 +259,53 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
       state: req.body.state?.trim() || null,
       zip: req.body.zip?.trim() || null,
       companyId: user.companyId,
-      technicianId: req.body.technicianId || user.id,
+      technicianId: req.body.technicianId || null, // Will be resolved below
       photos: photoUrls.length > 0 ? JSON.stringify(photoUrls) : JSON.stringify([]),
       generatedContent: req.body.generatedContent || null,
     };
 
     logger.info("Operation completed");
+
+    // Resolve technician ID - either from form or find/create one for the user
+    if (!checkInData.technicianId) {
+      try {
+        // First, try to find a technician associated with this user
+        const userTechnician = await storage.getTechnicianByUserId(user.id);
+        
+        if (userTechnician) {
+          checkInData.technicianId = userTechnician.id;
+        } else {
+          // If no technician exists for this user, find any technician in the company
+          const companyTechnicians = await storage.getTechniciansByCompany(user.companyId);
+          
+          if (companyTechnicians && companyTechnicians.length > 0) {
+            // Use the first available technician
+            checkInData.technicianId = companyTechnicians[0].id;
+            logger.info("Using existing company technician", { technicianId: companyTechnicians[0].id });
+          } else {
+            // Create a default technician for this company admin
+            const defaultTechnician = await storage.createTechnician({
+              name: user.username || user.email.split('@')[0],
+              email: user.email,
+              phone: null,
+              specialty: 'General Service',
+              userId: user.id,
+              companyId: user.companyId,
+              location: 'Main Office',
+              active: true
+            });
+            checkInData.technicianId = defaultTechnician.id;
+            logger.info("Created default technician", { technicianId: defaultTechnician.id });
+          }
+        }
+      } catch (techError: any) {
+        logger.error("Error resolving technician", { error: techError?.message });
+        return res.status(500).json({ 
+          message: 'Failed to resolve technician for check-in',
+          details: techError?.message || 'Unknown error'
+        });
+      }
+    }
 
     // Validate required fields before creating check-in
     if (!checkInData.jobType || !checkInData.companyId || !checkInData.technicianId) {
