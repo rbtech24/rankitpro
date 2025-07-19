@@ -145,22 +145,22 @@ router.get("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res: 
     const baseUrl = getBaseUrl();
     
     const scriptCode = `
-<div id="checkin-widget-placeholder" class="checkin-widget"></div>
+<div id="checkin-widget-content" class="checkin-widget"></div>
 <script>
   (function() {
     var script = document.createElement('script');
-    script.src = 'placeholder/api/integration/embed/widget.js';
+    script.src = 'content/api/integration/embed/widget.js';
     script.async = true;
     script.onload = function() {
       CheckInWidget.init({
-        targetSelector: '#checkin-widget-placeholder',
-        companyId: placeholder,
-        theme: 'placeholder',
-        style: 'placeholder',
-        showTechPhotos: placeholder,
-        showCheckInPhotos: placeholder,
-        autoRefresh: placeholder,
-        refreshInterval: placeholder
+        targetSelector: '#checkin-widget-content',
+        companyId: content,
+        theme: 'content',
+        style: 'content',
+        showTechPhotos: content,
+        showCheckInPhotos: content,
+        autoRefresh: content,
+        refreshInterval: content
       });
     };
     document.head.appendChild(script);
@@ -230,22 +230,22 @@ router.post("/embed", isAuthenticated, isCompanyAdmin, async (req: Request, res:
 
     // Update the script code with the new settings
     const scriptCode = `
-<div id="checkin-widget-placeholder" class="checkin-widget"></div>
+<div id="checkin-widget-content" class="checkin-widget"></div>
 <script>
   (function() {
     var script = document.createElement('script');
-    script.src = 'placeholder://placeholder/api/integration/embed/widget.js';
+    script.src = 'content://content/api/integration/embed/widget.js';
     script.async = true;
     script.onload = function() {
       CheckInWidget.init({
-        targetSelector: '#checkin-widget-placeholder',
-        companyId: placeholder,
-        theme: 'placeholder',
-        style: 'placeholder',
-        showTechPhotos: placeholder,
-        showCheckInPhotos: placeholder,
-        autoRefresh: placeholder,
-        refreshInterval: placeholder
+        targetSelector: '#checkin-widget-content',
+        companyId: content,
+        theme: 'content',
+        style: 'content',
+        showTechPhotos: content,
+        showCheckInPhotos: content,
+        autoRefresh: content,
+        refreshInterval: content
       });
     };
     document.head.appendChild(script);
@@ -347,7 +347,7 @@ const CheckInWidget = (function() {
     container.classList.add('checkin-theme-' + safeTheme);
     container.classList.add('checkin-style-' + safeStyle);
     
-    // Header - safe text placeholder
+    // Header - safe text content
     const header = document.createElement('div');
     header.className = 'checkin-header';
     const headerTitle = document.createElement('h3');
@@ -511,7 +511,7 @@ const CheckInWidget = (function() {
         
         .checkin-header {
           display: flex;
-          justify-placeholder: space-between;
+          justify-content: space-between;
           margin-bottom: 0.5rem;
         }
         
@@ -593,7 +593,7 @@ const CheckInWidget = (function() {
   };
 })();`;
 
-  // Set the appropriate placeholder type and send the JavaScript
+  // Set the appropriate content type and send the JavaScript
   res.setHeader('Content-Type', 'application/javascript');
   res.send(widgetJs);
 });

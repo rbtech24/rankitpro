@@ -38,7 +38,7 @@ import jsWidgetRoutes from "./routes/js-widget";
 import billingRoutes from "./routes/billing";
 import userRoutes from "./routes/users";
 import aiProvidersRoutes from "./routes/ai-providers";
-import generateContentRoutes from "./routes/generate-placeholder";
+import generateContentRoutes from "./routes/generate-content";
 // Removed conflicting mobile routes
 import crmIntegrationRoutes from "./routes/crm-integration";
 import salesRoutes from "./routes/sales";
@@ -641,7 +641,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     if (!healthCheck.features.ai) {
-      healthCheck.warnings.push("AI placeholder generation disabled - No AI provider API keys configured");
+      healthCheck.warnings.push("AI content generation disabled - No AI provider API keys configured");
     }
 
     // Check for super admin account
@@ -1070,7 +1070,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Enhanced AI Content Generation for Check-ins and Blog Posts
-  app.post('/api/ai/generate-placeholder', placeholderGenerationRateLimit, isAuthenticated, async (req: Request, res: Response) => {
+  app.post('/api/ai/generate-content', placeholderGenerationRateLimit, isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { prompt, type, context } = req.body;
       
@@ -1080,13 +1080,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let aiPrompt = prompt;
       
-      // Enhanced prompts for different placeholder types
+      // Enhanced prompts for different content types
       if (type === 'checkin' && context) {
-        aiPrompt = `Create a professional service check-in summary for a placeholder job at placeholder.
+        aiPrompt = `Create a professional service check-in summary for a content job at content.
 
-Work completed: placeholder
-Materials used: placeholder
-Customer concerns addressed: placeholder
+Work completed: content
+Materials used: content
+Customer concerns addressed: content
 
 Generate a comprehensive, professional summary (3-4 sentences) that:
 - Highlights the technical expertise and value delivered
@@ -1097,13 +1097,13 @@ Generate a comprehensive, professional summary (3-4 sentences) that:
 
 Tone: Professional, confident, and customer-focused.`;
       } else if (type === 'blog-post' && context) {
-        aiPrompt = `Create an SEO-optimized blog post about: placeholder
+        aiPrompt = `Create an SEO-optimized blog post about: content
 
 Based on this service experience:
-- Service type: placeholder
-- Location: placeholder
-- Work performed: placeholder
-- Materials used: placeholder
+- Service type: content
+- Location: content
+- Work performed: content
+- Materials used: content
 
 Generate a 400-500 word blog post that:
 - Starts with an engaging headline and introduction
@@ -1117,9 +1117,9 @@ Generate a 400-500 word blog post that:
 Focus on: practical tips, industry insights, and local service benefits.`;
       } else if (type === 'seo-title' && context) {
         aiPrompt = `Create 3 SEO-optimized blog post titles for:
-- Service: placeholder
-- Location: placeholder
-- Key work: placeholder
+- Service: content
+- Location: content
+- Key work: content
 
 Requirements:
 - 50-60 characters each
@@ -1131,9 +1131,9 @@ Requirements:
 Format as numbered list.`;
       } else if (type === 'meta-description' && context) {
         aiPrompt = `Write a compelling meta description (150-160 characters) for:
-- Service: placeholder
-- Location: placeholder
-- Key benefits: placeholder
+- Service: content
+- Location: content
+- Key benefits: content
 
 Include:
 - Clear service offering
@@ -1144,7 +1144,7 @@ Include:
 Make it compelling for search engine users to click.`;
       }
 
-      // OpenAI integration for placeholder generation with fallback
+      // OpenAI integration for content generation with fallback
       try {
         if (!process.env.OPENAI_API_KEY) {
           throw new Error('OpenAI API key not configured');
@@ -1161,19 +1161,19 @@ Make it compelling for search engine users to click.`;
           temperature: 0.7,
         });
 
-        const placeholder = response.choices[0].message.placeholder;
-        res.json({ placeholder });
+        const content = response.choices[0].message.content;
+        res.json({ content });
       } catch (openaiError) {
       logger.error("Database operation error", { error: error?.message || "Unknown error" });
         
-        // Generate fallback placeholder based on type
+        // Generate fallback content based on type
         let fallbackContent = '';
-        const { title, placeholder } = req.body;
+        const { title, content } = req.body;
         
         if (type === 'blog-post' && title) {
-          fallbackContent = `# placeholder
+          fallbackContent = `# content
 
-This comprehensive guide covers everything you need to know about placeholder.
+This comprehensive guide covers everything you need to know about content.
 
 ## Professional Service Excellence
 
@@ -1194,39 +1194,39 @@ We pride ourselves on providing exceptional service that exceeds customer expect
 ## Get Started Today
 
 Contact us for more information about our professional services and to schedule your consultation.`;
-        } else if (type === 'excerpt' && placeholder) {
-          const sentences = placeholder.split('.').filter((s: string) => s.trim().length > 0);
+        } else if (type === 'excerpt' && content) {
+          const sentences = content.split('.').filter((s: string) => s.trim().length > 0);
           fallbackContent = sentences.slice(0, 2).join('.') + '.';
         } else {
-          fallbackContent = 'Professional placeholder crafted for your business needs with attention to quality and customer engagement.';
+          fallbackContent = 'Professional content crafted for your business needs with attention to quality and customer engagement.';
         }
         
-        res.json({ placeholder: fallbackContent });
+        res.json({ content: fallbackContent });
       }
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
-      res.status(500).json({ error: 'Failed to generate AI placeholder' });
+      res.status(500).json({ error: 'Failed to generate AI content' });
     }
   });
 
   // Advanced AI Content Generation with Multiple Options
   app.post('/api/ai/generate-advanced', placeholderGenerationRateLimit, isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const { serviceType, location, workDetails, materials, customerNotes, placeholderType } = req.body;
+      const { serviceType, location, workDetails, materials, customerNotes, contentType } = req.body;
       
       if (!process.env.OPENAI_API_KEY) {
         return res.status(500).json({ error: 'AI service not configured' });
       }
 
       let aiPrompt = '';
-      let placeholderOptions = [];
+      let contentOptions = [];
 
-      // Generate multiple placeholder variations based on type
-      if (placeholderType === 'social-media') {
+      // Generate multiple content variations based on type
+      if (contentType === 'social-media') {
         aiPrompt = `Create 3 different social media posts about this service call:
-- Service: placeholder in placeholder
-- Work completed: placeholder
-- Materials used: placeholder
+- Service: content in content
+- Work completed: content
+- Materials used: content
 
 Generate:
 1. Facebook post (conversational, community-focused, 2-3 sentences)
@@ -1234,12 +1234,12 @@ Generate:
 3. LinkedIn post (professional, industry expertise, business-focused)
 
 Each should highlight professionalism, quality work, and customer satisfaction.`;
-      } else if (placeholderType === 'email-follow-up') {
+      } else if (contentType === 'email-follow-up') {
         aiPrompt = `Write a professional follow-up email template for this service:
-- Service: placeholder at placeholder
-- Work completed: placeholder
-- Materials used: placeholder
-- Customer notes: placeholder
+- Service: content at content
+- Work completed: content
+- Materials used: content
+- Customer notes: content
 
 Include:
 - Warm, professional greeting
@@ -1250,12 +1250,12 @@ Include:
 - Call-to-action for referrals
 
 Tone: Helpful, professional, and customer-focused.`;
-      } else if (placeholderType === 'technical-report') {
+      } else if (contentType === 'technical-report') {
         aiPrompt = `Create a detailed technical service report for:
-- Service type: placeholder
-- Location: placeholder
-- Work performed: placeholder
-- Materials/parts used: placeholder
+- Service type: content
+- Location: content
+- Work performed: content
+- Materials/parts used: content
 
 Include:
 - Executive summary
@@ -1280,23 +1280,23 @@ Format as professional service documentation.`;
           temperature: 0.7,
         });
 
-        const placeholder = response.choices[0].message.placeholder;
-        res.json({ placeholder, type: placeholderType });
+        const content = response.choices[0].message.content;
+        res.json({ content, type: contentType });
       } catch (openaiError) {
-        // Enhanced fallback placeholder
+        // Enhanced fallback content
         let fallbackContent = '';
-        if (placeholderType === 'social-media') {
-          fallbackContent = "placeholder-text";
-        } else if (placeholderType === 'email-follow-up') {
-          fallbackContent = "placeholder-text";
+        if (contentType === 'social-media') {
+          fallbackContent = "content-text";
+        } else if (contentType === 'email-follow-up') {
+          fallbackContent = "content-text";
         } else {
-          fallbackContent = "placeholder-text";
+          fallbackContent = "content-text";
         }
         res.json({ success: true });
       }
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
-      res.status(500).json({ error: 'Failed to generate advanced placeholder' });
+      res.status(500).json({ error: 'Failed to generate advanced content' });
     }
   });
 
@@ -1406,7 +1406,7 @@ Format as professional service documentation.`;
       await storage.setPasswordResetToken(user.id, resetToken, resetExpiry);
       
       // Send email with reset link
-      const resetUrl = "placeholder://placeholder/reset-password?token=placeholder";
+      const resetUrl = "content://content/reset-password?token=content";
       
       try {
         await emailService.sendPasswordResetEmail(email, user.username, resetUrl);
@@ -2754,7 +2754,7 @@ Format as professional service documentation.`;
         senderId: req.user.id,
         senderType: 'system',
         senderName: 'System',
-        message: "placeholder-text"
+        message: "content-text"
       });
 
       res.json({ session });
@@ -2846,7 +2846,7 @@ Format as professional service documentation.`;
       res.json({ 
         success: true, 
         clearedCount,
-        message: "placeholder-text" 
+        message: "content-text" 
       });
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
@@ -2867,7 +2867,7 @@ Format as professional service documentation.`;
       res.json({ 
         success: true, 
         archivedCount,
-        message: "placeholder-text" 
+        message: "content-text" 
       });
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
@@ -2929,9 +2929,9 @@ Format as professional service documentation.`;
       // Direct database query to bypass storage issues
       const neonSql = neon(process.env.DATABASE_URL!);
       const testimonials = await neonSql`
-        SELECT id, customer_name, customer_email, placeholder, type, media_url, status, created_at 
+        SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
         FROM testimonials 
-        WHERE company_id = placeholder
+        WHERE company_id = ${parseInt(req.params.companyId) || 0}
         ORDER BY created_at DESC
       `;
       logger.info("Syntax processed");
@@ -2956,7 +2956,7 @@ Format as professional service documentation.`;
         return res.status(401).send(`
           <html>
             <head><title>Authentication Required</title></head>
-            <body style="font-family: Arial, sans-serif; display: flex; justify-placeholder: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+            <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
               <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                 <h2 style="color: #dc3545; margin-bottom: 15px;">Authentication Required</h2>
                 <p style="color: #666; margin-bottom: 15px;">This embed widget requires valid API credentials.</p>
@@ -2975,7 +2975,7 @@ Format as professional service documentation.`;
           return res.status(401).send(`
             <html>
               <head><title>Invalid Credentials</title></head>
-              <body style="font-family: Arial, sans-serif; display: flex; justify-placeholder: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+              <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
                 <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                   <h2 style="color: #dc3545; margin-bottom: 15px;">Invalid Credentials</h2>
                   <p style="color: #666; margin-bottom: 15px;">The provided API credentials are invalid or expired.</p>
@@ -2997,7 +2997,7 @@ Format as professional service documentation.`;
           return res.status(404).send(`
             <html>
               <head><title>Company Not Found</title></head>
-              <body style="font-family: Arial, sans-serif; display: flex; justify-placeholder: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+              <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
                 <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                   <h2 style="color: #dc3545; margin-bottom: 15px;">Company Not Found</h2>
                   <p style="color: #666; margin-bottom: 15px;">The specified company could not be found.</p>
@@ -3011,9 +3011,9 @@ Format as professional service documentation.`;
         // Fetch testimonials using authenticated API
         const neonSql = neon(process.env.DATABASE_URL!);
         const testimonials = await neonSql`
-          SELECT id, customer_name, customer_email, placeholder, type, media_url, status, created_at 
+          SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
           FROM testimonials 
-          WHERE company_id = placeholder
+          WHERE company_id = ${actualCompanyId}
           ORDER BY created_at DESC
           LIMIT 5
         `;
@@ -3024,10 +3024,15 @@ Format as professional service documentation.`;
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" placeholder="width=device-width, initial-scale=1.0">
-  <title>placeholder - Customer Testimonials</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${company.name} - Customer Testimonials</title>
   <style>
-    body { success: true }
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 0; 
+      padding: 20px; 
+      background: #f8f9fa; 
+    }
     .widget-container { 
       background: white; 
       border: 2px solid #e2e8f0; 
@@ -3053,7 +3058,7 @@ Format as professional service documentation.`;
       border-left: 4px solid #3b82f6; 
       margin-bottom: 15px; 
     }
-    .testimonial-placeholder { 
+    .testimonial-content { 
       margin: 0 0 8px 0; 
       color: #374151; 
       font-size: 14px; 
@@ -3087,11 +3092,11 @@ Format as professional service documentation.`;
 </head>
 <body>
   <div class="widget-container">
-    <h3 class="widget-title">placeholder - Customer Testimonials</h3>
+    <h3 class="widget-title">${company.name} - Customer Testimonials</h3>
     ${testimonials.length > 0 ? testimonials.map(testimonial => `
       <div class="testimonial">
-        <p class="testimonial-placeholder">"placeholder"</p>
-        <p class="testimonial-author">— placeholder</p>
+        <p class="testimonial-content">"${testimonial.content || 'Great service!'}"</p>
+        <p class="testimonial-author">— ${testimonial.customer_name || 'Satisfied Customer'}</p>
       </div>
     `).join('') : '<p class="no-testimonials">No testimonials available at this time.</p>'}
     <div class="widget-footer">
@@ -3111,7 +3116,7 @@ Format as professional service documentation.`;
         return res.status(401).send(`
           <html>
             <head><title>Authentication Error</title></head>
-            <body style="font-family: Arial, sans-serif; display: flex; justify-placeholder: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+            <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
               <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                 <h2 style="color: #dc3545; margin-bottom: 15px;">Authentication Error</h2>
                 <p style="color: #666; margin-bottom: 15px;">Unable to validate API credentials.</p>
@@ -3126,7 +3131,7 @@ Format as professional service documentation.`;
       res.status(500).send(`
         <html>
           <head><title>Server Error</title></head>
-          <body style="font-family: Arial, sans-serif; display: flex; justify-placeholder: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
+          <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8f9fa;">
             <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
               <h2 style="color: #dc3545; margin-bottom: 15px;">Server Error</h2>
               <p style="color: #666; margin-bottom: 15px;">Unable to load testimonials widget.</p>
@@ -3203,38 +3208,38 @@ Format as professional service documentation.`;
       const parsedLimit = parseInt(String(limit));
       const validLimit = isNaN(parsedLimit) ? 10 : Math.max(1, Math.min(50, parsedLimit));
 
-      let placeholder: any = {};
+      let content: any = {};
 
       if (type === 'checkins' || type === 'all') {
         const checkins = await storage.getCheckInsByCompany(actualCompanyId);
-        placeholder.checkins = checkins.slice(0, validLimit);
+        content.checkins = checkins.slice(0, validLimit);
       }
 
       if (type === 'blogs' || type === 'all') {
         // Get actual blog posts from database
         const blogPosts = await storage.getBlogPostsByCompany(actualCompanyId);
         if (blogPosts && blogPosts.length > 0) {
-          placeholder.blogs = blogPosts.map(post => ({
+          content.blogs = blogPosts.map(post => ({
             id: post.id,
             title: post.title,
-            placeholder: post.placeholder.substring(0, 500) + (post.placeholder.length > 500 ? '...' : ''),
+            content: post.content.substring(0, 500) + (post.content.length > 500 ? '...' : ''),
             excerpt: post.excerpt || '',
             date: post.createdAt,
             author: (post as any).authorName || 'Technician'
           }));
         } else {
-          placeholder.blogs = [];
+          content.blogs = [];
         }
       }
 
       if (type === 'reviews' || type === 'all') {
         const reviews = await storage.getReviewsByCompany(actualCompanyId);
-        placeholder.reviews = reviews.slice(0, validLimit);
+        content.reviews = reviews.slice(0, validLimit);
       }
 
       if (type === 'testimonials' || type === 'all') {
         const testimonials = await storage.getTestimonialsByCompany(actualCompanyId);
-        placeholder.testimonials = testimonials.slice(0, validLimit);
+        content.testimonials = testimonials.slice(0, validLimit);
       }
 
       const widgetScript = `
@@ -3244,7 +3249,7 @@ Format as professional service documentation.`;
   const WIDGET_CONFIG = ${JSON.stringify({
     companyId: actualCompanyId,
     companyName: company.name,
-    placeholder,
+    content,
     type: type as string
   })};
   
@@ -3366,16 +3371,16 @@ Format as professional service documentation.`;
   function renderCheckIn(checkIn) {
     return \`
       <div class="rankitpro-checkin">
-        <h3>\placeholder Service Report</h3>
+        <h3>\content Service Report</h3>
         <div class="rankitpro-meta">
-          <span>\placeholder</span> • 
-          <span>\placeholder</span>
+          <span>\content</span> • 
+          <span>\content</span>
         </div>
-        <div class="rankitpro-location">📍 \placeholder</div>
-        <div class="rankitpro-description">\placeholder</div>
+        <div class="rankitpro-location">📍 \content</div>
+        <div class="rankitpro-description">\content</div>
         \${checkIn.photos && checkIn.photos.length > 0 ? \`
           <div class="rankitpro-photos">
-            \placeholder" alt="Service photo" />\`).join('')}
+            \content" alt="Service photo" />\`).join('')}
           </div>
         \` : ''}
       </div>
@@ -3385,11 +3390,11 @@ Format as professional service documentation.`;
   function renderBlog(blog) {
     return \`
       <article class="rankitpro-blog">
-        <h2>\placeholder</h2>
+        <h2>\content</h2>
         <div class="rankitpro-meta">
-          <time>\placeholder</time>
+          <time>\content</time>
         </div>
-        <div class="rankitpro-placeholder">\placeholder</div>
+        <div class="rankitpro-content">\content</div>
       </article>
     \`;
   }
@@ -3401,30 +3406,30 @@ Format as professional service documentation.`;
     
     return \`
       <div class="rankitpro-review">
-        <div class="rankitpro-stars">\placeholder</div>
+        <div class="rankitpro-stars">\content</div>
         <div class="rankitpro-meta">
-          <strong>\placeholder</strong> • 
-          <time>\placeholder</time>
+          <strong>\content</strong> • 
+          <time>\content</time>
         </div>
-        <div class="rankitpro-placeholder">"\placeholder"</div>
+        <div class="rankitpro-content">"\content"</div>
       </div>
     \`;
   }
   
   function renderWidget() {
-    const { placeholder, type } = WIDGET_CONFIG;
+    const { content, type } = WIDGET_CONFIG;
     let html = '';
     
-    if ((type === 'checkins' || type === 'all') && placeholder.checkins) {
-      html += placeholder.checkins.map(renderCheckIn).join('');
+    if ((type === 'checkins' || type === 'all') && content.checkins) {
+      html += content.checkins.map(renderCheckIn).join('');
     }
     
-    if ((type === 'blogs' || type === 'all') && placeholder.blogs) {
-      html += placeholder.blogs.map(renderBlog).join('');
+    if ((type === 'blogs' || type === 'all') && content.blogs) {
+      html += content.blogs.map(renderBlog).join('');
     }
     
-    if ((type === 'reviews' || type === 'all') && placeholder.reviews) {
-      html += placeholder.reviews.map(renderReview).join('');
+    if ((type === 'reviews' || type === 'all') && content.reviews) {
+      html += content.reviews.map(renderReview).join('');
     }
     
     return html;
@@ -3447,7 +3452,7 @@ Format as professional service documentation.`;
   
 })();`;
 
-      // Check if request wants HTML placeholder instead of JavaScript
+      // Check if request wants HTML content instead of JavaScript
       const format = req.query.format as string;
       logger.info("Syntax processed");
       
@@ -3464,7 +3469,7 @@ Format as professional service documentation.`;
 
       if (format === 'html') {
         
-        // Return template-matching HTML placeholder for WordPress shortcodes with theme-friendly CSS
+        // Return template-matching HTML content for WordPress shortcodes with theme-friendly CSS
         let html = `<style>
 .rankitpro-widget * { box-sizing: border-box; }
 .rankitpro-grid { success: true }
@@ -3631,15 +3636,15 @@ Format as professional service documentation.`;
               
               // Header - inherit theme colors
               html += `<div style="padding: 20px; background: var(--wp--preset--color--primary, #0073aa); color: white;">
-                <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 15px; color: inherit;">placeholder Testimonial</h1>
-                <div style="font-size: 16px; font-weight: 600; color: inherit;">placeholder</div>
-                <div style="font-size: 14px; opacity: 0.9; color: inherit;">placeholder</div>
+                <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 15px; color: inherit;">content Testimonial</h1>
+                <div style="font-size: 16px; font-weight: 600; color: inherit;">content</div>
+                <div style="font-size: 14px; opacity: 0.9; color: inherit;">content</div>
               </div>`;
               
               // Content
               html += `<div style="padding: 20px;">
                 <div style="font-size: 14px; line-height: 1.7; color: var(--wp--preset--color--foreground, #444); font-style: italic; margin-bottom: 15px;">
-                  "placeholder"
+                  "content"
                 </div>`;
               
               // Media player for audio/video
@@ -3650,8 +3655,8 @@ Format as professional service documentation.`;
                     <span style="font-size: 14px; font-weight: 600;">Audio Testimonial</span>
                   </div>
                   <audio controls style="width: 100%; height: 40px;">
-                    <source src="placeholder" type="audio/mpeg">
-                    <source src="placeholder" type="audio/wav">
+                    <source src="content" type="audio/mpeg">
+                    <source src="content" type="audio/wav">
                     Your browser does not support the audio element.
                   </audio>
                 </div>`;
@@ -3662,15 +3667,15 @@ Format as professional service documentation.`;
                     <span style="font-size: 14px; font-weight: 600;">Video Testimonial</span>
                   </div>
                   <video controls style="width: 100%; max-height: 300px; border-radius: 4px;">
-                    <source src="placeholder" type="video/mp4">
-                    <source src="placeholder" type="video/webm">
+                    <source src="content" type="video/mp4">
+                    <source src="content" type="video/webm">
                     Your browser does not support the video element.
                   </video>
                 </div>`;
               } else if (testimonial.type === 'audio' || testimonial.type === 'video') {
                 html += `<div style="background: var(--wp--preset--color--tertiary, #f8f9fa); padding: 15px; border-radius: 8px; text-align: center; border: 2px dashed var(--wp--preset--color--border, #ddd);">
-                  <span style="font-size: 48px; margin-bottom: 10px; display: block;">placeholder</span>
-                  <div style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">placeholder testimonial available</div>
+                  <span style="font-size: 48px; margin-bottom: 10px; display: block;">content</span>
+                  <div style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">content testimonial available</div>
                 </div>`;
               }
               
@@ -3737,19 +3742,19 @@ Format as professional service documentation.`;
               // Header with actual review data
               html += `<div style="padding: 20px; background: var(--wp--preset--color--background, white); border-bottom: 1px solid var(--wp--preset--color--border, #eee);">
                 <h1 style="font-size: 24px; font-weight: 600; color: var(--wp--preset--color--foreground, #333); margin-bottom: 15px;">Service Review</h1>
-                <div style="display: flex; justify-placeholder: space-between; align-items: center; margin-bottom: 15px;">
-                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">Customer: placeholder</span>
-                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">placeholder</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">Customer: content</span>
+                  <span style="font-size: 14px; color: var(--wp--preset--color--foreground, #666);">content</span>
                 </div>
                 <div style="display: flex; align-items: center; color: var(--wp--preset--color--primary, #0073aa); font-size: 14px; font-weight: 500;">
-                  <span style="margin-right: 8px;">📍</span>placeholder
+                  <span style="margin-right: 8px;">📍</span>content
                 </div>
               </div>`;
               
               // Customer info
               if (review.customerName) {
                 html += `<div style="background: #f8f9fa; padding: 15px 20px; border-bottom: 1px solid #eee;">
-                  <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;">placeholder</div>
+                  <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;">content</div>
                   <span style="font-size: 14px; color: #666; background: #e3f2fd; padding: 4px 12px; border-radius: 12px; display: inline-block;">Professional Service</span>
                 </div>`;
               }
@@ -3758,25 +3763,25 @@ Format as professional service documentation.`;
               if (review.rating) {
                 html += `<div style="padding: 20px; text-align: center; border-bottom: 1px solid #eee;">
                   <div style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333;">Overall Service Rating</div>
-                  <div style="display: flex; justify-placeholder: center; gap: 8px; margin-bottom: 15px;">`;
+                  <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 15px;">`;
                 for (let i = 1; i <= 5; i++) {
-                  html += "placeholder-text";
+                  html += "content-text";
                 }
                 html += `</div>
                   <div style="font-size: 18px; font-weight: 600; color: #4CAF50;">
-                    placeholder - placeholder Stars
+                    content - content Stars
                   </div>
                 </div>`;
               }
               
-              // Review placeholder with service location
+              // Review content with service location
               if (review.feedback) {
                 html += `<div style="padding: 20px; border-bottom: 1px solid var(--wp--preset--color--border, #eee);">
                   ${review.service_location ? `<div style="background: var(--wp--preset--color--primary, #0073aa); color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 15px; display: inline-block;">
-                    📍 Service Location: placeholder
+                    📍 Service Location: content
                   </div>` : ''}
                   <div style="font-size: 14px; line-height: 1.7; color: var(--wp--preset--color--foreground, #444); background: var(--wp--preset--color--tertiary, #f8f9fa); padding: 15px; border-radius: 8px; border-left: 4px solid var(--wp--preset--color--primary, #4CAF50); font-style: italic;">
-                    "placeholder"
+                    "content"
                   </div>
                 </div>`;
               }
@@ -3807,7 +3812,7 @@ Format as professional service documentation.`;
               
               // Verification
               html += `<div style="padding: 15px 20px; background: #e8f5e8; border-top: 3px solid #4CAF50; text-align: center; font-size: 12px; color: #2e7d2e;">
-                <span style="font-weight: bold; margin-right: 5px;">✓</span>Verified Customer Review - Service completed placeholder
+                <span style="font-weight: bold; margin-right: 5px;">✓</span>Verified Customer Review - Service completed content
               </div>`;
               
               html += '</div>'; // End container
@@ -3823,11 +3828,11 @@ Format as professional service documentation.`;
         }
         
         if (type === 'blogs' || type === 'all') {
-          if (placeholder.blogs && placeholder.blogs.length > 0) {
+          if (content.blogs && content.blogs.length > 0) {
             html += '<div class="rankitpro-blogs">';
             html += '<h3 style="color: var(--wp--preset--color--foreground, inherit); font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid var(--wp--preset--color--primary, #0073aa); display: inline-block;">Recent Blog Posts</h3>';
             html += '<div class="rankitpro-grid rankitpro-grid-2">';
-            placeholder.blogs.forEach((blog: any) => {
+            content.blogs.forEach((blog: any) => {
               html += `<article class="rankitpro-blog" style="
                 background: var(--wp--preset--color--background, #fff); 
                 margin-bottom: 0; 
@@ -3847,27 +3852,27 @@ Format as professional service documentation.`;
                 position: relative;
               ">`;
               html += `<h4 style="color: var(--wp--preset--color--background, white); font-size: 1.4em; margin: 0; font-weight: 600; line-height: 1.3;">
-                placeholder
+                content
               </h4>`;
               html += `</div>`;
               
-              // Blog placeholder
+              // Blog content
               html += `<div style="padding: 1.5em;">`;
-              if (blog.placeholder) {
-          const excerpt = blog.placeholder.length > 300 ? blog.placeholder.substring(0, 300) + '...' : blog.placeholder;
+              if (blog.content) {
+          const excerpt = blog.content.length > 300 ? blog.content.substring(0, 300) + '...' : blog.content;
                 html += `<div style="
                   line-height: 1.7; 
                   color: var(--wp--preset--color--foreground, #444); 
                   font-size: 1em; 
                   margin-bottom: 1.5em;
                   text-align: justify;
-                ">placeholder</div>`;
+                ">content</div>`;
               }
               
               // Meta information
               html += `<div style="
                 display: flex; 
-                justify-placeholder: space-between; 
+                justify-content: space-between; 
                 align-items: center; 
                 padding-top: 1em; 
                 border-top: 1px solid #eee; 
@@ -3886,11 +3891,11 @@ Format as professional service documentation.`;
                   align-items: center; 
                   gap: 0.5em;
                 ">
-                  <span>📅</span>Published: placeholder
+                  <span>📅</span>Published: content
                 </div>`;
               }
               
-              html += `<a href="javascript:void(0)" onclick="openBlogModal(placeholder, placeholder, placeholder, placeholder, placeholder, placeholder)" style="
+              html += `<a href="javascript:void(0)" onclick="openBlogModal(content, content, content, content, content, content)" style="
                 background: var(--wp--preset--color--primary, #0073aa); 
                 color: var(--wp--preset--color--background, white); 
                 padding: 0.4em 1em; 
@@ -3914,7 +3919,7 @@ Format as professional service documentation.`;
           }
         }
         
-        // Add blog modal for full placeholder viewing
+        // Add blog modal for full content viewing
         html += `
         <!-- Blog Modal -->
         <div id="rankitpro-blog-modal" style="
@@ -3973,7 +3978,7 @@ Format as professional service documentation.`;
               color: #333;
               text-align: justify;
             ">
-              <div id="modal-placeholder" style="
+              <div id="modal-content" style="
                 font-family: Georgia, 'Times New Roman', serif;
                 line-height: 1.7;
                 color: #2c3e50;
@@ -3998,15 +4003,15 @@ Format as professional service documentation.`;
         </style>
 
         <script>
-        function openBlogModal(id, title, placeholder, location, jobType, publishDate) {
+        function openBlogModal(id, title, content, location, jobType, publishDate) {
           document.getElementById('modal-title').innerHTML = title;
           
-          // Format placeholder with proper paragraphs
-          const formattedContent = placeholder.split('\n\n').map(paragraph => 
+          // Format content with proper paragraphs
+          const formattedContent = content.split('\n\n').map(paragraph => 
             '<p style="margin-bottom: 1.5em; text-indent: 1.5em; font-size: 1.05em;">' + paragraph.trim() + '</p>'
           ).join('');
           
-          document.getElementById('modal-placeholder').innerHTML = formattedContent;
+          document.getElementById('modal-content').innerHTML = formattedContent;
           
           let metaInfo = '';
           if (publishDate) metaInfo += '<span style="display: inline-flex; align-items: center; margin-right: 1em;"><span style="margin-right: 0.5em;">📅</span>Published: ' + publishDate + '</span>';
@@ -4069,10 +4074,10 @@ Format as professional service documentation.`;
     }
   });
   
-  // Add AI placeholder generation endpoint
-  app.post("/api/generate-placeholder", isAuthenticated, async (req, res) => {
+  // Add AI content generation endpoint
+  app.post("/api/generate-content", isAuthenticated, async (req, res) => {
     try {
-      const { jobType, notes, location, companyName = "Your Company", placeholderType = 'blog' } = req.body;
+      const { jobType, notes, location, companyName = "Your Company", contentType = 'blog' } = req.body;
       
       if (!jobType || !notes) {
         return res.status(400).json({ message: 'Job type and notes are required' });
@@ -4087,25 +4092,25 @@ Format as professional service documentation.`;
       let prompt = '';
       let systemMessage = '';
 
-      if (placeholderType === 'blog') {
-        systemMessage = "You are a professional placeholder writer specializing in service industry blog posts. Write engaging, SEO-friendly placeholder that showcases expertise and builds trust with potential customers. Always respond in plain text with NO markdown, HTML, or special formatting. Always respond in English regardless of the input language.";
-        prompt = `Create a professional blog post for placeholder about a recent placeholder service completed by our expert technicians.
+      if (contentType === 'blog') {
+        systemMessage = "You are a professional content writer specializing in service industry blog posts. Write engaging, SEO-friendly content that showcases expertise and builds trust with potential customers. Always respond in plain text with NO markdown, HTML, or special formatting. Always respond in English regardless of the input language.";
+        prompt = `Create a professional blog post for content about a recent content service completed by our expert technicians.
 
 Service Details:
-- Service Type: placeholder
-- Work Completed: placeholder
-- Service Location: placeholder
-- Company: placeholder
+- Service Type: content
+- Work Completed: content
+- Service Location: content
+- Company: content
 
 Write a detailed, engaging blog post that:
 1. Creates an attention-grabbing title related to the specific service
-2. Explains what our technicians accomplished during this placeholder job
-3. Describes the technical work performed: placeholder
+2. Explains what our technicians accomplished during this content job
+3. Describes the technical work performed: content
 4. Highlights the professional expertise and quality workmanship
-5. Mentions the service area: placeholder
+5. Mentions the service area: content
 6. Emphasizes customer satisfaction and professional results
 7. Includes a strong call-to-action for similar services
-8. Uses relevant keywords for placeholder services and the local area
+8. Uses relevant keywords for content services and the local area
 
 Make it 400-700 words, professional yet personable, and focus on the value delivered to the customer.
 
@@ -4117,21 +4122,21 @@ CRITICAL FORMATTING REQUIREMENTS:
 - Write naturally without any special formatting
 
 IMPORTANT: Respond in English only, regardless of the language used in the input.`;
-      } else if (placeholderType === 'service') {
+      } else if (contentType === 'service') {
         systemMessage = "You are a professional customer service specialist. Write brief, friendly service completion notifications. Keep responses to 2-3 sentences maximum. Use ONLY plain text with NO markdown, HTML, or special formatting. Always respond in English regardless of the input language.";
-        prompt = `Write a professional service completion message for placeholder about the placeholder work completed by our technician.
+        prompt = `Write a professional service completion message for content about the content work completed by our technician.
 
 Service Details:
-- Service Type: placeholder 
-- Work Completed: placeholder
-- Service Location: placeholder
-- Company: placeholder
+- Service Type: content 
+- Work Completed: content
+- Service Location: content
+- Company: content
 
 Create a 2-3 sentence message that:
-- Confirms the specific placeholder work was completed successfully
-- Briefly mentions what was accomplished: placeholder
-- References the service location: placeholder
-- Thanks the customer for choosing placeholder
+- Confirms the specific content work was completed successfully
+- Briefly mentions what was accomplished: content
+- References the service location: content
+- Thanks the customer for choosing content
 - Maintains a professional yet friendly tone
 
 FORMATTING REQUIREMENTS:
@@ -4139,21 +4144,21 @@ FORMATTING REQUIREMENTS:
 - No HTML tags or special formatting
 - Keep it concise but informative
 
-Example format: "We've successfully completed your [service] at [location]. [Brief work summary]. Thank you for choosing placeholder!"
+Example format: "We've successfully completed your [service] at [location]. [Brief work summary]. Thank you for choosing content!"
 
 IMPORTANT: Respond in English only, regardless of the language used in the input.`;
-      } else if (placeholderType === 'both') {
-        systemMessage = "You are a professional placeholder writer specializing in service industry communications. Create both blog placeholder and customer notifications that are professional, engaging, and build trust. Always respond in English regardless of the input language.";
-        prompt = `Create both a blog post AND a service completion notification for placeholder regarding a placeholder service.
+      } else if (contentType === 'both') {
+        systemMessage = "You are a professional content writer specializing in service industry communications. Create both blog content and customer notifications that are professional, engaging, and build trust. Always respond in English regardless of the input language.";
+        prompt = `Create both a blog post AND a service completion notification for content regarding a content service.
 
 Service Details:
-- Service Type: placeholder
-- Work Completed: placeholder
-- Service Location: placeholder
+- Service Type: content
+- Work Completed: content
+- Service Location: content
 
 Please provide:
 
-1. BLOG POST: An engaging 200-400 word blog post with title, professional service description, company expertise highlights, SEO-friendly placeholder, and call-to-action.
+1. BLOG POST: An engaging 200-400 word blog post with title, professional service description, company expertise highlights, SEO-friendly content, and call-to-action.
 
 2. SERVICE NOTIFICATION: A brief 2-3 sentence service completion message that confirms completion, thanks the customer, and maintains a professional tone.
 
@@ -4167,25 +4172,25 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
         messages: [
           {
             role: "system",
-            placeholder: systemMessage
+            content: systemMessage
           },
           {
             role: "user",
-            placeholder: prompt
+            content: prompt
           }
         ],
-        max_tokens: placeholderType === 'both' ? 1000 : placeholderType === 'service' ? 150 : 800,
+        max_tokens: contentType === 'both' ? 1000 : contentType === 'service' ? 150 : 800,
         temperature: 0.7,
       });
 
-      let placeholder = response.choices[0].message.placeholder;
+      let content = response.choices[0].message.content;
       
-      if (!placeholder) {
-        return res.status(500).json({ message: 'Failed to generate placeholder' });
+      if (!content) {
+        return res.status(500).json({ message: 'Failed to generate content' });
       }
 
       // Clean up any remaining markdown or HTML formatting
-      placeholder = placeholder
+      content = content
         .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove **bold**
         .replace(/\*(.*?)\*/g, '$1')      // Remove *italic*
         .replace(/#{1,6}\s*/g, '')        // Remove ### headers
@@ -4196,10 +4201,10 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
         .replace(/^\s*\d+\.\s*/gm, '')    // Remove numbered lists
         .trim();
       
-      res.json({ placeholder });
+      res.json({ content });
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
-      res.status(500).json({ message: 'Failed to generate placeholder' });
+      res.status(500).json({ message: 'Failed to generate content' });
     }
   });
 
@@ -4220,9 +4225,9 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
 
       const prompt = `Enhance and expand this job description to be more professional and detailed:
 
-Service Type: placeholder
-Current Description: placeholder
-Location Context: placeholder
+Service Type: content
+Current Description: content
+Location Context: content
 
 Please provide an enhanced, professional job description that:
 1. Uses proper technical terminology
@@ -4240,18 +4245,18 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
         messages: [
           {
             role: "system",
-            placeholder: "You are a professional service documentation specialist. Enhance job descriptions to be more detailed, professional, and technically accurate while maintaining the original meaning and facts. Always respond in English regardless of the input language."
+            content: "You are a professional service documentation specialist. Enhance job descriptions to be more detailed, professional, and technically accurate while maintaining the original meaning and facts. Always respond in English regardless of the input language."
           },
           {
             role: "user",
-            placeholder: prompt
+            content: prompt
           }
         ],
         max_tokens: 400,
         temperature: 0.5,
       });
 
-      const enhancedDescription = response.choices[0].message.placeholder;
+      const enhancedDescription = response.choices[0].message.content;
       
       res.json({ enhancedDescription });
     } catch (error) {
@@ -4271,7 +4276,7 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
       
       try {
         const response = await fetch(
-          "placeholder-text",
+          "content-text",
           {
             headers: {
               'User-Agent': 'RankItPro/1.0'
@@ -5058,9 +5063,9 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
           description: 'Access to view analytics data'
         },
         {
-          id: 'write_placeholder',
+          id: 'write_content',
           name: 'Write Content',
-          description: 'Permission to create and modify placeholder'
+          description: 'Permission to create and modify content'
         },
         {
           id: 'admin_access',

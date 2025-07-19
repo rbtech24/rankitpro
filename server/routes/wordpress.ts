@@ -76,7 +76,7 @@ router.get('/plugin', async (req: Request, res: Response) => {
     color: white;
     display: flex;
     align-items: center;
-    justify-placeholder: center;
+    justify-content: center;
     font-weight: bold;
     margin-right: 12px;
 }
@@ -237,7 +237,7 @@ Features:
 
 == Installation ==
 
-1. Upload the plugin files to '/wp-placeholder/plugins/rank-it-pro-plugin/' directory
+1. Upload the plugin files to '/wp-content/plugins/rank-it-pro-plugin/' directory
 2. Activate the plugin through the 'Plugins' screen in WordPress
 3. Configure your API settings in Settings > Rank It Pro
 4. Use shortcodes like [rankitpro_checkins] in your posts or pages

@@ -5,7 +5,7 @@ import { escapeHtml, createTestimonialHTML } from "../utils/dom-sanitizer";
 
 const router = Router();
 
-// Serve the iframe embed placeholder
+// Serve the iframe embed content
 router.get('/widget/:companySlug', async (req, res) => {
   try {
     // Set headers to allow iframe embedding on external domains
@@ -51,13 +51,13 @@ router.get('/widget/:companySlug', async (req, res) => {
         {
           id: 1,
           customer_name: 'John Doe',
-          placeholder: 'Amazing service! Highly recommended.',
+          content: 'Amazing service! Highly recommended.',
           created_at: new Date()
         },
         {
           id: 2,
           customer_name: 'Jane Smith', 
-          placeholder: 'Professional and reliable team.',
+          content: 'Professional and reliable team.',
           created_at: new Date(Date.now() - 24 * 60 * 60 * 1000)
         }
       ];
@@ -70,8 +70,8 @@ router.get('/widget/:companySlug', async (req, res) => {
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" placeholder="width=device-width, initial-scale=1.0">
-  <title>placeholder Widget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>content Widget</title>
   <style>
     body {
       margin: 0;
@@ -103,20 +103,20 @@ router.get('/widget/:companySlug', async (req, res) => {
       border-radius: 50%;
       display: flex;
       align-items: center;
-      justify-placeholder: center;
+      justify-content: center;
       color: white;
       font-weight: bold;
       font-size: 14px;
     }
-    .placeholder {
+    .content {
       flex: 1;
     }
-    .placeholder-title {
+    .content-title {
       font-weight: 500;
       color: #1f2937;
       margin-bottom: 2px;
     }
-    .placeholder-meta {
+    .content-meta {
       font-size: 14px;
       color: #64748b;
     }
@@ -135,10 +135,10 @@ router.get('/widget/:companySlug', async (req, res) => {
 </head>
 <body>
   <div class="widget-container">
-    <h3 class="widget-header">Recent Testimonials - placeholder</h3>
+    <h3 class="widget-header">Recent Testimonials - content</h3>
     ${testimonials.map((item: any) => {
       const safeCustomerName = escapeHtml(item.customer_name || item.jobType || 'Customer');
-      const safeContent = escapeHtml((item.placeholder || item.location || 'Great service!').substring(0, 80));
+      const safeContent = escapeHtml((item.content || item.location || 'Great service!').substring(0, 80));
       const initials = item.customer_name ? 
         item.customer_name.split(' ').map((n: string) => n[0]).join('').toUpperCase() :
         'TN';
@@ -148,10 +148,10 @@ router.get('/widget/:companySlug', async (req, res) => {
       
       return `
         <div class="item">
-          <div class="avatar">placeholder</div>
-          <div class="placeholder">
-            <div class="placeholder-title">placeholder</div>
-            <div class="placeholder-meta">placeholder... • placeholder</div>
+          <div class="avatar">content</div>
+          <div class="content">
+            <div class="content-title">content</div>
+            <div class="content-meta">content... • content</div>
           </div>
         </div>
       `;
@@ -173,7 +173,7 @@ router.get('/widget/:companySlug', async (req, res) => {
       companySlug: req.params.companySlug,
       companyId: req.query.company 
     }, error as Error);
-    res.status(500).send('<html><body><h3>Widget Error</h3><p>Unable to load widget placeholder.</p></body></html>');
+    res.status(500).send('<html><body><h3>Widget Error</h3><p>Unable to load widget content.</p></body></html>');
   }
 });
 
@@ -236,7 +236,7 @@ router.get('/embed/widget.js', async (req, res) => {
 (function() {
   var widgetContainer = document.currentScript.parentNode;
   var widget = document.createElement('div');
-  widget.id = 'rankitpro-widget-placeholder';
+  widget.id = 'rankitpro-widget-content';
   // Use safe DOM manipulation instead of innerHTML
   widget.insertAdjacentHTML('afterbegin', \`
     <div style="
@@ -248,7 +248,7 @@ router.get('/embed/widget.js', async (req, res) => {
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       max-width: 500px;
     ">
-      <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px;">Recent Service Calls - placeholder</h3>
+      <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px;">Recent Service Calls - content</h3>
       ${checkIns.map((checkIn: any) => {
         const initials = checkIn.technician ? 
           (checkIn.technician.firstName?.[0] || '') + (checkIn.technician.lastName?.[0] || '') :
@@ -257,7 +257,7 @@ router.get('/embed/widget.js', async (req, res) => {
           (Date.now() - new Date(checkIn.createdAt).getTime() < 24 * 60 * 60 * 1000 ? 'Today' : 'Yesterday') :
           'Recently';
         
-        return '<div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f5f9;"><div style="width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 50%; display: flex; align-items: center; justify-placeholder: center; color: white; font-weight: bold; font-size: 14px;">' + initials + '</div><div style="flex: 1;"><div style="font-weight: 500; color: #1f2937; margin-bottom: 2px;">' + checkIn.jobType + (checkIn.technician ? ' - ' + checkIn.technician.firstName + ' ' + checkIn.technician.lastName : '') + '</div><div style="font-size: 14px; color: #64748b;">' + (checkIn.location || 'Service location') + ' • ' + timeAgo + '</div></div></div>';
+        return '<div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f5f9;"><div style="width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">' + initials + '</div><div style="flex: 1;"><div style="font-weight: 500; color: #1f2937; margin-bottom: 2px;">' + checkIn.jobType + (checkIn.technician ? ' - ' + checkIn.technician.firstName + ' ' + checkIn.technician.lastName : '') + '</div><div style="font-size: 14px; color: #64748b;">' + (checkIn.location || 'Service location') + ' • ' + timeAgo + '</div></div></div>';
       }).join('')}
       <div style="
         text-align: center;
@@ -306,7 +306,7 @@ router.get('/api/embed/:companySlug', async (req, res) => {
     res.json({
       companySlug,
       token,
-      embedCode: "placeholder-text",
+      embedCode: "content-text",
       settings: {
         showTechPhotos: true,
         showCheckInPhotos: true,
@@ -359,8 +359,8 @@ router.get('/embed/:companySlug', async (req, res) => {
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" placeholder="width=device-width, initial-scale=1.0">
-  <title>placeholder - Customer Testimonials</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>content - Customer Testimonials</title>
   <style>
     body {
       margin: 0;
@@ -389,7 +389,7 @@ router.get('/embed/:companySlug', async (req, res) => {
       border-left: 4px solid #3b82f6;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    .testimonial-placeholder {
+    .testimonial-content {
       font-size: 16px;
       line-height: 1.6;
       color: #374151;
@@ -410,7 +410,7 @@ router.get('/embed/:companySlug', async (req, res) => {
       border-radius: 50%;
       display: flex;
       align-items: center;
-      justify-placeholder: center;
+      justify-content: center;
       color: white;
       font-weight: bold;
       font-size: 16px;
@@ -449,7 +449,7 @@ router.get('/embed/:companySlug', async (req, res) => {
 </head>
 <body>
   <div class="widget-container">
-    <h2 class="widget-header">placeholder</h2>
+    <h2 class="widget-header">content</h2>
     
     ${testimonials.length > 0 ? `
       <h3 style="color: #1f2937; margin-bottom: 15px;">Customer Testimonials</h3>
@@ -460,10 +460,10 @@ router.get('/embed/:companySlug', async (req, res) => {
         
         return `
           <div class="testimonial">
-            <div class="testimonial-placeholder">"placeholder"</div>
+            <div class="testimonial-content">"content"</div>
             <div class="testimonial-author">
-              <div class="author-avatar">placeholder</div>
-              <span>placeholder</span>
+              <div class="author-avatar">content</div>
+              <span>content</span>
             </div>
           </div>
         `;
@@ -474,8 +474,8 @@ router.get('/embed/:companySlug', async (req, res) => {
       <h3 style="color: #1f2937; margin-bottom: 15px; margin-top: 30px;">Recent Blog Posts</h3>
       ${blogPosts.slice(0, 2).map((post: any) => `
         <div class="blog-post">
-          <div class="blog-title">placeholder</div>
-          <div class="blog-excerpt">placeholder...</div>
+          <div class="blog-title">content</div>
+          <div class="blog-excerpt">content...</div>
         </div>
       `).join('')}
     ` : ''}
@@ -493,7 +493,7 @@ router.get('/embed/:companySlug', async (req, res) => {
 
   } catch (error) {
     logger.error("Unhandled error occurred");
-    res.status(500).send('<html><body><h3>Widget Error</h3><p>Unable to load widget placeholder.</p></body></html>');
+    res.status(500).send('<html><body><h3>Widget Error</h3><p>Unable to load widget content.</p></body></html>');
   }
 });
 
