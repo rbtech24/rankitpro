@@ -242,25 +242,59 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
       logger.info("Photo uploads processed", { count: req.files.length });
     }
     
-    // Prepare check-in data with photos
+    // Prepare check-in data with photos and default values
     const checkInData = {
-      ...req.body,
-      companyId: user.companyId,
-      technicianId: req.body.technicianId || user.id,
-      photos: photoUrls.length > 0 ? JSON.stringify(photoUrls) : null,
+      jobType: req.body.jobType?.trim() || 'General Service',
+      notes: req.body.notes?.trim() || 'Service completed',
+      customerName: req.body.customerName?.trim() || null,
+      customerEmail: req.body.customerEmail?.trim() || null,
+      customerPhone: req.body.customerPhone?.trim() || null,
+      workPerformed: req.body.workPerformed?.trim() || null,
+      materialsUsed: req.body.materialsUsed?.trim() || null,
       latitude: req.body.latitude ? parseFloat(req.body.latitude) : null,
       longitude: req.body.longitude ? parseFloat(req.body.longitude) : null,
-      street: req.body.street?.trim() || null,
+      location: req.body.location?.trim() || 'Service Location',
+      address: req.body.address?.trim() || null,
       city: req.body.city?.trim() || null,
       state: req.body.state?.trim() || null,
       zip: req.body.zip?.trim() || null,
+      companyId: user.companyId,
+      technicianId: req.body.technicianId || user.id,
+      photos: photoUrls.length > 0 ? JSON.stringify(photoUrls) : JSON.stringify([]),
       generatedContent: req.body.generatedContent || null,
     };
 
     logger.info("Operation completed");
 
-    // Create the check-in
-    const checkIn = await storage.createCheckIn(checkInData);
+    // Validate required fields before creating check-in
+    if (!checkInData.jobType || !checkInData.companyId || !checkInData.technicianId) {
+      return res.status(400).json({ 
+        message: 'Missing required fields: jobType, companyId, or technicianId',
+        received: {
+          jobType: checkInData.jobType,
+          companyId: checkInData.companyId,
+          technicianId: checkInData.technicianId
+        }
+      });
+    }
+
+    // Create the check-in with enhanced error handling
+    let checkIn;
+    try {
+      checkIn = await storage.createCheckIn(checkInData);
+      if (!checkIn) {
+        return res.status(500).json({ message: 'Failed to create check-in - database returned null' });
+      }
+    } catch (dbError: any) {
+      logger.error("Database error creating check-in", { 
+        error: dbError?.message || "Unknown database error",
+        data: checkInData 
+      });
+      return res.status(500).json({ 
+        message: 'Database error creating check-in',
+        details: dbError?.message || 'Unknown error'
+      });
+    }
     
     // Get the technician info for notifications
     const technician = await storage.getTechnician(checkIn.technicianId);
@@ -395,12 +429,22 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
     }
 
     return res.status(201).json(checkIn);
-  } catch (error) {
-    logger.error("Unhandled error occurred");
+  } catch (error: any) {
+    logger.error("Unhandled error in check-in creation", { 
+      error: error?.message || "Unknown error",
+      stack: error?.stack,
+      body: req.body 
+    });
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ success: true });
+      return res.status(400).json({ 
+        message: 'Validation error',
+        details: error.errors 
+      });
     }
-    return res.status(500).json({ message: 'Failed to create check-in' });
+    return res.status(500).json({ 
+      message: 'Failed to create check-in',
+      details: error?.message || 'Unknown error'
+    });
   }
 });
 
