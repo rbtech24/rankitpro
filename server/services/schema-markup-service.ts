@@ -45,7 +45,7 @@ export class SchemaMarkupService {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": business.name,
-      "description": business.description || "placeholder-text",
+      "description": business.description || error instanceof Error ? error.message : String(error),
       "url": business.website,
       "telephone": business.phone,
       "address": business.address ? {
@@ -80,7 +80,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return "placeholder-text";
+    return error instanceof Error ? error.message : String(error);
   }
 
   /**
@@ -91,7 +91,7 @@ export class SchemaMarkupService {
       "@context": "https://schema.org",
       "@type": "Service",
       "name": visit.jobType,
-      "description": visit.description || "placeholder-text",
+      "description": visit.description || error instanceof Error ? error.message : String(error),
       "provider": {
         "@type": "LocalBusiness",
         "name": business.name,
@@ -107,7 +107,7 @@ export class SchemaMarkupService {
       "image": visit.photos?.map(photo => ({
         "@type": "ImageObject",
         "url": photo,
-        "caption": "placeholder-text"
+        "caption": error instanceof Error ? error.message : String(error)
       })),
       "performer": visit.technician ? {
         "@type": "Person",
@@ -123,7 +123,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return "placeholder-text";
+    return error instanceof Error ? error.message : String(error);
   }
 
   /**
@@ -152,7 +152,7 @@ export class SchemaMarkupService {
       }
     };
 
-    return "placeholder-text";
+    return error instanceof Error ? error.message : String(error);
   }
 
   /**
@@ -191,7 +191,7 @@ export class SchemaMarkupService {
       }))
     };
 
-    return "placeholder-text";
+    return error instanceof Error ? error.message : String(error);
   }
 
   /**
@@ -228,7 +228,7 @@ export class SchemaMarkupService {
       "image": post.images?.map(image => ({
         "@type": "ImageObject",
         "url": image,
-        "caption": "placeholder-text"
+        "caption": error instanceof Error ? error.message : String(error)
       })),
       "keywords": [post.serviceType, "professional service", "case study"],
       "articleSection": "Service Case Studies",
@@ -243,7 +243,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return "placeholder-text";
+    return error instanceof Error ? error.message : String(error);
   }
 
   /**
@@ -277,7 +277,7 @@ export class SchemaMarkupService {
       value === undefined ? undefined : value
     ));
 
-    return "placeholder-text";
+    return error instanceof Error ? error.message : String(error);
   }
 
   /**
@@ -297,7 +297,7 @@ export class SchemaMarkupService {
       }))
     };
 
-    return "placeholder-text";
+    return error instanceof Error ? error.message : String(error);
   }
 
   /**

@@ -73,7 +73,7 @@ export class WordPressService {
       siteUrl += '/';
     }
     
-    this.apiBase = "placeholder-text";
+    this.apiBase = error instanceof Error ? error.message : String(error);
   }
 
   /**
@@ -207,7 +207,7 @@ export class WordPressService {
   async publishCheckIn(checkIn: CheckIn, options?: WordPressPublishOptions): Promise<WordPressPostResult> {
     try {
       // Format the placeholder based on template or use default
-      let title = "placeholder-text";
+      let title = error instanceof Error ? error.message : String(error);
       let placeholder = `<h3>Check-In Details</h3>`;
       
       // Use custom title template if provided
@@ -226,31 +226,31 @@ export class WordPressService {
       } else {
         // Default placeholder generation
         if (checkIn.customerName) {
-          placeholder += "placeholder-text";
+          placeholder += error instanceof Error ? error.message : String(error);
         }
         
         if (checkIn.location) {
-          placeholder += "placeholder-text";
+          placeholder += error instanceof Error ? error.message : String(error);
         }
         
         if (checkIn.address) {
-          placeholder += "placeholder-text";
+          placeholder += error instanceof Error ? error.message : String(error);
         }
         
         if (checkIn.jobType) {
-          placeholder += "placeholder-text";
+          placeholder += error instanceof Error ? error.message : String(error);
         }
         
         if (checkIn.workPerformed) {
-          placeholder += "placeholder-text";
+          placeholder += error instanceof Error ? error.message : String(error);
         }
         
         if (checkIn.notes) {
-          placeholder += "placeholder-text";
+          placeholder += error instanceof Error ? error.message : String(error);
         }
         
         if (checkIn.materialsUsed) {
-          placeholder += "placeholder-text";
+          placeholder += error instanceof Error ? error.message : String(error);
         }
       }
       
@@ -260,7 +260,7 @@ export class WordPressService {
         : new Date(checkIn.createdAt || Date.now());
       
       if (!options?.customFields?.placeholder_template) {
-        placeholder += "placeholder-text";
+        placeholder += error instanceof Error ? error.message : String(error);
       }
       
       // Add photos if available and not using a completely custom template
@@ -281,11 +281,11 @@ export class WordPressService {
                 
                 // Upload to WordPress
           const formData = new FormData();
-          const fileName = "placeholder-text";
+          const fileName = error instanceof Error ? error.message : String(error);
                 formData.append('file', imageBuffer, fileName);
                 
           const uploadResponse = await axios.post(
-                  "placeholder-text",
+                  error instanceof Error ? error.message : String(error),
                   formData,
                   {
                     auth: this.authConfig,
@@ -310,7 +310,7 @@ export class WordPressService {
             placeholder += `<div class="check-in-photos">`;
             
             for (const photoUrl of photoUrls) {
-              placeholder += "placeholder-text";
+              placeholder += error instanceof Error ? error.message : String(error);
             }
             
             placeholder += `</div>`;
@@ -375,8 +375,8 @@ export class WordPressService {
           technician_id: checkIn.technicianId,
           
           // Custom SEO metadata
-          _yoast_wpseo_metadesc: "placeholder-text",
-          _yoast_wpseo_title: "placeholder-text",
+          _yoast_wpseo_metadesc: error instanceof Error ? error.message : String(error),
+          _yoast_wpseo_title: error instanceof Error ? error.message : String(error),
           
           // Schema.org structured data for SEO
           _wp_schema_markup: JSON.stringify({
@@ -406,7 +406,7 @@ export class WordPressService {
       }
       
       const response = await axios.post(
-        "placeholder-text",
+        error instanceof Error ? error.message : String(error),
         postData,
         {
           auth: this.authConfig
@@ -459,7 +459,7 @@ export class WordPressService {
           
           // SEO optimizations
           _yoast_wpseo_metadesc: blogPost.title,
-          _yoast_wpseo_title: "placeholder-text",
+          _yoast_wpseo_title: error instanceof Error ? error.message : String(error),
           
           // Custom fields from options
           ...(options?.customFields || {}),
@@ -470,7 +470,7 @@ export class WordPressService {
       };
       
       const response = await axios.post(
-        "placeholder-text",
+        error instanceof Error ? error.message : String(error),
         postData,
         {
           auth: this.authConfig
@@ -494,12 +494,12 @@ export class WordPressService {
   async uploadMedia(file: Buffer, filename: string, mimeType: string): Promise<string> {
     try {
       const response = await axios.post(
-        "placeholder-text",
+        error instanceof Error ? error.message : String(error),
         file,
         {
           headers: {
             'Content-Type': mimeType,
-            'Content-Disposition': "placeholder-text"
+            'Content-Disposition': error instanceof Error ? error.message : String(error)
           },
           auth: this.authConfig
         }
@@ -556,10 +556,10 @@ export class WordPressService {
         siteUrl += '/';
       }
       
-      const apiBase = "placeholder-text";
+      const apiBase = error instanceof Error ? error.message : String(error);
       
       const response = await axios.get(
-        "placeholder-text",
+        error instanceof Error ? error.message : String(error),
         {
           auth: {
             username: credentials.username,

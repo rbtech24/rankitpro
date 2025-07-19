@@ -158,7 +158,7 @@ export class AnalyticsService {
       recentUsers.forEach((user: any) => {
         recentActivity.push({
           type: "user_created",
-          description: "placeholder-text",
+          description: error instanceof Error ? error.message : String(error),
           timestamp: new Date(user.createdAt || Date.now()),
           user: user.username || user.email
         });
@@ -218,8 +218,8 @@ export class AnalyticsService {
         queryTime: Math.round(process.hrtime()[1] / 1000000) // Real query time in ms
       },
       storage: {
-        used: "placeholder-text",
-        available: "placeholder-text"
+        used: error instanceof Error ? error.message : String(error),
+        available: error instanceof Error ? error.message : String(error)
       },
       performance: {
         cpu: Math.floor((process.cpuUsage().user / 1000000) % 100), // Real CPU usage

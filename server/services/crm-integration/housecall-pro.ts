@@ -34,9 +34,9 @@ export class HouseCallProIntegration implements CRMIntegration {
     try {
       const response = await axios({
         method,
-        url: "placeholder-text",
+        url: error instanceof Error ? error.message : String(error),
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -82,7 +82,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       // Try to find by email first
       if (customer.email) {
         const emailSearchResponse = await this.apiRequest<any>('GET', 
-          "System message");
+          `${apiBase}/${endpoint}`;
         
         if (emailSearchResponse.customers && emailSearchResponse.customers.length > 0) {
           return { id: emailSearchResponse.customers[0].id };
@@ -94,7 +94,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         // Normalize phone number to just digits
         const phone = customer.phone.replace(/\D/g, '');
         const phoneSearchResponse = await this.apiRequest<any>('GET', 
-          "System message");
+          `${apiBase}/${endpoint}`;
         
         if (phoneSearchResponse.customers && phoneSearchResponse.customers.length > 0) {
           return { id: phoneSearchResponse.customers[0].id };
@@ -103,7 +103,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       
       // Try to find by name as last resort
       const nameSearchResponse = await this.apiRequest<any>('GET', 
-        "System message");
+        `${apiBase}/${endpoint}`;
       
       if (nameSearchResponse.customers && nameSearchResponse.customers.length > 0) {
         return { id: nameSearchResponse.customers[0].id };
@@ -126,7 +126,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       // Check if customer already exists
       if (customer.externalId) {
         try {
-          const existingCustomer = await this.apiRequest<any>('GET', "System message");
+          const existingCustomer = await this.apiRequest<any>('GET', `${apiBase}/${endpoint}`;
           if (existingCustomer && existingCustomer.id) {
             customerId = existingCustomer.id;
           }
@@ -165,7 +165,7 @@ export class HouseCallProIntegration implements CRMIntegration {
           custom_fields: customer.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', "placeholder-text", customerData);
+        await this.apiRequest<any>('PUT', error instanceof Error ? error.message : String(error), customerData);
         return customerId;
       } else {
         // Create new customer
@@ -199,7 +199,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       // Check if job already exists
       if (job.externalId) {
         try {
-          const existingJob = await this.apiRequest<any>('GET', "System message");
+          const existingJob = await this.apiRequest<any>('GET', `${apiBase}/${endpoint}`;
           if (existingJob && existingJob.id) {
             jobId = existingJob.id;
           }
@@ -257,7 +257,7 @@ export class HouseCallProIntegration implements CRMIntegration {
           custom_fields: job.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', "placeholder-text", jobData);
+        await this.apiRequest<any>('PUT', error instanceof Error ? error.message : String(error), jobData);
         return jobId;
       } else {
         // Create new job
@@ -310,9 +310,9 @@ export class HouseCallProIntegration implements CRMIntegration {
           formData.append('description', 'Check-in photo from Rank It Pro');
           
           // Upload to Housecall Pro as an attachment
-          await axios.post("System message"), formData, {
+          await axios.post(`${apiBase}/${endpoint}`, formData, {
             headers: {
-              'Authorization': "placeholder-text",
+              'Authorization': error instanceof Error ? error.message : String(error),
               'Content-Type': 'multipart/form-data'
             }
           });
@@ -362,7 +362,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         const photoUrls = checkIn.photos?.map(p => p.url) || [];
         
         const job: CRMJobData = {
-          title: "placeholder-text",
+          title: error instanceof Error ? error.message : String(error),
           description: checkIn.workPerformed || checkIn.notes || 'Check-in from Rank It Pro',
           jobType: checkIn.jobType,
           status: checkIn.completedAt ? 'completed' : 'in_progress',
@@ -375,8 +375,8 @@ export class HouseCallProIntegration implements CRMIntegration {
           endDate: checkIn.completedAt || undefined,
           notes: [
             checkIn.notes,
-            checkIn.workPerformed ? "placeholder-text" : null,
-            checkIn.materialsUsed ? "placeholder-text" : null,
+            checkIn.workPerformed ? error instanceof Error ? error.message : String(error) : null,
+            checkIn.materialsUsed ? error instanceof Error ? error.message : String(error) : null,
           ].filter(Boolean).join('\n\n'),
           images: settings.syncPhotos ? photoUrls : []
         };
@@ -402,16 +402,16 @@ export class HouseCallProIntegration implements CRMIntegration {
   async fetchJobs(technicianId: string, dateRange?: { success: true }): Promise<CRMJobData[]> {
     try {
       // Build query parameters
-      let params = "placeholder-text";
+      let params = error instanceof Error ? error.message : String(error);
       
       if (dateRange) {
         const startDate = dateRange.start.toISOString();
         const endDate = dateRange.end.toISOString();
-        params += "placeholder-text";
+        params += error instanceof Error ? error.message : String(error);
       }
       
       // Get jobs for this technician
-      const response = await this.apiRequest<any>('GET', "System message");
+      const response = await this.apiRequest<any>('GET', `${apiBase}/${endpoint}`;
       
       // Map Housecall Pro jobs to our job model
       return response.jobs.map(job => ({
@@ -421,7 +421,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         jobType: job.job_type || 'Service',
         status: job.status,
         customerId: job.customer_id,
-        customerName: job.customer ? "placeholder-text" : 'Unknown Customer',
+        customerName: job.customer ? error instanceof Error ? error.message : String(error) : 'Unknown Customer',
         location: job.address ? this.formatAddress(job.address) : '',
         startDate: job.scheduled_start ? new Date(job.scheduled_start) : undefined,
         endDate: job.scheduled_end ? new Date(job.scheduled_end) : undefined,
@@ -446,7 +446,7 @@ export class HouseCallProIntegration implements CRMIntegration {
     const cityStateZip = [];
     if (address.city) cityStateZip.push(address.city);
     if (address.state && address.zip) {
-      cityStateZip.push("System message");
+      cityStateZip.push(`${apiBase}/${endpoint}`;
     } else {
       if (address.state) cityStateZip.push(address.state);
       if (address.zip) cityStateZip.push(address.zip);
@@ -466,15 +466,15 @@ export class HouseCallProIntegration implements CRMIntegration {
     try {
       let params = '?limit=100';
       if (query) {
-        params += "placeholder-text";
+        params += error instanceof Error ? error.message : String(error);
       }
       
-      const response = await this.apiRequest<any>('GET', "System message");
+      const response = await this.apiRequest<any>('GET', `${apiBase}/${endpoint}`;
       
       // Map Housecall Pro customers to our customer model
       return response.customers.map(customer => ({
         externalId: customer.id,
-        name: "placeholder-text",
+        name: error instanceof Error ? error.message : String(error),
         email: customer.email || null,
         phone: customer.phone || null,
         address: customer.address?.street_line_1 || null,

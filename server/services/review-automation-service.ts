@@ -129,7 +129,7 @@ class ReviewAutomationService {
       // Get the check-in
       const checkIn = await storage.getCheckIn(checkInId);
       if (!checkIn) {
-        throw new Error("System message");
+        throw new Error(`${apiBase}/${endpoint}`;
       }
       
       // Get company settings
@@ -172,7 +172,7 @@ class ReviewAutomationService {
       const statusData: InsertReviewRequestStatus = {
         reviewRequestId: reviewRequest.id,
         checkInId,
-        customerId: "placeholder-text", // Generate a unique customer ID
+        customerId: error instanceof Error ? error.message : String(error), // Generate a unique customer ID
         customerName: checkIn.customerName,
         customerEmail: checkIn.customerEmail || '', // Required field
         customerPhone: checkIn.customerPhone || undefined,
@@ -278,7 +278,7 @@ class ReviewAutomationService {
       ]);
       
       if (!company || !technician || !reviewRequest) {
-        throw new Error("System message");
+        throw new Error(`${apiBase}/${endpoint}`;
       }
       
       // Check if we should send now (smart timing)
@@ -289,7 +289,7 @@ class ReviewAutomationService {
       
       // Generate review link with token
       if (!reviewRequest.token) {
-        throw new Error("System message");
+        throw new Error(`${apiBase}/${endpoint}`;
       }
       const reviewLink = generateReviewLink(ensureValidToken(reviewRequest.token, reviewRequest.id));
       
@@ -395,7 +395,7 @@ class ReviewAutomationService {
       ]);
       
       if (!company || !technician || !reviewRequest) {
-        throw new Error("System message");
+        throw new Error(`${apiBase}/${endpoint}`;
       }
       
       // Check if we should send now (smart timing)
@@ -487,7 +487,7 @@ class ReviewAutomationService {
       ]);
       
       if (!company || !technician || !reviewRequest) {
-        throw new Error("System message");
+        throw new Error(`${apiBase}/${endpoint}`;
       }
       
       // Check if we should send now (smart timing)
@@ -580,7 +580,7 @@ class ReviewAutomationService {
       ]);
       
       if (!company || !technician || !reviewRequest) {
-        throw new Error("System message");
+        throw new Error(`${apiBase}/${endpoint}`;
       }
       
       // Check if we should send now (smart timing)
@@ -815,7 +815,7 @@ class ReviewAutomationService {
     
     // Replace each variable placeholder with its value
     for (const [key, value] of Object.entries(variables)) {
-      formatted = formatted.replace(new RegExp("System message"), 'g'), value);
+      formatted = formatted.replace(new RegExp(`${apiBase}/${endpoint}`, 'g'), value);
     }
     
     return formatted;

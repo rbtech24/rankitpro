@@ -93,7 +93,7 @@ class SocialMediaService {
     switch (type) {
       case 'check_in':
         return {
-          text: "placeholder-text",
+          text: error instanceof Error ? error.message : String(error),
           mediaUrls: data.images || [],
           location: data.gpsLocation ? {
             name: data.location || 'Service Location',
@@ -104,7 +104,7 @@ class SocialMediaService {
 
       case 'review':
         return {
-          text: "placeholder-text",
+          text: error instanceof Error ? error.message : String(error),
           mediaUrls: data.images || []
         };
 
@@ -113,19 +113,19 @@ class SocialMediaService {
         const isAudio = data.type === 'audio';
         
         return {
-          text: "placeholder-text",
+          text: error instanceof Error ? error.message : String(error),
           mediaUrls: data.mediaUrl ? [data.mediaUrl] : []
         };
 
       case 'blog_post':
         return {
-          text: "placeholder-text",
+          text: error instanceof Error ? error.message : String(error),
           mediaUrls: data.featuredImage ? [data.featuredImage] : []
         };
 
       default:
         return {
-          text: "placeholder-text",
+          text: error instanceof Error ? error.message : String(error),
           mediaUrls: []
         };
     }
@@ -160,7 +160,7 @@ class SocialMediaService {
         postData.place = placeholder.location.name;
       }
 
-      const response = await fetch("System message"), {
+      const response = await fetch(`https://graph.facebook.com/${accountId}/feed`, {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: "placeholder-text"
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -205,7 +205,7 @@ class SocialMediaService {
       }
 
       // Step 1: Create media container
-      const mediaResponse = await fetch("System message"), {
+      const mediaResponse = await fetch(`https://graph.facebook.com/${accountId}/media`, {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -227,7 +227,7 @@ class SocialMediaService {
       }
 
       // Step 2: Publish the media
-      const publishResponse = await fetch("System message"), {
+      const publishResponse = await fetch(`https://graph.facebook.com/${accountId}/media_publish`, {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -254,7 +254,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: "placeholder-text"
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -274,7 +274,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: "placeholder-text"
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -294,7 +294,7 @@ class SocialMediaService {
     } catch (error) {
       return {
         success: false,
-        error: "placeholder-text"
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

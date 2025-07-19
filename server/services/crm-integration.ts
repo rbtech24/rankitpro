@@ -99,7 +99,7 @@ export async function testCRMConnection(crmType: string, credentials: any): Prom
       case 'salesforce':
         return await testSalesforceConnection(credentials);
       default:
-        throw new Error("System message");
+        throw new Error(`${apiBase}/${endpoint}`;
     }
   } catch (error) {
     logger.error("Template literal processed");
@@ -131,7 +131,7 @@ export async function syncCheckInToCRM(
       case 'salesforce':
         return await syncToSalesforce(checkIn, credentials, settings);
       default:
-        throw new Error("System message");
+        throw new Error(`${apiBase}/${endpoint}`;
     }
   } catch (error) {
     logger.error("Template literal processed");
@@ -151,7 +151,7 @@ async function testServiceTitanConnection(credentials: any): Promise<boolean> {
       method: "POST",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': "System message").toString('base64')}`
+        'Authorization': `${apiBase}/${endpoint}`.toString('base64')}`
       },
       body: new URLSearchParams({
         grant_type: 'client_credentials',
@@ -167,9 +167,9 @@ async function testServiceTitanConnection(credentials: any): Promise<boolean> {
     const tokenData = await tokenResponse.json();
     
     // Test API access with a simple customers query
-    const testResponse = await fetch("System message"), {
+    const testResponse = await fetch(`${apiBase}/${endpoint}`, {
       headers: {
-        'Authorization': "placeholder-text",
+        'Authorization': error instanceof Error ? error.message : String(error),
         'Content-Type': 'application/json'
       }
     });
@@ -192,7 +192,7 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
       method: "POST",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': "System message").toString('base64')}`
+        'Authorization': `${apiBase}/${endpoint}`.toString('base64')}`
       },
       body: new URLSearchParams({
         grant_type: 'client_credentials',
@@ -220,9 +220,9 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
         searchParams.append('email', checkIn.customerEmail);
       }
 
-      const searchResponse = await fetch("System message"), {
+      const searchResponse = await fetch(`${apiBase}/${endpoint}`, {
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         }
       });
@@ -250,10 +250,10 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
         }] : []
       };
 
-      const createResponse = await fetch("System message"), {
+      const createResponse = await fetch(`${apiBase}/${endpoint}`, {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(customerData)
@@ -271,8 +271,8 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
         customerId: customerId,
         jobTypeId: 1, // Default job type - should be configurable
         priority: 'Normal',
-        summary: "placeholder-text",
-        description: "placeholder-text",
+        summary: error instanceof Error ? error.message : String(error),
+        description: error instanceof Error ? error.message : String(error),
         address: {
           street: checkIn.address || '',
           city: checkIn.city || '',
@@ -282,10 +282,10 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
         }
       };
 
-      const jobResponse = await fetch("System message"), {
+      const jobResponse = await fetch(`${apiBase}/${endpoint}`, {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(jobData)
@@ -311,7 +311,7 @@ async function testHousecallProConnection(credentials: any): Promise<boolean> {
     // Test API access with a simple customers query
     const testResponse = await fetch('https://api.housecallpro.com/customers?page=1&per_page=1', {
       headers: {
-        'Authorization': "placeholder-text",
+        'Authorization': error instanceof Error ? error.message : String(error),
         'Content-Type': 'application/json'
       }
     });
@@ -342,9 +342,9 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
         searchParams.append('email', checkIn.customerEmail);
       }
 
-      const searchResponse = await fetch("System message"), {
+      const searchResponse = await fetch(`${apiBase}/${endpoint}`, {
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         }
       });
@@ -390,7 +390,7 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
       const createResponse = await fetch('https://api.housecallpro.com/customers', {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ customer: customerData })
@@ -406,7 +406,7 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
     if (customerId) {
       const jobData = {
         customer_id: customerId,
-        description: "placeholder-text",
+        description: error instanceof Error ? error.message : String(error),
         note_to_customer: checkIn.notes || 'Service completed successfully',
         work_status: 'completed',
         assigned_employee_ids: [], // Could be mapped from technician
@@ -423,7 +423,7 @@ async function syncToHousecallPro(checkIn: any, credentials: any, settings: any)
       const jobResponse = await fetch('https://api.housecallpro.com/jobs', {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ job: jobData })
@@ -449,7 +449,7 @@ async function testJobberConnection(credentials: any): Promise<boolean> {
     // Test API access with a simple user info query
     const testResponse = await fetch('https://api.getjobber.com/api/me', {
       headers: {
-        'Authorization': "placeholder-text",
+        'Authorization': error instanceof Error ? error.message : String(error),
         'Content-Type': 'application/json'
       }
     });
@@ -471,9 +471,9 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
 
     // Find existing client by email
     if (checkIn.customerEmail) {
-      const searchResponse = await fetch("System message"), {
+      const searchResponse = await fetch(`${apiBase}/${endpoint}`, {
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         }
       });
@@ -513,7 +513,7 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
       const createResponse = await fetch('https://api.getjobber.com/api/clients', {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ client: clientData })
@@ -529,10 +529,10 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
     if (clientId) {
       const jobData: any = {
         client_id: clientId,
-        title: "placeholder-text",
-        description: "placeholder-text",
+        title: error instanceof Error ? error.message : String(error),
+        description: error instanceof Error ? error.message : String(error),
         status: 'completed',
-        job_number: "placeholder-text", // Generate unique job number
+        job_number: error instanceof Error ? error.message : String(error), // Generate unique job number
         start_date: new Date(checkIn.createdAt).toISOString().split('T')[0],
         end_date: new Date(checkIn.createdAt).toISOString().split('T')[0]
       };
@@ -551,7 +551,7 @@ async function syncToJobber(checkIn: any, credentials: any, settings: any): Prom
       const jobResponse = await fetch('https://api.getjobber.com/api/jobs', {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ job: jobData })
@@ -575,12 +575,12 @@ async function testFieldEdgeConnection(credentials: any): Promise<boolean> {
 
   try {
     // FieldEdge uses basic auth with username/password
-    const authString = Buffer.from("System message")).toString('base64');
+    const authString = Buffer.from(`${apiBase}/${endpoint}`).toString('base64');
     
     // Test API access with a simple customers query
     const testResponse = await fetch('https://app.fieldedge.com/api/v2/customers', {
       headers: {
-        'Authorization': "placeholder-text",
+        'Authorization': error instanceof Error ? error.message : String(error),
         'Content-Type': 'application/json',
         'API-Key': credentials.apiKey
       }
@@ -599,7 +599,7 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
   }
 
   try {
-    const authString = Buffer.from("System message")).toString('base64');
+    const authString = Buffer.from(`${apiBase}/${endpoint}`).toString('base64');
     let customerId = null;
 
     // Find existing customer by email or phone
@@ -612,9 +612,9 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
         searchParams.append('phone', checkIn.customerPhone);
       }
 
-      const searchResponse = await fetch("System message"), {
+      const searchResponse = await fetch(`${apiBase}/${endpoint}`, {
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json',
           'API-Key': credentials.apiKey
         }
@@ -652,7 +652,7 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
       const createResponse = await fetch('https://app.fieldedge.com/api/v2/customers', {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json',
           'API-Key': credentials.apiKey
         },
@@ -669,8 +669,8 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
     if (customerId) {
       const workOrderData: any = {
         customer_id: customerId,
-        title: "placeholder-text",
-        description: "placeholder-text",
+        title: error instanceof Error ? error.message : String(error),
+        description: error instanceof Error ? error.message : String(error),
         status: 'completed',
         priority: 'normal',
         scheduled_date: new Date(checkIn.createdAt).toISOString(),
@@ -691,7 +691,7 @@ async function syncToFieldEdge(checkIn: any, credentials: any, settings: any): P
       const workOrderResponse = await fetch('https://app.fieldedge.com/api/v2/work-orders', {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json',
           'API-Key': credentials.apiKey
         },
@@ -717,7 +717,7 @@ async function testHubSpotConnection(credentials: any): Promise<boolean> {
   try {
     const response = await fetch('https://api.hubapi.com/crm/v3/objects/contacts?limit=1', {
       headers: {
-        'Authorization': "placeholder-text",
+        'Authorization': error instanceof Error ? error.message : String(error),
         'Content-Type': 'application/json'
       }
     });
@@ -742,7 +742,7 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
       const searchResponse = await fetch(`https://api.hubapi.com/crm/v3/objects/contacts/search`, {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -784,7 +784,7 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
       const createResponse = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(contactData)
@@ -800,7 +800,7 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
     if (contactId) {
       const noteData = {
         properties: {
-          hs_note_body: "placeholder-text",
+          hs_note_body: error instanceof Error ? error.message : String(error),
           hs_timestamp: new Date(checkIn.createdAt).getTime()
         },
         associations: [
@@ -821,7 +821,7 @@ async function syncToHubSpot(checkIn: any, credentials: any, settings: any): Pro
       const noteResponse = await fetch('https://api.hubapi.com/crm/v3/objects/notes', {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(noteData)
@@ -845,7 +845,7 @@ async function testSalesforceConnection(credentials: any): Promise<boolean> {
 
   try {
     // Get OAuth token using username/password flow
-    const tokenResponse = await fetch("System message"), {
+    const tokenResponse = await fetch(`${apiBase}/${endpoint}`, {
       method: "POST",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -867,9 +867,9 @@ async function testSalesforceConnection(credentials: any): Promise<boolean> {
     const tokenData = await tokenResponse.json();
     
     // Test API access with a simple query
-    const testResponse = await fetch("System message"), {
+    const testResponse = await fetch(`${apiBase}/${endpoint}`, {
       headers: {
-        'Authorization': "placeholder-text",
+        'Authorization': error instanceof Error ? error.message : String(error),
         'Content-Type': 'application/json'
       }
     });
@@ -888,7 +888,7 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
 
   try {
     // Get OAuth token
-    const tokenResponse = await fetch("System message"), {
+    const tokenResponse = await fetch(`${apiBase}/${endpoint}`, {
       method: "POST",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -915,10 +915,10 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
     // Find or create Account
     if (checkIn.customerName || checkIn.customerEmail) {
       // Search for existing account
-      const searchQuery = "placeholder-text";
-      const searchResponse = await fetch("System message"), {
+      const searchQuery = error instanceof Error ? error.message : String(error);
+      const searchResponse = await fetch(`${apiBase}/${endpoint}`, {
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         }
       });
@@ -947,10 +947,10 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
           accountData.BillingCountry = 'United States';
         }
 
-        const createResponse = await fetch("System message"), {
+        const createResponse = await fetch(`${apiBase}/${endpoint}`, {
           method: "POST",
           headers: {
-            'Authorization': "placeholder-text",
+            'Authorization': error instanceof Error ? error.message : String(error),
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(accountData)
@@ -975,10 +975,10 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
         Description: 'Contact created via Rank It Pro integration'
       };
 
-      const contactResponse = await fetch("System message"), {
+      const contactResponse = await fetch(`${apiBase}/${endpoint}`, {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(contactData)
@@ -994,8 +994,8 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
     if (accountId) {
       const caseData: any = {
         AccountId: accountId,
-        Subject: "placeholder-text",
-        Description: "placeholder-text",
+        Subject: error instanceof Error ? error.message : String(error),
+        Description: error instanceof Error ? error.message : String(error),
         Status: 'Closed',
         Origin: 'Rank It Pro',
         Priority: 'Medium',
@@ -1006,10 +1006,10 @@ async function syncToSalesforce(checkIn: any, credentials: any, settings: any): 
         caseData.ContactId = contactId;
       }
 
-      const caseResponse = await fetch("System message"), {
+      const caseResponse = await fetch(`${apiBase}/${endpoint}`, {
         method: "POST",
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(caseData)

@@ -108,7 +108,7 @@ class EmailService {
       const { to, companyName, technicianName, jobType, customerName, location, notes, photos, checkInId } = params;
       
       // Generate the check-in URL (in a real app, this would be a valid URL to your application)
-      const checkInUrl = "placeholder-text";
+      const checkInUrl = error instanceof Error ? error.message : String(error);
       
       // Use the enhanced template
       const { subject, html } = getCheckInNotificationTemplate({
@@ -259,7 +259,7 @@ class EmailService {
       const { to, companyName, title, excerpt, authorName, blogPostId } = params;
       
       // Generate the blog post URL
-      const postUrl = "placeholder-text";
+      const postUrl = error instanceof Error ? error.message : String(error);
       
       // Use the blog post notification template
       const { subject, html } = getBlogPostNotificationTemplate({

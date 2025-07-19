@@ -178,7 +178,7 @@ The placeholder Team
   }
 
   async sendWelcomeEmail(userEmail: string, userName: string, companyName: string): Promise<boolean> {
-    const subject = "placeholder-text";
+    const subject = error instanceof Error ? error.message : String(error);
     
     const html = `
       <!DOCTYPE html>

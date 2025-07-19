@@ -1,0 +1,50 @@
+2025-07-19T01:02:24.199317849Z 🔧 Installing platform-specific dependencies...
+2025-07-19T01:02:25.452340752Z 
+2025-07-19T01:02:25.452366974Z added 10 packages, and audited 473 packages in 1s
+2025-07-19T01:02:25.452387135Z 
+2025-07-19T01:02:25.452399096Z 81 packages are looking for funding
+2025-07-19T01:02:25.452403477Z   run `npm fund` for details
+2025-07-19T01:02:25.453475974Z 
+2025-07-19T01:02:25.453491335Z found 0 vulnerabilities
+2025-07-19T01:02:25.47025699Z 📦 Building client application...
+2025-07-19T01:02:26.153554558Z vite v6.3.5 building for production...
+2025-07-19T01:02:26.765806873Z transforming...
+2025-07-19T01:02:35.82973227Z ✓ 2924 modules transformed.
+2025-07-19T01:02:36.41796784Z rendering chunks...
+2025-07-19T01:02:37.029560532Z computing gzip size...
+2025-07-19T01:02:37.11221748Z ../dist/public/index.html                     4.05 kB │ gzip:   1.36 kB
+2025-07-19T01:02:37.112899256Z ../dist/public/assets/main-9wLjLJuK.css     127.60 kB │ gzip:  19.65 kB
+2025-07-19T01:02:37.112924438Z ../dist/public/assets/logout-H4_kCKaO.js      1.19 kB │ gzip:   0.54 kB
+2025-07-19T01:02:37.112928478Z ../dist/public/assets/main-DkubMJyO.js    2,342.10 kB │ gzip: 560.79 kB
+2025-07-19T01:02:37.112937909Z 
+2025-07-19T01:02:37.112941219Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-07-19T01:02:37.11294465Z - Using dynamic import() to code-split the application
+2025-07-19T01:02:37.11294811Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-07-19T01:02:37.11295079Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-07-19T01:02:37.113174478Z ✓ built in 10.93s
+2025-07-19T01:02:37.238296993Z 🚀 Building server application with enhanced exclusions...
+2025-07-19T01:02:37.856552567Z ✘ [ERROR] Expected identifier but found "\"POST\""
+2025-07-19T01:02:37.856566448Z 
+2025-07-19T01:02:37.856569908Z     server/services/social-media-service.ts:164:16:
+2025-07-19T01:02:37.856572849Z       164 │         method: "POST",
+2025-07-19T01:02:37.856575329Z           ╵                 ~~~~~~
+2025-07-19T01:02:37.856577719Z 
+2025-07-19T01:02:37.858018916Z ▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+2025-07-19T01:02:37.858033247Z 
+2025-07-19T01:02:37.858037298Z     server/vite.ts:72:32:
+2025-07-19T01:02:37.858040528Z       72 │   const distPath = path.resolve(import.meta.dirname, "public");
+2025-07-19T01:02:37.858089442Z          ╵                                 ~~~~~~~~~~~
+2025-07-19T01:02:37.858109824Z 
+2025-07-19T01:02:37.858113794Z   You need to set the output format to "esm" for "import.meta" to work correctly.
+2025-07-19T01:02:37.858116024Z 
+2025-07-19T01:02:37.879982854Z ▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+2025-07-19T01:02:37.880001176Z 
+2025-07-19T01:02:37.880005146Z     vite.config.ts:8:33:
+2025-07-19T01:02:37.880008506Z       8 │ const __filename = fileURLToPath(import.meta.url);
+2025-07-19T01:02:37.880011356Z         ╵                                  ~~~~~~~~~~~
+2025-07-19T01:02:37.880013807Z 
+2025-07-19T01:02:37.880016767Z   You need to set the output format to "esm" for "import.meta" to work correctly.
+2025-07-19T01:02:37.880019347Z 
+2025-07-19T01:02:37.967540811Z 2 warnings and 1 error
+2025-07-19T01:02:37.999658426Z ==> Build failed 😞
+2025-07-19T01:02:37.999683757Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys

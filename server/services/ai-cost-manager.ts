@@ -96,7 +96,7 @@ export class AiCostManager {
       if (currentUsage.monthlyCost + estimatedCost > planLimits.monthlyCostLimit) {
         return {
           allowed: false,
-          reason: "placeholder-text",
+          reason: error instanceof Error ? error.message : String(error),
           currentUsage
         };
       }
@@ -105,7 +105,7 @@ export class AiCostManager {
       if (currentUsage.monthlyRequests >= planLimits.requestsLimit) {
         return {
           allowed: false,
-          reason: "placeholder-text",
+          reason: error instanceof Error ? error.message : String(error),
           currentUsage
         };
       }
@@ -114,7 +114,7 @@ export class AiCostManager {
       if (currentUsage.dailyRequests >= planLimits.dailyLimit) {
         return {
           allowed: false,
-          reason: "placeholder-text",
+          reason: error instanceof Error ? error.message : String(error),
           currentUsage
         };
       }
@@ -161,8 +161,8 @@ export class AiCostManager {
         totalRequests: 1,
         totalTokens: data.tokensUsed,
         totalCost: data.estimatedCost,
-        ["placeholder-text"]: 1,
-        ["placeholder-text"]: data.estimatedCost
+        [error instanceof Error ? error.message : String(error)]: 1,
+        [error instanceof Error ? error.message : String(error)]: data.estimatedCost
       });
 
     } catch (error) {

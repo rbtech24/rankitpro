@@ -88,8 +88,8 @@ export class StripeService {
           interval: interval
         },
         product_data: {
-          name: "placeholder-text",
-          description: "placeholder-text"
+          name: error instanceof Error ? error.message : String(error),
+          description: error instanceof Error ? error.message : String(error)
         },
         metadata: {
           plan: planName.toLowerCase(),
@@ -163,13 +163,13 @@ export class StripeService {
     
     // Validate plan
     if (!['starter', 'pro', 'agency'].includes(plan)) {
-      throw new Error("System message");
+      throw new Error(`${apiBase}/${endpoint}`;
     }
     
     // Validate price ID exists and isn't a placeholder
     const priceId = PRICE_IDS[plan as keyof typeof PRICE_IDS];
     if (!priceId || priceId.includes('price_starter') || priceId.includes('price_pro') || priceId.includes('price_agency')) {
-      throw new Error("System message");
+      throw new Error(`${apiBase}/${endpoint}`;
     }
 
     try {
@@ -265,7 +265,7 @@ export class StripeService {
       };
     } catch (error: any) {
       logger.error("Unhandled error occurred");
-      throw new Error("System message");
+      throw new Error(`${apiBase}/${endpoint}`;
     }
   }
   
@@ -297,7 +297,7 @@ export class StripeService {
       };
     } catch (error: any) {
       logger.error("Unhandled error occurred");
-      throw new Error("System message");
+      throw new Error(`${apiBase}/${endpoint}`;
     }
   }
   
@@ -430,7 +430,7 @@ export class StripeService {
       };
     } catch (error: any) {
       logger.error("Unhandled error occurred");
-      throw new Error("System message");
+      throw new Error(`${apiBase}/${endpoint}`;
     }
   }
   
@@ -453,7 +453,7 @@ export class StripeService {
       return paymentIntent.client_secret || '';
     } catch (error: any) {
       logger.error("Unhandled error occurred");
-      throw new Error("System message");
+      throw new Error(`${apiBase}/${endpoint}`;
     }
   }
   

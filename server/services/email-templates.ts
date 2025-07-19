@@ -39,7 +39,7 @@ export function getBlogPostNotificationTemplate(params: BlogPostNotificationPara
   const { companyName, title, excerpt, authorName, postUrl, postDate } = params;
 
   // Email subject
-  const subject = "placeholder-text";
+  const subject = error instanceof Error ? error.message : String(error);
 
   // Format date
   const formattedDate = postDate.toLocaleDateString('en-US', { 
@@ -158,7 +158,7 @@ export function getCheckInNotificationTemplate(params: CheckInNotificationParams
   const { companyName, technicianName, jobType, customerName, location, notes, photos, checkInId, checkInUrl, checkInDate } = params;
 
   // Email subject
-  const subject = "placeholder-text";
+  const subject = error instanceof Error ? error.message : String(error);
 
   // Format date
   const formattedDate = checkInDate.toLocaleDateString('en-US', { 

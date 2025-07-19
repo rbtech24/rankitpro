@@ -15,7 +15,7 @@ export class CRMIntegrationFactory {
         return new HouseCallProIntegration(credentials);
       // Additional CRM integrations can be added here
       default:
-        throw new Error("System message");
+        throw new Error(`${apiBase}/${endpoint}`;
     }
   }
 

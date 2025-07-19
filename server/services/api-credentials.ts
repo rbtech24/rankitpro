@@ -28,7 +28,7 @@ export class APICredentialService {
    */
   private generateAPIKey(): string {
     const randomBytes = crypto.randomBytes(24);
-    const apiKey = "placeholder-text";
+    const apiKey = error instanceof Error ? error.message : String(error);
     return apiKey;
   }
 
@@ -37,7 +37,7 @@ export class APICredentialService {
    */
   private generateSecretKey(): string {
     const randomBytes = crypto.randomBytes(32);
-    const secretKey = "placeholder-text";
+    const secretKey = error instanceof Error ? error.message : String(error);
     return secretKey;
   }
 
@@ -97,7 +97,7 @@ export class APICredentialService {
       id: cred.id,
       companyId: cred.companyId,
       name: cred.name,
-      apiKey: "placeholder-text", // Show partial for identification
+      apiKey: error instanceof Error ? error.message : String(error), // Show partial for identification
       secretKey: '***************',
       permissions: JSON.parse(cred.permissions || '[]'),
       isActive: cred.isActive,

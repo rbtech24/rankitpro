@@ -74,9 +74,9 @@ export class ServiceTitanIntegration implements CRMIntegration {
       
       const response = await axios({
         method,
-        url: "placeholder-text",
+        url: error instanceof Error ? error.message : String(error),
         headers: {
-          'Authorization': "placeholder-text",
+          'Authorization': error instanceof Error ? error.message : String(error),
           'ST-App-Key': this.clientId,
           'Content-Type': 'application/json',
           'ST-Tenant-ID': this.tenantId
@@ -123,7 +123,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       // Try to find by email first
       if (customer.email) {
         const emailSearchResponse = await this.apiRequest<{ data: any[] }>('GET', 
-          "System message");
+          `${apiBase}/${endpoint}`;
         
         if (emailSearchResponse.data && emailSearchResponse.data.length > 0) {
           return { id: emailSearchResponse.data[0].id };
@@ -135,7 +135,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         // Normalize phone number to just digits
         const phone = customer.phone.replace(/\D/g, '');
         const phoneSearchResponse = await this.apiRequest<{ data: any[] }>('GET', 
-          "System message");
+          `${apiBase}/${endpoint}`;
         
         if (phoneSearchResponse.data && phoneSearchResponse.data.length > 0) {
           return { id: phoneSearchResponse.data[0].id };
@@ -144,7 +144,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       
       // Try to find by name as last resort
       const nameSearchResponse = await this.apiRequest<{ data: any[] }>('GET', 
-        "System message");
+        `${apiBase}/${endpoint}`;
       
       if (nameSearchResponse.data && nameSearchResponse.data.length > 0) {
         return { id: nameSearchResponse.data[0].id };
@@ -167,7 +167,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       // Check if customer already exists
       if (customer.externalId) {
         try {
-          const existingCustomer = await this.apiRequest<any>('GET', "System message");
+          const existingCustomer = await this.apiRequest<any>('GET', `${apiBase}/${endpoint}`;
           if (existingCustomer && existingCustomer.id) {
             customerId = existingCustomer.id;
           }
@@ -204,7 +204,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
           customFields: customer.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', "placeholder-text", customerData);
+        await this.apiRequest<any>('PUT', error instanceof Error ? error.message : String(error), customerData);
         return customerId.toString();
       } else {
         // Create new customer
@@ -243,7 +243,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       // Check if job already exists
       if (job.externalId) {
         try {
-          const existingJob = await this.apiRequest<any>('GET', "System message");
+          const existingJob = await this.apiRequest<any>('GET', `${apiBase}/${endpoint}`;
           if (existingJob && existingJob.id) {
             jobId = existingJob.id;
           }
@@ -281,7 +281,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
           customFields: job.customFields || {}
         };
         
-        await this.apiRequest<any>('PUT', "placeholder-text", jobData);
+        await this.apiRequest<any>('PUT', error instanceof Error ? error.message : String(error), jobData);
         return jobId.toString();
       } else {
         // Create new job
@@ -329,8 +329,8 @@ export class ServiceTitanIntegration implements CRMIntegration {
           const base64Image = buffer.toString('base64');
           
           // Upload to ServiceTitan as an attachment
-          await this.apiRequest('POST', "placeholder-text", {
-            fileName: "placeholder-text",
+          await this.apiRequest('POST', error instanceof Error ? error.message : String(error), {
+            fileName: error instanceof Error ? error.message : String(error),
             mimeType: 'image/jpeg',
             base64Data: base64Image,
             description: 'Check-in photo from Rank It Pro',
@@ -399,7 +399,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
         const photoUrls = checkIn.photos?.map(p => p.url) || [];
         
         const job: CRMJobData = {
-          title: "placeholder-text",
+          title: error instanceof Error ? error.message : String(error),
           description: checkIn.workPerformed || checkIn.notes || 'Check-in from Rank It Pro',
           jobType: checkIn.jobType,
           status: checkIn.completedAt ? 'completed' : 'in_progress',
@@ -412,8 +412,8 @@ export class ServiceTitanIntegration implements CRMIntegration {
           endDate: checkIn.completedAt || undefined,
           notes: [
             checkIn.notes,
-            checkIn.workPerformed ? "placeholder-text" : null,
-            checkIn.materialsUsed ? "placeholder-text" : null,
+            checkIn.workPerformed ? error instanceof Error ? error.message : String(error) : null,
+            checkIn.materialsUsed ? error instanceof Error ? error.message : String(error) : null,
           ].filter(Boolean).join('\n\n'),
           images: settings.syncPhotos ? photoUrls : []
         };
@@ -443,12 +443,12 @@ export class ServiceTitanIntegration implements CRMIntegration {
       if (dateRange) {
         const startDate = dateRange.start.toISOString().split('T')[0]; // YYYY-MM-DD
         const endDate = dateRange.end.toISOString().split('T')[0]; // YYYY-MM-DD
-        queryParams += "placeholder-text";
+        queryParams += error instanceof Error ? error.message : String(error);
       }
       
       // Get jobs for this technician
       const response = await this.apiRequest<{ data: any[] }>('GET', 
-        "System message");
+        `${apiBase}/${endpoint}`;
       
       // Map ServiceTitan jobs to our job model
       return response.data.map(job => ({
@@ -480,7 +480,7 @@ export class ServiceTitanIntegration implements CRMIntegration {
       let endpoint = '/crm/customers?limit=50';
       
       if (query) {
-        endpoint += "placeholder-text";
+        endpoint += error instanceof Error ? error.message : String(error);
       }
       
       const response = await this.apiRequest<{ data: any[]; }>(
