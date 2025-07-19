@@ -194,7 +194,7 @@ router.post('/register',
         username: req.body.username,
         ip: req.ip 
       }, error as Error);
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: "Server error during registration" });
     }
   }
 );

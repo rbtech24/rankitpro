@@ -8,18 +8,33 @@ import helmet from 'helmet';
 
 export function securityHeaders() {
   return helmet({
-    placeholderSecurityPolicy: {
+    contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        scriptSrc: [
+          "'self'", 
+          "'unsafe-inline'", 
+          "'unsafe-eval'",
+          "https://js.stripe.com",
+          "https://replit.com",
+          "https://*.replit.com",
+          "https://basil.stripe.com"
+        ],
         imgSrc: ["'self'", "data:", "https:", "blob:"],
-        connectSrc: ["'self'", "ws:", "wss:"],
+        connectSrc: [
+          "'self'", 
+          "ws:", 
+          "wss:",
+          "https://api.stripe.com",
+          "https://basil.stripe.com",
+          "https://*.stripe.com"
+        ],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
-        frameSrc: ["'none'"],
-        childSrc: ["'none'"],
+        frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
+        childSrc: ["'self'"],
         workerSrc: ["'self'"],
         manifestSrc: ["'self'"],
         formAction: ["'self'"],
