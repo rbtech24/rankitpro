@@ -26,11 +26,17 @@ export function log(message: string, source = "express") {
 }
 
 export async function setupVite(app: Express, server: Server) {
+  // Ensure Stripe key is available for Vite
+  process.env.VITE_STRIPE_PUBLIC_KEY = "pk_live_51Q1IJKABx6OzSP6kA2eNndSD5luY9WJPP6HSuQ9QFZOFGIlTQaT0YeHAQCIuTlHXEZ0eV04wBl3WdjBtCf4gXi2W00jdezk2mo";
+  
   // Custom Vite configuration that handles dirname properly
   const viteConfig = {
     plugins: [
       // Disable React plugin completely and use esbuild for JSX transformation
     ],
+    define: {
+      'import.meta.env.VITE_STRIPE_PUBLIC_KEY': JSON.stringify(process.env.VITE_STRIPE_PUBLIC_KEY)
+    },
     esbuild: {
       jsx: 'automatic',
       jsxImportSource: 'react',
