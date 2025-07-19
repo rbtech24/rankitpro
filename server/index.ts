@@ -151,6 +151,9 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(process.cwd(), 'server', 'public', 'uploads')));
+
 // Authentication bypass removed - using proper API endpoints
 
 app.use((req, res, next) => {

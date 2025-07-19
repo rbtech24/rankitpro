@@ -33,7 +33,7 @@ const storage_config = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     // Create unique filename
-    const uniqueFilename = "placeholder-text";
+    const uniqueFilename = `${uuidv4()}-${file.originalname}`;
     cb(null, uniqueFilename);
   }
 });
@@ -67,11 +67,11 @@ router.post('/upload-photos', isAuthenticated, upload.array('photos', 10), async
     const category = req.body.category || 'general'; // general, before, after
     
     // Base URL for serving static files
-    const baseUrl = "placeholder-text";
+    const baseUrl = `${req.protocol}://${req.get('host')}/uploads`;
     
     // Create URLs for uploaded files
     const photoUrls = (req.files as Express.Multer.File[]).map(file => ({
-      url: "placeholder-text",
+      url: `${baseUrl}/${file.filename}`,
       category
     }));
     
@@ -176,7 +176,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
         // Check if location is just coordinates
         const isCoordinatesOnly = !checkIn.location || 
           checkIn.location.match(/^-?\d+\.?\d*,?\s*-?\d+\.?\d*$/) ||
-          checkIn.location === "placeholder-text";
+          checkIn.location === "";
         
         if (checkIn.latitude && checkIn.longitude && isCoordinatesOnly) {
           try {
@@ -195,7 +195,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
             }
           } catch (error) {
             logger.warn("Parameter processed");
-            formattedLocation = "placeholder-text";
+            formattedLocation = `${checkIn.latitude}, ${checkIn.longitude}`;
           }
         }
 
@@ -237,9 +237,9 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
     let photoUrls: string[] = [];
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
       // Use correct upload path that matches the server setup
-      const baseUrl = "placeholder-text";
-      photoUrls = req.files.map(file => "System message");
-      logger.info("Operation completed");
+      const baseUrl = `${req.protocol}://${req.get('host')}/uploads`;
+      photoUrls = req.files.map(file => `${baseUrl}/${file.filename}`);
+      logger.info("Photo uploads processed", { count: req.files.length });
     }
     
     // Prepare check-in data with photos
@@ -316,7 +316,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
           try {
             aiLocation = await reverseGeocode(checkIn.latitude, checkIn.longitude);
           } catch (error) {
-            aiLocation = "placeholder-text";
+            aiLocation = `${checkIn.latitude}, ${checkIn.longitude}`;
           }
         }
 
@@ -332,7 +332,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
         // Create the blog post
         const blogPost = await storage.createBlogPost({
           title: blogPostResult.title,
-          placeholder: blogPostResult.placeholder,
+          content: blogPostResult.content,
           companyId: user.companyId!,
           checkInId: checkIn.id,
           photos: checkIn.photos,
@@ -380,7 +380,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
           const companyName = company ? company.name : "Our Service Company";
           
           // Create review link (in a real app, this would be a unique URL)
-          const reviewLink = "placeholder-text";
+          const reviewLink = `${req.protocol}://${req.get('host')}/review/${reviewRequest.token || reviewRequest.id}`;
           
           await emailService.sendReviewRequest(
             reviewRequest,

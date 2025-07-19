@@ -2119,7 +2119,7 @@ Format as professional service documentation.`;
       }
       
       // Combine city and state for location if location not provided
-      const techLocation = location || "placeholder-text";
+      const techLocation = location || `${city}, ${state}`;
       
       // Create technician
       const technicianData = {
@@ -2176,7 +2176,7 @@ Format as professional service documentation.`;
       }
       
       // Combine city and state for location if location not provided
-      const techLocation = location || "placeholder-text";
+      const techLocation = location || `${city}, ${state}`;
       
       const updates = {
         name,
