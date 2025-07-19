@@ -69,11 +69,23 @@ export default function Register() {
       });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Registration Failed",
-        description: error.message || "Please check your details and try again.",
-        variant: "destructive",
-      });
+      const errorMessage = error.message || "Please check your details and try again.";
+      
+      // Check for duplicate email error
+      if (errorMessage.includes("Email already registered") || errorMessage.includes("already exists")) {
+        toast({
+          title: "Email Already Registered",
+          description: "This email address is already associated with an account. Please try logging in instead or use a different email address.",
+          variant: "destructive",
+          duration: 6000, // Show longer for important message
+        });
+      } else {
+        toast({
+          title: "Registration Failed", 
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     },
   });
   

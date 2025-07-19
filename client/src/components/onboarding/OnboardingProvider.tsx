@@ -53,25 +53,30 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
   useEffect(() => {
     if (auth?.user && onboardingData !== undefined) {
       const hasCompletedWalkthrough = onboardingData?.hasSeenWalkthrough || false;
-      setHasSeenWalkthrough(hasCompletedWalkthrough);
+      const localStorageCompleted = localStorage.getItem('rankitpro_walkthrough_completed') === 'true';
+      
+      // Use either backend OR localStorage completion status
+      const isCompleted = hasCompletedWalkthrough || localStorageCompleted;
+      setHasSeenWalkthrough(isCompleted);
 
-      // Auto-start for new users
-      if (!hasCompletedWalkthrough && !showWalkthrough) {
+      // Only auto-start for genuinely new users who have never seen the walkthrough
+      if (!isCompleted && !showWalkthrough && !hasSeenWalkthrough) {
         // Check if this is a new user (account created within last 24 hours)
         const userCreatedAt = new Date(auth.user.createdAt || 0);
         const now = new Date();
         const hoursSinceCreation = (now.getTime() - userCreatedAt.getTime()) / (1000 * 60 * 60);
         
-        if (hoursSinceCreation < 24) {
+        // Only auto-start for very new users (within 2 hours) to prevent persistent popups
+        if (hoursSinceCreation < 2) {
           setShouldAutoStart(true);
         }
       }
     }
-  }, [auth, onboardingData, showWalkthrough]);
+  }, [auth, onboardingData]);
 
-  // Auto-start walkthrough for new users after a short delay
+  // Auto-start walkthrough for new users after a short delay (only once)
   useEffect(() => {
-    if (shouldAutoStart && !showWalkthrough) {
+    if (shouldAutoStart && !showWalkthrough && !hasSeenWalkthrough) {
       const timer = setTimeout(() => {
         setShowWalkthrough(true);
         setShouldAutoStart(false);
@@ -87,24 +92,33 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
 
   const completeWalkthrough = async () => {
     try {
+      // Immediately update local state to prevent reappearance
+      setShowWalkthrough(false);
+      setHasSeenWalkthrough(true);
+      setShouldAutoStart(false);
+      
       // Save completion status to backend
-      await fetch('/api/onboarding/complete', {
+      const response = await fetch('/api/onboarding/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ hasSeenWalkthrough: true })
       });
       
-      // Invalidate onboarding progress query to refresh UI
-      queryClient.invalidateQueries({ queryKey: ['/api/onboarding/progress'] });
+      if (!response.ok) {
+        throw new Error(`Failed to save completion: ${response.status}`);
+      }
       
-      setShowWalkthrough(false);
-      setHasSeenWalkthrough(true);
+      // Invalidate onboarding progress query to refresh UI
+      await queryClient.invalidateQueries({ queryKey: ['/api/onboarding/progress'] });
+      
+      // Store completion in localStorage as additional safeguard
+      localStorage.setItem('rankitpro_walkthrough_completed', 'true');
+      
     } catch (error) {
       console.error('Failed to save walkthrough completion:', error);
-      // Still close walkthrough locally even if save fails
-      setShowWalkthrough(false);
-      setHasSeenWalkthrough(true);
+      // Keep local state updated even if backend fails
+      localStorage.setItem('rankitpro_walkthrough_completed', 'true');
     }
   };
 

@@ -527,7 +527,15 @@ export function OnboardingWalkthrough({
                 {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                 <span className="ml-1">{isPlaying ? 'Pause' : 'Play'}</span>
               </Button>
-              <Button variant="ghost" size="sm" onClick={onClose}>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  // Ensure completion is saved when closing
+                  onComplete();
+                }}
+                title="Close and mark as completed"
+              >
                 <X className="w-4 h-4" />
               </Button>
             </div>
@@ -677,7 +685,10 @@ export function OnboardingWalkthrough({
               </Button>
               <Button
                 variant="ghost"
-                onClick={handleSkip}
+                onClick={() => {
+                  // Mark as completed when skipped
+                  onComplete();
+                }}
               >
                 Skip Walkthrough
               </Button>
