@@ -65,8 +65,12 @@ export function securityHeaders() {
  * Additional security headers middleware
  */
 export function additionalSecurityHeaders(req: Request, res: Response, next: NextFunction) {
-  // Prevent clickjacking
-  res.setHeader('X-Frame-Options', 'DENY');
+  // Allow framing for widget embedding but deny for main app
+  if (req.path.startsWith('/embed') || req.path.startsWith('/widget')) {
+    res.setHeader('X-Frame-Options', 'ALLOWALL');
+  } else {
+    res.setHeader('X-Frame-Options', 'DENY');
+  }
   
   // Prevent MIME type sniffing
   res.setHeader('X-Content-Type-Options', 'nosniff');
