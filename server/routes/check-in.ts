@@ -336,10 +336,8 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
           companyId: user.companyId!,
           checkInId: checkIn.id,
           photos: checkIn.photos,
-          published: true
+          status: "published"
         });
-
-    logger.error("Database operation error", { error: error?.message || "Unknown error" });
 
         // Send blog post notification
         try {
