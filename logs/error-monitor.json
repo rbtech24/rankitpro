@@ -4,11 +4,11 @@
       "bfdbcb60",
       {
         "id": "bfdbcb60",
-        "timestamp": "2025-07-19T00:29:49.802Z",
+        "timestamp": "2025-07-19T00:39:55.018Z",
         "level": "info",
         "message": "Application startup initiated",
         "resolved": false,
-        "count": 152
+        "count": 155
       }
     ],
     [
@@ -59,13 +59,24 @@
         "resolved": false,
         "count": 4
       }
+    ],
+    [
+      "aa9d024e",
+      {
+        "id": "aa9d024e",
+        "timestamp": "2025-07-19T00:38:47.998Z",
+        "level": {},
+        "message": "Uncaught Exception",
+        "resolved": false,
+        "count": 1
+      }
     ]
   ],
   "stats": {
-    "totalErrors": 197,
+    "totalErrors": 201,
     "criticalErrors": 0,
     "errorsByHour": {
-      "0": 10,
+      "0": 14,
       "1": 14,
       "2": 7,
       "4": 1,
@@ -92,16 +103,16 @@
       "/": 5
     },
     "errorsByType": {
-      "General": 197
+      "General": 201
     },
     "lastError": {
       "id": "bfdbcb60",
-      "timestamp": "2025-07-19T00:29:49.802Z",
+      "timestamp": "2025-07-19T00:39:55.018Z",
       "level": "info",
       "message": "Application startup initiated",
       "resolved": false,
-      "count": 152
+      "count": 155
     }
   },
-  "lastSaved": "2025-07-19T00:29:49.802Z"
+  "lastSaved": "2025-07-19T00:39:55.018Z"
 }

@@ -334,7 +334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             if (userId) {
               userConnections.set(parseInt(userId), ws);
-    logger.info("WebSocket chat message", { sessionId, senderId, senderType });
+              logger.info("WebSocket user authenticated", { userId, companyId });
               
               // Send authentication confirmation
               ws.send(JSON.stringify({ 

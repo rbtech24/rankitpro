@@ -107,16 +107,22 @@ const limiter = rateLimit({
 
 app.use('/api/', limiter);
 
-// Completely disable CSP in development to allow Vite
+// Completely disable CSP and security headers in development 
 app.use((req, res, next) => {
   if (process.env.NODE_ENV !== 'production') {
-    // Override any CSP headers that might be set by Replit infrastructure
-    res.set({
-      'Content-Security-Policy': "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src * ws: wss: data: blob:;",
-      'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY',
-      'X-XSS-Protection': '0'
-    });
+    // Disable all security headers for development
+    res.removeHeader('Content-Security-Policy');
+    res.removeHeader('Content-Security-Policy-Report-Only');
+    res.removeHeader('X-Content-Type-Options');
+    res.removeHeader('X-Frame-Options');
+    res.removeHeader('X-XSS-Protection');
+    res.removeHeader('Strict-Transport-Security');
+    res.removeHeader('X-Permitted-Cross-Domain-Policies');
+    res.removeHeader('Referrer-Policy');
+    res.removeHeader('Permissions-Policy');
+    
+    // Explicitly set to allow everything
+    res.set('Content-Security-Policy', 'script-src * \'unsafe-inline\' \'unsafe-eval\' data: blob:; object-src * data: blob:; style-src * \'unsafe-inline\' data: blob:; img-src * data: blob:; connect-src * ws: wss: data: blob:; font-src * data: blob:; frame-src * data: blob:; media-src * data: blob:; default-src * \'unsafe-inline\' \'unsafe-eval\' data: blob:;');
   }
   next();
 });

@@ -29,9 +29,12 @@ export async function setupVite(app: Express, server: Server) {
   // Custom Vite configuration that handles dirname properly
   const viteConfig = {
     plugins: [
-      // Temporarily disable React plugin to test if it's causing preamble issues
-      // (await import('@vitejs/plugin-react')).default(),
+      // Disable React plugin completely and use esbuild for JSX transformation
     ],
+    esbuild: {
+      jsx: 'automatic',
+      jsxImportSource: 'react',
+    },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "..", "client", "src"),
