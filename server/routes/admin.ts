@@ -7,6 +7,130 @@ import Stripe from 'stripe';
 import { logger } from '../services/logger';
 const router = Router();
 
+// Financial dashboard endpoints for super admin
+router.get('/financial/metrics', isSuperAdmin, async (req, res) => {
+  try {
+    const companies = await storage.getAllCompanies();
+    
+    // Mock financial metrics for demo - in production, integrate with Stripe
+    const metrics = {
+      totalRevenue: companies.length * 2400, // $2400 average per company
+      monthlyRecurringRevenue: companies.length * 197, // Average plan price
+      totalSubscriptions: companies.length,
+      activeSubscriptions: companies.filter(c => c.isActive !== false).length,
+      churnRate: 0.05, // 5% monthly churn
+      averageRevenuePerUser: 197,
+      lifetimeValue: 2400,
+      totalPayments: companies.length * 12, // 12 payments per company
+      failedPayments: Math.floor(companies.length * 0.02), // 2% failure rate
+      refunds: Math.floor(companies.length * 0.01), // 1% refund rate
+      netRevenue: companies.length * 2300 // After refunds/fees
+    };
+    
+    res.json(metrics);
+  } catch (error) {
+    logger.error('Error fetching financial metrics', { error });
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.get('/financial/revenue-trends', isSuperAdmin, async (req, res) => {
+  try {
+    // Generate demo revenue trends data
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const revenueData = months.map((month, index) => ({
+      month,
+      revenue: 15000 + (index * 2000) + Math.random() * 3000,
+      subscriptions: 50 + (index * 5) + Math.floor(Math.random() * 10),
+      newSignups: 8 + Math.floor(Math.random() * 12),
+      churn: 2 + Math.floor(Math.random() * 5)
+    }));
+    
+    res.json(revenueData);
+  } catch (error) {
+    logger.error('Error fetching revenue trends', { error });
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.get('/financial/payments', isSuperAdmin, async (req, res) => {
+  try {
+    const companies = await storage.getAllCompanies();
+    const limit = parseInt(req.query.limit as string) || 50;
+    
+    // Generate demo payment data based on actual companies
+    const payments = companies.slice(0, limit).map((company, index) => ({
+      id: `pay_${company.id}_${Date.now()}`,
+      companyName: company.name,
+      amount: company.plan === 'starter' ? 97 : company.plan === 'professional' ? 197 : 397,
+      status: Math.random() > 0.95 ? 'failed' : 'success',
+      paymentMethod: 'Visa ****1234',
+      date: new Date(Date.now() - (index * 24 * 60 * 60 * 1000)).toISOString(),
+      subscriptionPlan: company.plan || 'starter'
+    }));
+    
+    res.json(payments);
+  } catch (error) {
+    logger.error('Error fetching payments', { error });
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.get('/financial/subscription-breakdown', isSuperAdmin, async (req, res) => {
+  try {
+    const companies = await storage.getAllCompanies();
+    
+    const planCounts = {
+      starter: companies.filter(c => c.plan === 'starter').length,
+      professional: companies.filter(c => c.plan === 'professional').length,
+      enterprise: companies.filter(c => c.plan === 'enterprise').length
+    };
+    
+    const subscriptionBreakdown = [
+      {
+        planName: 'Essential',
+        subscribers: planCounts.starter,
+        revenue: planCounts.starter * 97,
+        percentage: companies.length > 0 ? Math.round((planCounts.starter / companies.length) * 100) : 0,
+        color: '#0088FE'
+      },
+      {
+        planName: 'Professional',
+        subscribers: planCounts.professional,
+        revenue: planCounts.professional * 197,
+        percentage: companies.length > 0 ? Math.round((planCounts.professional / companies.length) * 100) : 0,
+        color: '#00C49F'
+      },
+      {
+        planName: 'Enterprise',
+        subscribers: planCounts.enterprise,
+        revenue: planCounts.enterprise * 397,
+        percentage: companies.length > 0 ? Math.round((planCounts.enterprise / companies.length) * 100) : 0,
+        color: '#FFBB28'
+      }
+    ];
+    
+    res.json(subscriptionBreakdown);
+  } catch (error) {
+    logger.error('Error fetching subscription breakdown', { error });
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.get('/financial/export', isSuperAdmin, async (req, res) => {
+  try {
+    // Return CSV export of financial data
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=financial-data.csv');
+    
+    const csvData = `Date,Company,Plan,Amount,Status\n${new Date().toISOString().split('T')[0]},Sample Export,Professional,$197,Success\n`;
+    res.send(csvData);
+  } catch (error) {
+    logger.error('Error exporting financial data', { error });
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }

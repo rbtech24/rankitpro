@@ -89,9 +89,11 @@ export function additionalSecurityHeaders(req: Request, res: Response, next: Nex
   // Feature policy / permissions policy
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
   
-  // Content type options
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  // Content type options - disabled in development for Stripe.js compatibility
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  }
   
   // Cache control for sensitive pages
   if (req.path.startsWith('/api/') || req.path.includes('admin') || req.path.includes('auth')) {

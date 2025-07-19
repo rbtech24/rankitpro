@@ -277,7 +277,7 @@ export default function FinancialDashboard() {
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="month" />
                           <YAxis />
-                          <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']} />
+                          <Tooltip formatter={(value: number) => [`$${(value || 0).toLocaleString()}`, 'Revenue']} />
                           <Area 
                             type="monotone" 
                             dataKey="revenue" 
@@ -348,7 +348,7 @@ export default function FinancialDashboard() {
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']} />
+                          <Tooltip formatter={(value: number) => [`$${(value || 0).toLocaleString()}`, 'Revenue']} />
                         </PieChart>
                       </ResponsiveContainer>
                     )}
@@ -380,7 +380,7 @@ export default function FinancialDashboard() {
                             <TableRow key={`${plan.planName}-${index}`}>
                               <TableCell className="font-medium">{plan.planName}</TableCell>
                               <TableCell>{plan.subscribers}</TableCell>
-                              <TableCell>${plan.revenue.toLocaleString()}</TableCell>
+                              <TableCell>${(plan.revenue || 0).toLocaleString()}</TableCell>
                               <TableCell>{plan.percentage}%</TableCell>
                             </TableRow>
                           ))}
