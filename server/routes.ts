@@ -3503,11 +3503,11 @@ Format as professional service documentation.`;
         <div class="rankitpro-widget" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 2em 0;">`;
         
         if (type === 'checkins' || type === 'all') {
-          if (placeholder.checkins && placeholder.checkins.length > 0) {
+          if (companyData.checkins && companyData.checkins.length > 0) {
             html += '<div class="rankitpro-checkins">';
             html += '<h3 style="color: inherit; font-size: 1.5em; margin-bottom: 1em; padding-bottom: 0.5em; border-bottom: 2px solid #0073aa; display: inline-block;">Recent Service Visits</h3>';
             html += '<div class="rankitpro-grid rankitpro-checkin-grid">';
-            placeholder.checkins.forEach((checkin: any) => {
+            companyData.checkins.forEach((checkin: any) => {
               // Template-style container matching the design
               html += `<div class="rankitpro-checkin" style="
                 margin: 0;
@@ -3520,20 +3520,20 @@ Format as professional service documentation.`;
               
               // Header section
               html += `<div style="padding: 20px; background: white; border-bottom: 1px solid #eee;">`;
-              html += "placeholder-text";
+              html += `<h4 style="margin: 0; color: #333; font-size: 18px;">${checkin.customer_name || 'Service Visit'}</h4>`;
               
               // Tech info and date
-              html += `<div style="display: flex; justify-placeholder: space-between; align-items: center; margin-bottom: 15px;">`;
-              html += "placeholder-text";
+              html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">`;
+              html += `<span style="color: #666; font-size: 14px;">Tech: ${checkin.technician_name || 'Staff'}</span>`;
               if (checkin.createdAt) {
-                html += "placeholder-text";
+                html += `<span style="color: #666; font-size: 14px;">${new Date(checkin.createdAt).toLocaleDateString()}</span>`;
               }
               html += `</div>`;
               
               // Location with pin icon
               if (checkin.location) {
                 html += `<div style="display: flex; align-items: center; color: #e91e63; font-size: 14px; font-weight: 500;">
-                  <span style="margin-right: 8px;">📍</span>placeholder
+                  <span style="margin-right: 8px;">📍</span>${checkin.location}
                 </div>`;
               }
               html += `</div>`;
@@ -3541,31 +3541,31 @@ Format as professional service documentation.`;
               // Leaflet Map Integration
         const lat = Number(checkin.latitude) || 32.9537;  // Default to Carrollton, TX coordinates
         const lng = Number(checkin.longitude) || -96.8903;
-        const mapId = "placeholder-text";
+        const mapId = `map_${checkin.id}_${Date.now()}`;
               
-              html += `<div id="placeholder" style="height: 200px; margin: 0 20px; border-radius: 8px; overflow: hidden; border: 1px solid #ddd;"></div>
+              html += `<div id="${mapId}" style="height: 200px; margin: 0 20px; border-radius: 8px; overflow: hidden; border: 1px solid #ddd;"></div>
               <script>
                 if (typeof L !== 'undefined') {
                   try {
-                    var map_placeholder = L.map('placeholder').setView([placeholder, placeholder], 15);
+                    var map_${checkin.id} = L.map('${mapId}').setView([${lat}, ${lng}], 15);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                       attribution: '© OpenStreetMap contributors'
-                    }).addTo(map_placeholder);
-                    L.marker([placeholder, placeholder]).addTo(map_placeholder)
-                      .bindPopup('<b>Service Location</b><br>placeholder')
+                    }).addTo(map_${checkin.id});
+                    L.marker([${lat}, ${lng}]).addTo(map_${checkin.id})
+                      .bindPopup('<b>Service Location</b><br>${checkin.location || 'Service Location'}')
                       .openPopup();
                   } catch(e) {
-                    document.getElementById('placeholder').innerHTML = '<div style="display: flex; align-items: center; justify-placeholder: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 placeholder</span></div>';
+                    document.getElementById('${mapId}').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 ${checkin.location || 'Service Location'}</span></div>';
                   }
                 } else {
-                  document.getElementById('placeholder').innerHTML = '<div style="display: flex; align-items: center; justify-placeholder: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 placeholder</span></div>';
+                  document.getElementById('${mapId}').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; color: #666;"><span>📍 ${checkin.location || 'Service Location'}</span></div>';
                 }
               </script>`;
               
               // Description section
               if (checkin.notes) {
                 html += `<div style="padding: 20px; font-size: 14px; line-height: 1.8; color: #444; text-align: center;">
-                  placeholder
+                  ${checkin.notes}
                 </div>`;
               }
               
@@ -3580,9 +3580,9 @@ Format as professional service documentation.`;
                     'background: radial-gradient(circle at 30% 40%, #8B4513 0%, #A0522D 20%, #654321 40%, #3E2723 60%, #2E1B12 80%);';
                   
                   html += `<div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-                    <img src="placeholder" style="width: 100%; height: 150px; object-fit: cover; display: block;" alt="Service photo" />
+                    <img src="${photo}" style="width: 100%; height: 150px; object-fit: cover; display: block;" alt="Service photo" />
                     <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
-                      placeholder
+                      ${isAfter ? 'After' : 'Before'}
                     </div>
                   </div>`;
                 });
@@ -3591,9 +3591,9 @@ Format as professional service documentation.`;
               
               // Hashtags section
               html += `<div style="padding: 20px; border-top: 1px solid #eee; background: #fafafa;">`;
-        const hashtags = ["placeholder-text", '#sprinkler-repair', '#professional-service'];
+        const hashtags = [`#${checkin.customer_name?.toLowerCase().replace(/\s+/g, '-') || 'service'}`, '#professional-service', '#quality-work'];
               hashtags.forEach(tag => {
-                html += "placeholder-text";
+                html += `<span style="display: inline-block; background: #e3f2fd; color: #1976d2; padding: 4px 8px; margin: 4px 4px 4px 0; border-radius: 12px; font-size: 12px; font-weight: 500;">${tag}</span>`;
               });
               html += `</div>`;
               

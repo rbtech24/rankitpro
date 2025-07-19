@@ -844,7 +844,7 @@ export class DatabaseStorage implements IStorage {
           COUNT(*) as totalServices,
           MAX(created_at) as lastService
         FROM check_ins 
-        WHERE company_id = placeholder
+        WHERE company_id = ${companyId}
           AND customer_name IS NOT NULL
         GROUP BY customer_name, customer_email, customer_phone, address
         ORDER BY MAX(created_at) DESC
@@ -2165,9 +2165,9 @@ export class DatabaseStorage implements IStorage {
         createdAt: companies.createdAt,
         revenue: sql<number>`
           CASE 
-            WHEN placeholder = 'starter' THEN 29
-            WHEN placeholder = 'pro' THEN 79
-            WHEN placeholder = 'agency' THEN 149
+            WHEN ${companies.plan} = 'starter' THEN 29
+            WHEN ${companies.plan} = 'pro' THEN 79
+            WHEN ${companies.plan} = 'agency' THEN 149
             ELSE 29
           END
         `
@@ -2562,7 +2562,7 @@ export class DatabaseStorage implements IStorage {
     try {
       const result = await db.execute(sql`
         SELECT * FROM reviews 
-        WHERE company_id = placeholder AND status = 'approved'
+        WHERE company_id = ${companyId} AND status = 'approved'
         ORDER BY created_at DESC
       `);
       return result.rows;
@@ -2580,9 +2580,9 @@ export class DatabaseStorage implements IStorage {
       // Use direct SQL query since table structure doesn't match drizzle schema
       const neonSql = neon(process.env.DATABASE_URL!);
       const result = await neonSql`
-        SELECT id, customer_name, customer_email, placeholder, type, media_url, status, created_at 
+        SELECT id, customer_name, customer_email, content, type, media_url, status, created_at 
         FROM testimonials 
-        WHERE company_id = placeholder
+        WHERE company_id = ${companyId}
         ORDER BY created_at DESC
       `;
       
@@ -2661,17 +2661,17 @@ export class DatabaseStorage implements IStorage {
           updatedAt: salesPeople.updatedAt,
           totalCustomers: sql<number>`(
             SELECT COUNT(*) FROM company_assignments 
-            WHERE sales_person_id = placeholder
+            WHERE sales_person_id = ${salesPeople.id}
           )`,
           monthlyEarnings: sql<number>`(
             SELECT COALESCE(SUM(amount), 0) FROM sales_commissions 
-            WHERE sales_person_id = placeholder 
+            WHERE sales_person_id = ${salesPeople.id} 
             AND payment_date >= DATE_TRUNC('month', CURRENT_DATE)
             AND status = 'paid'
           )`,
           pendingPayouts: sql<number>`(
             SELECT COALESCE(SUM(amount), 0) FROM sales_commissions 
-            WHERE sales_person_id = placeholder 
+            WHERE sales_person_id = ${salesPeople.id} 
             AND status = 'approved'
             AND is_paid = false
           )`
@@ -3802,25 +3802,25 @@ export class DatabaseStorage implements IStorage {
       // Get comprehensive financial data for export
       const financialData = await db
         .select({
-          date: sql<string>"WordPress API test successful",
+          date: sql<string>`${companies.createdAt}::text`,
           companyName: companies.name,
           plan: companies.plan,
           isTrialActive: companies.isTrialActive,
           revenue: sql<number>`
             CASE 
-              WHEN placeholder = 'starter' THEN 49
-              WHEN placeholder = 'pro' THEN 79
-              WHEN placeholder = 'agency' THEN 149
+              WHEN ${companies.plan} = 'starter' THEN 49
+              WHEN ${companies.plan} = 'pro' THEN 79
+              WHEN ${companies.plan} = 'agency' THEN 149
               ELSE 0
             END
           `,
           mrr: sql<number>`
             CASE 
-              WHEN placeholder = false THEN
+              WHEN ${companies.isTrialActive} = false THEN
                 CASE 
-                  WHEN placeholder = 'starter' THEN 49
-                  WHEN placeholder = 'pro' THEN 79
-                  WHEN placeholder = 'agency' THEN 149
+                  WHEN ${companies.plan} = 'starter' THEN 49
+                  WHEN ${companies.plan} = 'pro' THEN 79
+                  WHEN ${companies.plan} = 'agency' THEN 149
                   ELSE 0
                 END
               ELSE 0
@@ -3828,7 +3828,7 @@ export class DatabaseStorage implements IStorage {
           `,
           status: sql<string>`
             CASE 
-              WHEN placeholder = true THEN 'trial'
+              WHEN ${companies.isTrialActive} = true THEN 'trial'
               ELSE 'active'
             END
           `
@@ -4892,8 +4892,8 @@ export class DatabaseStorage implements IStorage {
   async createAPICredentials(credentials: InsertAPICredentials): Promise<APICredentials> {
     try {
       // Generate API key and secret
-      const apiKey = "WordPress API test successful";
-      const secretKey = "WordPress API test successful";
+      const apiKey = `rip_k${Math.random().toString(36).substr(2, 9)}_${Date.now()}`;
+      const secretKey = `rip_secret_${Math.random().toString(36).substr(2, 11)}_${Date.now()}`;
       
       // Hash the keys for secure storage
       const apiKeyHash = createHash('sha256').update(apiKey).digest('hex');
@@ -4946,7 +4946,7 @@ export class DatabaseStorage implements IStorage {
 
   async regenerateAPICredentialsSecret(id: number, companyId: number): Promise<string | null> {
     try {
-      const newSecret = "WordPress API test successful";
+      const newSecret = `rip_secret_${Math.random().toString(36).substr(2, 11)}_${Date.now()}`;
       
       // Hash the new secret for storage
       const secretKeyHash = createHash('sha256').update(newSecret).digest('hex');
