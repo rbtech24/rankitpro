@@ -1983,9 +1983,9 @@ export class DatabaseStorage implements IStorage {
         companyName: companies.name,
         plan: companies.plan,
         amount: sql<number>`CASE 
-          WHEN placeholder = 'starter' THEN 29
-          WHEN placeholder = 'pro' THEN 79
-          WHEN placeholder = 'agency' THEN 149
+          WHEN $2 = 'starter' THEN 29
+          WHEN $2 = 'pro' THEN 79
+          WHEN $2 = 'agency' THEN 149
           ELSE 29
         END`,
         status: sql<string>`'completed'`,
@@ -2124,9 +2124,9 @@ export class DatabaseStorage implements IStorage {
         count: sql<number>`count(*)`,
         totalRevenue: sql<number>`
           CASE 
-            WHEN placeholder = 'starter' THEN count(*) * 29
-            WHEN placeholder = 'pro' THEN count(*) * 79
-            WHEN placeholder = 'agency' THEN count(*) * 149
+            WHEN $1 = 'starter' THEN count(*) * 29
+            WHEN $1 = 'pro' THEN count(*) * 79
+            WHEN $1 = 'agency' THEN count(*) * 149
             ELSE count(*) * 29
           END
         `
