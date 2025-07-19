@@ -134,29 +134,48 @@ export async function logout(): Promise<void> {
 
 export async function getCurrentUser(): Promise<AuthState> {
   try {
-    // Always validate with server first to ensure session is valid
-    console.log('getCurrentUser - validating with server');
+    // Check if we have cached data first to avoid excessive server requests
+    const cachedUser = localStorage.getItem('authUser');
+    const cachedCompany = localStorage.getItem('authCompany');
+    const isAuth = localStorage.getItem('isAuthenticated');
+    
+    // If we have cached data, try server validation but don't fail immediately
+    if (cachedUser && isAuth) {
+      try {
+        const response = await apiRequest("GET", "/api/auth/me");
+        const data = await response.json();
+        
+        // Update cache with fresh data
+        localStorage.setItem('authUser', JSON.stringify(data.user));
+        localStorage.setItem('authCompany', JSON.stringify(data.company || null));
+        localStorage.setItem('isAuthenticated', 'true');
+        
+        return data;
+      } catch (error) {
+        // If server validation fails but we have cached data, clear cache
+        // and return unauthenticated state without logging excessive errors
+        localStorage.removeItem('authUser');
+        localStorage.removeItem('authCompany');
+        localStorage.removeItem('isAuthenticated');
+        queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
+        return { user: null, company: null };
+      }
+    }
+    
+    // No cached data, try server validation once
     const response = await apiRequest("GET", "/api/auth/me");
     const data = await response.json();
-    console.log('getCurrentUser - server validation successful:', data);
     
-    // Store the validated response in localStorage
+    // Store fresh data
     if (data.user) {
       localStorage.setItem('authUser', JSON.stringify(data.user));
-      localStorage.setItem('authCompany', JSON.stringify(data.company));
+      localStorage.setItem('authCompany', JSON.stringify(data.company || null));
       localStorage.setItem('isAuthenticated', 'true');
-    } else {
-      // Clear localStorage if no user returned
-      localStorage.removeItem('authUser');
-      localStorage.removeItem('authCompany');
-      localStorage.removeItem('isAuthenticated');
     }
     
     return data;
   } catch (error) {
-    console.log('getCurrentUser - authentication failed:', error);
-    
-    // Clear stale auth data on any authentication failure
+    // Silently clear auth state without excessive logging
     queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
     localStorage.removeItem('authUser');
     localStorage.removeItem('authCompany');
