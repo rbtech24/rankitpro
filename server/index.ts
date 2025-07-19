@@ -107,24 +107,16 @@ const limiter = rateLimit({
 
 app.use('/api/', limiter);
 
-// Override CSP headers in development to allow Vite
+// Completely disable CSP in development to allow Vite
 app.use((req, res, next) => {
   if (process.env.NODE_ENV !== 'production') {
-    // Remove any existing CSP headers and set permissive ones for development
-    res.removeHeader('Content-Security-Policy');
-    res.removeHeader('Content-Security-Policy-Report-Only');
-    res.setHeader('Content-Security-Policy', 
-      "default-src * 'unsafe-inline' 'unsafe-eval'; " +
-      "script-src * 'unsafe-inline' 'unsafe-eval'; " +
-      "style-src * 'unsafe-inline'; " +
-      "img-src * data: blob:; " +
-      "font-src * data:; " +
-      "connect-src * ws: wss: data: blob:; " +
-      "frame-src *; " +
-      "object-src *; " +
-      "media-src *; " +
-      "child-src *;"
-    );
+    // Override any CSP headers that might be set by Replit infrastructure
+    res.set({
+      'Content-Security-Policy': "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src * ws: wss: data: blob:;",
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '0'
+    });
   }
   next();
 });

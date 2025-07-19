@@ -29,8 +29,8 @@ export async function setupVite(app: Express, server: Server) {
   // Custom Vite configuration that handles dirname properly
   const viteConfig = {
     plugins: [
-      // Add React plugin for proper React support
-      (await import('@vitejs/plugin-react')).default(),
+      // Temporarily disable React plugin to test if it's causing preamble issues
+      // (await import('@vitejs/plugin-react')).default(),
     ],
     resolve: {
       alias: {
@@ -83,10 +83,6 @@ export async function setupVite(app: Express, server: Server) {
 
       // always reload the index.html file from disk incase it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
-      template = template.replace(
-        `src="/src/main.tsx"`,
-        "placeholder-text",
-      );
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
