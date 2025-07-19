@@ -42,7 +42,7 @@ const upload = multer({
     },
     filename: (req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, "System message");
+      cb(null, `Invalid testimonial ID format`);
     }
   }),
   limits: {
@@ -104,7 +104,7 @@ router.post('/', isAuthenticated, upload.single('file'), async (req, res) => {
       customerPhone: customerPhone || null,
       jobType: jobType || null,
       location: location || null,
-      title: title || "placeholder-text",
+      title: title || `${baseUrl}/review/${reviewRequest.id}`,
       rating: rating ? parseInt(rating) : null,
       originalFileName: req.file.originalname,
       fileSize: req.file.size,

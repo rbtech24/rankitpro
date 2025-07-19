@@ -1,70 +1,71 @@
-#!/usr/bin/env node
-
 const fs = require('fs');
 const path = require('path');
 
-// Files that contain template corruption
-const corruptedFiles = [
-  'server/routes.ts',
-  'server/routes/wordpress.ts', 
-  'server/routes/wordpress-broken.ts',
-  'server/routes/integration.ts',
-  'server/routes/embed.ts'
-];
-
-// Function to fix template corruption in a file
+// Function to fix template literal corruption in a file
 function fixTemplateCorruption(filePath) {
-  console.log(`Fixing template corruption in: ${filePath}`);
-  
   try {
     let content = fs.readFileSync(filePath, 'utf8');
-    let fixes = 0;
+    let hasChanges = false;
     
-    // Fix CSS justify-placeholder -> justify-content
-    const beforeJustify = content;
-    content = content.replace(/justify-placeholder/g, 'justify-content');
-    if (content !== beforeJustify) {
-      fixes++;
-      console.log(`  - Fixed justify-placeholder -> justify-content`);
-    }
+    // Fix common template literal corruptions
+    const fixes = [
+      // Fix broken template literal endings
+      {
+        pattern: /\/uploads\/checkins\/converted;/g,
+        replacement: `/uploads/checkins/\${photo}\``
+      },
+      // Fix placeholder-text corruption
+      {
+        pattern: /"placeholder-text"/g,
+        replacement: '`${baseUrl}/review/${reviewRequest.id}`'
+      },
+      // Fix System message corruption
+      {
+        pattern: /"System message"\)/g,
+        replacement: '`Review request email sent successfully`'
+      },
+      // Fix log statement corruption
+      {
+        pattern: /log\("System message"\);/g,
+        replacement: 'log(`SMS review request would be sent to ${reviewRequest.phone}`, "info");'
+      }
+    ];
     
-    // Fix corrupted template literals and database fields
-    const beforeTemplate = content;
-    content = content.replace(/placeholder(?!Generation|_generation)/g, 'content');
-    if (content !== beforeTemplate) {
-      fixes++;
-      console.log(`  - Fixed placeholder -> content in database fields`);
-    }
+    fixes.forEach(fix => {
+      const newContent = content.replace(fix.pattern, fix.replacement);
+      if (newContent !== content) {
+        hasChanges = true;
+        content = newContent;
+        console.log(`Fixed pattern in ${filePath}`);
+      }
+    });
     
-    // Fix specific corrupted HTML attributes
-    content = content.replace(/placeholder="width=device-width/g, 'content="width=device-width');
-    content = content.replace(/meta name="viewport" placeholder=/g, 'meta name="viewport" content=');
-    
-    // Fix corrupted CSS body styles
-    content = content.replace(/body { success: true }/g, 'body { font-family: Arial, sans-serif; margin: 0; padding: 0; }');
-    
-    // Write the fixed content back
-    if (fixes > 0) {
-      fs.writeFileSync(filePath, content, 'utf8');
-      console.log(`  ✅ Applied ${fixes} fixes to ${filePath}`);
-    } else {
-      console.log(`  ℹ️  No fixes needed for ${filePath}`);
+    if (hasChanges) {
+      fs.writeFileSync(filePath, content);
+      console.log(`✅ Fixed corruptions in ${filePath}`);
     }
     
   } catch (error) {
-    console.error(`  ❌ Error fixing ${filePath}:`, error.message);
+    console.error(`❌ Error processing ${filePath}:`, error.message);
   }
 }
 
-// Fix all corrupted files
-console.log('🔧 Starting template corruption fix...\n');
+// Process all TypeScript files in server directory
+function processDirectory(dirPath) {
+  const files = fs.readdirSync(dirPath);
+  
+  files.forEach(file => {
+    const fullPath = path.join(dirPath, file);
+    const stat = fs.statSync(fullPath);
+    
+    if (stat.isDirectory()) {
+      processDirectory(fullPath);
+    } else if (file.endsWith('.ts') && !file.endsWith('.d.ts')) {
+      fixTemplateCorruption(fullPath);
+    }
+  });
+}
 
-corruptedFiles.forEach(file => {
-  if (fs.existsSync(file)) {
-    fixTemplateCorruption(file);
-  } else {
-    console.log(`⚠️  File not found: ${file}`);
-  }
-});
-
-console.log('\n✅ Template corruption fix completed!');
+console.log('🔧 Starting template literal corruption fix...');
+processDirectory('./server');
+console.log('✅ Template literal corruption fix completed');

@@ -144,7 +144,7 @@ router.get('/', isAuthenticated, async (req, res) => {
           ...checkIn,
           photos: Array.isArray(photos) ? photos.map((photo: any) => {
             if (typeof photo === 'string') {
-              return { url: `/uploads/checkins/converted;
+              return { url: `/uploads/checkins/${photo}`
             }
             return photo;
           }) : []
@@ -187,7 +187,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     // Add full URLs to photos
     const photosWithUrls = Array.isArray(photos) ? photos.map((photo: any) => {
       if (typeof photo === 'string') {
-        return { url: `/uploads/checkins/converted;
+        return { url: `/uploads/checkins/${photo}` };
       }
       return photo;
     }) : [];
@@ -198,7 +198,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       photos: photosWithUrls
     });
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Error getting check-in", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -387,7 +387,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
       ...updatedCheckIn,
       photos: Array.isArray(photos) ? photos.map((photo: any) => {
         if (typeof photo === 'string') {
-          return { url: `/uploads/checkins/converted;
+          return { url: `/uploads/checkins/${photo}`
         }
         return photo;
       }) : []
@@ -506,7 +506,7 @@ router.patch('/:id/complete', isAuthenticated, async (req, res) => {
       ...updatedCheckIn,
       photos: Array.isArray(photos) ? photos.map((photo: any) => {
         if (typeof photo === 'string') {
-          return { url: `/uploads/checkins/converted;
+          return { url: `/uploads/checkins/${photo}`
         }
         return photo;
       }) : []

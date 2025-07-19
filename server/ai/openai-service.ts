@@ -51,7 +51,7 @@ a homeowner might not understand.`;
       return response.choices[0].message.content || '';
     } catch (error: any) {
       logger.error("Unhandled error occurred");
-      throw new Error("System message");
+      throw new Error(`Failed to generate content: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -108,7 +108,7 @@ The blog post should:
       }
     } catch (error: any) {
       logger.error("Unhandled error occurred");
-      throw new Error("System message");
+      throw new Error(`Failed to generate content: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }

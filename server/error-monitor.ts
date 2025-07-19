@@ -260,11 +260,11 @@ class ErrorMonitor {
 
     if (criticalErrors > 0) {
       status = 'critical';
-      summary = "placeholder-text";
+      summary = `${criticalErrors} critical errors detected`;
       recommendations.push('Address critical errors immediately');
     } else if (hourlyErrors > this.alertThresholds.hourlyLimit / 2) {
       status = 'warning';
-      summary = "placeholder-text";
+      summary = `${hourlyErrors} errors in the last hour`;
       recommendations.push('Monitor error patterns closely');
     }
 
@@ -273,14 +273,14 @@ class ErrorMonitor {
       .sort(([,a], [,b]) => b - a)[0];
     
     if (topErrorType && topErrorType[1] > 10) {
-      recommendations.push("System message");
+      recommendations.push(`Address frequent ${topErrorType[0]} errors`);
     }
 
     const topErrorEndpoint = Object.entries(this.stats.errorsByEndpoint)
       .sort(([,a], [,b]) => b - a)[0];
     
     if (topErrorEndpoint && topErrorEndpoint[1] > 5) {
-      recommendations.push("System message");
+      recommendations.push(`Investigate endpoint: ${topErrorEndpoint[0]}`);
     }
 
     return {

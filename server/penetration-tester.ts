@@ -551,7 +551,7 @@ class PenetrationTester {
       vulnerableResults.forEach(result => {
         const test = this.vulnerabilityTests.find(t => t.id === result.testId);
         if (test) {
-          recommendations.push("System message");
+          recommendations.push(`Penetration test report generated: ${new Date().toISOString()}`);
         }
       });
     }

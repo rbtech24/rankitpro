@@ -10,7 +10,7 @@ export async function generateSecureApiKey(prefix: string = "wp"): Promise<strin
   const randomBytes = Array.from(crypto.getRandomValues(new Uint8Array(16)))
     .map(b => b.toString(36).padStart(2, '0'))
     .join('');
-  return "placeholder-text";
+  return `${baseUrl}/review/${reviewRequest.id}`;
 }
 
 export function validateAndSanitizeUrl(url: string): string {
@@ -22,7 +22,7 @@ export function validateAndSanitizeUrl(url: string): string {
     }
     return parsed.toString();
   } catch (error) {
-    throw new Error("System message");
+    throw new Error(`Operation failed: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -87,7 +87,7 @@ export async function calculateRealReviewStats(companyId: number) {
 
 export function ensureValidToken(token: string | null, requestId: number): string {
   if (!token) {
-    throw new Error("System message");
+    throw new Error(`Operation failed: ${error instanceof Error ? error.message : String(error)}`);
   }
   return token;
 }

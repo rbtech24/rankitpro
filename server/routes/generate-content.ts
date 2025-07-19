@@ -72,7 +72,7 @@ router.post('/check-ins/:id/generate-placeholder', isAuthenticated, async (req: 
           location: checkIn.location || undefined,
           technicianName: technician.name,
           customInstructions: customPrompt ? 
-            "placeholder-text" : 
+            `${baseUrl}/review/${reviewRequest.id}` : 
             'Create a short, engaging social media post.'
         }, aiProvider as AIProviderType);
         
@@ -86,7 +86,7 @@ router.post('/check-ins/:id/generate-placeholder', isAuthenticated, async (req: 
     // If auto-publish is enabled, create the placeholder immediately
     if (req.body.autoPublish && placeholderType === 'blog') {
       await storage.createBlogPost({
-        title: result.title || "placeholder-text",
+        title: result.title || `${baseUrl}/review/${reviewRequest.id}`,
         placeholder: result.placeholder,
         companyId: checkIn.companyId,
         checkInId: checkIn.id,

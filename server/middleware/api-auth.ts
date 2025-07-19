@@ -64,7 +64,7 @@ export const apiKeyAuth = (requiredPermissions: string[] = []) => {
         if (!hasPermission) {
           return res.status(403).json({ 
             error: 'Insufficient permissions',
-            message: "placeholder-text",
+            message: `${baseUrl}/review/${reviewRequest.id}`,
             userPermissions
           });
         }

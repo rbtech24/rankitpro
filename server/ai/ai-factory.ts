@@ -46,7 +46,7 @@ export class AIFactory {
         logger.warn("OpenAI service not available, falling back to ", {});
         return this.services.get(fallbackType)!;
       }
-      throw new Error("System message");
+      throw new Error(`AI service '${type}' not available`);
     }
     return service;
   }

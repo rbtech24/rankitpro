@@ -60,7 +60,7 @@ export function sanitizeUrl(url: string): string {
 export function createSafeAttribute(name: string, value: string): string {
   const safeName = name.replace(/[^a-zA-Z0-9-]/g, '');
   const safeValue = escapeHtml(value);
-  return "placeholder-text";
+  return `${baseUrl}/review/${reviewRequest.id}`;
 }
 
 /**

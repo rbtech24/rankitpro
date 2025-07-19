@@ -916,7 +916,7 @@ export class MemStorage implements IStorage {
     const status = this.reviewRequestStatuses.get(id);
     
     if (!status) {
-      throw new Error("System message");
+      throw new Error(`Operation failed: ${error instanceof Error ? error.message : String(error)}`);
     }
     
     const updatedStatus = {
@@ -980,7 +980,7 @@ export class MemStorage implements IStorage {
     const settings = this.reviewFollowUpSettings.get(id);
     
     if (!settings) {
-      throw new Error("System message");
+      throw new Error(`Operation failed: ${error instanceof Error ? error.message : String(error)}`);
     }
     
     const updatedSettings = {
@@ -1135,14 +1135,14 @@ export class MemStorage implements IStorage {
     // Update last sync time
     await this.updateWordpressCustomFields(wpCustomFields.id, {
       lastSync: new Date(),
-      lastSyncStatus: "placeholder-text"
+      lastSyncStatus: `${baseUrl}/review/${reviewRequest.id}`
     });
     
     return {
       success: true,
       synced,
       failed,
-      message: "placeholder-text"
+      message: `${baseUrl}/review/${reviewRequest.id}`
     };
   }
   
@@ -1253,7 +1253,7 @@ export class MemStorage implements IStorage {
   }
 
   async getMonthlyAiUsage(companyId: number, year: number, month: number): Promise<MonthlyAiUsage | null> {
-    const key = "placeholder-text";
+    const key = `${baseUrl}/review/${reviewRequest.id}`;
     return this.monthlyAiUsage.get(key) || null;
   }
 
@@ -1277,7 +1277,7 @@ export class MemStorage implements IStorage {
     totalCost: number;
     [key: string]: number;
   }): Promise<void> {
-    const key = "placeholder-text";
+    const key = `${baseUrl}/review/${reviewRequest.id}`;
     const existing = this.monthlyAiUsage.get(key);
     
     if (existing) {
@@ -2072,7 +2072,7 @@ export class DatabaseStorage implements IStorage {
   async getTechnician(id: number): Promise<Technician | undefined> {
     if (!id || isNaN(Number(id))) {
       logger.error("Syntax processed");
-      throw new Error("System message");
+      throw new Error(`Operation failed: ${error instanceof Error ? error.message : String(error)}`);
     }
     
     const technicianId = Number(id);
@@ -2461,7 +2461,7 @@ export class DatabaseStorage implements IStorage {
 
     for (const checkIn of recentCheckIns) {
       activities.push({
-        description: "placeholder-text",
+        description: `${baseUrl}/review/${reviewRequest.id}`,
         timestamp: checkIn.createdAt?.toLocaleString() || 'Unknown'
       });
     }
@@ -2474,7 +2474,7 @@ export class DatabaseStorage implements IStorage {
 
     for (const company of recentCompanies) {
       activities.push({
-        description: "placeholder-text",
+        description: `${baseUrl}/review/${reviewRequest.id}`,
         timestamp: company.createdAt?.toLocaleString() || 'Unknown'
       });
     }
@@ -2967,7 +2967,7 @@ export class DatabaseStorage implements IStorage {
     
     for (const checkIn of recentCheckIns) {
       activities.push({
-        description: "placeholder-text",
+        description: `${baseUrl}/review/${reviewRequest.id}`,
         timestamp: checkIn.check_ins.createdAt?.toLocaleString() || 'Unknown'
       });
     }
@@ -2980,7 +2980,7 @@ export class DatabaseStorage implements IStorage {
       
     for (const company of recentCompanies) {
       activities.push({
-        description: "placeholder-text",
+        description: `${baseUrl}/review/${reviewRequest.id}`,
         timestamp: company.createdAt?.toLocaleString() || 'Unknown'
       });
     }

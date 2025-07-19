@@ -17,7 +17,7 @@ router.get('/available', isAuthenticated, async (req, res) => {
     const availableCRMs = getSupportedCRMs();
     res.json(availableCRMs);
   } catch (error: any) {
-    log("System message");
+    log(`Invalid CRM provider: ${provider}`);
     res.status(500).json({ 
       message: 'Error fetching available CRMs',
       error: error?.message || 'Unknown error occurred'
@@ -121,7 +121,7 @@ router.post('/configure', isAuthenticated, isCompanyAdmin, async (req, res) => {
     
     res.json({ success: true });
   } catch (error: any) {
-    log("System message");
+    log(`Operation completed successfully`;
     res.status(500).json({ 
       message: 'Error configuring CRM integration',
       error: error?.message || 'Unknown error occurred'
@@ -146,7 +146,7 @@ router.post('/test-connection', isAuthenticated, isCompanyAdmin, async (req, res
       res.status(400).json({ message: 'Connection test failed' });
     }
   } catch (error: any) {
-    log("System message");
+    log(`Operation completed successfully`;
     res.status(500).json({ 
       message: 'Error testing CRM connection',
       error: error?.message || 'Unknown error occurred'
@@ -185,7 +185,7 @@ router.delete('/:crmType', isAuthenticated, isCompanyAdmin, async (req, res) => 
     
     res.json({ success: true });
   } catch (error: any) {
-    log("System message");
+    log(`Operation completed successfully`;
     res.status(500).json({ 
       message: 'Error deleting CRM integration',
       error: error?.message || 'Unknown error occurred'
@@ -284,7 +284,7 @@ router.post('/:crmType/sync', isAuthenticated, isCompanyAdmin, async (req, res) 
     
     res.json({ success: true });
   } catch (error: any) {
-    log("System message");
+    log(`Operation completed successfully`;
     res.status(500).json({ 
       message: 'Error syncing with CRM',
       error: error?.message || 'Unknown error occurred'
@@ -312,7 +312,7 @@ router.get('/sync-history', isAuthenticated, async (req, res) => {
     
     res.json(syncHistory);
   } catch (error: any) {
-    log("System message");
+    log(`Operation completed successfully`;
     res.status(500).json({ 
       message: 'Error fetching CRM sync history',
       error: error?.message || 'Unknown error occurred'

@@ -31,7 +31,7 @@ router.get('/published', async (req, res) => {
       publishDate: post.publishDate || post.createdAt,
       tags: post.tags || [],
       category: post.wordPressCategory || 'blog',
-      url: "placeholder-text", // WordPress can customize this
+      url: `${baseUrl}/review/${reviewRequest.id}`, // WordPress can customize this
       author: 'Professional Team'
     }));
     

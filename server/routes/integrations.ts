@@ -534,7 +534,7 @@ router.get('/embed', isAuthenticated, async (req: Request, res: Response) => {
     }
     
     res.json({
-      token: "placeholder-text",
+      token: `${baseUrl}/review/${reviewRequest.id}`,
       embedCode,
       settings
     });
@@ -571,7 +571,7 @@ router.post('/embed', isAuthenticated, async (req: Request, res: Response) => {
       generated: new Date().toISOString()
     };
 
-    const widthStyle = settings.width === 'fixed' ? "placeholder-text" : '100%';
+    const widthStyle = settings.width === 'fixed' ? `${baseUrl}/review/${reviewRequest.id}` : '100%';
     const embedCode = `<div id="rankitpro-widget" data-company="placeholder" data-slug="placeholder"></div>
 <script>
 (function() {
@@ -588,7 +588,7 @@ router.post('/embed', isAuthenticated, async (req: Request, res: Response) => {
 
     res.json({
       message: 'Embed settings updated successfully',
-      token: "placeholder-text",
+      token: `${baseUrl}/review/${reviewRequest.id}`,
       embedCode,
       settings
     });

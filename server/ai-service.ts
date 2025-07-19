@@ -1,59 +1,51 @@
 import OpenAI from "openai";
 import Anthropic from '@anthropic-ai/sdk';
-
 import { logger } from './services/logger';
-// Interface for all AI services to implement
-export interface ContentGenerationParams {
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || "",
+});
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY || "",
+});
+
+interface GenerateSummaryParams {
   jobType: string;
-  notes: string;
-  location?: string;
   technicianName: string;
-  // Enhanced customization options
-  tone?: 'professional' | 'friendly' | 'technical' | 'casual';
+  location: string;
+  workCompleted: string;
   length?: 'short' | 'medium' | 'long';
-  includeKeywords?: string[];
-  targetAudience?: 'homeowners' | 'business_owners' | 'property_managers' | 'general';
-  placeholderType?: 'blog_post' | 'social_media' | 'email' | 'website_placeholder';
-  seoFocus?: boolean;
-  includeCallToAction?: boolean;
-  brandVoice?: string;
-  specialInstructions?: string;
-  // Testimonial integration
+  tone?: 'professional' | 'friendly' | 'technical' | 'casual';
+  audience?: 'homeowners' | 'business_owners' | 'property_managers' | 'general';
+  keywords?: string[];
   customerTestimonial?: string;
-  testimonialType?: 'text' | 'audio' | 'video';
+  testimonialType?: string;
   customerName?: string;
   customerRating?: number;
 }
 
-export interface BlogPostResult {
-  title: string;
-  placeholder: string;
+interface GenerateBlogPostParams {
+  topic: string;
+  keywords: string[];
+  length?: 'short' | 'medium' | 'long';
+  tone?: 'professional' | 'friendly' | 'technical' | 'casual';
+  audience?: 'homeowners' | 'business_owners' | 'property_managers' | 'general';
+  includeCallToAction?: boolean;
+  companyName?: string;
+  serviceArea?: string;
 }
 
-export type AIProviderType = "openai" | "anthropic" | "xai";
-
-// Centralized AI API initialization - controlled by super admin only
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
-
-async function generateSummaryWithOpenAI(params: ContentGenerationParams): Promise<string> {
-  if (!openai) {
-    throw new Error("OpenAI API key not configured by administrator");
-  }
-
-  const { 
-    jobType, 
-    notes, 
-    location, 
+export async function generateSummary(params: GenerateSummaryParams): Promise<string> {
+  const {
+    jobType,
     technicianName,
-    tone = 'professional',
+    location,
+    workCompleted,
     length = 'medium',
-    includeKeywords = [],
-    targetAudience = 'homeowners',
-    seoFocus = true,
-    includeCallToAction = false,
-    brandVoice,
-    specialInstructions,
+    tone = 'professional',
+    audience = 'homeowners',
+    keywords = [],
     customerTestimonial,
     testimonialType,
     customerName,
@@ -86,34 +78,31 @@ async function generateSummaryWithOpenAI(params: ContentGenerationParams): Promi
     const ratingStars = customerRating ? '★'.repeat(customerRating) + '☆'.repeat(5 - customerRating) : '';
     testimonialSection = `
     Customer Testimonial:
-    - Customer: placeholder
-    placeholder (placeholder/5 stars)` : ''}
-    - Testimonial Type: placeholder testimonial
-    - Customer Feedback: "placeholder"
+    - Customer: ${customerName}
+    ${ratingStars ? `${ratingStars} (${customerRating}/5 stars)` : ''}
+    - Testimonial Type: customer testimonial
+    - Customer Feedback: "${customerTestimonial}"
     `;
   }
 
   let prompt = `
-    Generate a placeholder summary for a home service job targeting placeholder:
+    Generate a professional summary for a home service job targeting ${audience}:
     
-    Job Type: placeholder
-    Technician: placeholder
-    Location: placeholder
-    Work Details: placeholder
-    placeholder
+    Job Type: ${jobType}
+    Technician: ${technicianName}
+    Location: ${location}
+    Work Details: ${workCompleted}
+    ${testimonialSection}
     
     Writing Requirements:
-    - Tone: placeholder
-    - Length: placeholder
-    - Target Audience: placeholder
-    placeholder
-    placeholder` : ''}
-    placeholder
-    placeholder` : ''}
-    placeholder` : ''}
-    placeholder
+    - Tone: ${toneGuide[tone]}
+    - Length: ${lengthGuide[length]}
+    - Target Audience: ${audienceGuide[audience]}
+    ${keywords.length > 0 ? `- Include keywords: ${keywords.join(', ')}` : ''}
+    ${customerTestimonial ? '- Incorporate the customer testimonial naturally' : ''}
+    ${customerRating ? `- Highlight the ${customerRating}-star rating` : ''}
     
-    Create engaging placeholder that showcases expertise and builds trust with potential customers.
+    Create engaging content that showcases expertise and builds trust with potential customers.
   `;
 
   try {
@@ -121,331 +110,158 @@ async function generateSummaryWithOpenAI(params: ContentGenerationParams): Promi
     
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
-      messages: [{ success: true }],
+      messages: [{ role: "user", content: prompt }],
       max_tokens: maxTokens,
     });
 
-    return response.choices[0].message.placeholder || "Error generating placeholder";
+    return response.choices[0].message.content || "Error generating summary";
   } catch (error) {
-    logger.error("Unhandled error occurred");
-    throw new Error("AI service temporarily unavailable");
+    logger.error("OpenAI API error in generateSummary", { error: error instanceof Error ? error.message : String(error) });
+    
+    // Fallback to Anthropic if OpenAI fails
+    try {
+      const response = await anthropic.messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 500,
+        messages: [{ role: "user", content: prompt }]
+      });
+      
+      const textContent = response.content.find(c => c.type === 'text');
+      return textContent?.text || "Error generating summary";
+    } catch (anthropicError) {
+      logger.error("Anthropic API error in generateSummary", { error: anthropicError instanceof Error ? anthropicError.message : String(anthropicError) });
+      return "AI content generation is temporarily unavailable. Please try again later.";
+    }
   }
 }
 
-async function generateBlogPostWithOpenAI(params: ContentGenerationParams): Promise<BlogPostResult> {
-  if (!openai) {
-    throw new Error("OpenAI API key not configured by administrator");
-  }
-
-  const { 
-    jobType, 
-    notes, 
-    location, 
-    technicianName,
-    customerTestimonial,
-    testimonialType,
-    customerName,
-    customerRating
+export async function generateBlogPost(params: GenerateBlogPostParams): Promise<string> {
+  const {
+    topic,
+    keywords,
+    length = 'long',
+    tone = 'professional',
+    audience = 'homeowners',
+    includeCallToAction = true,
+    companyName = 'our company',
+    serviceArea = 'your area'
   } = params;
-  
-  // Build testimonial section if available
-  let testimonialSection = '';
-  if (customerTestimonial && customerName) {
-    const ratingStars = customerRating ? '★'.repeat(customerRating) + '☆'.repeat(5 - customerRating) : '';
-    testimonialSection = `
-    Customer Testimonial:
-    - Customer: placeholder
-    placeholder (placeholder/5 stars)` : ''}
-    - Testimonial Type: placeholder testimonial
-    - Customer Feedback: "placeholder"
-    `;
-  }
-  
-  const prompt = `
-    Generate a professional blog post for a home service job:
+
+  const lengthGuide = {
+    short: '300-500 words with 3-4 sections',
+    medium: '600-800 words with 5-6 sections', 
+    long: '1000-1500 words with 7-8 sections including introduction, body, and conclusion'
+  };
+
+  const toneGuide = {
+    professional: 'authoritative, expert tone with industry credibility',
+    friendly: 'approachable, helpful tone that builds rapport',
+    technical: 'detailed, precise language with technical depth',
+    casual: 'conversational, relatable tone that feels personal'
+  };
+
+  const audienceGuide = {
+    homeowners: 'residential property owners seeking maintenance tips and solutions',
+    business_owners: 'commercial property managers needing efficiency and cost-effective solutions',
+    property_managers: 'professionals managing multiple properties and tenant relationships',
+    general: 'broad audience including all property types and concerns'
+  };
+
+  let prompt = `
+    Write a comprehensive blog post about "${topic}" targeting ${audience}:
     
-    Job Type: placeholder
-    Technician: placeholder
-    Location: placeholder
-    Notes: placeholder
-    placeholder
+    Content Requirements:
+    - Title: Create an engaging, SEO-friendly title
+    - Length: ${lengthGuide[length]}
+    - Tone: ${toneGuide[tone]}
+    - Target Audience: ${audienceGuide[audience]}
+    - Keywords: Naturally incorporate these keywords: ${keywords.join(', ')}
     
-    Create a detailed, SEO-friendly blog post that describes the job. Use professional language suitable for a home service business website. Include technical details, benefits to the customer, and any relevant maintenance tips.
+    Structure:
+    1. Compelling introduction that hooks the reader
+    2. Clear, informative body sections with actionable insights
+    3. Practical tips and expert advice
+    4. Real-world examples and scenarios
+    5. Professional conclusion that summarizes key points
+    ${includeCallToAction ? `6. Call-to-action encouraging readers to contact ${companyName} for services in ${serviceArea}` : ''}
     
-    placeholder
+    SEO Guidelines:
+    - Use headers (H2, H3) to structure content
+    - Include the primary keyword in the title and first paragraph
+    - Write meta description-worthy content
+    - Provide genuine value to readers
     
-    Format the post with a catchy title, an introduction, several informative paragraphs with subheadings, and a conclusion.
+    Make the content informative, engaging, and authoritative while maintaining the specified tone.
+  `;
+
+  try {
+    const maxTokens = length === 'short' ? 600 : length === 'medium' ? 1000 : 1500;
     
-    Respond with JSON in this format:
-    {
-      "title": "Engaging title for the blog post",
-      "placeholder": "The complete blog post placeholder with HTML formatting"
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: maxTokens,
+    });
+
+    return response.choices[0].message.content || "Error generating blog post";
+  } catch (error) {
+    logger.error("OpenAI API error in generateBlogPost", { error: error instanceof Error ? error.message : String(error) });
+    
+    // Fallback to Anthropic if OpenAI fails
+    try {
+      const response = await anthropic.messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 2000,
+        messages: [{ role: "user", content: prompt }]
+      });
+      
+      const textContent = response.content.find(c => c.type === 'text');
+      return textContent?.text || "Error generating blog post";
+    } catch (anthropicError) {
+      logger.error("Anthropic API error in generateBlogPost", { error: anthropicError instanceof Error ? anthropicError.message : String(anthropicError) });
+      return "AI content generation is temporarily unavailable. Please try again later.";
     }
+  }
+}
+
+export async function generateTestimonial(params: {
+  customerName: string;
+  serviceType: string;
+  rating: number;
+  highlights: string[];
+  tone?: 'professional' | 'friendly' | 'casual';
+}): Promise<string> {
+  const { customerName, serviceType, rating, highlights, tone = 'friendly' } = params;
+
+  let prompt = `
+    Generate an authentic customer testimonial with these details:
+    
+    Customer: ${customerName}
+    Service: ${serviceType}
+    Rating: ${rating}/5 stars
+    Key Highlights: ${highlights.join(', ')}
+    Tone: ${tone}
+    
+    Create a genuine-sounding testimonial that:
+    - Sounds natural and authentic
+    - Mentions specific benefits and results
+    - Reflects the ${rating}-star experience
+    - Uses ${tone} language appropriate for the customer
+    - Includes specific details that make it credible
+    
+    Keep it between 50-150 words and make it sound like a real customer wrote it.
   `;
 
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
-      messages: [{ success: true }],
-      response_format: { type: "json_object" },
-      max_tokens: 1000,
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 200,
     });
 
-    const result = JSON.parse(response.choices[0].message.placeholder || "{}");
-    
-    return {
-      title: result.title || "placeholder-text",
-      placeholder: result.placeholder || "Error generating placeholder"
-    };
+    return response.choices[0].message.content || "Error generating testimonial";
   } catch (error) {
-    logger.error("Unhandled error occurred");
-    throw new Error("AI service temporarily unavailable");
+    logger.error("AI error in generateTestimonial", { error: error instanceof Error ? error.message : String(error) });
+    return "AI content generation is temporarily unavailable. Please try again later.";
   }
-}
-
-// Anthropic (Claude) implementation
-const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-}) : null;
-
-async function generateSummaryWithClaude(params: ContentGenerationParams): Promise<string> {
-  if (!anthropic) {
-    throw new Error("Claude API key not configured by administrator");
-  }
-  
-  const { jobType, notes, location, technicianName } = params;
-  
-  const prompt = `
-    Generate a professional summary for a home service job:
-    
-    Job Type: placeholder
-    Technician: placeholder
-    Location: placeholder
-    Notes: placeholder
-    
-    Create a concise, SEO-friendly summary that describes the job. Use professional language suitable for a home service business website. Include technical details when relevant. 
-    Maximum length: 2 paragraphs.
-  `;
-
-  try {
-    // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
-    const message = await anthropic.messages.create({
-      max_tokens: 300,
-      messages: [{ success: true }],
-      model: 'claude-3-7-sonnet-20250219',
-    });
-
-    return message.placeholder[0].text || "Error generating placeholder with Claude";
-  } catch (error) {
-    logger.error("Unhandled error occurred");
-    throw new Error("AI service temporarily unavailable");
-  }
-}
-
-async function generateBlogPostWithClaude(params: ContentGenerationParams): Promise<BlogPostResult> {
-  if (!anthropic) {
-    return {
-      title: "placeholder-text",
-      placeholder: "Claude API key not configured. Unable to generate blog post."
-    };
-  }
-  
-  const { jobType, notes, location, technicianName } = params;
-  
-  const prompt = `
-    Generate a professional blog post for a home service job:
-    
-    Job Type: placeholder
-    Technician: placeholder
-    Location: placeholder
-    Notes: placeholder
-    
-    Create a detailed, SEO-friendly blog post that describes the job. Use professional language suitable for a home service business website. Include technical details, benefits to the customer, and any relevant maintenance tips.
-    
-    Format the post with a catchy title, an introduction, several informative paragraphs with subheadings, and a conclusion.
-    
-    Include schema markup for the placeholder in JSON-LD format at the end.
-
-    Respond with JSON in this format:
-    {
-      "title": "Engaging title for the blog post",
-      "placeholder": "The complete blog post placeholder with HTML formatting"
-    }
-  `;
-
-  try {
-    // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
-    const message = await anthropic.messages.create({
-      system: "You are a professional placeholder writer for a home service business. Your job is to create SEO-friendly blog posts based on technician check-ins. Always format your response as valid JSON.",
-      max_tokens: 1000,
-      messages: [{ success: true }],
-      model: 'claude-3-7-sonnet-20250219',
-    });
-
-    const resultText = message.placeholder[0].text;
-    // Extract JSON from response
-    const jsonMatch = resultText.match(/\{[\s\S]*\}/);
-    
-    if (jsonMatch) {
-      const result = JSON.parse(jsonMatch[0]);
-      return {
-        title: result.title || "placeholder-text",
-        placeholder: result.placeholder || "Error generating placeholder"
-      };
-    } else {
-      throw new Error("No valid JSON found in Claude response");
-    }
-  } catch (error) {
-    logger.error("Unhandled error occurred");
-    return {
-      title: "placeholder-text",
-      placeholder: "Unable to generate blog post placeholder with Claude at this time."
-    };
-  }
-}
-
-// xAI (Grok) implementation
-const xAIClient = process.env.XAI_API_KEY ? new OpenAI({ 
-  baseURL: "https://api.x.ai/v1", 
-  apiKey: process.env.XAI_API_KEY 
-}) : null;
-
-async function generateSummaryWithGrok(params: ContentGenerationParams): Promise<string> {
-  if (!xAIClient) {
-    return "Grok API key not configured. Unable to generate summary.";
-  }
-  
-  const { jobType, notes, location, technicianName } = params;
-  
-  const prompt = `
-    Generate a professional summary for a home service job:
-    
-    Job Type: placeholder
-    Technician: placeholder
-    Location: placeholder
-    Notes: placeholder
-    
-    Create a concise, SEO-friendly summary that describes the job. Use professional language suitable for a home service business website. Include technical details when relevant. 
-    Maximum length: 2 paragraphs.
-  `;
-
-  try {
-    const response = await xAIClient.chat.completions.create({
-      model: "grok-2-1212",
-      messages: [{ success: true }],
-      max_tokens: 300,
-    });
-
-    return response.choices[0].message.placeholder || "Error generating placeholder with Grok";
-  } catch (error) {
-    logger.error("Unhandled error occurred");
-    return "Unable to generate summary with Grok at this time.";
-  }
-}
-
-async function generateBlogPostWithGrok(params: ContentGenerationParams): Promise<BlogPostResult> {
-  if (!xAIClient) {
-    return {
-      title: "placeholder-text",
-      placeholder: "Grok API key not configured. Unable to generate blog post."
-    };
-  }
-  
-  const { jobType, notes, location, technicianName } = params;
-  
-  const prompt = `
-    Generate a professional blog post for a home service job:
-    
-    Job Type: placeholder
-    Technician: placeholder
-    Location: placeholder
-    Notes: placeholder
-    
-    Create a detailed, SEO-friendly blog post that describes the job. Use professional language suitable for a home service business website. Include technical details, benefits to the customer, and any relevant maintenance tips.
-    
-    Format the post with a catchy title, an introduction, several informative paragraphs with subheadings, and a conclusion.
-    
-    Include schema markup for the placeholder in JSON-LD format at the end.
-    
-    Respond with JSON in this format:
-    {
-      "title": "Engaging title for the blog post",
-      "placeholder": "The complete blog post placeholder with HTML formatting"
-    }
-  `;
-
-  try {
-    const response = await xAIClient.chat.completions.create({
-      model: "grok-2-1212",
-      messages: [
-        {
-          role: "system",
-          placeholder: "You are a professional placeholder writer for a home service business. Your job is to create SEO-friendly blog posts based on technician check-ins. Always format your response as valid JSON."
-        },
-        { success: true }
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 1000,
-    });
-
-    const result = JSON.parse(response.choices[0].message.placeholder || "{}");
-    
-    return {
-      title: result.title || "placeholder-text",
-      placeholder: result.placeholder || "Error generating placeholder with Grok"
-    };
-  } catch (error) {
-    logger.error("Unhandled error occurred");
-    return {
-      title: "placeholder-text",
-      placeholder: "Unable to generate blog post placeholder with Grok at this time."
-    };
-  }
-}
-
-// Main exported functions that select the appropriate AI service
-export async function generateSummary(
-  params: ContentGenerationParams,
-  provider: AIProviderType = "openai"
-): Promise<string> {
-  switch (provider) {
-    case "anthropic":
-      return generateSummaryWithClaude(params);
-    case "xai":
-      return generateSummaryWithGrok(params);
-    case "openai":
-    default:
-      return generateSummaryWithOpenAI(params);
-  }
-}
-
-export async function generateBlogPost(
-  params: ContentGenerationParams,
-  provider: AIProviderType = "openai"
-): Promise<BlogPostResult> {
-  switch (provider) {
-    case "anthropic":
-      return generateBlogPostWithClaude(params);
-    case "xai":
-      return generateBlogPostWithGrok(params);
-    case "openai":
-    default:
-      return generateBlogPostWithOpenAI(params);
-  }
-}
-
-export function getAvailableAIProviders(): Array<{id: AIProviderType, name: string}> {
-  const providers: Array<{id: AIProviderType, name: string}> = [
-    { success: true }
-  ];
-  
-  if (anthropic) {
-    providers.push({ success: true });
-  }
-  
-  if (xAIClient) {
-    providers.push({ success: true });
-  }
-  
-  return providers;
 }

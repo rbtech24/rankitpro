@@ -17,7 +17,7 @@ export async function createSampleData() {
       usageLimit: 100,
     });
     
-    log("System message"), 'info');
+    log(`Review request email sent successfully`, 'info');
 
     // Create an admin user for the demo company
     const salt = await bcrypt.genSalt(10);
@@ -31,7 +31,7 @@ export async function createSampleData() {
       companyId: demoCompany.id,
     });
 
-    log("System message"), 'info');
+    log(`Review request email sent successfully`, 'info');
     
     // Create some technicians
     const technicians = [
@@ -61,7 +61,7 @@ export async function createSampleData() {
     const createdTechnicians = await Promise.all(
       technicians.map(async (tech) => {
         const technician = await storage.createTechnician(tech);
-        log("System message"), 'info');
+        log(`Review request email sent successfully`, 'info');
         return technician;
       })
     );
@@ -136,7 +136,7 @@ export async function createSampleData() {
         isBlog: false
       });
       
-      log("System message"), 'info');
+      log(`Review request email sent successfully`, 'info');
       
       // Create blog post for selected check-ins
       if (template.createBlog) {
@@ -158,12 +158,12 @@ export async function createSampleData() {
             photos: checkIn.photos || []
           });
           
-          log("System message"), 'info');
+          log(`Review request email sent successfully`, 'info');
           
           // Mark check-in as having been made into a blog post
           await storage.updateCheckIn(checkIn.id, { isBlog: true });
         } catch (error) {
-          log("System message"), 'error');
+          log(`Review request email sent successfully`, 'error');
         }
       }
       
@@ -178,7 +178,7 @@ export async function createSampleData() {
           phone: null
         });
         
-        log("System message"), 'info');
+        log(`Review request email sent successfully`, 'info');
       }
     }
     
@@ -190,7 +190,7 @@ export async function createSampleData() {
       message: 'Sample data created successfully'
     };
   } catch (error) {
-    log("System message"), 'error');
+    log(`Review request email sent successfully`, 'error');
     throw error;
   }
 }

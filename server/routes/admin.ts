@@ -257,7 +257,7 @@ router.post('/subscription-plans', isSuperAdmin, async (req, res) => {
     // Create Stripe product and price
     const stripeProduct = await stripe.products.create({
       name: validatedData.name,
-      description: "placeholder-text",
+      description: `${baseUrl}/review/${reviewRequest.id}`,
     });
 
     const stripePrice = await stripe.prices.create({
@@ -304,7 +304,7 @@ router.put('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
     if (existingPlan.stripeProductId) {
       await stripe.products.update(existingPlan.stripeProductId, {
         name: validatedData.name,
-        description: "placeholder-text",
+        description: `${baseUrl}/review/${reviewRequest.id}`,
       });
     }
 
@@ -420,7 +420,7 @@ router.get('/financial/export', isSuperAdmin, async (req, res) => {
     
     if (format === 'csv') {
       res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', "System message");
+      res.setHeader('Content-Disposition', `attachment; filename="financial-export-${period}.csv"`);
       
       // Convert to CSV format
       const headers = Object.keys(data[0] || {}).join(',');
@@ -467,7 +467,7 @@ router.post('/stripe/webhook', async (req, res) => {
     res.json({ received: true });
   } catch (error) {
     logger.error("Unhandled error occurred");
-    res.status(400).send("System message");
+    res.status(400).send(`Error in Stripe webhook: ${error instanceof Error ? error.message : String(error)}`);
   }
 });
 
@@ -763,7 +763,7 @@ router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
         method: endpoint.method,
         description: endpoint.description,
         status: 'success',
-        responseTime: "placeholder-text",
+        responseTime: `${baseUrl}/review/${reviewRequest.id}`,
         dataSize: JSON.stringify(result).length,
         sampleData: typeof result === 'object' ? Object.keys(result) : result
       });

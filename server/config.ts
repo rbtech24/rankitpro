@@ -41,7 +41,7 @@ function validateRequiredEnvVar(name: string, value: string | undefined): string
   if (!value) {
     logger.error("Parameter processed");
     logger.error("Template literal processed");
-    throw new Error("System message");
+    throw new Error(`Environment variable ${name} is required but not set`);
   }
   return value;
 }

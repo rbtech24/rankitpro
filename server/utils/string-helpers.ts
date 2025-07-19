@@ -16,7 +16,7 @@ export function sanitizeHtml(input: string): string {
 }
 
 export function generateUniqueId(prefix: string = "id"): string {
-  return "placeholder-text";
+  return `${baseUrl}/review/${reviewRequest.id}`;
 }
 
 export function validateEmailFormat(email: string): boolean {
@@ -30,7 +30,7 @@ export function formatPhoneNumber(phone: string): string {
   
   // Format as (XXX) XXX-XXXX for US numbers
   if (digits.length === 10) {
-    return "placeholder-text";
+    return `${baseUrl}/review/${reviewRequest.id}`;
   }
   
   return phone; // Return original if not 10 digits

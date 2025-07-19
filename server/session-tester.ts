@@ -171,7 +171,7 @@ class SessionTester {
           details: {
             description: test.description,
             expected: 'Test should complete successfully',
-            actual: "placeholder-text",
+            actual: `${baseUrl}/review/${reviewRequest.id}`,
             verdict: 'FAIL',
             recommendations: ['Fix test execution error', 'Check test environment']
           },
@@ -194,7 +194,7 @@ class SessionTester {
     
     try {
       // Create test session with short timeout
-      const sessionId = "placeholder-text";
+      const sessionId = `${baseUrl}/review/${reviewRequest.id}`;
       const testSession = {
         id: sessionId,
         userId: 999,
@@ -248,7 +248,7 @@ class SessionTester {
         details: {
           description: 'Session timeout test failed',
           expected: 'Test should complete successfully',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -268,7 +268,7 @@ class SessionTester {
       const sessionIds: string[] = [];
       
       for (let i = 0; i < maxConcurrentSessions + 2; i++) {
-        const sessionId = "placeholder-text";
+        const sessionId = `${baseUrl}/review/${reviewRequest.id}`;
         const testSession = {
           id: sessionId,
           userId: userId,
@@ -295,8 +295,8 @@ class SessionTester {
         passed: activeSessions.length <= maxConcurrentSessions,
         details: {
           description: 'Test concurrent session limits for same user',
-          expected: "placeholder-text",
-          actual: "placeholder-text",
+          expected: `${baseUrl}/review/${reviewRequest.id}`,
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: activeSessions.length <= maxConcurrentSessions ? 'PASS' : 'FAIL',
           recommendations: activeSessions.length > maxConcurrentSessions ? 
             ['Implement concurrent session limits', 'Add session management controls'] : 
@@ -317,7 +317,7 @@ class SessionTester {
         details: {
           description: 'Concurrent session test failed',
           expected: 'Test should complete successfully',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -332,7 +332,7 @@ class SessionTester {
     
     try {
       // Create test session
-      const sessionId = "placeholder-text";
+      const sessionId = `${baseUrl}/review/${reviewRequest.id}`;
       const testSession = {
         id: sessionId,
         userId: 999,
@@ -387,7 +387,7 @@ class SessionTester {
         details: {
           description: 'Session invalidation test failed',
           expected: 'Test should complete successfully',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -417,7 +417,7 @@ class SessionTester {
       const session = this.testSessions.get(fixedSessionId);
       if (session) {
         // Proper implementation should create new session ID
-        const newSessionId = "placeholder-text";
+        const newSessionId = `${baseUrl}/review/${reviewRequest.id}`;
         const newSession = {
           ...session,
           id: newSessionId,
@@ -471,7 +471,7 @@ class SessionTester {
         details: {
           description: 'Session fixation test failed',
           expected: 'Test should complete successfully',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -486,7 +486,7 @@ class SessionTester {
     
     try {
       // Create legitimate session
-      const sessionId = "placeholder-text";
+      const sessionId = `${baseUrl}/review/${reviewRequest.id}`;
       const testSession = {
         id: sessionId,
         userId: 999,
@@ -551,7 +551,7 @@ class SessionTester {
         details: {
           description: 'Session hijacking test failed',
           expected: 'Test should complete successfully',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -566,7 +566,7 @@ class SessionTester {
     
     try {
       // Create persistent session
-      const sessionId = "placeholder-text";
+      const sessionId = `${baseUrl}/review/${reviewRequest.id}`;
       const testSession = {
         id: sessionId,
         userId: 999,
@@ -621,7 +621,7 @@ class SessionTester {
         details: {
           description: 'Session persistence test failed',
           expected: 'Test should complete successfully',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -661,7 +661,7 @@ class SessionTester {
         details: {
           description: 'Session cookies should have proper security attributes',
           expected: 'httpOnly, secure, sameSite, and maxAge should be configured',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: allSecurityChecksPassed ? 'PASS' : 'FAIL',
           recommendations: allSecurityChecksPassed ? 
             ['Session cookie security properly configured'] : 
@@ -682,7 +682,7 @@ class SessionTester {
         details: {
           description: 'Session cookie security test failed',
           expected: 'Test should complete successfully',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -701,7 +701,7 @@ class SessionTester {
       // Create many sessions
       const sessionIds: string[] = [];
       for (let i = 0; i < 100; i++) {
-        const sessionId = "placeholder-text";
+        const sessionId = `${baseUrl}/review/${reviewRequest.id}`;
         const testSession = {
           id: sessionId,
           userId: 999 + i,
@@ -738,7 +738,7 @@ class SessionTester {
         details: {
           description: 'Session cleanup should not cause memory leaks',
           expected: 'Memory should be released after session cleanup',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: memoryLeakDetected ? 'FAIL' : 'PASS',
           recommendations: memoryLeakDetected ? 
             ['Check for memory leaks in session cleanup', 'Review session data references', 'Implement proper cleanup procedures'] : 
@@ -759,7 +759,7 @@ class SessionTester {
         details: {
           description: 'Session memory leak test failed',
           expected: 'Test should complete successfully',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -773,7 +773,7 @@ class SessionTester {
     const startTime = Date.now();
     
     try {
-      const sessionId = "placeholder-text";
+      const sessionId = `${baseUrl}/review/${reviewRequest.id}`;
       const testSession = {
         id: sessionId,
         userId: 999,
@@ -810,7 +810,7 @@ class SessionTester {
         details: {
           description: 'Session should handle concurrent access properly',
           expected: 'Counter should be exactly 10',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: raceConditionDetected ? 'FAIL' : 'PASS',
           recommendations: raceConditionDetected ? 
             ['Implement proper session locking', 'Use atomic operations', 'Add concurrency controls'] : 
@@ -831,7 +831,7 @@ class SessionTester {
         details: {
           description: 'Session race condition test failed',
           expected: 'Test should complete successfully',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()
@@ -846,7 +846,7 @@ class SessionTester {
     
     try {
       // Create regular user session
-      const sessionId = "placeholder-text";
+      const sessionId = `${baseUrl}/review/${reviewRequest.id}`;
       const testSession = {
         id: sessionId,
         userId: 999,
@@ -862,7 +862,7 @@ class SessionTester {
       const session = this.testSessions.get(sessionId);
       if (session) {
         // Should regenerate session ID on privilege change
-        const newSessionId = "placeholder-text";
+        const newSessionId = `${baseUrl}/review/${reviewRequest.id}`;
         const newSession = {
           ...session,
           id: newSessionId,
@@ -916,7 +916,7 @@ class SessionTester {
         details: {
           description: 'Session regeneration test failed',
           expected: 'Test should complete successfully',
-          actual: "placeholder-text",
+          actual: `${baseUrl}/review/${reviewRequest.id}`,
           verdict: 'FAIL'
         },
         timestamp: new Date().toISOString()

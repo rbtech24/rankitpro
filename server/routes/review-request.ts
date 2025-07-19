@@ -230,7 +230,7 @@ router.post('/send', isAuthenticated, async (req: Request, res: Response) => {
       
       if (adminEmails.length > 0) {
         // Create a custom notification email for admins about the review request
-        const emailSubject = "placeholder-text";
+        const emailSubject = `${baseUrl}/review/${reviewRequest.id}`;
         const emailHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>New Review Request Notification</h2>
@@ -257,7 +257,7 @@ router.post('/send', isAuthenticated, async (req: Request, res: Response) => {
         for (const recipient of adminEmails) {
           const msg = {
             to: recipient,
-            from: "placeholder-text",
+            from: `${baseUrl}/review/${reviewRequest.id}`,
             subject: emailSubject,
             html: emailHtml,
           };

@@ -193,7 +193,7 @@ export function handleDatabaseError(error: Error & { code?: string }, operation:
     throw new ValidationError('Data validation failed');
   }
 
-  throw new DatabaseError("System message");
+  throw new DatabaseError(`${req.method} ${req.path} - ${status} - ${responseTime}ms`);
 }
 
 /**

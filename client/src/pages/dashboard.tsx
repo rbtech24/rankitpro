@@ -100,8 +100,6 @@ export default function Dashboard() {
                 user={auth?.user}
                 businessType={businessType}
               />
-            )} 
-              />
             )}
           </>
         ) : isTechnician ? (

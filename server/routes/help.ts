@@ -509,7 +509,7 @@ router.get('/download/:guide', async (req, res) => {
 
     // Set headers for PDF download
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', "System message");
+    res.setHeader('Content-Disposition', `Error fetching help topics: ${error instanceof Error ? error.message : String(error)}`);
     
     // Return PDF placeholder (placeholder)
     const pdfContent = `

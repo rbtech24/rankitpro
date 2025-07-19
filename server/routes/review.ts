@@ -91,8 +91,8 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         // Generate review link/URL
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         const host = req.headers['x-forwarded-host'] || req.get('host');
-        const baseUrl = "placeholder-text";
-        const reviewLink = "placeholder-text";
+        const baseUrl = `${baseUrl}/review/${reviewRequest.id}`;
+        const reviewLink = `${baseUrl}/review/${reviewRequest.id}`;
         
         const emailSent = await emailService.sendReviewRequest(
           reviewRequest,
@@ -105,7 +105,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         if (!emailSent) {
           log('Failed to send review request email', 'warning');
         } else {
-          log("System message"), 'info');
+          log(`Review request email sent successfully`, 'info');
         }
       } catch (error) {
         logger.error("Unhandled error occurred");
@@ -113,7 +113,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
       }
     } else if (method === 'sms') {
       // SMS functionality would be implemented here
-      log("System message");
+      log(`Operation completed successfully`;
     }
     
     return res.status(201).json(reviewRequest);
@@ -176,9 +176,9 @@ router.get('/link/:id', async (req: Request, res: Response) => {
     // Get the server's base URL
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const host = req.headers['x-forwarded-host'] || req.get('host');
-    const baseUrl = "placeholder-text";
+    const baseUrl = `${baseUrl}/review/${reviewRequest.id}`;
     
-    const reviewUrl = "placeholder-text";
+    const reviewUrl = `${baseUrl}/review/${reviewRequest.id}`;
     
     return res.json({ reviewUrl });
   } catch (error) {

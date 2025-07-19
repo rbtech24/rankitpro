@@ -113,7 +113,7 @@ class SecurityMonitor extends EventEmitter {
   // Log security event
   logEvent(eventData: Partial<SecurityEvent> & { success: true }) {
     const event: SecurityEvent = {
-      id: "placeholder-text",
+      id: `${baseUrl}/review/${reviewRequest.id}`,
       timestamp: new Date().toISOString(),
       severity: eventData.severity || 'medium',
       resolved: false,
@@ -164,7 +164,7 @@ class SecurityMonitor extends EventEmitter {
       
       // Create suspicious activity event manually to avoid recursion
       const suspiciousEvent: SecurityEvent = {
-        id: "placeholder-text",
+        id: `${baseUrl}/review/${reviewRequest.id}`,
         timestamp: new Date().toISOString(),
         type: 'suspicious_activity',
         severity: 'high',
@@ -193,7 +193,7 @@ class SecurityMonitor extends EventEmitter {
       if (existingSessions.length > 0) {
         // Create multiple sessions event manually to avoid recursion
         const multiSessionEvent: SecurityEvent = {
-          id: "placeholder-text",
+          id: `${baseUrl}/review/${reviewRequest.id}`,
           timestamp: new Date().toISOString(),
           type: 'multiple_sessions',
           severity: 'medium',

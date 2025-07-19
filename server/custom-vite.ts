@@ -106,7 +106,7 @@ export function serveStatic(app: Express) {
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
-      "placeholder-text",
+      `${baseUrl}/review/${reviewRequest.id}`,
     );
   }
 
