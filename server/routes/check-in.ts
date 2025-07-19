@@ -245,7 +245,7 @@ router.post('/', isAuthenticated, upload.array('photos', 10), async (req: Reques
     // Prepare check-in data with photos and default values
     const checkInData = {
       jobType: req.body.jobType?.trim() || 'General Service',
-      notes: req.body.notes?.trim() || 'Service completed',
+      notes: req.body.notes?.trim() || '',
       customerName: req.body.customerName?.trim() || null,
       customerEmail: req.body.customerEmail?.trim() || null,
       customerPhone: req.body.customerPhone?.trim() || null,

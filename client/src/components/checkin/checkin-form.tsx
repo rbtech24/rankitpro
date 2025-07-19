@@ -520,14 +520,17 @@ export default function CheckinForm({ onSuccess }: { onSuccess?: () => void }) {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Job Description</FormLabel>
+                    <FormLabel>Job Description <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Describe the work performed..."
-                        rows={3}
+                        placeholder="Describe the work performed, issues found, materials used, and any important details..."
+                        rows={4}
                         {...field}
                       />
                     </FormControl>
+                    <FormDescription className="text-sm text-muted-foreground">
+                      This description will appear in your visit records and can be used for AI-generated content.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
