@@ -43,7 +43,7 @@ interface JobType {
 const formSchema = z.object({
   technicianId: z.string().min(1, "Please select a technician"),
   jobType: z.string().min(1, "Please select a job type"),
-  notes: z.string().min(5, "Please add detailed notes about the work performed"),
+  notes: z.string().min(10, "Job description must be at least 10 characters long and describe the work performed"),
   address: z.string().min(1, "Address is required"),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
