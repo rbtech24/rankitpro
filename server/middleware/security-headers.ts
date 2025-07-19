@@ -90,8 +90,8 @@ export function additionalSecurityHeaders(req: Request, res: Response, next: Nex
   // Referrer policy
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   
-  // Feature policy / permissions policy
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+  // Feature policy / permissions policy - enable payment for Stripe
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(self)');
   
   // Content type options - disabled for Stripe.js compatibility
   // Cross-Origin policies disabled to allow external resources
