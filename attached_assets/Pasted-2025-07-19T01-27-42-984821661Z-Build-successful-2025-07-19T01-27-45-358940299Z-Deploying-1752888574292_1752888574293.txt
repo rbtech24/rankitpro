@@ -1,0 +1,50 @@
+2025-07-19T01:27:42.984821661Z ==> Build successful 🎉
+2025-07-19T01:27:45.358940299Z ==> Deploying...
+2025-07-19T01:28:08.680147044Z ==> Running 'npm start'
+2025-07-19T01:28:09.081394712Z 
+2025-07-19T01:28:09.081422263Z > workspace@1.0.0 start
+2025-07-19T01:28:09.081425263Z > node dist/index.js
+2025-07-19T01:28:09.081427403Z 
+2025-07-19T01:28:09.389043624Z file:///opt/render/project/src/dist/index.js:38
+2025-07-19T01:28:09.389074274Z     var relative = require("path").relative;
+2025-07-19T01:28:09.389077974Z                    ^
+2025-07-19T01:28:09.389080274Z 
+2025-07-19T01:28:09.389083585Z ReferenceError: require is not defined in ES module scope, you can use import instead
+2025-07-19T01:28:09.389093525Z This file is being treated as an ES module because it has a '.js' file extension and '/opt/render/project/src/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+2025-07-19T01:28:09.389097615Z     at node_modules/depd/index.js (file:///opt/render/project/src/dist/index.js:38:20)
+2025-07-19T01:28:09.389101015Z     at __require (file:///opt/render/project/src/dist/index.js:12:50)
+2025-07-19T01:28:09.389103745Z     at node_modules/body-parser/index.js (file:///opt/render/project/src/dist/index.js:17037:21)
+2025-07-19T01:28:09.389106135Z     at __require (file:///opt/render/project/src/dist/index.js:12:50)
+2025-07-19T01:28:09.389109105Z     at node_modules/express/lib/express.js (file:///opt/render/project/src/dist/index.js:22398:22)
+2025-07-19T01:28:09.389111365Z     at __require (file:///opt/render/project/src/dist/index.js:12:50)
+2025-07-19T01:28:09.389113765Z     at node_modules/express/index.js (file:///opt/render/project/src/dist/index.js:22467:23)
+2025-07-19T01:28:09.389116315Z     at __require (file:///opt/render/project/src/dist/index.js:12:50)
+2025-07-19T01:28:09.389119265Z     at file:///opt/render/project/src/dist/index.js:127224:32
+2025-07-19T01:28:09.389121635Z     at ModuleJob.run (node:internal/modules/esm/module_job:271:25)
+2025-07-19T01:28:09.389123745Z 
+2025-07-19T01:28:09.389126006Z Node.js v22.14.0
+2025-07-19T01:28:13.135712552Z ==> Exited with status 1
+2025-07-19T01:28:13.151134852Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-07-19T01:28:16.487817657Z ==> Running 'npm start'
+2025-07-19T01:28:16.841522357Z 
+2025-07-19T01:28:16.841552778Z > workspace@1.0.0 start
+2025-07-19T01:28:16.841555988Z > node dist/index.js
+2025-07-19T01:28:16.841558158Z 
+2025-07-19T01:28:17.381926992Z file:///opt/render/project/src/dist/index.js:38
+2025-07-19T01:28:17.381973033Z     var relative = require("path").relative;
+2025-07-19T01:28:17.381977013Z                    ^
+2025-07-19T01:28:17.381979443Z 
+2025-07-19T01:28:17.381982173Z ReferenceError: require is not defined in ES module scope, you can use import instead
+2025-07-19T01:28:17.381987153Z This file is being treated as an ES module because it has a '.js' file extension and '/opt/render/project/src/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+2025-07-19T01:28:17.381992073Z     at node_modules/depd/index.js (file:///opt/render/project/src/dist/index.js:38:20)
+2025-07-19T01:28:17.381995443Z     at __require (file:///opt/render/project/src/dist/index.js:12:50)
+2025-07-19T01:28:17.381998004Z     at node_modules/body-parser/index.js (file:///opt/render/project/src/dist/index.js:17037:21)
+2025-07-19T01:28:17.382000804Z     at __require (file:///opt/render/project/src/dist/index.js:12:50)
+2025-07-19T01:28:17.382003664Z     at node_modules/express/lib/express.js (file:///opt/render/project/src/dist/index.js:22398:22)
+2025-07-19T01:28:17.382006304Z     at __require (file:///opt/render/project/src/dist/index.js:12:50)
+2025-07-19T01:28:17.382008994Z     at node_modules/express/index.js (file:///opt/render/project/src/dist/index.js:22467:23)
+2025-07-19T01:28:17.382011274Z     at __require (file:///opt/render/project/src/dist/index.js:12:50)
+2025-07-19T01:28:17.382014364Z     at file:///opt/render/project/src/dist/index.js:127224:32
+2025-07-19T01:28:17.382028994Z     at ModuleJob.run (node:internal/modules/esm/module_job:271:25)
+2025-07-19T01:28:17.382031514Z 
+2025-07-19T01:28:17.382033864Z Node.js v22.14.0
