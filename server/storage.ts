@@ -508,13 +508,10 @@ export class DatabaseStorage implements IStorage {
     const companiesWithStats = await Promise.all(
       companiesList.map(async (company) => {
         try {
-          // Get technician count for this company
+          // Get technician count for this company from technicians table
           const technicians = await db.select({ count: sql<number>`count(*)` })
-            .from(users)
-            .where(and(
-              eq(users.companyId, company.id),
-              eq(users.role, 'technician')
-            ));
+            .from(technicians)
+            .where(eq(technicians.companyId, company.id));
           
           // Get check-ins count for this company
           const checkInsCount = await db.select({ count: sql<number>`count(*)` })
@@ -716,7 +713,7 @@ export class DatabaseStorage implements IStorage {
     today.setHours(0, 0, 0, 0);
     
     const result = await db.select({
-      usage: sql<number>"WordPress API test successful"
+      usage: sql<number>`SUM(COALESCE(tokens_used, 0))`
     })
     .from(aiUsageLogs)
     .where(
@@ -1011,7 +1008,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(checkIns.companyId, companyId),
-          sql`created_at >= ${startOfMonth}`
+          gte(checkIns.createdAt, startOfMonth)
         )
       );
     
@@ -1027,8 +1024,7 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             eq(checkIns.companyId, companyId),
-            sql`created_at >= ${startOfMonth}`,
-            sql`created_at >= ${startOfMonth}`
+            gte(checkIns.createdAt, startOfMonth)
           )
         ),
       
@@ -1038,8 +1034,7 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             eq(reviewRequests.companyId, companyId),
-            sql`created_at >= ${startOfMonth}`,
-            sql`created_at >= ${startOfMonth}`
+            gte(reviewRequests.createdAt, startOfMonth)
           )
         )
     ]);
@@ -1629,13 +1624,13 @@ export class DatabaseStorage implements IStorage {
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
       
       const result = await db.select({
-        date: sql<string>"WordPress API test successful",
+        date: sql<string>`DATE_TRUNC('month', created_at)::text`,
         count: sql<number>`COUNT(*)`
       })
       .from(checkIns)
       .where(gte(checkIns.createdAt, sixMonthsAgo))
-      .groupBy(sql`created_at >= ${startOfMonth}`)
-      .orderBy(sql`created_at >= ${startOfMonth}`);
+      .groupBy(sql`DATE_TRUNC('month', created_at)`)
+      .orderBy(sql`DATE_TRUNC('month', created_at)`);
       
       return result;
     } catch (error) {
@@ -2263,9 +2258,9 @@ export class DatabaseStorage implements IStorage {
         createdAt: companies.createdAt,
         revenue: sql<number>`
           CASE 
-            WHEN ${companies.plan} = 'starter' THEN 29
-            WHEN ${companies.plan} = 'pro' THEN 79
-            WHEN ${companies.plan} = 'agency' THEN 149
+            WHEN plan = 'starter' THEN 29
+            WHEN plan = 'pro' THEN 79
+            WHEN plan = 'agency' THEN 149
             ELSE 29
           END
         `
@@ -3233,13 +3228,13 @@ export class DatabaseStorage implements IStorage {
 
       const checkInData = await db
         .select({
-          date: sql<string>"WordPress API test successful",
+          date: sql<string>`DATE_TRUNC('month', created_at)::text`,
           count: sql<number>`COUNT(*)`
         })
         .from(checkIns)
         .where(gte(checkIns.createdAt, sixMonthsAgo))
-        .groupBy(sql`created_at >= ${startOfMonth}`)
-        .orderBy(sql`created_at >= ${startOfMonth}`);
+        .groupBy(sql`DATE_TRUNC('month', created_at)`)
+        .orderBy(sql`DATE_TRUNC('month', created_at)`);
 
       return checkInData.map(row => ({
         date: new Date(row.date).toISOString().slice(0, 7), // Format as YYYY-MM
@@ -3258,13 +3253,13 @@ export class DatabaseStorage implements IStorage {
 
       const reviewData = await db
         .select({
-          month: sql<string>"WordPress API test successful",
+          month: sql<string>`DATE_TRUNC('month', created_at)::text`,
           reviews: sql<number>`count(*)`
         })
         .from(reviewResponses)
         .where(gte(reviewResponses.createdAt, sixMonthsAgo))
-        .groupBy(sql`created_at >= ${startOfMonth}`)
-        .orderBy(sql`created_at >= ${startOfMonth}`);
+        .groupBy(sql`DATE_TRUNC('month', created_at)`)
+        .orderBy(sql`DATE_TRUNC('month', created_at)`);
 
       return reviewData.map(row => ({
         month: new Date(row.month + '-01').toLocaleDateString('en-US', { month: 'short' }),
