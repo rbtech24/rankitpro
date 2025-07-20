@@ -148,6 +148,7 @@ const availableFeatures = [
 // Industries for dropdown - comprehensive list for all business types
 const industries = [
   "Home Services",
+  "Irrigation & Sprinkler Services",
   "Pool & Spa Services", 
   "Landscaping & Lawn Care",
   "HVAC Services",
@@ -155,6 +156,7 @@ const industries = [
   "Electrical Services",
   "Cleaning Services",
   "Construction & Contractors",
+  "Roofing Services",
   "Pest Control",
   "Security Services",
   "Automotive Services",

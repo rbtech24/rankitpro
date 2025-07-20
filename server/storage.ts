@@ -517,17 +517,17 @@ export class DatabaseStorage implements IStorage {
             ));
           
           // Get check-ins count for this company
-          const checkIns = await db.select({ count: sql<number>`count(*)` })
+          const checkInsCount = await db.select({ count: sql<number>`count(*)` })
             .from(checkIns)
             .where(eq(checkIns.companyId, company.id));
           
           // Get blog posts count for this company
-          const blogPosts = await db.select({ count: sql<number>`count(*)` })
+          const blogPostsCount = await db.select({ count: sql<number>`count(*)` })
             .from(blogPosts)
             .where(eq(blogPosts.companyId, company.id));
           
           // Get reviews count for this company
-          const reviews = await db.select({ count: sql<number>`count(*)` })
+          const reviewsCount = await db.select({ count: sql<number>`count(*)` })
             .from(testimonials)
             .where(eq(testimonials.companyId, company.id));
           
@@ -545,9 +545,9 @@ export class DatabaseStorage implements IStorage {
             ...company,
             stats: {
               totalTechnicians: technicians[0]?.count || 0,
-              totalCheckIns: checkIns[0]?.count || 0,
-              totalBlogPosts: blogPosts[0]?.count || 0,
-              totalReviews: reviews[0]?.count || 0,
+              totalCheckIns: checkInsCount[0]?.count || 0,
+              totalBlogPosts: blogPostsCount[0]?.count || 0,
+              totalReviews: reviewsCount[0]?.count || 0,
               avgRating: Number((avgRating[0]?.avg || 0).toFixed(1))
             }
           };
