@@ -8,6 +8,8 @@ import { Textarea } from "../components/ui/textarea";
 import { Badge } from "../components/ui/badge";
 import { Separator } from "../components/ui/separator";
 import { useToast } from "../hooks/use-toast";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "../lib/queryClient";
 import { 
   Package, 
   DollarSign, 
@@ -34,54 +36,51 @@ interface SubscriptionPlan {
 export default function SubscriptionPlans() {
   const { toast } = useToast();
   
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([
-    {
-      id: 'starter',
-      name: 'Starter Plan',
-      description: 'Perfect for small businesses getting started',
-      price: 29,
-      interval: 'month',
-      userLimit: 5,
-      aiGenerationLimit: 0,
-      features: ['Basic check-ins', 'Photo documentation', 'Customer reviews', 'Email support'],
-      active: true
-    },
-    {
-      id: 'professional',
-      name: 'Professional Plan',
-      description: 'For growing businesses with advanced needs',
-      price: 79,
-      interval: 'month',
-      userLimit: 20,
-      aiGenerationLimit: 0,
-      features: ['All Starter features', 'WordPress integration', 'Priority support', 'Advanced analytics'],
-      active: true
-    },
-    {
-      id: 'agency',
-      name: 'Agency Plan',
-      description: 'For large agencies managing multiple clients',
-      price: 199,
-      interval: 'month',
-      userLimit: -1, // Unlimited
-      aiGenerationLimit: 0,
-      features: ['All Professional features', 'Unlimited users', 'White-label options', 'Custom integrations', 'Dedicated support'],
-      active: true
-    }
-  ]);
+  // Fetch subscription plans from database
+  const { data: plans = [], refetch } = useQuery({
+    queryKey: ["/api/billing/plans"],
+    queryFn: () => apiRequest("/api/billing/plans")
+  });
 
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
 
-  const handleSavePlan = (plan: SubscriptionPlan) => {
-    setPlans(prevPlans => 
-      prevPlans.map(p => p.id === plan.id ? plan : p)
-    );
-    setEditingPlan(null);
-    toast({
-      title: "Plan Updated",
-      description: `${plan.name} has been updated successfully.`
-    });
-  };
+  // Create new subscription plan
+  const createPlan = useMutation({
+    mutationFn: (newPlan: any) => apiRequest("POST", "/api/billing/plans", newPlan),
+    onSuccess: () => {
+      refetch();
+      toast({
+        title: "Plan Created",
+        description: "Subscription plan has been created successfully."
+      });
+    }
+  });
+
+  // Update subscription plan
+  const updatePlan = useMutation({
+    mutationFn: ({ id, updates }: { id: number; updates: any }) => 
+      apiRequest("PUT", `/api/billing/plans/${id}`, updates),
+    onSuccess: () => {
+      refetch();
+      setEditingPlan(null);
+      toast({
+        title: "Plan Updated",
+        description: "Subscription plan has been updated successfully."
+      });
+    }
+  });
+
+  // Delete subscription plan
+  const deletePlan = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/billing/plans/${id}`),
+    onSuccess: () => {
+      refetch();
+      toast({
+        title: "Plan Deleted",
+        description: "Subscription plan has been deleted successfully."
+      });
+    }
+  });
 
   const PlanCard = ({ plan }: { plan: SubscriptionPlan }) => (
     <Card className="relative">

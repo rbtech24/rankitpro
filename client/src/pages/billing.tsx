@@ -40,18 +40,7 @@ interface PlanFeature {
   agency: string | boolean;
 }
 
-const planFeatures: PlanFeature[] = [
-  { name: "Check-ins per month", starter: "50", pro: "500", agency: "Unlimited" },
-  { name: "Blog posts", starter: "20", pro: "200", agency: "Unlimited" },
-  { name: "Active technicians", starter: "2", pro: "10", agency: "Unlimited" },
-  { name: "AI content generation", starter: true, pro: true, agency: true },
-  { name: "WordPress plugin", starter: true, pro: true, agency: true },
-  { name: "JavaScript embed", starter: true, pro: true, agency: true },
-  { name: "Custom domain", starter: false, pro: true, agency: true },
-  { name: "White labeling", starter: false, pro: false, agency: true },
-  { name: "API access", starter: false, pro: true, agency: true },
-  { name: "Priority support", starter: false, pro: true, agency: true },
-];
+// Dynamic plan features will be loaded from database
 
 export default function Billing() {
   const { toast } = useToast();
@@ -72,6 +61,12 @@ export default function Billing() {
   const [renewalDate, setRenewalDate] = useState<Date | null>(null);
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   
+  // Query for subscription plans from database
+  const { data: subscriptionPlans } = useQuery({
+    queryKey: ["/api/billing/plans"],
+    queryFn: () => apiRequest("/api/billing/plans")
+  });
+
   // Query for subscription data
   const { data: subscriptionData, isLoading: isLoadingSubscription } = useQuery({
     queryKey: ['/api/billing/subscription'],
@@ -87,19 +82,7 @@ export default function Billing() {
     enabled: !!auth?.company
   });
 
-  // Query for subscription plans
-  const { data: plansData, isLoading: isLoadingPlans } = useQuery({
-    queryKey: ['/api/subscription/plans'],
-    queryFn: async () => {
-      try {
-        const response = await fetch('/api/subscription/plans');
-        return response.json();
-      } catch (error) {
-        console.error('Error fetching plans data:', error);
-        return null;
-      }
-    }
-  });
+  // Plans are now fetched from the main subscriptionPlans query above
   
   // Update state based on subscription data
   useEffect(() => {
@@ -400,114 +383,78 @@ export default function Billing() {
               </CardFooter>
             </Card>
             
-            {/* Available Plans */}
+            {/* Available Plans - Dynamic from Database */}
             <Card>
               <CardHeader>
                 <CardTitle>Available Plans</CardTitle>
-                <CardDescription>Choose the plan that works best for your business.</CardDescription>
+                <CardDescription>
+                  {subscriptionPlans && subscriptionPlans.length > 0 
+                    ? "Choose the plan that works best for your business."
+                    : "No subscription plans available. Please contact support."
+                  }
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Starter Plan */}
-                  <Card className={`border-2 ${currentPlan === 'starter' ? 'border-primary' : 'border-gray-200'}`}>
-                    <CardHeader>
-                      <CardTitle>Starter</CardTitle>
-                      <CardDescription>For small businesses just getting started</CardDescription>
-                      <div className="mt-2">
-                        <span className="text-3xl font-bold">${plansData?.plans?.starter?.price || 29}</span>
-                        <span className="text-gray-500">/{plansData?.plans?.starter?.interval || 'month'}</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        {planFeatures.map((feature, index) => (
-                          <li key={index} className="flex items-center">
-                            <span className="mr-2">{formatFeatureValue(feature.starter)}</span>
-                            <span>{typeof feature.starter === 'boolean' ? feature.name : `${feature.name}: ${feature.starter}`}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                    <CardFooter>
-                      <Button 
-                        className="w-full" 
-                        variant={currentPlan === 'starter' ? 'outline' : 'default'}
-                        onClick={() => handleChangePlan('starter')}
-                        disabled={currentPlan === 'starter' || isLoading}
-                      >
-                        {currentPlan === 'starter' ? 'Current Plan' : 'Select Plan'}
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                  
-                  {/* Pro Plan */}
-                  <Card className={`border-2 ${currentPlan === 'pro' ? 'border-primary' : 'border-gray-200'}`}>
-                    <CardHeader>
-                      <CardTitle>Pro</CardTitle>
-                      <CardDescription>For growing businesses with more needs</CardDescription>
-                      <div className="mt-2">
-                        <span className="text-3xl font-bold">${plansData?.plans?.pro?.price || 79}</span>
-                        <span className="text-gray-500">/{plansData?.plans?.pro?.interval || 'month'}</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        {planFeatures.map((feature, index) => (
-                          <li key={index} className="flex items-center">
-                            <span className="mr-2">{formatFeatureValue(feature.pro)}</span>
-                            <span>{typeof feature.pro === 'boolean' ? feature.name : `${feature.name}: ${feature.pro}`}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                    <CardFooter>
-                      <Button 
-                        className="w-full" 
-                        variant={currentPlan === 'pro' ? 'outline' : 'default'}
-                        onClick={() => handleChangePlan('pro')}
-                        disabled={currentPlan === 'pro' || isLoading}
-                      >
-                        {currentPlan === 'pro' ? 'Current Plan' : 'Select Plan'}
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                  
-                  {/* Agency Plan */}
-                  <Card className={`border-2 ${currentPlan === 'agency' ? 'border-primary' : 'border-gray-200'}`}>
-                    <CardHeader>
-                      <CardTitle>Agency</CardTitle>
-                      <CardDescription>For larger businesses with advanced needs</CardDescription>
-                      <div className="mt-2">
-                        <span className="text-3xl font-bold">${plansData?.plans?.agency?.price || 199}</span>
-                        <span className="text-gray-500">/{plansData?.plans?.agency?.interval || 'month'}</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        {planFeatures.map((feature, index) => (
-                          <li key={index} className="flex items-center">
-                            <span className="mr-2">{formatFeatureValue(feature.agency)}</span>
-                            <span>{typeof feature.agency === 'boolean' ? feature.name : `${feature.name}: ${feature.agency}`}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                    <CardFooter>
-                      <Button 
-                        className="w-full" 
-                        variant={currentPlan === 'agency' ? 'outline' : 'default'}
-                        onClick={() => handleChangePlan('agency')}
-                        disabled={currentPlan === 'agency' || isLoading}
-                      >
-                        {currentPlan === 'agency' ? 'Current Plan' : 'Select Plan'}
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </div>
+                {subscriptionPlans && subscriptionPlans.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {subscriptionPlans.map((plan: any) => (
+                      <Card key={plan.id} className={`border-2 ${currentPlan === plan.name.toLowerCase() ? 'border-primary' : 'border-gray-200'}`}>
+                        <CardHeader>
+                          <CardTitle>{plan.name}</CardTitle>
+                          <CardDescription>
+                            {plan.maxTechnicians === -1 ? 'Unlimited' : plan.maxTechnicians} technicians, 
+                            {plan.maxCheckIns === -1 ? 'Unlimited' : plan.maxCheckIns} check-ins
+                          </CardDescription>
+                          <div className="mt-2">
+                            <span className="text-3xl font-bold">${plan.price}</span>
+                            <span className="text-gray-500">/{plan.billingPeriod}</span>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-2">
+                            <li className="flex items-center">
+                              <span className="mr-2">👥</span>
+                              <span>Max {plan.maxTechnicians === -1 ? 'Unlimited' : plan.maxTechnicians} Technicians</span>
+                            </li>
+                            <li className="flex items-center">
+                              <span className="mr-2">📋</span>
+                              <span>Max {plan.maxCheckIns === -1 ? 'Unlimited' : plan.maxCheckIns} Check-ins</span>
+                            </li>
+                            {plan.features && Array.isArray(plan.features) && plan.features.map((feature: string, index: number) => (
+                              <li key={index} className="flex items-center">
+                                <span className="mr-2">✓</span>
+                                <span>{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+                        <CardFooter>
+                          <Button 
+                            className="w-full" 
+                            variant={currentPlan === plan.name.toLowerCase() ? 'outline' : 'default'}
+                            onClick={() => handleChangePlan(plan.name.toLowerCase())}
+                            disabled={currentPlan === plan.name.toLowerCase() || isLoading}
+                          >
+                            {currentPlan === plan.name.toLowerCase() ? 'Current Plan' : 'Select Plan'}
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No subscription plans available.</p>
+                    <p className="text-sm text-gray-400 mt-2">
+                      Super admin must create subscription plans first.
+                    </p>
+                  </div>
+                )}
               </CardContent>
-              <CardFooter>
-                <p className="text-sm text-gray-500">All plans include a 14-day free trial. No credit card required to try.</p>
-              </CardFooter>
+              {subscriptionPlans && subscriptionPlans.length > 0 && (
+                <CardFooter>
+                  <p className="text-sm text-gray-500">All plans include a 14-day free trial. No credit card required to try.</p>
+                </CardFooter>
+              )}
             </Card>
           </div>
       </div>
