@@ -60,7 +60,8 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
       setHasSeenWalkthrough(isCompleted);
 
       // Only auto-start for genuinely new users who have never seen the walkthrough
-      if (!isCompleted && !showWalkthrough && !hasSeenWalkthrough) {
+      // Use isCompleted (from current data) instead of hasSeenWalkthrough (stale state)
+      if (!isCompleted && !showWalkthrough) {
         // Check if this is a new user (account created within last 24 hours)
         const userCreatedAt = new Date(auth.user.createdAt || 0);
         const now = new Date();
@@ -70,21 +71,28 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
         if (hoursSinceCreation < 2) {
           setShouldAutoStart(true);
         }
+      } else {
+        // If completed, ensure auto-start is disabled
+        setShouldAutoStart(false);
       }
     }
-  }, [auth, onboardingData]);
+  }, [auth, onboardingData, showWalkthrough]);
 
   // Auto-start walkthrough for new users after a short delay (only once)
   useEffect(() => {
     if (shouldAutoStart && !showWalkthrough && !hasSeenWalkthrough) {
       const timer = setTimeout(() => {
-        setShowWalkthrough(true);
+        // Double-check completion status before showing
+        const localStorageCompleted = localStorage.getItem('rankitpro_walkthrough_completed') === 'true';
+        if (!localStorageCompleted && !hasSeenWalkthrough) {
+          setShowWalkthrough(true);
+        }
         setShouldAutoStart(false);
       }, 2000); // 2 second delay
 
       return () => clearTimeout(timer);
     }
-  }, [shouldAutoStart, showWalkthrough]);
+  }, [shouldAutoStart, showWalkthrough, hasSeenWalkthrough]);
 
   const startWalkthrough = () => {
     setShowWalkthrough(true);

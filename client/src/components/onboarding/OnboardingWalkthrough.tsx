@@ -413,6 +413,8 @@ export function OnboardingWalkthrough({
         {
           label: 'Start Using Rank It Pro',
           action: () => {
+            // Immediately set localStorage to prevent reappearance
+            localStorage.setItem('rankitpro_walkthrough_completed', 'true');
             onComplete();
             toast({
               title: 'Welcome to Rank It Pro!',
@@ -481,6 +483,9 @@ export function OnboardingWalkthrough({
   };
 
   const handleComplete = () => {
+    // Immediately set localStorage to prevent reappearance
+    localStorage.setItem('rankitpro_walkthrough_completed', 'true');
+    
     setCompletedSteps(prev => [...prev, currentStep.id]);
     saveProgressMutation.mutate({
       hasSeenWalkthrough: true,
@@ -531,6 +536,8 @@ export function OnboardingWalkthrough({
                 variant="ghost" 
                 size="sm" 
                 onClick={() => {
+                  // Immediately set localStorage to prevent reappearance
+                  localStorage.setItem('rankitpro_walkthrough_completed', 'true');
                   // Ensure completion is saved when closing
                   onComplete();
                 }}
@@ -686,6 +693,8 @@ export function OnboardingWalkthrough({
               <Button
                 variant="ghost"
                 onClick={() => {
+                  // Immediately set localStorage to prevent reappearance
+                  localStorage.setItem('rankitpro_walkthrough_completed', 'true');
                   // Mark as completed when skipped
                   onComplete();
                 }}
