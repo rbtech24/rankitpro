@@ -535,9 +535,9 @@ export class DatabaseStorage implements IStorage {
           const avgRating = await db.select({ 
             avg: sql<number>`AVG(CAST(rating AS DECIMAL))` 
           })
-          .from(testimonials)
+          .from(reviewResponses)
           .where(and(
-            eq(testimonials.companyId, company.id),
+            eq(reviewResponses.companyId, company.id),
             sql`rating IS NOT NULL AND rating != ''`
           ));
           
@@ -1341,87 +1341,110 @@ export class DatabaseStorage implements IStorage {
       reviewRequestsChange: number;
     };
   }> {
-    // Current counts
-    const [checkInCount] = await db.select({ count: sql<number>`count(*)` }).from(checkIns).where(eq(checkIns.companyId, companyId));
-    const [techCount] = await db.select({ count: sql<number>`count(*)` }).from(technicians).where(eq(technicians.companyId, companyId));
-    const [blogCount] = await db.select({ count: sql<number>`count(*)` }).from(blogPosts).where(eq(blogPosts.companyId, companyId));
-    const [reviewReqCount] = await db.select({ count: sql<number>`count(*)` }).from(reviewRequests).where(eq(reviewRequests.companyId, companyId));
-    const [reviewRespCount] = await db.select({ count: sql<number>`count(*)` }).from(reviewResponses).where(eq(reviewResponses.companyId, companyId));
+    try {
+      // Current counts
+      const [checkInCount] = await db.select({ count: sql<number>`count(*)` }).from(checkIns).where(eq(checkIns.companyId, companyId));
+      const [techCount] = await db.select({ count: sql<number>`count(*)` }).from(technicians).where(eq(technicians.companyId, companyId));
+      const [blogCount] = await db.select({ count: sql<number>`count(*)` }).from(blogPosts).where(eq(blogPosts.companyId, companyId));
+      const [reviewReqCount] = await db.select({ count: sql<number>`count(*)` }).from(reviewRequests).where(eq(reviewRequests.companyId, companyId));
+      const [reviewRespCount] = await db.select({ count: sql<number>`count(*)` }).from(reviewResponses).where(eq(reviewResponses.companyId, companyId));
 
-    // Calculate trends (compare last 30 days vs previous 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const sixtyDaysAgo = new Date();
-    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+      // Calculate average rating from reviewResponses table
+      const [avgRating] = await db.select({ 
+        avg: sql<number>`COALESCE(AVG(CAST(rating AS DECIMAL)), 0)` 
+      }).from(reviewResponses).where(eq(reviewResponses.companyId, companyId));
 
-    // Last 30 days counts
-    const [recentCheckIns] = await db.select({ count: sql<number>`count(*)` })
-      .from(checkIns)
-      .where(and(
-        eq(checkIns.companyId, companyId),
-        gte(checkIns.createdAt, thirtyDaysAgo)
-      ));
+      // Calculate trends (compare last 30 days vs previous 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const sixtyDaysAgo = new Date();
+      sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
-    const [recentBlogs] = await db.select({ count: sql<number>`count(*)` })
-      .from(blogPosts)
-      .where(and(
-        eq(blogPosts.companyId, companyId),
-        gte(blogPosts.createdAt, thirtyDaysAgo)
-      ));
+      // Last 30 days counts
+      const [recentCheckIns] = await db.select({ count: sql<number>`count(*)` })
+        .from(checkIns)
+        .where(and(
+          eq(checkIns.companyId, companyId),
+          gte(checkIns.createdAt, thirtyDaysAgo)
+        ));
 
-    const [recentReviews] = await db.select({ count: sql<number>`count(*)` })
-      .from(reviewRequests)
-      .where(and(
-        eq(reviewRequests.companyId, companyId),
-        gte(reviewRequests.createdAt, thirtyDaysAgo)
-      ));
+      const [recentBlogs] = await db.select({ count: sql<number>`count(*)` })
+        .from(blogPosts)
+        .where(and(
+          eq(blogPosts.companyId, companyId),
+          gte(blogPosts.createdAt, thirtyDaysAgo)
+        ));
 
-    // Previous 30 days counts (30-60 days ago)
-    const [previousCheckIns] = await db.select({ count: sql<number>`count(*)` })
-      .from(checkIns)
-      .where(and(
-        eq(checkIns.companyId, companyId),
-        gte(checkIns.createdAt, sixtyDaysAgo),
-        lt(checkIns.createdAt, thirtyDaysAgo)
-      ));
+      const [recentReviews] = await db.select({ count: sql<number>`count(*)` })
+        .from(reviewRequests)
+        .where(and(
+          eq(reviewRequests.companyId, companyId),
+          gte(reviewRequests.createdAt, thirtyDaysAgo)
+        ));
 
-    const [previousBlogs] = await db.select({ count: sql<number>`count(*)` })
-      .from(blogPosts)
-      .where(and(
-        eq(blogPosts.companyId, companyId),
-        gte(blogPosts.createdAt, sixtyDaysAgo),
-        lt(blogPosts.createdAt, thirtyDaysAgo)
-      ));
+      // Previous 30 days counts (30-60 days ago)
+      const [previousCheckIns] = await db.select({ count: sql<number>`count(*)` })
+        .from(checkIns)
+        .where(and(
+          eq(checkIns.companyId, companyId),
+          gte(checkIns.createdAt, sixtyDaysAgo),
+          lt(checkIns.createdAt, thirtyDaysAgo)
+        ));
 
-    const [previousReviews] = await db.select({ count: sql<number>`count(*)` })
-      .from(reviewRequests)
-      .where(and(
-        eq(reviewRequests.companyId, companyId),
-        gte(reviewRequests.createdAt, sixtyDaysAgo),
-        lt(reviewRequests.createdAt, thirtyDaysAgo)
-      ));
+      const [previousBlogs] = await db.select({ count: sql<number>`count(*)` })
+        .from(blogPosts)
+        .where(and(
+          eq(blogPosts.companyId, companyId),
+          gte(blogPosts.createdAt, sixtyDaysAgo),
+          lt(blogPosts.createdAt, thirtyDaysAgo)
+        ));
 
-    // Calculate percentage changes
-    const calculateChange = (current: number, previous: number): number => {
-      if (previous === 0) return current > 0 ? 100 : 0;
-      return Math.round(((current - previous) / previous) * 100);
-    };
+      const [previousReviews] = await db.select({ count: sql<number>`count(*)` })
+        .from(reviewRequests)
+        .where(and(
+          eq(reviewRequests.companyId, companyId),
+          gte(reviewRequests.createdAt, sixtyDaysAgo),
+          lt(reviewRequests.createdAt, thirtyDaysAgo)
+        ));
 
-    return {
-      totalCheckins: Number(checkInCount?.count) || 0,
-      activeTechs: Number(techCount?.count) || 0,
-      blogPosts: Number(blogCount?.count) || 0,
-      reviewRequests: Number(reviewReqCount?.count) || 0,
-      reviewResponses: Number(reviewRespCount?.count) || 0,
-      averageRating: 4.5,
-      trends: {
-        checkinsChange: calculateChange(recentCheckIns?.count || 0, previousCheckIns?.count || 0),
-        techsChange: calculateChange(techCount?.count || 0, techCount?.count || 0), // Techs change is typically 0 unless adding/removing
-        blogPostsChange: calculateChange(recentBlogs?.count || 0, previousBlogs?.count || 0),
-        reviewRequestsChange: calculateChange(recentReviews?.count || 0, previousReviews?.count || 0)
-      }
-    };
+      // Calculate percentage changes
+      const calculateChange = (current: number, previous: number): number => {
+        if (previous === 0) return current > 0 ? 100 : 0;
+        return Math.round(((current - previous) / previous) * 100);
+      };
+
+      return {
+        totalCheckins: Number(checkInCount?.count) || 0,
+        activeTechs: Number(techCount?.count) || 0,
+        blogPosts: Number(blogCount?.count) || 0,
+        reviewRequests: Number(reviewReqCount?.count) || 0,
+        reviewResponses: Number(reviewRespCount?.count) || 0,
+        averageRating: Number(avgRating?.avg) || 0,
+        trends: {
+          checkinsChange: calculateChange(recentCheckIns?.count || 0, previousCheckIns?.count || 0),
+          techsChange: 0, // Techs change is typically 0 unless adding/removing
+          blogPostsChange: calculateChange(recentBlogs?.count || 0, previousBlogs?.count || 0),
+          reviewRequestsChange: calculateChange(recentReviews?.count || 0, previousReviews?.count || 0)
+        }
+      };
+    } catch (error) {
+      logger.error("Error calculating company stats", { companyId, error: error instanceof Error ? error.message : String(error) });
+      return {
+        totalCheckins: 0,
+        activeTechs: 0,
+        blogPosts: 0,
+        reviewRequests: 0,
+        reviewResponses: 0,
+        averageRating: 0,
+        trends: {
+          checkinsChange: 0,
+          techsChange: 0,
+          blogPostsChange: 0,
+          reviewRequestsChange: 0
+        }
+      };
+    }
   }
 
   // Missing technician methods
