@@ -509,7 +509,7 @@ export class DatabaseStorage implements IStorage {
       companiesList.map(async (company) => {
         try {
           // Get technician count for this company from technicians table
-          const technicians = await db.select({ count: sql<number>`count(*)` })
+          const techCount = await db.select({ count: sql<number>`count(*)` })
             .from(technicians)
             .where(eq(technicians.companyId, company.id));
           
@@ -541,7 +541,7 @@ export class DatabaseStorage implements IStorage {
           return {
             ...company,
             stats: {
-              totalTechnicians: technicians[0]?.count || 0,
+              totalTechnicians: techCount[0]?.count || 0,
               totalCheckIns: checkInsCount[0]?.count || 0,
               totalBlogPosts: blogPostsCount[0]?.count || 0,
               totalReviews: reviewsCount[0]?.count || 0,
@@ -1665,12 +1665,12 @@ export class DatabaseStorage implements IStorage {
       const activities = [
         ...recentCompanies.map(company => ({
           type: 'company_created',
-          description: "WordPress API test successful",
+          description: `New company registered: ${company.name}`,
           timestamp: company.createdAt || new Date()
         })),
         ...recentCheckIns.map(checkIn => ({
           type: 'check_in_created',
-          description: "WordPress API test successful",
+          description: `New check-in completed (ID: ${checkIn.id})`,
           timestamp: checkIn.createdAt || new Date()
         }))
       ];
@@ -1702,10 +1702,10 @@ export class DatabaseStorage implements IStorage {
 
       recentCheckIns.forEach(checkIn => {
         activities.push({
-          id: "WordPress API test successful",
+          id: `checkin-${checkIn.id}`,
           type: 'check-in',
           title: 'Service Check-in Completed',
-          description: "WordPress API test successful",
+          description: `${checkIn.jobType || 'Service'} completed for ${checkIn.customerName || 'customer'}`,
           company: checkIn.companyName || 'Unknown Company',
           timestamp: checkIn.createdAt,
           metadata: {
@@ -1732,10 +1732,10 @@ export class DatabaseStorage implements IStorage {
 
       recentReviews.forEach(review => {
         activities.push({
-          id: "WordPress API test successful",
+          id: `review-${review.id}`,
           type: 'review',
-          title: "WordPress API test successful",
-          description: "WordPress API test successful",
+          title: 'New Customer Review',
+          description: `${review.rating}-star review from ${review.customerName || 'customer'}`,
           company: review.companyName || 'Unknown Company',
           timestamp: review.createdAt,
           metadata: {
@@ -2090,7 +2090,7 @@ export class DatabaseStorage implements IStorage {
         .limit(limit);
 
       return recentSignups.map(transaction => ({
-        id: "WordPress API test successful",
+        id: `transaction-${transaction.id}`,
         companyName: transaction.companyName,
         plan: transaction.plan,
         amount: transaction.amount,
