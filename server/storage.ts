@@ -530,7 +530,7 @@ export class DatabaseStorage implements IStorage {
           
           // Calculate average rating (safely handle non-numeric ratings)
           const avgRating = await db.select({ 
-            avg: sql<number>`COALESCE(AVG(CASE WHEN rating ~ '^[0-9]+(\.[0-9]+)?$' THEN CAST(rating AS DECIMAL) ELSE NULL END), 0)` 
+            avg: sql<number>`COALESCE(AVG(CASE WHEN rating IS NOT NULL AND rating != '' AND rating != '0' THEN GREATEST(1, LEAST(5, CAST(rating AS INTEGER))) ELSE NULL END), 0)` 
           })
           .from(reviewResponses)
           .where(eq(reviewResponses.companyId, company.id));
@@ -1343,7 +1343,7 @@ export class DatabaseStorage implements IStorage {
 
       // Calculate average rating from reviewResponses table (only numeric ratings)
       const [avgRating] = await db.select({ 
-        avg: sql<number>`COALESCE(AVG(CASE WHEN rating ~ '^[0-9]+(\.[0-9]+)?$' THEN CAST(rating AS DECIMAL) ELSE NULL END), 0)` 
+        avg: sql<number>`COALESCE(AVG(CASE WHEN rating IS NOT NULL AND rating != '' AND rating != '0' THEN GREATEST(1, LEAST(5, CAST(rating AS INTEGER))) ELSE NULL END), 0)` 
       }).from(reviewResponses).where(eq(reviewResponses.companyId, companyId));
 
       // Calculate trends (compare last 30 days vs previous 30 days)
