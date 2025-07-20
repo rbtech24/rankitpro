@@ -9,6 +9,67 @@ import { logger } from '../services/logger';
 
 const router = express.Router();
 
+// Direct generate-content endpoint (used by frontend)
+router.post('/', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const { checkInId, contentType } = req.body;
+    
+    if (!checkInId) {
+      return res.status(400).json({ message: 'Check-in ID is required' });
+    }
+    
+    const checkIn = await storage.getCheckIn(parseInt(checkInId));
+    if (!checkIn) {
+      return res.status(404).json({ message: 'Check-in not found' });
+    }
+    
+    // Check if user has access to this check-in
+    const user = req.user;
+    if (user.role !== 'super_admin' && checkIn.companyId !== user.companyId) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+    
+    const technician = await storage.getTechnician(checkIn.technicianId);
+    if (!technician) {
+      return res.status(404).json({ message: 'Technician not found' });
+    }
+    
+    let result: any;
+    
+    if (contentType === 'summary') {
+      const summary = await generateSummary({
+        jobType: checkIn.jobType,
+        notes: checkIn.notes || '',
+        location: checkIn.location || undefined,
+        technicianName: technician.name,
+        customInstructions: undefined
+      }, 'openai' as AIProviderType);
+      
+      result = { content: summary };
+    } else if (contentType === 'blog') {
+      const blogPost = await generateBlogPost({
+        jobType: checkIn.jobType,
+        notes: checkIn.notes || '',
+        location: checkIn.location || undefined,
+        technicianName: technician.name,
+        customInstructions: undefined
+      }, 'openai' as AIProviderType);
+      
+      result = {
+        title: blogPost.title,
+        content: blogPost.content
+      };
+    } else {
+      return res.status(400).json({ message: 'Invalid content type' });
+    }
+    
+    return res.json(result);
+  } catch (error) {
+    logger.error("Database operation error", { error: error?.message || "Unknown error" });
+    return res.status(500).json({ message: 'Failed to generate content' });
+  }
+});
+
 // Generate placeholder from a check-in
 router.post('/check-ins/:id/generate-placeholder', isAuthenticated, async (req: Request, res: Response) => {
   try {
