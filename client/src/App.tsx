@@ -298,7 +298,12 @@ function Router() {
           : <Onboarding />}
       </Route>
       <Route path="/">
-        <Home />
+        {auth?.user ? 
+          (auth.user.role === "technician" ? <Redirect to="/mobile-field-app" /> : 
+           auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> :
+           auth.user.role === "sales_staff" ? <Redirect to="/sales-dashboard" /> :
+           <Redirect to="/dashboard" />) 
+          : <Home />}
       </Route>
       
       {/* Informational Pages */}

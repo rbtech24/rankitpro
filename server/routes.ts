@@ -2422,6 +2422,10 @@ Format as professional service documentation.`;
   // Register generate-content routes
   app.use("/api/generate-content", generateContentRoutes);
   
+  // Register billing routes for subscription management - BEFORE catch-all
+  const billingRoutes = await import("./routes/billing");
+  app.use("/api/billing", billingRoutes.default);
+  
   // Add review-response routes for compatibility
   app.get("/api/review-response/company/:companyId", isAuthenticated, async (req: Request, res: Response) => {
     try {

@@ -163,13 +163,13 @@ export class StripeService {
     
     // Validate plan
     if (!['starter', 'pro', 'agency'].includes(plan)) {
-      throw new Error(`${apiBase}/${endpoint}`;
+      throw new Error(`Invalid plan: ${plan}`);
     }
     
     // Validate price ID exists and isn't a placeholder
     const priceId = PRICE_IDS[plan as keyof typeof PRICE_IDS];
     if (!priceId || priceId.includes('price_starter') || priceId.includes('price_pro') || priceId.includes('price_agency')) {
-      throw new Error(`${apiBase}/${endpoint}`;
+      throw new Error(`Invalid Stripe price ID for plan: ${plan}`);
     }
 
     try {
@@ -265,7 +265,7 @@ export class StripeService {
       };
     } catch (error: any) {
       logger.error("Unhandled error occurred");
-      throw new Error(`${apiBase}/${endpoint}`;
+      throw new Error("Failed to create subscription");
     }
   }
   
@@ -297,7 +297,7 @@ export class StripeService {
       };
     } catch (error: any) {
       logger.error("Unhandled error occurred");
-      throw new Error(`${apiBase}/${endpoint}`;
+      throw new Error("Failed to cancel subscription");
     }
   }
   
@@ -430,7 +430,7 @@ export class StripeService {
       };
     } catch (error: any) {
       logger.error("Unhandled error occurred");
-      throw new Error(`${apiBase}/${endpoint}`;
+      throw new Error("Failed to get subscription data");
     }
   }
   
@@ -453,7 +453,7 @@ export class StripeService {
       return paymentIntent.client_secret || '';
     } catch (error: any) {
       logger.error("Unhandled error occurred");
-      throw new Error(`${apiBase}/${endpoint}`;
+      throw new Error("Failed to create payment intent");
     }
   }
   

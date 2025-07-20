@@ -9,7 +9,7 @@ const router = express.Router();
 /**
  * Get all subscription plans (admin only)
  */
-router.get('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
+router.get('/plans', isAuthenticated, async (req: Request, res: Response) => {
   try {
     // Return predefined subscription plans with current statistics
     const plans = [
