@@ -4,11 +4,11 @@
       "bfdbcb60",
       {
         "id": "bfdbcb60",
-        "timestamp": "2025-07-20T01:19:00.148Z",
+        "timestamp": "2025-07-20T01:57:58.087Z",
         "level": "info",
         "message": "Application startup initiated",
         "resolved": false,
-        "count": 214
+        "count": 218
       }
     ],
     [
@@ -90,14 +90,36 @@
         "resolved": false,
         "count": 1
       }
+    ],
+    [
+      "9441a124",
+      {
+        "id": "9441a124",
+        "timestamp": "2025-07-20T01:57:09.625Z",
+        "level": "warn",
+        "message": "baseUrl is not defined",
+        "stack": "ReferenceError: baseUrl is not defined\n    at SecurityMonitor.logEvent (/home/runner/workspace/server/security-monitor.ts:116:14)\n    at <anonymous> (/home/runner/workspace/server/security-monitor.ts:468:23)\n    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)\n    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9\n    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)\n    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n    at additionalSecurityHeaders (/home/runner/workspace/server/middleware/security-headers.ts:108:3)\n    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)",
+        "url": "/api/auth/login",
+        "method": "POST",
+        "userAgent": "curl/8.14.1",
+        "ip": "127.0.0.1",
+        "context": {
+          "body": {
+            "email": "bill.dittman@gmail.com",
+            "password": "admin123"
+          }
+        },
+        "resolved": false,
+        "count": 2
+      }
     ]
   ],
   "stats": {
-    "totalErrors": 261,
+    "totalErrors": 267,
     "criticalErrors": 0,
     "errorsByHour": {
       "0": 17,
-      "1": 25,
+      "1": 31,
       "2": 13,
       "4": 1,
       "5": 18,
@@ -122,19 +144,19 @@
     },
     "errorsByEndpoint": {
       "/": 5,
-      "/api/auth/login": 1
+      "/api/auth/login": 3
     },
     "errorsByType": {
-      "General": 261
+      "General": 267
     },
     "lastError": {
       "id": "bfdbcb60",
-      "timestamp": "2025-07-20T01:19:00.148Z",
+      "timestamp": "2025-07-20T01:57:58.087Z",
       "level": "info",
       "message": "Application startup initiated",
       "resolved": false,
-      "count": 214
+      "count": 218
     }
   },
-  "lastSaved": "2025-07-20T01:19:00.148Z"
+  "lastSaved": "2025-07-20T01:57:58.087Z"
 }

@@ -113,7 +113,7 @@ class SecurityMonitor extends EventEmitter {
   // Log security event
   logEvent(eventData: Partial<SecurityEvent> & { success: true }) {
     const event: SecurityEvent = {
-      id: `${baseUrl}/review/${reviewRequest.id}`,
+      id: `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date().toISOString(),
       severity: eventData.severity || 'medium',
       resolved: false,
