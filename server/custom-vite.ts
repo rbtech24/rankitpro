@@ -59,8 +59,8 @@ export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
     hmr: { 
-      server,
-      port: 5173,
+      server: server,
+      port: 5000,
       host: "0.0.0.0",
     },
     host: "0.0.0.0",
@@ -106,7 +106,7 @@ export function serveStatic(app: Express) {
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
-      `${baseUrl}/review/${reviewRequest.id}`,
+      `Static files directory not found: ${distPath}`,
     );
   }
 

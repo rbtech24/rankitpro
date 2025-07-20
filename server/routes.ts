@@ -2416,6 +2416,12 @@ Format as professional service documentation.`;
   const { default: reviewsRouter } = await import("./routes/reviews");
   app.use("/api/reviews", reviewsRouter);
   
+  // Register review-requests routes
+  app.use("/api/review-requests", reviewRequestRoutes);
+  
+  // Register generate-content routes
+  app.use("/api/generate-content", generateContentRoutes);
+  
   // Add review-response routes for compatibility
   app.get("/api/review-response/company/:companyId", isAuthenticated, async (req: Request, res: Response) => {
     try {

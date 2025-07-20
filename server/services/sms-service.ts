@@ -1,4 +1,10 @@
-import twilio from 'twilio';
+// Optional Twilio import - gracefully handle missing dependency
+let twilio: any = null;
+try {
+  twilio = require('twilio');
+} catch (error) {
+  console.warn('Twilio not installed - SMS functionality disabled');
+}
 import { getReviewRequestSMSTemplate } from './sms-templates';
 
 import { logger } from '../services/logger';
@@ -18,7 +24,7 @@ class SMSService {
     const authToken = process.env.TWILIO_AUTH_TOKEN;
     this.twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
     
-    if (accountSid && authToken && this.twilioPhoneNumber) {
+    if (twilio && accountSid && authToken && this.twilioPhoneNumber) {
       try {
         this.twilioClient = twilio(accountSid, authToken);
         this.initialized = true;
@@ -38,7 +44,8 @@ class SMSService {
    * Checks if SMS functionality is available
    */
   isAvailable(): boolean {
-    return this.initialized && 
+    return !!twilio && 
+           this.initialized && 
            !!this.twilioClient && 
            !!this.twilioPhoneNumber && 
            !!process.env.TWILIO_ACCOUNT_SID && 

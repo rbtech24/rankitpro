@@ -46,7 +46,7 @@ router.post('/check-ins/:id/generate-placeholder', isAuthenticated, async (req: 
           customInstructions: customPrompt
         }, aiProvider as AIProviderType);
         
-        result = { placeholder: summary };
+        result = { content: summary };
         break;
         
       case 'blog':
@@ -60,34 +60,34 @@ router.post('/check-ins/:id/generate-placeholder', isAuthenticated, async (req: 
         
         result = {
           title: blogPost.title,
-          placeholder: blogPost.placeholder
+          content: blogPost.content
         };
         break;
         
       case 'social':
-        // For social media, we'll generate a shorter piece of placeholder
+        // For social media, we'll generate a shorter piece of content
         const socialContent = await generateSummary({
           jobType: checkIn.jobType,
           notes: checkIn.notes || '',
           location: checkIn.location || undefined,
           technicianName: technician.name,
           customInstructions: customPrompt ? 
-            `${baseUrl}/review/${reviewRequest.id}` : 
+            customPrompt : 
             'Create a short, engaging social media post.'
         }, aiProvider as AIProviderType);
         
-        result = { placeholder: socialContent };
+        result = { content: socialContent };
         break;
         
       default:
         return res.status(400).json({ message: 'Invalid placeholder type' });
     }
     
-    // If auto-publish is enabled, create the placeholder immediately
+    // If auto-publish is enabled, create the content immediately
     if (req.body.autoPublish && placeholderType === 'blog') {
       await storage.createBlogPost({
-        title: result.title || `${baseUrl}/review/${reviewRequest.id}`,
-        placeholder: result.placeholder,
+        title: result.title || `Blog Post for ${checkIn.jobType}`,
+        content: result.content,
         companyId: checkIn.companyId,
         checkInId: checkIn.id,
         photos: includePhotos ? checkIn.photos : null
