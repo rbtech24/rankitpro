@@ -362,7 +362,7 @@ export default function CompaniesManagement() {
   }) || [];
   
   // Real technicians data for selected company
-  const { data: companyTechnicians = [] } = useQuery({
+  const { data: companyTechnicians = [], isLoading: techniciansLoading, error: techniciansError } = useQuery({
     queryKey: ['/api/technicians', selectedCompany?.id],
     queryFn: async () => {
       if (!selectedCompany?.id) return [];
@@ -1591,7 +1591,7 @@ export default function CompaniesManagement() {
             <DialogHeader>
               <DialogTitle>Technicians: {selectedCompany?.name}</DialogTitle>
               <DialogDescription>
-                All technicians for {selectedCompany?.name} ({companyTechnicians.length} of {selectedCompany?.maxTechnicians} available slots used)
+                All technicians for {selectedCompany?.name} ({Array.isArray(companyTechnicians) ? companyTechnicians.length : 0} of {selectedCompany?.maxTechnicians} available slots used)
               </DialogDescription>
             </DialogHeader>
             
@@ -1608,8 +1608,34 @@ export default function CompaniesManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {companyTechnicians.map(technician => (
-                  <TableRow key={technician.id}>
+                {techniciansLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center">
+                      <Loader2 className="h-4 w-4 animate-spin inline mr-2" />
+                      Loading technicians...
+                    </TableCell>
+                  </TableRow>
+                ) : techniciansError ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-red-500">
+                      Error loading technicians: {techniciansError.message}
+                    </TableCell>
+                  </TableRow>
+                ) : !Array.isArray(companyTechnicians) ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-yellow-600">
+                      No technician data available
+                    </TableCell>
+                  </TableRow>
+                ) : companyTechnicians.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-gray-500">
+                      No technicians found for this company
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  companyTechnicians.map((technician) => (
+                    <TableRow key={technician.id}>
                     <TableCell>
                       <div className="flex items-center">
                         <Avatar className="h-8 w-8 mr-2">
@@ -1641,8 +1667,9 @@ export default function CompaniesManagement() {
                         ? formatDistanceToNow(new Date(technician.lastCheckInDate)) + ' ago'
                         : 'Never'}
                     </TableCell>
-                  </TableRow>
-                ))}
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
             

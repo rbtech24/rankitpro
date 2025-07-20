@@ -23,6 +23,22 @@ import {
   Input,
 } from "../components/ui/input";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../components/ui/form";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -38,11 +54,17 @@ import {
   Search,
   Filter,
   Power,
-  PowerOff
+  PowerOff,
+  Key,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
 import { Button } from "../components/ui/button";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 interface Technician {
   id: number;
@@ -64,20 +86,80 @@ interface Technician {
   };
 }
 
+const passwordChangeSchema = z.object({
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string()
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 export default function TechniciansManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [companyFilter, setCompanyFilter] = useState<string>("all");
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [selectedTechnician, setSelectedTechnician] = useState<Technician | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const passwordForm = useForm<z.infer<typeof passwordChangeSchema>>({
+    resolver: zodResolver(passwordChangeSchema),
+    defaultValues: {
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
 
   const { data: technicians = [], isLoading } = useQuery<Technician[]>({
     queryKey: ["/api/technicians/all"],
   });
 
-  const { data: companies = [] } = useQuery<any[]>({
+  const { data: companies = [] } = useQuery({
     queryKey: ["/api/companies"],
   });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: { technicianId: number; newPassword: string }) => {
+      return apiRequest(`/api/technicians/${data.technicianId}/change-password`, {
+        method: "POST",
+        body: JSON.stringify({ newPassword: data.newPassword }),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Password updated successfully",
+      });
+      setIsPasswordDialogOpen(false);
+      passwordForm.reset();
+      setSelectedTechnician(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update password",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleChangePassword = (technician: Technician) => {
+    setSelectedTechnician(technician);
+    setIsPasswordDialogOpen(true);
+    passwordForm.reset();
+  };
+
+  const onPasswordSubmit = (values: z.infer<typeof passwordChangeSchema>) => {
+    if (selectedTechnician) {
+      changePasswordMutation.mutate({
+        technicianId: selectedTechnician.id,
+        newPassword: values.newPassword,
+      });
+    }
+  };
 
   const toggleTechnicianMutation = useMutation({
     mutationFn: async (technicianId: number) => {
@@ -339,28 +421,39 @@ export default function TechniciansManagement() {
                       </TableCell>
                       
                       <TableCell>
-                        <Button
-                          variant={technician.active ? "outline" : "default"}
-                          size="sm"
-                          onClick={() => toggleTechnicianMutation.mutate(technician.id)}
-                          disabled={toggleTechnicianMutation.isPending}
-                          className={`${technician.active 
-                            ? "text-red-600 hover:text-red-700 hover:bg-red-50" 
-                            : "text-green-600 hover:text-green-700 hover:bg-green-50"
-                          }`}
-                        >
-                          {technician.active ? (
-                            <>
-                              <PowerOff className="h-4 w-4 mr-1" />
-                              Deactivate
-                            </>
-                          ) : (
-                            <>
-                              <Power className="h-4 w-4 mr-1" />
-                              Activate
-                            </>
-                          )}
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleChangePassword(technician)}
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Key className="h-4 w-4 mr-1" />
+                            Password
+                          </Button>
+                          <Button
+                            variant={technician.active ? "outline" : "default"}
+                            size="sm"
+                            onClick={() => toggleTechnicianMutation.mutate(technician.id)}
+                            disabled={toggleTechnicianMutation.isPending}
+                            className={`${technician.active 
+                              ? "text-red-600 hover:text-red-700 hover:bg-red-50" 
+                              : "text-green-600 hover:text-green-700 hover:bg-green-50"
+                            }`}
+                          >
+                            {technician.active ? (
+                              <>
+                                <PowerOff className="h-4 w-4 mr-1" />
+                                Deactivate
+                              </>
+                            ) : (
+                              <>
+                                <Power className="h-4 w-4 mr-1" />
+                                Activate
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -380,6 +473,104 @@ export default function TechniciansManagement() {
           </div>
         </footer>
       </div>
+
+      {/* Password Change Dialog */}
+      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+            <DialogDescription>
+              Change password for {selectedTechnician?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...passwordForm}>
+            <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
+              <FormField
+                control={passwordForm.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Password</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          {...field}
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter new password"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={passwordForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          {...field}
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="Confirm new password"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsPasswordDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={changePasswordMutation.isPending}
+                >
+                  {changePasswordMutation.isPending ? "Updating..." : "Update Password"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -473,6 +473,8 @@ export const insertAiUsageLogsSchema = createInsertSchema(aiUsageLogs).omit({
   createdAt: true
 });
 
+// Remove duplicate subscription plans table - already exists at line 36
+
 export const insertMonthlyAiUsageSchema = createInsertSchema(monthlyAiUsage).omit({ 
   id: true, 
   createdAt: true,

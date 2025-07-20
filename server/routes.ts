@@ -2155,6 +2155,26 @@ Format as professional service documentation.`;
   });
 
   // Create technician
+  // Change technician password endpoint  
+  app.post("/api/technicians/:id/change-password", isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
+    try {
+      const technicianId = parseInt(req.params.id);
+      const { newPassword } = req.body;
+      
+      if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+      }
+      
+      // Update technician password
+      await storage.updateTechnicianPassword(technicianId, newPassword);
+      
+      res.json({ success: true, message: 'Password updated successfully' });
+    } catch (error) {
+      logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
+      res.status(500).json({ error: 'Failed to update password' });
+    }
+  });
+
   app.post("/api/technicians", isAuthenticated, isCompanyAdmin, async (req, res) => {
     try {
       const { name, email, phone, specialty, location, city, state, password } = req.body;

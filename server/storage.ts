@@ -4634,6 +4634,22 @@ export class DatabaseStorage implements IStorage {
       .where(eq(chatQuickReplies.id, id));
   }
 
+  // Technician password management
+  async updateTechnicianPassword(technicianId: number, newPassword: string): Promise<void> {
+    const bcrypt = require('bcrypt');
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    
+    await db.update(users)
+      .set({ 
+        password: hashedPassword,
+        updatedAt: new Date()
+      })
+      .where(and(
+        eq(users.id, technicianId),
+        eq(users.role, 'technician')
+      ));
+  }
+
   // Chat Analytics operations
   async getChatSessionStats(): Promise<{
     totalSessions: number;
