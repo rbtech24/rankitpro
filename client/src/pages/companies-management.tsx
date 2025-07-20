@@ -367,7 +367,9 @@ export default function CompaniesManagement() {
     queryFn: async () => {
       if (!selectedCompany?.id) return [];
       const response = await apiRequest('GET', `/api/companies/${selectedCompany.id}/technicians`);
-      return response.json();
+      const data = await response.json();
+      // Ensure we always return an array
+      return Array.isArray(data) ? data : [];
     },
     enabled: !!selectedCompany?.id
   });
@@ -378,7 +380,9 @@ export default function CompaniesManagement() {
     queryFn: async () => {
       if (!selectedCompany?.id) return [];
       const response = await apiRequest('GET', `/api/companies/${selectedCompany.id}/check-ins`);
-      return response.json();
+      const data = await response.json();
+      // Ensure we always return an array
+      return Array.isArray(data) ? data : [];
     },
     enabled: !!selectedCompany?.id
   });
@@ -389,7 +393,9 @@ export default function CompaniesManagement() {
     queryFn: async () => {
       if (!selectedCompany?.id) return [];
       const response = await apiRequest('GET', `/api/companies/${selectedCompany.id}/reviews`);
-      return response.json();
+      const data = await response.json();
+      // Ensure we always return an array
+      return Array.isArray(data) ? data : [];
     },
     enabled: !!selectedCompany?.id
   });
@@ -557,7 +563,7 @@ export default function CompaniesManagement() {
                           </TableCell>
                           <TableCell>Not specified</TableCell>
                           <TableCell>{company.plan}</TableCell>
-                          <TableCell>{company.stats?.totalTechnicians || 0} / Unlimited</TableCell>
+                          <TableCell>{company.stats?.totalTechnicians || 0} / {company.maxTechnicians || 'Unlimited'}</TableCell>
                           <TableCell>{company.stats?.totalCheckIns || 0}</TableCell>
                           <TableCell>
                             <div className="flex items-center">

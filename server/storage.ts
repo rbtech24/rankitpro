@@ -502,7 +502,75 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllCompanies(): Promise<Company[]> {
-    return await db.select().from(companies);
+    const companiesList = await db.select().from(companies);
+    
+    // For each company, calculate stats including technician count
+    const companiesWithStats = await Promise.all(
+      companiesList.map(async (company) => {
+        try {
+          // Get technician count for this company
+          const technicians = await db.select({ count: sql<number>`count(*)` })
+            .from(users)
+            .where(and(
+              eq(users.companyId, company.id),
+              eq(users.role, 'technician')
+            ));
+          
+          // Get check-ins count for this company
+          const checkIns = await db.select({ count: sql<number>`count(*)` })
+            .from(checkIns)
+            .where(eq(checkIns.companyId, company.id));
+          
+          // Get blog posts count for this company
+          const blogPosts = await db.select({ count: sql<number>`count(*)` })
+            .from(blogPosts)
+            .where(eq(blogPosts.companyId, company.id));
+          
+          // Get reviews count for this company
+          const reviews = await db.select({ count: sql<number>`count(*)` })
+            .from(testimonials)
+            .where(eq(testimonials.companyId, company.id));
+          
+          // Calculate average rating
+          const avgRating = await db.select({ 
+            avg: sql<number>`AVG(CAST(rating AS DECIMAL))` 
+          })
+          .from(testimonials)
+          .where(and(
+            eq(testimonials.companyId, company.id),
+            sql`rating IS NOT NULL AND rating != ''`
+          ));
+          
+          return {
+            ...company,
+            stats: {
+              totalTechnicians: technicians[0]?.count || 0,
+              totalCheckIns: checkIns[0]?.count || 0,
+              totalBlogPosts: blogPosts[0]?.count || 0,
+              totalReviews: reviews[0]?.count || 0,
+              avgRating: Number((avgRating[0]?.avg || 0).toFixed(1))
+            }
+          };
+        } catch (error) {
+          logger.error("Error calculating company stats", { 
+            companyId: company.id, 
+            error: error instanceof Error ? error.message : String(error) 
+          });
+          return {
+            ...company,
+            stats: {
+              totalTechnicians: 0,
+              totalCheckIns: 0,
+              totalBlogPosts: 0,
+              totalReviews: 0,
+              avgRating: 0
+            }
+          };
+        }
+      })
+    );
+    
+    return companiesWithStats;
   }
 
   async createCompany(company: InsertCompany): Promise<Company> {
