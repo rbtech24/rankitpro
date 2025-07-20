@@ -11,61 +11,7 @@ const router = express.Router();
  */
 router.get('/plans', isAuthenticated, async (req: Request, res: Response) => {
   try {
-    // Return predefined subscription plans with current statistics
-    const plans = [
-      {
-        id: 1,
-        name: 'Essential',
-        price: '$97',
-        billingPeriod: 'monthly',
-        maxTechnicians: 5,
-        maxCheckIns: 50,
-        features: ['10 AI blog posts per month', 'Review automation', 'Basic analytics', 'Email support'],
-        isActive: true,
-        subscriberCount: 0,
-        revenue: 0
-      },
-      {
-        id: 2,
-        name: 'Professional',
-        price: '$197',
-        billingPeriod: 'monthly',
-        maxTechnicians: 15,
-        maxCheckIns: 200,
-        features: ['50 AI blog posts per month', 'Advanced review automation', 'CRM integrations', 'Priority support', 'Custom branding'],
-        isActive: true,
-        subscriberCount: 0,
-        revenue: 0
-      },
-      {
-        id: 3,
-        name: 'Enterprise',
-        price: '$397',
-        billingPeriod: 'monthly',
-        maxTechnicians: -1, // Unlimited
-        maxCheckIns: -1, // Unlimited
-        features: ['Unlimited AI content', 'White-label solution', 'API access', 'Dedicated support', 'Custom integrations'],
-        isActive: true,
-        subscriberCount: 0,
-        revenue: 0
-      }
-    ];
-
-    // Get actual subscriber counts and revenue from database
-    const companies = await storage.getAllCompanies();
-    
-    plans.forEach(plan => {
-      const planCompanies = companies.filter(company => {
-        if (plan.name === 'Essential') return company.plan === 'starter';
-        if (plan.name === 'Professional') return company.plan === 'pro';
-        if (plan.name === 'Enterprise') return company.plan === 'agency';
-        return false;
-      });
-      
-      plan.subscriberCount = planCompanies.length;
-      plan.revenue = planCompanies.length * parseInt(plan.price.replace('$', ''));
-    });
-
+    const plans = await storage.getAllSubscriptionPlans();
     res.json(plans);
   } catch (error: any) {
     logger.error("Storage operation error", { error: error?.message || "Unknown error" });
@@ -87,11 +33,16 @@ router.post('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: R
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
-    // For now, return success since plans are hardcoded
-    res.json({ 
-      message: 'Plan configuration saved',
-      id: Date.now()
+    const newPlan = await storage.createSubscriptionPlan({
+      name,
+      price,
+      billingPeriod: billingPeriod || 'monthly',
+      maxTechnicians: maxTechnicians || 5,
+      maxCheckIns: maxCheckIns || 50,
+      features: Array.isArray(features) ? features : [features]
     });
+    
+    res.json(newPlan);
   } catch (error: any) {
     logger.error("Storage operation error", { error: error?.message || "Unknown error" });
     res.status(500).json({ 
@@ -109,11 +60,13 @@ router.put('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, res
     const { id } = req.params;
     const updates = req.body;
     
-    // For now, return success since plans are hardcoded
-    res.json({ 
-      message: 'Plan configuration updated',
-      id: parseInt(id)
-    });
+    const updatedPlan = await storage.updateSubscriptionPlan(parseInt(id), updates);
+    
+    if (!updatedPlan) {
+      return res.status(404).json({ error: 'Subscription plan not found' });
+    }
+    
+    res.json(updatedPlan);
   } catch (error: any) {
     logger.error("Storage operation error", { error: error?.message || "Unknown error" });
     res.status(500).json({ 
@@ -130,9 +83,14 @@ router.delete('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, 
   try {
     const { id } = req.params;
     
-    // For now, return success since plans are hardcoded
+    const success = await storage.deleteSubscriptionPlan(parseInt(id));
+    
+    if (!success) {
+      return res.status(404).json({ error: 'Subscription plan not found' });
+    }
+    
     res.json({ 
-      message: 'Plan configuration removed',
+      message: 'Subscription plan deleted successfully',
       id: parseInt(id)
     });
   } catch (error: any) {

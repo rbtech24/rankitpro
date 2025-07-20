@@ -404,6 +404,13 @@ export interface IStorage {
     resolutionRate: number;
   }>;
   getChatSessionsByDateRange(startDate: Date, endDate: Date): Promise<any[]>;
+
+  // Subscription Plans operations
+  getAllSubscriptionPlans(): Promise<any[]>;
+  getSubscriptionPlan(id: number): Promise<any | undefined>;
+  createSubscriptionPlan(plan: any): Promise<any>;
+  updateSubscriptionPlan(id: number, updates: any): Promise<any | undefined>;
+  deleteSubscriptionPlan(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -4966,6 +4973,147 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return null;
+    }
+  }
+
+  // Subscription Plans operations
+  async getAllSubscriptionPlans(): Promise<any[]> {
+    try {
+      const plans = await db.select().from(subscriptionPlans).orderBy(asc(subscriptionPlans.id));
+      
+      // Get actual subscriber counts and revenue from companies
+      const allCompanies = await this.getAllCompanies();
+      
+      return plans.map(plan => {
+        const planCompanies = allCompanies.filter(company => {
+          // Map plan names to company plan values
+          if (plan.name === 'Essential' || plan.name === 'Starter') return company.plan === 'starter';
+          if (plan.name === 'Professional' || plan.name === 'Pro') return company.plan === 'pro';
+          if (plan.name === 'Enterprise' || plan.name === 'Agency') return company.plan === 'agency';
+          return false;
+        });
+        
+        return {
+          id: plan.id,
+          name: plan.name,
+          price: `$${plan.price}`,
+          billingPeriod: plan.billingPeriod,
+          maxTechnicians: plan.maxTechnicians,
+          maxCheckIns: plan.maxCheckIns,
+          features: Array.isArray(plan.features) ? plan.features : JSON.parse(plan.features || '[]'),
+          isActive: plan.isActive,
+          subscriberCount: planCompanies.length,
+          revenue: planCompanies.length * Number(plan.price)
+        };
+      });
+    } catch (error) {
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      return [];
+    }
+  }
+
+  async getSubscriptionPlan(id: number): Promise<any | undefined> {
+    try {
+      const [plan] = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+      if (!plan) return undefined;
+      
+      return {
+        id: plan.id,
+        name: plan.name,
+        price: `$${plan.price}`,
+        billingPeriod: plan.billingPeriod,
+        maxTechnicians: plan.maxTechnicians,
+        maxCheckIns: plan.maxCheckIns,
+        features: Array.isArray(plan.features) ? plan.features : JSON.parse(plan.features || '[]'),
+        isActive: plan.isActive
+      };
+    } catch (error) {
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      return undefined;
+    }
+  }
+
+  async createSubscriptionPlan(planData: any): Promise<any> {
+    try {
+      const [newPlan] = await db.insert(subscriptionPlans).values({
+        name: planData.name,
+        price: parseFloat(planData.price.replace('$', '')),
+        billingPeriod: planData.billingPeriod,
+        maxTechnicians: planData.maxTechnicians,
+        maxCheckIns: planData.maxCheckIns,
+        features: JSON.stringify(planData.features),
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).returning();
+      
+      return {
+        id: newPlan.id,
+        name: newPlan.name,
+        price: `$${newPlan.price}`,
+        billingPeriod: newPlan.billingPeriod,
+        maxTechnicians: newPlan.maxTechnicians,
+        maxCheckIns: newPlan.maxCheckIns,
+        features: Array.isArray(newPlan.features) ? newPlan.features : JSON.parse(newPlan.features || '[]'),
+        isActive: newPlan.isActive,
+        subscriberCount: 0,
+        revenue: 0
+      };
+    } catch (error) {
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      throw error;
+    }
+  }
+
+  async updateSubscriptionPlan(id: number, updates: any): Promise<any | undefined> {
+    try {
+      const updateData: any = {
+        updatedAt: new Date()
+      };
+      
+      if (updates.name) updateData.name = updates.name;
+      if (updates.price) updateData.price = parseFloat(updates.price.replace('$', ''));
+      if (updates.billingPeriod) updateData.billingPeriod = updates.billingPeriod;
+      if (updates.maxTechnicians !== undefined) updateData.maxTechnicians = updates.maxTechnicians;
+      if (updates.maxCheckIns !== undefined) updateData.maxCheckIns = updates.maxCheckIns;
+      if (updates.features) updateData.features = JSON.stringify(updates.features);
+      if (updates.isActive !== undefined) updateData.isActive = updates.isActive;
+      
+      const [updatedPlan] = await db.update(subscriptionPlans)
+        .set(updateData)
+        .where(eq(subscriptionPlans.id, id))
+        .returning();
+      
+      if (!updatedPlan) return undefined;
+      
+      return {
+        id: updatedPlan.id,
+        name: updatedPlan.name,
+        price: `$${updatedPlan.price}`,
+        billingPeriod: updatedPlan.billingPeriod,
+        maxTechnicians: updatedPlan.maxTechnicians,
+        maxCheckIns: updatedPlan.maxCheckIns,
+        features: Array.isArray(updatedPlan.features) ? updatedPlan.features : JSON.parse(updatedPlan.features || '[]'),
+        isActive: updatedPlan.isActive
+      };
+    } catch (error) {
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      return undefined;
+    }
+  }
+
+  async deleteSubscriptionPlan(id: number): Promise<boolean> {
+    try {
+      // Soft delete by setting isActive to false instead of actually deleting
+      const [result] = await db.update(subscriptionPlans)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(eq(subscriptionPlans.id, id))
+        .returning();
+      
+      return !!result;
+    } catch (error) {
+      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      return false;
     }
   }
 }
