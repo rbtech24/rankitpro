@@ -528,15 +528,12 @@ export class DatabaseStorage implements IStorage {
             .from(testimonials)
             .where(eq(testimonials.companyId, company.id));
           
-          // Calculate average rating
+          // Calculate average rating (safely handle non-numeric ratings)
           const avgRating = await db.select({ 
-            avg: sql<number>`AVG(CAST(rating AS DECIMAL))` 
+            avg: sql<number>`COALESCE(AVG(CASE WHEN rating ~ '^[0-9]+(\.[0-9]+)?$' THEN CAST(rating AS DECIMAL) ELSE NULL END), 0)` 
           })
           .from(reviewResponses)
-          .where(and(
-            eq(reviewResponses.companyId, company.id),
-            sql`rating IS NOT NULL AND rating != ''`
-          ));
+          .where(eq(reviewResponses.companyId, company.id));
           
           return {
             ...company,
@@ -545,7 +542,7 @@ export class DatabaseStorage implements IStorage {
               totalCheckIns: checkInsCount[0]?.count || 0,
               totalBlogPosts: blogPostsCount[0]?.count || 0,
               totalReviews: reviewsCount[0]?.count || 0,
-              avgRating: Number((avgRating[0]?.avg || 0).toFixed(1))
+              avgRating: Math.round((avgRating[0]?.avg || 0) * 10) / 10
             }
           };
         } catch (error) {
@@ -1344,9 +1341,9 @@ export class DatabaseStorage implements IStorage {
       const [reviewReqCount] = await db.select({ count: sql<number>`count(*)` }).from(reviewRequests).where(eq(reviewRequests.companyId, companyId));
       const [reviewRespCount] = await db.select({ count: sql<number>`count(*)` }).from(reviewResponses).where(eq(reviewResponses.companyId, companyId));
 
-      // Calculate average rating from reviewResponses table
+      // Calculate average rating from reviewResponses table (only numeric ratings)
       const [avgRating] = await db.select({ 
-        avg: sql<number>`COALESCE(AVG(CAST(rating AS DECIMAL)), 0)` 
+        avg: sql<number>`COALESCE(AVG(CASE WHEN rating ~ '^[0-9]+(\.[0-9]+)?$' THEN CAST(rating AS DECIMAL) ELSE NULL END), 0)` 
       }).from(reviewResponses).where(eq(reviewResponses.companyId, companyId));
 
       // Calculate trends (compare last 30 days vs previous 30 days)
