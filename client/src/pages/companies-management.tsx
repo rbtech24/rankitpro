@@ -145,22 +145,33 @@ const availableFeatures = [
   { id: "priority_support", name: "Priority Support" }
 ];
 
-// Industries for dropdown
+// Industries for dropdown - comprehensive list for all business types
 const industries = [
-  "HVAC",
-  "Plumbing",
-  "Electrical",
-  "Roofing",
-  "Landscaping",
-  "Cleaning",
-  "Construction",
+  "Home Services",
+  "Pool & Spa Services", 
+  "Landscaping & Lawn Care",
+  "HVAC Services",
+  "Plumbing Services",
+  "Electrical Services",
+  "Cleaning Services",
+  "Construction & Contractors",
   "Pest Control",
-  "Locksmith",
-  "Garage Door",
-  "Painting",
-  "Appliance Repair",
-  "Window Cleaning",
-  "Handyman",
+  "Security Services",
+  "Automotive Services",
+  "Healthcare & Medical",
+  "Dental Services",
+  "Veterinary Services",
+  "Restaurant & Food Service",
+  "Retail & E-commerce",
+  "Real Estate",
+  "Legal Services",
+  "Financial Services", 
+  "Fitness & Wellness",
+  "Beauty & Personal Care",
+  "Education & Training",
+  "Technology Services",
+  "Marketing & Advertising",
+  "Consulting Services",
   "Other"
 ];
 
@@ -558,10 +569,10 @@ export default function CompaniesManagement() {
                           <TableCell>
                             <div>
                               <div className="font-medium">{company.name}</div>
-                              <div className="text-sm text-gray-500">No industry specified</div>
+                              <div className="text-sm text-gray-500">{company.industry ? `${company.industry}` : 'No industry specified'}</div>
                             </div>
                           </TableCell>
-                          <TableCell>Not specified</TableCell>
+                          <TableCell>{company.industry || 'Not specified'}</TableCell>
                           <TableCell>{company.plan}</TableCell>
                           <TableCell>{company.stats?.totalTechnicians || 0} / {company.maxTechnicians || 'Unlimited'}</TableCell>
                           <TableCell>{company.stats?.totalCheckIns || 0}</TableCell>
@@ -1047,7 +1058,7 @@ export default function CompaniesManagement() {
             }
           }}
         >
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{isAddingCompany ? 'Add New Company' : 'Edit Company'}</DialogTitle>
               <DialogDescription>

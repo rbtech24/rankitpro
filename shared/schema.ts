@@ -79,6 +79,17 @@ export const companies = pgTable("companies", {
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   businessType: text("business_type").notNull().default("field_service"), // 'field_service' or 'marketing_focused'
+  industry: text("industry"),
+  email: text("email"),
+  phoneNumber: text("phone_number"),
+  website: text("website"),
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  zipCode: text("zip_code"),
+  maxTechnicians: integer("max_technicians").default(10),
+  isActive: boolean("is_active").default(true).notNull(),
+  notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

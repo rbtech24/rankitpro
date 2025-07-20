@@ -1947,7 +1947,7 @@ Format as professional service documentation.`;
   });
 
   // Update company endpoint
-  app.put("/api/companies/:id", async (req, res) => {
+  app.put("/api/companies/:id", isAuthenticated, async (req, res) => {
     try {
       const companyId = parseInt(req.params.id);
       const user = req.user;
