@@ -105,18 +105,15 @@ export default function CheckIns() {
 
       // Generate blog post content using the visit data
       const contentRes = await apiRequest("POST", "/api/generate-content", {
-        jobType: visit.jobType,
-        notes: visit.notes || "",
-        location: visit.location || "",
-        technicianName: visit.technician.name,
-        contentType: "blog_post"
+        checkInId: visit.id,
+        contentType: "blog"
       });
       const contentData = await contentRes.json();
       
       // Create blog post with generated content
       await apiRequest("POST", "/api/blog-posts", {
         title: contentData.title,
-        content: contentData.content,
+        placeholder: contentData.content,
         checkInId
       });
       
