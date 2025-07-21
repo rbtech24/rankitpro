@@ -100,7 +100,7 @@ The blog post should:
         const parsedContent = JSON.parse(responseContent);
         return {
           title: parsedContent.title,
-          content: parsedContent.content
+          placeholder: parsedContent.content
         };
       } catch (parseError: any) {
         logger.error("Unhandled error occurred");
