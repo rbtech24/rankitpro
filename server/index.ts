@@ -122,7 +122,8 @@ app.use((req, res, next) => {
     res.removeHeader('Strict-Transport-Security');
     res.removeHeader('X-Permitted-Cross-Domain-Policies');
     res.removeHeader('Referrer-Policy');
-    res.removeHeader('Permissions-Policy');
+    // Allow geolocation and camera for mobile field app
+    res.setHeader('Permissions-Policy', 'camera=*, microphone=(), geolocation=*, payment=*');
     
     // Explicitly set to allow everything
     res.set('Content-Security-Policy', 'script-src * \'unsafe-inline\' \'unsafe-eval\' data: blob:; object-src * data: blob:; style-src * \'unsafe-inline\' data: blob:; img-src * data: blob:; connect-src * ws: wss: data: blob:; font-src * data: blob:; frame-src * data: blob:; media-src * data: blob:; default-src * \'unsafe-inline\' \'unsafe-eval\' data: blob:;');
