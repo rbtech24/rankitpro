@@ -235,7 +235,7 @@ export default function IntegrationsPage() {
               ${checkInHTML}
               
               <div class="powered-by">
-                <a href="https://rankitpro.com" target="_blank">Powered by Rank It Pro</a>
+                <a href="https://rankitpro.com?utm_source=widget&utm_medium=backlink&utm_campaign=client_attribution" target="_blank" rel="noopener nofollow" title="Business Management Platform">Powered by Rank It Pro</a>
               </div>
             </div>
           </body>

@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
       .sort((a, b) => new Date(b.respondedAt || b.createdAt || 0).getTime() - new Date(a.respondedAt || a.createdAt || 0).getTime())
       .slice(0, parseInt(limit as string));
     
-    // Format for public display
+    // Format for public display with backlink attribution
     const formattedReviews = approvedReviews.map(review => ({
       id: review.id,
       rating: review.rating || 5,
@@ -34,7 +34,11 @@ router.get('/', async (req, res) => {
     res.json({
       success: true,
       reviews: formattedReviews,
-      total: formattedReviews.length
+      total: formattedReviews.length,
+      attribution: {
+        html: '<div class="rip-attribution"><a href="https://rankitpro.com" target="_blank" rel="noopener nofollow" title="Review Management Platform">Powered by Rank It Pro</a></div>',
+        css: '.rip-attribution { text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #6b7280; }'
+      }
     });
   } catch (error) {
     logger.error("Unhandled error occurred");

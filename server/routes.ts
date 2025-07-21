@@ -4341,6 +4341,10 @@ IMPORTANT: Respond in English only, regardless of the language used in the input
   // Add embed routes for JavaScript widget
   app.use("/", embedRoutes);
   
+  // Enhanced backlink widgets
+  const backlinkWidgets = await import("./routes/backlink-enhanced-widgets");
+  app.use("/api", backlinkWidgets.default);
+  
   // Serve widget demo and preview files
   app.get("/widget-demo.html", (req, res) => {
     res.sendFile(path.join(process.cwd(), 'public', 'widget-demo.html'));
