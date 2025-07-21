@@ -196,7 +196,7 @@ export interface IStorage {
   }>;
   
   // Chart data operations for super admin
-  getCheckInChartData(): Promise<{ success: true }[]>;
+  getCheckInChartData(): Promise<Array<{ date: string; count: number }>>;
   getReviewChartData(): Promise<{ success: true }[]>;
   getCompanyGrowthData(): Promise<{ success: true }[]>;
   getRevenueData(): Promise<{ success: true }[]>;
@@ -1615,21 +1615,31 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getCheckInChartData(): Promise<Array<{ success: true }>> {
+  async getCheckInChartData(): Promise<Array<{ date: string; count: number }>> {
     try {
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      // Get data from the last 30 days for more detailed daily chart
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
       const result = await db.select({
-        date: sql<string>`DATE_TRUNC('month', created_at)::text`,
+        date: sql<string>`DATE(created_at)::text`,
         count: sql<number>`COUNT(*)`
       })
       .from(checkIns)
-      .where(gte(checkIns.createdAt, sixMonthsAgo))
-      .groupBy(sql`DATE_TRUNC('month', created_at)`)
-      .orderBy(sql`DATE_TRUNC('month', created_at)`);
+      .where(gte(checkIns.createdAt, thirtyDaysAgo))
+      .groupBy(sql`DATE(created_at)`)
+      .orderBy(sql`DATE(created_at)`);
       
-      return result;
+      // Convert to proper date format for the chart
+      const chartData = result.map(item => ({
+        date: new Date(item.date).toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric' 
+        }),
+        count: item.count
+      }));
+      
+      return chartData;
     } catch (error) {
       logger.error("Storage operation error", { error: error?.message || "Unknown error" });
       return [];
