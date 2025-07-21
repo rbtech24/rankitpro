@@ -266,10 +266,10 @@ export default function IntegrationsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Code className="h-5 w-5" />
-              JavaScript Embed Widget
+              Enhanced SEO Widget Integration
             </CardTitle>
             <CardDescription>
-              Embed your service check-ins on any website with a customizable JavaScript widget
+              Embed widgets with advanced backlink strategies for sustainable SEO growth to RankItPro.com
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
