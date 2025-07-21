@@ -15,14 +15,14 @@ const router = express.Router();
 router.get('/', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const user = req.user;
-    if (!user.companyId) {
+    if (!user || !user.companyId) {
       return res.status(400).json({ message: 'User is not associated with a company' });
     }
 
     const blogPosts = await storage.getBlogPostsByCompany(user.companyId);
     return res.json(blogPosts);
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Failed to fetch blog posts: " + (error instanceof Error ? error.message : String(error)));
     return res.status(500).json({ message: 'Failed to fetch blog posts' });
   }
 });
@@ -31,7 +31,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
 router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
   try {
     const user = req.user;
-    if (!user.companyId) {
+    if (!user || !user.companyId) {
       return res.status(400).json({ message: 'User is not associated with a company' });
     }
 
@@ -134,15 +134,15 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         }
       }
     } catch (error) {
-      logger.error("Unhandled error occurred");
+      logger.error("Email notification failed: " + (error instanceof Error ? error.message : String(error)));
       // Continue even if email fails
     }
     
     return res.status(201).json(blogPost);
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Failed to create blog post: " + (error instanceof Error ? error.message : String(error)));
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ success: true });
+      return res.status(400).json({ message: 'Validation error', errors: error.errors });
     }
     return res.status(500).json({ message: 'Failed to create blog post' });
   }
@@ -160,7 +160,7 @@ router.get('/:id', isAuthenticated, async (req: Request, res: Response) => {
     
     // Check if user has access to this blog post
     const user = req.user;
-    if (user.role !== 'super_admin' && blogPost.companyId !== user.companyId) {
+    if (!user || (user.role !== 'super_admin' && blogPost.companyId !== user.companyId)) {
       return res.status(403).json({ message: 'Access denied' });
     }
     
@@ -183,7 +183,7 @@ router.patch('/:id', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
     
     // Check if user has access to update this blog post
     const user = req.user;
-    if (user.role !== 'super_admin' && blogPost.companyId !== user.companyId) {
+    if (!user || (user.role !== 'super_admin' && blogPost.companyId !== user.companyId)) {
       return res.status(403).json({ message: 'Access denied' });
     }
     
@@ -207,7 +207,7 @@ router.delete('/:id', isAuthenticated, isCompanyAdmin, async (req: Request, res:
     
     // Check if user has access to delete this blog post
     const user = req.user;
-    if (user.role !== 'super_admin' && blogPost.companyId !== user.companyId) {
+    if (!user || (user.role !== 'super_admin' && blogPost.companyId !== user.companyId)) {
       return res.status(403).json({ message: 'Access denied' });
     }
     
@@ -235,7 +235,7 @@ router.post('/generate-from-checkin/:id', isAuthenticated, isCompanyAdmin, async
     
     // Check if user has access to this check-in
     const user = req.user;
-    if (user.role !== 'super_admin' && checkIn.companyId !== user.companyId) {
+    if (!user || (user.role !== 'super_admin' && checkIn.companyId !== user.companyId)) {
       return res.status(403).json({ message: 'Access denied' });
     }
     
