@@ -40,6 +40,7 @@ export default function CheckIns() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [generatingPosts, setGeneratingPosts] = useState<Set<number>>(new Set());
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -96,6 +97,9 @@ export default function CheckIns() {
   };
   
   const handleCreatePost = async (checkInId: number) => {
+    // Add to generating posts set
+    setGeneratingPosts(prev => new Set(prev).add(checkInId));
+    
     try {
       // Get the visit data first
       const visit = checkIns.find(c => c.id === checkInId);
@@ -130,6 +134,13 @@ export default function CheckIns() {
         title: "Error",
         description: "Failed to create blog post. Please try again.",
         variant: "destructive",
+      });
+    } finally {
+      // Remove from generating posts set
+      setGeneratingPosts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(checkInId);
+        return newSet;
       });
     }
   };
@@ -202,6 +213,7 @@ export default function CheckIns() {
                     <CheckinCard
                       checkIn={checkIn}
                       onCreatePost={() => handleCreatePost(checkIn.id)}
+                      isGeneratingPost={generatingPosts.has(checkIn.id)}
                       onRequestReview={() => {
                         handleRequestReview(checkIn.id, checkIn.technician?.id || 0);
                       }}

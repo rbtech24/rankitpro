@@ -25,12 +25,13 @@ interface CheckIn {
 interface CheckinCardProps {
   checkIn: CheckIn;
   onCreatePost?: () => void;
+  isGeneratingPost?: boolean;
   onRequestReview?: () => void;
   onEdit?: () => void;
   onViewDetails?: () => void;
 }
 
-export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, onEdit, onViewDetails }: CheckinCardProps) {
+export default function CheckinCard({ checkIn, onCreatePost, isGeneratingPost, onRequestReview, onEdit, onViewDetails }: CheckinCardProps) {
   // Format the date as "X time ago"
   const timeAgo = formatDistanceToNow(new Date(checkIn.createdAt), { addSuffix: true });
   
@@ -158,15 +159,33 @@ export default function CheckinCard({ checkIn, onCreatePost, onRequestReview, on
           )}
           
           {onCreatePost && (
-            <Button variant="link" size="sm" className="text-xs text-primary-600" onClick={onCreatePost}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" x2="8" y1="13" y2="13"/>
-                <line x1="16" x2="8" y1="17" y2="17"/>
-                <line x1="10" x2="8" y1="9" y2="9"/>
-              </svg>
-              Create Post
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="text-xs text-primary-600" 
+              onClick={onCreatePost}
+              disabled={isGeneratingPost}
+            >
+              {isGeneratingPost ? (
+                <>
+                  <svg className="animate-spin mr-1 h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" x2="8" y1="13" y2="13"/>
+                    <line x1="16" x2="8" y1="17" y2="17"/>
+                    <line x1="10" x2="8" y1="9" y2="9"/>
+                  </svg>
+                  Create Post
+                </>
+              )}
             </Button>
           )}
           

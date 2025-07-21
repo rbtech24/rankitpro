@@ -5,12 +5,13 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import BlogEditModal from "../components/modals/blog-edit-modal";
 import AdvancedBlogEditor from "../components/blog/advanced-blog-editor";
 import { apiRequest } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
 import { format } from "date-fns";
-import { Plus, Edit, Trash2, Eye, Globe, Calendar } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Globe, Calendar, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface BlogPost {
@@ -76,6 +77,31 @@ export default function BlogPosts() {
     },
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ postId, status }: { postId: number; status: string }) => {
+      const res = await apiRequest("PATCH", `/api/blog-posts/${postId}`, {
+        status: status
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Blog post status updated successfully.",
+        variant: "default",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/blog-posts"] });
+    },
+    onError: (error) => {
+      console.error("Update blog post status error:", error);
+      toast({
+        title: "Error", 
+        description: "Failed to update blog post status. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const filteredBlogPosts = blogPosts?.filter(post => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -107,6 +133,10 @@ export default function BlogPosts() {
       setSelectedPost(post);
       setAdvancedEditorOpen(true);
     }
+  };
+
+  const handleStatusChange = (postId: number, newStatus: string) => {
+    updateStatusMutation.mutate({ postId, status: newStatus });
   };
 
   const getStatusColor = (status: string) => {
@@ -195,9 +225,16 @@ export default function BlogPosts() {
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute top-2 left-2">
-                      <Badge className={getStatusColor(post.status || 'draft')}>
-                        {post.status || 'draft'}
-                      </Badge>
+                      <Select value={post.status || 'draft'} onValueChange={(value) => handleStatusChange(post.id, value)}>
+                        <SelectTrigger className={`h-6 px-2 py-1 text-xs font-medium border-0 ${getStatusColor(post.status || 'draft')}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="published">Published</SelectItem>
+                          <SelectItem value="scheduled">Scheduled</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     {post.publishToWordPress && (
                       <div className="absolute top-2 right-2">
@@ -214,9 +251,16 @@ export default function BlogPosts() {
                     <CardTitle className="text-lg line-clamp-2 flex-1">{post.title}</CardTitle>
                     {!(post.featuredImage || (post.photos && post.photos.length > 0)) && (
                       <div className="flex gap-1 ml-2">
-                        <Badge className={getStatusColor(post.status || 'draft')}>
-                          {post.status || 'draft'}
-                        </Badge>
+                        <Select value={post.status || 'draft'} onValueChange={(value) => handleStatusChange(post.id, value)}>
+                          <SelectTrigger className={`h-6 px-2 py-1 text-xs font-medium border-0 ${getStatusColor(post.status || 'draft')}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="draft">Draft</SelectItem>
+                            <SelectItem value="published">Published</SelectItem>
+                            <SelectItem value="scheduled">Scheduled</SelectItem>
+                          </SelectContent>
+                        </Select>
                         {post.publishToWordPress && (
                           <Badge variant="outline">
                             <Globe className="w-3 h-3 mr-1" />
