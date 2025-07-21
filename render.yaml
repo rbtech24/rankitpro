@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: rankitpro
+    env: node
+    buildCommand: npm install --ignore-optional --no-optional && ./build.sh
+    startCommand: node dist/server.js || tsx server/index.ts
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rankitpro-db
+          property: connectionString
+    region: oregon
+    plan: starter
+    
+databases:
+  - name: rankitpro-db
+    databaseName: rankitpro
+    user: rankitpro
+    region: oregon
+    plan: starter
