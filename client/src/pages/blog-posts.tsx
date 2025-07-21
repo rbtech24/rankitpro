@@ -5,7 +5,6 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import BlogEditModal from "../components/modals/blog-edit-modal";
 import AdvancedBlogEditor from "../components/blog/advanced-blog-editor";
 import { apiRequest } from "../lib/queryClient";
@@ -77,31 +76,6 @@ export default function BlogPosts() {
     },
   });
 
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({ postId, status }: { postId: number; status: string }) => {
-      const res = await apiRequest("PATCH", `/api/blog-posts/${postId}`, {
-        status: status
-      });
-      return res.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Blog post status updated successfully.",
-        variant: "default",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/blog-posts"] });
-    },
-    onError: (error) => {
-      console.error("Update status error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update blog post status. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
   const filteredBlogPosts = blogPosts?.filter(post => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -133,23 +107,6 @@ export default function BlogPosts() {
       setSelectedPost(post);
       setAdvancedEditorOpen(true);
     }
-  };
-
-  const handleStatusChange = (postId: number, newStatus: string) => {
-    updateStatusMutation.mutate({ postId, status: newStatus });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'published': return 'bg-green-100 text-green-800';
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'scheduled': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const handleStatusChange = (postId: number, newStatus: string) => {
-    updateStatusMutation.mutate({ postId, status: newStatus });
   };
 
   const getStatusColor = (status: string) => {
@@ -299,46 +256,26 @@ export default function BlogPosts() {
                     </div>
                   )}
                   
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-gray-600">Status:</span>
-                      <Select
-                        value={post.status || 'draft'}
-                        onValueChange={(value) => handleStatusChange(post.id, value)}
-                        disabled={updateStatusMutation.isPending}
-                      >
-                        <SelectTrigger className="w-auto h-7 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="draft">Draft</SelectItem>
-                          <SelectItem value="published">Published</SelectItem>
-                          <SelectItem value="scheduled">Scheduled</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEditPost(post.id)}>
-                          <Edit className="w-3 h-3 mr-1" />
-                          Edit
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => {
-                          const selectedPost = filteredBlogPosts?.find(p => p.id === post.id);
-                          if (selectedPost) {
-                            setSelectedPost(selectedPost);
-                            setAdvancedEditorOpen(true);
-                          }
-                        }}>
-                          <Eye className="w-3 h-3 mr-1" />
-                          Quick
-                        </Button>
-                      </div>
-                      <Button variant="destructive" size="sm" onClick={() => handleDeletePost(post.id)}>
-                        <Trash2 className="w-3 h-3" />
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleEditPost(post.id)}>
+                        <Edit className="w-3 h-3 mr-1" />
+                        Edit
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        const selectedPost = filteredBlogPosts?.find(p => p.id === post.id);
+                        if (selectedPost) {
+                          setSelectedPost(selectedPost);
+                          setAdvancedEditorOpen(true);
+                        }
+                      }}>
+                        <Eye className="w-3 h-3 mr-1" />
+                        Quick
                       </Button>
                     </div>
+                    <Button variant="destructive" size="sm" onClick={() => handleDeletePost(post.id)}>
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
