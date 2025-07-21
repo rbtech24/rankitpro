@@ -66,7 +66,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         
         blogPostData = insertBlogPostSchema.parse({
           title: blogPostResult.title,
-          placeholder: blogPostResult.placeholder,
+          content: blogPostResult.placeholder,
           companyId: user.companyId,
           checkInId: checkIn.id,
           photos: checkIn.photos
@@ -74,7 +74,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
       } else {
         blogPostData = insertBlogPostSchema.parse({
           title: req.body.title,
-          placeholder: req.body.placeholder,
+          content: req.body.content,
           companyId: user.companyId,
           checkInId: checkIn.id,
           photos: checkIn.photos || req.body.photos
@@ -87,7 +87,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
       // Regular blog post creation
       blogPostData = insertBlogPostSchema.parse({
         title: req.body.title,
-        placeholder: req.body.placeholder,
+        content: req.body.content,
         companyId: user.companyId,
         photos: req.body.photos
       });
@@ -110,10 +110,10 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
           adminEmails.push(user.email);
         }
         
-        // Generate a short excerpt from the placeholder for the email
-        const excerpt = blogPost.placeholder.length > 300 
-          ? blogPost.placeholder.substring(0, 297) + '...' 
-          : blogPost.placeholder;
+        // Generate a short excerpt from the content for the email
+        const excerpt = blogPost.content.length > 300 
+          ? blogPost.content.substring(0, 297) + '...' 
+          : blogPost.content;
         
         if (adminEmails.length > 0) {
           // Send the notification email
@@ -129,7 +129,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
           if (!emailSent) {
             log('Failed to send blog post notification email', 'warning');
           } else {
-    logger.info("Blog post operation", { blogId, companyId });
+    logger.info("Blog post operation", { blogId: blogPost.id, companyId: company.id });
           }
         }
       }

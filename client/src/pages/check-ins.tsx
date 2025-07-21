@@ -113,7 +113,7 @@ export default function CheckIns() {
       // Create blog post with generated content
       await apiRequest("POST", "/api/blog-posts", {
         title: contentData.title,
-        placeholder: contentData.content,
+        content: contentData.content,
         checkInId
       });
       

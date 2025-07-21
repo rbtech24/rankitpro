@@ -57,7 +57,7 @@ router.post('/', isAuthenticated, async (req: Request, res: Response) => {
       
       result = {
         title: blogPost.title,
-        content: blogPost.content
+        content: blogPost.placeholder
       };
     } else {
       return res.status(400).json({ message: 'Invalid content type' });
@@ -121,7 +121,7 @@ router.post('/check-ins/:id/generate-placeholder', isAuthenticated, async (req: 
         
         result = {
           title: blogPost.title,
-          content: blogPost.content
+          content: blogPost.placeholder
         };
         break;
         
