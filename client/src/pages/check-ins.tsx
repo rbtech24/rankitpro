@@ -40,6 +40,7 @@ export default function CheckIns() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [generatingPostId, setGeneratingPostId] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -72,6 +73,51 @@ export default function CheckIns() {
     },
   });
 
+  const createPostMutation = useMutation({
+    mutationFn: async (checkInId: number) => {
+      setGeneratingPostId(checkInId);
+      
+      // Get the visit data first
+      const visit = checkIns.find(c => c.id === checkInId);
+      if (!visit) {
+        throw new Error("Visit not found");
+      }
+
+      // Generate blog post content using the visit data
+      const contentRes = await apiRequest("POST", "/api/generate-content", {
+        checkInId: visit.id,
+        contentType: "blog"
+      });
+      const contentData = await contentRes.json();
+      
+      // Create blog post with generated content
+      await apiRequest("POST", "/api/blog-posts", {
+        title: contentData.title,
+        content: contentData.content,
+        checkInId
+      });
+
+      return { success: true, checkInId };
+    },
+    onSuccess: () => {
+      toast({
+        title: "Blog Post Created",
+        description: "The blog post was created successfully and is ready for publishing.",
+        variant: "default",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/check-ins"] });
+      setGeneratingPostId(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create blog post. Please try again.",
+        variant: "destructive",
+      });
+      setGeneratingPostId(null);
+    },
+  });
+
   const filteredCheckIns = checkIns.filter(checkIn => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -95,43 +141,8 @@ export default function CheckIns() {
     }
   };
   
-  const handleCreatePost = async (checkInId: number) => {
-    try {
-      // Get the visit data first
-      const visit = checkIns.find(c => c.id === checkInId);
-      if (!visit) {
-        throw new Error("Visit not found");
-      }
-
-      // Generate blog post content using the visit data
-      const contentRes = await apiRequest("POST", "/api/generate-content", {
-        checkInId: visit.id,
-        contentType: "blog"
-      });
-      const contentData = await contentRes.json();
-      
-      // Create blog post with generated content
-      await apiRequest("POST", "/api/blog-posts", {
-        title: contentData.title,
-        content: contentData.content,
-        checkInId
-      });
-      
-      toast({
-        title: "Blog Post Created",
-        description: "The blog post was created successfully and is ready for publishing.",
-        variant: "default",
-      });
-      
-      // Refresh the data
-      refetch();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create blog post. Please try again.",
-        variant: "destructive",
-      });
-    }
+  const handleCreatePost = (checkInId: number) => {
+    createPostMutation.mutate(checkInId);
   };
 
   const handleRequestReview = async (checkInId: number, technicianId: number) => {
@@ -214,6 +225,7 @@ export default function CheckIns() {
                         setDetailsModalOpen(true);
                         setEditModalOpen(false); // Close edit modal if open
                       }}
+                      isGeneratingPost={generatingPostId === checkIn.id}
                     />
                     <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
