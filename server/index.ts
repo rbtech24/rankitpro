@@ -255,7 +255,7 @@ async function createSuperAdminIfNotExists() {
     const enabledFeatures = Object.entries(features).filter(([_, enabled]) => enabled).map(([name]) => name).join(", ") || "none";
     logger.info(`Features enabled: ${enabledFeatures}`);
   } catch (error) {
-    console.error("Database operation error", { error: error?.message || "Unknown error" });
+    logger.error("Environment validation failed", { error: error instanceof Error ? error.message : String(error) });
     process.exit(1);
   }
 
@@ -407,7 +407,7 @@ async function createSuperAdminIfNotExists() {
   // Add error handling for port conflicts
   server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
-      logger.error(`Port ${port} is already in use`, { port, error: err.message });
+      logger.error(`Port ${port} is already in use`, { port: Number(port), error: err.message });
       // Try alternative ports
       const alternativePort = parseInt(port.toString()) + 1;
       server.listen({
