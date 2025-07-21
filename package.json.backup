@@ -1,7 +1,7 @@
 {
   "name": "workspace",
   "version": "1.0.0",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "dev": "tsx server/index.ts",
     "build": "npm run build:client && npm run build:server",
@@ -38,14 +38,6 @@
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/react-query": "^5.81.5",
     "@tinymce/tinymce-react": "^6.2.1",
-    "@types/bcrypt": "^6.0.0",
-    "@types/connect-pg-simple": "^7.0.3",
-    "@types/express": "^5.0.3",
-    "@types/express-session": "^1.18.2",
-    "@types/multer": "^2.0.0",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^4.6.0",
     "autoprefixer": "^10.4.21",
     "bcrypt": "^6.0.0",

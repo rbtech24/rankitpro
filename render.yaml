@@ -1,9 +1,10 @@
 services:
   - type: web
-    name: rankitpro
+    name: rankitpro-saas
     env: node
+    plan: starter
     buildCommand: npm install --ignore-optional --no-optional && ./build.sh
-    startCommand: node dist/server.js || tsx server/index.ts
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -11,12 +12,14 @@ services:
         fromDatabase:
           name: rankitpro-db
           property: connectionString
-    region: oregon
-    plan: starter
-    
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: PORT
+        value: 10000
+    healthCheckPath: /api/health
+
 databases:
   - name: rankitpro-db
     databaseName: rankitpro
-    user: rankitpro
-    region: oregon
+    user: rankitpro_user
     plan: starter
