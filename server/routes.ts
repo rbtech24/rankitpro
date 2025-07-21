@@ -409,7 +409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     logger.info('🚀 WebSocket server initialized successfully');
   } catch (wsError) {
-    logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("WebSocket initialization error", { error: wsError instanceof Error ? wsError.message : String(wsError) });
     logger.info('📱 Application will continue without real-time features');
   }
   
@@ -437,7 +437,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     );
     logger.info('[SESSION] Memory session store initialized successfully');
   } catch (sessionError) {
-    logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Session initialization error", { error: sessionError instanceof Error ? sessionError.message : String(sessionError) });
     // Minimal session fallback
     app.use((req, res, next) => {
       req.session = { userId: undefined } as any;
@@ -821,7 +821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await new Promise<void>((resolve, reject) => {
         req.session.save((err: any) => {
           if (err) {
-            logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
+            logger.error("Session save error", { error: err instanceof Error ? err.message : String(err) });
             reject(new Error("Session save failed"));
           } else {
             logger.info("Parameter processed");
@@ -1162,7 +1162,7 @@ Make it compelling for search engine users to click.`;
 
         const response = await openai.chat.completions.create({
           model: "gpt-4o",
-          messages: [{ success: true }],
+          messages: [{ role: "user", content: aiPrompt }],
           max_tokens: 500,
           temperature: 0.7,
         });
@@ -1170,7 +1170,7 @@ Make it compelling for search engine users to click.`;
         const content = response.choices[0].message.content;
         res.json({ content });
       } catch (openaiError) {
-      logger.error("Database operation error", { error: error?.message || "Unknown error" });
+      logger.error("OpenAI generation error", { error: openaiError instanceof Error ? openaiError.message : String(openaiError) });
         
         // Generate fallback content based on type
         let fallbackContent = '';
@@ -1281,7 +1281,7 @@ Format as professional service documentation.`;
 
         const response = await openai.chat.completions.create({
           model: "gpt-4o",
-          messages: [{ success: true }],
+          messages: [{ role: "user", content: aiPrompt }],
           max_tokens: 800,
           temperature: 0.7,
         });
@@ -1298,7 +1298,7 @@ Format as professional service documentation.`;
         } else {
           fallbackContent = "content-text";
         }
-        res.json({ success: true });
+        res.json({ content: fallbackContent, type: contentType });
       }
     } catch (error) {
       logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
@@ -1620,7 +1620,7 @@ Format as professional service documentation.`;
     if (req.session) {
       req.session.destroy((err) => {
         if (err) {
-          logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
+          logger.error("Session destroy error", { error: err instanceof Error ? err.message : String(err) });
         }
         
         // Always clear cookies regardless of session destruction result
@@ -1655,7 +1655,7 @@ Format as professional service documentation.`;
     if (req.session) {
       req.session.destroy((err) => {
         if (err) {
-          logger.error("Database error", { error: error instanceof Error ? error.message : String(error) });
+          logger.error("Session destroy error", { error: err instanceof Error ? err.message : String(err) });
         }
         
         // Always clear cookies regardless of session destruction result
