@@ -80,6 +80,7 @@ import {
   validateParams as validateInputParams,
   sanitizeAllInputs
 } from "./middleware/input-validation";
+import { setupSimpleAuth } from "./simple-auth";
 import { enforceSessionTimeout, enforceConcurrentSessions, sessionMonitoring, cleanupSession } from "./middleware/session-management";
 import { generalRateLimit, authRateLimit, passwordResetRateLimit, placeholderGenerationRateLimit, adminRateLimit } from "./middleware/rate-limiting";
 import { securityHeaders, additionalSecurityHeaders, apiSecurityHeaders } from "./middleware/security-headers";
@@ -221,6 +222,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       maxAge: isProduction ? 2 * 60 * 60 * 1000 : 4 * 60 * 60 * 1000 // 2 hours in production, 4 hours in dev
     }
   }));
+
+  // Setup simple auth for admin access
+  setupSimpleAuth(app);
 
   // Critical: Force API routes to bypass static file serving
   app.all('/api/*', (req, res, next) => {
