@@ -576,7 +576,7 @@ export default function CompaniesManagement() {
                           </TableCell>
                           <TableCell>{company.industry || 'Not specified'}</TableCell>
                           <TableCell>{company.plan}</TableCell>
-                          <TableCell>{parseInt(String(company.stats?.totalTechnicians || 0)) || 0} / {company.maxTechnicians || 'Unlimited'}</TableCell>
+                          <TableCell>{parseInt(String(company.stats?.totalTechnicians || 0)) || 0} / {company.maxTechnicians ? company.maxTechnicians : 'Unlimited'}</TableCell>
                           <TableCell>{parseInt(String(company.stats?.totalCheckIns || 0)) || 0}</TableCell>
                           <TableCell>
                             <div className="flex items-center">
@@ -766,13 +766,15 @@ export default function CompaniesManagement() {
                       </div>
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Technician Limit</h3>
-                        <p>{selectedCompany.currentTechnicians} used of {selectedCompany.maxTechnicians}</p>
-                        <div className="w-full h-2 bg-gray-200 rounded-full mt-1">
-                          <div 
-                            className="h-full bg-primary rounded-full"
-                            style={{ width: `${(selectedCompany.currentTechnicians / selectedCompany.maxTechnicians) * 100}%` }}
-                          ></div>
-                        </div>
+                        <p>{parseInt(String(selectedCompany.stats?.totalTechnicians || 0)) || 0} used of {selectedCompany.maxTechnicians ? selectedCompany.maxTechnicians : 'Unlimited'}</p>
+                        {selectedCompany.maxTechnicians && (
+                          <div className="w-full h-2 bg-gray-200 rounded-full mt-1">
+                            <div 
+                              className="h-full bg-primary rounded-full"
+                              style={{ width: `${Math.min(((parseInt(String(selectedCompany.stats?.totalTechnicians || 0)) || 0) / selectedCompany.maxTechnicians) * 100, 100)}%` }}
+                            ></div>
+                          </div>
+                        )}
                       </div>
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Enabled Features</h3>
