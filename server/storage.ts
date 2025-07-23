@@ -1343,7 +1343,7 @@ export class DatabaseStorage implements IStorage {
 
       // Calculate average rating from reviewResponses table (only numeric ratings)
       const [avgRating] = await db.select({ 
-        avg: sql<number>`COALESCE(AVG(CASE WHEN rating IS NOT NULL AND rating != '' AND rating != '0' THEN GREATEST(1, LEAST(5, CAST(rating AS INTEGER))) ELSE NULL END), 0)` 
+        avg: sql<number>`COALESCE(AVG(CASE WHEN rating IS NOT NULL AND rating::text != '' AND rating != 0 THEN GREATEST(1, LEAST(5, rating)) ELSE NULL END), 0)` 
       }).from(reviewResponses).where(eq(reviewResponses.companyId, companyId));
 
       // Calculate trends (compare last 30 days vs previous 30 days)
@@ -1864,7 +1864,7 @@ export class DatabaseStorage implements IStorage {
       }).from(companies);
 
       // Calculate metrics from database companies (fallback/baseline data)
-      const planPrices = { success: true };
+      const planPrices = { starter: 29, pro: 79, agency: 149 };
       const activeCompanies = allCompanies.filter(company => !company.isTrialActive);
       
       let baselineMonthlyRevenue = 0;
@@ -2031,14 +2031,14 @@ export class DatabaseStorage implements IStorage {
         .orderBy(companies.createdAt);
 
       // Group by month
-    const monthlyData = [];
-      const planPrices = { success: true };
+      const monthlyData: { [key: string]: { month: string; signups: number; revenue: number } } = {};
+      const planPrices = { starter: 29, pro: 79, agency: 149 };
 
       signups.forEach(signup => {
         if (signup.createdAt) {
           const month = signup.createdAt.toISOString().substring(0, 7); // YYYY-MM
           if (!monthlyData[month]) {
-            monthlyData[month] = { success: true };
+            monthlyData[month] = { month, signups: 0, revenue: 0 };
           }
           monthlyData[month].signups += 1;
           monthlyData[month].revenue += planPrices[signup.plan as keyof typeof planPrices] || 29;
@@ -2061,7 +2061,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(companies.isTrialActive, true))
         .groupBy(companies.plan);
 
-      const planPrices = { success: true };
+      const planPrices = { starter: 29, pro: 79, agency: 149 };
       
       return planCounts.map(item => ({
         plan: item.plan,
@@ -2281,7 +2281,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(companies.createdAt);
 
       // Group by month
-      const monthlyRevenue: { success: true } = {};
+      const monthlyRevenue: { [key: string]: number } = {};
       
       companiesWithRevenue.forEach(company => {
         if (company.createdAt) {
@@ -3325,7 +3325,7 @@ export class DatabaseStorage implements IStorage {
         .orderBy(sql`created_at >= ${startOfMonth}`);
 
       // Convert to revenue data by applying plan pricing
-      const planPricing = { success: true };
+      const planPricing = { starter: 29, pro: 79, agency: 149 };
       const monthlyRevenue = new Map<string, number>();
 
       revenueData.forEach(row => {
