@@ -37,7 +37,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
     
     return res.json(enrichedRequests);
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Error occurred", { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to fetch review requests' });
   }
 });
@@ -105,10 +105,10 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         if (!emailSent) {
           log('Failed to send review request email', 'warning');
         } else {
-          log(`Review request email sent successfully`, 'info');
+          logger.info(`Review request email sent successfully`, 'info');
         }
       } catch (error) {
-        logger.error("Unhandled error occurred");
+        logger.error("Error occurred", { error: error instanceof Error ? error.message : String(error) });
         // Continue even if email fails
       }
     } else if (method === 'sms') {
@@ -118,7 +118,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
     
     return res.status(201).json(reviewRequest);
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Error occurred", { error: error instanceof Error ? error.message : String(error) });
     if (error instanceof z.ZodError) {
       return res.status(400).json({ success: true });
     }
@@ -155,7 +155,7 @@ router.get('/:id', isAuthenticated, async (req: Request, res: Response) => {
       } : null
     });
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Error occurred", { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to fetch review request' });
   }
 });
@@ -176,13 +176,13 @@ router.get('/link/:id', async (req: Request, res: Response) => {
     // Get the server's base URL
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const host = req.headers['x-forwarded-host'] || req.get('host');
-    const baseUrl = `${baseUrl}/review/${reviewRequest.id}`;
+    const reviewBaseUrl = `${protocol}://${host}`;
     
-    const reviewUrl = `${baseUrl}/review/${reviewRequest.id}`;
+    const reviewUrl = `${reviewBaseUrl}/review/${reviewRequest.id}`;
     
     return res.json({ reviewUrl });
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Error occurred", { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to generate review link' });
   }
 });

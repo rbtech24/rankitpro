@@ -233,8 +233,8 @@ async function createSuperAdminIfNotExists() {
       log("=====================================");
       log("SYSTEM ADMIN ACCOUNT CREATED");
       log("=====================================");
-      log(`Email: ${adminEmail}`);
-      log(`Password: ${adminPassword}`);
+      logger.info(`Email: ${adminEmail}`);
+      logger.info(`Password: ${adminPassword}`);
       log("=====================================");
       log("SAVE THESE CREDENTIALS IMMEDIATELY");
       log("They will not be displayed again!");

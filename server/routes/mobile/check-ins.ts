@@ -152,7 +152,7 @@ router.get('/', isAuthenticated, async (req, res) => {
       })
     });
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Error in check-ins", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -266,7 +266,7 @@ router.post('/', isAuthenticated, async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    logger.error("Unhandled error occurred");
+    logger.error("Error in check-ins", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -322,7 +322,7 @@ router.post('/:id/photos', isAuthenticated, upload.array('photos', 10), async (r
       }))
     });
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Error in check-ins", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -398,7 +398,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
       return res.status(400).json({ message: validationError.message });
     }
     
-    logger.error("Unhandled error occurred");
+    logger.error("Error in check-ins", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -464,7 +464,7 @@ router.delete('/:id/photos/:photoName', isAuthenticated, async (req, res) => {
       }))
     });
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Error in check-ins", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -512,7 +512,7 @@ router.patch('/:id/complete', isAuthenticated, async (req, res) => {
       }) : []
     });
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Error in check-ins", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -569,7 +569,7 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
     // Return success
     res.status(204).send();
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Error in check-ins", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -702,7 +702,7 @@ router.post('/sync', isAuthenticated, async (req, res) => {
       results
     });
   } catch (error) {
-    logger.error("Unhandled error occurred");
+    logger.error("Error in check-ins", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });

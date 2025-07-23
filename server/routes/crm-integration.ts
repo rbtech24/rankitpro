@@ -17,7 +17,7 @@ router.get('/available', isAuthenticated, async (req, res) => {
     const availableCRMs = getSupportedCRMs();
     res.json(availableCRMs);
   } catch (error: any) {
-    log(`Invalid CRM provider: ${provider}`);
+    logger.error('Error fetching available CRMs', { error: error?.message || 'Unknown error' });
     res.status(500).json({ 
       message: 'Error fetching available CRMs',
       error: error?.message || 'Unknown error occurred'
@@ -62,7 +62,7 @@ router.get('/configured', isAuthenticated, async (req, res) => {
     
     res.json(configuredCRMs);
   } catch (error: any) {
-    logger.error("Unhandled error occurred");
+    logger.error('Error fetching configured CRMs', { error: error?.message || 'Unknown error' });
     res.status(500).json({ message: 'Error fetching configured CRMs' });
   }
 });

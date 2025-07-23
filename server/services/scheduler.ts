@@ -50,7 +50,7 @@ class SchedulerService {
       await reviewAutomationService.processScheduledReviewRequests();
       log('Review follow-up processing completed.', 'scheduler');
     } catch (error) {
-      log(`${apiBase}/${endpoint}`, 'scheduler');
+      logger.info(`${apiBase}/${endpoint}`, 'scheduler');
     }
   }
 }

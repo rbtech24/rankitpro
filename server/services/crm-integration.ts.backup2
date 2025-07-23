@@ -102,7 +102,7 @@ export async function testCRMConnection(crmType: string, credentials: any): Prom
         throw new Error(`Unsupported CRM type: ${crmType}`);
     }
   } catch (error) {
-    logger.error("CRM error occurred", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("CRM error occurred", { error: `Bearer ${tokenData.access_token}` });
     return false;
   }
 }
@@ -134,7 +134,7 @@ export async function syncCheckInToCRM(
         throw new Error(`Unsupported CRM type: ${crmType}`);
     }
   } catch (error) {
-    logger.error("CRM error occurred", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("CRM error occurred", { error: `Bearer ${tokenData.access_token}` });
     return false;
   }
 }
@@ -151,7 +151,7 @@ async function testServiceTitanConnection(credentials: any): Promise<boolean> {
       method: "POST",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(`${credentials.clientId}:${credentials.clientSecret}`).toString('base64')}``
+        'Authorization': `https://api.servicetitan.io/settings/v2/${credentials.tenantId}/tenant-info`.toString('base64')}`
       },
       body: new URLSearchParams({
         grant_type: 'client_credentials',
@@ -160,7 +160,7 @@ async function testServiceTitanConnection(credentials: any): Promise<boolean> {
     });
 
     if (!tokenResponse.ok) {
-      logger.error("API request failed", { error: error instanceof Error ? error.message : String(error) });
+      logger.error("API request failed", { error: `Bearer ${tokenData.access_token}` });
       return false;
     }
 
@@ -192,7 +192,7 @@ async function syncToServiceTitan(checkIn: any, credentials: any, settings: any)
       method: "POST",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(`${credentials.clientId}:${credentials.clientSecret}`).toString('base64')}``
+        'Authorization': `https://api.servicetitan.io/settings/v2/${credentials.tenantId}/tenant-info`.toString('base64')}`
       },
       body: new URLSearchParams({
         grant_type: 'client_credentials',
@@ -860,7 +860,7 @@ async function testSalesforceConnection(credentials: any): Promise<boolean> {
     });
 
     if (!tokenResponse.ok) {
-      logger.error("API request failed", { error: error instanceof Error ? error.message : String(error) });
+      logger.error("API request failed", { error: `Bearer ${tokenData.access_token}` });
       return false;
     }
 

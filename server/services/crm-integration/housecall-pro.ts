@@ -51,7 +51,7 @@ export class HouseCallProIntegration implements CRMIntegration {
           data: error.response.data
         });
       } else {
-        logger.error("Unhandled error occurred");
+        logger.error("Housecall Pro operation failed", { error: error instanceof Error ? error.message : String(error) });
       }
       throw error;
     }
@@ -66,7 +66,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       await this.apiRequest<any>('GET', '/customers?limit=1');
       return true;
     } catch (error) {
-      logger.error("Unhandled error occurred");
+      logger.error("Housecall Pro operation failed", { error: error instanceof Error ? error.message : String(error) });
       return false;
     }
   }
@@ -108,7 +108,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       
       return null;
     } catch (error) {
-      logger.error("Unhandled error occurred");
+      logger.error("Housecall Pro operation failed", { error: error instanceof Error ? error.message : String(error) });
       return null;
     }
   }
@@ -181,7 +181,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         return newCustomer.id;
       }
     } catch (error) {
-      logger.error("Unhandled error occurred");
+      logger.error("Housecall Pro operation failed", { error: error instanceof Error ? error.message : String(error) });
       return null;
     }
   }
@@ -196,7 +196,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       // Check if job already exists
       if (job.externalId) {
         try {
-          const existingJob = await this.apiRequest<any>('GET', `/customers?email=${encodeURIComponent(customer.email)}`;
+          const existingJob = await this.apiRequest<any>('GET', `/jobs/${job.externalId}`);
           if (existingJob && existingJob.id) {
             jobId = existingJob.id;
           }
@@ -283,7 +283,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         return newJob.id;
       }
     } catch (error) {
-      logger.error("Unhandled error occurred");
+      logger.error("Housecall Pro operation failed", { error: error instanceof Error ? error.message : String(error) });
       return null;
     }
   }
@@ -388,7 +388,7 @@ export class HouseCallProIntegration implements CRMIntegration {
       
       return true;
     } catch (error) {
-      logger.error("Unhandled error occurred");
+      logger.error("Housecall Pro operation failed", { error: error instanceof Error ? error.message : String(error) });
       return false;
     }
   }
@@ -427,7 +427,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         notes: job.notes || ''
       }));
     } catch (error) {
-      logger.error("Unhandled error occurred");
+      logger.error("Housecall Pro operation failed", { error: error instanceof Error ? error.message : String(error) });
       return [];
     }
   }
@@ -481,7 +481,7 @@ export class HouseCallProIntegration implements CRMIntegration {
         notes: customer.notes || null
       }));
     } catch (error) {
-      logger.error("Unhandled error occurred");
+      logger.error("Housecall Pro operation failed", { error: error instanceof Error ? error.message : String(error) });
       return [];
     }
   }
