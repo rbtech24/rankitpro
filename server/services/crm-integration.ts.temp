@@ -1,0 +1,50 @@
+// CRM Integration Service
+// Provides functionality for managing CRM integrations
+
+export interface CRM {
+  id: string;
+  name: string;
+  description: string;
+  logo?: string;
+  features: string[];
+  authType: 'oauth2' | 'api_key' | 'username_password';
+  setupComplexity: 'low' | 'medium' | 'high';
+  isPopular: boolean;
+}
+
+/**
+ * Get list of supported CRM systems
+ */
+export function getSupportedCRMs(): CRM[] {
+  return [
+    {
+      id: 'servicetitan',
+      name: 'ServiceTitan',
+      description: 'Complete field service management platform with scheduling, dispatching, and customer management',
+      logo: '/api/crm/logos/servicetitan.png',
+      features: ['Customer Management', 'Job Scheduling', 'Invoicing', 'Technician Tracking'],
+      authType: 'oauth2',
+      setupComplexity: 'high',
+      isPopular: true
+    },
+    {
+      id: 'housecallpro',
+      name: 'Housecall Pro',
+      description: 'Simple field service software for scheduling, dispatching, and customer communication',
+      logo: '/api/crm/logos/housecallpro.png',
+      features: ['Scheduling', 'Customer Communication', 'Invoicing', 'Photo Documentation'],
+      authType: 'api_key',
+      setupComplexity: 'medium',
+      isPopular: true
+    },
+    {
+      id: 'jobber',
+      name: 'Jobber',
+      description: 'Home service business management software with quoting, scheduling, and invoicing',
+      logo: '/api/crm/logos/jobber.png',
+      features: ['Quoting', 'Scheduling', 'Customer Management', 'Payment Processing'],
+      authType: 'oauth2',
+      setupComplexity: 'medium',
+      isPopular: true
+    },
+    {

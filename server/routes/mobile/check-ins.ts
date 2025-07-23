@@ -7,7 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
 
-import { logger } from '../services/logger';
+import { logger } from '../../services/logger';
 const router = Router();
 
 // Setup multer for file uploads
@@ -64,7 +64,7 @@ const checkInSchema = z.object({
   materialsUsed: z.string().optional(),
   location: locationSchema.optional(),
   offlineId: z.string().optional(), // For offline sync
-  completedAt: z.string().optional(), // ISO date string
+  updatedAt: z.string().optional(), // ISO date string
   isBillable: z.boolean().optional(),
   followUpRequired: z.boolean().optional(),
   estimatedHours: z.number().positive().optional(),
@@ -77,8 +77,8 @@ const checkInSchema = z.object({
 router.get('/', isAuthenticated, async (req, res) => {
   try {
     // Get technician details
-    const technicians = await storage.getTechniciansByCompany(req.user.companyId);
-    const technician = technicians.find(tech => tech.userId === req.user.id);
+    const technicians = await storage.getTechniciansByCompany(req.user?.companyId!);
+    const technician = technicians.find(tech => tech.userId === req.user?.id!);
     
     if (!technician) {
       return res.status(404).json({ message: "Technician not found" });
@@ -166,8 +166,8 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     }
     
     // Get technician details
-    const technicians = await storage.getTechniciansByCompany(req.user.companyId);
-    const technician = technicians.find(tech => tech.userId === req.user.id);
+    const technicians = await storage.getTechniciansByCompany(req.user?.companyId!);
+    const technician = technicians.find(tech => tech.userId === req.user?.id!);
     
     if (!technician) {
       return res.status(404).json({ message: "Technician not found" });
@@ -209,7 +209,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     const data = checkInSchema.parse(req.body);
     
     // Check usage limits before creating check-in
-    const usageLimits = await storage.checkUsageLimits(req.user.companyId);
+    const usageLimits = await storage.checkUsageLimits(req.user?.companyId!);
     
     if (!usageLimits.canCreateCheckIn) {
       return res.status(429).json({
@@ -225,8 +225,8 @@ router.post('/', isAuthenticated, async (req, res) => {
     }
     
     // Get technician details
-    const technicians = await storage.getTechniciansByCompany(req.user.companyId);
-    const technician = technicians.find(tech => tech.userId === req.user.id);
+    const technicians = await storage.getTechniciansByCompany(req.user?.companyId!);
+    const technician = technicians.find(tech => tech.userId === req.user?.id!);
     
     if (!technician) {
       return res.status(404).json({ message: "Technician not found" });
@@ -234,7 +234,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     
     // Create the check-in
     const checkIn = await storage.createCheckIn({
-      companyId: req.user.companyId,
+      companyId: req.user?.companyId!,
       technicianId: technician.id,
       jobType: data.jobType,
       notes: data.notes || null,
@@ -248,7 +248,7 @@ router.post('/', isAuthenticated, async (req, res) => {
       longitude: data.location?.longitude?.toString() || null,
       isBillable: data.isBillable || false,
       followUpRequired: data.followUpRequired || false,
-      completedAt: data.completedAt ? new Date(data.completedAt) : null,
+      updatedAt: data.completedAt ? new Date(data.completedAt) : null,
       tags: data.tags ? JSON.stringify(data.tags) : null,
       offlineId: data.offlineId || null,
       // We'll add photos separately
@@ -280,8 +280,8 @@ router.post('/:id/photos', isAuthenticated, upload.array('photos', 10), async (r
     }
     
     // Get technician details
-    const technicians = await storage.getTechniciansByCompany(req.user.companyId);
-    const technician = technicians.find(tech => tech.userId === req.user.id);
+    const technicians = await storage.getTechniciansByCompany(req.user?.companyId!);
+    const technician = technicians.find(tech => tech.userId === req.user?.id!);
     
     if (!technician) {
       return res.status(404).json({ message: "Technician not found" });
@@ -338,8 +338,8 @@ router.put('/:id', isAuthenticated, async (req, res) => {
     const updates = checkInSchema.partial().parse(req.body);
     
     // Get technician details
-    const technicians = await storage.getTechniciansByCompany(req.user.companyId);
-    const technician = technicians.find(tech => tech.userId === req.user.id);
+    const technicians = await storage.getTechniciansByCompany(req.user?.companyId!);
+    const technician = technicians.find(tech => tech.userId === req.user?.id!);
     
     if (!technician) {
       return res.status(404).json({ message: "Technician not found" });
@@ -414,8 +414,8 @@ router.delete('/:id/photos/:photoName', isAuthenticated, async (req, res) => {
     const photoName = req.params.photoName;
     
     // Get technician details
-    const technicians = await storage.getTechniciansByCompany(req.user.companyId);
-    const technician = technicians.find(tech => tech.userId === req.user.id);
+    const technicians = await storage.getTechniciansByCompany(req.user?.companyId!);
+    const technician = technicians.find(tech => tech.userId === req.user?.id!);
     
     if (!technician) {
       return res.status(404).json({ message: "Technician not found" });
@@ -478,8 +478,8 @@ router.patch('/:id/complete', isAuthenticated, async (req, res) => {
     }
     
     // Get technician details
-    const technicians = await storage.getTechniciansByCompany(req.user.companyId);
-    const technician = technicians.find(tech => tech.userId === req.user.id);
+    const technicians = await storage.getTechniciansByCompany(req.user?.companyId!);
+    const technician = technicians.find(tech => tech.userId === req.user?.id!);
     
     if (!technician) {
       return res.status(404).json({ message: "Technician not found" });
@@ -495,7 +495,7 @@ router.patch('/:id/complete', isAuthenticated, async (req, res) => {
     
     // Update the check-in as completed
     const updatedCheckIn = await storage.updateCheckIn(checkInId, {
-      completedAt: new Date()
+      updatedAt: new Date()
     });
     
     // Parse photos for response
@@ -526,8 +526,8 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
     }
     
     // Get technician details
-    const technicians = await storage.getTechniciansByCompany(req.user.companyId);
-    const technician = technicians.find(tech => tech.userId === req.user.id);
+    const technicians = await storage.getTechniciansByCompany(req.user?.companyId!);
+    const technician = technicians.find(tech => tech.userId === req.user?.id!);
     
     if (!technician) {
       return res.status(404).json({ message: "Technician not found" });
@@ -583,8 +583,8 @@ router.post('/sync', isAuthenticated, async (req, res) => {
     }
     
     // Get technician details
-    const technicians = await storage.getTechniciansByCompany(req.user.companyId);
-    const technician = technicians.find(tech => tech.userId === req.user.id);
+    const technicians = await storage.getTechniciansByCompany(req.user?.companyId!);
+    const technician = technicians.find(tech => tech.userId === req.user?.id!);
     
     if (!technician) {
       return res.status(404).json({ message: "Technician not found" });
@@ -650,7 +650,7 @@ router.post('/sync', isAuthenticated, async (req, res) => {
         } else {
           // This is a new check-in
           const newCheckIn = await storage.createCheckIn({
-            companyId: req.user.companyId,
+            companyId: req.user?.companyId!,
             technicianId: technician.id,
             jobType: validatedData.jobType,
             notes: validatedData.notes || null,
@@ -664,7 +664,7 @@ router.post('/sync', isAuthenticated, async (req, res) => {
             longitude: validatedData.location?.longitude?.toString() || null,
             isBillable: validatedData.isBillable || false,
             followUpRequired: validatedData.followUpRequired || false,
-            completedAt: validatedData.completedAt ? new Date(validatedData.completedAt) : null,
+            updatedAt: validatedData.completedAt ? new Date(validatedData.completedAt) : null,
             tags: validatedData.tags ? JSON.stringify(validatedData.tags) : null,
             offlineId: validatedData.offlineId || null,
             photos: JSON.stringify([])

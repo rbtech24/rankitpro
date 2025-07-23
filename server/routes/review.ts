@@ -37,7 +37,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
     
     return res.json(enrichedRequests);
   } catch (error) {
-    logger.error("Error occurred", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Error occurred", { message: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to fetch review requests' });
   }
 });
@@ -108,7 +108,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
           logger.info(`Review request email sent successfully`, 'info');
         }
       } catch (error) {
-        logger.error("Error occurred", { error: error instanceof Error ? error.message : String(error) });
+        logger.error("Error occurred", { message: error instanceof Error ? error.message : String(error) });
         // Continue even if email fails
       }
     } else if (method === 'sms') {
@@ -118,7 +118,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
     
     return res.status(201).json(reviewRequest);
   } catch (error) {
-    logger.error("Error occurred", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Error occurred", { message: error instanceof Error ? error.message : String(error) });
     if (error instanceof z.ZodError) {
       return res.status(400).json({ success: true });
     }
@@ -155,7 +155,7 @@ router.get('/:id', isAuthenticated, async (req: Request, res: Response) => {
       } : null
     });
   } catch (error) {
-    logger.error("Error occurred", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Error occurred", { message: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to fetch review request' });
   }
 });
@@ -182,7 +182,7 @@ router.get('/link/:id', async (req: Request, res: Response) => {
     
     return res.json({ reviewUrl });
   } catch (error) {
-    logger.error("Error occurred", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Error occurred", { message: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to generate review link' });
   }
 });

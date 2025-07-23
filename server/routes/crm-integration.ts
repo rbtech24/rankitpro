@@ -17,7 +17,7 @@ router.get('/available', isAuthenticated, async (req, res) => {
     const availableCRMs = getSupportedCRMs();
     res.json(availableCRMs);
   } catch (error: any) {
-    logger.error('Error fetching available CRMs', { error: error?.message || 'Unknown error' });
+    logger.error('Error fetching available CRMs', { message: error?.message || 'Unknown error' });
     res.status(500).json({ 
       message: 'Error fetching available CRMs',
       error: error?.message || 'Unknown error occurred'
@@ -28,7 +28,7 @@ router.get('/available', isAuthenticated, async (req, res) => {
 // Get configured CRM integrations for the current company
 router.get('/configured', isAuthenticated, async (req, res) => {
   try {
-    const { companyId } = req.user;
+    const companyId = req.user?.companyId;
     
     if (!companyId) {
       return res.status(400).json({ message: 'Company ID is required' });
@@ -62,7 +62,7 @@ router.get('/configured', isAuthenticated, async (req, res) => {
     
     res.json(configuredCRMs);
   } catch (error: any) {
-    logger.error('Error fetching configured CRMs', { error: error?.message || 'Unknown error' });
+    logger.error('Error fetching configured CRMs', { message: error?.message || 'Unknown error' });
     res.status(500).json({ message: 'Error fetching configured CRMs' });
   }
 });
@@ -70,7 +70,7 @@ router.get('/configured', isAuthenticated, async (req, res) => {
 // Configure a CRM integration
 router.post('/configure', isAuthenticated, isCompanyAdmin, async (req, res) => {
   try {
-    const { companyId } = req.user;
+    const companyId = req.user?.companyId;
     const { crmType, credentials, syncSettings } = req.body;
     
     if (!companyId) {
@@ -121,7 +121,7 @@ router.post('/configure', isAuthenticated, isCompanyAdmin, async (req, res) => {
     
     res.json({ success: true });
   } catch (error: any) {
-    logger.error('Error configuring CRM integration', { error: error?.message || 'Unknown error' });
+    logger.error('Error configuring CRM integration', { message: error?.message || 'Unknown error' });
     res.status(500).json({ 
       message: 'Error configuring CRM integration',
       error: error?.message || 'Unknown error occurred'
@@ -146,7 +146,7 @@ router.post('/test-connection', isAuthenticated, isCompanyAdmin, async (req, res
       res.status(400).json({ message: 'Connection test failed' });
     }
   } catch (error: any) {
-    logger.error('Error testing CRM connection', { error: error?.message || 'Unknown error' });
+    logger.error('Error testing CRM connection', { message: error?.message || 'Unknown error' });
     res.status(500).json({ 
       message: 'Error testing CRM connection',
       error: error?.message || 'Unknown error occurred'
@@ -157,7 +157,7 @@ router.post('/test-connection', isAuthenticated, isCompanyAdmin, async (req, res
 // Delete a CRM integration
 router.delete('/:crmType', isAuthenticated, isCompanyAdmin, async (req, res) => {
   try {
-    const { companyId } = req.user;
+    const companyId = req.user?.companyId;
     const { crmType } = req.params;
     
     if (!companyId) {
@@ -185,7 +185,7 @@ router.delete('/:crmType', isAuthenticated, isCompanyAdmin, async (req, res) => 
     
     res.json({ success: true });
   } catch (error: any) {
-    logger.error('Error deleting CRM integration', { error: error?.message || 'Unknown error' });
+    logger.error('Error deleting CRM integration', { message: error?.message || 'Unknown error' });
     res.status(500).json({ 
       message: 'Error deleting CRM integration',
       error: error?.message || 'Unknown error occurred'
@@ -196,7 +196,7 @@ router.delete('/:crmType', isAuthenticated, isCompanyAdmin, async (req, res) => 
 // Trigger a manual sync
 router.post('/:crmType/sync', isAuthenticated, isCompanyAdmin, async (req, res) => {
   try {
-    const { companyId } = req.user;
+    const companyId = req.user?.companyId;
     const { crmType } = req.params;
     
     if (!companyId) {
@@ -284,7 +284,7 @@ router.post('/:crmType/sync', isAuthenticated, isCompanyAdmin, async (req, res) 
     
     res.json({ success: true });
   } catch (error: any) {
-    logger.error('Error syncing with CRM', { error: error?.message || 'Unknown error' });
+    logger.error('Error syncing with CRM', { message: error?.message || 'Unknown error' });
     res.status(500).json({ 
       message: 'Error syncing with CRM',
       error: error?.message || 'Unknown error occurred'
@@ -295,7 +295,7 @@ router.post('/:crmType/sync', isAuthenticated, isCompanyAdmin, async (req, res) 
 // Get sync history
 router.get('/sync-history', isAuthenticated, async (req, res) => {
   try {
-    const { companyId } = req.user;
+    const companyId = req.user?.companyId;
     
     if (!companyId) {
       return res.status(400).json({ message: 'Company ID is required' });
@@ -312,7 +312,7 @@ router.get('/sync-history', isAuthenticated, async (req, res) => {
     
     res.json(syncHistory);
   } catch (error: any) {
-    logger.error('Error fetching CRM sync history', { error: error?.message || 'Unknown error' });
+    logger.error('Error fetching CRM sync history', { message: error?.message || 'Unknown error' });
     res.status(500).json({ 
       message: 'Error fetching CRM sync history',
       error: error?.message || 'Unknown error occurred'
