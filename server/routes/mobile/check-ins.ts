@@ -144,7 +144,7 @@ router.get('/', isAuthenticated, async (req, res) => {
           ...checkIn,
           photos: Array.isArray(photos) ? photos.map((photo: any) => {
             if (typeof photo === 'string') {
-              return { url: `/uploads/checkins/${photo}`
+              return { url: `/uploads/checkins/${photo}` };
             }
             return photo;
           }) : []
@@ -387,7 +387,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
       ...updatedCheckIn,
       photos: Array.isArray(photos) ? photos.map((photo: any) => {
         if (typeof photo === 'string') {
-          return { url: `/uploads/checkins/${photo}`
+          return { url: `/uploads/checkins/${photo}` };
         }
         return photo;
       }) : []
@@ -506,7 +506,7 @@ router.patch('/:id/complete', isAuthenticated, async (req, res) => {
       ...updatedCheckIn,
       photos: Array.isArray(photos) ? photos.map((photo: any) => {
         if (typeof photo === 'string') {
-          return { url: `/uploads/checkins/${photo}`
+          return { url: `/uploads/checkins/${photo}` };
         }
         return photo;
       }) : []

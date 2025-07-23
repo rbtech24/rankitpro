@@ -91,7 +91,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
         // Generate review link/URL
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         const host = req.headers['x-forwarded-host'] || req.get('host');
-        const baseUrl = `${baseUrl}/review/${reviewRequest.id}`;
+        const baseUrl = `${protocol}://${host}`;
         const reviewLink = `${baseUrl}/review/${reviewRequest.id}`;
         
         const emailSent = await emailService.sendReviewRequest(
@@ -113,7 +113,7 @@ router.post('/', isAuthenticated, isCompanyAdmin, async (req: Request, res: Resp
       }
     } else if (method === 'sms') {
       // SMS functionality would be implemented here
-      log(`Operation completed successfully`;
+      logger.info('SMS review request would be sent here');
     }
     
     return res.status(201).json(reviewRequest);

@@ -203,8 +203,8 @@ router.get('/download-plugin', async (req: Request, res: Response) => {
 
 ## Configuration
 
-- **API Key**: placeholder
-- **Webhook URL**: placeholder/api/wordpress/webhook
+- **API Key**: ${apiKey}
+- **Webhook URL**: ${apiKey}/api/wordpress/webhook
 - **Auto Sync**: Enable to automatically publish check-ins
 - **Photo Upload**: Enable to include technician photos
 
@@ -379,11 +379,11 @@ router.get('/embed', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
         const embedCode = `<script>
 (function() {
   window.RankItProConfig = {
-    apiKey: 'placeholder',
-    endpoint: 'placeholder'
+    apiKey: '${apiKey}',
+    endpoint: '${apiKey}'
   };
   var script = document.createElement('script');
-  script.src = 'placeholder/widget.js';
+  script.src = '${apiKey}/widget.js';
   document.head.appendChild(script);
 })();
 </script>`;
@@ -641,7 +641,7 @@ router.post('/custom-fields/connection', isAuthenticated, isCompanyAdmin, async 
         defaultAuthor: data.author || null,
         titlePrefix: "[Check-in] ",
         titleTemplate: null,
-        placeholderTemplate: null,
+        ${apiKey}Template: null,
         includePhotos: true,
         includeLocation: true,
         includeMap: false,
@@ -679,7 +679,7 @@ router.post('/custom-fields/mapping', isAuthenticated, isCompanyAdmin, async (re
     // Validate the request body
     const fieldMappingSchema = z.object({
       titlePrefix: z.string().optional(),
-      placeholderFieldMapping: z.string().min(1),
+      ${apiKey}FieldMapping: z.string().min(1),
       includePhotos: z.boolean().default(true),
       includeLocation: z.boolean().default(true),
       customFields: z.array(
@@ -711,7 +711,7 @@ router.post('/custom-fields/mapping', isAuthenticated, isCompanyAdmin, async (re
     // Update existing settings
     await storage.updateWordpressCustomFields(existingSettings.id, {
       titlePrefix: data.titlePrefix || null,
-      placeholderTemplate: data.placeholderFieldMapping,
+      ${apiKey}Template: data.${apiKey}FieldMapping,
       includePhotos: data.includePhotos,
       includeLocation: data.includeLocation,
       customFieldMappings: JSON.stringify(data.customFields),
@@ -915,9 +915,9 @@ router.get('/public/video-testimonials', async (req: Request, res: Response) => 
   }
 });
 
-// Generate schema markup for WordPress placeholder
-router.get('/schema/:placeholderType/:placeholderId', async (req: Request, res: Response) => {
-  const { placeholderType, placeholderId } = req.params;
+// Generate schema markup for WordPress ${apiKey}
+router.get('/schema/:${apiKey}Type/:${apiKey}Id', async (req: Request, res: Response) => {
+  const { ${apiKey}Type, ${apiKey}Id } = req.params;
   const { companyId } = req.query;
 
   try {
@@ -939,9 +939,9 @@ router.get('/schema/:placeholderType/:placeholderId', async (req: Request, res: 
 
     let schemaMarkup = '';
 
-    switch (placeholderType) {
+    switch (${apiKey}Type) {
       case 'visit':
-        const checkIn = await storage.getCheckIn(parseInt(placeholderId));
+        const checkIn = await storage.getCheckIn(parseInt(${apiKey}Id));
         if (checkIn) {
           const visit: ServiceVisit = {
             id: checkIn.id,
@@ -958,7 +958,7 @@ router.get('/schema/:placeholderType/:placeholderId', async (req: Request, res: 
         break;
 
       case 'review':
-        const reviewResponse = await storage.getReviewResponse(parseInt(placeholderId));
+        const reviewResponse = await storage.getReviewResponse(parseInt(${apiKey}Id));
         if (reviewResponse) {
           const review: ReviewData = {
             rating: reviewResponse.rating,
@@ -990,7 +990,7 @@ router.get('/schema/:placeholderType/:placeholderId', async (req: Request, res: 
         break;
 
       default:
-        return res.status(400).json({ error: 'Invalid placeholder type' });
+        return res.status(400).json({ error: 'Invalid ${apiKey} type' });
     }
 
     res.setHeader('Content-Type', 'text/html');
