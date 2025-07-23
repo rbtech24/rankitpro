@@ -445,7 +445,7 @@ export default function CompaniesManagement() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-2xl">
-                    {companies?.reduce((sum, company) => sum + (company.stats?.totalTechnicians || 0), 0) || 0}
+                    {companies?.reduce((sum, company) => sum + (parseInt(String(company.stats?.totalTechnicians || 0)) || 0), 0) || 0}
                   </CardTitle>
                   <CardDescription>Active Technicians</CardDescription>
                 </CardHeader>
@@ -459,13 +459,13 @@ export default function CompaniesManagement() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-2xl">
-                    {companies?.reduce((sum, company) => sum + (company.stats?.totalCheckIns || 0), 0) || 0}
+                    {companies?.reduce((sum, company) => sum + (parseInt(String(company.stats?.totalCheckIns || 0)) || 0), 0) || 0}
                   </CardTitle>
                   <CardDescription>Total Check-ins</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-green-600">
-                    {companies?.reduce((sum, company) => sum + ((company.stats?.activeCheckInsLast30Days !== undefined) ? company.stats?.activeCheckInsLast30Days : company.stats?.totalCheckIns || 0), 0) || 0} in last 30 days
+                    {companies?.reduce((sum, company) => sum + (parseInt(String((company.stats?.activeCheckInsLast30Days !== undefined) ? company.stats?.activeCheckInsLast30Days : company.stats?.totalCheckIns || 0)) || 0), 0) || 0} in last 30 days
                   </p>
                 </CardContent>
               </Card>
@@ -482,7 +482,7 @@ export default function CompaniesManagement() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-slate-600">
-                    {companies?.reduce((sum, company) => sum + (company.stats?.totalReviews || 0), 0) || 0} total reviews
+                    {companies?.reduce((sum, company) => sum + (parseInt(String(company.stats?.totalReviews || 0)) || 0), 0) || 0} total reviews
                   </p>
                 </CardContent>
               </Card>
@@ -576,8 +576,8 @@ export default function CompaniesManagement() {
                           </TableCell>
                           <TableCell>{company.industry || 'Not specified'}</TableCell>
                           <TableCell>{company.plan}</TableCell>
-                          <TableCell>{company.stats?.totalTechnicians || 0} / {company.maxTechnicians || 'Unlimited'}</TableCell>
-                          <TableCell>{company.stats?.totalCheckIns || 0}</TableCell>
+                          <TableCell>{parseInt(String(company.stats?.totalTechnicians || 0)) || 0} / {company.maxTechnicians || 'Unlimited'}</TableCell>
+                          <TableCell>{parseInt(String(company.stats?.totalCheckIns || 0)) || 0}</TableCell>
                           <TableCell>
                             <div className="flex items-center">
                               <span className="mr-1">{company.stats?.avgRating?.toFixed(1) || "0.0"}</span>
@@ -799,17 +799,17 @@ export default function CompaniesManagement() {
                     <CardContent className="space-y-4">
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Total Check-ins</h3>
-                        <p className="text-2xl font-bold">{selectedCompany.stats?.totalCheckIns || 0}</p>
-                        <p className="text-sm text-gray-500">{selectedCompany.stats?.activeCheckInsLast30Days || 0} in the last 30 days</p>
+                        <p className="text-2xl font-bold">{parseInt(String(selectedCompany.stats?.totalCheckIns || 0)) || 0}</p>
+                        <p className="text-sm text-gray-500">{parseInt(String(selectedCompany.stats?.activeCheckInsLast30Days || 0)) || 0} in the last 30 days</p>
                       </div>
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Blog Posts Generated</h3>
-                        <p className="text-2xl font-bold">{selectedCompany.stats?.totalBlogPosts || 0}</p>
+                        <p className="text-2xl font-bold">{parseInt(String(selectedCompany.stats?.totalBlogPosts || 0)) || 0}</p>
                       </div>
                       <div>
                         <h3 className="text-sm font-medium text-gray-500">Reviews Collected</h3>
                         <div className="flex items-center">
-                          <span className="text-2xl font-bold mr-2">{selectedCompany.stats?.totalReviews || 0}</span>
+                          <span className="text-2xl font-bold mr-2">{parseInt(String(selectedCompany.stats?.totalReviews || 0)) || 0}</span>
                           <div className="flex items-center">
                             <span className="mr-1">Avg {selectedCompany.stats?.avgRating || 0}</span>
                             <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
@@ -953,10 +953,10 @@ export default function CompaniesManagement() {
                           <TableRow key={company.id}>
                             <TableCell className="font-medium">{company.name}</TableCell>
                             <TableCell>{company.plan || 'starter'}</TableCell>
-                            <TableCell>{(company.stats?.activeCheckInsLast30Days !== undefined) ? company.stats.activeCheckInsLast30Days : Math.floor((company.stats?.totalCheckIns || 0) * 0.3)}</TableCell>
-                            <TableCell>{company.stats?.totalCheckIns || 0}</TableCell>
-                            <TableCell>{company.stats?.totalBlogPosts || 0}</TableCell>
-                            <TableCell>{company.stats?.totalReviews || 0}</TableCell>
+                            <TableCell>{(company.stats?.activeCheckInsLast30Days !== undefined) ? parseInt(String(company.stats.activeCheckInsLast30Days)) || 0 : Math.floor((parseInt(String(company.stats?.totalCheckIns || 0)) || 0) * 0.3)}</TableCell>
+                            <TableCell>{parseInt(String(company.stats?.totalCheckIns || 0)) || 0}</TableCell>
+                            <TableCell>{parseInt(String(company.stats?.totalBlogPosts || 0)) || 0}</TableCell>
+                            <TableCell>{parseInt(String(company.stats?.totalReviews || 0)) || 0}</TableCell>
                             <TableCell>
                               <div className="flex items-center">
                                 <span>{company.stats?.avgRating?.toFixed(1) || '0.0'}</span>
