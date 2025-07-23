@@ -2127,12 +2127,18 @@ Format as professional service documentation.`;
         ORDER BY t.created_at DESC
       `;
       
+      // Log for debugging
+      logger.info("Technicians query result", { 
+        count: technicians.length,
+        rodBartruff: technicians.find(t => t.email === 'rodbartruffonline@gmail.com')
+      });
+      
       // Get stats for each technician
       const techniciansWithStats = await Promise.all(technicians.map(async (tech: any) => {
         const checkIns = await storage.getCheckInsByTechnician(tech.id);
         const reviews = await storage.getReviewsByTechnician(tech.id);
         
-        return {
+        const result = {
           id: tech.id,
           name: tech.name || '',
           email: tech.email || '',
@@ -2149,6 +2155,13 @@ Format as professional service documentation.`;
           reviewsCount: reviews.length,
           rating: reviews.length > 0 ? 4.8 : 0
         };
+        
+        // Log Rod Bartruff specifically for debugging
+        if (tech.email === 'rodbartruffonline@gmail.com') {
+          logger.info("Rod Bartruff data", { tech, result });
+        }
+        
+        return result;
       }));
       
       res.json(techniciansWithStats);
