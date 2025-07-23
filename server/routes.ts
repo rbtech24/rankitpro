@@ -2149,6 +2149,10 @@ Format as professional service documentation.`;
           companyId: tech.company_id,
           companyName: tech.company_name || 'No Company',
           companyPlan: tech.company_plan || 'starter',
+          company: {
+            name: tech.company_name || 'No Company',
+            plan: tech.company_plan || 'starter'
+          },
           userId: tech.user_id || null,
           createdAt: tech.created_at,
           checkinsCount: checkIns.length,
