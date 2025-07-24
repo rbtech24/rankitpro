@@ -2,7 +2,23 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
+    let errorData;
+    try {
+      errorData = await res.json();
+    } catch {
+      errorData = { message: res.statusText };
+    }
+    
+    // Handle trial expiration specifically
+    if (res.status === 403 && errorData.error === 'trial_expired') {
+      const trialError = new Error(errorData.message || 'Trial expired');
+      (trialError as any).trialExpired = true;
+      (trialError as any).upgradeRequired = errorData.upgradeRequired;
+      (trialError as any).trialEndDate = errorData.trialEndDate;
+      throw trialError;
+    }
+    
+    const text = errorData.message || res.statusText;
     throw new Error(`${res.status}: ${text}`);
   }
 }

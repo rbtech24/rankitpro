@@ -10,6 +10,10 @@ import NotFound from "./pages/not-found";
 import { performImmediateLogout } from "./lib/logout";
 import AuthenticatedLayout from "./components/layout/authenticated-layout";
 import { OnboardingProvider } from "./components/onboarding/OnboardingProvider";
+import { TrialStatusBanner } from "./components/trial-status-banner";
+import { TrialExpiredModal } from "./components/trial-expired-modal";
+import { useTrialEnforcement } from "./hooks/use-trial-enforcement";
+import { TrialEnforcementWrapper } from "./components/TrialEnforcementWrapper";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard-fixed";
@@ -167,7 +171,11 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
     return <Redirect to="/dashboard" />;
   }
   
-  return <Component {...rest} />;
+  return (
+    <TrialEnforcementWrapper user={auth.user}>
+      <Component {...rest} />
+    </TrialEnforcementWrapper>
+  );
 }
 
 function Router() {

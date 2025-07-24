@@ -549,10 +549,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
-  // Apply trial enforcement middleware to all API routes except auth and health
-  app.use('/api', (req, res, next) => {
-    // Skip trial enforcement for health checks and auth endpoints
-    if (req.path.startsWith('/health') || req.path.startsWith('/auth')) {
+  // Apply trial enforcement middleware to all authenticated API routes
+  app.use('/api', isAuthenticated, (req, res, next) => {
+    // Skip trial enforcement for health checks, auth endpoints, and test endpoints
+    if (req.path.startsWith('/health') || 
+        req.path.startsWith('/auth') || 
+        req.path.startsWith('/test/trial') ||
+        req.path.includes('/billing') ||
+        req.path.includes('/embed') ||
+        req.path.includes('/public')) {
       return next();
     }
     enforceTrialLimits(req as any, res, next);
