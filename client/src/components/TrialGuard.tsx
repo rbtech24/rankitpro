@@ -41,12 +41,22 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
   const [blockingActive, setBlockingActive] = useState(false);
   const queryClient = useQueryClient();
 
-  // Skip trial enforcement for super admins
-  if (!user || user.role === 'super_admin') {
+  // TrialGuard is specifically for company admins and technicians
+  if (!user) {
     return <>{children}</>;
   }
 
-  // Skip trial enforcement if user has no company
+  // Skip trial enforcement for super admins - they have system-wide access
+  if (user.role === 'super_admin') {
+    return <>{children}</>;
+  }
+
+  // Only enforce for company admins and technicians
+  if (user.role !== 'company_admin' && user.role !== 'technician') {
+    return <>{children}</>;
+  }
+
+  // Skip trial enforcement if user has no company (shouldn't happen for company roles)
   if (!user.companyId) {
     return <>{children}</>;
   }
@@ -136,11 +146,14 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
           </h1>
           
           <p className="text-gray-600 mb-6">
-            Your 14-day free trial ended on{' '}
+            Your company's 14-day free trial ended on{' '}
             {trialStatus.trialEndDate ? 
               new Date(trialStatus.trialEndDate).toLocaleDateString() : 
               'recently'
-            }. Choose a subscription plan to restore access to all features.
+            }. {user.role === 'company_admin' ? 
+              'Choose a subscription plan to restore access for your team.' :
+              'Please contact your company administrator to upgrade the subscription.'
+            }
           </p>
           
           <div className="bg-red-50 rounded-lg p-4 mb-6">
@@ -156,14 +169,22 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
           </div>
           
           <div className="space-y-3">
-            <Button 
-              onClick={handleUpgrade}
-              className="w-full"
-              size="lg"
-            >
-              <CreditCard className="h-4 w-4 mr-2" />
-              View Subscription Plans
-            </Button>
+            {user.role === 'company_admin' ? (
+              <Button 
+                onClick={handleUpgrade}
+                className="w-full"
+                size="lg"
+              >
+                <CreditCard className="h-4 w-4 mr-2" />
+                View Subscription Plans
+              </Button>
+            ) : (
+              <div className="bg-blue-50 rounded-lg p-4 text-center">
+                <p className="text-sm text-blue-700 font-medium">
+                  Please contact your company administrator to restore access.
+                </p>
+              </div>
+            )}
             
             <Button 
               variant="outline" 
@@ -236,14 +257,22 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
             </div>
             
             <div className="flex flex-col space-y-3">
-              <Button 
-                onClick={handleUpgrade}
-                className="w-full"
-                size="lg"
-              >
-                <CreditCard className="h-4 w-4 mr-2" />
-                View Subscription Plans
-              </Button>
+              {user.role === 'company_admin' ? (
+                <Button 
+                  onClick={handleUpgrade}
+                  className="w-full"
+                  size="lg"
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  View Subscription Plans
+                </Button>
+              ) : (
+                <div className="bg-blue-50 rounded-lg p-3 text-center">
+                  <p className="text-sm text-blue-700">
+                    Contact your company administrator to upgrade the subscription.
+                  </p>
+                </div>
+              )}
               
               {!enforceBlocking && (
                 <Button 
