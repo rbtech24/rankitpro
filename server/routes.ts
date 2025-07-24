@@ -49,6 +49,7 @@ import publicReviewsRoutes from "./routes/public-reviews";
 import publicCompanyRoutes from "./routes/public-company";
 import testimonialsRoutes from "./routes/testimonials";
 import helpRoutes from "./routes/help";
+import trialTestingRoutes from "./routes/trial-testing";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
 import { analyticsService } from "./services/analytics-service";
@@ -2433,6 +2434,7 @@ Format as professional service documentation.`;
 
   // Register WordPress routes for plugin functionality
   app.use("/api/wordpress", wordpressRoutes);
+  app.use("/api/test/trial", trialTestingRoutes);
   
   // Register integrations routes
   app.use("/api/integration", integrationsRoutes);
