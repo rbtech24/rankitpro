@@ -14,6 +14,7 @@ import { TrialStatusBanner } from "./components/trial-status-banner";
 import { TrialExpiredModal } from "./components/trial-expired-modal";
 import { useTrialEnforcement } from "./hooks/use-trial-enforcement";
 import { TrialEnforcementWrapper } from "./components/TrialEnforcementWrapper";
+import { TrialGuard } from "./components/TrialGuard";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard-fixed";
@@ -172,9 +173,9 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
   }
   
   return (
-    <TrialEnforcementWrapper user={auth.user}>
+    <TrialGuard user={auth.user} enforceBlocking={true}>
       <Component {...rest} />
-    </TrialEnforcementWrapper>
+    </TrialGuard>
   );
 }
 
