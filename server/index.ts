@@ -10,6 +10,7 @@ import { validateEnvironment, getFeatureFlags } from "./env-validation";
 import path from "path";
 import { createServer, IncomingMessage, ServerResponse } from "http";
 import rateLimit from "express-rate-limit";
+import { advancedRateLimit } from "./middleware/advanced-rate-limiting";
 import helmet from "helmet";
 import MemoryOptimizer from "./services/memory-optimizer";
 import { errorMonitor, logError } from "./error-monitor";

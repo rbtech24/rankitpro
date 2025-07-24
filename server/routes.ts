@@ -50,6 +50,7 @@ import publicCompanyRoutes from "./routes/public-company";
 import testimonialsRoutes from "./routes/testimonials";
 import helpRoutes from "./routes/help";
 import trialTestingRoutes from "./routes/trial-testing";
+import rateLimitingRoutes from "./routes/admin/rate-limiting";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
 import { analyticsService } from "./services/analytics-service";
@@ -2446,6 +2447,7 @@ Format as professional service documentation.`;
   
   // Register admin routes for subscription management
   app.use("/api/admin", adminRoutes);
+  app.use("/api/admin/rate-limiting", rateLimitingRoutes);
 
   // Register sales routes for sales staff management
   app.use("/api/sales", salesRoutes);
