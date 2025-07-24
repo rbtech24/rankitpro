@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trial Expiration Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Trial Expiration System Demo</h1>
+    
+    <h2>Current Status:</h2>
+    <div id="status"></div>
+    
+    <h2>Test Actions:</h2>
+    <button onclick="checkTrialStatus()">Check Trial Status</button>
+    <button onclick="expireTrial()">Expire Trial (Company 29)</button>
+    <button onclick="testAPIBlocking()">Test API Blocking</button>
+    <button onclick="restoreTrial()">Restore Trial</button>
+    
+    <h2>Results:</h2>
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+        
+        function addResult(message, type = 'success') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+        
+        async function makeRequest(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                const data = await response.json();
+                return { status: response.status, data };
+            } catch (error) {
+                return { status: 0, error: error.message };
+            }
+        }
+        
+        async function checkTrialStatus() {
+            addResult('<strong>🔍 Checking Trial Status...</strong>', 'warning');
+            
+            const result = await makeRequest(`${API_BASE}/api/test/trial/companies`);
+            
+            if (result.status === 200) {
+                const companies = result.data.companies;
+                let statusHTML = '<h3>Company Trial Status:</h3>';
+                
+                companies.forEach(company => {
+                    const statusIcon = company.hasSubscription ? '💳' : 
+                                     company.expired ? '❌' : 
+                                     company.daysLeft <= 3 ? '⚠️' : '✅';
+                    
+                    statusHTML += `<p>${statusIcon} <strong>${company.name}</strong> (ID: ${company.id})<br>`;
+                    statusHTML += `&nbsp;&nbsp;&nbsp;Plan: ${company.plan} | Days Left: ${company.daysLeft} | Status: ${company.expired ? 'EXPIRED' : 'ACTIVE'}</p>`;
+                });
+                
+                addResult(statusHTML, 'success');
+            } else {
+                addResult(`❌ Failed to check status: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+        
+        async function expireTrial() {
+            addResult('<strong>⏰ Expiring Company 29 Trial...</strong>', 'warning');
+            
+            const result = await makeRequest(`${API_BASE}/api/test/trial/expire/29`, {
+                method: 'POST'
+            });
+            
+            if (result.status === 200) {
+                addResult(`✅ <strong>Trial Expired Successfully!</strong><br>
+                          Company: ${result.data.message}<br>
+                          End Date: ${result.data.trialEndDate}<br>
+                          <em>Now try accessing features - they should be blocked!</em>`, 'success');
+            } else {
+                addResult(`❌ Failed to expire trial: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+        
+        async function testAPIBlocking() {
+            addResult('<strong>🚫 Testing API Blocking...</strong>', 'warning');
+            
+            const endpoints = [
+                '/api/check-ins',
+                '/api/blog-posts', 
+                '/api/testimonials',
+                '/api/review-requests'
+            ];
+            
+            for (const endpoint of endpoints) {
+                const result = await makeRequest(`${API_BASE}${endpoint}`);
+                
+                let message, type;
+                if (result.status === 403 && result.data?.error === 'trial_expired') {
+                    message = `✅ ${endpoint} - <strong>Properly Blocked</strong> (403 trial_expired)`;
+                    type = 'success';
+                } else if (result.status === 401) {
+                    message = `🔐 ${endpoint} - Authentication Required (expected)`;
+                    type = 'warning';
+                } else if (result.status === 200) {
+                    message = `⚠️ ${endpoint} - <strong>Access Allowed</strong> (trial may not be expired)`;
+                    type = 'warning';
+                } else {
+                    message = `❓ ${endpoint} - Status: ${result.status}`;
+                    type = 'error';
+                }
+                
+                addResult(message, type);
+            }
+        }
+        
+        async function restoreTrial() {
+            addResult('<strong>🔄 Restoring Company 29 Trial...</strong>', 'warning');
+            
+            const result = await makeRequest(`${API_BASE}/api/test/trial/restore/29`, {
+                method: 'POST'
+            });
+            
+            if (result.status === 200) {
+                addResult(`✅ <strong>Trial Restored Successfully!</strong><br>
+                          Company: ${result.data.message}<br>
+                          Days Left: ${result.data.daysLeft}<br>
+                          End Date: ${result.data.trialEndDate}<br>
+                          <em>Access should now be restored!</em>`, 'success');
+            } else {
+                addResult(`❌ Failed to restore trial: ${result.data?.message || result.error}`, 'error');
+            }
+        }
+        
+        // Auto-check status on page load
+        window.onload = function() {
+            checkTrialStatus();
+        };
+    </script>
+</body>
+</html>
