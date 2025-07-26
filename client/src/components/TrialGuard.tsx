@@ -233,8 +233,8 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
         </Alert>
       )}
 
-      {/* Trial Expired Modal */}
-      <Dialog open={showTrialModal} onOpenChange={handleDismiss}>
+      {/* Trial Expired Modal - don't show on billing page */}
+      <Dialog open={showTrialModal && !isBillingPage} onOpenChange={handleDismiss}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
