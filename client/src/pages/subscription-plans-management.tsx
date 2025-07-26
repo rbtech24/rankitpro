@@ -134,20 +134,23 @@ export default function SubscriptionPlansManagement() {
     }
   });
 
-  // Sync with Stripe mutation
-  const syncWithStripeMutation = useMutation({
-    mutationFn: (id: number) => apiRequest('POST', `/api/billing/plans/${id}/sync-stripe`),
-    onSuccess: () => {
+  // Sync all plans with Stripe mutation
+  const syncAllWithStripeMutation = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/billing/plans/sync'),
+    onSuccess: (data: any) => {
+      const successCount = data.results?.filter((r: any) => r.success).length || 0;
+      const failCount = data.results?.filter((r: any) => !r.success).length || 0;
+      
       toast({
-        title: "Success",
-        description: "Plan synced with Stripe successfully"
+        title: "Stripe Sync Complete",
+        description: `${successCount} plans synced successfully${failCount > 0 ? `, ${failCount} failed` : ''}`
       });
       queryClient.invalidateQueries({ queryKey: ["/api/billing/plans"] });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to sync with Stripe",
+        title: "Sync Failed", 
+        description: error.message || "Failed to sync plans with Stripe",
         variant: "destructive"
       });
     }

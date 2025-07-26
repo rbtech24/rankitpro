@@ -146,6 +146,69 @@ router.delete('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, 
 });
 
 /**
+ * Sync all plans with Stripe (admin only)
+ */
+router.post('/plans/sync', isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
+  try {
+    const plans = await storage.getAllSubscriptionPlans();
+    const syncResults = [];
+    
+    for (const plan of plans) {
+      try {
+        // Extract numeric price from database value
+        const numericPrice = typeof plan.price === 'string' 
+          ? parseFloat(plan.price.replace('$', '')) 
+          : parseFloat(plan.price);
+        
+        const stripeProductId = await stripeService.createOrUpdatePlanPrice(
+          plan.name, 
+          numericPrice, 
+          plan.billingPeriod === 'yearly' ? 'year' : 'month'
+        );
+        
+        if (stripeProductId) {
+          await storage.updateSubscriptionPlan(plan.id, {
+            stripePriceId: stripeProductId
+          });
+          
+          syncResults.push({
+            planId: plan.id,
+            planName: plan.name,
+            stripePriceId: stripeProductId,
+            success: true
+          });
+        } else {
+          syncResults.push({
+            planId: plan.id,
+            planName: plan.name,
+            success: false,
+            error: 'Failed to create Stripe price'
+          });
+        }
+      } catch (error: any) {
+        syncResults.push({
+          planId: plan.id,
+          planName: plan.name,
+          success: false,
+          error: error.message
+        });
+      }
+    }
+    
+    res.json({
+      message: 'Stripe sync completed',
+      results: syncResults
+    });
+  } catch (error: any) {
+    logger.error("Stripe sync operation failed", { errorMessage: error?.message || "Unknown error" });
+    res.status(500).json({ 
+      error: 'Failed to sync plans with Stripe',
+      message: error.message
+    });
+  }
+});
+
+/**
  * Get subscription information for the current user's company
  */
 router.get('/subscription', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
