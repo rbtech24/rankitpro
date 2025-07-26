@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Sidebar from '../components/layout/sidebar-clean';
+import AdminLayout from '../components/layout/AdminLayout';
 import {
   Card,
   CardContent,
@@ -109,15 +109,12 @@ export default function SystemOverview() {
   // Don't render if no data available
   if (!stats) {
     return (
-      <div className="flex">
-        <Sidebar />
-        <div className="flex-1 p-8">
-          <div className="text-center py-12">
-            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" />
-            <p>Loading system statistics...</p>
-          </div>
+      <AdminLayout currentPath="/system-overview">
+        <div className="text-center py-12">
+          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p>Loading system statistics...</p>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
@@ -129,9 +126,7 @@ export default function SystemOverview() {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1 p-8">
+    <AdminLayout currentPath="/system-overview">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">System Overview</h1>
@@ -479,7 +474,6 @@ export default function SystemOverview() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
-    </div>
+    </AdminLayout>
   );
 }
