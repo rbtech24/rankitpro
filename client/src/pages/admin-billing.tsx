@@ -19,6 +19,7 @@ import {
   Download,
   AlertTriangle
 } from "lucide-react";
+import AdminLayout from "../components/layout/AdminLayout";
 
 interface Company {
   id: number;
@@ -98,7 +99,8 @@ export default function AdminBilling() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-white rounded-lg shadow p-6">
@@ -323,5 +325,6 @@ export default function AdminBilling() {
         </Card>
       </div>
     </div>
+    </AdminLayout>
   );
 }

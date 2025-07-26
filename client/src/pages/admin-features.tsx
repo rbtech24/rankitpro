@@ -19,6 +19,7 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { useLocation } from "wouter";
+import AdminLayout from "../components/layout/AdminLayout";
 
 export default function AdminFeatures() {
   const [, setLocation] = useLocation();
@@ -98,22 +99,25 @@ export default function AdminFeatures() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
-            ))}
+      <AdminLayout>
+        <div className="min-h-screen bg-gray-50 p-6">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-32 bg-gray-200 rounded"></div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center mb-6">
           <Button
@@ -222,7 +226,8 @@ export default function AdminFeatures() {
             </Card>
           ))}
         </div>
+        </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

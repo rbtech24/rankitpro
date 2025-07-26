@@ -4,11 +4,11 @@
       "bfdbcb60",
       {
         "id": "bfdbcb60",
-        "timestamp": "2025-07-26T16:59:41.279Z",
+        "timestamp": "2025-07-26T17:07:50.168Z",
         "level": "info",
         "message": "Application startup initiated",
         "resolved": false,
-        "count": 401
+        "count": 406
       }
     ],
     [
@@ -131,10 +131,30 @@
         "resolved": false,
         "count": 5
       }
+    ],
+    [
+      "2cb2be22",
+      {
+        "id": "2cb2be22",
+        "timestamp": "2025-07-26T17:05:41.384Z",
+        "level": "warn",
+        "message": "Cannot set headers after they are sent to the client",
+        "stack": "Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client\n    at ServerResponse.setHeader (node:_http_outgoing:655:11)\n    at ServerResponse.header (/home/runner/workspace/node_modules/express/lib/response.js:794:10)\n    at ServerResponse.header (/home/runner/workspace/node_modules/express/lib/response.js:797:12)\n    at <anonymous> (/home/runner/workspace/server/custom-vite.ts:96:23)",
+        "url": "/api/companies/16/technicians",
+        "method": "GET",
+        "userId": 68,
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+        "ip": "172.31.74.2",
+        "context": {
+          "body": {}
+        },
+        "resolved": false,
+        "count": 2
+      }
     ]
   ],
   "stats": {
-    "totalErrors": 491,
+    "totalErrors": 498,
     "criticalErrors": 0,
     "errorsByHour": {
       "0": 17,
@@ -154,7 +174,7 @@
       "14": 42,
       "15": 30,
       "16": 26,
-      "17": 21,
+      "17": 28,
       "18": 3,
       "19": 82,
       "20": 17,
@@ -164,19 +184,20 @@
     },
     "errorsByEndpoint": {
       "/": 10,
-      "/api/auth/login": 3
+      "/api/auth/login": 3,
+      "/api/companies/16/technicians": 2
     },
     "errorsByType": {
-      "General": 491
+      "General": 498
     },
     "lastError": {
       "id": "bfdbcb60",
-      "timestamp": "2025-07-26T16:59:41.279Z",
+      "timestamp": "2025-07-26T17:07:50.168Z",
       "level": "info",
       "message": "Application startup initiated",
       "resolved": false,
-      "count": 401
+      "count": 406
     }
   },
-  "lastSaved": "2025-07-26T16:59:41.279Z"
+  "lastSaved": "2025-07-26T17:07:50.168Z"
 }

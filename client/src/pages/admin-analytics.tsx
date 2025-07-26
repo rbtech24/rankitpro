@@ -15,6 +15,7 @@ import {
   Download
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell } from 'recharts';
+import AdminLayout from "../components/layout/AdminLayout";
 
 export default function AdminAnalytics() {
   const [timeRange, setTimeRange] = useState("30d");
@@ -36,7 +37,8 @@ export default function AdminAnalytics() {
   const COLORS = ['#3B82F6', '#8B5CF6', '#F59E0B', '#10B981'];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <AdminLayout>
+      <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-white rounded-lg shadow p-6">
@@ -359,5 +361,6 @@ export default function AdminAnalytics() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }
