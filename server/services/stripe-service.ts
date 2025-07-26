@@ -70,6 +70,31 @@ export class StripeService {
   }
 
   /**
+   * Create a payment intent for processing payments
+   */
+  async createPaymentIntent(amount: number, currency: string = 'usd', metadata: any = {}): Promise<any> {
+    if (!stripe) {
+      throw new Error('Stripe is not configured');
+    }
+
+    try {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency,
+        metadata,
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      return paymentIntent;
+    } catch (error: any) {
+      logger.error("Failed to create payment intent", { errorMessage: error?.message || "Unknown error" });
+      throw error;
+    }
+  }
+
+  /**
    * Create or update Stripe price for a subscription plan
    * This eliminates the need to manually configure price IDs when prices change
    */

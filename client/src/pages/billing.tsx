@@ -113,21 +113,24 @@ export default function Billing() {
     }
   }, [subscriptionData]);
   
-  // Mutation for updating subscription
+  // Mutation for updating subscription with plan selection
   const updateSubscription = useMutation({
-    mutationFn: async (plan: string) => {
+    mutationFn: async (data: { planId: number; billingPeriod: 'monthly' | 'yearly' }) => {
       setIsLoading(true);
-      const response = await apiRequest('POST', '/api/billing/subscription', { plan });
+      const response = await apiRequest('POST', '/api/billing/subscription', { 
+        planId: data.planId,
+        billingPeriod: data.billingPeriod
+      });
       return response.json();
     },
     onSuccess: (data) => {
       setIsLoading(false);
       
-      // If we have a clientSecret, open the payment modal
+      // Always expect a clientSecret for real Stripe payment
       if (data.clientSecret) {
         setClientSecret(data.clientSecret);
-      } else {
-        // Otherwise, just update the subscription
+      } else if (data.success) {
+        // Plan updated successfully without payment (e.g., same price)
         toast({
           title: "Subscription Updated",
           description: `Your subscription plan has been updated.`,
@@ -191,21 +194,9 @@ export default function Billing() {
     }
   });
   
-  const handleChangePlan = (plan: string) => {
-    setSelectedPlan(plan);
-    
-    if (plan === currentPlan) {
-      toast({
-        title: "Already Subscribed",
-        description: `You are already subscribed to the ${plan} plan.`,
-        variant: "default",
-      });
-      return;
-    }
-    
-    // Find the selected plan details
-    const selectedPlanDetails = subscriptionPlans?.find(p => p.name.toLowerCase() === plan);
-    if (!selectedPlanDetails) {
+  const handleChangePlan = (planId: number, billingPeriod: 'monthly' | 'yearly') => {
+    const planDetails = subscriptionPlans?.find(p => p.id === planId);
+    if (!planDetails) {
       toast({
         title: "Plan Not Found",
         description: "The selected plan could not be found.",
@@ -213,14 +204,25 @@ export default function Billing() {
       });
       return;
     }
+
+    if (planDetails.name.toLowerCase() === currentPlan) {
+      toast({
+        title: "Already Subscribed",
+        description: `You are already subscribed to the ${planDetails.name} plan.`,
+        variant: "default",
+      });
+      return;
+    }
     
-    // Show upgrade dialog with plan details
-    const planPrice = `$${selectedPlanDetails.price}/${selectedPlanDetails.billingPeriod}`;
-    const confirmMessage = `Upgrade to ${selectedPlanDetails.name} plan for ${planPrice}?\n\nThis will change your billing immediately.`;
+    setSelectedPlan(planDetails.name.toLowerCase());
+    
+    // Show upgrade dialog with plan details  
+    const price = billingPeriod === 'yearly' ? planDetails.yearlyPrice : planDetails.price;
+    const planPrice = `$${price}/${billingPeriod}`;
+    const confirmMessage = `Upgrade to ${planDetails.name} plan for ${planPrice}?\n\nThis will change your billing immediately.`;
     
     if (window.confirm(confirmMessage)) {
-      setIsLoading(true);
-      updateSubscription.mutate(plan);
+      updateSubscription.mutate({ planId, billingPeriod });
     } else {
       setSelectedPlan(null);
     }
@@ -272,87 +274,62 @@ export default function Billing() {
             </DialogDescription>
           </DialogHeader>
           
-          {/* Development Mode Simulation */}
-          {clientSecret && clientSecret.startsWith('pi_dev_') ? (
-            <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                  <span className="font-medium text-blue-800">Development Mode</span>
+          {/* Real Stripe Payment Form */}
+          {clientSecret && stripePromise ? (
+            <Elements stripe={stripePromise} options={{ clientSecret }}>
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <h4 className="font-medium">Subscription Details:</h4>
+                  {selectedPlan && subscriptionPlans && (() => {
+                    const planDetails = subscriptionPlans.find(p => p.name.toLowerCase() === selectedPlan);
+                    return planDetails ? (
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">{planDetails.name} Plan</span>
+                          <span className="text-lg font-bold">${planDetails.price}/{planDetails.billingPeriod}</span>
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          {planDetails.maxTechnicians === -1 ? 'Unlimited' : planDetails.maxTechnicians} technicians, 
+                          {planDetails.maxCheckIns === -1 ? 'Unlimited' : planDetails.maxCheckIns} check-ins
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
                 </div>
-                <p className="text-sm text-blue-700 mt-2">
-                  This is a simulated payment flow. In production, you would enter your payment details here.
+                
+                <PaymentForm 
+                  onSuccess={() => {
+                    setClientSecret(null);
+                    toast({
+                      title: "Subscription Updated",
+                      description: "Your subscription has been successfully updated!",
+                      variant: "default",
+                    });
+                    queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
+                    queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+                    setSelectedPlan(null);
+                  }}
+                  onError={(error) => {
+                    toast({
+                      title: "Payment Failed",
+                      description: error,
+                      variant: "destructive",
+                    });
+                  }}
+                  onCancel={() => setClientSecret(null)}
+                />
+              </div>
+            </Elements>
+          ) : clientSecret ? (
+            <div className="space-y-4">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-yellow-800">
+                  Payment system is being configured. Please try again in a moment.
                 </p>
               </div>
-              
-              <div className="space-y-3">
-                <h4 className="font-medium">Subscription Details:</h4>
-                {selectedPlan && subscriptionPlans && (() => {
-                  const planDetails = subscriptionPlans.find(p => p.name.toLowerCase() === selectedPlan);
-                  return planDetails ? (
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">{planDetails.name} Plan</span>
-                        <span className="text-lg font-bold">${planDetails.price}/{planDetails.billingPeriod}</span>
-                      </div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        {planDetails.maxTechnicians === -1 ? 'Unlimited' : planDetails.maxTechnicians} technicians, 
-                        {planDetails.maxCheckIns === -1 ? 'Unlimited' : planDetails.maxCheckIns} check-ins
-                      </div>
-                    </div>
-                  ) : null;
-                })()}
-              </div>
-              
-              <div className="flex space-x-3">
-                <Button 
-                  onClick={async () => {
-                    // Simulate successful payment by calling the development endpoint
-                    try {
-                      const response = await apiRequest('POST', '/api/billing/subscription/complete-development', { 
-                        plan: selectedPlan 
-                      });
-                      const data = await response.json();
-                      
-                      setClientSecret(null);
-                      toast({
-                        title: "Subscription Updated",
-                        description: "Your subscription has been successfully upgraded!",
-                        variant: "default",
-                      });
-                      
-                      queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
-                      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
-                      setSelectedPlan(null);
-                    } catch (error) {
-                      console.error('Development payment error:', error);
-                      toast({
-                        title: "Error",
-                        description: "Failed to update subscription. Please try again.",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                  className="flex-1"
-                >
-                  Simulate Payment Success
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setClientSecret(null)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          ) : (
-            // Real Stripe payment form would go here
-            <div className="space-y-4">
-              <p>Stripe payment form would appear here in production.</p>
               <Button onClick={() => setClientSecret(null)}>Close</Button>
             </div>
-          )}
+          ) : null}
         </DialogContent>
       </Dialog>
       
@@ -459,7 +436,12 @@ export default function Billing() {
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Button variant="outline" onClick={handleCancelSubscription}>Cancel Subscription</Button>
-                <Button onClick={() => handleChangePlan("professional")}>Upgrade Plan</Button>
+                <Button onClick={() => {
+                  const professionalPlan = subscriptionPlans?.find(p => p.name.toLowerCase() === 'professional');
+                  if (professionalPlan) {
+                    handleChangePlan(professionalPlan.id, 'monthly');
+                  }
+                }}>Upgrade Plan</Button>
               </CardFooter>
             </Card>
             
@@ -509,14 +491,27 @@ export default function Billing() {
                           </ul>
                         </CardContent>
                         <CardFooter>
-                          <Button 
-                            className="w-full" 
-                            variant={currentPlan === plan.name.toLowerCase() ? 'outline' : 'default'}
-                            onClick={() => handleChangePlan(plan.name.toLowerCase())}
-                            disabled={currentPlan === plan.name.toLowerCase() || isLoading}
-                          >
-                            {currentPlan === plan.name.toLowerCase() ? 'Current Plan' : 'Select Plan'}
-                          </Button>
+                          <div className="w-full space-y-2">
+                            <Button 
+                              className="w-full" 
+                              variant={currentPlan === plan.name.toLowerCase() ? 'outline' : 'default'}
+                              onClick={() => handleChangePlan(plan.id, 'monthly')}
+                              disabled={currentPlan === plan.name.toLowerCase() || isLoading}
+                            >
+                              {currentPlan === plan.name.toLowerCase() ? 'Current Plan' : 'Select Monthly'}
+                            </Button>
+                            {plan.yearlyPrice && (
+                              <Button 
+                                className="w-full" 
+                                variant="outline"
+                                onClick={() => handleChangePlan(plan.id, 'yearly')}
+                                disabled={currentPlan === plan.name.toLowerCase() || isLoading}
+                                size="sm"
+                              >
+                                Select Yearly (${plan.yearlyPrice}/year)
+                              </Button>
+                            )}
+                          </div>
                         </CardFooter>
                       </Card>
                     ))}

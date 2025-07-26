@@ -3558,8 +3558,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSubscriptionPlan(id: number): Promise<any | undefined> {
-    const plans = await this.getSubscriptionPlans();
-    return plans.find(plan => plan.id === id);
+    try {
+      const plan = await db
+        .select()
+        .from(subscriptionPlans)
+        .where(eq(subscriptionPlans.id, id))
+        .limit(1);
+      
+      if (plan.length === 0) return undefined;
+      
+      return {
+        id: plan[0].id,
+        name: plan[0].name,
+        price: parseFloat(plan[0].price.toString()),
+        yearlyPrice: plan[0].yearlyPrice ? parseFloat(plan[0].yearlyPrice.toString()) : null,
+        billingPeriod: plan[0].billingPeriod,
+        maxTechnicians: plan[0].maxTechnicians,
+        maxCheckIns: plan[0].maxCheckIns,
+        features: plan[0].features,
+        stripeProductId: plan[0].stripeProductId,
+        stripePriceId: plan[0].stripePriceId
+      };
+    } catch (error) {
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
+      return undefined;
+    }
   }
 
   async createSubscriptionPlan(planData: any): Promise<any> {

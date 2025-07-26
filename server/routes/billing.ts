@@ -11,7 +11,7 @@ const router = express.Router();
  */
 router.get('/plans', isAuthenticated, async (req: Request, res: Response) => {
   try {
-    const plans = await storage.getAllSubscriptionPlans();
+    const plans = await storage.getActiveSubscriptionPlans();
     res.json(plans);
   } catch (error: any) {
     logger.error("Storage operation error", { errorMessage: error?.message || "Unknown error" });
@@ -231,63 +231,80 @@ router.get('/subscription', isAuthenticated, isCompanyAdmin, async (req: Request
 });
 
 /**
- * Create or update a subscription for the current user's company
+ * Create or update subscription with real Stripe integration
  */
 router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
   try {
-    const { plan } = req.body;
-    
-    if (!plan || !['starter', 'pro', 'agency', 'essential', 'professional', 'enterprise'].includes(plan)) {
-      return res.status(400).json({ error: 'Invalid plan specified' });
+    const { planId, billingPeriod } = req.body;
+    const user = req.user as any;
+    const companyId = user.companyId;
+
+    if (!planId || !billingPeriod) {
+      return res.status(400).json({ error: 'Plan ID and billing period are required' });
     }
-    
-    // @ts-ignore - userId does exist on req.user
-    const userId = req.user.id;
-    
-    // Map new plan names to old ones for Stripe compatibility
-    let stripePlan = plan;
-    if (plan === 'essential') stripePlan = 'starter';
-    if (plan === 'professional') stripePlan = 'pro';
-    if (plan === 'enterprise') stripePlan = 'agency';
-    
-    // Create or update subscription
-    const result = await stripeService.getOrCreateSubscription(userId, stripePlan);
-    
-    // If the user is already subscribed to this plan
-    if (result.alreadySubscribed) {
-      return res.json({ 
-        message: 'Already subscribed to this plan',
-        alreadySubscribed: true,
-        subscriptionId: result.subscriptionId
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID not found in session' });
+    }
+
+    // Get the current company data
+    const company = await storage.getCompany(companyId);
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    // Get plan details from database
+    const planDetails = await storage.getSubscriptionPlan(planId);
+    if (!planDetails) {
+      return res.status(404).json({ error: 'Subscription plan not found' });
+    }
+
+    // Check if Stripe is available
+    if (!stripeService.isStripeAvailable()) {
+      return res.status(500).json({ 
+        error: 'Payment processing unavailable',
+        message: 'Stripe payment system is not configured. Please contact support.'
       });
     }
-    
-    // If there's no client secret, subscription was updated without requiring payment
-    if (!result.clientSecret) {
-      // Update company plan
-      await stripeService.updateCompanyPlan(userId);
-      
-      return res.json({ 
-        message: 'Subscription updated successfully',
-        subscriptionId: result.subscriptionId
-      });
+
+    // Determine the price based on billing period
+    const price = billingPeriod === 'yearly' ? 
+      (planDetails.yearlyPrice || planDetails.price * 12) : 
+      planDetails.price;
+
+    // Create Stripe payment intent for the plan
+    const paymentIntent = await stripeService.createPaymentIntent(
+      Math.round(price * 100), // Convert to cents
+      'usd',
+      {
+        companyId: companyId,
+        planId: planId,
+        billingPeriod: billingPeriod,
+        planName: planDetails.name
+      }
+    );
+
+    if (!paymentIntent.client_secret) {
+      throw new Error('Failed to create payment intent');
     }
+
+    // Store the subscription change request temporarily
+    // This will be completed when the payment succeeds via webhook
     
-    // Return the client secret for the frontend to complete the payment
-    res.json({ 
-      clientSecret: result.clientSecret,
-      subscriptionId: result.subscriptionId,
-      developmentMode: result.developmentMode || false
+    return res.json({
+      clientSecret: paymentIntent.client_secret,
+      planId: planId,
+      planName: planDetails.name,
+      billingPeriod: billingPeriod,
+      amount: price,
+      message: 'Payment intent created successfully'
     });
+
   } catch (error: any) {
-    logger.error("Failed to create subscription", { 
-      errorMessage: error instanceof Error ? error.message : String(error),
-      plan: req.body.plan,
-      userId: req.user?.id
-    });
-    res.status(500).json({ 
-      error: 'Failed to create or update subscription',
-      message: error.message || error
+    logger.error("Subscription creation error", { errorMessage: error?.message || "Unknown error" });
+    res.status(500).json({
+      error: 'Failed to process subscription request',
+      message: error.message
     });
   }
 });
