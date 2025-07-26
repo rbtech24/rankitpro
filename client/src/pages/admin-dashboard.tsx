@@ -66,8 +66,8 @@ export default function AdminDashboard() {
                 className="bg-white text-purple-700 hover:bg-purple-50"
                 onClick={() => setLocation('/admin-user-management')}
               >
-                <Users className="h-4 w-4 mr-2" />
-                Manage Users
+                <Shield className="h-4 w-4 mr-2" />
+                Admin Management
               </Button>
             </div>
           </div>
