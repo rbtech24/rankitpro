@@ -30,7 +30,7 @@ export function TrialStatusBanner() {
     return null;
   }
 
-  // Trial expired - show urgent upgrade notice
+  // Trial expired - show urgent upgrade notice with quick pay option
   if (trialStatus.expired) {
     return (
       <Alert className="border-red-500 bg-red-50 mb-4">
@@ -38,17 +38,34 @@ export function TrialStatusBanner() {
         <AlertDescription className="flex items-center justify-between">
           <div className="text-red-800">
             <strong>Trial Expired</strong> - Your 14-day free trial has ended. 
-            Upgrade now to continue using Rank It Pro.
+            Reactivate instantly or view all plans.
           </div>
-          <Button 
-            variant="destructive" 
-            size="sm"
-            onClick={() => setLocation('/billing')}
-            className="ml-4"
-          >
-            <CreditCard className="h-4 w-4 mr-2" />
-            Upgrade Now
-          </Button>
+          <div className="flex gap-2 ml-4">
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => {
+                // Trigger trial expired modal for quick payment
+                const modal = document.createElement('div');
+                modal.id = 'trial-expired-quick-pay';
+                document.body.appendChild(modal);
+                
+                // This will be handled by the TrialGuard component
+                window.dispatchEvent(new CustomEvent('show-trial-modal'));
+              }}
+            >
+              <CreditCard className="h-4 w-4 mr-2" />
+              Quick Pay
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setLocation('/billing')}
+              className="bg-white border-red-300 text-red-700 hover:bg-red-50"
+            >
+              View Plans
+            </Button>
+          </div>
         </AlertDescription>
       </Alert>
     );

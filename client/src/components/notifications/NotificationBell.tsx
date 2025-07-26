@@ -81,6 +81,9 @@ const NotificationBell: React.FC<NotificationBellProps> = () => {
           if (data.type === 'notification') {
             // Handle notification through context instead of local state
             console.log('Received notification:', data.notification);
+          } else if (data.type === 'payment_success') {
+            // Handle payment success notification
+            console.log('Payment success:', data);
           }
         } catch (error) {
           // Silently handle parse errors

@@ -28,11 +28,11 @@ router.get('/plans', isAuthenticated, async (req: Request, res: Response) => {
 router.post('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
   try {
     const { name, price, yearlyPrice, billingPeriod, maxTechnicians, maxCheckIns, features, isActive } = req.body;
-    
+
     if (!name || !price || !features) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-    
+
     // Create plan in database first
     const newPlan = await storage.createSubscriptionPlan({
       name,
@@ -44,7 +44,7 @@ router.post('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: R
       features: Array.isArray(features) ? features : [features],
       isActive: isActive !== undefined ? isActive : true
     });
-    
+
     // Auto-sync with Stripe
     try {
       const stripeProductId = await stripeService.createOrUpdatePlanPrice(
@@ -52,7 +52,7 @@ router.post('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: R
         parseFloat(price), 
         billingPeriod === 'yearly' ? 'year' : 'month'
       );
-      
+
       if (stripeProductId) {
         // Update plan with Stripe IDs
         await storage.updateSubscriptionPlan(newPlan.id, {
@@ -63,7 +63,7 @@ router.post('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: R
     } catch (stripeError: any) {
       logger.warn("Stripe sync failed during plan creation", { errorMessage: stripeError?.message || "Unknown error" });
     }
-    
+
     res.json(newPlan);
   } catch (error: any) {
     logger.error("Storage operation error", { errorMessage: error?.message || "Unknown error" });
@@ -81,13 +81,13 @@ router.put('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, res
   try {
     const { id } = req.params;
     const updates = req.body;
-    
+
     const updatedPlan = await storage.updateSubscriptionPlan(parseInt(id), updates);
-    
+
     if (!updatedPlan) {
       return res.status(404).json({ error: 'Subscription plan not found' });
     }
-    
+
     // Auto-sync with Stripe if price changed
     if (updates.price || updates.name) {
       try {
@@ -96,7 +96,7 @@ router.put('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, res
           parseFloat(updatedPlan.price), 
           updatedPlan.billingPeriod === 'yearly' ? 'year' : 'month'
         );
-        
+
         if (stripeProductId && stripeProductId !== updatedPlan.stripePriceId) {
           // Update plan with new Stripe ID
           await storage.updateSubscriptionPlan(parseInt(id), {
@@ -108,7 +108,7 @@ router.put('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, res
         logger.warn("Stripe sync failed during plan update", { errorMessage: stripeError?.message || "Unknown error" });
       }
     }
-    
+
     res.json(updatedPlan);
   } catch (error: any) {
     logger.error("Storage operation error", { errorMessage: error?.message || "Unknown error" });
@@ -125,13 +125,13 @@ router.put('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, res
 router.delete('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    
+
     const success = await storage.deleteSubscriptionPlan(parseInt(id));
-    
+
     if (!success) {
       return res.status(404).json({ error: 'Subscription plan not found' });
     }
-    
+
     res.json({ 
       message: 'Subscription plan deleted successfully',
       id: parseInt(id)
@@ -152,25 +152,25 @@ router.post('/plans/sync', isAuthenticated, isSuperAdmin, async (req: Request, r
   try {
     const plans = await storage.getAllSubscriptionPlans();
     const syncResults = [];
-    
+
     for (const plan of plans) {
       try {
         // Extract numeric price from database value
         const numericPrice = typeof plan.price === 'string' 
           ? parseFloat(plan.price.replace('$', '')) 
           : parseFloat(plan.price);
-        
+
         const stripeProductId = await stripeService.createOrUpdatePlanPrice(
           plan.name, 
           numericPrice, 
           plan.billingPeriod === 'yearly' ? 'year' : 'month'
         );
-        
+
         if (stripeProductId) {
           await storage.updateSubscriptionPlan(plan.id, {
             stripePriceId: stripeProductId
           });
-          
+
           syncResults.push({
             planId: plan.id,
             planName: plan.name,
@@ -194,7 +194,7 @@ router.post('/plans/sync', isAuthenticated, isSuperAdmin, async (req: Request, r
         });
       }
     }
-    
+
     res.json({
       message: 'Stripe sync completed',
       results: syncResults
@@ -215,10 +215,10 @@ router.get('/subscription', isAuthenticated, isCompanyAdmin, async (req: Request
   try {
     // @ts-ignore - userId does exist on req.user
     const userId = req.user.id;
-    
+
     // Get subscription data
     const subscriptionData = await stripeService.getSubscriptionData(userId);
-    
+
     // Return subscription data
     res.json(subscriptionData);
   } catch (error: any) {
@@ -278,6 +278,26 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
         plan: planDetails.name.toLowerCase() as any
       });
 
+      // Create payment success notification
+      try {
+        await storage.createNotification({
+          userId: user.id,
+          companyId: companyId,
+          type: 'payment_success',
+          title: 'Payment Successful',
+          message: `Your subscription to ${planDetails.name} plan has been activated. Welcome back!`,
+          data: {
+            planName: planDetails.name,
+            amount: price,
+            billingPeriod: billingPeriod
+          }
+        });
+      } catch (notificationError) {
+        logger.warn("Failed to create payment success notification", { 
+          errorMessage: notificationError?.message || "Unknown error" 
+        });
+      }
+
       return res.json({
         success: true,
         planId: planId,
@@ -329,7 +349,7 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
         planId,
         planName: planDetails.name
       });
-      
+
       return res.status(500).json({
         error: 'Payment processing failed',
         message: stripeError.message || 'Unable to process payment. Please try again or contact support.',
@@ -355,10 +375,10 @@ router.post('/subscription/cancel', isAuthenticated, isCompanyAdmin, async (req:
   try {
     // @ts-ignore - userId does exist on req.user
     const userId = req.user.id;
-    
+
     // Cancel subscription
     const result = await stripeService.cancelSubscription(userId);
-    
+
     res.json({ 
       message: 'Subscription canceled successfully',
       cancelDate: result.cancelDate
@@ -378,22 +398,22 @@ router.post('/subscription/cancel', isAuthenticated, isCompanyAdmin, async (req:
 router.post('/payment-intent', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const { amount, currency } = req.body;
-    
+
     if (!amount || typeof amount !== 'number' || amount <= 0) {
       return res.status(400).json({ error: 'Invalid amount specified' });
     }
-    
+
     // @ts-ignore - userId does exist on req.user
     const userId = req.user.id;
     const user = await storage.getUser(userId);
-    
+
     // Create payment intent
     const clientSecret = await stripeService.createPaymentIntent(
       amount,
       currency || 'usd',
       user?.stripeCustomerId || undefined
     );
-    
+
     res.json({ clientSecret });
   } catch (error: any) {
     logger.error("Unhandled error occurred");
@@ -412,14 +432,14 @@ router.get('/usage', isAuthenticated, isCompanyAdmin, async (req: Request, res: 
     // @ts-ignore - userId does exist on req.user
     const userId = req.user.id;
     const user = await storage.getUser(userId);
-    
+
     if (!user || !user.companyId) {
       return res.status(400).json({ error: 'No company associated with this user' });
     }
-    
+
     // Get usage statistics
     const stats = await getUsageStats(user.companyId);
-    
+
     res.json(stats);
   } catch (error: any) {
     logger.error("Unhandled error occurred");
@@ -438,10 +458,10 @@ async function getUsageStats(companyId: number) {
   if (!company) {
     throw new Error('Company not found');
   }
-  
+
   // Get company stats from storage
   const stats = await storage.getCompanyStats(companyId);
-  
+
   // Get plan limits
   const planLimits = {
     starter: {
@@ -460,11 +480,11 @@ async function getUsageStats(companyId: number) {
       technicians: 15
     }
   };
-  
+
   // Set plan to starter if not defined
   const plan = company.plan || 'starter';
   const limits = planLimits[plan];
-  
+
   // Format the response
   return {
     plan,
@@ -494,31 +514,31 @@ async function getUsageStats(companyId: number) {
 router.post('/plans/:id/sync-stripe', isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    
+
     // Get the plan first
     const plans = await storage.getAllSubscriptionPlans();
     const plan = plans.find(p => p.id === parseInt(id));
-    
+
     if (!plan) {
       return res.status(404).json({ error: 'Subscription plan not found' });
     }
-    
+
     // Sync with Stripe
     const stripeProductId = await stripeService.createOrUpdatePlanPrice(
       plan.name, 
       parseFloat(plan.price), 
       plan.billingPeriod === 'yearly' ? 'year' : 'month'
     );
-    
+
     if (!stripeProductId) {
       return res.status(500).json({ error: 'Failed to sync with Stripe' });
     }
-    
+
     // Update plan with Stripe ID
     const updatedPlan = await storage.updateSubscriptionPlan(parseInt(id), {
       stripePriceId: stripeProductId
     });
-    
+
     res.json(updatedPlan);
   } catch (error: any) {
     logger.error("Stripe sync error", { errorMessage: error?.message || "Unknown error" });
@@ -535,35 +555,35 @@ router.post('/plans/:id/sync-stripe', isAuthenticated, isSuperAdmin, async (req:
 router.post('/subscription/complete-development', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
   try {
     const { plan } = req.body;
-    
+
     if (!plan) {
       return res.status(400).json({ error: 'Plan is required' });
     }
-    
+
     // @ts-ignore - userId does exist on req.user
     const userId = req.user.id;
     const user = await storage.getUser(userId);
-    
+
     if (!user || !user.companyId) {
       return res.status(400).json({ error: 'User or company not found' });
     }
-    
+
     // Map new plan names to old ones for database compatibility
     let dbPlan = plan;
     if (plan === 'essential') dbPlan = 'starter';
     if (plan === 'professional') dbPlan = 'pro';
     if (plan === 'enterprise') dbPlan = 'agency';
-    
+
     // Update company plan
     await storage.updateCompany(user.companyId, { plan: dbPlan as any });
-    
+
     logger.info("Development payment simulation completed", { 
       userId,
       companyId: user.companyId,
       plan: dbPlan,
       originalPlan: plan
     });
-    
+
     res.json({ 
       success: true,
       message: 'Plan updated successfully',

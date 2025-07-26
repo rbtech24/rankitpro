@@ -143,6 +143,18 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
     }
   };
 
+  // Listen for quick payment trigger from banner
+  useEffect(() => {
+    const handleShowTrialModal = () => {
+      setShowTrialModal(true);
+    };
+
+    window.addEventListener('show-trial-modal', handleShowTrialModal);
+    return () => {
+      window.removeEventListener('show-trial-modal', handleShowTrialModal);
+    };
+  }, []);
+
   // Show trial warning banner for non-expired but low days
   const showWarningBanner = trialStatus && !trialStatus.expired && 
                            !trialStatus.subscriptionActive && 
