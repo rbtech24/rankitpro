@@ -39,12 +39,15 @@ function AdminLayout({ children }: AdminLayoutProps) {
 
   const handleLogout = async () => {
     try {
-      await apiRequest('POST', '/api/auth/logout');
-      setLocation('/login');
+      // Use the comprehensive logout function
+      const { performImmediateLogout } = await import('../../lib/logout');
+      await performImmediateLogout();
     } catch (error) {
-      console.error('Logout error:', error);
-      // Force redirect even if logout fails
-      setLocation('/login');
+      // Fallback: clear everything and redirect to home
+      queryClient.clear();
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = '/';
     }
   };
 

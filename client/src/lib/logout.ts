@@ -66,10 +66,10 @@ export async function performImmediateLogout() {
     delete (window as any).userSession;
     
     // Step 6: Force complete page reload to clear any lingering state
-    window.location.replace("/login?cleared=1");
+    window.location.href = "/";
     
   } catch (error) {
     // Extreme fallback - force reload
-    window.location.replace("/login?error=1");
+    window.location.href = "/";
   }
 }
