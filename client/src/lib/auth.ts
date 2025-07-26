@@ -35,6 +35,45 @@ export interface AuthState {
   company: Company | null;
 }
 
+export async function getCurrentUser(): Promise<AuthState | null> {
+  try {
+    // First try localStorage cache to prevent 404 redirects
+    const cachedUser = localStorage.getItem('authUser');
+    const cachedCompany = localStorage.getItem('authCompany');
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    
+    if (isAuthenticated === 'true' && cachedUser) {
+      const user = JSON.parse(cachedUser);
+      const company = cachedCompany ? JSON.parse(cachedCompany) : null;
+      
+      // Return cached data immediately to prevent 404 redirects
+      return { user, company };
+    }
+    
+    // If no cache, try API but handle failures gracefully
+    const response = await apiRequest("GET", "/api/auth/me");
+    const data = await response.json();
+    
+    if (data.user) {
+      // Update cache
+      localStorage.setItem('authUser', JSON.stringify(data.user));
+      localStorage.setItem('authCompany', JSON.stringify(data.company));
+      localStorage.setItem('isAuthenticated', 'true');
+      
+      return { user: data.user, company: data.company };
+    }
+    
+    return null;
+  } catch (error) {
+    // Silently handle auth failures to prevent 404 redirects
+    console.warn("Auth check failed, clearing cache:", error);
+    localStorage.removeItem('authUser');
+    localStorage.removeItem('authCompany');
+    localStorage.removeItem('isAuthenticated');
+    return null;
+  }
+}
+
 export async function login(credentials: LoginCredentials): Promise<AuthState> {
   try {
     console.log("Attempting login for:", credentials.email);
@@ -135,60 +174,6 @@ export async function logout(): Promise<void> {
     
     // Redirect to login page
     window.location.href = '/login';
-  }
-}
-
-export async function getCurrentUser(): Promise<AuthState> {
-  try {
-    // Check if we have cached data first to avoid excessive server requests
-    const cachedUser = localStorage.getItem('authUser');
-    const cachedCompany = localStorage.getItem('authCompany');
-    const isAuth = localStorage.getItem('isAuthenticated');
-    
-    // If we have cached data, try server validation but don't fail immediately
-    if (cachedUser && isAuth) {
-      try {
-        const response = await apiRequest("GET", "/api/auth/me");
-        const data = await response.json();
-        
-        // Update cache with fresh data
-        localStorage.setItem('authUser', JSON.stringify(data.user));
-        localStorage.setItem('authCompany', JSON.stringify(data.company || null));
-        localStorage.setItem('isAuthenticated', 'true');
-        
-        return data;
-      } catch (error) {
-        // If server validation fails but we have cached data, clear cache
-        // and return unauthenticated state without logging excessive errors
-        localStorage.removeItem('authUser');
-        localStorage.removeItem('authCompany');
-        localStorage.removeItem('isAuthenticated');
-        queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
-        return { user: null, company: null };
-      }
-    }
-    
-    // No cached data, try server validation once
-    const response = await apiRequest("GET", "/api/auth/me");
-    const data = await response.json();
-    
-    // Store fresh data
-    if (data.user) {
-      localStorage.setItem('authUser', JSON.stringify(data.user));
-      localStorage.setItem('authCompany', JSON.stringify(data.company || null));
-      localStorage.setItem('isAuthenticated', 'true');
-    }
-    
-    return data;
-  } catch (error) {
-    // Silently clear auth state without excessive logging
-    queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
-    localStorage.removeItem('authUser');
-    localStorage.removeItem('authCompany');
-    localStorage.removeItem('isAuthenticated');
-    
-    // Return empty auth state instead of throwing
-    return { user: null, company: null };
   }
 }
 
