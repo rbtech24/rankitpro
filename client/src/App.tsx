@@ -117,6 +117,7 @@ import ForgotPassword from "./pages/forgot-password";
 import ResetPassword from "./pages/reset-password";
 import AdminSetup from "./pages/AdminSetup";
 import AdminUserManagement from "./pages/admin-user-management";
+import AdminPage from "./pages/admin";
 import Landing from "./pages/landing";
 import SocialMediaSettings from "./pages/social-media-settings";
 import Profile from "./pages/profile";
@@ -269,7 +270,7 @@ function Router() {
       <Route path="/login">
         {auth?.user && !isLoggedOut ? 
           (auth.user.role === "technician" ? <Redirect to="/mobile-field-app" /> : 
-           auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> :
+           auth.user.role === "super_admin" ? <Redirect to="/admin" /> :
            auth.user.role === "sales_staff" ? <Redirect to="/sales-dashboard" /> :
            <Redirect to="/dashboard" />) 
           : <Login />}
@@ -290,7 +291,7 @@ function Router() {
       </Route>
       <Route path="/register">
         {auth?.user ? 
-          (auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : 
+          (auth.user.role === "super_admin" ? <Redirect to="/admin" /> : 
            auth.user.role === "sales_staff" ? <Redirect to="/sales-dashboard" /> :
            <Redirect to="/dashboard" />) 
           : <Onboarding />}
@@ -303,7 +304,7 @@ function Router() {
 
       <Route path="/onboarding">
         {auth?.user ? 
-          (auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> : 
+          (auth.user.role === "super_admin" ? <Redirect to="/admin" /> : 
            auth.user.role === "sales_staff" ? <Redirect to="/sales-dashboard" /> :
            <Redirect to="/dashboard" />) 
           : <Onboarding />}
@@ -311,7 +312,7 @@ function Router() {
       <Route path="/">
         {auth?.user ? 
           (auth.user.role === "technician" ? <Redirect to="/mobile-field-app" /> : 
-           auth.user.role === "super_admin" ? <Redirect to="/system-overview" /> :
+           auth.user.role === "super_admin" ? <Redirect to="/admin" /> :
            auth.user.role === "sales_staff" ? <Redirect to="/sales-dashboard" /> :
            <Redirect to="/dashboard" />) 
           : <Home />}
@@ -1188,9 +1189,6 @@ function Router() {
       <Route path="/system-overview">
         <PrivateRoute component={SystemOverview} path="/system-overview" role="super_admin" />
       </Route>
-      <Route path="/admin">
-        <PrivateRoute component={AdminDashboard} path="/admin" role="super_admin" />
-      </Route>
       <Route path="/setup">
         <PrivateRoute component={SetupGuide} path="/setup" role="company_admin" />
       </Route>
@@ -1299,6 +1297,9 @@ function Router() {
       </Route>
       <Route path="/system-settings">
         <PrivateRoute component={SystemSettings} path="/system-settings" role="super_admin" />
+      </Route>
+      <Route path="/admin">
+        <PrivateRoute component={AdminPage} path="/admin" role="super_admin" />
       </Route>
       <Route path="/api-testing">
         <PrivateRoute component={APITesting} path="/api-testing" role="super_admin" />
