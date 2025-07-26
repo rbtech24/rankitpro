@@ -1445,8 +1445,37 @@ export class DatabaseStorage implements IStorage {
     return technician;
   }
 
-  async getAllTechnicians(): Promise<Technician[]> {
-    return await db.select().from(technicians);
+  async getAllTechnicians(): Promise<any[]> {
+    try {
+      const techniciansData = await db.select({
+        id: technicians.id,
+        name: technicians.name,
+        email: technicians.email,
+        phone: technicians.phone,
+        specialty: technicians.specialty,
+        location: technicians.location,
+        companyId: technicians.companyId,
+        active: technicians.active,
+        createdAt: technicians.createdAt,
+        companyName: companies.name,
+        companyPlan: companies.plan
+      })
+      .from(technicians)
+      .leftJoin(companies, eq(technicians.companyId, companies.id))
+      .orderBy(desc(technicians.createdAt));
+
+      return techniciansData.map(tech => ({
+        ...tech,
+        company: {
+          id: tech.companyId,
+          name: tech.companyName || 'Unknown Company',
+          plan: tech.companyPlan || 'unknown'
+        }
+      }));
+    } catch (error) {
+      logger.error("Error getting all technicians", { error: error instanceof Error ? error.message : String(error) });
+      return [];
+    }
   }
 
   async deleteTechnician(id: number): Promise<boolean> {

@@ -66,6 +66,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
+interface Company {
+  id: number;
+  name: string;
+  plan: string;
+}
+
 interface Technician {
   id: number;
   name: string;
@@ -117,15 +123,14 @@ export default function TechniciansManagement() {
     queryKey: ["/api/technicians/all"],
   });
 
-  const { data: companies = [] } = useQuery({
+  const { data: companies = [] } = useQuery<Company[]>({
     queryKey: ["/api/companies"],
   });
 
   const changePasswordMutation = useMutation({
     mutationFn: async (data: { technicianId: number; newPassword: string }) => {
-      return apiRequest(`/api/technicians/${data.technicianId}/change-password`, {
-        method: "POST",
-        body: JSON.stringify({ newPassword: data.newPassword }),
+      return apiRequest("POST", `/api/technicians/${data.technicianId}/change-password`, {
+        newPassword: data.newPassword,
       });
     },
     onSuccess: () => {
