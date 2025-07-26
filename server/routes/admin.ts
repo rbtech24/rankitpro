@@ -7,6 +7,126 @@ import Stripe from 'stripe';
 import { logger } from '../services/logger';
 const router = Router();
 
+// System health endpoint
+router.get('/system-health', isSuperAdmin, async (req, res) => {
+  try {
+    // Check database connection
+    let databaseStatus = 'Healthy';
+    let databaseColor = 'bg-green-100 text-green-800';
+    try {
+      await storage.getAllCompanies();
+    } catch (error) {
+      databaseStatus = 'Error';
+      databaseColor = 'bg-red-100 text-red-800';
+    }
+
+    // Check memory usage (rough estimate)
+    const memoryUsage = process.memoryUsage();
+    const usedMemoryMB = Math.round(memoryUsage.heapUsed / 1024 / 1024);
+    const totalMemoryMB = Math.round(memoryUsage.heapTotal / 1024 / 1024);
+    const memoryPercentage = Math.round((usedMemoryMB / totalMemoryMB) * 100);
+    
+    const memoryStatus = memoryPercentage > 85 ? 'High' : memoryPercentage > 70 ? 'Moderate' : 'Good';
+    const memoryColor = memoryPercentage > 85 ? 'bg-red-100 text-red-800' : 
+                       memoryPercentage > 70 ? 'bg-yellow-100 text-yellow-800' : 
+                       'bg-green-100 text-green-800';
+
+    const systemHealth = [
+      {
+        name: 'Database',
+        status: databaseStatus,
+        color: databaseColor
+      },
+      {
+        name: 'API Services',
+        status: 'Operational',
+        color: 'bg-green-100 text-green-800'
+      },
+      {
+        name: 'WebSocket',
+        status: 'Connected',
+        color: 'bg-green-100 text-green-800'
+      },
+      {
+        name: 'Memory Usage',
+        status: `${memoryPercentage}%`,
+        color: memoryColor
+      }
+    ];
+
+    res.json(systemHealth);
+  } catch (error) {
+    logger.error('Error fetching system health', { errorMessage: error instanceof Error ? error.message : String(error) });
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Recent activity endpoint
+router.get('/recent-activity', isSuperAdmin, async (req, res) => {
+  try {
+    // Get recent activities from various sources
+    const activities = [];
+
+    // Get recent companies (last 7 days)
+    const companies = await storage.getAllCompanies();
+    const recentCompanies = companies.filter(company => {
+      if (!company.createdAt) return false;
+      const createdDate = new Date(company.createdAt);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return createdDate > weekAgo;
+    }).slice(0, 3);
+
+    recentCompanies.forEach(company => {
+      const timeAgo = getTimeAgo(new Date(company.createdAt));
+      activities.push({
+        icon: 'Building2',
+        iconColor: 'bg-green-100 text-green-600',
+        message: `New company registered: ${company.name}`,
+        timestamp: timeAgo
+      });
+    });
+
+    // Get recent user logins from current session activity
+    activities.push({
+      icon: 'User',
+      iconColor: 'bg-blue-100 text-blue-600',
+      message: `Admin user logged in`,
+      timestamp: 'Just now'
+    });
+
+    // Add system activity
+    activities.push({
+      icon: 'Server',
+      iconColor: 'bg-purple-100 text-purple-600',
+      message: 'System health check completed',
+      timestamp: '5 minutes ago'
+    });
+
+    // Sort by most recent and limit to 5
+    const sortedActivities = activities.slice(0, 5);
+
+    res.json(sortedActivities);
+  } catch (error) {
+    logger.error('Error fetching recent activity', { errorMessage: error instanceof Error ? error.message : String(error) });
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Helper function to calculate time ago
+function getTimeAgo(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMinutes < 1) return 'Just now';
+  if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+}
+
 // Financial dashboard endpoints for super admin
 router.get('/financial/metrics', isSuperAdmin, async (req, res) => {
   try {

@@ -49,6 +49,26 @@ export default function AdminPage() {
     },
   });
 
+  // Fetch system health
+  const { data: systemHealth = [] } = useQuery({
+    queryKey: ['/api/admin/system-health'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/admin/system-health');
+      return response.json();
+    },
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  // Fetch recent activity
+  const { data: recentActivity = [] } = useQuery({
+    queryKey: ['/api/admin/recent-activity'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/admin/recent-activity');
+      return response.json();
+    },
+    refetchInterval: 60000, // Refresh every minute
+  });
+
   const adminMenuItems = [
     {
       section: "Dashboard",
@@ -227,22 +247,12 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Database</span>
-                    <Badge className="bg-green-100 text-green-800">Healthy</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">API Services</span>
-                    <Badge className="bg-green-100 text-green-800">Operational</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">WebSocket</span>
-                    <Badge className="bg-green-100 text-green-800">Connected</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Memory Usage</span>
-                    <Badge className="bg-yellow-100 text-yellow-800">72%</Badge>
-                  </div>
+                  {systemHealth.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <span className="text-sm">{item.name}</span>
+                      <Badge className={item.color}>{item.status}</Badge>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -258,33 +268,28 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-blue-100 rounded-full p-1">
-                      <User className="h-3 w-3 text-blue-600" />
+                  {recentActivity.map((activity, index) => {
+                    const IconComponent = activity.icon === 'User' ? User : 
+                                       activity.icon === 'Building2' ? Building2 :
+                                       activity.icon === 'Server' ? Server : Activity;
+                    
+                    return (
+                      <div key={index} className="flex items-start gap-3">
+                        <div className={`rounded-full p-1 ${activity.iconColor}`}>
+                          <IconComponent className="h-3 w-3" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm">{activity.message}</p>
+                          <p className="text-xs text-gray-500">{activity.timestamp}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {recentActivity.length === 0 && (
+                    <div className="flex items-center justify-center py-4">
+                      <p className="text-sm text-gray-500">No recent activity</p>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm">New admin user created</p>
-                      <p className="text-xs text-gray-500">2 minutes ago</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="bg-green-100 rounded-full p-1">
-                      <Building2 className="h-3 w-3 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm">Company subscription updated</p>
-                      <p className="text-xs text-gray-500">15 minutes ago</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="bg-purple-100 rounded-full p-1">
-                      <Server className="h-3 w-3 text-purple-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm">System backup completed</p>
-                      <p className="text-xs text-gray-500">1 hour ago</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
