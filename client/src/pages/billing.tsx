@@ -53,6 +53,7 @@ export default function Billing() {
   // State for subscription management and payment modal
   const [currentPlan, setCurrentPlan] = useState<string>("starter");
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [isLoading, setIsLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
@@ -224,6 +225,7 @@ export default function Billing() {
     }
     
     setSelectedPlan(planDetails.name.toLowerCase());
+    setSelectedBillingPeriod(billingPeriod);
     
     // Proceed with upgrade directly - no confirmation popup needed
     updateSubscription.mutate({ planId, billingPeriod });
@@ -283,19 +285,105 @@ export default function Billing() {
                   <h4 className="font-medium">Subscription Details:</h4>
                   {selectedPlan && subscriptionPlans && (() => {
                     const planDetails = subscriptionPlans.find(p => p.name.toLowerCase() === selectedPlan);
-                    return planDetails ? (
+                    if (!planDetails) return null;
+                    
+                    const price = selectedBillingPeriod === 'yearly' ? 
+                      (planDetails.yearlyPrice || planDetails.price * 12) : 
+                      planDetails.price;
+                    
+                    return (
                       <div className="bg-gray-50 p-3 rounded-lg">
                         <div className="flex justify-between items-center">
                           <span className="font-medium">{planDetails.name} Plan</span>
-                          <span className="text-lg font-bold">${planDetails.price}/{planDetails.billingPeriod}</span>
+                          <span className="text-lg font-bold">${price}/{selectedBillingPeriod}</span>
                         </div>
                         <div className="text-sm text-gray-600 mt-1">
                           {planDetails.maxTechnicians === -1 ? 'Unlimited' : planDetails.maxTechnicians} technicians, 
                           {planDetails.maxCheckIns === -1 ? 'Unlimited' : planDetails.maxCheckIns} submissions
                         </div>
+                        {selectedBillingPeriod === 'yearly' && planDetails.yearlyPrice && (
+                          <div className="text-sm text-green-600 mt-1 font-medium">
+                            Save ${(planDetails.price * 12) - planDetails.yearlyPrice}/year with annual billing
+                          </div>
+                        )}
                       </div>
-                    ) : null;
+                    );
                   })()}
+                  
+                  {/* Billing Period Selector */}
+                  <div className="space-y-2">
+                    <h5 className="text-sm font-medium">Billing Period:</h5>
+                    <div className="flex space-x-3">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setSelectedBillingPeriod('monthly');
+                          // Update payment with new billing period
+                          if (selectedPlan && subscriptionPlans) {
+                            const planDetails = subscriptionPlans.find(p => p.name.toLowerCase() === selectedPlan);
+                            if (planDetails) {
+                              try {
+                                const response = await updateSubscription.mutateAsync({ 
+                                  planId: planDetails.id, 
+                                  billingPeriod: 'monthly' 
+                                });
+                                if (response.clientSecret) {
+                                  setClientSecret(response.clientSecret);
+                                }
+                              } catch (error) {
+                                console.error('Error updating billing period:', error);
+                              }
+                            }
+                          }
+                        }}
+                        className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                          selectedBillingPeriod === 'monthly'
+                            ? 'bg-primary text-white border-primary'
+                            : 'bg-white text-gray-700 border-gray-300 hover:border-primary'
+                        }`}
+                      >
+                        Monthly
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setSelectedBillingPeriod('yearly');
+                          // Update payment with new billing period
+                          if (selectedPlan && subscriptionPlans) {
+                            const planDetails = subscriptionPlans.find(p => p.name.toLowerCase() === selectedPlan);
+                            if (planDetails) {
+                              try {
+                                const response = await updateSubscription.mutateAsync({ 
+                                  planId: planDetails.id, 
+                                  billingPeriod: 'yearly' 
+                                });
+                                if (response.clientSecret) {
+                                  setClientSecret(response.clientSecret);
+                                }
+                              } catch (error) {
+                                console.error('Error updating billing period:', error);
+                              }
+                            }
+                          }
+                        }}
+                        className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                          selectedBillingPeriod === 'yearly'
+                            ? 'bg-primary text-white border-primary'
+                            : 'bg-white text-gray-700 border-gray-300 hover:border-primary'
+                        }`}
+                      >
+                        Yearly
+                        {selectedPlan && subscriptionPlans && (() => {
+                          const planDetails = subscriptionPlans.find(p => p.name.toLowerCase() === selectedPlan);
+                          if (planDetails?.yearlyPrice) {
+                            const savings = (planDetails.price * 12) - planDetails.yearlyPrice;
+                            return <span className="ml-1 text-xs text-green-600">(Save ${savings})</span>;
+                          }
+                          return null;
+                        })()}
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 
                 <PaymentForm 
