@@ -176,7 +176,7 @@ const CompaniesManagement = () => {
                   
                   return (
                     <TableRow key={company.id}>
-                      <TableCell className="font-mono text-sm text-gray-500">#{company.id}</TableCell>
+                      <TableCell className="font-mono text-sm text-gray-500 bg-blue-50 font-bold">ID: {company.id}</TableCell>
                       <TableCell className="font-medium">{company.name}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="capitalize">
@@ -197,12 +197,12 @@ const CompaniesManagement = () => {
                             onClick={() => toggleStatusMutation.mutate(company.id)}
                             disabled={toggleStatusMutation.isPending}
                             title={company.isActive ? "Deactivate Company" : "Activate Company"}
-                            className="h-8 w-8 p-0 border-2"
+                            className="h-10 w-10 p-0 border-4 border-red-500 bg-yellow-100"
                           >
                             {company.isActive ? (
-                              <PowerOff className="h-4 w-4 text-red-600" />
+                              <PowerOff className="h-6 w-6 text-red-800 font-bold" />
                             ) : (
-                              <Power className="h-4 w-4 text-green-600" />
+                              <Power className="h-6 w-6 text-green-800 font-bold" />
                             )}
                           </Button>
                         </div>
