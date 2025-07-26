@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trial Payment Flow Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .current-status {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .steps {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #007bff;
+            background: white;
+            padding-left: 15px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .plan-option {
+            border: 2px solid #e0e0e0;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        .plan-option:hover {
+            border-color: #007bff;
+        }
+        .plan-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .plan-price {
+            font-size: 24px;
+            color: #007bff;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .features {
+            list-style: none;
+            padding: 0;
+        }
+        .features li {
+            padding: 5px 0;
+            color: #666;
+        }
+        .features li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔒 Trial Payment Flow Demonstration</h1>
+        
+        <div class="current-status">
+            <h3>Current Trial Status</h3>
+            <p><strong>User:</strong> rodbartrufftech@gmail.com</p>
+            <p><strong>Company:</strong> Carrollton Sprinkler Repair</p>
+            <p><strong>Trial Status:</strong> EXPIRED (since July 5, 2025)</p>
+            <p><strong>Current Plan:</strong> Starter (Free) - Reset for testing</p>
+            <p><strong>Subscription Active:</strong> False</p>
+        </div>
+
+        <div class="steps">
+            <h3>🚀 How to Test the Payment Flow</h3>
+            <div class="step">
+                <strong>Step 1:</strong> Refresh the dashboard page or navigate to any feature
+            </div>
+            <div class="step">
+                <strong>Step 2:</strong> The Trial Expired modal should appear immediately
+            </div>
+            <div class="step">
+                <strong>Step 3:</strong> Click "View Subscription Plans" to see payment options
+            </div>
+            <div class="step">
+                <strong>Step 4:</strong> Select a plan and proceed to payment
+            </div>
+            <div class="step">
+                <strong>Step 5:</strong> Test both monthly and yearly billing options
+            </div>
+        </div>
+
+        <h2>Available Subscription Plans</h2>
+        
+        <div class="plan-option">
+            <div class="plan-name">Essential Plan</div>
+            <div class="plan-price">$97/month</div>
+            <ul class="features">
+                <li>Basic check-in tracking</li>
+                <li>Customer testimonials</li>
+                <li>Email notifications</li>
+                <li>Mobile app access</li>
+                <li>Max 5 technicians</li>
+                <li>Max 100 submissions</li>
+            </ul>
+            <button onclick="testPayment(13, 'Essential', 97)">Subscribe to Essential</button>
+        </div>
+
+        <div class="plan-option">
+            <div class="plan-name">Professional Plan</div>
+            <div class="plan-price">$197/month</div>
+            <ul class="features">
+                <li>Everything in Essential</li>
+                <li>AI-powered blog posts</li>
+                <li>Advanced analytics</li>
+                <li>Review automation</li>
+                <li>WordPress integration</li>
+                <li>Max 25 technicians</li>
+                <li>Max 500 submissions</li>
+            </ul>
+            <button onclick="testPayment(14, 'Professional', 197)">Subscribe to Professional</button>
+        </div>
+
+        <div class="plan-option">
+            <div class="plan-name">Enterprise Plan</div>
+            <div class="plan-price">$397/month</div>
+            <ul class="features">
+                <li>Everything in Professional</li>
+                <li>Unlimited technicians</li>
+                <li>Unlimited submissions</li>
+                <li>Custom integrations</li>
+                <li>Priority support</li>
+                <li>White-label options</li>
+            </ul>
+            <button onclick="testPayment(15, 'Enterprise', 397)">Subscribe to Enterprise</button>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px;">
+            <h3>🧪 Testing Instructions</h3>
+            <p>1. <strong>Refresh the dashboard page</strong> - the trial expired modal should appear automatically</p>
+            <p>2. <strong>In development mode</strong> - the payment flow will bypass actual Stripe processing</p>
+            <p>3. <strong>You can test all plans</strong> - Essential ($97), Professional ($197), Enterprise ($397)</p>
+            <p>4. <strong>Both monthly and yearly billing</strong> are supported in the modal</p>
+            <p>5. <strong>After payment</strong> - the service will be restored immediately</p>
+        </div>
+
+        <button onclick="window.location.reload()">Refresh Dashboard to Trigger Modal</button>
+    </div>
+
+    <script>
+        async function testPayment(planId, planName, price) {
+            const response = await fetch('/api/billing/subscription', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    planId: planId,
+                    billingPeriod: 'monthly'
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(`✅ Success! Subscribed to ${planName} plan for $${result.amount}/month\n\nDevelopment mode: ${result.devMode}\nPlan ID: ${result.planId}`);
+                
+                // Refresh to see restored service
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                alert(`❌ Payment failed: ${result.message || 'Unknown error'}`);
+            }
+        }
+        
+        // Auto-refresh every 30 seconds to check for trial modal
+        setInterval(() => {
+            console.log('Checking for trial expired modal...');
+        }, 30000);
+    </script>
+</body>
+</html>
