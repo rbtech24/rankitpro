@@ -463,13 +463,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
               Restore Service Now
             </Button>
 
-            <Button 
-              variant="outline"
-              onClick={() => setLocation('/billing')}
-              className="w-full"
-            >
-              View All Options
-            </Button>
+
 
             <Button 
               variant="ghost" 
