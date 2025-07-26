@@ -76,7 +76,10 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
   // Monitor for trial expiration
   useEffect(() => {
     if (trialStatus?.expired) {
-      setShowTrialModal(true);
+      // Only show modal if not on billing page
+      if (!isBillingPage) {
+        setShowTrialModal(true);
+      }
       if (enforceBlocking) {
         setBlockingActive(true);
       }
@@ -84,7 +87,7 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
       setShowTrialModal(false);
       setBlockingActive(false);
     }
-  }, [trialStatus, enforceBlocking]);
+  }, [trialStatus, enforceBlocking, isBillingPage]);
 
   // Global error handler for 403 trial_expired responses
   useEffect(() => {
@@ -98,7 +101,10 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
         try {
           const data = await response.clone().json();
           if (data.error === 'trial_expired') {
-            setShowTrialModal(true);
+            // Only show modal if not on billing page
+            if (!isBillingPage) {
+              setShowTrialModal(true);
+            }
             setBlockingActive(true);
             // Invalidate trial status to refetch
             queryClient.invalidateQueries({ queryKey: ['/api/trial/status'] });
@@ -114,7 +120,7 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
     return () => {
       window.fetch = originalFetch;
     };
-  }, [queryClient]);
+  }, [queryClient, isBillingPage]);
 
   const handleUpgrade = () => {
     console.log('Navigating to billing page...');
