@@ -40,7 +40,7 @@ const planFormSchema = z.object({
   yearlyPrice: z.string().optional(),
   billingPeriod: z.enum(['monthly', 'yearly']),
   maxTechnicians: z.number().min(1, "Must allow at least 1 technician"),
-  maxCheckIns: z.number().min(1, "Must allow at least 1 check-in"),
+  maxCheckIns: z.number().min(1, "Must allow at least 1 submission"),
   features: z.string().min(1, "Features are required"),
   isActive: z.boolean().default(true),
 });
@@ -311,7 +311,7 @@ export default function SubscriptionPlansManagement() {
             name="maxCheckIns"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Max Check-ins per Month</FormLabel>
+                <FormLabel>Max Submissions per Month</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
@@ -319,6 +319,7 @@ export default function SubscriptionPlansManagement() {
                     onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                   />
                 </FormControl>
+                <FormDescription>Includes check-ins, reviews, testimonials, and blog posts</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -516,7 +517,7 @@ export default function SubscriptionPlansManagement() {
                       <TableCell>
                         <div className="text-sm">
                           <div>{plan.maxTechnicians} technicians</div>
-                          <div className="text-muted-foreground">{plan.maxCheckIns} check-ins/mo</div>
+                          <div className="text-muted-foreground">{plan.maxCheckIns} submissions/mo</div>
                         </div>
                       </TableCell>
                       <TableCell>
