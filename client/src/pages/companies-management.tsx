@@ -349,7 +349,7 @@ export default function CompaniesManagement() {
   const toggleCompanyStatus = (id: number) => {
     const company = companies?.find(c => c.id === id);
     if (company) {
-      toggleStatusMutation.mutate({ id, isActive: !company.isEmailVerified });
+      toggleStatusMutation.mutate({ id, isActive: !(company.isActive ?? company.isTrialActive) });
     }
   };
   
@@ -583,7 +583,7 @@ export default function CompaniesManagement() {
                           </TableCell>
                           <TableCell>{company.industry || 'Not specified'}</TableCell>
                           <TableCell>{company.plan}</TableCell>
-                          <TableCell>{parseInt(String(company.stats?.totalTechnicians || 0)) || 0} / {company.maxTechnicians ? company.maxTechnicians : 'Unlimited'}</TableCell>
+                          <TableCell>{parseInt(String(company.stats?.totalTechnicians || 0)) || 0} / {(company as any).maxTechnicians ? (company as any).maxTechnicians : 'Unlimited'}</TableCell>
                           <TableCell>{parseInt(String(company.stats?.totalCheckIns || 0)) || 0}</TableCell>
                           <TableCell>
                             <div className="flex items-center">
@@ -593,17 +593,17 @@ export default function CompaniesManagement() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <Badge className={company.isTrialActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                                {company.isTrialActive ? "Active" : "Inactive"}
+                              <Badge className={(company.isActive ?? company.isTrialActive) ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                                {(company.isActive ?? company.isTrialActive) ? "Active" : "Inactive"}
                               </Badge>
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleStatusToggle(company.id, !company.isTrialActive)}
+                                onClick={() => handleStatusToggle(company.id, !(company.isActive ?? company.isTrialActive))}
                                 className="h-6 w-6 p-0"
-                                title={company.isTrialActive ? "Deactivate company" : "Activate company"}
+                                title={(company.isActive ?? company.isTrialActive) ? "Deactivate company" : "Activate company"}
                               >
-                                {company.isTrialActive ? <PowerOff className="h-3 w-3" /> : <Power className="h-3 w-3" />}
+                                {(company.isActive ?? company.isTrialActive) ? <PowerOff className="h-3 w-3" /> : <Power className="h-3 w-3" />}
                               </Button>
                             </div>
                           </TableCell>
@@ -1532,7 +1532,7 @@ export default function CompaniesManagement() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {(Array.isArray(viewCompanyStats.featuresEnabled) ? viewCompanyStats.featuresEnabled : []).map(featureId => {
+                        {(Array.isArray(viewCompanyStats.featuresEnabled) ? viewCompanyStats.featuresEnabled : []).map((featureId: string) => {
                           const feature = availableFeatures.find(f => f.id === featureId);
                           if (!feature) return null;
                           
@@ -1679,7 +1679,7 @@ export default function CompaniesManagement() {
                       <div className="flex items-center">
                         <Avatar className="h-8 w-8 mr-2">
                           <AvatarImage src={`https://ui-avatars.com/api/?name=${encodeURIComponent(technician.name)}&background=random`} />
-                          <AvatarFallback>{technician.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          <AvatarFallback>{technician.name.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="font-medium">{technician.name}</div>
