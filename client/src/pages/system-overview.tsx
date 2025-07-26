@@ -240,7 +240,7 @@ export default function SystemOverview() {
                           <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
                           <div className="space-y-1">
                             <p className="text-sm font-medium leading-none">
-                              {activity.description}
+                              {activity.message || activity.description}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {activity.timestamp}

@@ -731,16 +731,7 @@ router.get('/companies', isSuperAdmin, async (req, res) => {
   }
 });
 
-// Get recent system activity
-router.get('/recent-activity', isSuperAdmin, async (req, res) => {
-  try {
-    const activities = await storage.getRecentActivity();
-    res.json(activities);
-  } catch (error) {
-    logger.error("Unhandled error occurred");
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+// Removed duplicate /recent-activity endpoint - using the comprehensive one above instead
 
 // Super Admin Analytics Dashboard
 router.get('/analytics/dashboard', isSuperAdmin, async (req, res) => {
