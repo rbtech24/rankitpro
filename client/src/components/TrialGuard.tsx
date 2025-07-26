@@ -36,10 +36,13 @@ interface TrialGuardProps {
 }
 
 export function TrialGuard({ children, user, enforceBlocking = false }: TrialGuardProps) {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [showTrialModal, setShowTrialModal] = useState(false);
   const [blockingActive, setBlockingActive] = useState(false);
   const queryClient = useQueryClient();
+
+  // Allow access to billing page even when trial is expired
+  const isBillingPage = location === '/billing';
 
   // TrialGuard is specifically for company admins and technicians
   if (!user) {
@@ -115,13 +118,13 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
 
   const handleUpgrade = () => {
     console.log('Navigating to billing page...');
+    // Temporarily disable blocking to allow navigation
+    setBlockingActive(false);
+    setShowTrialModal(false);
+    // Navigate to billing page
     setLocation('/billing');
-    // Also try window location as backup
-    if (window.location.pathname !== '/billing') {
-      setTimeout(() => {
-        window.location.href = '/billing';
-      }, 100);
-    }
+    // Use window location as primary method for trial expired screen
+    window.location.href = '/billing';
   };
 
   const handleLogout = () => {
@@ -139,8 +142,8 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
                            !trialStatus.subscriptionActive && 
                            trialStatus.daysLeft <= 7;
 
-  // Complete blocking mode - show modal and prevent access
-  if (blockingActive && trialStatus?.expired) {
+  // Complete blocking mode - show modal and prevent access (except for billing page)
+  if (blockingActive && trialStatus?.expired && !isBillingPage) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
