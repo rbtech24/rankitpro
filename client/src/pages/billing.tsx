@@ -225,16 +225,8 @@ export default function Billing() {
     
     setSelectedPlan(planDetails.name.toLowerCase());
     
-    // Show upgrade dialog with plan details  
-    const price = billingPeriod === 'yearly' ? planDetails.yearlyPrice : planDetails.price;
-    const planPrice = `$${price}/${billingPeriod}`;
-    const confirmMessage = `Upgrade to ${planDetails.name} plan for ${planPrice}?\n\nThis will change your billing immediately.`;
-    
-    if (window.confirm(confirmMessage)) {
-      updateSubscription.mutate({ planId, billingPeriod });
-    } else {
-      setSelectedPlan(null);
-    }
+    // Proceed with upgrade directly - no confirmation popup needed
+    updateSubscription.mutate({ planId, billingPeriod });
   };
   
   const handleCancelSubscription = () => {
