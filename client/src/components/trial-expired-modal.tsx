@@ -1,4 +1,3 @@
-
 /**
  * Trial Expired Modal Component
  * Redesigned with streamlined payment options for service restoration
@@ -25,18 +24,18 @@ import PaymentForm from "./billing/payment-form";
 
 const getStripePromise = () => {
   const publicKey = "pk_live_51Q1IJKABx6OzSP6kA2eNndSD5luY9WJPP6HSuQ9QFZOFGIlTQaT0YeHAQCIuTlHXEZ0eV04wBl3WdjBtCf4gXi2W00jdezk2mo";
-  
+
   // Check if we're in development and use test key
   const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('replit');
   const testKey = "pk_test_51Q1IJKABx6OzSP6kRq8F1vKKJ6r1r7QfQ8Y7nU8TnH5gH8cKL9hWpA8YqL8qK8cN7vN6tM8hB9aY6xC4vS8wD7aR5nE1zF2aK00XhY8qY";
-  
+
   const keyToUse = isDev && testKey ? testKey : publicKey;
-  
+
   if (!keyToUse || !keyToUse.startsWith('pk_')) {
     console.warn('Stripe key not configured properly');
     return Promise.resolve(null);
   }
-  
+
   try {
     console.log('Loading Stripe with key:', keyToUse.substring(0, 20) + '...');
     return loadStripe(keyToUse);
@@ -100,14 +99,14 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
     },
     onSuccess: (data) => {
       setIsProcessing(false);
-      
+
       // Always try to show Stripe payment form first
       if (data.clientSecret) {
         setClientSecret(data.clientSecret);
         setCurrentStep('payment');
         return;
       }
-      
+
       // Only fall back to dev mode if no client secret is provided
       if (data.devMode || data.success) {
         setCurrentStep('success');
@@ -118,13 +117,13 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
         });
         queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
         queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
-        
+
         setTimeout(() => {
           window.location.reload();
         }, 2000);
         return;
       }
-      
+
       // If neither client secret nor dev mode, show error
       toast({
         title: "Payment Setup Failed",
@@ -158,7 +157,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
     });
     queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
     queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
-    
+
     setTimeout(() => {
       window.location.reload();
     }, 2000);
@@ -209,7 +208,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
               </div>
             </div>
           </DialogHeader>
-          
+
           <div className="bg-blue-50 p-4 rounded-lg mb-4">
             <div className="flex justify-between items-center mb-2">
               <span className="font-medium">{selectedPlan?.name} Plan</span>
@@ -225,7 +224,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
               </div>
             )}
           </div>
-          
+
           {stripePromise ? (
             <Elements stripe={stripePromise} options={{ clientSecret }}>
               <PaymentForm 
@@ -294,7 +293,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
               </div>
             </div>
           </DialogHeader>
-          
+
           {plansLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin" />
@@ -334,7 +333,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                     (plan.yearlyPrice || plan.price * 12) : 
                     plan.price;
                   const isPopular = plan.name.toLowerCase() === 'professional';
-                  
+
                   return (
                     <div key={plan.id} className={`relative border rounded-lg p-6 hover:border-blue-500 transition-colors ${
                       isPopular ? 'border-blue-500 shadow-lg' : 'border-gray-200'
@@ -345,14 +344,14 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                           Most Popular
                         </Badge>
                       )}
-                      
+
                       <div className="text-center">
                         <h3 className="font-semibold text-lg mb-2">{plan.name}</h3>
                         <div className="mb-4">
                           <span className="text-3xl font-bold">${price}</span>
                           <span className="text-gray-500">/{selectedBilling}</span>
                         </div>
-                        
+
                         <div className="space-y-2 mb-6 text-sm text-left">
                           <div className="flex items-center">
                             <Check className="h-4 w-4 text-green-500 mr-2" />
@@ -369,7 +368,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                             </div>
                           ))}
                         </div>
-                        
+
                         <Button 
                           onClick={() => handleQuickRestore(plan, selectedBilling)}
                           disabled={isProcessing}
@@ -388,7 +387,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                             </>
                           )}
                         </Button>
-                        
+
                         {selectedBilling === 'yearly' && plan.yearlyPrice && (
                           <p className="text-xs text-green-600 mt-2 font-medium">
                             Save ${(plan.price * 12) - plan.yearlyPrice} vs monthly
@@ -429,7 +428,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
             Choose a plan to restore immediate access.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4 mt-6">
           <div className="bg-red-50 rounded-lg p-4 border border-red-200">
             <h4 className="font-medium text-red-900 mb-2 flex items-center">
@@ -442,7 +441,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
               <li>• Restore access in under 2 minutes</li>
             </ul>
           </div>
-          
+
           <div className="flex flex-col space-y-3">
             <Button 
               onClick={() => setCurrentStep('plans')}
@@ -452,7 +451,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
               <CreditCard className="h-4 w-4 mr-2" />
               Restore Service Now
             </Button>
-            
+
             <Button 
               variant="outline"
               onClick={() => setLocation('/billing')}
@@ -460,10 +459,32 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
             >
               View All Options
             </Button>
-            
+
             <Button 
               variant="ghost" 
-              onClick={() => window.location.href = '/api/auth/logout'}
+              onClick={async () => {
+                try {
+                  // Make POST request to logout endpoint
+                  await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                  });
+        
+                  // Clear local storage
+                  localStorage.clear();
+                  sessionStorage.clear();
+        
+                  // Redirect to login
+                  window.location.href = '/login';
+                } catch (error) {
+                  console.error('Logout error:', error);
+                  // Force redirect even if logout fails
+                  window.location.href = '/login';
+                }
+              }}
               className="w-full text-gray-500"
               size="sm"
             >
@@ -471,7 +492,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
             </Button>
           </div>
         </div>
-        
+
         <p className="text-xs text-gray-500 text-center mt-4">
           Questions? Contact support for assistance with plan selection.
         </p>
@@ -519,7 +540,7 @@ export function PaymentFailedModal({ isOpen, onClose, error, attemptedPlan }: Pa
             {error || "We couldn't process your payment. Your service remains suspended until payment is completed."}
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4 mt-6">
           {attemptedPlan && (
             <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
@@ -539,7 +560,7 @@ export function PaymentFailedModal({ isOpen, onClose, error, attemptedPlan }: Pa
               <li>• Contact your bank if needed</li>
             </ul>
           </div>
-          
+
           <div className="flex flex-col space-y-3">
             <Button 
               onClick={handleRetryPayment}
@@ -559,7 +580,7 @@ export function PaymentFailedModal({ isOpen, onClose, error, attemptedPlan }: Pa
                 </>
               )}
             </Button>
-            
+
             <Button 
               variant="outline"
               onClick={handleTryDifferentPlan}
@@ -567,7 +588,7 @@ export function PaymentFailedModal({ isOpen, onClose, error, attemptedPlan }: Pa
             >
               Try Different Plan
             </Button>
-            
+
             <Button 
               variant="ghost"
               onClick={onClose}
@@ -578,7 +599,7 @@ export function PaymentFailedModal({ isOpen, onClose, error, attemptedPlan }: Pa
             </Button>
           </div>
         </div>
-        
+
         <p className="text-xs text-gray-500 text-center mt-4">
           Need help? Contact our support team for payment assistance.
         </p>
