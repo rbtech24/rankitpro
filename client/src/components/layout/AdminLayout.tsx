@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "../ui/button";
 import { useLocation } from "wouter";
+import { apiRequest } from "../../lib/queryClient";
 import { 
   Users, 
   Building2, 
@@ -13,7 +14,8 @@ import {
   CheckCircle2, 
   Clock,
   Menu,
-  X
+  X,
+  LogOut
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -24,6 +26,17 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children, currentPath }: AdminLayoutProps) {
   const [, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await apiRequest('POST', '/api/auth/logout');
+      setLocation('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force redirect even if logout fails
+      setLocation('/login');
+    }
+  };
 
   const adminMenuItems = [
     {
@@ -136,6 +149,23 @@ export default function AdminLayout({ children, currentPath }: AdminLayoutProps)
                   </div>
                 </div>
               ))}
+              
+              {/* Logout Button */}
+              <div className="pt-6 mt-6 border-t border-gray-200">
+                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-3">
+                  Account
+                </h3>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-colors text-red-600 hover:bg-red-50 hover:text-red-700"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <div className="flex-1 text-left">
+                    <div>Logout</div>
+                    <div className="text-xs text-red-400">Sign out of admin panel</div>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         </aside>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Sidebar from "../components/layout/sidebar-clean";
+import AdminLayout from "../components/layout/AdminLayout";
 import NotificationBell from "../components/notifications/NotificationBell";
 import {
   Card,
@@ -207,26 +207,17 @@ export default function TechniciansManagement() {
   const uniqueCompanies = new Set(technicians.map(t => t.companyId)).size;
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Technicians Management</h1>
-              <p className="text-gray-600 mt-1">View and manage all technicians across the platform</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <NotificationBell />
-            </div>
+    <AdminLayout currentPath="/technicians-management">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Technicians Management</h1>
+            <p className="text-gray-600 mt-1">View and manage all technicians across the platform</p>
           </div>
-        </header>
-
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto p-6">
-          <div className="space-y-6">
+          <div className="flex items-center space-x-4">
+            <NotificationBell />
+          </div>
+        </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
@@ -469,15 +460,6 @@ export default function TechniciansManagement() {
         </CardContent>
       </Card>
           </div>
-        </main>
-
-        {/* Footer */}
-        <footer className="bg-white border-t border-gray-200 px-6 py-4">
-          <div className="text-center text-sm text-gray-500">
-            © 2025 Rank It Pro. All rights reserved.
-          </div>
-        </footer>
-      </div>
 
       {/* Password Change Dialog */}
       <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
@@ -576,6 +558,6 @@ export default function TechniciansManagement() {
           </Form>
         </DialogContent>
       </Dialog>
-    </div>
+    </AdminLayout>
   );
 }

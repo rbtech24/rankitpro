@@ -91,15 +91,12 @@ export default function SystemOverview() {
 
   if (statsLoading || chartLoading) {
     return (
-      <div className="flex">
-        <Sidebar />
-        <div className="flex-1 p-8">
-          <div className="text-center py-12">
-            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" />
-            <p>Loading system data...</p>
-          </div>
+      <AdminLayout currentPath="/system-overview">
+        <div className="text-center py-12">
+          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p>Loading system data...</p>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
