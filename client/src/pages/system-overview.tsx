@@ -56,10 +56,15 @@ import {
   Activity,
   AlertTriangle,
   CheckCircle2,
-  ServerOff
+  ServerOff,
+  Shield,
+  UserPlus
 } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 export default function SystemOverview() {
+  const [, setLocation] = useLocation();
+  
   // Fetch real system statistics
   const { data: systemStats, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/admin/system-stats'],
@@ -136,6 +141,15 @@ export default function SystemOverview() {
           </div>
           <div className="flex items-center space-x-4">
             <NotificationBell />
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-800 font-semibold"
+              onClick={() => setLocation('/admin-user-management')}
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              🔐 Add Admin Users
+            </Button>
             <Button variant="outline" size="sm">
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
