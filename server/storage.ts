@@ -3585,37 +3585,11 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async createSubscriptionPlan(planData: any): Promise<any> {
-    // In a real implementation, this would save to a subscription_plans table
-    // For now, we'll simulate creating a plan with a new ID
-    const plans = await this.getSubscriptionPlans();
-    const newId = Math.max(...plans.map(p => p.id), 0) + 1;
-    
-    const newPlan = {
-      id: newId,
-      ...planData,
-      subscriberCount: 0,
-      revenue: 0,
-      isActive: true
-    };
 
-    return newPlan;
-  }
 
-  async updateSubscriptionPlan(id: number, updates: any): Promise<any | undefined> {
-    // In a real implementation, this would update the subscription_plans table
-    const plan = await this.getSubscriptionPlan(id);
-    if (!plan) return undefined;
 
-    return { data: "converted" };
-  }
 
-  async deleteSubscriptionPlan(id: number): Promise<boolean> {
-    // In a real implementation, this would delete from subscription_plans table
-    // For now, we'll just verify the plan exists
-    const plan = await this.getSubscriptionPlan(id);
-    return !!plan;
-  }
+
 
   async getSubscriberCountForPlan(planId: number): Promise<number> {
     try {
