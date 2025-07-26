@@ -328,6 +328,41 @@ export default function CompaniesManagement() {
       });
     }
   };
+
+  // Add React effect to populate form when selectedCompany changes
+  React.useEffect(() => {
+    if (selectedCompany && !isAddingCompany) {
+      // Populate the form with full company data
+      form.reset({
+        name: selectedCompany.name || "",
+        email: selectedCompany.email || "",
+        phoneNumber: selectedCompany.phone || selectedCompany.phoneNumber || "",
+        website: selectedCompany.website || "",
+        address: selectedCompany.address || "",
+        city: selectedCompany.city || "",
+        state: selectedCompany.state || "",
+        zipCode: selectedCompany.zipCode || "",
+        industry: selectedCompany.industry || "",
+        plan: selectedCompany.subscriptionPlan || selectedCompany.plan || "starter",
+        maxTechnicians: selectedCompany.maxTechnicians || 5
+      });
+    } else if (isAddingCompany) {
+      // Reset form for adding new company
+      form.reset({
+        name: "",
+        email: "",
+        phoneNumber: "",
+        website: "",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        industry: "",
+        plan: "starter",
+        maxTechnicians: 5
+      });
+    }
+  }, [selectedCompany, isAddingCompany, form]);
   
   // Submit handler for company form
   const onSubmit = (data: z.infer<typeof companySchema>) => {
