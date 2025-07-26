@@ -63,11 +63,11 @@ export default function AdminDashboard() {
                 Manage Companies
               </Button>
               <Button 
-                className="bg-white text-purple-700 hover:bg-purple-50"
+                className="bg-yellow-400 text-black hover:bg-yellow-300 font-semibold"
                 onClick={() => setLocation('/admin-user-management')}
               >
                 <Shield className="h-4 w-4 mr-2" />
-                Admin Management
+                🔐 Add Admin Users
               </Button>
             </div>
           </div>
@@ -141,11 +141,11 @@ export default function AdminDashboard() {
               </Button>
               <Button 
                 variant="outline" 
-                className="w-full justify-start"
+                className="w-full justify-start bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-800 font-semibold"
                 onClick={() => setLocation('/admin-user-management')}
               >
                 <Shield className="h-4 w-4 mr-2" />
-                Admin Account Management
+                🔐 Create Additional Admin Accounts
               </Button>
             </div>
           </CardContent>
