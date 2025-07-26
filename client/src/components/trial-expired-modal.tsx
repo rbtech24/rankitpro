@@ -76,7 +76,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
   });
 
   // Don't show modal for super admins
-  if (user?.role === 'super_admin') {
+  if ((user as any)?.user?.role === 'super_admin') {
     return null;
   }
 

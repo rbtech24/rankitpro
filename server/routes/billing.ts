@@ -7,14 +7,14 @@ import { logger } from '../services/logger';
 const router = express.Router();
 
 /**
- * Get all subscription plans (admin only)
+ * Get all subscription plans (accessible for trial restoration)
  */
-router.get('/plans', isAuthenticated, async (req: Request, res: Response) => {
+router.get('/plans', async (req: Request, res: Response) => {
   try {
     const plans = await storage.getActiveSubscriptionPlans();
     res.json(plans);
   } catch (error: any) {
-    logger.error("Storage operation error", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to retrieve subscription plans',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -66,7 +66,7 @@ router.post('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: R
 
     res.json(newPlan);
   } catch (error: any) {
-    logger.error("Storage operation error", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to create subscription plan',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -111,7 +111,7 @@ router.put('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, res
 
     res.json(updatedPlan);
   } catch (error: any) {
-    logger.error("Storage operation error", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to update subscription plan',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -137,7 +137,7 @@ router.delete('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, 
       id: parseInt(id)
     });
   } catch (error: any) {
-    logger.error("Storage operation error", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to delete subscription plan',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -232,8 +232,9 @@ router.get('/subscription', isAuthenticated, isCompanyAdmin, async (req: Request
 
 /**
  * Create or update subscription with real Stripe integration
+ * Allow expired trial users to restore service
  */
-router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+router.post('/subscription', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const { planId, billingPeriod } = req.body;
     const user = req.user as any;
@@ -351,7 +352,7 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
       });
     } catch (stripeError: any) {
       logger.error("Stripe payment intent creation failed", { 
-        error: stripeError instanceof Error ? stripeError.message : String(stripeError),
+        errorMessage: stripeError instanceof Error ? stripeError.message : String(stripeError),
         companyId,
         planId,
         planName: planDetails.name,
@@ -395,7 +396,7 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
 
   } catch (error: any) {
     logger.error("Subscription creation error", { 
-      error: error instanceof Error ? error.message : String(error),
+      errorMessage: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : 'No stack trace',
       planId: req.body?.planId,
       companyId: (req.user as any)?.companyId,
@@ -421,7 +422,7 @@ router.post('/subscription/cancel', isAuthenticated, isCompanyAdmin, async (req:
 
     res.json({ 
       message: 'Subscription canceled successfully',
-      cancelDate: result.cancelDate
+      success: true
     });
   } catch (error: any) {
     logger.error("Unhandled error occurred");
