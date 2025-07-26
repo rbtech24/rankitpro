@@ -127,5 +127,42 @@ export default function registerRoutes(app: Express) {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
+  // Trial status endpoint for TrialGuard component (must be authenticated)
+  app.get("/api/trial/status", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      if (!user || !user.companyId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const company = await storage.getCompany(user.companyId);
+      if (!company) {
+        return res.status(404).json({ error: "Company not found" });
+      }
+
+      const now = new Date();
+      const trialEndDate = company.trialEndDate ? new Date(company.trialEndDate) : null;
+      
+      let daysLeft = 0;
+      let expired = true;
+
+      if (trialEndDate && company.isTrialActive) {
+        const timeDiff = trialEndDate.getTime() - now.getTime();
+        daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+        expired = daysLeft <= 0;
+      }
+
+      res.json({
+        expired: expired || !company.isTrialActive,
+        daysLeft: Math.max(0, daysLeft),
+        subscriptionActive: !!company.stripeSubscriptionId,
+        trialEndDate: trialEndDate?.toISOString()
+      });
+    } catch (error) {
+      console.error('Trial status error:', error);
+      res.status(500).json({ error: "Failed to get trial status" });
+    }
+  });
+
   console.log("✅ All routes registered successfully");
 }
