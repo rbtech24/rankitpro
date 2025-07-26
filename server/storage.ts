@@ -39,10 +39,12 @@ export interface IStorage {
   getUsersByCompanyAndRole(companyId: number, role: string): Promise<User[]>;
   getUsersByCompany(companyId: number): Promise<User[]>;
   getAllUsers(): Promise<User[]>;
+  getAdminUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   updateUserStripeInfo(userId: number, stripeInfo: { success: true }): Promise<User | undefined>;
   updateUserPassword(userId: number, hashedPassword: string): Promise<void>;
+  deleteUser(id: number): Promise<boolean>;
   setPasswordResetToken(userId: number, token: string, expiry: Date): Promise<void>;
   verifyPasswordResetToken(token: string): Promise<number | null>;
   clearPasswordResetToken(userId: number): Promise<void>;
@@ -848,6 +850,24 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users);
+  }
+
+  async getAdminUsers(): Promise<User[]> {
+    const result = await db.select()
+      .from(users)
+      .where(or(eq(users.role, 'super_admin'), eq(users.role, 'company_admin')))
+      .orderBy(users.email);
+    return result;
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(users).where(eq(users.id, id));
+      return result.rowCount ? result.rowCount > 0 : false;
+    } catch (error) {
+      logger.error('Failed to delete user', { userId: id, errorMessage: error instanceof Error ? error.message : String(error) });
+      return false;
+    }
   }
 
   async getAllSubscriptions(): Promise<any[]> {

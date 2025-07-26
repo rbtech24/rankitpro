@@ -116,6 +116,7 @@ import EmergencyLogin from "./pages/emergency-login";
 import ForgotPassword from "./pages/forgot-password";
 import ResetPassword from "./pages/reset-password";
 import AdminSetup from "./pages/AdminSetup";
+import AdminUserManagement from "./pages/admin-user-management";
 import Landing from "./pages/landing";
 import SocialMediaSettings from "./pages/social-media-settings";
 import Profile from "./pages/profile";
@@ -1274,6 +1275,9 @@ function Router() {
       </Route>
       <Route path="/admin-billing">
         <PrivateRoute component={AdminBilling} path="/admin-billing" role="super_admin" />
+      </Route>
+      <Route path="/admin-user-management">
+        <PrivateRoute component={AdminUserManagement} path="/admin-user-management" role="super_admin" />
       </Route>
       <Route path="/admin-analytics">
         <PrivateRoute component={AdminAnalytics} path="/admin-analytics" role="super_admin" />

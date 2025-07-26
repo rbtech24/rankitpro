@@ -144,8 +144,8 @@ export default function AdminDashboard() {
                 className="w-full justify-start"
                 onClick={() => setLocation('/admin-user-management')}
               >
-                <Users className="h-4 w-4 mr-2" />
-                Manage All Users
+                <Shield className="h-4 w-4 mr-2" />
+                Admin Account Management
               </Button>
             </div>
           </CardContent>

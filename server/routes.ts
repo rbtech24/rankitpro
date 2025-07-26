@@ -53,6 +53,7 @@ import trialTestingRoutes from "./routes/trial-testing";
 import rateLimitingRoutes from "./routes/admin/rate-limiting";
 import authRoutes from "./routes/auth-routes";
 import companyRoutes from "./routes/company-routes";
+import adminUsersRoutes from "./routes/admin-users";
 import technicianRoutes from "./routes/technician-routes";
 import emailService from "./services/email-service";
 import schedulerService from "./services/scheduler";
@@ -120,6 +121,7 @@ export default function registerRoutes(app: Express) {
   app.use("/api/companies", companyRoutes);
   app.use("/api/technicians", technicianRoutes);
   app.use("/api/admin", adminRoutes);
+  app.use("/api/admin/users", adminUsersRoutes);
   app.use("/api/admin/rate-limiting", rateLimitingRoutes);
   app.use("/api/sales", salesRoutes);
   app.use("/api/check-ins", checkInRoutes);
