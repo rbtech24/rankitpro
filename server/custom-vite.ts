@@ -84,8 +84,18 @@ export async function setupVite(app: Express, server: Server) {
   });
 
   app.use(vite.middlewares);
+  
+  // Handle SPA routing - serve index.html for non-API routes
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
+
+    // Skip API routes, uploads, and static assets
+    if (url.startsWith('/api/') || 
+        url.startsWith('/uploads/') || 
+        url.includes('.') ||
+        url.startsWith('/@')) {
+      return next();
+    }
 
     try {
       const clientTemplate = path.resolve(__dirname, "..", "client", "index.html");
@@ -112,8 +122,16 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
+  // Enhanced SPA fallback for production - serve index.html for client-side routes
+  app.use("*", (req, res, next) => {
+    // Skip API routes, uploads, and static assets
+    if (req.path.startsWith('/api/') || 
+        req.path.startsWith('/uploads/') || 
+        req.path.includes('.')) {
+      return next();
+    }
+    
+    // Serve index.html for all client-side routes
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
