@@ -14,14 +14,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/ui/table";
+
 import { 
   BarChart, 
   Bar, 
@@ -76,9 +69,7 @@ export default function SystemOverview() {
     refetchInterval: 60000, // Refresh every minute
   });
 
-  const { data: companies, isLoading: companiesLoading } = useQuery({
-    queryKey: ['/api/admin/companies'],
-  });
+
 
   const { data: recentActivity, isLoading: activityLoading } = useQuery({
     queryKey: ['/api/admin/recent-activity'],
@@ -154,7 +145,7 @@ export default function SystemOverview() {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="companies">Companies</TabsTrigger>
+
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
@@ -419,57 +410,7 @@ export default function SystemOverview() {
             </div>
           </TabsContent>
 
-          <TabsContent value="companies" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Company Overview</CardTitle>
-                <CardDescription>
-                  Active companies and their subscription status
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {companiesLoading ? (
-                  <div className="text-center py-8">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
-                    <p>Loading companies...</p>
-                  </div>
-                ) : companies && Array.isArray(companies) && companies.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Company Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Plan</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Created</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {companies.map((company: any) => (
-                        <TableRow key={company.id}>
-                          <TableCell className="font-medium">{company.name}</TableCell>
-                          <TableCell>{company.email}</TableCell>
-                          <TableCell>
-                            <Badge variant={company.subscriptionPlan === 'pro' ? 'default' : 'secondary'}>
-                              {company.subscriptionPlan || 'starter'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={company.active ? 'default' : 'destructive'}>
-                              {company.active ? 'Active' : 'Inactive'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{new Date(company.createdAt).toLocaleDateString()}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <p className="text-center py-8 text-muted-foreground">No companies found</p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+
         </Tabs>
     </AdminLayout>
   );
