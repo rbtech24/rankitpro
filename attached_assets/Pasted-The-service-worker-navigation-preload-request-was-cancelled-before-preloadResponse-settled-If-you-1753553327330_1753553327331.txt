@@ -1,0 +1,713 @@
+The service worker navigation preload request was cancelled before 'preloadResponse' settled. If you intend to use 'preloadResponse', use waitUntil() or respondWith() to wait for the promise to settle.
+The service worker navigation preload request was cancelled before 'preloadResponse' settled. If you intend to use 'preloadResponse', use waitUntil() or respondWith() to wait for the promise to settle.
+The service worker navigation preload request was cancelled before 'preloadResponse' settled. If you intend to use 'preloadResponse', use waitUntil() or respondWith() to wait for the promise to settle.
+The service worker navigation preload request was cancelled before 'preloadResponse' settled. If you intend to use 'preloadResponse', use waitUntil() or respondWith() to wait for the promise to settle.
+_app-fa2bbf2ef2a04535.js:18 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-fa2bbf2ef2a04535.js:18 [LaunchDarkly] LaunchDarkly client initialized
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+framework-3696f0681438c975.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-3696f0681438c975.js:1
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Afetch%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3Ae94b8644&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=91bf06c0-fb35-4402-9e2d-a672a135c6ad:1  Failed to load resource: net::ERR_CONNECTION_CLOSED
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=zdLNnT-HtQsw' failed: 
+t @ eruda.js:2
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=zdLNnT-HtQsw' failed: 
+t @ eruda.js:2
+createConnection @ 3ba12234-e3a1-4984-9…ev/@vite/client:802
+connect @ 3ba12234-e3a1-4984-9…ev/@vite/client:437
+connect @ 3ba12234-e3a1-4984-9…ev/@vite/client:811
+connect @ 3ba12234-e3a1-4984-9…ev/@vite/client:290
+connect @ 3ba12234-e3a1-4984-9…ev/@vite/client:383
+(anonymous) @ 3ba12234-e3a1-4984-9…ev/@vite/client:908
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=zdLNnT-HtQsw' failed: 
+t @ eruda.js:2
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=zdLNnT-HtQsw' failed: 
+t @ Network.js:227
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=zdLNnT-HtQsw' failed: 
+t @ eruda.js:2
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=zdLNnT-HtQsw' failed: 
+t @ eruda.js:2
+3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=zdLNnT-HtQsw' failed: 
+t @ Network.js:227
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=zdLNnT-HtQsw' failed: 
+t @ eruda.js:2
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=zdLNnT-HtQsw' failed: 
+t @ eruda.js:2
+eruda.js:2 [vite] failed to connect to websocket (Error: WebSocket closed without opened.). 
+Mt.forEach.n.<computed> @ Console.js:61
+client:454 Uncaught (in promise) Error: WebSocket closed without opened.
+    at WebSocket.<anonymous> (client:454:22)
+App.tsx:3723 Uncaught ReferenceError: lazy is not defined
+    at Router (App.tsx:3723:137)
+    at react-stack-bottom-frame (react-dom_client.js:17424:20)
+    at renderWithHooks (react-dom_client.js:4206:24)
+    at updateFunctionComponent (react-dom_client.js:6619:21)
+    at beginWork (react-dom_client.js:7654:20)
+    at runWithFiberInDEV (react-dom_client.js:1485:72)
+    at performUnitOfWork (react-dom_client.js:10874:82)
+    at workLoopSync (react-dom_client.js:10728:43)
+    at renderRootSync (react-dom_client.js:10711:13)
+    at performWorkOnRoot (react-dom_client.js:10359:46)
+eruda.js:2 An error occurred in the <Router> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+Mt.forEach.n.<computed> @ Console.js:61
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=zdLNnT-HtQsw' failed: 
+t @ Network.js:227
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=zdLNnT-HtQsw' failed: 
+t @ eruda.js:2
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+eruda.js:2 [vite] failed to connect to websocket (Error: WebSocket closed without opened.). 
+Mt.forEach.n.<computed> @ Console.js:61
+connect @ client:841
+await in connect
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+client:454 Uncaught (in promise) Error: WebSocket closed without opened.
+    at WebSocket.<anonymous> (client:454:22)
+(anonymous) @ client:454
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=zdLNnT-HtQsw' failed: 
+t @ Network.js:227
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+eruda.js:2 [vite] failed to connect to websocket (Error: WebSocket closed without opened.). 
+Mt.forEach.n.<computed> @ Console.js:61
+connect @ client:841
+await in connect
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+client:454 Uncaught (in promise) Error: WebSocket closed without opened.
+    at WebSocket.<anonymous> (client:454:22)
+(anonymous) @ client:454
+rankitpro:1 Access to fetch at 'https://sp.replit.com/v1/m' from origin 'https://replit.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+_app-fa2bbf2ef2a04535.js:18  POST https://sp.replit.com/v1/m net::ERR_FAILED 502 (Bad Gateway)
+(anonymous) @ _app-fa2bbf2ef2a04535.js:18
+o @ sdk.min.js:1
+(anonymous) @ remote-metrics.ts:138
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+i.148.t.send @ sdk.min.js:1
+(anonymous) @ remote-metrics.ts:125
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ sdk.min.js:1
+l @ remote-metrics.ts:83
+n @ _app-fa2bbf2ef2a04535.js:18
+_app-fa2bbf2ef2a04535.js:18 Error sending segment performance metrics TypeError: Failed to fetch
+    at _app-fa2bbf2ef2a04535.js:18:9046
+    at o (sdk.min.js:1:23763)
+    at t.<anonymous> (remote-metrics.ts:138:12)
+    at tslib.es6.js:103:23
+    at Object.next (tslib.es6.js:108:37)
+    at tslib.es6.js:80:8
+    at new Promise (<anonymous>)
+    at u (tslib.es6.js:72:27)
+    at i.148.t.send (sdk.min.js:1:22021)
+    at t.<anonymous> (remote-metrics.ts:125:16)
+    at tslib.es6.js:103:23
+    at Object.next (tslib.es6.js:108:37)
+    at tslib.es6.js:80:8
+    at new Promise (<anonymous>)
+    at u (tslib.es6.js:72:27)
+    at t.flush (sdk.min.js:1:21754)
+    at l (remote-metrics.ts:83:14)
+    at n (_app-fa2bbf2ef2a04535.js:18:2959)
+(anonymous) @ _app-fa2bbf2ef2a04535.js:18
+a @ remote-metrics.ts:53
+(anonymous) @ remote-metrics.ts:126
+Promise.catch
+(anonymous) @ remote-metrics.ts:125
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ sdk.min.js:1
+l @ remote-metrics.ts:83
+n @ _app-fa2bbf2ef2a04535.js:18
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=dR-CO7_iChw-' failed: 
+t @ Network.js:227
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+eruda.js:2 [vite] failed to connect to websocket (Error: WebSocket closed without opened.). 
+Mt.forEach.n.<computed> @ Console.js:61
+connect @ client:841
+await in connect
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+client:454 Uncaught (in promise) Error: WebSocket closed without opened.
+    at WebSocket.<anonymous> (client:454:22)
+(anonymous) @ client:454
+check-ins.tsx:9  GET https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/src/components/checkin/checkin-card.tsx net::ERR_ABORTED 502 (Bad Gateway)
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=gVreXi50P-D0' failed: 
+t @ Network.js:227
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+eruda.js:2 [vite] failed to connect to websocket (Error: WebSocket closed without opened.). 
+Mt.forEach.n.<computed> @ Console.js:61
+connect @ client:841
+await in connect
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+client:454 Uncaught (in promise) Error: WebSocket closed without opened.
+    at WebSocket.<anonymous> (client:454:22)
+(anonymous) @ client:454
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=r7GMVx3YTyMg' failed: 
+t @ Network.js:227
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+eruda.js:2 [vite] failed to connect to websocket (Error: WebSocket closed without opened.). 
+Mt.forEach.n.<computed> @ Console.js:61
+connect @ client:841
+await in connect
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+client:454 Uncaught (in promise) Error: WebSocket closed without opened.
+    at WebSocket.<anonymous> (client:454:22)
+(anonymous) @ client:454
+subscription-plans-management.tsx:3 Uncaught SyntaxError: The requested module '/src/components/layout/AdminLayout.tsx' does not provide an export named 'AdminLayout' (at subscription-plans-management.tsx:3:10)
+eruda.js:2 WebSocket connection to 'wss://0.0.0.0:5000/?token=mX6gi110alrb' failed: 
+t @ Network.js:227
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+eruda.js:2 [vite] failed to connect to websocket (Error: WebSocket closed without opened.). 
+Mt.forEach.n.<computed> @ Console.js:61
+connect @ client:841
+await in connect
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+client:454 Uncaught (in promise) Error: WebSocket closed without opened.
+    at WebSocket.<anonymous> (client:454:22)
+(anonymous) @ client:454
+subscription-plans-management.tsx:3 Uncaught SyntaxError: The requested module '/src/components/layout/AdminLayout.tsx' does not provide an export named 'AdminLayout' (at subscription-plans-management.tsx:3:10)
+client:802 WebSocket connection to 'wss://0.0.0.0:5000/?token=VGO004k56CF8' failed: 
+t @ Network.js:227
+createConnection @ client:802
+connect @ client:437
+connect @ client:811
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+Console.js:61 [vite] failed to connect to websocket (Error: WebSocket closed without opened.). 
+Mt.forEach.n.<computed> @ Console.js:61
+connect @ client:841
+await in connect
+connect @ client:290
+connect @ client:383
+(anonymous) @ client:908
+client:454 Uncaught (in promise) Error: WebSocket closed without opened.
+    at WebSocket.<anonymous> (client:454:22)
+(anonymous) @ client:454
+queryClient.ts:31  GET https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me 401 (Unauthorized)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:31
+getCurrentUser @ auth.ts:151
+fetchFn @ @tanstack_react-query.js?v=2e7ef1ae:881
+run @ @tanstack_react-query.js?v=2e7ef1ae:513
+start @ @tanstack_react-query.js?v=2e7ef1ae:555
+fetch @ @tanstack_react-query.js?v=2e7ef1ae:969
+fetchQuery @ @tanstack_react-query.js?v=2e7ef1ae:1828
+prefetchQuery @ @tanstack_react-query.js?v=2e7ef1ae:1831
+(anonymous) @ App.tsx:1421
+react-stack-bottom-frame @ react-dom_client.js?v=2e7ef1ae:17478
+runWithFiberInDEV @ react-dom_client.js?v=2e7ef1ae:1485
+commitHookEffectListMount @ react-dom_client.js?v=2e7ef1ae:8460
+commitHookPassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:8518
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9887
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9899
+flushPassiveEffects @ react-dom_client.js?v=2e7ef1ae:11302
+(anonymous) @ react-dom_client.js?v=2e7ef1ae:11060
+performWorkUntilDeadline @ react-dom_client.js?v=2e7ef1ae:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=2e7ef1ae:250
+(anonymous) @ main.tsx:5
+queryClient.ts:31  GET https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/auth/me 401 (Unauthorized)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:31
+getCurrentUser @ auth.ts:172
+fetchFn @ @tanstack_react-query.js?v=2e7ef1ae:881
+run @ @tanstack_react-query.js?v=2e7ef1ae:513
+start @ @tanstack_react-query.js?v=2e7ef1ae:555
+fetch @ @tanstack_react-query.js?v=2e7ef1ae:969
+executeFetch_fn @ @tanstack_react-query.js?v=2e7ef1ae:2279
+onSubscribe @ @tanstack_react-query.js?v=2e7ef1ae:1983
+subscribe @ @tanstack_react-query.js?v=2e7ef1ae:24
+(anonymous) @ @tanstack_react-query.js?v=2e7ef1ae:3146
+subscribeToStore @ react-dom_client.js?v=2e7ef1ae:4638
+react-stack-bottom-frame @ react-dom_client.js?v=2e7ef1ae:17478
+runWithFiberInDEV @ react-dom_client.js?v=2e7ef1ae:1485
+commitHookEffectListMount @ react-dom_client.js?v=2e7ef1ae:8460
+commitHookPassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:8518
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9887
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9899
+flushPassiveEffects @ react-dom_client.js?v=2e7ef1ae:11302
+flushPendingEffects @ react-dom_client.js?v=2e7ef1ae:11276
+performSyncWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:11632
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=2e7ef1ae:11536
+flushSpawnedWork @ react-dom_client.js?v=2e7ef1ae:11254
+commitRoot @ react-dom_client.js?v=2e7ef1ae:11081
+commitRootWhenReady @ react-dom_client.js?v=2e7ef1ae:10512
+performWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:10457
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=2e7ef1ae:11623
+performWorkUntilDeadline @ react-dom_client.js?v=2e7ef1ae:36
+<Router>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=2e7ef1ae:250
+App @ App.tsx:1442
+react-stack-bottom-frame @ react-dom_client.js?v=2e7ef1ae:17424
+renderWithHooks @ react-dom_client.js?v=2e7ef1ae:4206
+updateFunctionComponent @ react-dom_client.js?v=2e7ef1ae:6619
+beginWork @ react-dom_client.js?v=2e7ef1ae:7654
+runWithFiberInDEV @ react-dom_client.js?v=2e7ef1ae:1485
+performUnitOfWork @ react-dom_client.js?v=2e7ef1ae:10874
+workLoopSync @ react-dom_client.js?v=2e7ef1ae:10728
+renderRootSync @ react-dom_client.js?v=2e7ef1ae:10711
+performWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=2e7ef1ae:11623
+performWorkUntilDeadline @ react-dom_client.js?v=2e7ef1ae:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=2e7ef1ae:250
+(anonymous) @ main.tsx:5
+Console.js:61 Attempting login for: digitalprofits@gmail.com
+Console.js:61 Login response received: {user: {…}}
+Console.js:61 WebSocket disabled for notifications - using API polling instead
+queryClient.ts:48  GET https://3ba12234-e3a1-4984-9152-1724cec12a3c-00-3d1awbp5bhqqy.kirk.replit.dev/api/companies/current 500 (Internal Server Error)
+window.fetch @ Network.js:219
+(anonymous) @ queryClient.ts:48
+fetchFn @ @tanstack_react-query.js?v=2e7ef1ae:881
+run @ @tanstack_react-query.js?v=2e7ef1ae:513
+start @ @tanstack_react-query.js?v=2e7ef1ae:555
+fetch @ @tanstack_react-query.js?v=2e7ef1ae:969
+executeFetch_fn @ @tanstack_react-query.js?v=2e7ef1ae:2279
+setOptions @ @tanstack_react-query.js?v=2e7ef1ae:2040
+(anonymous) @ @tanstack_react-query.js?v=2e7ef1ae:3156
+react-stack-bottom-frame @ react-dom_client.js?v=2e7ef1ae:17478
+runWithFiberInDEV @ react-dom_client.js?v=2e7ef1ae:1485
+commitHookEffectListMount @ react-dom_client.js?v=2e7ef1ae:8460
+commitHookPassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:8518
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9887
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=2e7ef1ae:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=2e7ef1ae:9899
+flushPassiveEffects @ react-dom_client.js?v=2e7ef1ae:11302
+flushPendingEffects @ react-dom_client.js?v=2e7ef1ae:11276
+flushSpawnedWork @ react-dom_client.js?v=2e7ef1ae:11250
+commitRoot @ react-dom_client.js?v=2e7ef1ae:11081
+commitRootWhenReady @ react-dom_client.js?v=2e7ef1ae:10512
+performWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:10457
+performSyncWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=2e7ef1ae:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=2e7ef1ae:11558
+(anonymous) @ react-dom_client.js?v=2e7ef1ae:11649
+<OnboardingProvider>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=2e7ef1ae:250
+App @ App.tsx:1438
+react-stack-bottom-frame @ react-dom_client.js?v=2e7ef1ae:17424
+renderWithHooks @ react-dom_client.js?v=2e7ef1ae:4206
+updateFunctionComponent @ react-dom_client.js?v=2e7ef1ae:6619
+beginWork @ react-dom_client.js?v=2e7ef1ae:7654
+runWithFiberInDEV @ react-dom_client.js?v=2e7ef1ae:1485
+performUnitOfWork @ react-dom_client.js?v=2e7ef1ae:10874
+workLoopSync @ react-dom_client.js?v=2e7ef1ae:10728
+renderRootSync @ react-dom_client.js?v=2e7ef1ae:10711
+performWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=2e7ef1ae:11623
+performWorkUntilDeadline @ react-dom_client.js?v=2e7ef1ae:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=2e7ef1ae:250
+(anonymous) @ main.tsx:5
+subscription-plans-management.tsx:426 Uncaught TypeError: plans?.filter is not a function
+    at SubscriptionPlansManagement (subscription-plans-management.tsx:426:25)
+    at react-stack-bottom-frame (react-dom_client.js?v=2e7ef1ae:17424:20)
+    at renderWithHooks (react-dom_client.js?v=2e7ef1ae:4206:24)
+    at updateFunctionComponent (react-dom_client.js?v=2e7ef1ae:6619:21)
+    at beginWork (react-dom_client.js?v=2e7ef1ae:7654:20)
+    at runWithFiberInDEV (react-dom_client.js?v=2e7ef1ae:1485:72)
+    at performUnitOfWork (react-dom_client.js?v=2e7ef1ae:10874:82)
+    at workLoopSync (react-dom_client.js?v=2e7ef1ae:10728:43)
+    at renderRootSync (react-dom_client.js?v=2e7ef1ae:10711:13)
+    at performWorkOnRoot (react-dom_client.js?v=2e7ef1ae:10359:46)
+SubscriptionPlansManagement @ subscription-plans-management.tsx:426
+react-stack-bottom-frame @ react-dom_client.js?v=2e7ef1ae:17424
+renderWithHooks @ react-dom_client.js?v=2e7ef1ae:4206
+updateFunctionComponent @ react-dom_client.js?v=2e7ef1ae:6619
+beginWork @ react-dom_client.js?v=2e7ef1ae:7654
+runWithFiberInDEV @ react-dom_client.js?v=2e7ef1ae:1485
+performUnitOfWork @ react-dom_client.js?v=2e7ef1ae:10874
+workLoopSync @ react-dom_client.js?v=2e7ef1ae:10728
+renderRootSync @ react-dom_client.js?v=2e7ef1ae:10711
+performWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:10359
+performSyncWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=2e7ef1ae:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=2e7ef1ae:11558
+(anonymous) @ react-dom_client.js?v=2e7ef1ae:11649
+<SubscriptionPlansManagement>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=2e7ef1ae:250
+PrivateRoute @ App.tsx:181
+react-stack-bottom-frame @ react-dom_client.js?v=2e7ef1ae:17424
+renderWithHooks @ react-dom_client.js?v=2e7ef1ae:4206
+updateFunctionComponent @ react-dom_client.js?v=2e7ef1ae:6619
+beginWork @ react-dom_client.js?v=2e7ef1ae:7654
+runWithFiberInDEV @ react-dom_client.js?v=2e7ef1ae:1485
+performUnitOfWork @ react-dom_client.js?v=2e7ef1ae:10874
+workLoopSync @ react-dom_client.js?v=2e7ef1ae:10728
+renderRootSync @ react-dom_client.js?v=2e7ef1ae:10711
+performWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=2e7ef1ae:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=2e7ef1ae:11558
+(anonymous) @ react-dom_client.js?v=2e7ef1ae:11649
+<PrivateRoute>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=2e7ef1ae:250
+Router @ App.tsx:1307
+react-stack-bottom-frame @ react-dom_client.js?v=2e7ef1ae:17424
+renderWithHooks @ react-dom_client.js?v=2e7ef1ae:4206
+updateFunctionComponent @ react-dom_client.js?v=2e7ef1ae:6619
+beginWork @ react-dom_client.js?v=2e7ef1ae:7654
+runWithFiberInDEV @ react-dom_client.js?v=2e7ef1ae:1485
+performUnitOfWork @ react-dom_client.js?v=2e7ef1ae:10874
+workLoopSync @ react-dom_client.js?v=2e7ef1ae:10728
+renderRootSync @ react-dom_client.js?v=2e7ef1ae:10711
+performWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=2e7ef1ae:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=2e7ef1ae:11558
+(anonymous) @ react-dom_client.js?v=2e7ef1ae:11649
+Console.js:61 An error occurred in the <SubscriptionPlansManagement> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+Mt.forEach.n.<computed> @ Console.js:61
+defaultOnUncaughtError @ react-dom_client.js?v=2e7ef1ae:6229
+logUncaughtError @ react-dom_client.js?v=2e7ef1ae:6283
+runWithFiberInDEV @ react-dom_client.js?v=2e7ef1ae:1485
+lane.callback @ react-dom_client.js?v=2e7ef1ae:6311
+callCallback @ react-dom_client.js?v=2e7ef1ae:4097
+commitCallbacks @ react-dom_client.js?v=2e7ef1ae:4109
+runWithFiberInDEV @ react-dom_client.js?v=2e7ef1ae:1487
+commitLayoutEffectOnFiber @ react-dom_client.js?v=2e7ef1ae:9029
+flushLayoutEffects @ react-dom_client.js?v=2e7ef1ae:11174
+commitRoot @ react-dom_client.js?v=2e7ef1ae:11080
+commitRootWhenReady @ react-dom_client.js?v=2e7ef1ae:10512
+performWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:10457
+performSyncWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=2e7ef1ae:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=2e7ef1ae:11558
+(anonymous) @ react-dom_client.js?v=2e7ef1ae:11649
+<SubscriptionPlansManagement>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=2e7ef1ae:250
+PrivateRoute @ App.tsx:181
+react-stack-bottom-frame @ react-dom_client.js?v=2e7ef1ae:17424
+renderWithHooks @ react-dom_client.js?v=2e7ef1ae:4206
+updateFunctionComponent @ react-dom_client.js?v=2e7ef1ae:6619
+beginWork @ react-dom_client.js?v=2e7ef1ae:7654
+runWithFiberInDEV @ react-dom_client.js?v=2e7ef1ae:1485
+performUnitOfWork @ react-dom_client.js?v=2e7ef1ae:10874
+workLoopSync @ react-dom_client.js?v=2e7ef1ae:10728
+renderRootSync @ react-dom_client.js?v=2e7ef1ae:10711
+performWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=2e7ef1ae:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=2e7ef1ae:11558
+(anonymous) @ react-dom_client.js?v=2e7ef1ae:11649
+<PrivateRoute>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=2e7ef1ae:250
+Router @ App.tsx:1307
+react-stack-bottom-frame @ react-dom_client.js?v=2e7ef1ae:17424
+renderWithHooks @ react-dom_client.js?v=2e7ef1ae:4206
+updateFunctionComponent @ react-dom_client.js?v=2e7ef1ae:6619
+beginWork @ react-dom_client.js?v=2e7ef1ae:7654
+runWithFiberInDEV @ react-dom_client.js?v=2e7ef1ae:1485
+performUnitOfWork @ react-dom_client.js?v=2e7ef1ae:10874
+workLoopSync @ react-dom_client.js?v=2e7ef1ae:10728
+renderRootSync @ react-dom_client.js?v=2e7ef1ae:10711
+performWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=2e7ef1ae:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=2e7ef1ae:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=2e7ef1ae:11558
+(anonymous) @ react-dom_client.js?v=2e7ef1ae:11649

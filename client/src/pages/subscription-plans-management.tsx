@@ -54,10 +54,13 @@ export default function SubscriptionPlansManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Query for subscription plans
-  const { data: plans, isLoading } = useQuery<SubscriptionPlan[]>({
+  const { data: plansResponse, isLoading } = useQuery<SubscriptionPlan[]>({
     queryKey: ["/api/billing/plans"],
     queryFn: () => apiRequest('GET', "/api/billing/plans")
   });
+
+  // Ensure plans is always an array
+  const plans = Array.isArray(plansResponse) ? plansResponse : [];
 
   // Create plan mutation
   const createPlanMutation = useMutation({
