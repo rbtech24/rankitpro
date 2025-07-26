@@ -959,4 +959,92 @@ router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
   });
 });
 
+/**
+ * Expire trial for testing purposes (development only)
+ */
+router.post('/trial/expire', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    // Only allow in development
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({ error: 'Not available in production' });
+    }
+    
+    const user = req.user as any;
+    const companyId = user.companyId || req.body.companyId;
+    
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID required' });
+    }
+
+    // Expire the trial
+    await storage.updateCompany(companyId, {
+      isTrialActive: false,
+      trialEndDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // Yesterday
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Trial expired for testing',
+      companyId 
+    });
+  } catch (error: any) {
+    logger.error("Error expiring trial", { errorMessage: error?.message || "Unknown error" });
+    res.status(500).json({ error: 'Failed to expire trial' });
+  }
+});
+
+/**
+ * Get trial status for current user's company (for testing)
+ */
+router.get('/trial/status', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const user = req.user as any;
+    
+    // Super admin users don't have trials
+    if (user.role === 'super_admin') {
+      return res.json({ success: true });
+    }
+    
+    const companyId = user.companyId;
+    if (!companyId) {
+      return res.json({ success: true });
+    }
+
+    const company = await storage.getCompany(companyId);
+    if (!company) {
+      return res.json({ success: true });
+    }
+
+    // Has paid subscription
+    if (company.stripeSubscriptionId) {
+      return res.json({ 
+        success: true,
+        subscriptionActive: true 
+      });
+    }
+
+    // No trial or trial inactive
+    if (!company.isTrialActive || !company.trialEndDate) {
+      return res.json({ 
+        expired: true,
+        daysLeft: 0,
+        trialEndDate: company.trialEndDate || new Date().toISOString()
+      });
+    }
+
+    const now = new Date();
+    const trialEndDate = new Date(company.trialEndDate);
+    const daysLeft = Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+    return res.json({
+      expired: now > trialEndDate,
+      daysLeft: Math.max(0, daysLeft),
+      trialEndDate: trialEndDate.toISOString()
+    });
+  } catch (error: any) {
+    logger.error("Error getting trial status", { errorMessage: error?.message || "Unknown error" });
+    return res.json({ success: true });
+  }
+});
+
 export default router;

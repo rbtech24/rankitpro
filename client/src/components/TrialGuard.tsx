@@ -16,6 +16,7 @@ import {
 } from '../components/ui/dialog';
 import { Button } from '../components/ui/button';
 import { Alert, AlertDescription } from '../components/ui/alert';
+import { TrialExpiredModal } from './trial-expired-modal';
 
 interface TrialStatus {
   expired: boolean;
@@ -92,10 +93,10 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
   // Global error handler for 403 trial_expired responses
   useEffect(() => {
     const originalFetch = window.fetch;
-    
+
     window.fetch = async (...args) => {
       const response = await originalFetch(...args);
-      
+
       // Check for trial expiration in API responses
       if (response.status === 403) {
         try {
@@ -113,7 +114,7 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
           // Ignore JSON parsing errors
         }
       }
-      
+
       return response;
     };
 
@@ -168,11 +169,11 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
             <XCircle className="h-8 w-8 text-red-600" />
           </div>
-          
+
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Trial Expired
           </h1>
-          
+
           <p className="text-gray-600 mb-6">
             Your company's 14-day free trial ended on{' '}
             {trialStatus.trialEndDate ? 
@@ -183,7 +184,7 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
               'Please contact your company administrator to upgrade the subscription.'
             }
           </p>
-          
+
           <div className="bg-red-50 rounded-lg p-4 mb-6">
             <div className="flex items-center mb-2">
               <Shield className="h-5 w-5 text-red-600 mr-2" />
@@ -195,7 +196,7 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
               <li>• Upgrade now to restore immediate access</li>
             </ul>
           </div>
-          
+
           <div className="space-y-3">
             {user.role === 'company_admin' ? (
               <Button 
@@ -213,7 +214,7 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
                 </p>
               </div>
             )}
-            
+
             <Button 
               variant="outline" 
               onClick={handleLogout}
@@ -251,78 +252,12 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
         </Alert>
       )}
 
-      {/* Trial Expired Modal - don't show on billing page */}
-      <Dialog open={showTrialModal && !isBillingPage} onOpenChange={handleDismiss}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
-            </div>
-            <DialogTitle className="text-xl font-semibold">
-              Free Trial Expired
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 mt-2">
-              Your 14-day free trial ended on{' '}
-              {trialStatus?.trialEndDate ? 
-                new Date(trialStatus.trialEndDate).toLocaleDateString() : 
-                'recently'
-              }. Upgrade to continue using Rank It Pro.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 mt-6">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-2 flex items-center">
-                <Clock className="h-4 w-4 mr-2 text-gray-600" />
-                What happens now?
-              </h4>
-              <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Choose a subscription plan to restore access</li>
-                <li>• All your data and settings are preserved</li>
-                <li>• Resume using all platform features immediately</li>
-                <li>• No setup required - just upgrade and continue</li>
-              </ul>
-            </div>
-            
-            <div className="flex flex-col space-y-3">
-              {user.role === 'company_admin' ? (
-                <Button 
-                  onClick={handleUpgrade}
-                  className="w-full"
-                  size="lg"
-                >
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  View Subscription Plans
-                </Button>
-              ) : (
-                <div className="bg-blue-50 rounded-lg p-3 text-center">
-                  <p className="text-sm text-blue-700">
-                    Contact your company administrator to upgrade the subscription.
-                  </p>
-                </div>
-              )}
-              
-              {!enforceBlocking && (
-                <Button 
-                  variant="outline" 
-                  onClick={handleDismiss}
-                  className="w-full"
-                >
-                  Continue (Limited Access)
-                </Button>
-              )}
-              
-              <Button 
-                variant="ghost" 
-                onClick={handleLogout}
-                className="w-full text-gray-500"
-              >
-                Sign Out
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Enhanced Trial Expired Modal */}
+      <TrialExpiredModal 
+        isOpen={showTrialModal}
+        onClose={handleDismiss}
+        trialEndDate={trialStatus?.trialEndDate}
+      />
 
       {/* Render children */}
       {children}

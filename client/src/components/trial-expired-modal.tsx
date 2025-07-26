@@ -1,9 +1,10 @@
+
 /**
  * Trial Expired Modal Component
  * Blocks access when trial expires and allows direct payment
  */
 
-import { AlertTriangle, CreditCard, Clock, Loader2, Check } from "lucide-react";
+import { AlertTriangle, CreditCard, Clock, Loader2, Check, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -45,19 +46,19 @@ interface TrialExpiredModalProps {
 export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpiredModalProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [showPlans, setShowPlans] = useState(false);
+  const [currentStep, setCurrentStep] = useState<'expired' | 'plans' | 'payment' | 'success'>('expired');
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   // Get subscription plans
-  const { data: subscriptionPlans } = useQuery({
+  const { data: subscriptionPlans, isLoading: plansLoading } = useQuery({
     queryKey: ["/api/billing/plans"],
     queryFn: async () => {
       const response = await apiRequest('GET', "/api/billing/plans");
       return response.json();
-    }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Create subscription mutation
@@ -71,8 +72,8 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
       setIsProcessing(false);
       
       if (data.devMode || data.success) {
-        // Success in development mode
-        setPaymentSuccess(true);
+        // Success in development mode or direct payment
+        setCurrentStep('success');
         toast({
           title: "Account Reactivated!",
           description: "Your subscription has been activated successfully. Full access restored!",
@@ -81,7 +82,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
         queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
         queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
         
-        // Close modal after success
+        // Reload page after success
         setTimeout(() => {
           window.location.reload();
         }, 2000);
@@ -90,6 +91,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
       
       if (data.clientSecret) {
         setClientSecret(data.clientSecret);
+        setCurrentStep('payment');
       }
     },
     onError: (error: any) => {
@@ -107,7 +109,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
     createSubscription.mutate({ planId: plan.id, billingPeriod: 'monthly' });
   };
 
-  const handleUpgrade = () => {
+  const handleViewBilling = () => {
     setLocation('/billing');
   };
 
@@ -116,7 +118,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
   };
 
   const handlePaymentSuccess = () => {
-    setPaymentSuccess(true);
+    setCurrentStep('success');
     setClientSecret(null);
     toast({
       title: "Payment Successful!",
@@ -126,26 +128,23 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
     queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
     queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
     
-    // Close modal if provided
-    if (onClose) {
-      setTimeout(() => {
-        onClose();
-      }, 1500);
-    }
-    
     // Reload page to restore access
     setTimeout(() => {
       window.location.reload();
     }, 2000);
   };
 
-  const handleModalClose = () => {
-    if (onClose && !isProcessing) {
-      onClose();
+  const handleBack = () => {
+    if (currentStep === 'plans') {
+      setCurrentStep('expired');
+    } else if (currentStep === 'payment') {
+      setCurrentStep('plans');
+      setClientSecret(null);
     }
   };
 
-  if (paymentSuccess) {
+  // Success step
+  if (currentStep === 'success') {
     return (
       <Dialog open={isOpen} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-md">
@@ -170,15 +169,23 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
     );
   }
 
-  if (clientSecret && stripePromise) {
+  // Payment step
+  if (currentStep === 'payment' && clientSecret && stripePromise) {
     return (
       <Dialog open={isOpen} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Complete Your Subscription</DialogTitle>
-            <DialogDescription>
-              Complete payment to reactivate your account immediately
-            </DialogDescription>
+            <div className="flex items-center">
+              <Button variant="ghost" size="sm" onClick={handleBack} className="mr-2">
+                ← Back
+              </Button>
+              <div>
+                <DialogTitle>Complete Your Subscription</DialogTitle>
+                <DialogDescription>
+                  Complete payment to reactivate your account immediately
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
           
           {selectedPlan && (
@@ -204,7 +211,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                   variant: "destructive",
                 });
               }}
-              onCancel={() => setClientSecret(null)}
+              onCancel={handleBack}
             />
           </Elements>
         </DialogContent>
@@ -212,72 +219,39 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
     );
   }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={handleModalClose}>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-            <AlertTriangle className="h-6 w-6 text-red-600" />
-          </div>
-          <DialogTitle className="text-xl font-semibold">
-            {showPlans ? 'Reactivate Your Account' : 'Free Trial Expired'}
-          </DialogTitle>
-          <DialogDescription className="text-gray-600 mt-2">
-            {showPlans ? 
-              'Choose a plan to immediately restore access to your account' :
-              `Your 14-day free trial ended on ${trialEndDate ? new Date(trialEndDate).toLocaleDateString() : 'recently'}. Choose a plan to continue.`
-            }
-          </DialogDescription>
-        </DialogHeader>
-        
-        {!showPlans ? (
-          <div className="space-y-4 mt-6">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-2 flex items-center">
-                <Clock className="h-4 w-4 mr-2 text-gray-600" />
-                Quick Reactivation Available
-              </h4>
-              <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Select a plan and pay instantly to restore access</li>
-                <li>• All your data and settings are preserved</li>
-                <li>• Resume using all platform features immediately</li>
-              </ul>
+  // Plans selection step
+  if (currentStep === 'plans') {
+    return (
+      <Dialog open={isOpen} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-4xl">
+          <DialogHeader>
+            <div className="flex items-center">
+              <Button variant="ghost" size="sm" onClick={handleBack} className="mr-2">
+                ← Back
+              </Button>
+              <div>
+                <DialogTitle className="text-xl font-semibold">
+                  Choose Your Plan
+                </DialogTitle>
+                <DialogDescription className="text-gray-600 mt-2">
+                  Select a plan to immediately restore access to your account
+                </DialogDescription>
+              </div>
             </div>
-            
-            <div className="flex flex-col space-y-3">
-              <Button 
-                onClick={() => setShowPlans(true)}
-                className="w-full"
-                size="lg"
-              >
-                <CreditCard className="h-4 w-4 mr-2" />
-                Choose Plan & Pay Now
-              </Button>
-              
-              <Button 
-                variant="outline"
-                onClick={handleUpgrade}
-                className="w-full"
-              >
-                View Full Billing Page
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                onClick={handleLogout}
-                className="w-full"
-                size="sm"
-              >
-                Sign Out
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4 mt-6">
-            {subscriptionPlans && subscriptionPlans.length > 0 ? (
+          </DialogHeader>
+          
+          <div className="mt-6">
+            {plansLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : subscriptionPlans && subscriptionPlans.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {subscriptionPlans.map((plan: any) => (
-                  <div key={plan.id} className="border rounded-lg p-4 hover:border-blue-500 transition-colors">
+                  <div key={plan.id} className="border rounded-lg p-4 hover:border-blue-500 transition-colors relative">
+                    {plan.name.toLowerCase() === 'professional' && (
+                      <Badge className="absolute -top-2 -right-2 bg-blue-600">Most Popular</Badge>
+                    )}
                     <div className="text-center">
                       <h3 className="font-semibold text-lg">{plan.name}</h3>
                       <div className="mt-2">
@@ -290,9 +264,12 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                       </p>
                       
                       {plan.features && plan.features.length > 0 && (
-                        <ul className="text-xs text-gray-600 mt-3 space-y-1">
-                          {plan.features.slice(0, 3).map((feature: string, index: number) => (
-                            <li key={index}>✓ {feature}</li>
+                        <ul className="text-xs text-gray-600 mt-3 space-y-1 text-left">
+                          {plan.features.slice(0, 4).map((feature: string, index: number) => (
+                            <li key={index} className="flex items-start">
+                              <Check className="h-3 w-3 text-green-500 mr-1 mt-0.5 flex-shrink-0" />
+                              <span>{feature}</span>
+                            </li>
                           ))}
                         </ul>
                       )}
@@ -301,7 +278,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                         onClick={() => handlePlanSelect(plan)}
                         disabled={isProcessing}
                         className="w-full mt-4"
-                        size="sm"
+                        variant={plan.name.toLowerCase() === 'professional' ? 'default' : 'outline'}
                       >
                         {isProcessing ? (
                           <>
@@ -311,7 +288,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                         ) : (
                           <>
                             <CreditCard className="h-4 w-4 mr-2" />
-                            Select & Pay
+                            Select Plan
                           </>
                         )}
                       </Button>
@@ -321,24 +298,76 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-500 mb-4">No subscription plans available</p>
-                <Button onClick={handleUpgrade}>
+                <p className="text-gray-500 mb-4">Unable to load subscription plans</p>
+                <Button onClick={handleViewBilling}>
                   Go to Billing Page
                 </Button>
               </div>
             )}
-            
-            <div className="flex justify-center">
-              <Button 
-                variant="ghost" 
-                onClick={() => setShowPlans(false)}
-                size="sm"
-              >
-                ← Back
-              </Button>
-            </div>
           </div>
-        )}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Initial expired step
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose ? () => onClose() : undefined}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader className="text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+            <AlertTriangle className="h-6 w-6 text-red-600" />
+          </div>
+          <DialogTitle className="text-xl font-semibold">
+            Trial Expired
+          </DialogTitle>
+          <DialogDescription className="text-gray-600 mt-2">
+            Your company's 14-day free trial ended on {trialEndDate ? new Date(trialEndDate).toLocaleDateString() : '7/5/2025'}.
+            Choose a subscription plan to restore access for your team.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-4 mt-6">
+          <div className="bg-red-50 rounded-lg p-4">
+            <h4 className="font-medium text-red-900 mb-2 flex items-center">
+              <X className="h-4 w-4 mr-2 text-red-600" />
+              Access Restricted
+            </h4>
+            <ul className="text-sm text-red-700 space-y-1">
+              <li>• All platform features are now locked</li>
+              <li>• Your data and settings are safely preserved</li>
+              <li>• Upgrade now to restore immediate access</li>
+            </ul>
+          </div>
+          
+          <div className="flex flex-col space-y-3">
+            <Button 
+              onClick={() => setCurrentStep('plans')}
+              className="w-full"
+              size="lg"
+            >
+              <CreditCard className="h-4 w-4 mr-2" />
+              View Subscription Plans
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={handleViewBilling}
+              className="w-full"
+            >
+              Go to Billing Page
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleLogout}
+              className="w-full"
+              size="sm"
+            >
+              Sign Out
+            </Button>
+          </div>
+        </div>
         
         <p className="text-xs text-gray-500 text-center mt-4">
           Need help? Contact our support team for assistance with upgrading your account.
