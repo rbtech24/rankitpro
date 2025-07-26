@@ -40,12 +40,12 @@ async function initializeViteOrStatic() {
 
 // Global error handling for unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error("Unhandled Promise Rejection", { reasonMessage: reason instanceof Error ? reason.message : String(reason) });
+  logger.error("Unhandled Promise Rejection", reason instanceof Error ? reason : new Error(String(reason)));
   logError('Unhandled Promise Rejection', 'error');
 });
 
 process.on('uncaughtException', (error) => {
-  logger.error("Uncaught Exception", { errorMessage: error.message, stack: error.stack });
+  logger.error("Uncaught Exception", error);
   logError('Uncaught Exception', 'error');
   process.exit(1);
 });
@@ -262,7 +262,7 @@ async function createSuperAdminIfNotExists() {
       log("=====================================");
     }
   } catch (error) {
-    logger.error("Super admin setup failed", { errorMessage: (error as Error).message });
+    logger.error("Super admin setup failed", error as Error);
   }
 }
 
@@ -276,7 +276,7 @@ async function createSuperAdminIfNotExists() {
     const enabledFeatures = Object.entries(features).filter(([_, enabled]) => enabled).map(([name]) => name).join(", ") || "none";
     logger.info(`Features enabled: ${enabledFeatures}`);
   } catch (error) {
-    logger.error("Environment validation failed", { errorMessage: error instanceof Error ? error.message : String(error) });
+    logger.error("Environment validation failed", error instanceof Error ? error : new Error(String(error)));
     process.exit(1);
   }
 
@@ -299,7 +299,7 @@ async function createSuperAdminIfNotExists() {
     } catch (error) {
       retryCount++;
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(`Database connection attempt ${retryCount}/${maxRetries} failed`, { errorMessage });
+      logger.error(`Database connection attempt ${retryCount}/${maxRetries} failed`, error instanceof Error ? error : new Error(errorMessage));
 
       // Check if it's a connection-related error
       const isConnectionError = errorMessage.includes('connect') || 
@@ -323,7 +323,7 @@ async function createSuperAdminIfNotExists() {
         break;
       } else {
         // Non-connection error, don't retry
-        logger.error("Database connection failed with non-connection error", { errorMessage });
+        logger.error("Database connection failed with non-connection error", error instanceof Error ? error : new Error(errorMessage));
         break;
       }
     }
@@ -396,7 +396,7 @@ async function createSuperAdminIfNotExists() {
   // Add error handling for port conflicts
   server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
-      logger.error(`Port ${port} is already in use`, { port: Number(port), errorMessage: err.message });
+      logger.error(`Port ${port} is already in use`, err, { port: Number(port) });
       // Try alternative ports
       const alternativePort = parseInt(port.toString()) + 1;
       server.listen({
@@ -419,119 +419,3 @@ async function createSuperAdminIfNotExists() {
     logger.info("📱 Ready to accept connections");
   });
 })();
-import express from 'express';
-import session from 'express-session';
-import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
-import rateLimit from 'express-rate-limit';
-import { createServer } from 'http';
-import { WebSocketServer } from 'ws';
-import WebSocket from 'ws';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { logger } from './services/logger';
-const app = express();
-const PORT = process.env.PORT || 5000;
-const server = createServer(app);
-
-// Security middleware with proper WebSocket support
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "ws:", "wss:", `ws://localhost:${PORT}`, `wss://localhost:${PORT}`],
-      fontSrc: ["'self'", "https:", "data:"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'self'"],
-    },
-  },
-  crossOriginEmbedderPolicy: false
-}));
-// WebSocket server for real-time features
-const wss = new WebSocketServer({ 
-  server: server,
-  path: '/ws',
-  perMessageDeflate: false 
-});
-
-const activeConnections = new Map<number, WebSocket>();
-
-wss.on('connection', (ws, req) => {
-  logger.info('WebSocket client connected', { 
-    ip: req.socket.remoteAddress,
-    userAgent: req.headers['user-agent']
-  });
-
-  let userId: number | null = null;
-
-  ws.on('message', (message) => {
-    try {
-      const data = JSON.parse(message.toString());
-
-      if (data.type === 'auth' && data.userId) {
-        userId = data.userId;
-        activeConnections.set(userId, ws);
-
-        ws.send(JSON.stringify({
-          type: 'auth_success',
-          message: 'WebSocket authenticated'
-        }));
-      }
-
-    } catch (error) {
-      logger.warn('WebSocket message parse error', { error });
-    }
-  });
-
-  ws.on('close', () => {
-    if (userId) {
-      activeConnections.delete(userId);
-    }
-    logger.info('WebSocket client disconnected', { userId });
-  });
-
-  ws.on('error', (error) => {
-    logger.error('WebSocket error', { error, userId });
-    if (userId) {
-      activeConnections.delete(userId);
-    }
-  });
-
-  // Send ping every 30 seconds to keep connection alive
-  const pingInterval = setInterval(() => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.ping();
-    } else {
-      clearInterval(pingInterval);
-    }
-  }, 30000);
-
-  ws.on('close', () => clearInterval(pingInterval));
-});
-
-// Function to broadcast notifications to specific users
-export function broadcastNotification(userId: number, notification: any) {
-  const ws = activeConnections.get(userId);
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    try {
-      ws.send(JSON.stringify({
-        type: 'notification',
-        notification
-      }));
-    } catch (error) {
-      logger.error('Failed to send WebSocket notification', { error, userId });
-      activeConnections.delete(userId);
-    }
-  }
-}
-// Start server with WebSocket support
-server.listen(PORT, '0.0.0.0', () => {
-  logger.info(`Server running on http://0.0.0.0:${PORT}`);
-  logger.info(`WebSocket server available at ws://0.0.0.0:${PORT}/ws`);
-  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});

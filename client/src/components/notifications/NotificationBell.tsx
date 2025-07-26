@@ -13,6 +13,8 @@ import {
   CardFooter,
 } from "../../components/ui/card";
 import { useNotifications } from '../../context/NotificationContext';
+import { useQuery } from '@tanstack/react-query';
+import { getCurrentUser } from '../../lib/auth';
 import { Link } from 'wouter';
 
 interface NotificationBellProps {
@@ -20,14 +22,21 @@ interface NotificationBellProps {
 }
 
 const NotificationBell: React.FC<NotificationBellProps> = () => {
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { notifications, unreadCount, markAsRead } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 5;
+
+  // Get current user data
+  const { data: userData } = useQuery({
+    queryKey: ['/api/auth/me'],
+    queryFn: getCurrentUser,
+  });
+  
+  const user = userData?.user;
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -70,8 +79,8 @@ const NotificationBell: React.FC<NotificationBellProps> = () => {
         try {
           const data = JSON.parse(event.data);
           if (data.type === 'notification') {
-            setNotifications(prev => [data.notification, ...prev.slice(0, 19)]);
-            setUnreadCount(prev => prev + 1);
+            // Handle notification through context instead of local state
+            console.log('Received notification:', data.notification);
           }
         } catch (error) {
           // Silently handle parse errors
@@ -103,19 +112,9 @@ const NotificationBell: React.FC<NotificationBellProps> = () => {
 
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
-
-    try {
-      const response = await fetch('/api/notifications', {
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.unreadCount || 0);
-      }
-    } catch (error) {
-      // Silently handle API errors
-    }
+    
+    // This will be handled by the NotificationContext
+    // No need to fetch manually here
   }, [user]);
 
   useEffect(() => {
@@ -146,7 +145,6 @@ const NotificationBell: React.FC<NotificationBellProps> = () => {
       }
     };
   }, [user, connectWebSocket, fetchNotifications, wsConnected]);
-  const { notifications, unreadCount, markAsRead } = useNotifications();
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
