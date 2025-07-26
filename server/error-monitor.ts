@@ -151,7 +151,7 @@ class ErrorMonitor {
   private async sendAlert(errorInfo: ErrorInfo) {
     try {
       // Log critical alerts to console
-      logger.error("Critical error alert", {
+      logger.error("Critical error alert", undefined, {
         id: errorInfo.id,
         message: errorInfo.message,
         count: errorInfo.count,
@@ -164,8 +164,8 @@ class ErrorMonitor {
         // Example: await this.sendSlackAlert(errorInfo);
         // Example: await this.sendEmailAlert(errorInfo);
       }
-    } catch (error) {
-      logger.error("Unhandled error occurred");
+    } catch (alertError) {
+      console.error("Failed to send alert:", alertError instanceof Error ? alertError.message : String(alertError));
     }
   }
 

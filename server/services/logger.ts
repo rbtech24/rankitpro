@@ -3,7 +3,7 @@
  * Centralized logging system with different levels and proper formatting
  */
 
-import { logError } from '../error-monitor';
+// Remove circular dependency - we'll handle error monitoring differently
 export enum LogLevel {
   ERROR = 'error',
   WARN = 'warn',
@@ -24,6 +24,13 @@ export interface LogEntry {
     companyId?: number;
     ip?: string;
     userAgent?: string;
+    port?: number;
+    statusCode?: number;
+    duration?: number;
+    email?: string;
+    query?: string;
+    connectionId?: string;
+    [key: string]: any; // Allow additional properties
   };
 }
 
@@ -84,10 +91,8 @@ class Logger {
         break;
     }
 
-    // Send errors to error monitoring system
-    if (level === LogLevel.ERROR && context instanceof Error) {
-      logError(message, context, metadata);
-    }
+    // Error monitoring will be handled at the application level
+    // to avoid circular dependencies
   }
 
   // Public logging methods
@@ -173,6 +178,5 @@ export const logger = new Logger();
 
 // Helper functions for backward compatibility
 export const logInfo = (message: string, context?: any) => logger.info(message, context);
-export const logError = (message: string, error?: Error, metadata?: any) => logger.error(message, error, metadata);
 export const logWarn = (message: string, context?: any) => logger.warn(message, context);
 export const logDebug = (message: string, context?: any) => logger.debug(message, context);
