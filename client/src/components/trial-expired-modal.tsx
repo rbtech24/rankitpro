@@ -332,13 +332,13 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                   const price = selectedBilling === 'yearly' ? 
                     (plan.yearlyPrice || plan.price * 12) : 
                     plan.price;
+                  const isRequired = plan.name.toLowerCase() === 'essential';
                   const isPopular = plan.name.toLowerCase() === 'professional';
-                  const isMinimum = plan.name.toLowerCase() === 'starter';
 
                   return (
                     <div key={plan.id} className={`relative border rounded-lg p-6 hover:border-blue-500 transition-colors ${
                       isPopular ? 'border-blue-500 shadow-lg' : 
-                      isMinimum ? 'border-green-500 shadow-md' : 'border-gray-200'
+                      isRequired ? 'border-green-500 shadow-md' : 'border-gray-200'
                     }`}>
                       {isPopular && (
                         <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-blue-600">
@@ -346,7 +346,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                           Most Popular
                         </Badge>
                       )}
-                      {isMinimum && (
+                      {isRequired && (
                         <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-600">
                           Minimum Required
                         </Badge>
@@ -432,7 +432,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
           </DialogTitle>
           <DialogDescription className="text-gray-600 mt-2">
             Your 14-day free trial ended on {trialEndDate ? new Date(trialEndDate).toLocaleDateString() : 'recently'}.
-            Select a paid plan starting from $47/month to continue using Rank It Pro.
+            Choose a plan starting from $97/month to continue using Rank It Pro.
           </DialogDescription>
         </DialogHeader>
 
@@ -444,7 +444,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
             </h4>
             <ul className="text-sm text-blue-700 space-y-1">
               <li>• After 14 days, all companies must subscribe to a paid plan</li>
-              <li>• Plans start at just $47/month (Starter plan)</li>
+              <li>• Plans start at $97/month (Essential - minimum required)</li>
               <li>• Your data is safely preserved during subscription setup</li>
               <li>• Restore access immediately after payment</li>
             </ul>
