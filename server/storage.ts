@@ -5147,7 +5147,7 @@ export class DatabaseStorage implements IStorage {
         return {
           id: plan.id,
           name: plan.name,
-          price: `$${plan.price}`,
+          price: plan.price,
           billingPeriod: plan.billingPeriod,
           maxTechnicians: plan.maxTechnicians,
           maxCheckIns: plan.maxCheckIns,
@@ -5182,7 +5182,7 @@ export class DatabaseStorage implements IStorage {
       return {
         id: plan.id,
         name: plan.name,
-        price: `$${plan.price}`,
+        price: plan.price,
         billingPeriod: plan.billingPeriod,
         maxTechnicians: plan.maxTechnicians,
         maxCheckIns: plan.maxCheckIns,
