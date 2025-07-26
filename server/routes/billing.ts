@@ -66,7 +66,7 @@ router.post('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: R
 
     res.json(newPlan);
   } catch (error: any) {
-    logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : String(error) });
+    logger.error("Storage operation error", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to create subscription plan',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -222,7 +222,7 @@ router.get('/subscription', isAuthenticated, isCompanyAdmin, async (req: Request
     // Return subscription data
     res.json(subscriptionData);
   } catch (error: any) {
-    logger.error("Failed to retrieve subscription information", { errorMessage: error instanceof Error ? error.message : String(error) });
+    logger.error("Failed to retrieve subscription information", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to retrieve subscription information',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -245,7 +245,9 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
       planIdType: typeof planId,
       billingPeriod,
       companyId,
-      requestBody: req.body
+      requestBody: req.body,
+      userAgent: req.headers['user-agent'],
+      environment: process.env.NODE_ENV
     });
 
     if (!planId || !billingPeriod) {
@@ -349,7 +351,7 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
       });
     } catch (stripeError: any) {
       logger.error("Stripe payment intent creation failed", { 
-        errorMessage: stripeError instanceof Error ? stripeError.message : String(stripeError),
+        error: stripeError instanceof Error ? stripeError.message : String(stripeError),
         companyId,
         planId,
         planName: planDetails.name,
@@ -392,7 +394,13 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
 
 
   } catch (error: any) {
-    logger.error("Subscription creation error", { errorMessage: error instanceof Error ? error.message : String(error) });
+    logger.error("Subscription creation error", { 
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : 'No stack trace',
+      planId: req.body?.planId,
+      companyId: (req.user as any)?.companyId,
+      stripeAvailable: stripeService.isStripeAvailable()
+    });
     res.status(500).json({
       error: 'Failed to process subscription request',
       message: error instanceof Error ? error.message : 'Unknown error'
