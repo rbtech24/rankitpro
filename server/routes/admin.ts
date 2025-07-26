@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { storage } from '../storage';
-import { isSuperAdmin } from '../middleware/auth';
+import { isSuperAdmin, isAuthenticated } from '../middleware/auth';
 import { insertSubscriptionPlanSchema } from '@shared/schema';
 import Stripe from 'stripe';
+import { Request, Response } from 'express';
 
 import { logger } from '../services/logger';
 const router = Router();
