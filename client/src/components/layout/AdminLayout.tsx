@@ -201,54 +201,11 @@ export default function AdminLayout({ children, currentPath }: AdminLayoutProps)
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 pb-16">
+        <main className="flex-1 p-6">
           {children}
         </main>
 
-        {/* Footer */}
-        <div 
-          className="bg-gray-900 text-white z-30 hidden md:block"
-          style={{ 
-            position: 'fixed',
-            bottom: '0px',
-            left: '256px',
-            right: '0px',
-            height: 'auto',
-            zIndex: 30
-          }}
-        >
-          <div className="px-6 py-3">
-            <div className="flex justify-between items-center text-sm">
-              <div className="flex items-center space-x-6">
-                <button 
-                  onClick={() => setLocation('/companies-management')}
-                  className="hover:text-purple-300 transition-colors"
-                >
-                  Companies
-                </button>
-                <button 
-                  onClick={() => setLocation('/technicians-management')}
-                  className="hover:text-purple-300 transition-colors"
-                >
-                  Technicians
-                </button>
-                <button 
-                  onClick={() => setLocation('/security-dashboard')}
-                  className="hover:text-purple-300 transition-colors"
-                >
-                  Security
-                </button>
-              </div>
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-400">Rank It Pro Admin Console v2.1</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-green-400">All Systems Operational</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+
         
         {/* Mobile Footer */}
         <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white z-30 md:hidden">
