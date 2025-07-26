@@ -44,6 +44,7 @@ const SUBSCRIPTION_STATUS = {
   cancelled: { label: "Cancelled", color: "bg-gray-100 text-gray-800" },
 };
 
+// CACHE BUSTER 1753544900: Force browser to reload with ID column and toggle buttons
 const CompaniesManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
@@ -150,10 +151,10 @@ const CompaniesManagement = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
+                  <TableHead className="bg-red-500 text-white font-bold text-center">🆔 COMPANY ID</TableHead>
                   <TableHead>Company Name</TableHead>
                   <TableHead>Plan</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="bg-orange-200">Status & Toggle</TableHead>
                   <TableHead>Technicians</TableHead>
                   <TableHead>Subscription Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -176,7 +177,7 @@ const CompaniesManagement = () => {
                   
                   return (
                     <TableRow key={company.id}>
-                      <TableCell className="font-mono text-lg text-white bg-red-600 font-bold border-4 border-yellow-400">COMPANY ID: {company.id}</TableCell>
+                      <TableCell className="font-mono text-2xl text-white bg-red-600 font-bold border-8 border-yellow-400 text-center animate-pulse">🆔 ID: {company.id}</TableCell>
                       <TableCell className="font-medium">{company.name}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="capitalize">
@@ -197,12 +198,12 @@ const CompaniesManagement = () => {
                             onClick={() => toggleStatusMutation.mutate(company.id)}
                             disabled={toggleStatusMutation.isPending}
                             title={company.isActive ? "Deactivate Company" : "Activate Company"}
-                            className="h-12 w-12 p-0 border-8 border-purple-500 bg-orange-400 hover:bg-orange-300"
+                            className="h-16 w-16 p-0 border-8 border-purple-500 bg-orange-400 hover:bg-orange-300 animate-bounce shadow-2xl"
                           >
                             {company.isActive ? (
-                              <PowerOff className="h-6 w-6 text-red-800 font-bold" />
+                              <PowerOff className="h-8 w-8 text-red-800 font-bold" />
                             ) : (
-                              <Power className="h-6 w-6 text-green-800 font-bold" />
+                              <Power className="h-8 w-8 text-green-800 font-bold" />
                             )}
                           </Button>
                         </div>
