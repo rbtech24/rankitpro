@@ -153,6 +153,18 @@ export class StripeService {
   }
 
   /**
+   * Map frontend plan identifiers to database plan names
+   */
+  private mapPlanToDatabase(plan: string): string {
+    const planMapping: { [key: string]: string } = {
+      'starter': 'Essential',
+      'pro': 'Professional', 
+      'agency': 'Enterprise'
+    };
+    return planMapping[plan] || plan;
+  }
+
+  /**
    * Get or create a subscription for a user
    */
   async getOrCreateSubscription(userId: number, plan: string): Promise<{
@@ -176,11 +188,15 @@ export class StripeService {
       throw new Error(`Invalid plan: ${plan}`);
     }
     
-    // Validate price ID exists and isn't a placeholder
-    const priceId = PRICE_IDS[plan as keyof typeof PRICE_IDS];
-    if (!priceId || priceId.includes('price_starter') || priceId.includes('price_pro') || priceId.includes('price_agency')) {
-      throw new Error(`Invalid Stripe price ID for plan: ${plan}`);
+    // Get the actual plan from database using the mapped name
+    const dbPlanName = this.mapPlanToDatabase(plan);
+    const dbPlan = await storage.getSubscriptionPlanByName(dbPlanName);
+    
+    if (!dbPlan || !dbPlan.stripePriceId) {
+      throw new Error(`No Stripe price ID found for plan: ${plan} (${dbPlanName})`);
     }
+    
+    const priceId = dbPlan.stripePriceId;
 
     try {
       const user = await storage.getUser(userId);
@@ -196,7 +212,7 @@ export class StripeService {
         const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
         
         // If user is already subscribed to this plan, return early
-        if (subscription.items.data[0].price.id === PRICE_IDS[plan as keyof typeof PRICE_IDS]) {
+        if (subscription.items.data[0].price.id === priceId) {
           return { 
             subscriptionId: subscription.id,
             alreadySubscribed: true
@@ -210,7 +226,7 @@ export class StripeService {
         const updatedSubscription = await stripe.subscriptions.update(subscription.id, {
           items: [{
             id: subscription.items.data[0].id,
-            price: PRICE_IDS[plan as keyof typeof PRICE_IDS],
+            price: priceId,
           }],
           payment_behavior: 'default_incomplete',
           proration_behavior: 'create_prorations',
@@ -254,7 +270,7 @@ export class StripeService {
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
         items: [{
-          price: PRICE_IDS[plan as keyof typeof PRICE_IDS],
+          price: priceId,
         }],
         payment_behavior: 'default_incomplete',
         expand: ['latest_invoice.payment_intent'],

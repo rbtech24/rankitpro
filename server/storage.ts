@@ -5154,12 +5154,23 @@ export class DatabaseStorage implements IStorage {
           features: Array.isArray(plan.features) ? plan.features : JSON.parse(plan.features || '[]'),
           isActive: plan.isActive,
           subscriberCount: planCompanies.length,
-          revenue: planCompanies.length * Number(plan.price)
+          revenue: planCompanies.length * Number(plan.price),
+          stripePriceId: plan.stripePriceId
         };
       });
     } catch (error) {
       logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
+    }
+  }
+
+  async getSubscriptionPlanByName(name: string): Promise<any | undefined> {
+    try {
+      const [plan] = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, name));
+      return plan;
+    } catch (error) {
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
+      return undefined;
     }
   }
 
