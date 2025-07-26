@@ -332,8 +332,11 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                   const price = selectedBilling === 'yearly' ? 
                     (plan.yearlyPrice || plan.price * 12) : 
                     plan.price;
-                  const isRequired = plan.name.toLowerCase() === 'essential';
-                  const isPopular = plan.name.toLowerCase() === 'professional';
+                  const planPrice = parseFloat(price);
+                  
+                  // Set badges based on plan characteristics
+                  const isPopular = plan.name.toLowerCase().includes('professional') || plan.name.toLowerCase().includes('pro');
+                  const isRequired = planPrice <= 100; // Plans $100 or less are considered minimum options
 
                   return (
                     <div key={plan.id} className={`relative border rounded-lg p-6 hover:border-blue-500 transition-colors ${
@@ -432,7 +435,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
           </DialogTitle>
           <DialogDescription className="text-gray-600 mt-2">
             Your 14-day free trial ended on {trialEndDate ? new Date(trialEndDate).toLocaleDateString() : 'recently'}.
-            Choose a plan starting from $97/month to continue using Rank It Pro.
+            Choose a subscription plan to continue using Rank It Pro after your free trial.
           </DialogDescription>
         </DialogHeader>
 
@@ -444,7 +447,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
             </h4>
             <ul className="text-sm text-blue-700 space-y-1">
               <li>• After 14 days, all companies must subscribe to a paid plan</li>
-              <li>• Plans start at $97/month (Essential - minimum required)</li>
+              <li>• Choose from our available subscription options</li>
               <li>• Your data is safely preserved during subscription setup</li>
               <li>• Restore access immediately after payment</li>
             </ul>
