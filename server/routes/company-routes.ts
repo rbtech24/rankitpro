@@ -38,12 +38,12 @@ router.get('/:id',
       // Check if user belongs to company or is super admin
       const user = await storage.getUser(userId);
       if (!user) {
-        logger.authFailure('User not found for company access', { userId, companyId });
+        logger.warn('User not found for company access', { userId, companyId });
         return res.status(401).json({ message: "User not found" });
       }
 
       if (user.role !== 'super_admin' && user.companyId !== companyId) {
-        logger.authFailure('Unauthorized company access attempt', { 
+        logger.warn('Unauthorized company access attempt', { 
           userId, 
           userCompanyId: user.companyId,
           requestedCompanyId: companyId 
@@ -140,22 +140,15 @@ router.get('/',
   async (req, res) => {
     try {
       const userId = req.session.userId!;
-
-      logger.apiRequest(req.method, req.path, { userId, ip: req.ip });
+      console.log(`API request: GET /api/companies from user ${userId}`);
 
       const companies = await storage.getAllCompanies();
-
-      logger.info('All companies retrieved by super admin', { 
-        userId,
-        companyCount: companies.length 
-      });
+      console.log(`Retrieved ${companies.length} companies`);
 
       res.json(companies);
 
     } catch (error) {
-      logger.error('Get all companies endpoint error', { 
-        userId: req.session.userId 
-      }, error as Error);
+      console.error('Get all companies endpoint error:', error);
       res.status(500).json({ message: "Internal server error" });
     }
   }

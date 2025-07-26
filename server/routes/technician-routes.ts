@@ -13,6 +13,34 @@ import { z } from "zod";
 
 const router = Router();
 
+// Get all technicians (super admin only)
+router.get('/all',
+  isAuthenticated,
+  async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      console.log(`API request: GET /api/technicians/all from user ${userId}`);
+      
+      // Check if user is super admin
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'super_admin') {
+        console.log(`Access denied for user ${userId}, role: ${user?.role}`);
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Get all technicians across all companies
+      const technicians = await storage.getAllTechnicians();
+      console.log(`Retrieved ${technicians.length} technicians`);
+
+      res.json(technicians);
+
+    } catch (error) {
+      console.error('Get all technicians endpoint error:', error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+);
+
 // Technician update schema
 const updateTechnicianSchema = z.object({
   firstName: z.string().min(1).optional(),
