@@ -18,7 +18,8 @@ const updateCompanySchema = z.object({
   name: z.string().min(1).optional(),
   plan: z.enum(["starter", "pro", "agency"]).optional(),
   usageLimit: z.number().min(0).optional(),
-  featuresEnabled: z.record(z.boolean()).optional()
+  featuresEnabled: z.record(z.boolean()).optional(),
+  isActive: z.boolean().optional()
 });
 
 // Get company details
@@ -283,6 +284,62 @@ router.delete('/:id',
 
     } catch (error) {
       logger.error('Delete company endpoint error', { 
+        companyId: req.params.id,
+        userId: req.session.userId 
+      }, error as Error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+);
+
+// Toggle company status (activate/deactivate)
+router.patch('/:id/status',
+  isAuthenticated,
+  isSuperAdmin,
+  async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      const userId = req.session.userId!;
+
+      logger.apiRequest(req.method, req.path, { 
+        userId, 
+        companyId,
+        ip: req.ip 
+      });
+
+      // Get current company status
+      const company = await storage.getCompany(companyId);
+      if (!company) {
+        logger.warn('Company not found for status toggle', { companyId, userId });
+        return res.status(404).json({ message: "Company not found" });
+      }
+
+      // Toggle the active status
+      const newStatus = !company.isActive;
+      const updatedCompany = await storage.updateCompany(companyId, { 
+        isActive: newStatus 
+      });
+
+      if (!updatedCompany) {
+        logger.error('Failed to update company status', { companyId, userId });
+        return res.status(500).json({ message: "Failed to update company status" });
+      }
+
+      logger.businessEvent('Company status toggled', {
+        companyId,
+        userId,
+        companyName: updatedCompany.name,
+        newStatus: newStatus ? 'active' : 'inactive',
+        previousStatus: company.isActive ? 'active' : 'inactive'
+      });
+
+      res.json({ 
+        message: `Company ${newStatus ? 'activated' : 'deactivated'} successfully`,
+        company: updatedCompany
+      });
+
+    } catch (error) {
+      logger.error('Toggle company status endpoint error', { 
         companyId: req.params.id,
         userId: req.session.userId 
       }, error as Error);

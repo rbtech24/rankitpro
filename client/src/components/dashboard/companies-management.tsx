@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../../lib/queryClient";
+import { useToast } from "../../hooks/use-toast";
 import { 
   Card, 
   CardContent, 
@@ -20,7 +21,10 @@ import {
   Building2, 
   Users,
   CreditCard,
-  Search
+  Search,
+  Power,
+  PowerOff,
+  Edit
 } from "lucide-react";
 import { Input } from "../../components/ui/input";
 import { 
@@ -44,6 +48,8 @@ const CompaniesManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   // Fetch companies data
   const { data: companies = [], isLoading } = useQuery({
@@ -51,6 +57,28 @@ const CompaniesManagement = () => {
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/companies');
       return response.json();
+    },
+  });
+
+  // Company status toggle mutation
+  const toggleStatusMutation = useMutation({
+    mutationFn: async (companyId: number) => {
+      const response = await apiRequest('PATCH', `/api/companies/${companyId}/status`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/companies'] });
+      toast({
+        title: "Success",
+        description: data.message,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to update company status",
+        variant: "destructive",
+      });
     },
   });
   
@@ -124,6 +152,7 @@ const CompaniesManagement = () => {
                 <TableRow>
                   <TableHead>Company Name</TableHead>
                   <TableHead>Plan</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Users</TableHead>
                   <TableHead>Subscription Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -152,19 +181,42 @@ const CompaniesManagement = () => {
                           {company.plan || "starter"}
                         </Badge>
                       </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={company.isActive ? "default" : "secondary"}
+                          className={company.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}
+                        >
+                          {company.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
                       <TableCell>{company.userCount || 0}</TableCell>
                       <TableCell>
                         <Badge className={status.color}>{status.label}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleCompanyDetail(company.id)}
-                        >
-                          <ArrowUpRight className="h-4 w-4 mr-1" /> 
-                          Details
-                        </Button>
+                        <div className="flex justify-end space-x-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => toggleStatusMutation.mutate(company.id)}
+                            disabled={toggleStatusMutation.isPending}
+                            title={company.isActive ? "Deactivate Company" : "Activate Company"}
+                          >
+                            {company.isActive ? (
+                              <PowerOff className="h-4 w-4 text-red-500" />
+                            ) : (
+                              <Power className="h-4 w-4 text-green-500" />
+                            )}
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleCompanyDetail(company.id)}
+                            title="View Details"
+                          >
+                            <ArrowUpRight className="h-4 w-4" /> 
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -291,11 +343,40 @@ const CompaniesManagement = () => {
                     </div>
                   </div>
                   
-                  <div className="flex justify-end space-x-2 pt-4">
-                    <Button variant="outline">Edit Company</Button>
-                    <Button variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50">
-                      Suspend Company
-                    </Button>
+                  <div className="flex justify-between items-center pt-4">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm font-medium">Company Status:</span>
+                      <Badge 
+                        variant={selectedCompany.isActive ? "default" : "secondary"}
+                        className={selectedCompany.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}
+                      >
+                        {selectedCompany.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button variant="outline">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Company
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => toggleStatusMutation.mutate(selectedCompany.id)}
+                        disabled={toggleStatusMutation.isPending}
+                        className={selectedCompany.isActive ? "text-red-600 hover:text-red-700 hover:bg-red-50" : "text-green-600 hover:text-green-700 hover:bg-green-50"}
+                      >
+                        {selectedCompany.isActive ? (
+                          <>
+                            <PowerOff className="h-4 w-4 mr-2" />
+                            Deactivate Company
+                          </>
+                        ) : (
+                          <>
+                            <Power className="h-4 w-4 mr-2" />
+                            Activate Company
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
                 
