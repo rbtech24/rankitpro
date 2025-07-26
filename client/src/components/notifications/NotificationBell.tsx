@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -20,25 +20,133 @@ interface NotificationBellProps {
 }
 
 const NotificationBell: React.FC<NotificationBellProps> = () => {
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const { notifications, unreadCount, markAsRead } = useNotifications();
-  
+  const [wsConnected, setWsConnected] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const maxReconnectAttempts = 5;
+
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
-    
+
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
     return `${Math.floor(diffInMinutes / 1440)} days ago`;
   };
-  
+
   const handleNotificationClick = (notification: any) => {
     if (!notification.read) {
       markAsRead(notification.id);
     }
   };
+
+  const connectWebSocket = useCallback(() => {
+    if (!user || wsRef.current?.readyState === WebSocket.CONNECTING) return;
+
+    try {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+      wsRef.current = new WebSocket(wsUrl);
+
+      wsRef.current.onopen = () => {
+        setWsConnected(true);
+        reconnectAttemptsRef.current = 0;
+
+        // Send authentication
+        wsRef.current?.send(JSON.stringify({
+          type: 'auth',
+          userId: user.id
+        }));
+      };
+
+      wsRef.current.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'notification') {
+            setNotifications(prev => [data.notification, ...prev.slice(0, 19)]);
+            setUnreadCount(prev => prev + 1);
+          }
+        } catch (error) {
+          // Silently handle parse errors
+        }
+      };
+
+      wsRef.current.onclose = () => {
+        setWsConnected(false);
+
+        // Only attempt reconnection if under max attempts
+        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+          reconnectAttemptsRef.current++;
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
+
+          reconnectTimeoutRef.current = setTimeout(() => {
+            connectWebSocket();
+          }, delay);
+        }
+      };
+
+      wsRef.current.onerror = () => {
+        setWsConnected(false);
+      };
+
+    } catch (error) {
+      setWsConnected(false);
+    }
+  }, [user]);
+
+  const fetchNotifications = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const response = await fetch('/api/notifications', {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.unreadCount || 0);
+      }
+    } catch (error) {
+      // Silently handle API errors
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Try WebSocket connection first
+    connectWebSocket();
+
+    // Fallback to API polling if WebSocket fails
+    const pollInterval = setInterval(() => {
+      if (!wsConnected) {
+        fetchNotifications();
+      }
+    }, 15000);
+
+    // Initial fetch
+    fetchNotifications();
+
+    return () => {
+      clearInterval(pollInterval);
+
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, [user, connectWebSocket, fetchNotifications, wsConnected]);
+  const { notifications, unreadCount, markAsRead } = useNotifications();
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>

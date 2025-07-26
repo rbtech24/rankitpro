@@ -125,7 +125,7 @@ app.use((req, res, next) => {
     res.removeHeader('Referrer-Policy');
     // Allow geolocation and camera for mobile field app
     res.setHeader('Permissions-Policy', 'camera=*, microphone=(), geolocation=*, payment=*');
-    
+
     // Explicitly set to allow everything
     res.set('Content-Security-Policy', 'script-src * \'unsafe-inline\' \'unsafe-eval\' data: blob:; object-src * data: blob:; style-src * \'unsafe-inline\' data: blob:; img-src * data: blob:; connect-src * ws: wss: data: blob:; font-src * data: blob:; frame-src * data: blob:; media-src * data: blob:; default-src * \'unsafe-inline\' \'unsafe-eval\' data: blob:;');
   }
@@ -136,16 +136,16 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   const isProduction = process.env.NODE_ENV === 'production';
   const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5000', 'http://localhost:3000'];
-  
+
   const origin = req.headers.origin;
   if (!isProduction || (origin && allowedOrigins.includes(origin))) {
     res.header('Access-Control-Allow-Origin', isProduction ? origin : '*');
   }
-  
+
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');
-  
+
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
   } else {
@@ -233,14 +233,14 @@ async function createSuperAdminIfNotExists() {
     logger.info(`Found ${users.length} users in database`);
     const existingSuperAdmin = users.find(user => user.role === "super_admin");
     logger.info("Checking for existing super admin account");
-    
+
     if (!existingSuperAdmin) {
       logger.info('Creating new secure super admin account...');
       // Use environment variables if provided, otherwise generate secure credentials
       const adminPassword = process.env.SUPER_ADMIN_PASSWORD || generateSecurePassword();
       const adminEmail = process.env.SUPER_ADMIN_EMAIL || "admin@rankitpro.com";
       const hashedPassword = await bcrypt.hash(adminPassword, 12);
-      
+
       await storage.createUser({
         username: "system_admin",
         email: adminEmail,
@@ -250,7 +250,7 @@ async function createSuperAdminIfNotExists() {
         stripeCustomerId: null,
         stripeSubscriptionId: null
       });
-      
+
       log("=====================================");
       log("SYSTEM ADMIN ACCOUNT CREATED");
       log("=====================================");
@@ -271,7 +271,7 @@ async function createSuperAdminIfNotExists() {
   try {
     const env = validateEnvironment();
     const features = getFeatureFlags();
-    
+
     logger.info('🚀 Starting Rank It Pro SaaS Platform');
     const enabledFeatures = Object.entries(features).filter(([_, enabled]) => enabled).map(([name]) => name).join(", ") || "none";
     logger.info(`Features enabled: ${enabledFeatures}`);
@@ -284,14 +284,14 @@ async function createSuperAdminIfNotExists() {
   let dbConnected = false;
   let retryCount = 0;
   const maxRetries = 5;
-  
+
   while (!dbConnected && retryCount < maxRetries) {
     try {
       logger.info(`Database connection attempt ${retryCount + 1}/${maxRetries}`);
-      
+
       // Import storage to trigger connection initialization
       const { storage } = await import("./storage");
-      
+
       // Test the connection with a simple query
       const users = await storage.getAllUsers();
       logger.info("✅ Database connection test successful");
@@ -300,14 +300,14 @@ async function createSuperAdminIfNotExists() {
       retryCount++;
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error(`Database connection attempt ${retryCount}/${maxRetries} failed`, { errorMessage });
-      
+
       // Check if it's a connection-related error
       const isConnectionError = errorMessage.includes('connect') || 
                               errorMessage.includes('timeout') ||
                               errorMessage.includes('SSL') ||
                               errorMessage.includes('ENOTFOUND') ||
                               errorMessage.includes('ECONNREFUSED');
-      
+
       if (retryCount < maxRetries && isConnectionError) {
         const delay = Math.min(retryCount * 3000, 15000); // 3s, 6s, 9s, 12s, 15s
         logger.info(`🔄 Connection error detected. Retrying in ${delay}ms...`);
@@ -328,24 +328,24 @@ async function createSuperAdminIfNotExists() {
       }
     }
   }
-  
+
   // Admin setup is now handled via one-time setup page
   // await createSuperAdminIfNotExists();
-  
+
   // Initialize Vite or static serving
   await initializeViteOrStatic();
-  
+
   // Email service is automatically initialized in the Resend service
   if (emailService.isEnabled()) {
     log("Email service initialized successfully", "info");
   } else {
     log("Email service initialization failed - notifications will be disabled", "warn");
   }
-  
+
   // Initialize memory optimizer
   const memoryOptimizer = MemoryOptimizer.getInstance();
   memoryOptimizer.initialize();
-  
+
   // Serve static uploaded files with proper headers
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
     setHeaders: (res, path) => {
@@ -353,7 +353,7 @@ async function createSuperAdminIfNotExists() {
       res.setHeader('Cache-Control', 'public, max-age=86400');
     }
   }));
-  
+
   // Initialize error monitoring system
   errorMonitor.setupRoutes(app);
   logError('Application startup initiated', 'info');
@@ -372,7 +372,7 @@ async function createSuperAdminIfNotExists() {
 
   // Create server before setting up Vite
   const server = createServer(app);
-  
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
@@ -380,7 +380,7 @@ async function createSuperAdminIfNotExists() {
     await setupVite(app, server);
   } else {
     serveStatic(app);
-    
+
     // Serve admin access page at /admin-access
     app.get('/admin-access', (req, res) => {
       res.sendFile(__dirname + '/../public/admin-access.html');
@@ -392,7 +392,7 @@ async function createSuperAdminIfNotExists() {
 
   // Use Render's PORT environment variable in production, fallback to 5000 for development
   const port = process.env.PORT || 5000;
-  
+
   // Add error handling for port conflicts
   server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
@@ -410,7 +410,7 @@ async function createSuperAdminIfNotExists() {
       process.exit(1);
     }
   });
-  
+
   server.listen({
     port,
     host: "0.0.0.0",
@@ -419,3 +419,119 @@ async function createSuperAdminIfNotExists() {
     logger.info("📱 Ready to accept connections");
   });
 })();
+import express from 'express';
+import session from 'express-session';
+import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
+import { createServer } from 'http';
+import { WebSocketServer } from 'ws';
+import WebSocket from 'ws';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import { logger } from './services/logger';
+const app = express();
+const PORT = process.env.PORT || 5000;
+const server = createServer(app);
+
+// Security middleware with proper WebSocket support
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "ws:", "wss:", `ws://localhost:${PORT}`, `wss://localhost:${PORT}`],
+      fontSrc: ["'self'", "https:", "data:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'self'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false
+}));
+// WebSocket server for real-time features
+const wss = new WebSocketServer({ 
+  server: server,
+  path: '/ws',
+  perMessageDeflate: false 
+});
+
+const activeConnections = new Map<number, WebSocket>();
+
+wss.on('connection', (ws, req) => {
+  logger.info('WebSocket client connected', { 
+    ip: req.socket.remoteAddress,
+    userAgent: req.headers['user-agent']
+  });
+
+  let userId: number | null = null;
+
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message.toString());
+
+      if (data.type === 'auth' && data.userId) {
+        userId = data.userId;
+        activeConnections.set(userId, ws);
+
+        ws.send(JSON.stringify({
+          type: 'auth_success',
+          message: 'WebSocket authenticated'
+        }));
+      }
+
+    } catch (error) {
+      logger.warn('WebSocket message parse error', { error });
+    }
+  });
+
+  ws.on('close', () => {
+    if (userId) {
+      activeConnections.delete(userId);
+    }
+    logger.info('WebSocket client disconnected', { userId });
+  });
+
+  ws.on('error', (error) => {
+    logger.error('WebSocket error', { error, userId });
+    if (userId) {
+      activeConnections.delete(userId);
+    }
+  });
+
+  // Send ping every 30 seconds to keep connection alive
+  const pingInterval = setInterval(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.ping();
+    } else {
+      clearInterval(pingInterval);
+    }
+  }, 30000);
+
+  ws.on('close', () => clearInterval(pingInterval));
+});
+
+// Function to broadcast notifications to specific users
+export function broadcastNotification(userId: number, notification: any) {
+  const ws = activeConnections.get(userId);
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    try {
+      ws.send(JSON.stringify({
+        type: 'notification',
+        notification
+      }));
+    } catch (error) {
+      logger.error('Failed to send WebSocket notification', { error, userId });
+      activeConnections.delete(userId);
+    }
+  }
+}
+// Start server with WebSocket support
+server.listen(PORT, '0.0.0.0', () => {
+  logger.info(`Server running on http://0.0.0.0:${PORT}`);
+  logger.info(`WebSocket server available at ws://0.0.0.0:${PORT}/ws`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});

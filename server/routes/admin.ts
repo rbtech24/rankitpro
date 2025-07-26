@@ -24,7 +24,7 @@ router.get('/system-health', isSuperAdmin, async (req, res) => {
     const memoryUsage = process.memoryUsage();
     const usedMemoryMB = Math.round(memoryUsage.heapUsed / 1024 / 1024);
     const totalMemoryMB = Math.round(memoryUsage.heapTotal / 1024 / 1024);
-    
+
     // Show actual memory usage in MB instead of percentage
     const memoryStatus = `${usedMemoryMB}MB`;
     const memoryColor = usedMemoryMB > 200 ? 'bg-red-100 text-red-800' : 
@@ -132,12 +132,12 @@ router.get('/financial/metrics', isSuperAdmin, async (req, res) => {
   try {
     const companies = await storage.getAllCompanies();
     const subscriptionPlans = await storage.getAllSubscriptionPlans();
-    
+
     // Calculate real financial metrics from database
     let totalRevenue = 0;
     let monthlyRecurringRevenue = 0;
     const activeCompanies = companies.filter(c => c.isActive !== false);
-    
+
     // Calculate revenue from subscription plans
     for (const company of activeCompanies) {
       const plan = subscriptionPlans.find(p => p.name.toLowerCase() === company.plan?.toLowerCase());
@@ -147,7 +147,7 @@ router.get('/financial/metrics', isSuperAdmin, async (req, res) => {
         monthlyRecurringRevenue += planPrice;
       }
     }
-    
+
     const metrics = {
       totalRevenue,
       monthlyRecurringRevenue,
@@ -161,7 +161,7 @@ router.get('/financial/metrics', isSuperAdmin, async (req, res) => {
       refunds: 0, // Real refunds would come from Stripe data
       netRevenue: totalRevenue // Net revenue after processing fees
     };
-    
+
     res.json(metrics);
   } catch (error) {
     logger.error('Error fetching financial metrics', { errorMessage: error instanceof Error ? error.message : String(error) });
@@ -173,18 +173,18 @@ router.get('/financial/revenue-trends', isSuperAdmin, async (req, res) => {
   try {
     const companies = await storage.getAllCompanies();
     const subscriptionPlans = await storage.getAllSubscriptionPlans();
-    
+
     // Calculate real revenue trends based on company creation dates
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const currentYear = new Date().getFullYear();
-    
+
     const revenueData = months.map((month, index) => {
       const monthDate = new Date(currentYear, index, 1);
       const companiesCreatedInMonth = companies.filter(company => {
         const createdDate = new Date(company.createdAt);
         return createdDate.getFullYear() === currentYear && createdDate.getMonth() === index;
       });
-      
+
       let monthlyRevenue = 0;
       companiesCreatedInMonth.forEach(company => {
         const plan = subscriptionPlans.find(p => p.name.toLowerCase() === company.plan?.toLowerCase());
@@ -192,7 +192,7 @@ router.get('/financial/revenue-trends', isSuperAdmin, async (req, res) => {
           monthlyRevenue += parseFloat(plan.price.toString());
         }
       });
-      
+
       return {
         month,
         revenue: monthlyRevenue,
@@ -201,7 +201,7 @@ router.get('/financial/revenue-trends', isSuperAdmin, async (req, res) => {
         churn: 0 // Real churn data would require tracking subscription cancellations
       };
     });
-    
+
     res.json(revenueData);
   } catch (error) {
     logger.error('Error fetching revenue trends', { errorMessage: error instanceof Error ? error.message : String(error) });
@@ -214,12 +214,12 @@ router.get('/financial/payments', isSuperAdmin, async (req, res) => {
     const companies = await storage.getAllCompanies();
     const subscriptionPlans = await storage.getAllSubscriptionPlans();
     const limit = parseInt(req.query.limit as string) || 50;
-    
+
     // Generate payment records from actual company data
     const payments = companies.slice(0, limit).map((company) => {
       const plan = subscriptionPlans.find(p => p.name.toLowerCase() === company.plan?.toLowerCase());
       const planPrice = plan ? parseFloat(plan.price.toString()) : 97;
-      
+
       return {
         id: `payment_${company.id}`,
         companyName: company.name,
@@ -230,7 +230,7 @@ router.get('/financial/payments', isSuperAdmin, async (req, res) => {
         subscriptionPlan: company.plan || 'starter'
       };
     });
-    
+
     res.json(payments);
   } catch (error) {
     logger.error('Error fetching payments', { errorMessage: error instanceof Error ? error.message : String(error) });
@@ -242,12 +242,12 @@ router.get('/financial/subscription-breakdown', isSuperAdmin, async (req, res) =
   try {
     const companies = await storage.getAllCompanies();
     const subscriptionPlans = await storage.getAllSubscriptionPlans();
-    
+
     // Calculate real subscription breakdown from database
     const subscriptionBreakdown = subscriptionPlans.map((plan, index) => {
       const companiesOnPlan = companies.filter(c => c.plan?.toLowerCase() === plan.name.toLowerCase());
       const planPrice = parseFloat(plan.price.toString());
-      
+
       return {
         planName: plan.name,
         subscribers: companiesOnPlan.length,
@@ -256,7 +256,7 @@ router.get('/financial/subscription-breakdown', isSuperAdmin, async (req, res) =
         color: ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'][index % 5]
       };
     });
-    
+
     res.json(subscriptionBreakdown);
   } catch (error) {
     logger.error('Error fetching subscription breakdown', { errorMessage: error instanceof Error ? error.message : String(error) });
@@ -268,18 +268,18 @@ router.get('/financial/export', isSuperAdmin, async (req, res) => {
   try {
     const companies = await storage.getAllCompanies();
     const subscriptionPlans = await storage.getAllSubscriptionPlans();
-    
+
     // Generate CSV export from real data
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename=financial-data.csv');
-    
+
     let csvData = 'Date,Company,Plan,Amount,Status\n';
     companies.forEach(company => {
       const plan = subscriptionPlans.find(p => p.name.toLowerCase() === company.plan?.toLowerCase());
       const planPrice = plan ? parseFloat(plan.price.toString()) : 0;
       csvData += `${company.createdAt.split('T')[0]},${company.name},${company.plan || 'No Plan'},$${planPrice},Active\n`;
     });
-    
+
     res.send(csvData);
   } catch (error) {
     logger.error('Error exporting financial data', { errorMessage: error instanceof Error ? error.message : String(error) });
@@ -377,19 +377,19 @@ router.post('/initialize-plans', isSuperAdmin, async (req, res) => {
 router.get('/subscription-plans', isSuperAdmin, async (req, res) => {
   try {
     const plans = await storage.getSubscriptionPlans();
-    
+
     // Add subscriber count and revenue for each plan
     const plansWithStats = await Promise.all(plans.map(async (plan) => {
       const subscriberCount = await storage.getSubscriberCountForPlan(plan.id);
       const monthlyRevenue = await storage.getMonthlyRevenueForPlan(plan.id);
-      
+
       return {
         ...plan,
         subscriberCount,
         monthlyRevenue
       };
     }));
-    
+
     res.json(plansWithStats);
   } catch (error) {
     logger.error("Unhandled error occurred");
@@ -401,7 +401,7 @@ router.get('/subscription-plans', isSuperAdmin, async (req, res) => {
 router.post('/subscription-plans', isSuperAdmin, async (req, res) => {
   try {
     logger.info("Converted logger call");
-    
+
     // Validate the request data - convert price to string
     const requestData = {
       ...req.body,
@@ -409,7 +409,7 @@ router.post('/subscription-plans', isSuperAdmin, async (req, res) => {
     };
     const validatedData = insertSubscriptionPlanSchema.parse(requestData);
     logger.info('Validated data:', { validatedData });
-    
+
     // Create Stripe product and price
     const stripeProduct = await stripe.products.create({
       name: validatedData.name,
@@ -450,7 +450,7 @@ router.put('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
   try {
     const planId = parseInt(req.params.id);
     const validatedData = insertSubscriptionPlanSchema.parse(req.body);
-    
+
     const existingPlan = await storage.getSubscriptionPlan(planId);
     if (!existingPlan) {
       return res.status(404).json({ message: 'Subscription plan not found' });
@@ -477,7 +477,7 @@ router.put('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
 router.delete('/subscription-plans/:id', isSuperAdmin, async (req, res) => {
   try {
     const planId = parseInt(req.params.id);
-    
+
     const existingPlan = await storage.getSubscriptionPlan(planId);
     if (!existingPlan) {
       return res.status(404).json({ message: 'Subscription plan not found' });
@@ -571,18 +571,18 @@ router.get('/financial/export', isSuperAdmin, async (req, res) => {
   try {
     const period = req.query.period as string || '12months';
     const format = req.query.format as string || 'csv';
-    
+
     const data = await storage.getFinancialExportData(period);
-    
+
     if (format === 'csv') {
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename="financial-export-${period}.csv"`);
-      
+
       // Convert to CSV format
       const headers = Object.keys(data[0] || {}).join(',');
       const rows = data.map(row => Object.values(row).join(','));
       const csv = [headers, ...rows].join('\n');
-      
+
       res.send(csv);
     } else {
       res.json(data);
@@ -596,10 +596,10 @@ router.get('/financial/export', isSuperAdmin, async (req, res) => {
 // Webhook for Stripe events
 router.post('/stripe/webhook', async (req, res) => {
   const sig = req.headers['stripe-signature'] as string;
-  
+
   try {
     const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
-    
+
     switch (event.type) {
       case 'payment_intent.succeeded':
         await storage.handleSuccessfulPayment(event.data.object);
@@ -619,7 +619,7 @@ router.post('/stripe/webhook', async (req, res) => {
       default:
         logger.info("Unhandled event type ", {});
     }
-    
+
     res.json({ received: true });
   } catch (error) {
     logger.error("Unhandled error occurred");
@@ -704,11 +704,11 @@ router.get('/recent-activities', isSuperAdmin, async (req, res) => {
 router.get('/companies', isSuperAdmin, async (req, res) => {
   try {
     const companies = await storage.getAllCompanies();
-    
+
     // Add status calculation based on trial period and subscription
     const companiesWithStatus = companies.map(company => {
       let status = 'Inactive';
-      
+
       // Check if company has active trial period
       if (company.trialEndDate && new Date(company.trialEndDate) > new Date()) {
         status = 'Active';
@@ -717,13 +717,13 @@ router.get('/companies', isSuperAdmin, async (req, res) => {
       else if (company.stripeSubscriptionId) {
         status = 'Active';
       }
-      
+
       return {
         ...company,
         status
       };
     });
-    
+
     res.json(companiesWithStatus);
   } catch (error) {
     logger.error("Unhandled error occurred");
@@ -778,7 +778,7 @@ router.get('/analytics/dashboard', isSuperAdmin, async (req, res) => {
 router.get('/users', isSuperAdmin, async (req, res) => {
   try {
     const allUsers = await storage.getAllUsers();
-    
+
     // Add additional user information
     const usersWithStats = allUsers.map(user => ({
       ...user,
@@ -799,7 +799,7 @@ router.get('/users', isSuperAdmin, async (req, res) => {
 router.get('/companies/detailed', isSuperAdmin, async (req, res) => {
   try {
     const companies = await storage.getAllCompanies();
-    
+
     // Add detailed metrics for each company
     const companiesWithMetrics = await Promise.all(
       companies.map(async (company) => {
@@ -832,7 +832,7 @@ router.get('/companies/detailed', isSuperAdmin, async (req, res) => {
 // API Endpoint Testing Tool
 router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
   const testResults = [];
-  
+
   // Test all admin endpoints
   const endpoints = [
     { path: '/api/admin/system-stats', method: 'GET', description: 'System statistics and metrics' },
@@ -852,7 +852,7 @@ router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
     try {
       let result;
       const startTime = Date.now();
-      
+
       switch (endpoint.path) {
         case '/api/admin/system-stats':
           // Test system stats endpoint
@@ -924,9 +924,9 @@ router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
         default:
           result = { error: 'Endpoint not implemented in test' };
       }
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       testResults.push({
         endpoint: endpoint.path,
         method: endpoint.method,
@@ -936,7 +936,7 @@ router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
         dataSize: JSON.stringify(result).length,
         sampleData: typeof result === 'object' ? Object.keys(result) : result
       });
-      
+
     } catch (error) {
       testResults.push({
         endpoint: endpoint.path,
