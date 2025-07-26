@@ -114,7 +114,14 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
   }, [queryClient]);
 
   const handleUpgrade = () => {
+    console.log('Navigating to billing page...');
     setLocation('/billing');
+    // Also try window location as backup
+    if (window.location.pathname !== '/billing') {
+      setTimeout(() => {
+        window.location.href = '/billing';
+      }, 100);
+    }
   };
 
   const handleLogout = () => {

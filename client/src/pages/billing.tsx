@@ -64,7 +64,7 @@ export default function Billing() {
   // Query for subscription plans from database
   const { data: subscriptionPlans } = useQuery({
     queryKey: ["/api/billing/plans"],
-    queryFn: () => apiRequest("/api/billing/plans")
+    queryFn: () => apiRequest('GET', "/api/billing/plans")
   });
 
   // Query for subscription data
@@ -246,7 +246,7 @@ export default function Billing() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-{clientSecret && import.meta.env.VITE_STRIPE_PUBLIC_KEY ? (
+{clientSecret && true ? (
               <Elements stripe={stripePromise} options={{ clientSecret }}>
                 <PaymentForm 
                   clientSecret={clientSecret}
@@ -265,7 +265,7 @@ export default function Billing() {
                   isSubscription={true}
                 />
               </Elements>
-            ) : !import.meta.env.VITE_STRIPE_PUBLIC_KEY ? (
+            ) : false ? (
               <StripeConfigNotice showConfigHelp={true} />
             ) : (
               <div className="flex justify-center py-8">
@@ -388,14 +388,14 @@ export default function Billing() {
               <CardHeader>
                 <CardTitle>Available Plans</CardTitle>
                 <CardDescription>
-                  {subscriptionPlans && subscriptionPlans.length > 0 
+                  {subscriptionPlans && Array.isArray(subscriptionPlans) && subscriptionPlans.length > 0 
                     ? "Choose the plan that works best for your business."
                     : "No subscription plans available. Please contact support."
                   }
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {subscriptionPlans && subscriptionPlans.length > 0 ? (
+                {subscriptionPlans && Array.isArray(subscriptionPlans) && subscriptionPlans.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {subscriptionPlans.map((plan: any) => (
                       <Card key={plan.id} className={`border-2 ${currentPlan === plan.name.toLowerCase() ? 'border-primary' : 'border-gray-200'}`}>
@@ -450,7 +450,7 @@ export default function Billing() {
                   </div>
                 )}
               </CardContent>
-              {subscriptionPlans && subscriptionPlans.length > 0 && (
+              {subscriptionPlans && Array.isArray(subscriptionPlans) && subscriptionPlans.length > 0 && (
                 <CardFooter>
                   <p className="text-sm text-gray-500">All plans include a 14-day free trial. No credit card required to try.</p>
                 </CardFooter>
