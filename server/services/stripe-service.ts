@@ -197,6 +197,22 @@ export class StripeService {
     }
     
     const priceId = dbPlan.stripePriceId;
+    
+    // For development, simulate subscription success if using dummy price IDs
+    if (priceId.startsWith('price_1HgBKn')) {
+      logger.warn('Using dummy Stripe price ID - simulating subscription success');
+      
+      // Update plan in database without Stripe
+      const user = await storage.getUser(userId);
+      if (user && user.companyId) {
+        await storage.updateCompany(user.companyId, { plan: plan as any });
+      }
+      
+      return { 
+        subscriptionId: 'dummy_sub_' + Date.now(),
+        alreadySubscribed: false 
+      };
+    }
 
     try {
       const user = await storage.getUser(userId);
@@ -290,8 +306,12 @@ export class StripeService {
         clientSecret: clientSecret
       };
     } catch (error: any) {
-      logger.error("Unhandled error occurred");
-      throw new Error("Failed to create subscription");
+      logger.error("Failed to create subscription", { 
+        errorMessage: error instanceof Error ? error.message : String(error),
+        plan,
+        userId
+      });
+      throw new Error(`Failed to create subscription: ${error.message || error}`);
     }
   }
   

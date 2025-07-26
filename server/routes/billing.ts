@@ -273,10 +273,14 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
       subscriptionId: result.subscriptionId
     });
   } catch (error: any) {
-    logger.error("Unhandled error occurred");
+    logger.error("Failed to create subscription", { 
+      errorMessage: error instanceof Error ? error.message : String(error),
+      plan: req.body.plan,
+      userId: req.user?.id
+    });
     res.status(500).json({ 
       error: 'Failed to create or update subscription',
-      message: error.message
+      message: error.message || error
     });
   }
 });
