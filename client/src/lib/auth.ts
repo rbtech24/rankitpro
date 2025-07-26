@@ -39,9 +39,15 @@ export async function login(credentials: LoginCredentials): Promise<AuthState> {
   try {
     console.log("Attempting login for:", credentials.email);
     const response = await apiRequest("POST", "/api/auth/login", credentials);
-    const user = await response.json();
-    console.log("Login response received:", user);
+    const data = await response.json();
+    console.log("Login response received:", data);
     
+    // Handle already logged in scenario
+    if (data.alreadyLoggedIn) {
+      throw new Error(data.message || "You're already logged in! Please log out first if you need to switch accounts.");
+    }
+    
+    const user = data.user || data;
     let company: Company | null = null;
     
     // Get company data if user has companyId

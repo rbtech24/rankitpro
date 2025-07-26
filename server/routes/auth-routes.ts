@@ -37,6 +37,28 @@ router.post('/login',
     try {
       const { email, password, rememberMe } = req.body;
       
+      // Check if user is already logged in
+      if (req.session?.userId) {
+        const existingUser = await storage.getUser(req.session.userId);
+        if (existingUser) {
+          logger.info('Login attempt with existing session', { 
+            email, 
+            existingUserId: req.session.userId,
+            existingUserEmail: existingUser.email,
+            ip: req.ip 
+          });
+          
+          return res.status(200).json({
+            message: "You're already logged in! If you need to switch accounts, please log out first.",
+            alreadyLoggedIn: true,
+            currentUser: {
+              email: existingUser.email,
+              role: existingUser.role
+            }
+          });
+        }
+      }
+      
       logger.info('Login attempt initiated', { 
         email, 
         ip: req.ip,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,6 +19,8 @@ import {
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import { AlertCircle } from "lucide-react";
+import { apiRequest } from "../lib/queryClient";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -30,6 +32,8 @@ type LoginFormValues = z.infer<typeof formSchema>;
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [showAlreadyLoggedIn, setShowAlreadyLoggedIn] = useState(false);
+  const [currentUserInfo, setCurrentUserInfo] = useState<{email: string, role: string} | null>(null);
   
   // Get URL parameters
   const params = new URLSearchParams(window.location.search);
@@ -81,15 +85,58 @@ export default function Login() {
     },
     onError: (error: Error) => {
       console.error("Login error:", error);
+      
+      // Check if this is an "already logged in" error
+      const isAlreadyLoggedIn = error.message.includes("already logged in") || 
+                               error.message.includes("Please log out first");
+      
+      if (isAlreadyLoggedIn) {
+        setShowAlreadyLoggedIn(true);
+        // Try to extract current user info from localStorage
+        try {
+          const storedUser = localStorage.getItem('authUser');
+          if (storedUser) {
+            const user = JSON.parse(storedUser);
+            setCurrentUserInfo({ email: user.email, role: user.role });
+          }
+        } catch (e) {
+          // Ignore parsing errors
+        }
+      }
+      
       toast({
-        title: "Login Failed",
+        title: isAlreadyLoggedIn ? "Already Signed In" : "Login Failed",
         description: error.message || "Please check your credentials and try again.",
-        variant: "destructive",
+        variant: isAlreadyLoggedIn ? "default" : "destructive",
       });
     },
   });
   
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await apiRequest("POST", "/api/auth/logout");
+      localStorage.removeItem('authUser');
+      localStorage.removeItem('authCompany');
+      localStorage.removeItem('isAuthenticated');
+      setShowAlreadyLoggedIn(false);
+      setCurrentUserInfo(null);
+      toast({
+        title: "Logged Out",
+        description: "You've been successfully logged out. You can now sign in with a different account.",
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Logout Error",
+        description: "There was an issue logging you out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const onSubmit = (values: LoginFormValues) => {
+    setShowAlreadyLoggedIn(false); // Reset the state
     loginMutation.mutate(values);
   };
   
@@ -107,7 +154,40 @@ export default function Login() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isAdmin && (
+            {showAlreadyLoggedIn && (
+              <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-md">
+                <h4 className="text-sm font-medium text-orange-800 mb-2 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  Already Signed In
+                </h4>
+                <div className="text-sm text-orange-700 space-y-2">
+                  {currentUserInfo && (
+                    <p>You're currently signed in as <strong>{currentUserInfo.email}</strong> ({currentUserInfo.role})</p>
+                  )}
+                  <p>To sign in with a different account, please log out first.</p>
+                  <div className="flex space-x-2 mt-3">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleLogout}
+                      className="text-orange-700 border-orange-300 hover:bg-orange-100"
+                    >
+                      Log Out & Continue
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setLocation('/dashboard')}
+                      className="text-orange-700 border-orange-300 hover:bg-orange-100"
+                    >
+                      Go to Dashboard
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {isAdmin && !showAlreadyLoggedIn && (
               <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
                 <h4 className="text-sm font-medium text-blue-800 mb-2">
                   Admin Demo Account
