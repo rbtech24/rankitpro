@@ -398,27 +398,54 @@ export default function Billing() {
                   </div>
                 </div>
                 
-                <PaymentForm 
-                  onSuccess={() => {
-                    setClientSecret(null);
-                    toast({
-                      title: "Subscription Updated",
-                      description: "Your subscription has been successfully updated!",
-                      variant: "default",
-                    });
-                    queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
-                    queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
-                    setSelectedPlan(null);
-                  }}
-                  onError={(error) => {
-                    toast({
-                      title: "Payment Failed",
-                      description: error,
-                      variant: "destructive",
-                    });
-                  }}
-                  onCancel={() => setClientSecret(null)}
-                />
+                {/* Development Mode: Simple Payment Button */}
+                {process.env.NODE_ENV !== 'production' ? (
+                  <div className="space-y-4">
+                    <div className="p-4 border rounded-md bg-yellow-50 border-yellow-200">
+                      <p className="text-sm text-yellow-800">
+                        <strong>Development Mode:</strong> Click the button below to simulate payment completion.
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={() => {
+                        setClientSecret(null);
+                        toast({
+                          title: "Plan Updated",
+                          description: "Your subscription plan has been updated successfully (development mode)!",
+                          variant: "default",
+                        });
+                        queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
+                        queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+                        setSelectedPlan(null);
+                      }}
+                      className="w-full"
+                    >
+                      Complete Subscription Update
+                    </Button>
+                  </div>
+                ) : (
+                  <PaymentForm 
+                    onSuccess={() => {
+                      setClientSecret(null);
+                      toast({
+                        title: "Subscription Updated",
+                        description: "Your subscription has been successfully updated!",
+                        variant: "default",
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
+                      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+                      setSelectedPlan(null);
+                    }}
+                    onError={(error) => {
+                      toast({
+                        title: "Payment Failed",
+                        description: error,
+                        variant: "destructive",
+                      });
+                    }}
+                    onCancel={() => setClientSecret(null)}
+                  />
+                )}
               </div>
             </Elements>
           ) : clientSecret ? (
