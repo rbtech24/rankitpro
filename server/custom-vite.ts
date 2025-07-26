@@ -89,23 +89,25 @@ export async function setupVite(app: Express, server: Server) {
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
-    // Skip API routes, uploads, and static assets
+    // Skip API routes, uploads, static assets, and Vite internals
     if (url.startsWith('/api/') || 
         url.startsWith('/uploads/') || 
         url.includes('.') ||
-        url.startsWith('/@')) {
+        url.startsWith('/@') ||
+        url.startsWith('/__vite')) {
       return next();
     }
 
     try {
       const clientTemplate = path.resolve(__dirname, "..", "client", "index.html");
 
-      // always reload the index.html file from disk incase it changes
+      // Always reload the index.html file from disk in case it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
+      console.error('Vite SPA fallback error:', e);
       next(e);
     }
   });
@@ -124,14 +126,24 @@ export function serveStatic(app: Express) {
 
   // Enhanced SPA fallback for production - serve index.html for client-side routes
   app.use("*", (req, res, next) => {
-    // Skip API routes, uploads, and static assets
+    // Skip API routes, uploads, static assets, and known backend routes
     if (req.path.startsWith('/api/') || 
         req.path.startsWith('/uploads/') || 
-        req.path.includes('.')) {
+        req.path.includes('.') ||
+        req.path.startsWith('/@') ||
+        req.path.startsWith('/__vite')) {
       return next();
     }
     
+    // Log SPA fallback for debugging
+    console.log(`SPA fallback serving index.html for: ${req.path}`);
+    
     // Serve index.html for all client-side routes
-    res.sendFile(path.resolve(distPath, "index.html"));
+    res.sendFile(path.resolve(distPath, "index.html"), (err) => {
+      if (err) {
+        console.error('Error serving SPA fallback:', err);
+        next(err);
+      }
+    });
   });
 }
