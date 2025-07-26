@@ -65,28 +65,7 @@ router.post('/login',
         userAgent: req.get('User-Agent')
       });
 
-      // Check for super admin hardcoded credentials first
-      
-      if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
-        // Create session for super admin
-        req.session.userId = 1;
-        req.session.cookie.maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 4 * 60 * 60 * 1000;
-        
-        logger.info('Super admin login successful', { email, ip: req.ip });
-        
-        return res.json({
-          user: {
-            id: 1,
-            email: "bill@mrsprinklerrepair.com",
-            username: "admin",
-            role: "super_admin",
-            companyId: 1,
-            active: true
-          }
-        });
-      }
-
-      // Get user by email for regular users
+      // Get user by email
       const user = await storage.getUserByEmail(email);
       if (!user) {
         logger.warn('Login failed - user not found', { email, ip: req.ip });
