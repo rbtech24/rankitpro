@@ -64,11 +64,11 @@
       "aa9d024e",
       {
         "id": "aa9d024e",
-        "timestamp": "2025-07-26T05:05:28.538Z",
+        "timestamp": "2025-07-26T07:46:08.608Z",
         "level": {},
         "message": "Uncaught Exception",
         "resolved": false,
-        "count": 3
+        "count": 4
       }
     ],
     [
@@ -134,7 +134,7 @@
     ]
   ],
   "stats": {
-    "totalErrors": 440,
+    "totalErrors": 441,
     "criticalErrors": 0,
     "errorsByHour": {
       "0": 17,
@@ -144,7 +144,7 @@
       "4": 5,
       "5": 19,
       "6": 22,
-      "7": 8,
+      "7": 9,
       "8": 9,
       "9": 6,
       "10": 6,
@@ -167,16 +167,16 @@
       "/api/auth/login": 3
     },
     "errorsByType": {
-      "General": 440
+      "General": 441
     },
     "lastError": {
-      "id": "bfdbcb60",
-      "timestamp": "2025-07-26T06:46:08.263Z",
-      "level": "info",
-      "message": "Application startup initiated",
+      "id": "aa9d024e",
+      "timestamp": "2025-07-26T07:46:08.608Z",
+      "level": {},
+      "message": "Uncaught Exception",
       "resolved": false,
-      "count": 351
+      "count": 4
     }
   },
-  "lastSaved": "2025-07-26T06:46:08.263Z"
+  "lastSaved": "2025-07-26T07:46:08.609Z"
 }
