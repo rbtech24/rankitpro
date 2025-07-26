@@ -207,11 +207,14 @@ export default function AdminLayout({ children, currentPath }: AdminLayoutProps)
 
         {/* Footer */}
         <div 
-          className="fixed bottom-0 bg-gray-900 text-white z-30 hidden md:block"
+          className="bg-gray-900 text-white z-30 hidden md:block"
           style={{ 
+            position: 'fixed',
+            bottom: '0px',
             left: '256px',
             right: '0px',
-            width: 'calc(100vw - 256px)'
+            height: 'auto',
+            zIndex: 30
           }}
         >
           <div className="px-6 py-3">
