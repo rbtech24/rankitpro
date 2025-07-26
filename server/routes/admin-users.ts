@@ -97,7 +97,7 @@ router.post('/',
       const newAdmin = await storage.createUser({
         email,
         username,
-        passwordHash: hashedPassword,
+        password: hashedPassword,
         role,
         active: true,
         companyId: null // Admin users are not tied to specific companies
@@ -112,7 +112,7 @@ router.post('/',
       });
 
       // Return user without password hash
-      const { passwordHash, ...adminResponse } = newAdmin;
+      const { password: _, ...adminResponse } = newAdmin;
       res.status(201).json(adminResponse);
 
     } catch (error) {
