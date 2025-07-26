@@ -20,15 +20,15 @@ router.get('/system-health', isSuperAdmin, async (req, res) => {
       databaseColor = 'bg-red-100 text-red-800';
     }
 
-    // Check memory usage (rough estimate)
+    // Check memory usage - show actual heap size instead of misleading percentage
     const memoryUsage = process.memoryUsage();
     const usedMemoryMB = Math.round(memoryUsage.heapUsed / 1024 / 1024);
     const totalMemoryMB = Math.round(memoryUsage.heapTotal / 1024 / 1024);
-    const memoryPercentage = Math.round((usedMemoryMB / totalMemoryMB) * 100);
     
-    const memoryStatus = memoryPercentage > 85 ? 'High' : memoryPercentage > 70 ? 'Moderate' : 'Good';
-    const memoryColor = memoryPercentage > 85 ? 'bg-red-100 text-red-800' : 
-                       memoryPercentage > 70 ? 'bg-yellow-100 text-yellow-800' : 
+    // Show actual memory usage in MB instead of percentage
+    const memoryStatus = `${usedMemoryMB}MB`;
+    const memoryColor = usedMemoryMB > 200 ? 'bg-red-100 text-red-800' : 
+                       usedMemoryMB > 100 ? 'bg-yellow-100 text-yellow-800' : 
                        'bg-green-100 text-green-800';
 
     const systemHealth = [
@@ -49,7 +49,7 @@ router.get('/system-health', isSuperAdmin, async (req, res) => {
       },
       {
         name: 'Memory Usage',
-        status: `${memoryPercentage}%`,
+        status: memoryStatus,
         color: memoryColor
       }
     ];
