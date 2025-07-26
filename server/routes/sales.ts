@@ -70,10 +70,12 @@ const createPayoutSchema = z.object({
 // Get all sales people with stats (super admin only)
 router.get('/people', isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
   try {
+    logger.info('Fetching sales people');
     const salesPeople = await storage.getAllSalesPeople();
+    logger.info('Sales people fetched successfully', { count: salesPeople.length });
     res.json(salesPeople);
   } catch (error: any) {
-    logger.error("Unhandled error occurred");
+    logger.error("Failed to fetch sales people", { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ error: 'Failed to fetch sales people' });
   }
 });
@@ -417,7 +419,7 @@ router.post('/payouts', isAuthenticated, isSuperAdmin, async (req: Request, res:
       amount: Math.round(totalAmount * 100), // Convert to cents
       currency: 'usd',
       destination: salesPerson.stripeAccountId,
-      description: `${baseUrl}/review/${reviewRequest.id}`,
+      description: `Commission payout for sales person ${salesPersonId}`,
     });
 
     // Record payout in database
@@ -521,22 +523,7 @@ router.get('/analytics', isAuthenticated, isSuperAdmin, async (req: Request, res
   }
 });
 
-// Get subscription plans for sales staff
-router.get('/subscription-plans', isAuthenticated, async (req: Request, res: Response) => {
-  try {
-    const user = (req as any).user;
-    
-    if (user.role !== 'sales_staff') {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-
-    const plans = await storage.getActiveSubscriptionPlans();
-    res.json(plans);
-  } catch (error: any) {
-    logger.error("Unhandled error occurred");
-    res.status(500).json({ error: 'Failed to fetch subscription plans' });
-  }
-});
+// This endpoint is handled above - removed duplicate
 
 // Connect Stripe account for sales person
 router.post('/connect-stripe', isAuthenticated, async (req: Request, res: Response) => {
@@ -564,8 +551,8 @@ router.post('/connect-stripe', isAuthenticated, async (req: Request, res: Respon
     // Create account link for onboarding
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: `${baseUrl}/review/${reviewRequest.id}`,
-      return_url: `${baseUrl}/review/${reviewRequest.id}`,
+      refresh_url: `${process.env.FRONTEND_URL || 'http://localhost:5000'}/sales-dashboard`,
+      return_url: `${process.env.FRONTEND_URL || 'http://localhost:5000'}/sales-dashboard`,
       type: 'account_onboarding',
     });
 

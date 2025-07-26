@@ -73,28 +73,28 @@ export default function SalesManagement() {
 
   const assignForm = useForm<AssignCustomerForm>();
 
-  // Queries
-  const { data: salesPeople, isLoading: loadingSalesPeople } = useQuery({
+  // Queries with proper default values
+  const { data: salesPeople = [], isLoading: loadingSalesPeople } = useQuery({
     queryKey: ['/api/sales/people'],
     enabled: user?.role === 'super_admin'
   });
 
-  const { data: analytics } = useQuery({
+  const { data: analytics = {} } = useQuery({
     queryKey: ['/api/sales/analytics'],
     enabled: user?.role === 'super_admin'
   });
 
-  const { data: pendingCommissions } = useQuery({
+  const { data: pendingCommissions = [] } = useQuery({
     queryKey: ['/api/sales/commissions/pending'],
     enabled: user?.role === 'super_admin'
   });
 
-  const { data: allPayouts } = useQuery({
+  const { data: allPayouts = [] } = useQuery({
     queryKey: ['/api/sales/payouts'],
     enabled: user?.role === 'super_admin'
   });
 
-  const { data: companies } = useQuery({
+  const { data: companies = [] } = useQuery({
     queryKey: ['/api/companies'],
     enabled: user?.role === 'super_admin'
   });
@@ -315,7 +315,7 @@ export default function SalesManagement() {
   }, 0) || 0;
 
   return (
-    <AdminLayout currentPath="/sales-management">
+    <AdminLayout>
       <div className="container mx-auto py-8 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
