@@ -143,10 +143,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Sidebar */}
         <aside className={`
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:translate-x-0 transition-transform duration-300 ease-in-out
-          fixed md:sticky top-[72px] left-0 z-40
-          w-80 h-[calc(100vh-72px)] bg-white border-r border-gray-200
-          overflow-y-auto
+          md:translate-x-0
+          fixed md:relative top-[72px] md:top-0 left-0 z-40
+          w-80 h-[calc(100vh-72px)] md:h-[calc(100vh-72px)] bg-white border-r border-gray-200
+          overflow-y-auto flex-shrink-0
         `}>
           <div className="p-6">
             <div className="space-y-8">
@@ -161,7 +161,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                         key={item.path}
                         onClick={() => {
                           setLocation(item.path);
-                          setSidebarOpen(false);
+                          // Only close sidebar on mobile
+                          if (window.innerWidth < 768) {
+                            setSidebarOpen(false);
+                          }
                         }}
                         className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-colors ${
                           currentPath === item.path
