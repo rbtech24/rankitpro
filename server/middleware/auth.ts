@@ -18,7 +18,7 @@ declare global {
 export const isAuthenticated = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   // Use session authentication as primary method
   const userId = req.session?.userId;
-  
+
   if (!userId) {
     logger.auth('Authentication failed - no session', undefined, undefined, {
       method: req.method,
@@ -28,7 +28,7 @@ export const isAuthenticated = asyncHandler(async (req: Request, res: Response, 
     res.setHeader('Content-Type', 'application/json');
     return res.status(401).json({ message: "Not authenticated" });
   }
-  
+
   const user = await storage.getUser(userId);
   if (!user) {
     logger.auth('Authentication failed - user not found', userId, undefined, {
@@ -50,7 +50,7 @@ export const isAuthenticated = asyncHandler(async (req: Request, res: Response, 
     res.setHeader('Content-Type', 'application/json');
     return res.status(401).json({ message: "Account is disabled" });
   }
-  
+
   req.user = user;
   next();
 });
@@ -65,7 +65,7 @@ export const isSuperAdmin = asyncHandler(async (req: Request, res: Response, nex
     });
     return res.status(401).json({ message: "Unauthorized" });
   }
-  
+
   const user = await storage.getUser(req.session.userId);
   if (!user) {
     logger.security('Super admin access denied - user not found', 'warn' as any, {
@@ -76,7 +76,7 @@ export const isSuperAdmin = asyncHandler(async (req: Request, res: Response, nex
     });
     return res.status(401).json({ message: "User not found" });
   }
-  
+
   if (user.role !== "super_admin") {
     logger.security('Super admin access denied - insufficient privileges', 'warn' as any, {
       userId: user.id,
@@ -87,7 +87,7 @@ export const isSuperAdmin = asyncHandler(async (req: Request, res: Response, nex
     });
     return res.status(403).json({ success: true });
   }
-  
+
   req.user = user;
   next();
 });
@@ -102,7 +102,7 @@ export const isCompanyAdmin = asyncHandler(async (req: Request, res: Response, n
     });
     return res.status(401).json({ message: "Unauthorized" });
   }
-  
+
   const user = await storage.getUser(req.session.userId);
   if (!user) {
     logger.security('Company admin access denied - user not found', 'warn' as any, {
@@ -113,7 +113,7 @@ export const isCompanyAdmin = asyncHandler(async (req: Request, res: Response, n
     });
     return res.status(401).json({ message: "User not found" });
   }
-  
+
   if (user.role !== "company_admin" && user.role !== "super_admin") {
     logger.security('Company admin access denied - insufficient privileges', 'warn' as any, {
       userId: user.id,
@@ -124,7 +124,7 @@ export const isCompanyAdmin = asyncHandler(async (req: Request, res: Response, n
     });
     return res.status(403).json({ success: true });
   }
-  
+
   req.user = user;
   next();
 });
@@ -135,24 +135,24 @@ export const belongsToCompany = (companyId: number) => {
     if (!req.session || !req.session.userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    
+
     try {
       const user = await storage.getUser(req.session.userId);
       if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
-      
+
       // Super admins can access any company
       if (user.role === "super_admin") {
         req.user = user;
         return next();
       }
-      
+
       // Check if user belongs to the specified company
       if (user.companyId !== companyId) {
         return res.status(403).json({ success: true });
       }
-      
+
       req.user = user;
       next();
     } catch (error) {

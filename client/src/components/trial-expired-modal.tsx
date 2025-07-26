@@ -51,6 +51,17 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Get current user to check role
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/me'],
+    retry: false,
+  });
+
+  // Don't show modal for super admins
+  if (user?.role === 'super_admin') {
+    return null;
+  }
+
   // Debug current step changes
   useEffect(() => {
     console.log('Trial Modal - Current step changed to:', currentStep);

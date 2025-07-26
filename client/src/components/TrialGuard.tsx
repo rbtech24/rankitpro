@@ -52,16 +52,19 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
 
   // Skip trial enforcement for super admins - they have system-wide access
   if (user.role === 'super_admin') {
+    console.log('Super admin detected - skipping trial enforcement');
     return <>{children}</>;
   }
 
   // Only enforce for company admins and technicians
   if (user.role !== 'company_admin' && user.role !== 'technician') {
+    console.log('Non-company role detected - skipping trial enforcement:', user.role);
     return <>{children}</>;
   }
 
   // Skip trial enforcement if user has no company (shouldn't happen for company roles)
   if (!user.companyId) {
+    console.log('No company ID found - skipping trial enforcement');
     return <>{children}</>;
   }
 
@@ -69,9 +72,10 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
   const { data: trialStatus, error } = useQuery<TrialStatus>({
     queryKey: ['/api/trial/status'],
     retry: false,
-    refetchInterval: 15000, // Check every 15 seconds
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
+    refetchInterval: user?.role === 'super_admin' ? false : 15000, // Don't poll for super admins
+    refetchOnWindowFocus: user?.role !== 'super_admin',
+    refetchOnMount: user?.role !== 'super_admin',
+    enabled: user?.role !== 'super_admin' && user?.role === 'company_admin' || user?.role === 'technician',
   });
 
   // Monitor for trial expiration
@@ -92,6 +96,11 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
 
   // Global error handler for 403 trial_expired responses
   useEffect(() => {
+    // Skip global fetch interception for super admins
+    if (user?.role === 'super_admin') {
+      return;
+    }
+
     const originalFetch = window.fetch;
 
     window.fetch = async (...args) => {
@@ -121,7 +130,7 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
     return () => {
       window.fetch = originalFetch;
     };
-  }, [queryClient, isBillingPage]);
+  }, [queryClient, isBillingPage, user?.role]);
 
   const handleUpgrade = () => {
     console.log('Navigating to billing page...');
