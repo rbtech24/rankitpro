@@ -40,13 +40,13 @@ async function initializeViteOrStatic() {
 
 // Global error handling for unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error("Unhandled Promise Rejection", { reason: reason instanceof Error ? reason.message : String(reason) });
-  logError('Unhandled Promise Rejection', reason instanceof Error ? reason : new Error(String(reason)));
+  logger.error("Unhandled Promise Rejection", { reasonMessage: reason instanceof Error ? reason.message : String(reason) });
+  logError('Unhandled Promise Rejection', 'error');
 });
 
 process.on('uncaughtException', (error) => {
-  logger.error("Uncaught Exception", { error: error.message, stack: error.stack });
-  logError('Uncaught Exception', error);
+  logger.error("Uncaught Exception", { errorMessage: error.message, stack: error.stack });
+  logError('Uncaught Exception', 'error');
   process.exit(1);
 });
 
@@ -262,7 +262,7 @@ async function createSuperAdminIfNotExists() {
       log("=====================================");
     }
   } catch (error) {
-    logger.error("Super admin setup failed", { error: (error as Error).message });
+    logger.error("Super admin setup failed", { errorMessage: (error as Error).message });
   }
 }
 
@@ -276,7 +276,7 @@ async function createSuperAdminIfNotExists() {
     const enabledFeatures = Object.entries(features).filter(([_, enabled]) => enabled).map(([name]) => name).join(", ") || "none";
     logger.info(`Features enabled: ${enabledFeatures}`);
   } catch (error) {
-    logger.error("Environment validation failed", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Environment validation failed", { errorMessage: error instanceof Error ? error.message : String(error) });
     process.exit(1);
   }
 
@@ -299,7 +299,7 @@ async function createSuperAdminIfNotExists() {
     } catch (error) {
       retryCount++;
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(`Database connection attempt ${retryCount}/${maxRetries} failed`, { error: errorMessage });
+      logger.error(`Database connection attempt ${retryCount}/${maxRetries} failed`, { errorMessage });
       
       // Check if it's a connection-related error
       const isConnectionError = errorMessage.includes('connect') || 
@@ -323,7 +323,7 @@ async function createSuperAdminIfNotExists() {
         break;
       } else {
         // Non-connection error, don't retry
-        logger.error("Database connection failed with non-connection error", { error: errorMessage });
+        logger.error("Database connection failed with non-connection error", { errorMessage });
         break;
       }
     }
@@ -433,7 +433,7 @@ async function createSuperAdminIfNotExists() {
   // Add error handling for port conflicts
   server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
-      logger.error(`Port ${port} is already in use`, { port: Number(port), error: err.message });
+      logger.error(`Port ${port} is already in use`, { port: Number(port), errorMessage: err.message });
       // Try alternative ports
       const alternativePort = parseInt(port.toString()) + 1;
       server.listen({

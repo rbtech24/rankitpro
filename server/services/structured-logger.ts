@@ -103,7 +103,7 @@ class StructuredLogger {
       const contextStr = entry.context ? ` ${JSON.stringify(entry.context)}` : '';
       const errorStr = entry.error ? ` ${entry.error.message}` : '';
       
-      console.logger.info(`[${timestamp}] ${level} ${message}${contextStr}${errorStr}`);
+      console.log(`[${timestamp}] ${level} ${message}${contextStr}${errorStr}`);
       
       if (entry.error?.stack && !this.isProduction) {
         console.log(entry.error.stack);

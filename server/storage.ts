@@ -18,6 +18,7 @@ import { eq, and, or, desc, asc, gte, lt, lte, sql, not, like, ilike } from "dri
 import * as schema from "@shared/schema";
 import { neon } from "@neondatabase/serverless";
 import { createHash } from "crypto";
+import { startOfMonth } from "date-fns";
 
 import { logger } from './services/logger';
 const {
@@ -457,11 +458,11 @@ export class DatabaseStorage implements IStorage {
     return updatedUser;
   }
 
-  async updateUserStripeInfo(userId: number, stripeInfo: { success: true }): Promise<User | undefined> {
+  async updateUserStripeInfo(userId: number, stripeInfo: { success: true; customerId?: string; subscriptionId?: string }): Promise<User | undefined> {
     const [updatedUser] = await db.update(users)
       .set({
-        stripeCustomerId: stripeInfo.customerId,
-        stripeSubscriptionId: stripeInfo.subscriptionId
+        stripeCustomerId: stripeInfo.customerId || null,
+        stripeSubscriptionId: stripeInfo.subscriptionId || null
       })
       .where(eq(users.id, userId))
       .returning();
@@ -548,7 +549,7 @@ export class DatabaseStorage implements IStorage {
         } catch (error) {
           logger.error("Error calculating company stats", { 
             companyId: company.id, 
-            error: error instanceof Error ? error.message : String(error) 
+            errorMessage: error instanceof Error ? error.message : String(error) 
           });
           return {
             ...company,
@@ -588,7 +589,7 @@ export class DatabaseStorage implements IStorage {
         .set({ isTrialActive: false })
         .where(eq(companies.id, companyId));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -641,7 +642,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(companies).where(eq(companies.id, id));
       return result.rowCount ? result.rowCount > 0 : false;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -699,7 +700,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(companyLocations).where(eq(companyLocations.id, id));
       return result.rowCount ? result.rowCount > 0 : false;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -807,7 +808,7 @@ export class DatabaseStorage implements IStorage {
         lastBackup: new Date()
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return {
         status: "down",
         uptime: Math.floor(process.uptime()),
@@ -921,7 +922,7 @@ export class DatabaseStorage implements IStorage {
       
       return customers.rows || [];
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -1421,7 +1422,7 @@ export class DatabaseStorage implements IStorage {
         }
       };
     } catch (error) {
-      logger.error("Error calculating company stats", { companyId, error: error instanceof Error ? error.message : String(error) });
+      logger.error("Error calculating company stats", { companyId, errorMessage: error instanceof Error ? error.message : String(error) });
       return {
         totalCheckins: 0,
         activeTechs: 0,
@@ -1473,7 +1474,7 @@ export class DatabaseStorage implements IStorage {
         }
       }));
     } catch (error) {
-      logger.error("Error getting all technicians", { error: error instanceof Error ? error.message : String(error) });
+      logger.error("Error getting all technicians", { errorMessage: error instanceof Error ? error.message : String(error) });
       return [];
     }
   }
@@ -1533,7 +1534,7 @@ export class DatabaseStorage implements IStorage {
         { success: true }
       ];
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [{ success: true }];
     }
   }
@@ -1598,7 +1599,7 @@ export class DatabaseStorage implements IStorage {
         new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()
       );
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [
         { success: true }
       ];
@@ -1639,7 +1640,7 @@ export class DatabaseStorage implements IStorage {
         averageRating: Number(result[0]?.averageRating || 0)
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return { success: true };
     }
   }
@@ -1670,7 +1671,7 @@ export class DatabaseStorage implements IStorage {
       
       return chartData;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -1713,7 +1714,7 @@ export class DatabaseStorage implements IStorage {
 
       return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 10);
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -1841,7 +1842,7 @@ export class DatabaseStorage implements IStorage {
         .slice(0, 20);
         
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -1865,7 +1866,7 @@ export class DatabaseStorage implements IStorage {
         totalReviews: reviewStats.totalReviews || 0
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return {
         totalCompanies: 0,
         activeCompanies: 0,
@@ -2015,7 +2016,7 @@ export class DatabaseStorage implements IStorage {
         dataSource: 'database'
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return {
         totalRevenue: 0,
         monthlyRecurringRevenue: 0,
@@ -2076,7 +2077,7 @@ export class DatabaseStorage implements IStorage {
 
       return Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2099,7 +2100,7 @@ export class DatabaseStorage implements IStorage {
         percentage: 0 // Will be calculated on frontend
       }));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2136,7 +2137,7 @@ export class DatabaseStorage implements IStorage {
         transactionId: transaction.id
       }));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2171,7 +2172,7 @@ export class DatabaseStorage implements IStorage {
         status: 'completed'
       }));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2228,7 +2229,7 @@ export class DatabaseStorage implements IStorage {
         }
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return {
         status: 'critical',
         uptime: '0s',
@@ -2273,7 +2274,7 @@ export class DatabaseStorage implements IStorage {
         growthRate: 0 // TODO: Calculate based on historical plan changes
       }));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [
         { success: true },
         { success: true },
@@ -2323,7 +2324,7 @@ export class DatabaseStorage implements IStorage {
         .map(([month, revenue]) => ({ month, revenue }))
         .sort((a, b) => a.month.localeCompare(b.month));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2335,7 +2336,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(checkIns.companyId, companyId));
       return result[0]?.count || 0;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return 0;
     }
   }
@@ -2347,7 +2348,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(reviewResponses.companyId, companyId));
       return result[0]?.count || 0;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return 0;
     }
   }
@@ -2359,7 +2360,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(users.companyId, companyId));
       return result[0]?.count || 0;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return 0;
     }
   }
@@ -2371,7 +2372,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(reviewResponses.companyId, companyId));
       return Math.round((result[0]?.avg || 0) * 10) / 10;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return 0;
     }
   }
@@ -2390,7 +2391,7 @@ export class DatabaseStorage implements IStorage {
 
       return 'No activity';
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return 'Unknown';
     }
   }
@@ -2610,7 +2611,7 @@ export class DatabaseStorage implements IStorage {
             failed++;
           }
         } catch (error) {
-          logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+          logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
           await db.update(checkIns)
             .set({ wordpressSyncStatus: 'failed' })
             .where(eq(checkIns.id, checkIn.id));
@@ -2625,7 +2626,7 @@ export class DatabaseStorage implements IStorage {
         message: "WordPress API test successful"
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return {
         success: false,
         synced: 0,
@@ -2696,7 +2697,7 @@ export class DatabaseStorage implements IStorage {
       `);
       return result.rows;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2723,7 +2724,7 @@ export class DatabaseStorage implements IStorage {
       
       return result;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2746,7 +2747,7 @@ export class DatabaseStorage implements IStorage {
       const [salesPerson] = await db.select().from(salesPeople).where(eq(salesPeople.id, id));
       return salesPerson;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -2756,7 +2757,7 @@ export class DatabaseStorage implements IStorage {
       const [salesPerson] = await db.select().from(salesPeople).where(eq(salesPeople.userId, userId));
       return salesPerson;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -2766,7 +2767,7 @@ export class DatabaseStorage implements IStorage {
       const [salesPerson] = await db.select().from(salesPeople).where(eq(salesPeople.email, email));
       return salesPerson;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -2810,7 +2811,7 @@ export class DatabaseStorage implements IStorage {
 
       return salesPeopleWithStats;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2819,7 +2820,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(salesPeople).where(eq(salesPeople.isActive, true));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2838,7 +2839,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedSalesPerson;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -2862,7 +2863,7 @@ export class DatabaseStorage implements IStorage {
       
       return result.rowCount > 0;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -2873,7 +2874,7 @@ export class DatabaseStorage implements IStorage {
       const [commission] = await db.select().from(salesCommissions).where(eq(salesCommissions.id, id));
       return commission;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -2910,7 +2911,7 @@ export class DatabaseStorage implements IStorage {
         .where(whereCondition)
         .orderBy(desc(salesCommissions.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2921,7 +2922,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(salesCommissions.companyId, companyId))
         .orderBy(desc(salesCommissions.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2947,7 +2948,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(salesCommissions.status, 'pending'))
         .orderBy(desc(salesCommissions.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2961,7 +2962,7 @@ export class DatabaseStorage implements IStorage {
         ))
         .orderBy(desc(salesCommissions.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -2980,7 +2981,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedCommission;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -2992,7 +2993,7 @@ export class DatabaseStorage implements IStorage {
         .set({ success: true })
         .where(sql`created_at >= ${startOfMonth}`);
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -3003,7 +3004,7 @@ export class DatabaseStorage implements IStorage {
       const [assignment] = await db.select().from(companyAssignments).where(eq(companyAssignments.id, id));
       return assignment;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -3032,7 +3033,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(companyAssignments.salesPersonId, salesPersonId))
         .orderBy(desc(companyAssignments.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3043,7 +3044,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(companyAssignments.companyId, companyId));
       return assignment;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -3062,7 +3063,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedAssignment;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -3161,7 +3162,7 @@ export class DatabaseStorage implements IStorage {
         averageRevenuePerUser: 0
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return {
         totalRevenue: 0,
         monthlyRecurringRevenue: 0,
@@ -3236,7 +3237,7 @@ export class DatabaseStorage implements IStorage {
         yearToDate: yearToDateRevenue
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return {
         thisMonth: 0,
         lastMonth: 0,
@@ -3277,7 +3278,7 @@ export class DatabaseStorage implements IStorage {
         count: row.count
       }));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3302,7 +3303,7 @@ export class DatabaseStorage implements IStorage {
         reviews: row.reviews
       }));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3327,7 +3328,7 @@ export class DatabaseStorage implements IStorage {
         companies: row.companies
       }));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3368,7 +3369,7 @@ export class DatabaseStorage implements IStorage {
         revenue
       }));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3381,7 +3382,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(companies).orderBy(desc(companies.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3483,7 +3484,7 @@ export class DatabaseStorage implements IStorage {
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
         .slice(0, 10);
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3514,7 +3515,7 @@ export class DatabaseStorage implements IStorage {
       
       return plansWithMetrics;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3539,7 +3540,7 @@ export class DatabaseStorage implements IStorage {
         stripePriceId: plan.stripePriceId
       }));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3596,7 +3597,7 @@ export class DatabaseStorage implements IStorage {
 
       return result[0]?.count || 0;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return 0;
     }
   }
@@ -3606,7 +3607,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(checkIns).where(eq(checkIns.id, id));
       return (result.rowCount || 0) > 0;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return false;
     }
   }
@@ -3616,7 +3617,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(blogPosts).where(eq(blogPosts.id, id));
       return (result.rowCount || 0) > 0;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return false;
     }
   }
@@ -3626,7 +3627,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(reviewResponses).where(eq(reviewResponses.id, id));
       return (result.rowCount || 0) > 0;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return false;
     }
   }
@@ -3644,7 +3645,7 @@ export class DatabaseStorage implements IStorage {
       
       return updatedPlan || null;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return null;
     }
   }
@@ -3664,7 +3665,7 @@ export class DatabaseStorage implements IStorage {
       
       return result[0]?.revenue || 0;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return 0;
     }
   }
@@ -3713,7 +3714,7 @@ export class DatabaseStorage implements IStorage {
       const [newPayout] = await db.insert(schema.commissionPayouts).values(payout).returning();
       return newPayout;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -3724,7 +3725,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(schema.commissionPayouts.salesPersonId, salesPersonId))
         .orderBy(desc(schema.commissionPayouts.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3748,7 +3749,7 @@ export class DatabaseStorage implements IStorage {
         .leftJoin(salesPeople, eq(schema.commissionPayouts.salesPersonId, salesPeople.id))
         .orderBy(desc(schema.commissionPayouts.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3762,7 +3763,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedPayout;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -3828,7 +3829,7 @@ export class DatabaseStorage implements IStorage {
         lastSale: lastSaleResult[0]?.lastSale || null
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return {
         totalCustomers: 0,
         monthlyEarnings: 0,
@@ -3848,7 +3849,7 @@ export class DatabaseStorage implements IStorage {
 
       return result[0]?.total || 0;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return 0;
     }
   }
@@ -3875,7 +3876,7 @@ export class DatabaseStorage implements IStorage {
         paid: row.paidAmount
       }));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3885,7 +3886,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(checkIns).orderBy(desc(checkIns.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3894,7 +3895,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(reviewResponses).orderBy(desc(reviewResponses.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3903,7 +3904,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(blogPosts).orderBy(desc(blogPosts.publishDate));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -3976,7 +3977,7 @@ export class DatabaseStorage implements IStorage {
         isTrialActive: row.isTrialActive
       }));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -4002,7 +4003,7 @@ export class DatabaseStorage implements IStorage {
         return await query.orderBy(desc(helpTopics.lastActivity));
       }
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -4020,7 +4021,7 @@ export class DatabaseStorage implements IStorage {
       
       return topic[0];
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -4030,7 +4031,7 @@ export class DatabaseStorage implements IStorage {
       const [newTopic] = await db.insert(helpTopics).values(topic).returning();
       return newTopic;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -4043,7 +4044,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedTopic;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -4057,7 +4058,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.delete(helpTopics).where(eq(helpTopics.id, id));
       return (result.rowCount || 0) > 0;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return false;
     }
   }
@@ -4084,7 +4085,7 @@ export class DatabaseStorage implements IStorage {
       
       return true;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return false;
     }
   }
@@ -4103,7 +4104,7 @@ export class DatabaseStorage implements IStorage {
       }
       return false;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return false;
     }
   }
@@ -4116,7 +4117,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(helpTopicReplies.topicId, topicId))
         .orderBy(asc(helpTopicReplies.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -4135,7 +4136,7 @@ export class DatabaseStorage implements IStorage {
       
       return newReply;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -4148,7 +4149,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedReply;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -4177,7 +4178,7 @@ export class DatabaseStorage implements IStorage {
       
       return (result.rowCount || 0) > 0;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return false;
     }
   }
@@ -4204,7 +4205,7 @@ export class DatabaseStorage implements IStorage {
       
       return true;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return false;
     }
   }
@@ -4223,7 +4224,7 @@ export class DatabaseStorage implements IStorage {
       }
       return false;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return false;
     }
   }
@@ -4234,7 +4235,7 @@ export class DatabaseStorage implements IStorage {
       const [bugReport] = await db.select().from(schema.bugReports).where(eq(schema.bugReports.id, id));
       return bugReport;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -4243,7 +4244,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(schema.bugReports).orderBy(desc(schema.bugReports.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -4254,7 +4255,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(schema.bugReports.companyId, companyId))
         .orderBy(desc(schema.bugReports.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -4267,7 +4268,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return newBugReport;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -4280,7 +4281,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedBugReport;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -4293,7 +4294,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return assignedBugReport;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -4312,7 +4313,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return resolvedBugReport;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -4323,7 +4324,7 @@ export class DatabaseStorage implements IStorage {
       const [featureRequest] = await db.select().from(schema.featureRequests).where(eq(schema.featureRequests.id, id));
       return featureRequest;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -4332,7 +4333,7 @@ export class DatabaseStorage implements IStorage {
     try {
       return await db.select().from(schema.featureRequests).orderBy(desc(schema.featureRequests.votes), desc(schema.featureRequests.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -4343,7 +4344,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(schema.featureRequests.companyId, companyId))
         .orderBy(desc(schema.featureRequests.votes), desc(schema.featureRequests.createdAt));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -4356,7 +4357,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return newFeatureRequest;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -4369,7 +4370,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedFeatureRequest;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -4382,7 +4383,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return votedFeatureRequest;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -4395,7 +4396,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return assignedFeatureRequest;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -4413,7 +4414,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return completedFeatureRequest;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -5006,7 +5007,7 @@ export class DatabaseStorage implements IStorage {
         secretKey: '••••••••••••••••' // Hide secret completely
       }));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -5019,7 +5020,7 @@ export class DatabaseStorage implements IStorage {
       
       return credentials;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -5030,7 +5031,7 @@ export class DatabaseStorage implements IStorage {
         .set({ lastUsedAt: new Date() })
         .where(eq(apiCredentials.id, id));
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
     }
   }
 
@@ -5064,7 +5065,7 @@ export class DatabaseStorage implements IStorage {
         permissions: credentials.permissions // Return as array
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -5084,7 +5085,7 @@ export class DatabaseStorage implements IStorage {
       
       return !!result;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return false;
     }
   }
@@ -5109,7 +5110,7 @@ export class DatabaseStorage implements IStorage {
       
       return result ? newSecret : null;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return null;
     }
   }
@@ -5145,7 +5146,7 @@ export class DatabaseStorage implements IStorage {
         };
       });
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
     }
   }
@@ -5166,7 +5167,7 @@ export class DatabaseStorage implements IStorage {
         isActive: plan.isActive
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -5198,7 +5199,7 @@ export class DatabaseStorage implements IStorage {
         revenue: 0
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       throw error;
     }
   }
@@ -5235,7 +5236,7 @@ export class DatabaseStorage implements IStorage {
         isActive: updatedPlan.isActive
       };
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return undefined;
     }
   }
@@ -5250,7 +5251,7 @@ export class DatabaseStorage implements IStorage {
       
       return !!result;
     } catch (error) {
-      logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return false;
     }
   }

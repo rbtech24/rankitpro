@@ -4,11 +4,11 @@
       "bfdbcb60",
       {
         "id": "bfdbcb60",
-        "timestamp": "2025-07-26T06:46:08.263Z",
+        "timestamp": "2025-07-26T13:46:20.006Z",
         "level": "info",
         "message": "Application startup initiated",
         "resolved": false,
-        "count": 351
+        "count": 353
       }
     ],
     [
@@ -134,7 +134,7 @@
     ]
   ],
   "stats": {
-    "totalErrors": 441,
+    "totalErrors": 443,
     "criticalErrors": 0,
     "errorsByHour": {
       "0": 17,
@@ -150,7 +150,7 @@
       "10": 6,
       "11": 6,
       "12": 7,
-      "13": 9,
+      "13": 11,
       "14": 42,
       "15": 5,
       "16": 3,
@@ -167,16 +167,16 @@
       "/api/auth/login": 3
     },
     "errorsByType": {
-      "General": 441
+      "General": 443
     },
     "lastError": {
-      "id": "aa9d024e",
-      "timestamp": "2025-07-26T07:46:08.608Z",
-      "level": {},
-      "message": "Uncaught Exception",
+      "id": "bfdbcb60",
+      "timestamp": "2025-07-26T13:46:20.006Z",
+      "level": "info",
+      "message": "Application startup initiated",
       "resolved": false,
-      "count": 4
+      "count": 353
     }
   },
-  "lastSaved": "2025-07-26T07:46:08.609Z"
+  "lastSaved": "2025-07-26T13:46:20.006Z"
 }
