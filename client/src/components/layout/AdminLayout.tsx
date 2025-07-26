@@ -206,7 +206,7 @@ export default function AdminLayout({ children, currentPath }: AdminLayoutProps)
         </main>
 
         {/* Footer */}
-        <div className="fixed bottom-0 left-64 right-0 bg-gray-900 text-white z-30 hidden md:block">
+        <div className="fixed bottom-0 right-0 bg-gray-900 text-white z-30 hidden md:block" style={{ left: '256px' }}>
           <div className="max-w-7xl mx-auto px-6 py-3">
             <div className="flex justify-between items-center text-sm">
               <div className="flex items-center space-x-6">
