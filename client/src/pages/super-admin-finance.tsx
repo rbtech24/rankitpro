@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
+import AdminLayout from "../components/layout/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -152,16 +152,16 @@ export default function SuperAdminFinance() {
 
   if (metricsLoading) {
     return (
-      <DashboardLayout>
+      <AdminLayout currentPath="/financial-dashboard">
         <div className="flex items-center justify-center h-64">
           <RefreshCw className="h-8 w-8 animate-spin" />
         </div>
-      </DashboardLayout>
+      </AdminLayout>
     );
   }
 
   return (
-    <DashboardLayout>
+    <AdminLayout currentPath="/financial-dashboard">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -439,6 +439,6 @@ export default function SuperAdminFinance() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </AdminLayout>
   );
 }

@@ -41,7 +41,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "../hooks/use-toast";
 import { Edit2, Trash2, Plus, DollarSign, Users, CreditCard, TrendingUp } from "lucide-react";
 import * as z from "zod";
-import Sidebar from '../components/layout/sidebar-clean';
+import AdminLayout from '../components/layout/AdminLayout';
 
 // Plan creation schema with yearly pricing support
 const planSchema = z.object({
@@ -293,10 +293,8 @@ export default function BillingManagement() {
   };
   
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      
-      <div className="flex-1 overflow-auto p-6">
+    <AdminLayout currentPath="/billing-management">
+      <div className="space-y-6">
         <h1 className="text-2xl font-bold mb-6">Billing Management</h1>
         
         <Tabs defaultValue="overview">
@@ -594,6 +592,6 @@ export default function BillingManagement() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

@@ -65,7 +65,7 @@ import {
   MessageSquare,
   Save
 } from 'lucide-react';
-import Sidebar from '../components/layout/sidebar-clean';
+import AdminLayout from '../components/layout/AdminLayout';
 
 // Email settings schema
 const emailSettingsSchema = z.object({
@@ -293,10 +293,8 @@ export default function SystemSettings() {
   };
   
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      
-      <div className="flex-1 overflow-auto p-6">
+    <AdminLayout currentPath="/system-settings">
+      <div className="space-y-6">
         <h1 className="text-2xl font-bold mb-6">System Settings</h1>
         
         <Tabs defaultValue="email">
@@ -1379,6 +1377,6 @@ export default function SystemSettings() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
