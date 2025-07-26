@@ -5,7 +5,9 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { ScrollArea } from '../components/ui/scroll-area';
-import { RefreshCw, CheckCircle, XCircle, Clock, Database } from 'lucide-react';
+import { RefreshCw, CheckCircle, XCircle, Clock, Database, Activity, Zap } from 'lucide-react';
+import AdminLayout from '../components/layout/AdminLayout';
+import { apiRequest } from '../lib/queryClient';
 
 interface TestResult {
   endpoint: string;
@@ -37,13 +39,18 @@ export default function APITesting() {
   const testIndividualEndpoint = async (endpoint: string) => {
     setIsTestingManually(endpoint);
     try {
-      const response = await fetch(endpoint, {
-        credentials: 'include'
+      const startTime = Date.now();
+      const data = await apiRequest('GET', endpoint);
+      const endTime = Date.now();
+      const responseTime = `${endTime - startTime}ms`;
+      
+      console.log(`✅ Test result for ${endpoint}:`, {
+        success: true,
+        responseTime,
+        data: data
       });
-      const data = await response.json();
-      console.log(`Test result for ${endpoint}:`, data);
     } catch (error) {
-      console.error(`Error testing ${endpoint}:`, error);
+      console.error(`❌ Error testing ${endpoint}:`, error);
     } finally {
       setIsTestingManually(null);
     }
@@ -51,16 +58,17 @@ export default function APITesting() {
 
   const endpoints = [
     { path: '/api/admin/system-stats', description: 'System statistics and metrics' },
-    { path: '/api/admin/chart-data', description: 'Analytics chart data' },
     { path: '/api/admin/system-health', description: 'System health monitoring' },
-    { path: '/api/admin/companies', description: 'Company management data' },
     { path: '/api/admin/recent-activity', description: 'Recent system activities' },
-    { path: '/api/companies', description: 'User company information' },
+    { path: '/api/companies', description: 'Company information' },
     { path: '/api/check-ins', description: 'Check-in records' },
-    { path: '/api/reviews', description: 'Review data' },
+    { path: '/api/testimonials', description: 'Customer testimonials' },
     { path: '/api/blog-posts', description: 'Blog post content' },
     { path: '/api/technicians', description: 'Technician information' },
-    { path: '/api/auth/me', description: 'Current user authentication' }
+    { path: '/api/auth/me', description: 'Current user authentication' },
+    { path: '/api/admin/rate-limiting/config', description: 'Rate limiting configuration' },
+    { path: '/api/admin/rate-limiting/statistics', description: 'Rate limiting statistics' },
+    { path: '/api/health', description: 'Application health check' }
   ];
 
   const getStatusIcon = (status: string) => {
@@ -85,7 +93,8 @@ export default function APITesting() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">API Endpoint Testing</h1>
@@ -258,6 +267,7 @@ export default function APITesting() {
           )}
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }
