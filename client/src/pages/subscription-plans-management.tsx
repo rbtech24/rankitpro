@@ -56,7 +56,10 @@ export default function SubscriptionPlansManagement() {
   // Query for subscription plans
   const { data: plansResponse, isLoading } = useQuery<SubscriptionPlan[]>({
     queryKey: ["/api/billing/plans"],
-    queryFn: () => apiRequest('GET', "/api/billing/plans")
+    queryFn: async () => {
+      const response = await apiRequest('GET', "/api/billing/plans");
+      return response.json();
+    }
   });
 
   // Ensure plans is always an array
@@ -64,12 +67,13 @@ export default function SubscriptionPlansManagement() {
 
   // Create plan mutation
   const createPlanMutation = useMutation({
-    mutationFn: (data: PlanFormData) => {
+    mutationFn: async (data: PlanFormData) => {
       const formattedData = {
         ...data,
         features: data.features.split('\n').filter(f => f.trim())
       };
-      return apiRequest('POST', '/api/billing/plans', formattedData);
+      const response = await apiRequest('POST', '/api/billing/plans', formattedData);
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -90,12 +94,13 @@ export default function SubscriptionPlansManagement() {
 
   // Update plan mutation
   const updatePlanMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<PlanFormData> }) => {
+    mutationFn: async ({ id, data }: { id: number; data: Partial<PlanFormData> }) => {
       const formattedData = data.features ? {
         ...data,
         features: data.features.split('\n').filter(f => f.trim())
       } : data;
-      return apiRequest('PUT', `/api/billing/plans/${id}`, formattedData);
+      const response = await apiRequest('PUT', `/api/billing/plans/${id}`, formattedData);
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -117,7 +122,10 @@ export default function SubscriptionPlansManagement() {
 
   // Delete plan mutation
   const deletePlanMutation = useMutation({
-    mutationFn: (id: number) => apiRequest('DELETE', `/api/billing/plans/${id}`),
+    mutationFn: async (id: number) => {
+      const response = await apiRequest('DELETE', `/api/billing/plans/${id}`);
+      return response.json();
+    },
     onSuccess: () => {
       toast({
         title: "Success",
