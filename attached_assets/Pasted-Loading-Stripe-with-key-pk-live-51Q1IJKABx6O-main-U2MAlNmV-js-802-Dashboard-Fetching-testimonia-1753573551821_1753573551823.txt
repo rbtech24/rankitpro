@@ -1,0 +1,196 @@
+Loading Stripe with key: pk_live_51Q1IJKABx6O...
+main-U2MAlNmV.js:802 Dashboard: Fetching testimonials for company: 16
+main-U2MAlNmV.js:752 WebSocket disabled for notifications - using API polling instead
+main-U2MAlNmV.js:802 Loaded subscription plans: (3) [{…}, {…}, {…}]
+main-U2MAlNmV.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: WebSocket is closed before the connection is established.
+(anonymous) @ main-U2MAlNmV.js:802
+oo @ main-U2MAlNmV.js:48
+CE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+BE @ main-U2MAlNmV.js:48
+kp @ main-U2MAlNmV.js:48
+HE @ main-U2MAlNmV.js:48
+Lh @ main-U2MAlNmV.js:48
+$E @ main-U2MAlNmV.js:48
+DE @ main-U2MAlNmV.js:48
+EE @ main-U2MAlNmV.js:48
+AE @ main-U2MAlNmV.js:48
+KE @ main-U2MAlNmV.js:48
+U @ main-U2MAlNmV.js:17Understand this warning
+main-U2MAlNmV.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: WebSocket is closed before the connection is established.
+(anonymous) @ main-U2MAlNmV.js:802
+oo @ main-U2MAlNmV.js:48
+CE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+Mh @ main-U2MAlNmV.js:48
+SE @ main-U2MAlNmV.js:48
+BE @ main-U2MAlNmV.js:48
+kp @ main-U2MAlNmV.js:48
+HE @ main-U2MAlNmV.js:48
+Lh @ main-U2MAlNmV.js:48
+$E @ main-U2MAlNmV.js:48
+DE @ main-U2MAlNmV.js:48
+EE @ main-U2MAlNmV.js:48
+AE @ main-U2MAlNmV.js:48
+KE @ main-U2MAlNmV.js:48
+U @ main-U2MAlNmV.js:17Understand this warning
+main-U2MAlNmV.js:802  GET https://rankitpro.com/api/companies/current 401 (Unauthorized)
+window.fetch @ main-U2MAlNmV.js:802
+(anonymous) @ main-U2MAlNmV.js:57
+i @ main-U2MAlNmV.js:57
+b @ main-U2MAlNmV.js:57
+start @ main-U2MAlNmV.js:57
+fetch @ main-U2MAlNmV.js:57
+xx @ main-U2MAlNmV.js:57
+onSubscribe @ main-U2MAlNmV.js:57
+subscribe @ main-U2MAlNmV.js:57
+(anonymous) @ main-U2MAlNmV.js:57
+nA @ main-U2MAlNmV.js:48
+Th @ main-U2MAlNmV.js:48
+bE @ main-U2MAlNmV.js:48
+$i @ main-U2MAlNmV.js:48
+bE @ main-U2MAlNmV.js:48
+$i @ main-U2MAlNmV.js:48
+bE @ main-U2MAlNmV.js:48
+$i @ main-U2MAlNmV.js:48
+bE @ main-U2MAlNmV.js:48
+$i @ main-U2MAlNmV.js:48
+bE @ main-U2MAlNmV.js:48
+$i @ main-U2MAlNmV.js:48
+bE @ main-U2MAlNmV.js:48
+$i @ main-U2MAlNmV.js:48
+bE @ main-U2MAlNmV.js:48
+BE @ main-U2MAlNmV.js:48
+kp @ main-U2MAlNmV.js:48
+HE @ main-U2MAlNmV.js:48
+Lh @ main-U2MAlNmV.js:48
+$E @ main-U2MAlNmV.js:48
+DE @ main-U2MAlNmV.js:48
+EE @ main-U2MAlNmV.js:48
+AE @ main-U2MAlNmV.js:48
+KE @ main-U2MAlNmV.js:48
+U @ main-U2MAlNmV.js:17Understand this error
+dashboard:1 <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes">Understand this warning
+main-U2MAlNmV.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-U2MAlNmV.js:802
+(anonymous) @ main-U2MAlNmV.js:802Understand this error
+main-U2MAlNmV.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-U2MAlNmV.js:802
+(anonymous) @ main-U2MAlNmV.js:802Understand this error
+main-U2MAlNmV.js:752 Attempting to reconnect WebSocket...
+main-U2MAlNmV.js:752 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-U2MAlNmV.js:752Understand this error
+main-U2MAlNmV.js:802 Quick restore plan: {plan: {…}, planId: 19, planIdType: 'number', billing: 'monthly'}
+main-U2MAlNmV.js:802 Sending subscription request: {planId: 19, planIdType: 'number', billingPeriod: 'monthly'}
+main-U2MAlNmV.js:802  POST https://rankitpro.com/api/billing/subscription 401 (Unauthorized)
+window.fetch @ main-U2MAlNmV.js:802
+ie @ main-U2MAlNmV.js:57
+mutationFn @ main-U2MAlNmV.js:802
+fn @ main-U2MAlNmV.js:57
+b @ main-U2MAlNmV.js:57
+start @ main-U2MAlNmV.js:57
+execute @ main-U2MAlNmV.js:57
+await in execute
+mutate @ main-U2MAlNmV.js:57
+(anonymous) @ main-U2MAlNmV.js:57
+S @ main-U2MAlNmV.js:802
+onClick @ main-U2MAlNmV.js:802
+QE @ main-U2MAlNmV.js:48
+(anonymous) @ main-U2MAlNmV.js:48
+rP @ main-U2MAlNmV.js:48
+wb @ main-U2MAlNmV.js:48
+Ib @ main-U2MAlNmV.js:49
+sK @ main-U2MAlNmV.js:49Understand this error
+main-U2MAlNmV.js:802 Subscription creation error: Error: 401: Not authenticated
+    at fI (main-U2MAlNmV.js:57:44046)
+    at async ie (main-U2MAlNmV.js:57:44247)
+    at async Object.mutationFn (main-U2MAlNmV.js:802:13057)
+onError @ main-U2MAlNmV.js:802
+execute @ main-U2MAlNmV.js:57
+await in execute
+mutate @ main-U2MAlNmV.js:57
+(anonymous) @ main-U2MAlNmV.js:57
+S @ main-U2MAlNmV.js:802
+onClick @ main-U2MAlNmV.js:802
+QE @ main-U2MAlNmV.js:48
+(anonymous) @ main-U2MAlNmV.js:48
+rP @ main-U2MAlNmV.js:48
+wb @ main-U2MAlNmV.js:48
+Ib @ main-U2MAlNmV.js:49
+sK @ main-U2MAlNmV.js:49Understand this error
+main-U2MAlNmV.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-U2MAlNmV.js:802
+(anonymous) @ main-U2MAlNmV.js:802Understand this error
+main-U2MAlNmV.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-U2MAlNmV.js:802
+(anonymous) @ main-U2MAlNmV.js:802Understand this error
+main-U2MAlNmV.js:752 Attempting to reconnect WebSocket...
+main-U2MAlNmV.js:752 WebSocket connection to 'wss://rankitpro.com/ws' failed: 

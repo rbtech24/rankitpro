@@ -103,13 +103,39 @@ router.post('/login',
         req.session.cookie.maxAge = 4 * 60 * 60 * 1000; // 4 hours
       }
 
+      // Save session explicitly to ensure persistence
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err) => {
+          if (err) {
+            logger.error('Session save failed', {
+              userId: user.id,
+              email,
+              error: err.message,
+              ip: req.ip
+            });
+            reject(err);
+          } else {
+            logger.info('Session saved successfully', {
+              userId: user.id,
+              sessionId: req.sessionID,
+              email,
+              ip: req.ip
+            });
+            resolve();
+          }
+        });
+      });
+
       logger.info('User logged in successfully', {
         userId: user.id,
         email,
         role: user.role,
         companyId: user.companyId,
+        sessionId: req.sessionID,
         rememberMe,
-        ip: req.ip
+        ip: req.ip,
+        cookieSecure: req.session.cookie.secure,
+        cookieSameSite: req.session.cookie.sameSite
       });
 
       res.json({
@@ -326,6 +352,39 @@ router.get('/me', async (req, res) => {
     });
     res.status(500).json({ message: "Internal server error" });
   }
+});
+
+// Debug endpoint to check session status
+router.get('/debug/session', async (req, res) => {
+  const sessionInfo = {
+    hasSession: !!req.session,
+    sessionId: req.sessionID,
+    userId: req.session?.userId,
+    cookieSettings: req.session?.cookie,
+    headers: {
+      cookie: req.headers.cookie ? 'present' : 'missing',
+      userAgent: req.headers['user-agent']
+    },
+    environment: process.env.NODE_ENV,
+    timestamp: new Date().toISOString()
+  };
+
+  if (req.session?.userId) {
+    try {
+      const user = await storage.getUser(req.session.userId);
+      sessionInfo.user = user ? {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        active: user.active
+      } : null;
+    } catch (error) {
+      sessionInfo.userError = error instanceof Error ? error.message : String(error);
+    }
+  }
+
+  logger.info('Session debug request', sessionInfo);
+  res.json(sessionInfo);
 });
 
 export default router;

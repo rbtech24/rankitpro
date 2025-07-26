@@ -160,6 +160,11 @@ app.use((req, res, next) => {
   }
 });
 
+// Trust proxy for production deployment
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Session configuration
 import session from "express-session";
 import MemoryStore from "memorystore";
@@ -176,8 +181,11 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 4 * 60 * 60 * 1000 // 4 hours
-  }
+    maxAge: 4 * 60 * 60 * 1000, // 4 hours
+    sameSite: 'lax'
+  },
+  name: 'rankitpro_session',
+  proxy: process.env.NODE_ENV === 'production'
 }));
 
 app.use(express.json());

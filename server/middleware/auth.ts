@@ -23,7 +23,13 @@ export const isAuthenticated = asyncHandler(async (req: Request, res: Response, 
     logger.auth('Authentication failed - no session', undefined, undefined, {
       method: req.method,
       url: req.originalUrl,
-      ip: req.ip
+      ip: req.ip,
+      sessionId: req.sessionID,
+      cookies: Object.keys(req.cookies || {}),
+      headers: {
+        cookie: req.headers.cookie ? 'present' : 'missing',
+        userAgent: req.headers['user-agent']
+      }
     });
     res.setHeader('Content-Type', 'application/json');
     return res.status(401).json({ message: "Not authenticated" });
