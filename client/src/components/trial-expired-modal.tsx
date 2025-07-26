@@ -285,10 +285,10 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
               </Button>
               <div>
                 <DialogTitle className="text-xl font-semibold">
-                  Restore Your Service
+                  Choose Your Subscription Plan
                 </DialogTitle>
                 <DialogDescription>
-                  Choose a plan to immediately regain access to all features
+                  Select a paid plan to continue using Rank It Pro after your 14-day trial
                 </DialogDescription>
               </div>
             </div>
@@ -333,15 +333,22 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                     (plan.yearlyPrice || plan.price * 12) : 
                     plan.price;
                   const isPopular = plan.name.toLowerCase() === 'professional';
+                  const isMinimum = plan.name.toLowerCase() === 'starter';
 
                   return (
                     <div key={plan.id} className={`relative border rounded-lg p-6 hover:border-blue-500 transition-colors ${
-                      isPopular ? 'border-blue-500 shadow-lg' : 'border-gray-200'
+                      isPopular ? 'border-blue-500 shadow-lg' : 
+                      isMinimum ? 'border-green-500 shadow-md' : 'border-gray-200'
                     }`}>
                       {isPopular && (
                         <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-blue-600">
                           <Star className="h-3 w-3 mr-1" />
                           Most Popular
+                        </Badge>
+                      )}
+                      {isMinimum && (
+                        <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-600">
+                          Minimum Required
                         </Badge>
                       )}
 
@@ -424,21 +431,22 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
             Service Suspended
           </DialogTitle>
           <DialogDescription className="text-gray-600 mt-2">
-            Your 14-day trial ended on {trialEndDate ? new Date(trialEndDate).toLocaleDateString() : 'recently'}.
-            Choose a plan to restore immediate access.
+            Your 14-day free trial ended on {trialEndDate ? new Date(trialEndDate).toLocaleDateString() : 'recently'}.
+            Select a paid plan starting from $47/month to continue using Rank It Pro.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 mt-6">
-          <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-            <h4 className="font-medium text-red-900 mb-2 flex items-center">
-              <Clock className="h-4 w-4 mr-2 text-red-600" />
-              Current Status
+          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+            <h4 className="font-medium text-blue-900 mb-2 flex items-center">
+              <Clock className="h-4 w-4 mr-2 text-blue-600" />
+              Trial Requirements
             </h4>
-            <ul className="text-sm text-red-700 space-y-1">
-              <li>• All features are temporarily locked</li>
-              <li>• Your data is safely preserved</li>
-              <li>• Restore access in under 2 minutes</li>
+            <ul className="text-sm text-blue-700 space-y-1">
+              <li>• After 14 days, all companies must subscribe to a paid plan</li>
+              <li>• Plans start at just $47/month (Starter plan)</li>
+              <li>• Your data is safely preserved during subscription setup</li>
+              <li>• Restore access immediately after payment</li>
             </ul>
           </div>
 
