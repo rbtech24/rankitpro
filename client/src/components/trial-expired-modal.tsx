@@ -51,6 +51,11 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Debug current step changes
+  useEffect(() => {
+    console.log('Trial Modal - Current step changed to:', currentStep);
+  }, [currentStep]);
+
   // Get subscription plans
   const { data: subscriptionPlans, isLoading: plansLoading } = useQuery({
     queryKey: ["/api/billing/plans"],
@@ -223,7 +228,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
   if (currentStep === 'plans') {
     return (
       <Dialog open={isOpen} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-4xl">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center">
               <Button variant="ghost" size="sm" onClick={handleBack} className="mr-2">
@@ -312,7 +317,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
 
   // Initial expired step
   return (
-    <Dialog open={isOpen} onOpenChange={onClose ? () => onClose() : undefined}>
+    <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
@@ -342,7 +347,10 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
           
           <div className="flex flex-col space-y-3">
             <Button 
-              onClick={() => setCurrentStep('plans')}
+              onClick={() => {
+                console.log('Switching to plans step...');
+                setCurrentStep('plans');
+              }}
               className="w-full"
               size="lg"
             >

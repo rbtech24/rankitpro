@@ -130,8 +130,6 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
     setShowTrialModal(false);
     // Navigate to billing page
     setLocation('/billing');
-    // Use window location as primary method for trial expired screen
-    window.location.href = '/billing';
   };
 
   const handleLogout = () => {
