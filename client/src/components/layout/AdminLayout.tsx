@@ -30,12 +30,12 @@ import {
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  currentPath?: string;
 }
 
-export default function AdminLayout({ children, currentPath }: AdminLayoutProps) {
-  const [, setLocation] = useLocation();
+export default function AdminLayout({ children }: AdminLayoutProps) {
+  const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const currentPath = location;
 
   const handleLogout = async () => {
     try {
