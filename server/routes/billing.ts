@@ -14,10 +14,10 @@ router.get('/plans', isAuthenticated, async (req: Request, res: Response) => {
     const plans = await storage.getActiveSubscriptionPlans();
     res.json(plans);
   } catch (error: any) {
-    logger.error("Storage operation error", { errorMessage: error?.message || "Unknown error" });
+    logger.error("Storage operation error", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to retrieve subscription plans',
-      message: error.message
+      message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -61,7 +61,7 @@ router.post('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: R
         newPlan.stripePriceId = stripeProductId;
       }
     } catch (stripeError: any) {
-      logger.warn("Stripe sync failed during plan creation", { errorMessage: stripeError?.message || "Unknown error" });
+      logger.warn("Stripe sync failed during plan creation", { error: stripeError instanceof Error ? stripeError.message : String(stripeError) });
     }
 
     res.json(newPlan);
@@ -105,16 +105,16 @@ router.put('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, res
           updatedPlan.stripePriceId = stripeProductId;
         }
       } catch (stripeError: any) {
-        logger.warn("Stripe sync failed during plan update", { errorMessage: stripeError?.message || "Unknown error" });
+        logger.warn("Stripe sync failed during plan update", { error: stripeError instanceof Error ? stripeError.message : String(stripeError) });
       }
     }
 
     res.json(updatedPlan);
   } catch (error: any) {
-    logger.error("Storage operation error", { errorMessage: error?.message || "Unknown error" });
+    logger.error("Storage operation error", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to update subscription plan',
-      message: error.message
+      message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -137,10 +137,10 @@ router.delete('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, 
       id: parseInt(id)
     });
   } catch (error: any) {
-    logger.error("Storage operation error", { errorMessage: error?.message || "Unknown error" });
+    logger.error("Storage operation error", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to delete subscription plan',
-      message: error.message
+      message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -200,7 +200,7 @@ router.post('/plans/sync', isAuthenticated, isSuperAdmin, async (req: Request, r
       results: syncResults
     });
   } catch (error: any) {
-    logger.error("Stripe sync operation failed", { errorMessage: error?.message || "Unknown error" });
+    logger.error("Stripe sync operation failed", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to sync plans with Stripe',
       message: error.message
@@ -581,7 +581,7 @@ router.post('/plans/:id/sync-stripe', isAuthenticated, isSuperAdmin, async (req:
 
     res.json(updatedPlan);
   } catch (error: any) {
-    logger.error("Stripe sync error", { errorMessage: error?.message || "Unknown error" });
+    logger.error("Stripe sync error", { error: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to sync with Stripe',
       message: error.message
@@ -631,7 +631,7 @@ router.post('/subscription/complete-development', isAuthenticated, isCompanyAdmi
     });
   } catch (error: any) {
     logger.error("Failed to complete development payment", { 
-      errorMessage: error instanceof Error ? error.message : String(error),
+      error: error instanceof Error ? error.message : String(error),
       plan: req.body.plan,
       userId: req.user?.id
     });
