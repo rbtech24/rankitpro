@@ -2,7 +2,7 @@
 process.env.VITE_STRIPE_PUBLIC_KEY = "pk_live_51Q1IJKABx6OzSP6kA2eNndSD5luY9WJPP6HSuQ9QFZOFGIlTQaT0YeHAQCIuTlHXEZ0eV04wBl3WdjBtCf4gXi2W00jdezk2mo";
 
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
+// Dynamic import of routes to avoid circular dependencies
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import emailService from "./services/resend-email-service";
@@ -338,7 +338,9 @@ async function createSuperAdminIfNotExists() {
   errorMonitor.setupRoutes(app);
   logError('Application startup initiated', 'info');
 
-  const server = await registerRoutes(app);
+  // Import and register routes
+  const registerRoutes = (await import("./routes")).default;
+  registerRoutes(app);
 
   // Critical Fix: Add API route exclusion middleware BEFORE Vite setup
   // This prevents Vite from intercepting API calls
@@ -385,6 +387,9 @@ async function createSuperAdminIfNotExists() {
     next();
   });
 
+  // Create server before setting up Vite
+  const server = createServer(app);
+  
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes

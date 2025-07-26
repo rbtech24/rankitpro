@@ -4,11 +4,11 @@
       "bfdbcb60",
       {
         "id": "bfdbcb60",
-        "timestamp": "2025-07-26T03:44:33.927Z",
+        "timestamp": "2025-07-26T03:57:08.957Z",
         "level": "info",
         "message": "Application startup initiated",
         "resolved": false,
-        "count": 328
+        "count": 340
       }
     ],
     [
@@ -34,11 +34,11 @@
       "40637616",
       {
         "id": "40637616",
-        "timestamp": "2025-07-26T03:43:01.154Z",
+        "timestamp": "2025-07-26T03:55:06.591Z",
         "level": {},
         "message": "Unhandled Promise Rejection",
         "resolved": false,
-        "count": 58
+        "count": 68
       }
     ],
     [
@@ -112,16 +112,35 @@
         "resolved": false,
         "count": 2
       }
+    ],
+    [
+      "61fbc0af",
+      {
+        "id": "61fbc0af",
+        "timestamp": "2025-07-26T03:57:02.680Z",
+        "level": "warn",
+        "message": "Invalid value \"undefined\" for header \"X-Session-ID\"",
+        "stack": "TypeError [ERR_HTTP_INVALID_HEADER_VALUE]: Invalid value \"undefined\" for header \"X-Session-ID\"\n    at ServerResponse.setHeader (node:_http_outgoing:658:3)\n    at sessionMonitoring (/home/runner/workspace/server/middleware/session-management.ts:159:9)\n    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)\n    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9\n    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)\n    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)\n    at enforceConcurrentSessions (/home/runner/workspace/server/middleware/session-management.ts:73:12)\n    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)\n    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)",
+        "url": "/",
+        "method": "GET",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+        "ip": "172.31.95.2",
+        "context": {
+          "body": {}
+        },
+        "resolved": false,
+        "count": 5
+      }
     ]
   ],
   "stats": {
-    "totalErrors": 396,
+    "totalErrors": 423,
     "criticalErrors": 0,
     "errorsByHour": {
       "0": 17,
       "1": 37,
       "2": 17,
-      "3": 9,
+      "3": 36,
       "4": 4,
       "5": 18,
       "6": 7,
@@ -144,20 +163,20 @@
       "23": 10
     },
     "errorsByEndpoint": {
-      "/": 5,
+      "/": 10,
       "/api/auth/login": 3
     },
     "errorsByType": {
-      "General": 396
+      "General": 423
     },
     "lastError": {
       "id": "bfdbcb60",
-      "timestamp": "2025-07-26T03:44:33.927Z",
+      "timestamp": "2025-07-26T03:57:08.957Z",
       "level": "info",
       "message": "Application startup initiated",
       "resolved": false,
-      "count": 328
+      "count": 340
     }
   },
-  "lastSaved": "2025-07-26T03:44:33.927Z"
+  "lastSaved": "2025-07-26T03:57:08.957Z"
 }

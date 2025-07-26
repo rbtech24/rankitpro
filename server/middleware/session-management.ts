@@ -156,7 +156,9 @@ export function sessionMonitoring(req: SessionRequest, res: Response, next: Next
 
   // Add session info to response headers for debugging
   if (process.env.NODE_ENV !== 'production') {
-    res.setHeader('X-Session-ID', sessionId);
+    if (sessionId) {
+      res.setHeader('X-Session-ID', sessionId);
+    }
     res.setHeader('X-User-ID', userId || 'none');
     res.setHeader('X-Session-Count', userId ? getActiveSessionCount(userId).toString() : '0');
   }
