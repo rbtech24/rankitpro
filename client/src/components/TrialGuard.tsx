@@ -169,70 +169,32 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
                            !trialStatus.subscriptionActive && 
                            trialStatus.daysLeft <= 7;
 
-  // Complete blocking mode - show modal and prevent access (except for billing page)
+  // Complete blocking mode - show new modal with payment options (except for billing page)
   if (blockingActive && trialStatus?.expired && !isBillingPage) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-            <XCircle className="h-8 w-8 text-red-600" />
-          </div>
-
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Trial Expired
-          </h1>
-
-          <p className="text-gray-600 mb-6">
-            Your company's 14-day free trial ended on{' '}
-            {trialStatus.trialEndDate ? 
-              new Date(trialStatus.trialEndDate).toLocaleDateString() : 
-              'recently'
-            }. {user.role === 'company_admin' ? 
-              'Choose a subscription plan to restore access for your team.' :
-              'Please contact your company administrator to upgrade the subscription.'
+      <>
+        <TrialExpiredModal 
+          isOpen={true}
+          onClose={() => {
+            // Only allow closing if not enforcing blocking
+            if (!enforceBlocking) {
+              setShowTrialModal(false);
+              setBlockingActive(false);
             }
-          </p>
-
-          <div className="bg-red-50 rounded-lg p-4 mb-6">
-            <div className="flex items-center mb-2">
-              <Shield className="h-5 w-5 text-red-600 mr-2" />
-              <h3 className="font-medium text-red-900">Access Restricted</h3>
+          }}
+          trialEndDate={trialStatus?.trialEndDate}
+        />
+        {/* Render a minimal blocked page behind the modal */}
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center opacity-50">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+              <XCircle className="h-8 w-8 text-red-600" />
             </div>
-            <ul className="text-sm text-red-700 space-y-1">
-              <li>• All platform features are now locked</li>
-              <li>• Your data and settings are safely preserved</li>
-              <li>• Upgrade now to restore immediate access</li>
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            {user.role === 'company_admin' ? (
-              <Button 
-                onClick={handleUpgrade}
-                className="w-full"
-                size="lg"
-              >
-                <CreditCard className="h-4 w-4 mr-2" />
-                View Subscription Plans
-              </Button>
-            ) : (
-              <div className="bg-blue-50 rounded-lg p-4 text-center">
-                <p className="text-sm text-blue-700 font-medium">
-                  Please contact your company administrator to restore access.
-                </p>
-              </div>
-            )}
-
-            <Button 
-              variant="outline" 
-              onClick={handleLogout}
-              className="w-full"
-            >
-              Sign Out
-            </Button>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Service Suspended</h1>
+            <p className="text-gray-600">Please complete your subscription to continue.</p>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -260,7 +222,7 @@ export function TrialGuard({ children, user, enforceBlocking = false }: TrialGua
         </Alert>
       )}
 
-      {/* Enhanced Trial Expired Modal */}
+      {/* Enhanced Trial Expired Modal with Payment Options */}
       <TrialExpiredModal 
         isOpen={showTrialModal}
         onClose={handleDismiss}

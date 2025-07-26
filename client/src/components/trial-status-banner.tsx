@@ -46,11 +46,6 @@ export function TrialStatusBanner() {
               size="sm"
               onClick={() => {
                 // Trigger trial expired modal for quick payment
-                const modal = document.createElement('div');
-                modal.id = 'trial-expired-quick-pay';
-                document.body.appendChild(modal);
-                
-                // This will be handled by the TrialGuard component
                 window.dispatchEvent(new CustomEvent('show-trial-modal'));
               }}
             >
