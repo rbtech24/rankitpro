@@ -127,17 +127,29 @@ export default function Billing() {
     onSuccess: (data) => {
       setIsLoading(false);
       
-      // Always expect a clientSecret for real Stripe payment
-      if (data.clientSecret) {
-        setClientSecret(data.clientSecret);
-      } else if (data.success) {
-        // Plan updated successfully without payment (e.g., same price)
+      // Handle development mode response (direct plan update)
+      if (data.devMode || data.success) {
         toast({
-          title: "Subscription Updated",
-          description: `Your subscription plan has been updated.`,
+          title: "Plan Updated",
+          description: data.message || "Your subscription plan has been updated successfully!",
           variant: "default",
         });
-        
+        queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+        setSelectedPlan(null);
+        return;
+      }
+      
+      // Handle Stripe payment flow
+      if (data.clientSecret) {
+        setClientSecret(data.clientSecret);
+      } else {
+        // Fallback success case
+        toast({
+          title: "Subscription Updated",
+          description: "Your subscription plan has been updated.",
+          variant: "default",
+        });
         queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
         queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
         setSelectedPlan(null);

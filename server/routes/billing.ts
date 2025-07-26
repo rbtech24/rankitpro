@@ -259,7 +259,37 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
       return res.status(404).json({ error: 'Subscription plan not found' });
     }
 
-    // Check if Stripe is available
+    // Determine the price based on billing period
+    const price = billingPeriod === 'yearly' ? 
+      (planDetails.yearlyPrice || planDetails.price * 12) : 
+      planDetails.price;
+
+    // Development mode: bypass Stripe for testing
+    if (process.env.NODE_ENV !== 'production') {
+      logger.info("Development mode: Bypassing Stripe, updating plan directly", { 
+        companyId, 
+        planId, 
+        planName: planDetails.name,
+        billingPeriod 
+      });
+
+      // Update company plan directly in development
+      await storage.updateCompany(companyId, { 
+        plan: planDetails.name.toLowerCase() as any
+      });
+
+      return res.json({
+        success: true,
+        planId: planId,
+        planName: planDetails.name,
+        billingPeriod: billingPeriod,
+        amount: price,
+        message: 'Plan updated successfully (development mode)',
+        devMode: true
+      });
+    }
+
+    // Production mode: Use Stripe
     if (!stripeService.isStripeAvailable()) {
       return res.status(500).json({ 
         error: 'Payment processing unavailable',
@@ -267,38 +297,47 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
       });
     }
 
-    // Determine the price based on billing period
-    const price = billingPeriod === 'yearly' ? 
-      (planDetails.yearlyPrice || planDetails.price * 12) : 
-      planDetails.price;
+    try {
+      // Create Stripe payment intent for the plan
+      const paymentIntent = await stripeService.createPaymentIntent(
+        Math.round(price * 100), // Convert to cents
+        'usd',
+        {
+          companyId: companyId,
+          planId: planId,
+          billingPeriod: billingPeriod,
+          planName: planDetails.name
+        }
+      );
 
-    // Create Stripe payment intent for the plan
-    const paymentIntent = await stripeService.createPaymentIntent(
-      Math.round(price * 100), // Convert to cents
-      'usd',
-      {
-        companyId: companyId,
-        planId: planId,
-        billingPeriod: billingPeriod,
-        planName: planDetails.name
+      if (!paymentIntent.client_secret) {
+        throw new Error('Failed to create payment intent');
       }
-    );
 
-    if (!paymentIntent.client_secret) {
-      throw new Error('Failed to create payment intent');
+      return res.json({
+        clientSecret: paymentIntent.client_secret,
+        planId: planId,
+        planName: planDetails.name,
+        billingPeriod: billingPeriod,
+        amount: price,
+        message: 'Payment intent created successfully'
+      });
+    } catch (stripeError: any) {
+      logger.error("Stripe payment intent creation failed", { 
+        errorMessage: stripeError?.message || "Unknown error",
+        companyId,
+        planId,
+        planName: planDetails.name
+      });
+      
+      return res.status(500).json({
+        error: 'Payment processing failed',
+        message: stripeError.message || 'Unable to process payment. Please try again or contact support.',
+        details: stripeError.message
+      });
     }
 
-    // Store the subscription change request temporarily
-    // This will be completed when the payment succeeds via webhook
-    
-    return res.json({
-      clientSecret: paymentIntent.client_secret,
-      planId: planId,
-      planName: planDetails.name,
-      billingPeriod: billingPeriod,
-      amount: price,
-      message: 'Payment intent created successfully'
-    });
+
 
   } catch (error: any) {
     logger.error("Subscription creation error", { errorMessage: error?.message || "Unknown error" });
