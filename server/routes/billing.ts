@@ -23,24 +23,46 @@ router.get('/plans', isAuthenticated, async (req: Request, res: Response) => {
 });
 
 /**
- * Create a new subscription plan (admin only)
+ * Create a new subscription plan with Stripe integration (admin only)
  */
 router.post('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
   try {
-    const { name, price, billingPeriod, maxTechnicians, maxCheckIns, features } = req.body;
+    const { name, price, yearlyPrice, billingPeriod, maxTechnicians, maxCheckIns, features, isActive } = req.body;
     
     if (!name || !price || !features) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
+    // Create plan in database first
     const newPlan = await storage.createSubscriptionPlan({
       name,
       price,
+      yearlyPrice: yearlyPrice || null,
       billingPeriod: billingPeriod || 'monthly',
       maxTechnicians: maxTechnicians || 5,
       maxCheckIns: maxCheckIns || 50,
-      features: Array.isArray(features) ? features : [features]
+      features: Array.isArray(features) ? features : [features],
+      isActive: isActive !== undefined ? isActive : true
     });
+    
+    // Auto-sync with Stripe
+    try {
+      const stripeProductId = await stripeService.createOrUpdatePlanPrice(
+        name, 
+        parseFloat(price), 
+        billingPeriod === 'yearly' ? 'year' : 'month'
+      );
+      
+      if (stripeProductId) {
+        // Update plan with Stripe IDs
+        await storage.updateSubscriptionPlan(newPlan.id, {
+          stripePriceId: stripeProductId
+        });
+        newPlan.stripePriceId = stripeProductId;
+      }
+    } catch (stripeError: any) {
+      logger.warn("Stripe sync failed during plan creation", { errorMessage: stripeError?.message || "Unknown error" });
+    }
     
     res.json(newPlan);
   } catch (error: any) {
@@ -53,7 +75,7 @@ router.post('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: R
 });
 
 /**
- * Update a subscription plan (admin only)
+ * Update a subscription plan with Stripe sync (admin only)
  */
 router.put('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
   try {
@@ -64,6 +86,27 @@ router.put('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, res
     
     if (!updatedPlan) {
       return res.status(404).json({ error: 'Subscription plan not found' });
+    }
+    
+    // Auto-sync with Stripe if price changed
+    if (updates.price || updates.name) {
+      try {
+        const stripeProductId = await stripeService.createOrUpdatePlanPrice(
+          updatedPlan.name, 
+          parseFloat(updatedPlan.price), 
+          updatedPlan.billingPeriod === 'yearly' ? 'year' : 'month'
+        );
+        
+        if (stripeProductId && stripeProductId !== updatedPlan.stripePriceId) {
+          // Update plan with new Stripe ID
+          await storage.updateSubscriptionPlan(parseInt(id), {
+            stripePriceId: stripeProductId
+          });
+          updatedPlan.stripePriceId = stripeProductId;
+        }
+      } catch (stripeError: any) {
+        logger.warn("Stripe sync failed during plan update", { errorMessage: stripeError?.message || "Unknown error" });
+      }
     }
     
     res.json(updatedPlan);
@@ -314,5 +357,46 @@ async function getUsageStats(companyId: number) {
     }
   };
 }
+
+/**
+ * Manually sync a subscription plan with Stripe
+ */
+router.post('/plans/:id/sync-stripe', isAuthenticated, isSuperAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    // Get the plan first
+    const plans = await storage.getAllSubscriptionPlans();
+    const plan = plans.find(p => p.id === parseInt(id));
+    
+    if (!plan) {
+      return res.status(404).json({ error: 'Subscription plan not found' });
+    }
+    
+    // Sync with Stripe
+    const stripeProductId = await stripeService.createOrUpdatePlanPrice(
+      plan.name, 
+      parseFloat(plan.price), 
+      plan.billingPeriod === 'yearly' ? 'year' : 'month'
+    );
+    
+    if (!stripeProductId) {
+      return res.status(500).json({ error: 'Failed to sync with Stripe' });
+    }
+    
+    // Update plan with Stripe ID
+    const updatedPlan = await storage.updateSubscriptionPlan(parseInt(id), {
+      stripePriceId: stripeProductId
+    });
+    
+    res.json(updatedPlan);
+  } catch (error: any) {
+    logger.error("Stripe sync error", { errorMessage: error?.message || "Unknown error" });
+    res.status(500).json({ 
+      error: 'Failed to sync with Stripe',
+      message: error.message
+    });
+  }
+});
 
 export default router;

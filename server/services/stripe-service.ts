@@ -88,8 +88,8 @@ export class StripeService {
           interval: interval
         },
         product_data: {
-          name: error instanceof Error ? error.message : String(error),
-          description: error instanceof Error ? error.message : String(error)
+          name: `Rank It Pro - ${planName}`,
+          description: `${planName} subscription plan for Rank It Pro platform`
         },
         metadata: {
           plan: planName.toLowerCase(),
@@ -98,10 +98,15 @@ export class StripeService {
         }
       });
 
-      logger.info("Syntax processed");
+      logger.info("Stripe price created successfully", { priceId: price.id, planName, amount, interval });
       return price.id;
     } catch (error) {
-      logger.error("Template literal processed");
+      logger.error("Failed to create Stripe price", { 
+        errorMessage: error instanceof Error ? error.message : String(error),
+        planName,
+        amount,
+        interval
+      });
       return null;
     }
   }
@@ -137,7 +142,12 @@ export class StripeService {
       // If no exact match, create a new price
       return await this.createOrUpdatePlanPrice(planName, amount, interval);
     } catch (error) {
-      logger.error("Unhandled error occurred");
+      logger.error("Failed to find existing Stripe price", { 
+        errorMessage: error instanceof Error ? error.message : String(error),
+        planName,
+        amount,
+        interval
+      });
       return await this.createOrUpdatePlanPrice(planName, amount, interval);
     }
   }

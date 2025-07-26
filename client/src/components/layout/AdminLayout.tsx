@@ -63,7 +63,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         { name: "Companies", path: "/companies-management", icon: Building2, description: "Manage client companies" },
         { name: "Technicians", path: "/technicians-management", icon: Users, description: "Field staff management" },
         { name: "Admin Users", path: "/admin-user-management", icon: Shield, description: "System administrators" },
-        { name: "Subscription Plans", path: "/subscription-management", icon: CreditCard, description: "Subscription management" },
+        { name: "Subscription Plans", path: "/subscription-plans-management", icon: CreditCard, description: "Manage subscription plans and pricing" },
         { name: "Sales Management", path: "/sales-management", icon: TrendingUp, description: "Sales team and performance" },
         { name: "Support Management", path: "/support-management", icon: MessageCircle, description: "Customer support system" },
       ]

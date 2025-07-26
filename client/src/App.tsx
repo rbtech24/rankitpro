@@ -1253,6 +1253,10 @@ function Router() {
       <Route path="/technicians-management">
         <PrivateRoute component={TechniciansManagement} path="/technicians-management" role="super_admin" />
       </Route>
+      
+      <Route path="/subscription-plans-management">
+        <PrivateRoute component={lazy(() => import("./pages/subscription-plans-management"))} path="/subscription-plans-management" role="super_admin" />
+      </Route>
       <Route path="/companies">
         <PrivateRoute component={CompaniesManagement} path="/companies" role="super_admin" />
       </Route>
