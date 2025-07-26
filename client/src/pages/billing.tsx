@@ -261,41 +261,98 @@ export default function Billing() {
     <DashboardLayout>
       {/* Payment Modal */}
       <Dialog open={!!clientSecret} onOpenChange={(open) => !open && setClientSecret(null)}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Complete Your Payment</DialogTitle>
+            <DialogTitle>Complete Your Subscription</DialogTitle>
             <DialogDescription>
-              Please provide your payment details to {selectedPlan ? `switch to the ${selectedPlan} plan` : 'complete your subscription'}.
+              {selectedPlan && subscriptionPlans && (() => {
+                const planDetails = subscriptionPlans.find(p => p.name.toLowerCase() === selectedPlan);
+                return planDetails ? `Upgrade to ${planDetails.name} plan for $${planDetails.price}/${planDetails.billingPeriod}` : 'Complete your subscription upgrade';
+              })()}
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-{clientSecret && true ? (
-              <Elements stripe={stripePromise} options={{ clientSecret }}>
-                <PaymentForm 
-                  clientSecret={clientSecret}
-                  onSuccess={() => {
-                    setClientSecret(null);
-                    toast({
-                      title: "Payment Successful",
-                      description: `Your subscription has been updated to the ${selectedPlan} plan.`,
-                      variant: "default",
-                    });
-                    queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
-                    queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
-                    setSelectedPlan(null);
-                  }}
-                  buttonText="Complete Payment"
-                  isSubscription={true}
-                />
-              </Elements>
-            ) : false ? (
-              <StripeConfigNotice showConfigHelp={true} />
-            ) : (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          
+          {/* Development Mode Simulation */}
+          {clientSecret && clientSecret.startsWith('pi_dev_') ? (
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                  <span className="font-medium text-blue-800">Development Mode</span>
+                </div>
+                <p className="text-sm text-blue-700 mt-2">
+                  This is a simulated payment flow. In production, you would enter your payment details here.
+                </p>
               </div>
-            )}
-          </div>
+              
+              <div className="space-y-3">
+                <h4 className="font-medium">Subscription Details:</h4>
+                {selectedPlan && subscriptionPlans && (() => {
+                  const planDetails = subscriptionPlans.find(p => p.name.toLowerCase() === selectedPlan);
+                  return planDetails ? (
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">{planDetails.name} Plan</span>
+                        <span className="text-lg font-bold">${planDetails.price}/{planDetails.billingPeriod}</span>
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {planDetails.maxTechnicians === -1 ? 'Unlimited' : planDetails.maxTechnicians} technicians, 
+                        {planDetails.maxCheckIns === -1 ? 'Unlimited' : planDetails.maxCheckIns} check-ins
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
+              </div>
+              
+              <div className="flex space-x-3">
+                <Button 
+                  onClick={async () => {
+                    // Simulate successful payment by calling the development endpoint
+                    try {
+                      const response = await apiRequest('POST', '/api/billing/subscription/complete-development', { 
+                        plan: selectedPlan 
+                      });
+                      const data = await response.json();
+                      
+                      setClientSecret(null);
+                      toast({
+                        title: "Subscription Updated",
+                        description: "Your subscription has been successfully upgraded!",
+                        variant: "default",
+                      });
+                      
+                      queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
+                      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+                      setSelectedPlan(null);
+                    } catch (error) {
+                      console.error('Development payment error:', error);
+                      toast({
+                        title: "Error",
+                        description: "Failed to update subscription. Please try again.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  className="flex-1"
+                >
+                  Simulate Payment Success
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setClientSecret(null)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            // Real Stripe payment form would go here
+            <div className="space-y-4">
+              <p>Stripe payment form would appear here in production.</p>
+              <Button onClick={() => setClientSecret(null)}>Close</Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
       

@@ -198,19 +198,17 @@ export class StripeService {
     
     const priceId = dbPlan.stripePriceId;
     
-    // For development, simulate subscription success if using dummy price IDs
+    // For development, simulate subscription with client secret if using dummy price IDs
     if (priceId.startsWith('price_1HgBKn')) {
-      logger.warn('Using dummy Stripe price ID - simulating subscription success');
+      logger.warn('Using dummy Stripe price ID - simulating subscription with payment flow');
       
-      // Update plan in database without Stripe
-      const user = await storage.getUser(userId);
-      if (user && user.companyId) {
-        await storage.updateCompany(user.companyId, { plan: plan as any });
-      }
-      
+      // Return a dummy client secret to trigger the payment modal in development
+      // The plan will be updated when the frontend confirms the "payment"
       return { 
+        clientSecret: 'pi_dev_' + Date.now() + '_secret_dev',
         subscriptionId: 'dummy_sub_' + Date.now(),
-        alreadySubscribed: false 
+        alreadySubscribed: false,
+        developmentMode: true
       };
     }
 

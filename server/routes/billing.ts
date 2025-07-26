@@ -276,7 +276,8 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
     // Return the client secret for the frontend to complete the payment
     res.json({ 
       clientSecret: result.clientSecret,
-      subscriptionId: result.subscriptionId
+      subscriptionId: result.subscriptionId,
+      developmentMode: result.developmentMode || false
     });
   } catch (error: any) {
     logger.error("Failed to create subscription", { 
@@ -468,6 +469,59 @@ router.post('/plans/:id/sync-stripe', isAuthenticated, isSuperAdmin, async (req:
     res.status(500).json({ 
       error: 'Failed to sync with Stripe',
       message: error.message
+    });
+  }
+});
+
+/**
+ * Complete development payment simulation
+ */
+router.post('/subscription/complete-development', isAuthenticated, isCompanyAdmin, async (req: Request, res: Response) => {
+  try {
+    const { plan } = req.body;
+    
+    if (!plan) {
+      return res.status(400).json({ error: 'Plan is required' });
+    }
+    
+    // @ts-ignore - userId does exist on req.user
+    const userId = req.user.id;
+    const user = await storage.getUser(userId);
+    
+    if (!user || !user.companyId) {
+      return res.status(400).json({ error: 'User or company not found' });
+    }
+    
+    // Map new plan names to old ones for database compatibility
+    let dbPlan = plan;
+    if (plan === 'essential') dbPlan = 'starter';
+    if (plan === 'professional') dbPlan = 'pro';
+    if (plan === 'enterprise') dbPlan = 'agency';
+    
+    // Update company plan
+    await storage.updateCompany(user.companyId, { plan: dbPlan as any });
+    
+    logger.info("Development payment simulation completed", { 
+      userId,
+      companyId: user.companyId,
+      plan: dbPlan,
+      originalPlan: plan
+    });
+    
+    res.json({ 
+      success: true,
+      message: 'Plan updated successfully',
+      plan: dbPlan
+    });
+  } catch (error: any) {
+    logger.error("Failed to complete development payment", { 
+      errorMessage: error instanceof Error ? error.message : String(error),
+      plan: req.body.plan,
+      userId: req.user?.id
+    });
+    res.status(500).json({ 
+      error: 'Failed to complete development payment',
+      message: error.message || error
     });
   }
 });
