@@ -30,7 +30,7 @@ router.get('/:id',
       const companyId = parseInt(req.params.id);
       const userId = req.session.userId!;
 
-      logger.apiRequest(req.method, req.path, { 
+      logger.info(req.method, req.path, { 
         userId, 
         companyId,
         ip: req.ip 
@@ -87,7 +87,7 @@ router.put('/:id',
       const userId = req.session.userId!;
       const updates = req.body;
 
-      logger.apiRequest(req.method, req.path, { 
+      logger.info(req.method, req.path, { 
         userId, 
         companyId,
         updates: Object.keys(updates),
@@ -141,7 +141,7 @@ router.get('/current',
     try {
       const userId = req.session.userId!;
       
-      logger.apiRequest(req.method, req.path, { 
+      logger.info(req.method, req.path, { 
         userId,
         ip: req.ip 
       });
@@ -187,7 +187,9 @@ router.get('/',
   async (req, res) => {
     try {
       const userId = req.session.userId!;
-      logger.apiRequest(req.method, req.path, { 
+      logger.info('API request received', { 
+        method: req.method,
+        path: req.path,
         userId,
         ip: req.ip 
       });
@@ -202,8 +204,10 @@ router.get('/',
 
     } catch (error) {
       logger.error('Get all companies endpoint error', { 
-        userId: req.session.userId 
-      }, error as Error);
+        userId: req.session.userId,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -219,7 +223,7 @@ router.post('/',
       const userId = req.session.userId!;
       const companyData = req.body;
 
-      logger.apiRequest(req.method, req.path, { 
+      logger.info(req.method, req.path, { 
         userId, 
         companyName: companyData.name,
         ip: req.ip 
@@ -255,7 +259,7 @@ router.delete('/:id',
       const companyId = parseInt(req.params.id);
       const userId = req.session.userId!;
 
-      logger.apiRequest(req.method, req.path, { 
+      logger.info(req.method, req.path, { 
         userId, 
         companyId,
         ip: req.ip 
@@ -301,7 +305,7 @@ router.patch('/:id/status',
       const companyId = parseInt(req.params.id);
       const userId = req.session.userId!;
 
-      logger.apiRequest(req.method, req.path, { 
+      logger.info(req.method, req.path, { 
         userId, 
         companyId,
         ip: req.ip 

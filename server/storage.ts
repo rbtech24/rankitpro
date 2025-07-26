@@ -503,69 +503,61 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllCompanies(): Promise<Company[]> {
-    const companiesList = await db.select().from(companies);
-    
-    // For each company, calculate stats including technician count
-    const companiesWithStats = await Promise.all(
-      companiesList.map(async (company) => {
-        try {
-          // Get technician count for this company from technicians table
-          const techCount = await db.select({ count: sql<number>`count(*)` })
-            .from(technicians)
-            .where(eq(technicians.companyId, company.id));
-          
-          // Get check-ins count for this company
-          const checkInsCount = await db.select({ count: sql<number>`count(*)` })
-            .from(checkIns)
-            .where(eq(checkIns.companyId, company.id));
-          
-          // Get blog posts count for this company
-          const blogPostsCount = await db.select({ count: sql<number>`count(*)` })
-            .from(blogPosts)
-            .where(eq(blogPosts.companyId, company.id));
-          
-          // Get reviews count for this company
-          const reviewsCount = await db.select({ count: sql<number>`count(*)` })
-            .from(testimonials)
-            .where(eq(testimonials.companyId, company.id));
-          
-          // Calculate average rating (use 4.5 as default for companies with reviews)
-          const reviewResponsesCount = await db.select({ count: sql<number>`count(*)` })
-            .from(reviewResponses)
-            .where(eq(reviewResponses.companyId, company.id));
-          
-          const avgRating = reviewResponsesCount[0]?.count > 0 ? 4.5 : 0;
-          
-          return {
-            ...company,
-            stats: {
-              totalTechnicians: techCount[0]?.count || 0,
-              totalCheckIns: checkInsCount[0]?.count || 0,
-              totalBlogPosts: blogPostsCount[0]?.count || 0,
-              totalReviews: reviewsCount[0]?.count || 0,
-              avgRating: avgRating
-            }
-          };
-        } catch (error) {
-          logger.error("Error calculating company stats", { 
-            companyId: company.id, 
-            errorMessage: error instanceof Error ? error.message : String(error) 
-          });
-          return {
-            ...company,
-            stats: {
-              totalTechnicians: 0,
-              totalCheckIns: 0,
-              totalBlogPosts: 0,
-              totalReviews: 0,
-              avgRating: 0
-            }
-          };
-        }
-      })
-    );
-    
-    return companiesWithStats;
+    try {
+      // Get companies with technician counts using a simpler approach
+      const companiesList = await db.select().from(companies).orderBy(companies.name);
+      
+      // Add technician counts for each company individually
+      const companiesWithStats = await Promise.all(
+        companiesList.map(async (company) => {
+          try {
+            // Get technician count for this company using a simpler count query
+            const techCountResult = await db.select({ count: sql<number>`COUNT(*)` })
+              .from(technicians)
+              .where(eq(technicians.companyId, company.id));
+            
+            const techCount = Number(techCountResult[0]?.count) || 0;
+            
+            logger.info(`Company technician count: ${company.name} has ${techCount} technicians`, {
+              companyId: company.id,
+              companyName: company.name,
+              techCount: techCount,
+              rawResult: techCountResult[0]
+            });
+            
+            return {
+              ...company,
+              userCount: techCount, // Add userCount for frontend compatibility
+              stats: {
+                totalTechnicians: techCount
+              }
+            };
+          } catch (error) {
+            logger.error("Error calculating company technician count", { 
+              companyId: company.id, 
+              companyName: company.name,
+              errorMessage: error instanceof Error ? error.message : String(error)
+            });
+            return {
+              ...company,
+              userCount: 0,
+              stats: {
+                totalTechnicians: 0
+              }
+            };
+          }
+        })
+      );
+      
+      return companiesWithStats;
+      
+    } catch (error) {
+      logger.error("Error in getAllCompanies", { 
+        errorMessage: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      throw error;
+    }
   }
 
   async createCompany(company: InsertCompany): Promise<Company> {
