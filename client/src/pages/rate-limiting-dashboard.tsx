@@ -24,6 +24,7 @@ import {
   Unlock
 } from 'lucide-react';
 import { apiRequest } from '../lib/queryClient';
+import AdminLayout from '../components/layout/AdminLayout';
 
 interface RateLimitConfig {
   name: string;
@@ -91,10 +92,7 @@ export default function RateLimitingDashboard() {
   // Unblock IP mutation
   const unblockMutation = useMutation({
     mutationFn: async (ip: string) => {
-      return apiRequest('/api/admin/rate-limiting/unblock-ip', {
-        method: 'POST',
-        body: { ip }
-      });
+      return apiRequest('POST', '/api/admin/rate-limiting/unblock-ip', { ip });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/rate-limiting/blocked-ips'] });
@@ -135,7 +133,8 @@ export default function RateLimitingDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -440,6 +439,7 @@ export default function RateLimitingDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }
