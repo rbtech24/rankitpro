@@ -94,6 +94,59 @@ router.get('/suspicious-activities', (req, res) => {
   }
 });
 
+// Block an IP address manually
+router.post('/block-ip', (req, res) => {
+  try {
+    const { ip, reason = 'Manually blocked by admin' } = req.body;
+
+    if (!ip) {
+      return res.status(400).json({
+        error: 'missing_ip',
+        message: 'IP address is required'
+      });
+    }
+
+    // Validate IP format (basic validation)
+    const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+    if (!ipRegex.test(ip)) {
+      return res.status(400).json({
+        error: 'invalid_ip',
+        message: 'Invalid IP address format'
+      });
+    }
+
+    const blocked = rateLimitAdminRoutes.blockIP(ip, reason);
+
+    if (blocked) {
+      logger.info('IP address manually blocked by admin', { 
+        ip, 
+        reason,
+        adminUserId: (req as any).user.id 
+      });
+      
+      res.json({
+        success: true,
+        message: `IP address ${ip} has been blocked`,
+        ip,
+        reason,
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      res.status(409).json({
+        error: 'ip_already_blocked',
+        message: `IP address ${ip} is already blocked`,
+        ip
+      });
+    }
+  } catch (error) {
+    logger.error('Failed to block IP', { error: String(error), ip: req.body.ip });
+    res.status(500).json({
+      error: 'failed_to_block',
+      message: 'Unable to block IP address'
+    });
+  }
+});
+
 // Unblock an IP address
 router.post('/unblock-ip', (req, res) => {
   try {

@@ -172,6 +172,15 @@ class ThreatDetectionService {
     return Array.from(this.blockedIPs);
   }
 
+  blockIP(ip: string, reason: string = 'Manually blocked'): boolean {
+    if (this.blockedIPs.has(ip)) {
+      return false; // Already blocked
+    }
+    this.blockedIPs.add(ip);
+    logger.info('IP address blocked', { ip, reason });
+    return true;
+  }
+
   unblockIP(ip: string): boolean {
     return this.blockedIPs.delete(ip);
   }
@@ -308,6 +317,7 @@ export function advancedRateLimit(req: Request, res: Response, next: NextFunctio
 // Admin endpoints for managing rate limiting
 export const rateLimitAdminRoutes = {
   getBlockedIPs: () => threatDetection.getBlockedIPs(),
+  blockIP: (ip: string, reason?: string) => threatDetection.blockIP(ip, reason),
   unblockIP: (ip: string) => threatDetection.unblockIP(ip),
   getSuspiciousActivities: () => threatDetection.getSuspiciousActivities(),
   getRateLimitTiers: () => rateLimitTiers.map(tier => ({

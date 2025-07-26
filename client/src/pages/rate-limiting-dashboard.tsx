@@ -63,6 +63,8 @@ interface RateLimitStatistics {
 
 export default function RateLimitingDashboard() {
   const [selectedIP, setSelectedIP] = useState('');
+  const [blockingIP, setBlockingIP] = useState('');
+  const [blockReason, setBlockReason] = useState('');
   const queryClient = useQueryClient();
 
   // Fetch rate limiting configuration
@@ -89,6 +91,19 @@ export default function RateLimitingDashboard() {
     refetchInterval: 30000
   });
 
+  // Block IP mutation
+  const blockMutation = useMutation({
+    mutationFn: async ({ ip, reason }: { ip: string; reason: string }) => {
+      return apiRequest('POST', '/api/admin/rate-limiting/block-ip', { ip, reason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/rate-limiting/blocked-ips'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/rate-limiting/statistics'] });
+      setBlockingIP('');
+      setBlockReason('');
+    }
+  });
+
   // Unblock IP mutation
   const unblockMutation = useMutation({
     mutationFn: async (ip: string) => {
@@ -100,6 +115,15 @@ export default function RateLimitingDashboard() {
       setSelectedIP('');
     }
   });
+
+  const handleBlockIP = () => {
+    if (blockingIP.trim()) {
+      blockMutation.mutate({ 
+        ip: blockingIP.trim(), 
+        reason: blockReason.trim() || 'Manually blocked by admin' 
+      });
+    }
+  };
 
   const handleUnblockIP = () => {
     if (selectedIP.trim()) {
@@ -259,6 +283,53 @@ export default function RateLimitingDashboard() {
         </TabsContent>
 
         <TabsContent value="blocked-ips" className="space-y-4">
+          {/* Block IP Tool */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Shield className="h-5 w-5 mr-2 text-red-600" />
+                Block IP Address
+              </CardTitle>
+              <CardDescription>
+                Manually block an IP address from accessing the system
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex space-x-2">
+                  <Input
+                    placeholder="Enter IP address (e.g., 192.168.1.100)"
+                    value={blockingIP}
+                    onChange={(e) => setBlockingIP(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleBlockIP}
+                    disabled={!blockingIP.trim() || blockMutation.isPending}
+                    variant="destructive"
+                  >
+                    {blockMutation.isPending ? 'Blocking...' : 'Block IP'}
+                  </Button>
+                </div>
+                <div>
+                  <Input
+                    placeholder="Reason for blocking (optional)"
+                    value={blockReason}
+                    onChange={(e) => setBlockReason(e.target.value)}
+                  />
+                </div>
+              </div>
+              {blockMutation.error && (
+                <Alert className="mt-3">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    Failed to block IP: {String(blockMutation.error)}
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Unblock IP Tool */}
           <Card>
             <CardHeader>
