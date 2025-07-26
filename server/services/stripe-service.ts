@@ -503,28 +503,7 @@ export class StripeService {
     }
   }
   
-  /**
-   * Create a payment intent for a one-time payment
-   */
-  async createPaymentIntent(amount: number, currency: string = 'usd', customerId?: string): Promise<string> {
-    // Return empty string if Stripe is not available
-    if (!this.isStripeAvailable()) {
-      return '';
-    }
-    
-    try {
-      const paymentIntent = await stripe!.paymentIntents.create({
-        amount: Math.round(amount * 100), // Convert to cents
-        currency,
-        ...(customerId && { customer: customerId }),
-      });
-      
-      return paymentIntent.client_secret || '';
-    } catch (error: any) {
-      logger.error("Unhandled error occurred");
-      throw new Error("Failed to create payment intent");
-    }
-  }
+
   
   /**
    * Update a company's plan based on a user's subscription

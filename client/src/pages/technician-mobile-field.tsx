@@ -95,7 +95,7 @@ export default function TechnicianMobileField() {
     { id: '5', name: 'Winterization' }
   ];
 
-  // Mock recent check-ins
+  // Mock recent submissions
   const checkIns = [
     { id: '1', jobType: 'Sprinkler Repair', timestamp: '2024-01-15 10:30 AM' },
     { id: '2', jobType: 'System Maintenance', timestamp: '2024-01-14 2:15 PM' }
@@ -400,10 +400,10 @@ export default function TechnicianMobileField() {
               </CardContent>
             </Card>
 
-            {/* Recent Check-ins */}
+            {/* Recent Submissions */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent Check-ins</CardTitle>
+                <CardTitle>Recent Submissions</CardTitle>
               </CardHeader>
               <CardContent>
                 {Array.isArray(checkIns) && checkIns.length > 0 ? (
@@ -416,7 +416,7 @@ export default function TechnicianMobileField() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-600">No recent check-ins</p>
+                  <p className="text-gray-600">No recent submissions</p>
                 )}
               </CardContent>
             </Card>

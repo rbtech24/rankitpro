@@ -142,20 +142,29 @@ export default function Billing() {
         setSelectedPlan(null);
       }
     },
-    onError: (error: any) => {
+    onError: async (error: any) => {
       setIsLoading(false);
       console.error('Error updating subscription:', error);
       
-      // Extract error message from response
+      // Extract detailed error message from response
       let errorMessage = "Failed to update your subscription. Please try again.";
-      if (error?.response?.json) {
-        error.response.json().then((data: any) => {
-          if (data.message) {
-            setSubscriptionError(data.message);
+      
+      try {
+        if (error?.response) {
+          const errorData = await error.response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+            setSubscriptionError(errorData.message);
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+            setSubscriptionError(errorData.error);
           }
-        });
-      } else if (error?.message) {
-        setSubscriptionError(error.message);
+        } else if (error?.message) {
+          errorMessage = error.message;
+          setSubscriptionError(error.message);
+        }
+      } catch (parseError) {
+        console.error('Error parsing error response:', parseError);
       }
       
       toast({
@@ -290,7 +299,7 @@ export default function Billing() {
                         </div>
                         <div className="text-sm text-gray-600 mt-1">
                           {planDetails.maxTechnicians === -1 ? 'Unlimited' : planDetails.maxTechnicians} technicians, 
-                          {planDetails.maxCheckIns === -1 ? 'Unlimited' : planDetails.maxCheckIns} check-ins
+                          {planDetails.maxCheckIns === -1 ? 'Unlimited' : planDetails.maxCheckIns} submissions
                         </div>
                       </div>
                     ) : null;
@@ -385,7 +394,7 @@ export default function Billing() {
                     ) : subscriptionData?.usage ? (
                       <>
                         <div className="bg-white rounded-lg border p-4">
-                          <div className="text-sm text-gray-500 mb-1">Check-ins</div>
+                          <div className="text-sm text-gray-500 mb-1">Submissions</div>
                           <div className="flex items-end justify-between">
                             <div className="text-xl font-semibold">{subscriptionData.usage.checkins.used}</div>
                             <div className="text-sm text-gray-500">/ {subscriptionData.usage.checkins.limit}</div>
@@ -465,7 +474,7 @@ export default function Billing() {
                           <CardTitle>{plan.name}</CardTitle>
                           <CardDescription>
                             {plan.maxTechnicians === -1 ? 'Unlimited' : plan.maxTechnicians} technicians, 
-                            {plan.maxCheckIns === -1 ? 'Unlimited' : plan.maxCheckIns} check-ins
+                            {plan.maxCheckIns === -1 ? 'Unlimited' : plan.maxCheckIns} submissions
                           </CardDescription>
                           <div className="mt-2">
                             <span className="text-3xl font-bold">${plan.price}</span>
@@ -480,7 +489,7 @@ export default function Billing() {
                             </li>
                             <li className="flex items-center">
                               <span className="mr-2">📋</span>
-                              <span>Max {plan.maxCheckIns === -1 ? 'Unlimited' : plan.maxCheckIns} Check-ins</span>
+                              <span>Max {plan.maxCheckIns === -1 ? 'Unlimited' : plan.maxCheckIns} Submissions</span>
                             </li>
                             {plan.features && Array.isArray(plan.features) && plan.features.map((feature: string, index: number) => (
                               <li key={index} className="flex items-center">
