@@ -184,7 +184,7 @@ const CompaniesManagement = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           <Badge 
                             variant={company.isActive ? "default" : "secondary"}
                             className={company.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}
@@ -192,17 +192,17 @@ const CompaniesManagement = () => {
                             {company.isActive ? "Active" : "Inactive"}
                           </Badge>
                           <Button 
-                            variant="ghost" 
+                            variant="outline" 
                             size="sm"
                             onClick={() => toggleStatusMutation.mutate(company.id)}
                             disabled={toggleStatusMutation.isPending}
                             title={company.isActive ? "Deactivate Company" : "Activate Company"}
-                            className="h-6 w-6 p-0"
+                            className="h-8 w-8 p-0 border-2"
                           >
                             {company.isActive ? (
-                              <PowerOff className="h-3 w-3 text-red-500" />
+                              <PowerOff className="h-4 w-4 text-red-600" />
                             ) : (
-                              <Power className="h-3 w-3 text-green-500" />
+                              <Power className="h-4 w-4 text-green-600" />
                             )}
                           </Button>
                         </div>
