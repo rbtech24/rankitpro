@@ -14,7 +14,7 @@ router.get('/plans', isAuthenticated, async (req: Request, res: Response) => {
     const plans = await storage.getAllSubscriptionPlans();
     res.json(plans);
   } catch (error: any) {
-    logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+    logger.error("Storage operation error", { errorMessage: error?.message || "Unknown error" });
     res.status(500).json({ 
       error: 'Failed to retrieve subscription plans',
       message: error.message
@@ -44,7 +44,7 @@ router.post('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: R
     
     res.json(newPlan);
   } catch (error: any) {
-    logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+    logger.error("Storage operation error", { errorMessage: error?.message || "Unknown error" });
     res.status(500).json({ 
       error: 'Failed to create subscription plan',
       message: error.message
@@ -68,7 +68,7 @@ router.put('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, res
     
     res.json(updatedPlan);
   } catch (error: any) {
-    logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+    logger.error("Storage operation error", { errorMessage: error?.message || "Unknown error" });
     res.status(500).json({ 
       error: 'Failed to update subscription plan',
       message: error.message
@@ -94,7 +94,7 @@ router.delete('/plans/:id', isAuthenticated, isSuperAdmin, async (req: Request, 
       id: parseInt(id)
     });
   } catch (error: any) {
-    logger.error("Storage operation error", { error: error?.message || "Unknown error" });
+    logger.error("Storage operation error", { errorMessage: error?.message || "Unknown error" });
     res.status(500).json({ 
       error: 'Failed to delete subscription plan',
       message: error.message

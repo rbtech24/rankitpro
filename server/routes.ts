@@ -124,6 +124,7 @@ export default function registerRoutes(app: Express) {
   app.use("/api/admin/users", adminUsersRoutes);
   app.use("/api/admin/rate-limiting", rateLimitingRoutes);
   app.use("/api/sales", salesRoutes);
+  app.use("/api/billing", billingRoutes);
   app.use("/api/check-ins", checkInRoutes);
   app.use("/api/blog", blogRoutes);
   app.use("/api/wordpress", wordpressRoutes);
