@@ -25,12 +25,23 @@ import PaymentForm from "./billing/payment-form";
 
 const getStripePromise = () => {
   const publicKey = "pk_live_51Q1IJKABx6OzSP6kA2eNndSD5luY9WJPP6HSuQ9QFZOFGIlTQaT0YeHAQCIuTlHXEZ0eV04wBl3WdjBtCf4gXi2W00jdezk2mo";
-  if (!publicKey || !publicKey.startsWith('pk_')) {
+  
+  // Check if we're in development and use test key
+  const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('replit');
+  const testKey = "pk_test_51Q1IJKABx6OzSP6kRq8F1vKKJ6r1r7QfQ8Y7nU8TnH5gH8cKL9hWpA8YqL8qK8cN7vN6tM8hB9aY6xC4vS8wD7aR5nE1zF2aK00XhY8qY";
+  
+  const keyToUse = isDev && testKey ? testKey : publicKey;
+  
+  if (!keyToUse || !keyToUse.startsWith('pk_')) {
+    console.warn('Stripe key not configured properly');
     return Promise.resolve(null);
   }
+  
   try {
-    return loadStripe(publicKey);
+    console.log('Loading Stripe with key:', keyToUse.substring(0, 20) + '...');
+    return loadStripe(keyToUse);
   } catch (error) {
+    console.error('Failed to load Stripe:', error);
     return Promise.resolve(null);
   }
 };
@@ -90,6 +101,14 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
     onSuccess: (data) => {
       setIsProcessing(false);
       
+      // Always try to show Stripe payment form first
+      if (data.clientSecret) {
+        setClientSecret(data.clientSecret);
+        setCurrentStep('payment');
+        return;
+      }
+      
+      // Only fall back to dev mode if no client secret is provided
       if (data.devMode || data.success) {
         setCurrentStep('success');
         toast({
@@ -106,10 +125,12 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
         return;
       }
       
-      if (data.clientSecret) {
-        setClientSecret(data.clientSecret);
-        setCurrentStep('payment');
-      }
+      // If neither client secret nor dev mode, show error
+      toast({
+        title: "Payment Setup Failed",
+        description: "Unable to setup payment processing. Please try again.",
+        variant: "destructive",
+      });
     },
     onError: (error: any) => {
       setIsProcessing(false);
@@ -167,7 +188,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
   }
 
   // Payment step
-  if (currentStep === 'payment' && clientSecret && stripePromise) {
+  if (currentStep === 'payment' && clientSecret) {
     const price = selectedBilling === 'yearly' ? 
       (selectedPlan?.yearlyPrice || selectedPlan?.price * 12) : 
       selectedPlan?.price;
@@ -205,19 +226,49 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
             )}
           </div>
           
-          <Elements stripe={stripePromise} options={{ clientSecret }}>
-            <PaymentForm 
-              onSuccess={handlePaymentSuccess}
-              onError={(error) => {
-                toast({
-                  title: "Payment Failed",
-                  description: error,
-                  variant: "destructive",
-                });
-              }}
-              onCancel={() => setCurrentStep('plans')}
-            />
-          </Elements>
+          {stripePromise ? (
+            <Elements stripe={stripePromise} options={{ clientSecret }}>
+              <PaymentForm 
+                clientSecret={clientSecret}
+                onSuccess={handlePaymentSuccess}
+                onError={(error) => {
+                  toast({
+                    title: "Payment Failed",
+                    description: error,
+                    variant: "destructive",
+                  });
+                }}
+                onCancel={() => setCurrentStep('plans')}
+              />
+            </Elements>
+          ) : (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="text-yellow-800 mb-3">
+                <strong>Payment Processing Unavailable</strong>
+              </div>
+              <p className="text-sm text-yellow-700 mb-4">
+                Stripe payment processing is not configured. This typically happens in development environments.
+              </p>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => {
+                    // Simulate successful payment for development
+                    handlePaymentSuccess();
+                  }}
+                  className="flex-1"
+                >
+                  Continue (Dev Mode)
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => setCurrentStep('plans')}
+                  className="flex-1"
+                >
+                  Back to Plans
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     );

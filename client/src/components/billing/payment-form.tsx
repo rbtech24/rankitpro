@@ -7,6 +7,8 @@ import { useToast } from '../../hooks/use-toast';
 interface PaymentFormProps {
   clientSecret?: string;
   onSuccess: () => void;
+  onError?: (error: string) => void;
+  onCancel?: () => void;
   buttonText?: string;
   isSubscription?: boolean;
 }
@@ -14,6 +16,8 @@ interface PaymentFormProps {
 export default function PaymentForm({ 
   clientSecret, 
   onSuccess, 
+  onError,
+  onCancel,
   buttonText = 'Submit Payment', 
   isSubscription = false 
 }: PaymentFormProps) {
@@ -51,6 +55,11 @@ export default function PaymentForm({
 
       if (error) {
         const errorMessage = error.message || 'Payment failed';
+
+        // Call onError callback if provided
+        if (onError) {
+          onError(errorMessage);
+        }
 
         // Dispatch payment failed event for modal handling
         window.dispatchEvent(new CustomEvent('paymentFailed', {
@@ -114,13 +123,26 @@ export default function PaymentForm({
         />
       </div>
 
-      <Button 
-        type="submit" 
-        disabled={isProcessing || !stripe || !elements || !clientSecret}
-        className="w-full"
-      >
-        {isProcessing ? 'Processing...' : buttonText}
-      </Button>
+      <div className="flex gap-2">
+        <Button 
+          type="submit" 
+          disabled={isProcessing || !stripe || !elements || !clientSecret}
+          className="flex-1"
+        >
+          {isProcessing ? 'Processing...' : buttonText}
+        </Button>
+        {onCancel && (
+          <Button 
+            type="button"
+            variant="outline" 
+            onClick={onCancel}
+            disabled={isProcessing}
+            className="flex-1"
+          >
+            Cancel
+          </Button>
+        )}
+      </div>
     </form>
   );
 }
