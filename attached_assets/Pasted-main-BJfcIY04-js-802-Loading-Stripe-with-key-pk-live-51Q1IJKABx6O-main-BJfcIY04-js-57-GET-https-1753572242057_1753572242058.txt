@@ -1,0 +1,278 @@
+main-BJfcIY04.js:802 Loading Stripe with key: pk_live_51Q1IJKABx6O...
+main-BJfcIY04.js:57  GET https://rankitpro.com/api/auth/me 401 (Unauthorized)
+ie @ main-BJfcIY04.js:57
+Nr @ main-BJfcIY04.js:752
+i @ main-BJfcIY04.js:57
+b @ main-BJfcIY04.js:57
+start @ main-BJfcIY04.js:57
+fetch @ main-BJfcIY04.js:57
+fetchQuery @ main-BJfcIY04.js:57
+prefetchQuery @ main-BJfcIY04.js:57
+(anonymous) @ main-BJfcIY04.js:2410
+Th @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+BE @ main-BJfcIY04.js:48
+(anonymous) @ main-BJfcIY04.js:48
+U @ main-BJfcIY04.js:17Understand this error
+js.stripe.com/:1 Refused to frame 'https://js.stripe.com/' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+Understand this error
+main-BJfcIY04.js:57  GET https://rankitpro.com/api/auth/me 401 (Unauthorized)
+ie @ main-BJfcIY04.js:57
+Nr @ main-BJfcIY04.js:752
+i @ main-BJfcIY04.js:57
+b @ main-BJfcIY04.js:57
+start @ main-BJfcIY04.js:57
+fetch @ main-BJfcIY04.js:57
+xx @ main-BJfcIY04.js:57
+onSubscribe @ main-BJfcIY04.js:57
+subscribe @ main-BJfcIY04.js:57
+(anonymous) @ main-BJfcIY04.js:57
+nA @ main-BJfcIY04.js:48
+Th @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+BE @ main-BJfcIY04.js:48
+kp @ main-BJfcIY04.js:48
+HE @ main-BJfcIY04.js:48
+Lh @ main-BJfcIY04.js:48
+$E @ main-BJfcIY04.js:48
+DE @ main-BJfcIY04.js:48
+EE @ main-BJfcIY04.js:48
+AE @ main-BJfcIY04.js:48
+KE @ main-BJfcIY04.js:48
+U @ main-BJfcIY04.js:17Understand this error
+rankitpro.com/:1 <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes">Understand this warning
+js.stripe.com/:1 Refused to frame 'https://js.stripe.com/' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+Understand this error
+main-BJfcIY04.js:752 Attempting login for: rodbartrufftech@gmail.com
+main-BJfcIY04.js:752 Login response received: {user: {…}}
+main-BJfcIY04.js:752 WebSocket disabled for notifications - using API polling instead
+main-BJfcIY04.js:802 Dashboard: Fetching testimonials for company: 16
+main-BJfcIY04.js:57  GET https://rankitpro.com/api/companies/current 403 (Forbidden)
+(anonymous) @ main-BJfcIY04.js:57
+i @ main-BJfcIY04.js:57
+b @ main-BJfcIY04.js:57
+start @ main-BJfcIY04.js:57
+fetch @ main-BJfcIY04.js:57
+xx @ main-BJfcIY04.js:57
+setOptions @ main-BJfcIY04.js:57
+(anonymous) @ main-BJfcIY04.js:57
+Th @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+$i @ main-BJfcIY04.js:48
+bE @ main-BJfcIY04.js:48
+BE @ main-BJfcIY04.js:48
+kp @ main-BJfcIY04.js:48
+$E @ main-BJfcIY04.js:48
+DE @ main-BJfcIY04.js:48
+EE @ main-BJfcIY04.js:48
+AE @ main-BJfcIY04.js:48
+HE @ main-BJfcIY04.js:48
+Lh @ main-BJfcIY04.js:48
+WE @ main-BJfcIY04.js:48
+(anonymous) @ main-BJfcIY04.js:48
+setTimeout
+KK @ main-BJfcIY04.js:57
+o @ main-BJfcIY04.js:57
+batch @ main-BJfcIY04.js:57
+Cl @ main-BJfcIY04.js:57
+setData @ main-BJfcIY04.js:57
+setQueryData @ main-BJfcIY04.js:57
+see @ main-BJfcIY04.js:752
+await in see
+mutationFn @ main-BJfcIY04.js:802
+await in mutationFn
+fn @ main-BJfcIY04.js:57
+b @ main-BJfcIY04.js:57
+start @ main-BJfcIY04.js:57
+execute @ main-BJfcIY04.js:57
+await in execute
+mutate @ main-BJfcIY04.js:57
+(anonymous) @ main-BJfcIY04.js:57
+y @ main-BJfcIY04.js:802
+(anonymous) @ main-BJfcIY04.js:802
+await in (anonymous)
+QE @ main-BJfcIY04.js:48
+(anonymous) @ main-BJfcIY04.js:48
+rP @ main-BJfcIY04.js:48
+wb @ main-BJfcIY04.js:48
+Ib @ main-BJfcIY04.js:49
+sK @ main-BJfcIY04.js:49Understand this error
+main-BJfcIY04.js:802 Loaded subscription plans: (3) [{…}, {…}, {…}]
+main-BJfcIY04.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: WebSocket is closed before the connection is established.
+(anonymous) @ main-BJfcIY04.js:802
+oo @ main-BJfcIY04.js:48
+CE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+BE @ main-BJfcIY04.js:48
+kp @ main-BJfcIY04.js:48
+HE @ main-BJfcIY04.js:48
+Lh @ main-BJfcIY04.js:48
+$E @ main-BJfcIY04.js:48
+DE @ main-BJfcIY04.js:48
+EE @ main-BJfcIY04.js:48
+AE @ main-BJfcIY04.js:48
+KE @ main-BJfcIY04.js:48
+U @ main-BJfcIY04.js:17Understand this warning
+main-BJfcIY04.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: WebSocket is closed before the connection is established.
+(anonymous) @ main-BJfcIY04.js:802
+oo @ main-BJfcIY04.js:48
+CE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+Mh @ main-BJfcIY04.js:48
+SE @ main-BJfcIY04.js:48
+BE @ main-BJfcIY04.js:48
+kp @ main-BJfcIY04.js:48
+HE @ main-BJfcIY04.js:48
+Lh @ main-BJfcIY04.js:48
+$E @ main-BJfcIY04.js:48
+DE @ main-BJfcIY04.js:48
+EE @ main-BJfcIY04.js:48
+AE @ main-BJfcIY04.js:48
+KE @ main-BJfcIY04.js:48
+U @ main-BJfcIY04.js:17Understand this warning
+main-BJfcIY04.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-BJfcIY04.js:802
+(anonymous) @ main-BJfcIY04.js:802Understand this error
+main-BJfcIY04.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-BJfcIY04.js:802
+(anonymous) @ main-BJfcIY04.js:802Understand this error
+main-BJfcIY04.js:752 Attempting to reconnect WebSocket...
+main-BJfcIY04.js:752 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-BJfcIY04.js:752Understand this error
+main-BJfcIY04.js:802 Quick restore plan: {plan: {…}, planId: 19, planIdType: 'number', billing: 'monthly'}
+main-BJfcIY04.js:802 Sending subscription request: {planId: 19, planIdType: 'number', billingPeriod: 'monthly'}
+main-BJfcIY04.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-BJfcIY04.js:802
+(anonymous) @ main-BJfcIY04.js:802Understand this error
+main-BJfcIY04.js:802  POST https://rankitpro.com/api/billing/subscription 500 (Internal Server Error)
+window.fetch @ main-BJfcIY04.js:802
+ie @ main-BJfcIY04.js:57
+mutationFn @ main-BJfcIY04.js:802
+fn @ main-BJfcIY04.js:57
+b @ main-BJfcIY04.js:57
+start @ main-BJfcIY04.js:57
+execute @ main-BJfcIY04.js:57
+await in execute
+mutate @ main-BJfcIY04.js:57
+(anonymous) @ main-BJfcIY04.js:57
+S @ main-BJfcIY04.js:802
+onClick @ main-BJfcIY04.js:802
+QE @ main-BJfcIY04.js:48
+(anonymous) @ main-BJfcIY04.js:48
+rP @ main-BJfcIY04.js:48
+wb @ main-BJfcIY04.js:48
+Ib @ main-BJfcIY04.js:49
+sK @ main-BJfcIY04.js:49Understand this error
+main-BJfcIY04.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-BJfcIY04.js:802
+(anonymous) @ main-BJfcIY04.js:802Understand this error
+main-BJfcIY04.js:752 Attempting to reconnect WebSocket...
+main-BJfcIY04.js:752 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-BJfcIY04.js:752Understand this error
+main-BJfcIY04.js:802 Quick restore plan: {plan: {…}, planId: 19, planIdType: 'number', billing: 'monthly'}
+main-BJfcIY04.js:802 Sending subscription request: {planId: 19, planIdType: 'number', billingPeriod: 'monthly'}
+main-BJfcIY04.js:802  POST https://rankitpro.com/api/billing/subscription 500 (Internal Server Error)

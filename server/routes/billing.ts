@@ -66,10 +66,10 @@ router.post('/plans', isAuthenticated, isSuperAdmin, async (req: Request, res: R
 
     res.json(newPlan);
   } catch (error: any) {
-    logger.error("Storage operation error", { errorMessage: error?.message || "Unknown error" });
+    logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to create subscription plan',
-      message: error.message
+      message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -222,10 +222,10 @@ router.get('/subscription', isAuthenticated, isCompanyAdmin, async (req: Request
     // Return subscription data
     res.json(subscriptionData);
   } catch (error: any) {
-    logger.error("Unhandled error occurred");
+    logger.error("Failed to retrieve subscription information", { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to retrieve subscription information',
-      message: error.message
+      message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -287,26 +287,12 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
         plan: planDetails.name.toLowerCase() as any
       });
 
-      // Create payment success notification
-      try {
-        await storage.createNotification({
-          userId: user.id,
-          companyId: companyId,
-          type: 'payment_success',
-          title: 'Account Reactivated! 🎉',
-          message: `Your ${planDetails.name} subscription is now active. All features have been restored and your account is ready to use.`,
-          data: {
-            planName: planDetails.name,
-            amount: price,
-            billingPeriod: billingPeriod,
-            activatedAt: new Date().toISOString()
-          }
-        });
-      } catch (notificationError) {
-        logger.warn("Failed to create payment success notification", { 
-          errorMessage: notificationError?.message || "Unknown error" 
-        });
-      }
+      logger.info("Payment success in bypass mode", { 
+        planName: planDetails.name,
+        amount: price,
+        billingPeriod: billingPeriod,
+        companyId: companyId
+      });
 
       return res.json({
         success: true,
@@ -333,26 +319,12 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
         plan: planDetails.name.toLowerCase() as any
       });
 
-      // Create payment success notification
-      try {
-        await storage.createNotification({
-          userId: user.id,
-          companyId: companyId,
-          type: 'payment_success',
-          title: 'Account Reactivated! 🎉',
-          message: `Your ${planDetails.name} subscription is now active. All features have been restored and your account is ready to use.`,
-          data: {
-            planName: planDetails.name,
-            amount: price,
-            billingPeriod: billingPeriod,
-            activatedAt: new Date().toISOString()
-          }
-        });
-      } catch (notificationError) {
-        logger.warn("Failed to create payment success notification", { 
-          errorMessage: notificationError?.message || "Unknown error" 
-        });
-      }
+      logger.info("Payment success in development mode (Stripe unavailable)", { 
+        planName: planDetails.name,
+        amount: price,
+        billingPeriod: billingPeriod,
+        companyId: companyId
+      });
 
       return res.json({
         success: true,
@@ -408,10 +380,10 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
 
 
   } catch (error: any) {
-    logger.error("Subscription creation error", { errorMessage: error?.message || "Unknown error" });
+    logger.error("Subscription creation error", { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({
       error: 'Failed to process subscription request',
-      message: error.message
+      message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
