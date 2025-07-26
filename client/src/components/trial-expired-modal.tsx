@@ -38,10 +38,11 @@ const stripePromise = getStripePromise();
 
 interface TrialExpiredModalProps {
   isOpen: boolean;
+  onClose?: () => void;
   trialEndDate?: string;
 }
 
-export function TrialExpiredModal({ isOpen, trialEndDate }: TrialExpiredModalProps) {
+export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpiredModalProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [showPlans, setShowPlans] = useState(false);
@@ -125,10 +126,23 @@ export function TrialExpiredModal({ isOpen, trialEndDate }: TrialExpiredModalPro
     queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
     queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
     
+    // Close modal if provided
+    if (onClose) {
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    }
+    
     // Reload page to restore access
     setTimeout(() => {
       window.location.reload();
     }, 2000);
+  };
+
+  const handleModalClose = () => {
+    if (onClose && !isProcessing) {
+      onClose();
+    }
   };
 
   if (paymentSuccess) {
@@ -199,7 +213,7 @@ export function TrialExpiredModal({ isOpen, trialEndDate }: TrialExpiredModalPro
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
+    <Dialog open={isOpen} onOpenChange={handleModalClose}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">

@@ -284,12 +284,13 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
           userId: user.id,
           companyId: companyId,
           type: 'payment_success',
-          title: 'Payment Successful',
-          message: `Your subscription to ${planDetails.name} plan has been activated. Welcome back!`,
+          title: 'Account Reactivated! 🎉',
+          message: `Your ${planDetails.name} subscription is now active. All features have been restored and your account is ready to use.`,
           data: {
             planName: planDetails.name,
             amount: price,
-            billingPeriod: billingPeriod
+            billingPeriod: billingPeriod,
+            activatedAt: new Date().toISOString()
           }
         });
       } catch (notificationError) {

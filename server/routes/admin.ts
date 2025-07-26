@@ -885,6 +885,7 @@ router.get('/test-endpoints', isSuperAdmin, async (req, res) => {
             sampleData: { checkIns: [] }
           };
           break;
+```text
         case '/api/testimonials':
           result = { 
             message: 'Testimonials endpoint accessible',
