@@ -201,12 +201,12 @@ export default function AdminLayout({ children, currentPath }: AdminLayoutProps)
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 pb-16">
           {children}
         </main>
 
         {/* Footer */}
-        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white z-30">
+        <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-gray-900 text-white z-30">
           <div className="max-w-7xl mx-auto px-6 py-3">
             <div className="flex justify-between items-center text-sm">
               <div className="flex items-center space-x-6">
