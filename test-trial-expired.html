@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trial Expired Modal Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .plan-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .plan-card h3 {
+            margin: 0 0 10px 0;
+        }
+        .plan-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Trial Expired Modal - Payment Test</h1>
+        
+        <div class="test-result info">
+            <h3>Test Scenario</h3>
+            <p>User: rodbartrufftech@gmail.com (Company Admin)</p>
+            <p>Trial Status: EXPIRED (since 2025-07-05)</p>
+            <p>Current Plan: Starter (Free)</p>
+            <p>Company ID: 16</p>
+        </div>
+
+        <h2>Available Subscription Plans</h2>
+        <div id="plans-container">
+            <!-- Plans will be loaded here -->
+        </div>
+
+        <h2>Payment Test Results</h2>
+        <div id="test-results">
+            <!-- Test results will be displayed here -->
+        </div>
+
+        <h2>Actions</h2>
+        <button onclick="testTrialStatus()">Check Trial Status</button>
+        <button onclick="testGetPlans()">Load Available Plans</button>
+        <button onclick="testPaymentFlow()">Test Payment Flow</button>
+        <button onclick="testPlanUpgrade()">Test Plan Upgrade</button>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        
+        async function makeRequest(method, url, data = null) {
+            try {
+                const options = {
+                    method: method,
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(API_BASE + url, options);
+                return await response.json();
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+
+        function addResult(message, type = 'info') {
+            const container = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `
+                <strong>${new Date().toLocaleTimeString()}</strong><br>
+                ${message}
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function testTrialStatus() {
+            addResult('Testing trial status...', 'info');
+            const result = await makeRequest('GET', '/api/trial/status');
+            
+            if (result.error) {
+                addResult(`❌ Error: ${result.error}`, 'error');
+            } else {
+                const status = result.expired ? 'EXPIRED' : 'ACTIVE';
+                const daysLeft = result.daysLeft || 0;
+                addResult(`✅ Trial Status: ${status} | Days Left: ${daysLeft} | Subscription Active: ${result.subscriptionActive}`, 'success');
+            }
+        }
+
+        async function testGetPlans() {
+            addResult('Loading subscription plans...', 'info');
+            const result = await makeRequest('GET', '/api/billing/plans');
+            
+            if (result.error) {
+                addResult(`❌ Error loading plans: ${result.error}`, 'error');
+            } else if (Array.isArray(result) && result.length > 0) {
+                addResult(`✅ Loaded ${result.length} subscription plans`, 'success');
+                displayPlans(result);
+            } else {
+                addResult('❌ No subscription plans available', 'error');
+            }
+        }
+
+        function displayPlans(plans) {
+            const container = document.getElementById('plans-container');
+            container.innerHTML = '';
+            
+            plans.forEach(plan => {
+                const planDiv = document.createElement('div');
+                planDiv.className = 'plan-card';
+                planDiv.innerHTML = `
+                    <h3>${plan.name}</h3>
+                    <div class="plan-price">$${plan.price}/month</div>
+                    <p><strong>Features:</strong></p>
+                    <ul>
+                        <li>Max Technicians: ${plan.maxTechnicians === -1 ? 'Unlimited' : plan.maxTechnicians}</li>
+                        <li>Max Submissions: ${plan.maxCheckIns === -1 ? 'Unlimited' : plan.maxCheckIns}</li>
+                        <li>Features: ${plan.features ? plan.features.join(', ') : 'Standard features'}</li>
+                    </ul>
+                    <button onclick="testSubscribeToPlan(${plan.id}, '${plan.name}', ${plan.price})">
+                        Subscribe to ${plan.name}
+                    </button>
+                `;
+                container.appendChild(planDiv);
+            });
+        }
+
+        async function testPaymentFlow() {
+            addResult('Testing payment flow with Professional plan...', 'info');
+            
+            const paymentData = {
+                planId: 14,
+                billingPeriod: 'monthly'
+            };
+            
+            const result = await makeRequest('POST', '/api/billing/subscription', paymentData);
+            
+            if (result.error) {
+                addResult(`❌ Payment failed: ${result.error}`, 'error');
+            } else if (result.success) {
+                addResult(`✅ Payment successful! Plan: ${result.planName} | Amount: $${result.amount} | Mode: ${result.devMode ? 'Development' : 'Production'}`, 'success');
+                
+                // Test trial status after payment
+                setTimeout(async () => {
+                    const trialStatus = await makeRequest('GET', '/api/trial/status');
+                    if (trialStatus.subscriptionActive) {
+                        addResult('✅ Trial restored - subscription is now active!', 'success');
+                    } else {
+                        addResult('⚠️ Payment processed but trial status may need refresh', 'error');
+                    }
+                }, 1000);
+            } else {
+                addResult(`❌ Unexpected payment response: ${JSON.stringify(result)}`, 'error');
+            }
+        }
+
+        async function testSubscribeToPlan(planId, planName, price) {
+            addResult(`Testing subscription to ${planName} plan ($${price}/month)...`, 'info');
+            
+            const paymentData = {
+                planId: planId,
+                billingPeriod: 'monthly'
+            };
+            
+            const result = await makeRequest('POST', '/api/billing/subscription', paymentData);
+            
+            if (result.error) {
+                addResult(`❌ Subscription to ${planName} failed: ${result.error}`, 'error');
+            } else if (result.success) {
+                addResult(`✅ Successfully subscribed to ${planName}! Amount: $${result.amount}`, 'success');
+            } else {
+                addResult(`❌ Unexpected response: ${JSON.stringify(result)}`, 'error');
+            }
+        }
+
+        async function testPlanUpgrade() {
+            addResult('Testing plan upgrade to Enterprise...', 'info');
+            
+            const upgradeData = {
+                planId: 15, // Enterprise
+                billingPeriod: 'monthly'
+            };
+            
+            const result = await makeRequest('POST', '/api/billing/subscription', upgradeData);
+            
+            if (result.error) {
+                addResult(`❌ Upgrade failed: ${result.error}`, 'error');
+            } else if (result.success) {
+                addResult(`✅ Successfully upgraded to ${result.planName}! New amount: $${result.amount}`, 'success');
+            } else {
+                addResult(`❌ Unexpected upgrade response: ${JSON.stringify(result)}`, 'error');
+            }
+        }
+
+        // Auto-load trial status and plans on page load
+        window.onload = function() {
+            setTimeout(() => {
+                testTrialStatus();
+                testGetPlans();
+            }, 500);
+        };
+    </script>
+</body>
+</html>
