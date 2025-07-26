@@ -74,8 +74,17 @@ export class StripeService {
    */
   async createPaymentIntent(amount: number, currency: string = 'usd', metadata: any = {}): Promise<any> {
     if (!stripe) {
-      throw new Error('Stripe is not configured');
+      const errorMessage = 'Stripe is not configured - missing STRIPE_SECRET_KEY environment variable';
+      logger.error("Stripe configuration error", { errorMessage });
+      throw new Error(errorMessage);
     }
+
+    logger.info("Creating Stripe payment intent", { 
+      amount, 
+      currency, 
+      metadata,
+      stripeConfigured: !!process.env.STRIPE_SECRET_KEY
+    });
 
     try {
       const paymentIntent = await stripe.paymentIntents.create({
@@ -87,9 +96,21 @@ export class StripeService {
         },
       });
 
+      logger.info("Payment intent created successfully", { 
+        paymentIntentId: paymentIntent.id,
+        amount: paymentIntent.amount,
+        currency: paymentIntent.currency
+      });
+
       return paymentIntent;
     } catch (error: any) {
-      logger.error("Failed to create payment intent", { errorMessage: error?.message || "Unknown error" });
+      logger.error("Failed to create payment intent", { 
+        errorMessage: error instanceof Error ? error.message : String(error),
+        amount,
+        currency,
+        stripeErrorCode: error?.code,
+        stripeErrorType: error?.type
+      });
       throw error;
     }
   }

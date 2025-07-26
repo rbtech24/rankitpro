@@ -83,10 +83,17 @@ if (process.env.NODE_ENV === 'production') {
           "https://api.stripe.com",
           "wss:",
           "ws:"
+        ],
+        frameSrc: [
+          "'self'",
+          "https://js.stripe.com",
+          "https://hooks.stripe.com"
         ]
       }
     },
-    crossOriginResourcePolicy: false
+    crossOriginResourcePolicy: false,
+    // Allow payment iframe embedding
+    crossOriginEmbedderPolicy: false
   }));
 }
 // Skip helmet entirely in development to avoid CSP conflicts with Vite
@@ -123,7 +130,7 @@ app.use((req, res, next) => {
     res.removeHeader('Strict-Transport-Security');
     res.removeHeader('X-Permitted-Cross-Domain-Policies');
     res.removeHeader('Referrer-Policy');
-    // Allow geolocation and camera for mobile field app
+    // Allow geolocation, camera, and payment for mobile field app and Stripe
     res.setHeader('Permissions-Policy', 'camera=*, microphone=(), geolocation=*, payment=*');
 
     // Explicitly set to allow everything

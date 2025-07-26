@@ -122,9 +122,12 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
     },
     onSuccess: (data) => {
       setIsProcessing(false);
+      
+      console.log('Subscription creation response:', data);
 
       // Always try to show Stripe payment form first
       if (data.clientSecret) {
+        console.log('Received client secret, showing payment form');
         setClientSecret(data.clientSecret);
         setCurrentStep('payment');
         return;
@@ -132,6 +135,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
 
       // Only fall back to dev mode if no client secret is provided
       if (data.devMode || data.success) {
+        console.log('Development mode or success response, skipping payment');
         setCurrentStep('success');
         toast({
           title: "🎉 Service Restored!",
@@ -148,6 +152,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
       }
 
       // If neither client secret nor dev mode, show error
+      console.error('Payment setup failed - no client secret and no dev mode');
       toast({
         title: "Payment Setup Failed",
         description: "Unable to setup payment processing. Please try again.",
@@ -156,9 +161,22 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
     },
     onError: (error: any) => {
       setIsProcessing(false);
+      console.error('Subscription creation error:', error);
+      
+      // Try to extract specific error message
+      let errorMessage = "Unable to setup payment. Please try again or contact support.";
+      if (error?.response?.json) {
+        try {
+          const errorData = error.response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (e) {
+          console.error('Failed to parse error response:', e);
+        }
+      }
+      
       toast({
         title: "Payment Setup Failed",
-        description: "Unable to setup payment. Please try again or contact support.",
+        description: errorMessage,
         variant: "destructive",
       });
     }

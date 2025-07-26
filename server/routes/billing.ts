@@ -305,37 +305,14 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
       });
     }
 
-    // Check if Stripe is available, if not use development mode for testing
-    if (!stripeService.isStripeAvailable()) {
-      logger.warn("Stripe not available, using development mode for testing", { 
-        companyId, 
-        planId, 
-        planName: planDetails.name,
-        billingPeriod 
-      });
-
-      // Update company plan directly in development mode when Stripe isn't available
-      await storage.updateCompany(companyId, { 
-        plan: planDetails.name.toLowerCase() as any
-      });
-
-      logger.info("Payment success in development mode (Stripe unavailable)", { 
-        planName: planDetails.name,
-        amount: price,
-        billingPeriod: billingPeriod,
-        companyId: companyId
-      });
-
-      return res.json({
-        success: true,
-        planId: planId,
-        planName: planDetails.name,
-        billingPeriod: billingPeriod,
-        amount: price,
-        message: 'Plan updated successfully (development mode - Stripe unavailable)',
-        devMode: true
-      });
-    }
+    // Always try to create Stripe payment intent first - don't fall back to dev mode automatically
+    logger.info("Creating Stripe payment intent", { 
+      companyId, 
+      planId, 
+      planName: planDetails.name,
+      billingPeriod,
+      stripeAvailable: stripeService.isStripeAvailable()
+    });
 
     try {
       // Create Stripe payment intent for the plan
@@ -350,9 +327,17 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
         }
       );
 
-      if (!paymentIntent.client_secret) {
-        throw new Error('Failed to create payment intent');
+      if (!paymentIntent || !paymentIntent.client_secret) {
+        throw new Error('Failed to create payment intent - no client secret returned');
       }
+
+      logger.info("Stripe payment intent created successfully", { 
+        companyId,
+        planId,
+        planName: planDetails.name,
+        amount: price,
+        billingPeriod
+      });
 
       return res.json({
         clientSecret: paymentIntent.client_secret,
@@ -364,16 +349,43 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
       });
     } catch (stripeError: any) {
       logger.error("Stripe payment intent creation failed", { 
-        errorMessage: stripeError?.message || "Unknown error",
+        errorMessage: stripeError instanceof Error ? stripeError.message : String(stripeError),
         companyId,
         planId,
-        planName: planDetails.name
+        planName: planDetails.name,
+        stripeAvailable: stripeService.isStripeAvailable()
       });
 
+      // Only fall back to development mode if explicitly configured or in development
+      if (process.env.NODE_ENV === 'development' || process.env.BYPASS_STRIPE === 'true') {
+        logger.warn("Falling back to development mode due to Stripe error", { 
+          companyId, 
+          planId, 
+          planName: planDetails.name,
+          billingPeriod 
+        });
+
+        // Update company plan directly in fallback mode
+        await storage.updateCompany(companyId, { 
+          plan: planDetails.name.toLowerCase() as any
+        });
+
+        return res.json({
+          success: true,
+          planId: planId,
+          planName: planDetails.name,
+          billingPeriod: billingPeriod,
+          amount: price,
+          message: 'Plan updated successfully (development mode)',
+          devMode: true
+        });
+      }
+
+      // In production, return error instead of falling back
       return res.status(500).json({
         error: 'Payment processing failed',
-        message: stripeError.message || 'Unable to process payment. Please try again or contact support.',
-        details: stripeError.message
+        message: 'Unable to process payment. Please try again or contact support.',
+        details: stripeError instanceof Error ? stripeError.message : 'Payment service unavailable'
       });
     }
 
