@@ -44,7 +44,7 @@ router.get('/financial/metrics', isSuperAdmin, async (req, res) => {
     
     res.json(metrics);
   } catch (error) {
-    logger.error('Error fetching financial metrics', { error });
+    logger.error('Error fetching financial metrics', { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -84,7 +84,7 @@ router.get('/financial/revenue-trends', isSuperAdmin, async (req, res) => {
     
     res.json(revenueData);
   } catch (error) {
-    logger.error('Error fetching revenue trends', { error });
+    logger.error('Error fetching revenue trends', { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -113,7 +113,7 @@ router.get('/financial/payments', isSuperAdmin, async (req, res) => {
     
     res.json(payments);
   } catch (error) {
-    logger.error('Error fetching payments', { error });
+    logger.error('Error fetching payments', { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -139,7 +139,7 @@ router.get('/financial/subscription-breakdown', isSuperAdmin, async (req, res) =
     
     res.json(subscriptionBreakdown);
   } catch (error) {
-    logger.error('Error fetching subscription breakdown', { error });
+    logger.error('Error fetching subscription breakdown', { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -162,7 +162,7 @@ router.get('/financial/export', isSuperAdmin, async (req, res) => {
     
     res.send(csvData);
   } catch (error) {
-    logger.error('Error exporting financial data', { error });
+    logger.error('Error exporting financial data', { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Server error' });
   }
 });

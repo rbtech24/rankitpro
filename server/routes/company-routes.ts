@@ -133,6 +133,52 @@ router.put('/:id',
   }
 );
 
+// Get current user's company
+router.get('/current',
+  isAuthenticated,
+  async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      
+      logger.apiRequest(req.method, req.path, { 
+        userId,
+        ip: req.ip 
+      });
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        logger.warn('User not found for current company request', { userId });
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      if (!user.companyId) {
+        logger.warn('User has no company association', { userId });
+        return res.status(404).json({ message: "No company associated with user" });
+      }
+
+      const company = await storage.getCompany(user.companyId);
+      if (!company) {
+        logger.warn('Company not found for user', { userId, companyId: user.companyId });
+        return res.status(404).json({ message: "Company not found" });
+      }
+
+      logger.info('Current company retrieved', { 
+        userId,
+        companyId: company.id,
+        companyName: company.name 
+      });
+
+      res.json(company);
+
+    } catch (error) {
+      logger.error('Get current company endpoint error', { 
+        userId: req.session.userId 
+      }, error as Error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+);
+
 // Get all companies (super admin only)
 router.get('/',
   isAuthenticated,
@@ -140,15 +186,23 @@ router.get('/',
   async (req, res) => {
     try {
       const userId = req.session.userId!;
-      console.log(`API request: GET /api/companies from user ${userId}`);
+      logger.apiRequest(req.method, req.path, { 
+        userId,
+        ip: req.ip 
+      });
 
       const companies = await storage.getAllCompanies();
-      console.log(`Retrieved ${companies.length} companies`);
+      logger.info('Retrieved companies for super admin', { 
+        userId,
+        companyCount: companies.length 
+      });
 
       res.json(companies);
 
     } catch (error) {
-      console.error('Get all companies endpoint error:', error);
+      logger.error('Get all companies endpoint error', { 
+        userId: req.session.userId 
+      }, error as Error);
       res.status(500).json({ message: "Internal server error" });
     }
   }
