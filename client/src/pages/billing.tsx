@@ -64,7 +64,10 @@ export default function Billing() {
   // Query for subscription plans from database
   const { data: subscriptionPlans } = useQuery({
     queryKey: ["/api/billing/plans"],
-    queryFn: () => apiRequest('GET', "/api/billing/plans")
+    queryFn: async () => {
+      const response = await apiRequest('GET', "/api/billing/plans");
+      return response.json();
+    }
   });
 
   // Query for subscription data
@@ -87,7 +90,13 @@ export default function Billing() {
   // Update state based on subscription data
   useEffect(() => {
     if (subscriptionData) {
-      setCurrentPlan(subscriptionData.plan || "starter");
+      // Map company plan to plan names for comparison
+      let planName = subscriptionData.plan || "starter";
+      if (planName === "starter") planName = "essential";
+      if (planName === "pro") planName = "professional";
+      if (planName === "agency") planName = "enterprise";
+      
+      setCurrentPlan(planName);
       setSubscriptionStatus(subscriptionData.status || "inactive");
       
       if (subscriptionData.paymentMethods) {
