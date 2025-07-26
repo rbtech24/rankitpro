@@ -264,16 +264,16 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
       (planDetails.yearlyPrice || planDetails.price * 12) : 
       planDetails.price;
 
-    // Development mode: bypass Stripe for testing
-    if (process.env.NODE_ENV !== 'production') {
-      logger.info("Development mode: Bypassing Stripe, updating plan directly", { 
+    // Development mode: Only bypass Stripe if BYPASS_STRIPE environment variable is set
+    if (process.env.BYPASS_STRIPE === 'true') {
+      logger.info("Stripe bypass mode enabled: Updating plan directly", { 
         companyId, 
         planId, 
         planName: planDetails.name,
         billingPeriod 
       });
 
-      // Update company plan directly in development
+      // Update company plan directly in bypass mode
       await storage.updateCompany(companyId, { 
         plan: planDetails.name.toLowerCase() as any
       });
@@ -305,7 +305,7 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
         planName: planDetails.name,
         billingPeriod: billingPeriod,
         amount: price,
-        message: 'Plan updated successfully (development mode)',
+        message: 'Plan updated successfully (bypass mode)',
         devMode: true
       });
     }
