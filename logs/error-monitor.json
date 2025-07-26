@@ -4,11 +4,11 @@
       "bfdbcb60",
       {
         "id": "bfdbcb60",
-        "timestamp": "2025-07-26T18:55:47.273Z",
+        "timestamp": "2025-07-26T18:58:40.677Z",
         "level": "info",
         "message": "Application startup initiated",
         "resolved": false,
-        "count": 436
+        "count": 437
       }
     ],
     [
@@ -154,7 +154,7 @@
     ]
   ],
   "stats": {
-    "totalErrors": 528,
+    "totalErrors": 529,
     "criticalErrors": 0,
     "errorsByHour": {
       "0": 17,
@@ -175,7 +175,7 @@
       "15": 30,
       "16": 26,
       "17": 43,
-      "18": 18,
+      "18": 19,
       "19": 82,
       "20": 17,
       "21": 24,
@@ -188,16 +188,16 @@
       "/api/companies/16/technicians": 2
     },
     "errorsByType": {
-      "General": 528
+      "General": 529
     },
     "lastError": {
       "id": "bfdbcb60",
-      "timestamp": "2025-07-26T18:55:47.273Z",
+      "timestamp": "2025-07-26T18:58:40.677Z",
       "level": "info",
       "message": "Application startup initiated",
       "resolved": false,
-      "count": 436
+      "count": 437
     }
   },
-  "lastSaved": "2025-07-26T18:55:47.273Z"
+  "lastSaved": "2025-07-26T18:58:40.677Z"
 }

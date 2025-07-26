@@ -203,8 +203,22 @@ export default function Billing() {
       return;
     }
     
-    // Confirm plan change
-    if (window.confirm(`Are you sure you want to change your subscription to the ${plan} plan?`)) {
+    // Find the selected plan details
+    const selectedPlanDetails = subscriptionPlans?.find(p => p.name.toLowerCase() === plan);
+    if (!selectedPlanDetails) {
+      toast({
+        title: "Plan Not Found",
+        description: "The selected plan could not be found.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Show upgrade dialog with plan details
+    const planPrice = `$${selectedPlanDetails.price}/${selectedPlanDetails.billingPeriod}`;
+    const confirmMessage = `Upgrade to ${selectedPlanDetails.name} plan for ${planPrice}?\n\nThis will change your billing immediately.`;
+    
+    if (window.confirm(confirmMessage)) {
       setIsLoading(true);
       updateSubscription.mutate(plan);
     } else {
@@ -388,7 +402,7 @@ export default function Billing() {
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Button variant="outline" onClick={handleCancelSubscription}>Cancel Subscription</Button>
-                <Button onClick={() => handleChangePlan("pro")}>Upgrade Plan</Button>
+                <Button onClick={() => handleChangePlan("professional")}>Upgrade Plan</Button>
               </CardFooter>
             </Card>
             

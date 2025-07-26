@@ -237,15 +237,21 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
   try {
     const { plan } = req.body;
     
-    if (!plan || !['starter', 'pro', 'agency'].includes(plan)) {
+    if (!plan || !['starter', 'pro', 'agency', 'essential', 'professional', 'enterprise'].includes(plan)) {
       return res.status(400).json({ error: 'Invalid plan specified' });
     }
     
     // @ts-ignore - userId does exist on req.user
     const userId = req.user.id;
     
+    // Map new plan names to old ones for Stripe compatibility
+    let stripePlan = plan;
+    if (plan === 'essential') stripePlan = 'starter';
+    if (plan === 'professional') stripePlan = 'pro';
+    if (plan === 'enterprise') stripePlan = 'agency';
+    
     // Create or update subscription
-    const result = await stripeService.getOrCreateSubscription(userId, plan);
+    const result = await stripeService.getOrCreateSubscription(userId, stripePlan);
     
     // If the user is already subscribed to this plan
     if (result.alreadySubscribed) {
