@@ -72,7 +72,7 @@ import * as z from "zod";
 import AdminLayout from '../components/layout/AdminLayout';
 import { Checkbox } from "../components/ui/checkbox";
 import { formatDistanceToNow } from 'date-fns';
-import { Loader2, Users, Briefcase, UserPlus, FileText, Star, BarChart2, Settings2, Mail, AlertTriangle, Check, X, Edit2, Trash2, Settings } from 'lucide-react';
+import { Loader2, Users, Briefcase, UserPlus, FileText, Star, BarChart2, Settings2, Mail, AlertTriangle, Check, X, Edit2, Trash2, Settings, Power, PowerOff } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 
 // Complete company schema with all form fields
@@ -286,7 +286,7 @@ export default function CompaniesManagement() {
   // Toggle company status mutation
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: number, isActive: boolean }) => {
-      const res = await apiRequest('PUT', `/api/companies/${id}/status`, { isActive });
+      const res = await apiRequest('PATCH', `/api/companies/${id}/status`, { isActive });
       return res.json();
     },
     onSuccess: () => {
@@ -304,6 +304,11 @@ export default function CompaniesManagement() {
       });
     }
   });
+
+  // Handler for status toggle
+  const handleStatusToggle = (id: number, isActive: boolean) => {
+    toggleStatusMutation.mutate({ id, isActive });
+  };
   
   // Company details form
   const form = useForm<z.infer<typeof companySchema>>({
@@ -546,6 +551,7 @@ export default function CompaniesManagement() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>ID</TableHead>
                       <TableHead>Company</TableHead>
                       <TableHead>Industry</TableHead>
                       <TableHead>Plan</TableHead>
@@ -559,13 +565,16 @@ export default function CompaniesManagement() {
                   <TableBody>
                     {filteredCompanies.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                        <TableCell colSpan={9} className="text-center py-8 text-gray-500">
                           No companies found matching your filters
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredCompanies.map(company => (
                         <TableRow key={company.id}>
+                          <TableCell>
+                            <span className="font-mono text-sm text-gray-600">#{company.id}</span>
+                          </TableCell>
                           <TableCell>
                             <div>
                               <div className="font-medium">{company.name}</div>
@@ -583,9 +592,20 @@ export default function CompaniesManagement() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge className={company.isTrialActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                              {company.isTrialActive ? "Active" : "Inactive"}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              <Badge className={company.isTrialActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                                {company.isTrialActive ? "Active" : "Inactive"}
+                              </Badge>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleStatusToggle(company.id, !company.isTrialActive)}
+                                className="h-6 w-6 p-0"
+                                title={company.isTrialActive ? "Deactivate company" : "Activate company"}
+                              >
+                                {company.isTrialActive ? <PowerOff className="h-3 w-3" /> : <Power className="h-3 w-3" />}
+                              </Button>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
