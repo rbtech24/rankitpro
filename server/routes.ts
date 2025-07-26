@@ -2447,6 +2447,8 @@ Format as professional service documentation.`;
   
   // Register admin routes for subscription management
   app.use("/api/admin", adminRoutes);
+  
+  // Rate limiting admin routes (authenticated via existing session middleware)
   app.use("/api/admin/rate-limiting", rateLimitingRoutes);
 
   // Register sales routes for sales staff management

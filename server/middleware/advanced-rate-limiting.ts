@@ -315,7 +315,18 @@ export const rateLimitAdminRoutes = {
     windowMs: tier.config.windowMs,
     max: tier.config.max,
     endpoints: tier.endpoints
-  }))
+  })),
+  
+  getStatistics: () => ({
+    totalBlockedIPs: threatDetection.getBlockedIPs().length,
+    totalSuspiciousActivities: threatDetection.getSuspiciousActivities().length,
+    recentActivities24h: threatDetection.getSuspiciousActivities().filter(
+      activity => Date.now() - activity.timestamp < 24 * 60 * 60 * 1000
+    ).length,
+    configuredTiers: rateLimitTiers.length,
+    topOffenders: [],
+    lastUpdated: new Date().toISOString()
+  })
 };
 
 export { threatDetection };
