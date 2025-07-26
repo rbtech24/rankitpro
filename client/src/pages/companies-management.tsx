@@ -69,7 +69,7 @@ import { useToast } from "../hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import Sidebar from '../components/layout/sidebar-clean';
+import AdminLayout from '../components/layout/AdminLayout';
 import { Checkbox } from "../components/ui/checkbox";
 import { formatDistanceToNow } from 'date-fns';
 import { Loader2, Users, Briefcase, UserPlus, FileText, Star, BarChart2, Settings2, Mail, AlertTriangle, Check, X, Edit2, Trash2, Settings } from 'lucide-react';
@@ -414,10 +414,8 @@ export default function CompaniesManagement() {
   });
   
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      
-      <div className="flex-1 overflow-auto p-6">
+    <AdminLayout currentPath="/companies-management">
+      <div className="space-y-6">
         <h1 className="text-2xl font-bold mb-6">Companies Management</h1>
         
         <Tabs defaultValue="overview">
@@ -1763,6 +1761,6 @@ export default function CompaniesManagement() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
