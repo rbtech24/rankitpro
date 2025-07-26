@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
+import AdminLayout from "../components/layout/AdminLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -230,7 +230,7 @@ export default function Settings() {
   };
 
   return (
-    <DashboardLayout>
+    <AdminLayout currentPath="/settings">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
@@ -587,6 +587,6 @@ export default function Settings() {
             </TabsContent>
           </Tabs>
       </div>
-    </DashboardLayout>
+    </AdminLayout>
   );
 }

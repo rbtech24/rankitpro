@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from "../lib/queryClient";
-import Sidebar from '../components/layout/sidebar-clean';
+import AdminLayout from '../components/layout/AdminLayout';
 import {
   Card,
   CardContent,
@@ -120,10 +120,8 @@ export default function ShortcodeDemo() {
   ];
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1 p-8">
-        <div className="max-w-6xl mx-auto space-y-8">
+    <AdminLayout currentPath="/shortcode-demo">
+      <div className="max-w-6xl mx-auto space-y-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">WordPress Shortcode Demo</h1>
             <p className="text-muted-foreground">
@@ -380,7 +378,6 @@ export default function ShortcodeDemo() {
             </Card>
           )}
         </div>
-      </div>
-    </div>
+    </AdminLayout>
   );
 }

@@ -15,7 +15,17 @@ import {
   Clock,
   Menu,
   X,
-  LogOut
+  LogOut,
+  User,
+  DollarSign,
+  TrendingUp,
+  MessageCircle,
+  Code,
+  Zap,
+  FileText,
+  Download,
+  Code2,
+  HelpCircle
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -44,6 +54,7 @@ export default function AdminLayout({ children, currentPath }: AdminLayoutProps)
       items: [
         { name: "System Overview", path: "/system-overview", icon: BarChart3, description: "Platform metrics and analytics" },
         { name: "Admin Dashboard", path: "/admin", icon: Server, description: "Main admin interface" },
+        { name: "Financial Dashboard", path: "/financial-dashboard", icon: DollarSign, description: "Revenue and financial metrics" },
       ]
     },
     {
@@ -52,7 +63,9 @@ export default function AdminLayout({ children, currentPath }: AdminLayoutProps)
         { name: "Companies", path: "/companies-management", icon: Building2, description: "Manage client companies" },
         { name: "Technicians", path: "/technicians-management", icon: Users, description: "Field staff management" },
         { name: "Admin Users", path: "/admin-user-management", icon: Shield, description: "System administrators" },
-        { name: "Billing & Plans", path: "/subscription-management", icon: CreditCard, description: "Subscription management" },
+        { name: "Subscription Plans", path: "/subscription-management", icon: CreditCard, description: "Subscription management" },
+        { name: "Sales Management", path: "/sales-management", icon: TrendingUp, description: "Sales team and performance" },
+        { name: "Support Management", path: "/support-management", icon: MessageCircle, description: "Customer support system" },
       ]
     },
     {
@@ -61,7 +74,24 @@ export default function AdminLayout({ children, currentPath }: AdminLayoutProps)
         { name: "System Health", path: "/admin-system", icon: Activity, description: "Performance monitoring" },
         { name: "Security Center", path: "/security-dashboard", icon: Shield, description: "Security monitoring" },
         { name: "Rate Limiting", path: "/rate-limiting-dashboard", icon: Server, description: "API rate controls" },
-        { name: "Settings", path: "/system-settings", icon: Settings, description: "System configuration" },
+        { name: "System Settings", path: "/system-settings", icon: Settings, description: "System configuration" },
+        { name: "Account Settings", path: "/settings", icon: User, description: "Admin account settings" },
+      ]
+    },
+    {
+      section: "Tools & Testing",
+      items: [
+        { name: "Shortcode Testing", path: "/shortcode-demo", icon: Code, description: "Test embed codes" },
+        { name: "API Testing", path: "/api-testing", icon: Zap, description: "API endpoint testing" },
+      ]
+    },
+    {
+      section: "Documentation",
+      items: [
+        { name: "Documentation", path: "/documentation", icon: FileText, description: "Platform documentation" },
+        { name: "Installation Guide", path: "/installation-guide", icon: Download, description: "Setup and installation" },
+        { name: "API Documentation", path: "/api-documentation", icon: Code2, description: "API reference guide" },
+        { name: "Troubleshooting", path: "/troubleshooting", icon: HelpCircle, description: "Problem resolution guide" },
       ]
     }
   ];

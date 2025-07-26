@@ -7,7 +7,7 @@ import { Textarea } from "../components/ui/textarea";
 import { useToast } from "../hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "../lib/queryClient";
-import Sidebar from "../components/layout/sidebar-clean";
+import AdminLayout from "../components/layout/AdminLayout";
 import { 
   MessageCircle, 
   Clock, 
@@ -370,12 +370,8 @@ export default function SupportManagement() {
   const recentClosed = chatSessions.filter(s => s.status === 'closed').slice(0, 5);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <div className="hidden md:block">
-        <Sidebar />
-      </div>
-      <div className="flex-1">
-        <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <AdminLayout currentPath="/support-management">
+      <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Support Management</h1>
@@ -647,9 +643,8 @@ export default function SupportManagement() {
         </Card>
       )}
         </div>
-      </div>
 
-      {/* Chat Interface Modal */}
+        {/* Chat Interface Modal */}
       {showChatInterface && selectedSession && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-[90vw] h-[80vh] max-w-4xl flex flex-col">
@@ -768,6 +763,6 @@ export default function SupportManagement() {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }

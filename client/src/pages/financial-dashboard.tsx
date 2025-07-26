@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Sidebar from '../components/layout/sidebar-clean';
+import AdminLayout from '../components/layout/AdminLayout';
 import {
   Card,
   CardContent,
@@ -141,14 +141,11 @@ export default function FinancialDashboard() {
 
   if (metricsLoading) {
     return (
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 p-6">
-          <div className="flex justify-center items-center h-96">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-          </div>
-        </main>
-      </div>
+      <AdminLayout currentPath="/financial-dashboard">
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        </div>
+      </AdminLayout>
     );
   }
 
@@ -167,9 +164,7 @@ export default function FinancialDashboard() {
   };
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <main className="flex-1 p-6">
+    <AdminLayout currentPath="/financial-dashboard">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex justify-between items-center">
             <div>
@@ -447,7 +442,6 @@ export default function FinancialDashboard() {
             </TabsContent>
           </Tabs>
         </div>
-      </main>
-    </div>
+    </AdminLayout>
   );
 }

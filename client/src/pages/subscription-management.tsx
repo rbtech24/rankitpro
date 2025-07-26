@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '../lib/queryClient';
-import Sidebar from '../components/layout/sidebar-clean';
-import Header from '../components/layout/header';
+import AdminLayout from '../components/layout/AdminLayout';
 import {
   Card,
   CardContent,
@@ -239,19 +238,17 @@ export default function SubscriptionManagement() {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
+      <AdminLayout currentPath="/subscription-management">
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
-            <div className="container mx-auto p-6 space-y-8">
+    <AdminLayout currentPath="/subscription-management">
+      <div className="container mx-auto space-y-8">
               <div className="flex justify-between items-center">
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight">Subscription Management</h1>
@@ -596,9 +593,7 @@ export default function SubscriptionManagement() {
             </DialogFooter>
         </DialogContent>
       </Dialog>
-            </div>
-        </main>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

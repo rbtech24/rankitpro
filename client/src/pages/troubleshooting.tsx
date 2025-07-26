@@ -19,7 +19,7 @@ import {
   RefreshCw,
   HelpCircle
 } from "lucide-react";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
+import AdminLayout from "../components/layout/AdminLayout";
 
 export default function Troubleshooting() {
   const commonIssues = [
@@ -235,7 +235,7 @@ export default function Troubleshooting() {
   };
 
   return (
-    <DashboardLayout>
+    <AdminLayout currentPath="/troubleshooting">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Troubleshooting</h1>
@@ -500,6 +500,6 @@ export default function Troubleshooting() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </AdminLayout>
   );
 }

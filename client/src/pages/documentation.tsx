@@ -14,7 +14,7 @@ import {
   BarChart3,
   MessageSquare
 } from "lucide-react";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
+import AdminLayout from "../components/layout/AdminLayout";
 import { useToast } from "../hooks/use-toast";
 import { useLocation } from "wouter";
 
@@ -178,7 +178,7 @@ export default function Documentation() {
   ];
 
   return (
-    <DashboardLayout>
+    <AdminLayout currentPath="/documentation">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Documentation & Support</h1>
@@ -284,6 +284,6 @@ export default function Documentation() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </AdminLayout>
   );
 }

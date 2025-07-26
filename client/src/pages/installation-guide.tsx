@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "../hooks/use-toast";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
+import AdminLayout from "../components/layout/AdminLayout";
 
 export default function InstallationGuide() {
   const [copiedItems, setCopiedItems] = useState(new Set<string>());
@@ -142,7 +142,7 @@ export default function InstallationGuide() {
   };
 
   return (
-    <DashboardLayout>
+    <AdminLayout currentPath="/installation-guide">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Installation Guide</h1>
@@ -439,6 +439,6 @@ export default function InstallationGuide() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </AdminLayout>
   );
 }

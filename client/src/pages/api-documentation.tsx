@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "../hooks/use-toast";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
+import AdminLayout from "../components/layout/AdminLayout";
 
 export default function APIDocumentation() {
   const [copiedItems, setCopiedItems] = useState(new Set<string>());
@@ -191,7 +191,7 @@ Response:
   };
 
   return (
-    <DashboardLayout>
+    <AdminLayout currentPath="/api-documentation">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">API Documentation</h1>
@@ -568,6 +568,6 @@ Response:
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </AdminLayout>
   );
 }

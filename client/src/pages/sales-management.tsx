@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Checkbox } from '../components/ui/checkbox';
 import { useToast } from '../hooks/use-toast';
 import { apiRequest } from '../lib/queryClient';
-import { DashboardLayout } from '../components/layout/DashboardLayout';
+import AdminLayout from '../components/layout/AdminLayout';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
 
 interface CreateSalesPersonForm {
@@ -315,7 +315,7 @@ export default function SalesManagement() {
   }, 0) || 0;
 
   return (
-    <DashboardLayout>
+    <AdminLayout currentPath="/sales-management">
       <div className="container mx-auto py-8 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -1350,6 +1350,6 @@ export default function SalesManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </DashboardLayout>
+    </AdminLayout>
   );
 }
