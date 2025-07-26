@@ -64,6 +64,7 @@ import SubscriptionManagement from "./pages/subscription-management";
 import FinancialDashboard from "./pages/financial-dashboard";
 import SuperAdminFinance from "./pages/super-admin-finance";
 import TechniciansManagement from "./pages/technicians-management";
+import SubscriptionPlansManagement from "./pages/subscription-plans-management";
 import SystemSettings from "./pages/system-settings";
 import SystemOverview from "./pages/system-overview";
 import SalesDashboard from "./pages/sales-dashboard";
@@ -1255,7 +1256,7 @@ function Router() {
       </Route>
       
       <Route path="/subscription-plans-management">
-        <PrivateRoute component={lazy(() => import("./pages/subscription-plans-management"))} path="/subscription-plans-management" role="super_admin" />
+        <PrivateRoute component={SubscriptionPlansManagement} path="/subscription-plans-management" role="super_admin" />
       </Route>
       <Route path="/companies">
         <PrivateRoute component={CompaniesManagement} path="/companies" role="super_admin" />

@@ -11,7 +11,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../components/ui/form";
 import { Input } from "../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Textarea } from "../components/ui/textarea";
 import { Switch } from "../components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -319,9 +318,9 @@ export default function SubscriptionPlansManagement() {
             <FormItem>
               <FormLabel>Features</FormLabel>
               <FormControl>
-                <Textarea 
+                <textarea 
                   placeholder="Enter one feature per line&#10;e.g.,&#10;AI Content Generation&#10;Review Management&#10;Advanced Analytics"
-                  className="min-h-[100px]"
+                  className="min-h-[100px] w-full px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-input bg-background rounded-md"
                   {...field} 
                 />
               </FormControl>

@@ -362,47 +362,10 @@ async function createSuperAdminIfNotExists() {
   const registerRoutes = (await import("./routes")).default;
   registerRoutes(app);
 
-  // Critical Fix: Add API route exclusion middleware BEFORE Vite setup
-  // This prevents Vite from intercepting API calls
+  // API route handling - let routes handle their own responses
   app.use((req, res, next) => {
     if (req.path.startsWith('/api/')) {
-      // Skip Vite middleware for API routes
-      const originalUrl = req.originalUrl;
-      logger.info(`API request received: ${req.method} ${originalUrl}`);
-      
-      // If no route matched, send 404 JSON response
-      const timer = setTimeout(() => {
-        if (!res.headersSent) {
-          res.status(404).json({
-            error: 'API endpoint not found',
-            path: originalUrl,
-            method: req.method,
-            timestamp: new Date().toISOString()
-          });
-        }
-      }, 100);
-      
-      // Clear timeout if response is sent
-      const originalSend = res.send;
-      const originalJson = res.json;
-      const originalEnd = res.end;
-      
-      const clearTimerAndCall = (originalFn: Function, thisArg: any, args: any[]) => {
-        clearTimeout(timer);
-        return originalFn.apply(thisArg, args);
-      };
-      
-      res.send = function(...args: any[]) {
-        return clearTimerAndCall(originalSend, this, args);
-      };
-      
-      res.json = function(...args: any[]) {
-        return clearTimerAndCall(originalJson, this, args);
-      };
-      
-      res.end = function(...args: any[]) {
-        return clearTimerAndCall(originalEnd, this, args);
-      };
+      logger.info(`API request received: ${req.method} ${req.originalUrl}`);
     }
     next();
   });
