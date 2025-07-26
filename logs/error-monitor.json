@@ -4,11 +4,11 @@
       "bfdbcb60",
       {
         "id": "bfdbcb60",
-        "timestamp": "2025-07-26T06:22:47.373Z",
+        "timestamp": "2025-07-26T06:33:45.225Z",
         "level": "info",
         "message": "Application startup initiated",
         "resolved": false,
-        "count": 342
+        "count": 346
       }
     ],
     [
@@ -34,11 +34,11 @@
       "40637616",
       {
         "id": "40637616",
-        "timestamp": "2025-07-26T03:55:06.591Z",
+        "timestamp": "2025-07-26T06:32:10.248Z",
         "level": {},
         "message": "Unhandled Promise Rejection",
         "resolved": false,
-        "count": 68
+        "count": 73
       }
     ],
     [
@@ -134,7 +134,7 @@
     ]
   ],
   "stats": {
-    "totalErrors": 426,
+    "totalErrors": 435,
     "criticalErrors": 0,
     "errorsByHour": {
       "0": 17,
@@ -143,7 +143,7 @@
       "3": 36,
       "4": 5,
       "5": 19,
-      "6": 8,
+      "6": 17,
       "7": 8,
       "8": 9,
       "9": 6,
@@ -167,16 +167,16 @@
       "/api/auth/login": 3
     },
     "errorsByType": {
-      "General": 426
+      "General": 435
     },
     "lastError": {
       "id": "bfdbcb60",
-      "timestamp": "2025-07-26T06:22:47.373Z",
+      "timestamp": "2025-07-26T06:33:45.225Z",
       "level": "info",
       "message": "Application startup initiated",
       "resolved": false,
-      "count": 342
+      "count": 346
     }
   },
-  "lastSaved": "2025-07-26T06:22:47.373Z"
+  "lastSaved": "2025-07-26T06:33:45.225Z"
 }
