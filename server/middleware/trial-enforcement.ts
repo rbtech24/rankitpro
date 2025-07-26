@@ -27,6 +27,16 @@ export async function enforceTrialLimits(req: AuthenticatedRequest, res: Respons
     return next();
   }
 
+  // Allow access to billing endpoints for trial expired users to restore service
+  if (req.path.startsWith('/api/billing/')) {
+    return next();
+  }
+
+  // Allow access to trial status endpoint
+  if (req.path === '/api/trial/status') {
+    return next();
+  }
+
   try {
     const companyId = req.user.companyId;
     if (!companyId) {

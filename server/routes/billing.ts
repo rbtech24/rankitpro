@@ -239,6 +239,15 @@ router.post('/subscription', isAuthenticated, isCompanyAdmin, async (req: Reques
     const user = req.user as any;
     const companyId = user.companyId;
 
+    // Debug logging to understand what's being received
+    logger.info("Billing subscription request received", { 
+      planId, 
+      planIdType: typeof planId,
+      billingPeriod,
+      companyId,
+      requestBody: req.body
+    });
+
     if (!planId || !billingPeriod) {
       return res.status(400).json({ error: 'Plan ID and billing period are required' });
     }
