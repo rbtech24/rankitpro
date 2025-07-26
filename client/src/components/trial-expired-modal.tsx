@@ -85,7 +85,17 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
     queryKey: ["/api/billing/plans"],
     queryFn: async () => {
       const response = await apiRequest('GET', "/api/billing/plans");
-      return response.json();
+      const plans = await response.json();
+      
+      // Ensure all plan IDs are numeric
+      const plansWithNumericIds = plans.map((plan: any) => ({
+        ...plan,
+        id: typeof plan.id === 'string' ? parseInt(plan.id, 10) : plan.id
+      }));
+      
+      console.log('Loaded subscription plans:', plansWithNumericIds);
+      
+      return plansWithNumericIds;
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -94,7 +104,20 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
   const createSubscription = useMutation({
     mutationFn: async (data: { planId: number; billingPeriod: 'monthly' | 'yearly' }) => {
       setIsProcessing(true);
-      const response = await apiRequest('POST', '/api/billing/subscription', data);
+      
+      // Ensure planId is a number
+      const numericPlanId = typeof data.planId === 'string' ? parseInt(data.planId, 10) : data.planId;
+      
+      console.log('Sending subscription request:', { 
+        planId: numericPlanId, 
+        planIdType: typeof numericPlanId,
+        billingPeriod: data.billingPeriod 
+      });
+      
+      const response = await apiRequest('POST', '/api/billing/subscription', {
+        planId: numericPlanId,
+        billingPeriod: data.billingPeriod
+      });
       return response.json();
     },
     onSuccess: (data) => {
@@ -144,7 +167,13 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
   const handleQuickRestore = (plan: any, billing: 'monthly' | 'yearly') => {
     setSelectedPlan(plan);
     setSelectedBilling(billing);
-    createSubscription.mutate({ planId: plan.id, billingPeriod: billing });
+    
+    // Ensure we're sending the numeric plan ID
+    const planId = typeof plan.id === 'string' ? parseInt(plan.id, 10) : plan.id;
+    
+    console.log('Quick restore plan:', { plan, planId, planIdType: typeof planId, billing });
+    
+    createSubscription.mutate({ planId, billingPeriod: billing });
   };
 
   const handlePaymentSuccess = () => {
