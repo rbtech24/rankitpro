@@ -161,6 +161,7 @@ export default function Billing() {
       
       // Extract detailed error message from response
       let errorMessage = "Failed to update your subscription. Please try again.";
+      let planDetails = null;
       
       try {
         if (error?.response) {
@@ -176,12 +177,25 @@ export default function Billing() {
           errorMessage = error.message;
           setSubscriptionError(error.message);
         }
+
+        // Get plan details for the failed payment
+        if (selectedPlan && subscriptionPlans) {
+          planDetails = subscriptionPlans.find(p => p.name.toLowerCase() === selectedPlan);
+        }
       } catch (parseError) {
         console.error('Error parsing error response:', parseError);
       }
       
+      // Trigger payment failed modal
+      window.dispatchEvent(new CustomEvent('paymentFailed', {
+        detail: {
+          error: errorMessage,
+          plan: planDetails
+        }
+      }));
+      
       toast({
-        title: "Subscription Error",
+        title: "Payment Setup Failed",
         description: errorMessage,
         variant: "destructive",
       });

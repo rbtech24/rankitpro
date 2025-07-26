@@ -38,7 +38,7 @@ export default function PaymentForm({
 
     try {
       const cardElement = elements.getElement(CardElement);
-      
+
       if (!cardElement) {
         throw new Error('Card element not found');
       }
@@ -50,11 +50,29 @@ export default function PaymentForm({
       });
 
       if (error) {
-        toast({
-          title: 'Payment failed',
-          description: error.message || 'An unexpected error occurred',
-          variant: 'destructive',
-        });
+        const errorMessage = error.message || 'Payment failed';
+
+        // Dispatch payment failed event for modal handling
+        window.dispatchEvent(new CustomEvent('paymentFailed', {
+          detail: {
+            error: errorMessage,
+            plan: null // Will be set by the calling component if available
+          }
+        }));
+
+        if (error.type === 'card_error' || error.type === 'validation_error') {
+          toast({
+            title: 'Payment failed',
+            description: errorMessage,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Payment error',
+            description: 'An unexpected error occurred',
+            variant: 'destructive',
+          });
+        }
       } else if (paymentIntent.status === 'succeeded') {
         toast({
           title: 'Payment successful',
@@ -95,7 +113,7 @@ export default function PaymentForm({
           }}
         />
       </div>
-      
+
       <Button 
         type="submit" 
         disabled={isProcessing || !stripe || !elements || !clientSecret}

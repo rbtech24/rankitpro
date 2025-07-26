@@ -16,7 +16,8 @@ import {
 } from '../components/ui/dialog';
 import { Button } from '../components/ui/button';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { TrialExpiredModal } from './trial-expired-modal';
+import { TrialExpiredModal, PaymentFailedModal } from "./trial-expired-modal";
+import { usePaymentModals } from "../hooks/use-payment-modals";
 
 interface TrialStatus {
   expired: boolean;

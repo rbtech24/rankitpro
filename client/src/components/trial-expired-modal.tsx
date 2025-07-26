@@ -1,10 +1,10 @@
 
 /**
  * Trial Expired Modal Component
- * Blocks access when trial expires and allows direct payment
+ * Redesigned with streamlined payment options for service restoration
  */
 
-import { AlertTriangle, CreditCard, Clock, Loader2, Check, X } from "lucide-react";
+import { AlertTriangle, CreditCard, Clock, Loader2, Check, X, ArrowLeft, Star } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -43,11 +43,19 @@ interface TrialExpiredModalProps {
   trialEndDate?: string;
 }
 
+interface PaymentFailedModalProps {
+  isOpen: boolean;
+  onClose?: () => void;
+  error?: string;
+  attemptedPlan?: any;
+}
+
 export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpiredModalProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState<'expired' | 'plans' | 'payment' | 'success'>('expired');
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [selectedBilling, setSelectedBilling] = useState<'monthly' | 'yearly'>('monthly');
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -62,11 +70,6 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
     return null;
   }
 
-  // Debug current step changes
-  useEffect(() => {
-    console.log('Trial Modal - Current step changed to:', currentStep);
-  }, [currentStep]);
-
   // Get subscription plans
   const { data: subscriptionPlans, isLoading: plansLoading } = useQuery({
     queryKey: ["/api/billing/plans"],
@@ -74,7 +77,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
       const response = await apiRequest('GET', "/api/billing/plans");
       return response.json();
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
   // Create subscription mutation
@@ -88,17 +91,15 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
       setIsProcessing(false);
       
       if (data.devMode || data.success) {
-        // Success in development mode or direct payment
         setCurrentStep('success');
         toast({
-          title: "Account Reactivated!",
-          description: "Your subscription has been activated successfully. Full access restored!",
+          title: "🎉 Service Restored!",
+          description: "Your account is now active. All features have been restored.",
           variant: "default",
         });
         queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
         queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
         
-        // Reload page after success
         setTimeout(() => {
           window.location.reload();
         }, 2000);
@@ -113,72 +114,52 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
     onError: (error: any) => {
       setIsProcessing(false);
       toast({
-        title: "Payment Error",
-        description: "Failed to process subscription. Please try again.",
+        title: "Payment Setup Failed",
+        description: "Unable to setup payment. Please try again or contact support.",
         variant: "destructive",
       });
     }
   });
 
-  const handlePlanSelect = (plan: any) => {
+  const handleQuickRestore = (plan: any, billing: 'monthly' | 'yearly') => {
     setSelectedPlan(plan);
-    createSubscription.mutate({ planId: plan.id, billingPeriod: 'monthly' });
-  };
-
-  const handleViewBilling = () => {
-    setLocation('/billing');
-  };
-
-  const handleLogout = () => {
-    window.location.href = '/api/auth/logout';
+    setSelectedBilling(billing);
+    createSubscription.mutate({ planId: plan.id, billingPeriod: billing });
   };
 
   const handlePaymentSuccess = () => {
     setCurrentStep('success');
     setClientSecret(null);
     toast({
-      title: "Payment Successful!",
-      description: "Your account has been reactivated. Welcome back!",
+      title: "🎉 Payment Successful!",
+      description: "Your service has been restored. Welcome back!",
       variant: "default",
     });
     queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
     queryClient.invalidateQueries({ queryKey: ['/api/billing/subscription'] });
     
-    // Reload page to restore access
     setTimeout(() => {
       window.location.reload();
     }, 2000);
-  };
-
-  const handleBack = () => {
-    if (currentStep === 'plans') {
-      setCurrentStep('expired');
-    } else if (currentStep === 'payment') {
-      setCurrentStep('plans');
-      setClientSecret(null);
-    }
   };
 
   // Success step
   if (currentStep === 'success') {
     return (
       <Dialog open={isOpen} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-              <Check className="h-6 w-6 text-green-600" />
-            </div>
-            <DialogTitle className="text-xl font-semibold text-green-700">
-              Account Reactivated!
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 mt-2">
-              Your subscription is now active. You have full access to all features.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="text-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-            <p className="text-sm text-gray-600">Redirecting you back to the dashboard...</p>
+        <DialogContent className="sm:max-w-md text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+            <Check className="h-8 w-8 text-green-600" />
+          </div>
+          <DialogTitle className="text-xl font-semibold text-green-700 mb-2">
+            Service Restored!
+          </DialogTitle>
+          <DialogDescription className="text-gray-600 mb-4">
+            Your subscription is active and all features are now available.
+          </DialogDescription>
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Redirecting you back to the dashboard...
           </div>
         </DialogContent>
       </Dialog>
@@ -187,35 +168,42 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
 
   // Payment step
   if (currentStep === 'payment' && clientSecret && stripePromise) {
+    const price = selectedBilling === 'yearly' ? 
+      (selectedPlan?.yearlyPrice || selectedPlan?.price * 12) : 
+      selectedPlan?.price;
+
     return (
       <Dialog open={isOpen} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <div className="flex items-center">
-              <Button variant="ghost" size="sm" onClick={handleBack} className="mr-2">
-                ← Back
+            <div className="flex items-center mb-4">
+              <Button variant="ghost" size="sm" onClick={() => setCurrentStep('plans')} className="mr-2">
+                <ArrowLeft className="h-4 w-4" />
               </Button>
               <div>
-                <DialogTitle>Complete Your Subscription</DialogTitle>
+                <DialogTitle>Complete Payment</DialogTitle>
                 <DialogDescription>
-                  Complete payment to reactivate your account immediately
+                  Restore your service immediately with {selectedPlan?.name} plan
                 </DialogDescription>
               </div>
             </div>
           </DialogHeader>
           
-          {selectedPlan && (
-            <div className="bg-blue-50 p-4 rounded-lg mb-4">
-              <div className="flex justify-between items-center">
-                <span className="font-medium">{selectedPlan.name} Plan</span>
-                <span className="text-lg font-bold">${selectedPlan.price}/month</span>
-              </div>
-              <div className="text-sm text-gray-600 mt-1">
-                {selectedPlan.maxTechnicians === -1 ? 'Unlimited' : selectedPlan.maxTechnicians} technicians, 
-                {selectedPlan.maxCheckIns === -1 ? 'Unlimited' : selectedPlan.maxCheckIns} submissions
-              </div>
+          <div className="bg-blue-50 p-4 rounded-lg mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-medium">{selectedPlan?.name} Plan</span>
+              <span className="text-xl font-bold">${price}/{selectedBilling}</span>
             </div>
-          )}
+            <div className="text-sm text-gray-600">
+              {selectedPlan?.maxTechnicians === -1 ? 'Unlimited' : selectedPlan?.maxTechnicians} technicians • 
+              {selectedPlan?.maxCheckIns === -1 ? 'Unlimited' : selectedPlan?.maxCheckIns} submissions
+            </div>
+            {selectedBilling === 'yearly' && selectedPlan?.yearlyPrice && (
+              <div className="text-sm text-green-600 font-medium mt-1">
+                Save ${(selectedPlan.price * 12) - selectedPlan.yearlyPrice}/year
+              </div>
+            )}
+          </div>
           
           <Elements stripe={stripePromise} options={{ clientSecret }}>
             <PaymentForm 
@@ -227,7 +215,7 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
                   variant: "destructive",
                 });
               }}
-              onCancel={handleBack}
+              onCancel={() => setCurrentStep('plans')}
             />
           </Elements>
         </DialogContent>
@@ -241,86 +229,134 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
       <Dialog open={isOpen} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center">
-              <Button variant="ghost" size="sm" onClick={handleBack} className="mr-2">
-                ← Back
+            <div className="flex items-center mb-4">
+              <Button variant="ghost" size="sm" onClick={() => setCurrentStep('expired')} className="mr-2">
+                <ArrowLeft className="h-4 w-4" />
               </Button>
               <div>
                 <DialogTitle className="text-xl font-semibold">
-                  Choose Your Plan
+                  Restore Your Service
                 </DialogTitle>
-                <DialogDescription className="text-gray-600 mt-2">
-                  Select a plan to immediately restore access to your account
+                <DialogDescription>
+                  Choose a plan to immediately regain access to all features
                 </DialogDescription>
               </div>
             </div>
           </DialogHeader>
           
-          <div className="mt-6">
-            {plansLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin" />
+          {plansLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : subscriptionPlans && subscriptionPlans.length > 0 ? (
+            <div className="space-y-6">
+              {/* Billing Toggle */}
+              <div className="flex justify-center">
+                <div className="bg-gray-100 p-1 rounded-lg">
+                  <button
+                    onClick={() => setSelectedBilling('monthly')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      selectedBilling === 'monthly'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    onClick={() => setSelectedBilling('yearly')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      selectedBilling === 'yearly'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Yearly <span className="text-green-600 text-xs">Save 20%</span>
+                  </button>
+                </div>
               </div>
-            ) : subscriptionPlans && subscriptionPlans.length > 0 ? (
+
+              {/* Plans Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {subscriptionPlans.map((plan: any) => (
-                  <div key={plan.id} className="border rounded-lg p-4 hover:border-blue-500 transition-colors relative">
-                    {plan.name.toLowerCase() === 'professional' && (
-                      <Badge className="absolute -top-2 -right-2 bg-blue-600">Most Popular</Badge>
-                    )}
-                    <div className="text-center">
-                      <h3 className="font-semibold text-lg">{plan.name}</h3>
-                      <div className="mt-2">
-                        <span className="text-2xl font-bold">${plan.price}</span>
-                        <span className="text-gray-500">/month</span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-2">
-                        {plan.maxTechnicians === -1 ? 'Unlimited' : plan.maxTechnicians} technicians<br/>
-                        {plan.maxCheckIns === -1 ? 'Unlimited' : plan.maxCheckIns} submissions
-                      </p>
-                      
-                      {plan.features && plan.features.length > 0 && (
-                        <ul className="text-xs text-gray-600 mt-3 space-y-1 text-left">
-                          {plan.features.slice(0, 4).map((feature: string, index: number) => (
-                            <li key={index} className="flex items-start">
-                              <Check className="h-3 w-3 text-green-500 mr-1 mt-0.5 flex-shrink-0" />
-                              <span>{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
+                {subscriptionPlans.map((plan: any) => {
+                  const price = selectedBilling === 'yearly' ? 
+                    (plan.yearlyPrice || plan.price * 12) : 
+                    plan.price;
+                  const isPopular = plan.name.toLowerCase() === 'professional';
+                  
+                  return (
+                    <div key={plan.id} className={`relative border rounded-lg p-6 hover:border-blue-500 transition-colors ${
+                      isPopular ? 'border-blue-500 shadow-lg' : 'border-gray-200'
+                    }`}>
+                      {isPopular && (
+                        <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-blue-600">
+                          <Star className="h-3 w-3 mr-1" />
+                          Most Popular
+                        </Badge>
                       )}
                       
-                      <Button 
-                        onClick={() => handlePlanSelect(plan)}
-                        disabled={isProcessing}
-                        className="w-full mt-4"
-                        variant={plan.name.toLowerCase() === 'professional' ? 'default' : 'outline'}
-                      >
-                        {isProcessing ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <CreditCard className="h-4 w-4 mr-2" />
-                            Select Plan
-                          </>
+                      <div className="text-center">
+                        <h3 className="font-semibold text-lg mb-2">{plan.name}</h3>
+                        <div className="mb-4">
+                          <span className="text-3xl font-bold">${price}</span>
+                          <span className="text-gray-500">/{selectedBilling}</span>
+                        </div>
+                        
+                        <div className="space-y-2 mb-6 text-sm text-left">
+                          <div className="flex items-center">
+                            <Check className="h-4 w-4 text-green-500 mr-2" />
+                            <span>{plan.maxTechnicians === -1 ? 'Unlimited' : plan.maxTechnicians} technicians</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Check className="h-4 w-4 text-green-500 mr-2" />
+                            <span>{plan.maxCheckIns === -1 ? 'Unlimited' : plan.maxCheckIns} submissions</span>
+                          </div>
+                          {plan.features?.slice(0, 3).map((feature: string, index: number) => (
+                            <div key={index} className="flex items-center">
+                              <Check className="h-4 w-4 text-green-500 mr-2" />
+                              <span>{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        <Button 
+                          onClick={() => handleQuickRestore(plan, selectedBilling)}
+                          disabled={isProcessing}
+                          className={`w-full ${isPopular ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+                          variant={isPopular ? 'default' : 'outline'}
+                        >
+                          {isProcessing ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              <CreditCard className="h-4 w-4 mr-2" />
+                              Restore Service
+                            </>
+                          )}
+                        </Button>
+                        
+                        {selectedBilling === 'yearly' && plan.yearlyPrice && (
+                          <p className="text-xs text-green-600 mt-2 font-medium">
+                            Save ${(plan.price * 12) - plan.yearlyPrice} vs monthly
+                          </p>
                         )}
-                      </Button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500 mb-4">Unable to load subscription plans</p>
-                <Button onClick={handleViewBilling}>
-                  Go to Billing Page
-                </Button>
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">Unable to load subscription plans</p>
+              <Button onClick={() => setLocation('/billing')}>
+                Go to Billing Page
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     );
@@ -335,52 +371,49 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
             <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
           <DialogTitle className="text-xl font-semibold">
-            Trial Expired
+            Service Suspended
           </DialogTitle>
           <DialogDescription className="text-gray-600 mt-2">
-            Your company's 14-day free trial ended on {trialEndDate ? new Date(trialEndDate).toLocaleDateString() : '7/5/2025'}.
-            Choose a subscription plan to restore access for your team.
+            Your 14-day trial ended on {trialEndDate ? new Date(trialEndDate).toLocaleDateString() : 'recently'}.
+            Choose a plan to restore immediate access.
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 mt-6">
-          <div className="bg-red-50 rounded-lg p-4">
+          <div className="bg-red-50 rounded-lg p-4 border border-red-200">
             <h4 className="font-medium text-red-900 mb-2 flex items-center">
-              <X className="h-4 w-4 mr-2 text-red-600" />
-              Access Restricted
+              <Clock className="h-4 w-4 mr-2 text-red-600" />
+              Current Status
             </h4>
             <ul className="text-sm text-red-700 space-y-1">
-              <li>• All platform features are now locked</li>
-              <li>• Your data and settings are safely preserved</li>
-              <li>• Upgrade now to restore immediate access</li>
+              <li>• All features are temporarily locked</li>
+              <li>• Your data is safely preserved</li>
+              <li>• Restore access in under 2 minutes</li>
             </ul>
           </div>
           
           <div className="flex flex-col space-y-3">
             <Button 
-              onClick={() => {
-                console.log('Switching to plans step...');
-                setCurrentStep('plans');
-              }}
-              className="w-full"
+              onClick={() => setCurrentStep('plans')}
+              className="w-full bg-blue-600 hover:bg-blue-700"
               size="lg"
             >
               <CreditCard className="h-4 w-4 mr-2" />
-              View Subscription Plans
+              Restore Service Now
             </Button>
             
             <Button 
               variant="outline"
-              onClick={handleViewBilling}
+              onClick={() => setLocation('/billing')}
               className="w-full"
             >
-              Go to Billing Page
+              View All Options
             </Button>
             
             <Button 
-              variant="outline" 
-              onClick={handleLogout}
-              className="w-full"
+              variant="ghost" 
+              onClick={() => window.location.href = '/api/auth/logout'}
+              className="w-full text-gray-500"
               size="sm"
             >
               Sign Out
@@ -389,7 +422,114 @@ export function TrialExpiredModal({ isOpen, onClose, trialEndDate }: TrialExpire
         </div>
         
         <p className="text-xs text-gray-500 text-center mt-4">
-          Need help? Contact our support team for assistance with upgrading your account.
+          Questions? Contact support for assistance with plan selection.
+        </p>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Payment Failed Modal Component
+export function PaymentFailedModal({ isOpen, onClose, error, attemptedPlan }: PaymentFailedModalProps) {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  // Get subscription plans for retry options
+  const { data: subscriptionPlans } = useQuery({
+    queryKey: ["/api/billing/plans"],
+    queryFn: async () => {
+      const response = await apiRequest('GET', "/api/billing/plans");
+      return response.json();
+    },
+  });
+
+  const handleRetryPayment = () => {
+    setIsRetrying(true);
+    // Redirect to billing page or retry the same plan
+    setLocation('/billing');
+  };
+
+  const handleTryDifferentPlan = () => {
+    setLocation('/billing');
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader className="text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+            <X className="h-6 w-6 text-red-600" />
+          </div>
+          <DialogTitle className="text-xl font-semibold text-red-700">
+            Payment Failed
+          </DialogTitle>
+          <DialogDescription className="text-gray-600 mt-2">
+            {error || "We couldn't process your payment. Your service remains suspended until payment is completed."}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-4 mt-6">
+          {attemptedPlan && (
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <h4 className="font-medium text-blue-900 mb-2">Attempted Plan</h4>
+              <div className="text-sm text-blue-700">
+                {attemptedPlan.name} - ${attemptedPlan.price}/month
+              </div>
+            </div>
+          )}
+
+          <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+            <h4 className="font-medium text-yellow-900 mb-2">Common Solutions</h4>
+            <ul className="text-sm text-yellow-700 space-y-1">
+              <li>• Check your card details and try again</li>
+              <li>• Ensure sufficient funds are available</li>
+              <li>• Try a different payment method</li>
+              <li>• Contact your bank if needed</li>
+            </ul>
+          </div>
+          
+          <div className="flex flex-col space-y-3">
+            <Button 
+              onClick={handleRetryPayment}
+              disabled={isRetrying}
+              className="w-full"
+              size="lg"
+            >
+              {isRetrying ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Redirecting...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Retry Payment
+                </>
+              )}
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={handleTryDifferentPlan}
+              className="w-full"
+            >
+              Try Different Plan
+            </Button>
+            
+            <Button 
+              variant="ghost"
+              onClick={onClose}
+              className="w-full text-gray-500"
+              size="sm"
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+        
+        <p className="text-xs text-gray-500 text-center mt-4">
+          Need help? Contact our support team for payment assistance.
         </p>
       </DialogContent>
     </Dialog>
