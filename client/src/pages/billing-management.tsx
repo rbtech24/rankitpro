@@ -315,7 +315,7 @@ export default function BillingManagement() {
                     </CardTitle>
                     <DollarSign className="h-6 w-6 text-green-600" />
                   </div>
-                  <CardDescription>Total Revenue</CardDescription>
+                  <CardDescription>Projected Yearly Revenue</CardDescription>
                 </CardHeader>
               </Card>
               
