@@ -147,6 +147,16 @@ export class StripeService {
     }
 
     try {
+      // First create a product, then create a price for it
+      const product = await stripe!.products.create({
+        name: `Rank It Pro - ${planName}`,
+        description: `${planName} subscription plan for Rank It Pro platform`,
+        metadata: {
+          plan: planName.toLowerCase(),
+          created_by: 'rank_it_pro_admin'
+        }
+      });
+
       // Create a new price object in Stripe
       const price = await stripe!.prices.create({
         unit_amount: Math.round(amount * 100), // Convert to cents
@@ -154,10 +164,7 @@ export class StripeService {
         recurring: {
           interval: interval
         },
-        product_data: {
-          name: `Rank It Pro - ${planName}`,
-          description: `${planName} subscription plan for Rank It Pro platform`
-        },
+        product: product.id,
         metadata: {
           plan: planName.toLowerCase(),
           interval: interval,
