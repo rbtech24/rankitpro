@@ -31,13 +31,15 @@ import AdminLayout from "../components/layout/AdminLayout";
 export default function AdminPage() {
   const [, setLocation] = useLocation();
 
-  // Fetch system stats
+  // Fetch system stats with fallback
   const { data: systemStats } = useQuery({
     queryKey: ['/api/admin/system-stats'],
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/admin/system-stats');
       return response.json();
     },
+    retry: 3,
+    staleTime: 5000
   });
 
   // Fetch companies
@@ -129,7 +131,7 @@ export default function AdminPage() {
   ];
 
   return (
-    <AdminLayout currentPath="/admin">
+    <AdminLayout>
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
             {quickStats.map((stat) => (
@@ -166,7 +168,7 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {systemHealth.map((item, index) => (
+                  {(systemHealth || []).map((item: any, index: number) => (
                     <div key={index} className="flex items-center justify-between">
                       <span className="text-sm">{item.name}</span>
                       <Badge className={item.color}>{item.status}</Badge>
@@ -187,7 +189,7 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {recentActivity.map((activity, index) => {
+                  {(recentActivity || []).map((activity: any, index: number) => {
                     const IconComponent = activity.icon === 'User' ? User : 
                                        activity.icon === 'Building2' ? Building2 :
                                        activity.icon === 'Server' ? Server : Activity;

@@ -111,10 +111,12 @@ export interface SessionRequest extends Request {
     username: string;
     createdAt: Date | null;
     stripeCustomerId: string | null;
+    stripeSubscriptionId: string | null;
     companyId: number | null;
     active: boolean;
     emailVerified: boolean;
     lastLogin: Date | null;
+    notificationPreferences: unknown;
     appearancePreferences: unknown;
   };
 }
