@@ -6,29 +6,230 @@ import path from 'path';
 import { logger } from '../services/logger';
 const router = Router();
 
-// WordPress Plugin Download Endpoint
+// Simple test route to verify routing works
+router.get('/test', async (req: Request, res: Response) => {
+  res.json({ message: 'WordPress routes working', timestamp: new Date().toISOString() });
+});
+
+// WordPress Plugin Download Endpoint - Simplified version
 router.get('/plugin', async (req: Request, res: Response) => {
   try {
+    logger.info('WordPress plugin download requested');
+    
+    // Use a simple embedded plugin code that works
+    const pluginCode = `<?php
+/**
+ * Plugin Name: Rank It Pro
+ * Description: Display customer testimonials, reviews, and check-ins from Rank It Pro
+ * Version: 1.5.0
+ * Author: Rank It Pro
+ */
+
+// Prevent direct access
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// Add shortcode for testimonials
+add_shortcode('rankitpro_testimonials', function($atts) {
+    $atts = shortcode_atts(array(
+        'company_id' => '',
+        'limit' => 5,
+        'columns' => 3
+    ), $atts);
+    
+    if (empty($atts['company_id'])) {
+        return '<p>Error: Company ID is required</p>';
+    }
+    
+    $api_url = 'https://rankitpro.com/api/testimonials/company/' . $atts['company_id'];
+    $response = wp_remote_get($api_url);
+    
+    if (is_wp_error($response)) {
+        return '<p>Error loading testimonials</p>';
+    }
+    
+    $testimonials = json_decode(wp_remote_retrieve_body($response), true);
+    
+    if (empty($testimonials)) {
+        return '<p>No testimonials found</p>';
+    }
+    
+    $output = '<div class="rankitpro-testimonials" style="display: grid; grid-template-columns: repeat(' . $atts['columns'] . ', 1fr); gap: 20px; margin: 20px 0;">';
+    
+    foreach (array_slice($testimonials, 0, $atts['limit']) as $testimonial) {
+        $output .= '<div class="testimonial-card" style="background: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 4px solid #0088d2;">';
+        $output .= '<div class="testimonial-content" style="font-style: italic; margin-bottom: 15px;">"' . esc_html($testimonial['content']) . '"</div>';
+        $output .= '<div class="testimonial-author" style="font-weight: bold; color: #0088d2;">- ' . esc_html($testimonial['customerName']) . '</div>';
+        if (!empty($testimonial['serviceType'])) {
+            $output .= '<div class="testimonial-service" style="font-size: 0.9em; color: #666; margin-top: 5px;">' . esc_html($testimonial['serviceType']) . '</div>';
+        }
+        $output .= '</div>';
+    }
+    
+    $output .= '</div>';
+    
+    return $output;
+});
+
+// Add shortcode for blog posts
+add_shortcode('rankitpro_blog_posts', function($atts) {
+    $atts = shortcode_atts(array(
+        'company_id' => '',
+        'limit' => 3,
+        'columns' => 2
+    ), $atts);
+    
+    if (empty($atts['company_id'])) {
+        return '<p>Error: Company ID is required</p>';
+    }
+    
+    $api_url = 'https://rankitpro.com/api/blog-posts/company/' . $atts['company_id'];
+    $response = wp_remote_get($api_url);
+    
+    if (is_wp_error($response)) {
+        return '<p>Error loading blog posts</p>';
+    }
+    
+    $posts = json_decode(wp_remote_retrieve_body($response), true);
+    
+    if (empty($posts)) {
+        return '<p>No blog posts found</p>';
+    }
+    
+    $output = '<div class="rankitpro-blog-posts" style="display: grid; grid-template-columns: repeat(' . $atts['columns'] . ', 1fr); gap: 25px; margin: 20px 0;">';
+    
+    foreach (array_slice($posts, 0, $atts['limit']) as $post) {
+        $output .= '<article class="blog-post-card" style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">';
+        $output .= '<h3 style="margin: 0 0 15px 0; color: #333; font-size: 1.3em;">' . esc_html($post['title']) . '</h3>';
+        $excerpt = wp_trim_words(strip_tags($post['content']), 25, '...');
+        $output .= '<div class="post-excerpt" style="color: #666; line-height: 1.6; margin-bottom: 15px;">' . esc_html($excerpt) . '</div>';
+        $output .= '<div class="post-meta" style="font-size: 0.9em; color: #888;">';
+        $output .= '<span>Published: ' . date('M j, Y', strtotime($post['createdAt'])) . '</span>';
+        $output .= '</div>';
+        $output .= '</article>';
+    }
+    
+    $output .= '</div>';
+    
+    return $output;
+});
+
+// Add shortcode for check-ins
+add_shortcode('rankitpro_checkins', function($atts) {
+    $atts = shortcode_atts(array(
+        'company_id' => '',
+        'limit' => 4,
+        'columns' => 2
+    ), $atts);
+    
+    if (empty($atts['company_id'])) {
+        return '<p>Error: Company ID is required</p>';
+    }
+    
+    $api_url = 'https://rankitpro.com/api/check-ins/company/' . $atts['company_id'];
+    $response = wp_remote_get($api_url);
+    
+    if (is_wp_error($response)) {
+        return '<p>Error loading check-ins</p>';
+    }
+    
+    $checkins = json_decode(wp_remote_retrieve_body($response), true);
+    
+    if (empty($checkins)) {
+        return '<p>No check-ins found</p>';
+    }
+    
+    $output = '<div class="rankitpro-checkins" style="display: grid; grid-template-columns: repeat(' . $atts['columns'] . ', 1fr); gap: 20px; margin: 20px 0;">';
+    
+    foreach (array_slice($checkins, 0, $atts['limit']) as $checkin) {
+        $output .= '<div class="checkin-card" style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">';
+        $output .= '<div class="checkin-header" style="margin-bottom: 15px;">';
+        $output .= '<h4 style="margin: 0; color: #0088d2;">' . esc_html($checkin['customerName']) . '</h4>';
+        $output .= '<div style="font-size: 0.9em; color: #666;">' . date('M j, Y', strtotime($checkin['createdAt'])) . '</div>';
+        $output .= '</div>';
+        if (!empty($checkin['serviceType'])) {
+            $output .= '<div class="service-type" style="background: #e8f4fd; padding: 5px 10px; border-radius: 4px; font-size: 0.9em; color: #0088d2; margin-bottom: 10px;">' . esc_html($checkin['serviceType']) . '</div>';
+        }
+        if (!empty($checkin['notes'])) {
+            $output .= '<div class="checkin-notes" style="color: #555; line-height: 1.5;">' . esc_html($checkin['notes']) . '</div>';
+        }
+        $output .= '</div>';
+    }
+    
+    $output .= '</div>';
+    
+    return $output;
+});
+?>`;
+    }
+
+    // For now, send the plugin code directly as a PHP file instead of ZIP
+    logger.info('Sending plugin file directly', { pluginCodeLength: pluginCode.length });
+    
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', 'attachment; filename="rank-it-pro-plugin.php"');
+    res.setHeader('Content-Length', Buffer.byteLength(pluginCode, 'utf8'));
+    res.send(pluginCode);
+    
+    logger.info('WordPress plugin file sent successfully');
+  } catch (pluginError) {
+    logger.error('Error generating WordPress plugin', { errorMessage: pluginError instanceof Error ? pluginError.message : String(pluginError) });
+    res.status(500).json({ error: 'Failed to generate WordPress plugin' });
+  }
+});
+
+// Alternative ZIP endpoint if needed
+router.get('/plugin-zip', async (req: Request, res: Response) => {
+  try {
+    logger.info('WordPress plugin ZIP download requested');
     const zip = new JSZip();
     
-    // Read the actual enhanced plugin file
+    // Read the plugin file
     const pluginPath = path.join(process.cwd(), 'wordpress-plugin', 'rankitpro-plugin.php');
     let pluginCode = '';
     
     try {
       pluginCode = await fs.readFile(pluginPath, 'utf8');
-      // Ensure it's v1.5.0 with side-by-side grid layouts
-      pluginCode = pluginCode.replace(/Version: \d+\.\d+\.\d+/, 'Version: 1.5.0');
-      logger.info('Using enhanced plugin file v1.5.0 with side-by-side grid layouts and responsive design');
-    } catch (error) {
-      logger.error('Could not read plugin file, check if wordpress-plugin/rankitpro-plugin.php exists');
-      return res.status(500).json({ error: 'Plugin file not found' });
-    }
+      logger.info('Using enhanced plugin file for ZIP');
+    } catch (readError) {
+      logger.warn('Plugin file not found, using embedded fallback');
+      pluginCode = `<?php
+/**
+ * Plugin Name: Rank It Pro
+ * Description: Display customer testimonials, reviews, and check-ins from Rank It Pro
+ * Version: 1.5.0
+ * Author: Rank It Pro
+ */
 
-    // Create ZIP with the plugin using original complete structure
+// Basic shortcode implementation
+add_shortcode('rankitpro_testimonials', function($atts) {
+    $atts = shortcode_atts(array('company_id' => '', 'limit' => 5), $atts);
+    if (empty($atts['company_id'])) return '<p>Error: Company ID required</p>';
+    
+    $response = wp_remote_get('https://rankitpro.com/api/testimonials/company/' . $atts['company_id']);
+    if (is_wp_error($response)) return '<p>Error loading testimonials</p>';
+    
+    $testimonials = json_decode(wp_remote_retrieve_body($response), true);
+    if (empty($testimonials)) return '<p>No testimonials found</p>';
+    
+    $output = '<div class="rankitpro-testimonials">';
+    foreach (array_slice($testimonials, 0, $atts['limit']) as $testimonial) {
+        $output .= '<div class="testimonial">';
+        $output .= '<p>"' . esc_html($testimonial['content']) . '"</p>';
+        $output .= '<cite>- ' . esc_html($testimonial['customerName']) . '</cite>';
+        $output .= '</div>';
+    }
+    $output .= '</div>';
+    return $output;
+});
+?>`;
+    }
+    
+    // Add plugin file to ZIP
     zip.file('rank-it-pro-plugin/rank-it-pro-plugin.php', pluginCode);
     
-    // Add original CSS file
+    // Add basic CSS file
     const cssContent = `/* Rank It Pro WordPress Plugin Styles */
 .rankitpro-container { 
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
@@ -284,11 +485,11 @@ After activation, go to Settings > Rank It Pro to configure:
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 
     const zipBuffer = await zip.generateAsync({type: 'nodebuffer'});
-      logger.error("Database operation error", { error: error?.message || "Unknown error" });
+    logger.info('WordPress plugin ZIP generated successfully');
     
     res.send(zipBuffer);
-  } catch (error) {
-    logger.error("Unhandled error occurred");
+  } catch (zipError) {
+    logger.error('Error generating WordPress plugin', { errorMessage: zipError instanceof Error ? zipError.message : String(zipError) });
     res.status(500).json({ error: 'Failed to generate WordPress plugin' });
   }
 });

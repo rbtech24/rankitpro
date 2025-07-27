@@ -1497,6 +1497,464 @@ loadTestimonials();`}</pre>
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/>
+              </svg>
+              WordPress Plugin Integration
+            </CardTitle>
+            <CardDescription>
+              Download the WordPress plugin to automatically display your content with shortcodes
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-semibold text-blue-900 text-lg">Rank It Pro WordPress Plugin v1.5.0</h3>
+                  <p className="text-blue-700 text-sm">Complete WordPress integration with testimonials and check-ins shortcodes</p>
+                  <div className="flex gap-2 mt-2">
+                    <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">Latest</span>
+                    <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">Stable</span>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => {
+                    // Create comprehensive WordPress plugin content
+                    const pluginContent = `<?php
+/**
+ * Plugin Name: Rank It Pro Integration
+ * Plugin URI: https://rankitpro.com
+ * Description: Display your RankItPro testimonials and check-ins on your WordPress site with simple shortcodes
+ * Version: 1.5.0
+ * Author: RankItPro
+ * License: GPL v2 or later
+ * Text Domain: rankitpro
+ */
+
+// Prevent direct access
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// Plugin activation hook
+register_activation_hook(__FILE__, 'rankitpro_activate');
+function rankitpro_activate() {
+    // Set default options
+    add_option('rankitpro_company_id', '');
+    add_option('rankitpro_api_key', '');
+    add_option('rankitpro_secret_key', '');
+    add_option('rankitpro_api_domain', 'https://rankitpro.com');
+}
+
+// Add admin menu
+add_action('admin_menu', 'rankitpro_admin_menu');
+function rankitpro_admin_menu() {
+    add_options_page(
+        'Rank It Pro Settings',
+        'Rank It Pro',
+        'manage_options',
+        'rankitpro-settings',
+        'rankitpro_settings_page'
+    );
+}
+
+// Settings page
+function rankitpro_settings_page() {
+    if (isset($_POST['submit'])) {
+        update_option('rankitpro_company_id', sanitize_text_field($_POST['company_id']));
+        update_option('rankitpro_api_key', sanitize_text_field($_POST['api_key']));
+        update_option('rankitpro_secret_key', sanitize_text_field($_POST['secret_key']));
+        update_option('rankitpro_api_domain', sanitize_url($_POST['api_domain']));
+        echo '<div class="notice notice-success"><p>Settings saved!</p></div>';
+    }
+    
+    $company_id = get_option('rankitpro_company_id', '');
+    $api_key = get_option('rankitpro_api_key', '');
+    $secret_key = get_option('rankitpro_secret_key', '');
+    $api_domain = get_option('rankitpro_api_domain', 'https://rankitpro.com');
+    ?>
+    <div class="wrap">
+        <h1>Rank It Pro Settings</h1>
+        <form method="post" action="">
+            <table class="form-table">
+                <tr>
+                    <th scope="row">Company ID</th>
+                    <td><input type="text" name="company_id" value="<?php echo esc_attr($company_id); ?>" class="regular-text" required /></td>
+                </tr>
+                <tr>
+                    <th scope="row">API Key</th>
+                    <td><input type="text" name="api_key" value="<?php echo esc_attr($api_key); ?>" class="regular-text" required /></td>
+                </tr>
+                <tr>
+                    <th scope="row">Secret Key</th>
+                    <td><input type="password" name="secret_key" value="<?php echo esc_attr($secret_key); ?>" class="regular-text" required /></td>
+                </tr>
+                <tr>
+                    <th scope="row">API Domain</th>
+                    <td><input type="url" name="api_domain" value="<?php echo esc_attr($api_domain); ?>" class="regular-text" /></td>
+                </tr>
+            </table>
+            <?php submit_button(); ?>
+        </form>
+        
+        <h2>Available Shortcodes</h2>
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+            <h3>Testimonials</h3>
+            <code>[rankitpro_testimonials limit="5" columns="2"]</code>
+            <p>Display customer testimonials in a grid layout</p>
+            
+            <h3>Check-ins / Service Visits</h3>
+            <code>[rankitpro_checkins limit="10" columns="1"]</code>
+            <p>Display recent service check-ins with technician details</p>
+            
+            <h3>Blog Posts</h3>
+            <code>[rankitpro_blogs limit="3" columns="2"]</code>
+            <p>Display latest blog posts generated by your team</p>
+        </div>
+    </div>
+    <?php
+}
+
+// Testimonials shortcode
+add_shortcode('rankitpro_testimonials', 'rankitpro_testimonials_shortcode');
+function rankitpro_testimonials_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'limit' => 5,
+        'columns' => 1
+    ), $atts);
+    
+    $company_id = get_option('rankitpro_company_id');
+    $api_key = get_option('rankitpro_api_key');
+    $secret_key = get_option('rankitpro_secret_key');
+    $api_domain = get_option('rankitpro_api_domain', 'https://rankitpro.com');
+    
+    if (empty($company_id) || empty($api_key) || empty($secret_key)) {
+        return '<p style="color: red;">Rank It Pro: Please configure your API credentials in Settings → Rank It Pro</p>';
+    }
+    
+    $response = wp_remote_get($api_domain . '/api/testimonials/company/' . $company_id, array(
+        'headers' => array(
+            'Authorization' => 'Bearer ' . $api_key,
+            'X-API-Secret' => $secret_key,
+            'Content-Type' => 'application/json'
+        ),
+        'timeout' => 15
+    ));
+    
+    if (is_wp_error($response)) {
+        return '<p style="color: red;">Error loading testimonials: ' . $response->get_error_message() . '</p>';
+    }
+    
+    $testimonials = json_decode(wp_remote_retrieve_body($response), true);
+    if (empty($testimonials)) {
+        return '<p>No testimonials found.</p>';
+    }
+    
+    $output = '<div class="rankitpro-testimonials" style="display: grid; grid-template-columns: repeat(' . intval($atts['columns']) . ', 1fr); gap: 20px; margin: 20px 0;">';
+    
+    foreach (array_slice($testimonials, 0, intval($atts['limit'])) as $testimonial) {
+        $output .= '<div class="testimonial" style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #0088d2;">';
+        $output .= '<div style="display: flex; align-items: center; margin-bottom: 12px;">';
+        
+        // Star rating
+        $stars = str_repeat('⭐', min(5, max(1, intval($testimonial['rating'] ?? 5))));
+        $output .= '<div style="color: #fbbf24; margin-right: 10px;">' . $stars . '</div>';
+        
+        $output .= '</div>';
+        $output .= '<p style="font-style: italic; margin-bottom: 15px; color: #374151; line-height: 1.6;">"' . esc_html($testimonial['content']) . '"</p>';
+        $output .= '<div style="display: flex; align-items: center; justify-content: space-between;">';
+        $output .= '<cite style="font-weight: bold; color: #0088d2; font-size: 14px;">– ' . esc_html($testimonial['customerName'] ?? $testimonial['customer_name'] ?? 'Customer') . '</cite>';
+        if (!empty($testimonial['createdAt'])) {
+            $output .= '<small style="color: #6b7280;">' . date('M j, Y', strtotime($testimonial['createdAt'])) . '</small>';
+        }
+        $output .= '</div>';
+        $output .= '</div>';
+    }
+    
+    $output .= '</div>';
+    $output .= '<div style="text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb;">';
+    $output .= '<a href="' . esc_url($api_domain) . '" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 12px;">Powered by Rank It Pro</a>';
+    $output .= '</div>';
+    
+    return $output;
+}
+
+// Check-ins shortcode
+add_shortcode('rankitpro_checkins', 'rankitpro_checkins_shortcode');
+function rankitpro_checkins_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'limit' => 10,
+        'columns' => 1
+    ), $atts);
+    
+    $company_id = get_option('rankitpro_company_id');
+    $api_key = get_option('rankitpro_api_key');
+    $secret_key = get_option('rankitpro_secret_key');
+    $api_domain = get_option('rankitpro_api_domain', 'https://rankitpro.com');
+    
+    if (empty($company_id) || empty($api_key) || empty($secret_key)) {
+        return '<p style="color: red;">Rank It Pro: Please configure your API credentials in Settings → Rank It Pro</p>';
+    }
+    
+    $response = wp_remote_get($api_domain . '/api/check-ins/company/' . $company_id, array(
+        'headers' => array(
+            'Authorization' => 'Bearer ' . $api_key,
+            'X-API-Secret' => $secret_key,
+            'Content-Type' => 'application/json'
+        ),
+        'timeout' => 15
+    ));
+    
+    if (is_wp_error($response)) {
+        return '<p style="color: red;">Error loading check-ins: ' . $response->get_error_message() . '</p>';
+    }
+    
+    $checkins = json_decode(wp_remote_retrieve_body($response), true);
+    if (empty($checkins)) {
+        return '<p>No service visits found.</p>';
+    }
+    
+    $output = '<div class="rankitpro-checkins" style="display: grid; grid-template-columns: repeat(' . intval($atts['columns']) . ', 1fr); gap: 20px; margin: 20px 0;">';
+    
+    foreach (array_slice($checkins, 0, intval($atts['limit'])) as $checkin) {
+        $techInitials = 'T';
+        if (!empty($checkin['technicianName'])) {
+            $nameParts = explode(' ', $checkin['technicianName']);
+            $techInitials = strtoupper(substr($nameParts[0], 0, 1) . (isset($nameParts[1]) ? substr($nameParts[1], 0, 1) : ''));
+        }
+        
+        $colors = array('#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6');
+        $color = $colors[($checkin['id'] ?? 0) % count($colors)];
+        
+        $output .= '<div class="checkin-card" style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid ' . $color . ';">';
+        $output .= '<div style="display: flex; align-items: center; margin-bottom: 15px;">';
+        $output .= '<div style="width: 40px; height: 40px; border-radius: 50%; background: ' . $color . '; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; font-size: 14px;">' . $techInitials . '</div>';
+        $output .= '<div>';
+        $output .= '<h4 style="margin: 0; color: #1f2937; font-size: 16px;">' . esc_html($checkin['jobType'] ?? $checkin['serviceType'] ?? 'Service Visit') . '</h4>';
+        $output .= '<p style="margin: 0; color: #6b7280; font-size: 14px;">' . esc_html($checkin['location'] ?? $checkin['customerName'] ?? 'Customer Location') . '</p>';
+        $output .= '</div>';
+        $output .= '</div>';
+        
+        if (!empty($checkin['notes']) || !empty($checkin['workPerformed'])) {
+            $output .= '<div style="color: #374151; line-height: 1.6; margin-bottom: 12px;">' . esc_html($checkin['notes'] ?? $checkin['workPerformed'] ?? 'Service completed successfully') . '</div>';
+        }
+        
+        $output .= '<div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #f3f4f6; color: #6b7280; font-size: 12px;">';
+        $output .= '<span>Customer: ' . esc_html($checkin['customerName'] ?? 'Customer') . '</span>';
+        if (!empty($checkin['createdAt'])) {
+            $output .= '<span>' . date('M j, Y', strtotime($checkin['createdAt'])) . '</span>';
+        }
+        $output .= '</div>';
+        $output .= '</div>';
+    }
+    
+    $output .= '</div>';
+    $output .= '<div style="text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb;">';
+    $output .= '<a href="' . esc_url($api_domain) . '" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 12px;">Powered by Rank It Pro</a>';
+    $output .= '</div>';
+    
+    return $output;
+}
+
+// Blog posts shortcode
+add_shortcode('rankitpro_blogs', 'rankitpro_blogs_shortcode');
+function rankitpro_blogs_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'limit' => 3,
+        'columns' => 1
+    ), $atts);
+    
+    $company_id = get_option('rankitpro_company_id');
+    $api_key = get_option('rankitpro_api_key');
+    $secret_key = get_option('rankitpro_secret_key');
+    $api_domain = get_option('rankitpro_api_domain', 'https://rankitpro.com');
+    
+    if (empty($company_id) || empty($api_key) || empty($secret_key)) {
+        return '<p style="color: red;">Rank It Pro: Please configure your API credentials in Settings → Rank It Pro</p>';
+    }
+    
+    $response = wp_remote_get($api_domain . '/api/blog-posts/company/' . $company_id, array(
+        'headers' => array(
+            'Authorization' => 'Bearer ' . $api_key,
+            'X-API-Secret' => $secret_key,
+            'Content-Type' => 'application/json'
+        ),
+        'timeout' => 15
+    ));
+    
+    if (is_wp_error($response)) {
+        return '<p style="color: red;">Error loading blog posts: ' . $response->get_error_message() . '</p>';
+    }
+    
+    $posts = json_decode(wp_remote_retrieve_body($response), true);
+    if (empty($posts)) {
+        return '<p>No blog posts found.</p>';
+    }
+    
+    $output = '<div class="rankitpro-blogs" style="display: grid; grid-template-columns: repeat(' . intval($atts['columns']) . ', 1fr); gap: 25px; margin: 20px 0;">';
+    
+    foreach (array_slice($posts, 0, intval($atts['limit'])) as $post) {
+        $output .= '<article class="blog-post" style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #0088d2;">';
+        $output .= '<header style="margin-bottom: 15px;">';
+        $output .= '<h3 style="margin: 0 0 8px 0; color: #1f2937; font-size: 18px; line-height: 1.4;">' . esc_html($post['title'] ?? 'Blog Post') . '</h3>';
+        
+        if (!empty($post['createdAt'])) {
+            $output .= '<time style="color: #6b7280; font-size: 13px;">' . date('F j, Y', strtotime($post['createdAt'])) . '</time>';
+        }
+        $output .= '</header>';
+        
+        if (!empty($post['content'])) {
+            // Create excerpt from content
+            $content = wp_strip_all_tags($post['content']);
+            $excerpt = strlen($content) > 200 ? substr($content, 0, 200) . '...' : $content;
+            $output .= '<div style="color: #374151; line-height: 1.6; margin-bottom: 15px;">' . esc_html($excerpt) . '</div>';
+        }
+        
+        if (!empty($post['status'])) {
+            $statusColor = $post['status'] === 'published' ? '#10b981' : '#f59e0b';
+            $output .= '<div style="display: inline-block; background: ' . $statusColor . '; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">' . esc_html($post['status']) . '</div>';
+        }
+        $output .= '</article>';
+    }
+    
+    $output .= '</div>';
+    $output .= '<div style="text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb;">';
+    $output .= '<a href="' . esc_url($api_domain) . '" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 12px;">Powered by Rank It Pro</a>';
+    $output .= '</div>';
+    
+    return $output;
+}
+
+// Add styles to frontend
+add_action('wp_enqueue_scripts', 'rankitpro_enqueue_styles');
+function rankitpro_enqueue_styles() {
+    wp_add_inline_style('wp-block-library', '
+        .rankitpro-testimonials .testimonial:hover,
+        .rankitpro-checkins .checkin-card:hover,
+        .rankitpro-blogs .blog-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+            transition: all 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .rankitpro-testimonials,
+            .rankitpro-checkins,
+            .rankitpro-blogs {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    ');
+}
+
+// Plugin deactivation hook
+register_deactivation_hook(__FILE__, 'rankitpro_deactivate');
+function rankitpro_deactivate() {
+    // Clean up if needed
+}
+?>`;
+                    
+                    const blob = new Blob([pluginContent], { type: 'application/octet-stream' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'rank-it-pro-plugin.php';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    
+                    toast({
+                      title: "Plugin Downloaded Successfully!",
+                      description: "Upload to WordPress: Plugins → Add New → Upload Plugin",
+                    });
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7,10 12,15 17,10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Download Plugin
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h4 className="font-medium">Installation Steps</h4>
+                <div className="space-y-3">
+                  <div className="flex gap-3">
+                    <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">1</div>
+                    <div>
+                      <p className="font-medium text-sm">Download the plugin</p>
+                      <p className="text-xs text-gray-600">Click the download button above to get the PHP file</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">2</div>
+                    <div>
+                      <p className="font-medium text-sm">Upload to WordPress</p>
+                      <p className="text-xs text-gray-600">Go to Plugins → Add New → Upload Plugin</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                    <div>
+                      <p className="font-medium text-sm">Configure API settings</p>
+                      <p className="text-xs text-gray-600">Go to Settings → Rank It Pro and enter your credentials</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                    <div>
+                      <p className="font-medium text-sm">Add shortcodes</p>
+                      <p className="text-xs text-gray-600">Use shortcodes in posts and pages to display content</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium">Available Shortcodes</h4>
+                <div className="space-y-3">
+                  <div className="bg-gray-50 p-3 rounded border">
+                    <div className="font-medium text-sm mb-1">Customer Testimonials</div>
+                    <code className="text-xs text-blue-600 bg-white px-2 py-1 rounded">[rankitpro_testimonials limit="5" columns="2"]</code>
+                    <p className="text-xs text-gray-600 mt-1">Display customer reviews in a responsive grid</p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded border">
+                    <div className="font-medium text-sm mb-1">Service Check-ins</div>
+                    <code className="text-xs text-blue-600 bg-white px-2 py-1 rounded">[rankitpro_checkins limit="10" columns="1"]</code>
+                    <p className="text-xs text-gray-600 mt-1">Show recent service visits with technician details</p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded border">
+                    <div className="font-medium text-sm mb-1">Blog Posts</div>
+                    <code className="text-xs text-blue-600 bg-white px-2 py-1 rounded">[rankitpro_blogs limit="3" columns="2"]</code>
+                    <p className="text-xs text-gray-600 mt-1">Display AI-generated blog content</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <h4 className="font-medium text-green-900 mb-2">🔧 Configuration Required</h4>
+              <p className="text-green-700 text-sm mb-3">
+                After installation, configure these settings in WordPress Admin → Settings → Rank It Pro:
+              </p>
+              <div className="space-y-2 text-green-700 text-sm">
+                <div><strong>Company ID:</strong> ${auth?.company?.id || 'YOUR_COMPANY_ID'}</div>
+                <div><strong>API Key:</strong> Get from <Button variant="link" className="p-0 h-auto text-green-700 underline" onClick={() => window.open('/api-credentials', '_blank')}>API Credentials page</Button></div>
+                <div><strong>Secret Key:</strong> Get from <Button variant="link" className="p-0 h-auto text-green-700 underline" onClick={() => window.open('/api-credentials', '_blank')}>API Credentials page</Button></div>
+                <div><strong>API Domain:</strong> https://rankitpro.com</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );

@@ -29,8 +29,11 @@ async function initializeViteOrStatic() {
     // Production static serving
     setupVite = () => Promise.resolve();
     serveStatic = (app: express.Application) => {
+      // Serve static files
       app.use(express.static(path.join(__dirname, 'public')));
-      app.get('*', (req, res) => {
+      
+      // CRITICAL: Only add catch-all for non-API routes
+      app.get(/^(?!\/api\/).*/, (req, res) => {
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
       });
     };
@@ -373,7 +376,7 @@ async function createSuperAdminIfNotExists() {
   errorMonitor.setupRoutes(app);
   logError('Application startup initiated', 'info');
 
-  // Import and register routes
+  // Import and register routes FIRST
   const registerRoutes = (await import("./routes")).default;
   registerRoutes(app);
 
@@ -388,9 +391,7 @@ async function createSuperAdminIfNotExists() {
   // Create server before setting up Vite
   const server = createServer(app);
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
+  // CRITICAL: Setup static serving AFTER routes to prevent catch-all interference
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {

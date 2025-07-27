@@ -19,7 +19,8 @@ import { insertUserSchema, insertCompanySchema, insertCompanyLocationSchema, ins
 import { apiCredentialService } from "./services/api-credentials";
 import { isAuthenticated, isCompanyAdmin, isSuperAdmin, belongsToCompany } from "./middleware/auth";
 import { enforceTrialLimits } from "./middleware/trial-enforcement";
-import wordpressRoutes from "./routes/wordpress";
+import wordpressRoutes from "./routes/wordpress-simple";
+import systemRoutes from "./routes/system";
 import multer from "multer";
 import { z } from "zod";
 import integrationsRoutes from "./routes/integrations";
@@ -128,6 +129,7 @@ export default function registerRoutes(app: Express) {
   app.use("/api/check-ins", checkInRoutes);
   app.use("/api/blog", blogRoutes);
   app.use("/api/wordpress", wordpressRoutes);
+  app.use("/api/system", systemRoutes);
   app.use("/api/integration", integrationsRoutes);
   app.use("/api/generate-content", generateContentRoutes);
 
