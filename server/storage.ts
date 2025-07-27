@@ -3147,12 +3147,44 @@ export class DatabaseStorage implements IStorage {
     try {
       // Get real company data
       const allCompanies = await db.select().from(companies);
-      const activeCompanies = allCompanies.filter(c => !c.isTrialActive);
+      const activeCompanies = allCompanies.filter(c => !c.isTrialActive && c.subscriptionPlanId !== null);
       
-      // NO FAKE REVENUE - only show actual payments received
-      const totalRevenue = 0; // No actual payments received yet
+      // Get REAL revenue from actual payment transactions
+      const revenueResult = await db
+        .select({ total: sql<number>`COALESCE(SUM(amount), 0)` })
+        .from(paymentTransactions)
+        .where(eq(paymentTransactions.status, 'success'));
+      
+      const totalRevenue = Number(revenueResult[0]?.total) || 0;
 
-      // Calculate churn rate based on actual company activity
+      // Calculate monthly recurring revenue from this month's payments
+      const thisMonth = new Date();
+      thisMonth.setDate(1);
+      thisMonth.setHours(0, 0, 0, 0);
+      
+      const monthlyRevenueResult = await db
+        .select({ total: sql<number>`COALESCE(SUM(amount), 0)` })
+        .from(paymentTransactions)
+        .where(and(
+          eq(paymentTransactions.status, 'success'),
+          eq(paymentTransactions.billingPeriod, 'monthly'),
+          gte(paymentTransactions.createdAt, thisMonth)
+        ));
+      
+      const monthlyRecurringRevenue = Number(monthlyRevenueResult[0]?.total) || 0;
+
+      // Count companies with successful payments (active subscriptions)
+      const transactionCountResult = await db
+        .select({ count: sql<number>`COUNT(DISTINCT company_id)` })
+        .from(paymentTransactions)
+        .where(eq(paymentTransactions.status, 'success'));
+      
+      const activeSubscriptions = Number(transactionCountResult[0]?.count) || 0;
+
+      // Calculate average revenue per user based on actual payments
+      const averageRevenuePerUser = activeSubscriptions > 0 ? totalRevenue / activeSubscriptions : 0;
+
+      // Calculate churn rate based on recent activity
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
       
@@ -3166,12 +3198,12 @@ export class DatabaseStorage implements IStorage {
         Math.max(0, (activeCompanies.length - activeInLastMonth) / activeCompanies.length) : 0;
 
       return {
-        totalRevenue: 0,
-        monthlyRecurringRevenue: 0,
+        totalRevenue,
+        monthlyRecurringRevenue,
         totalCompanies: allCompanies.length,
-        activeSubscriptions: 0,
-        churnRate: 0,
-        averageRevenuePerUser: 0
+        activeSubscriptions,
+        churnRate: Math.round(churnRate * 100) / 100,
+        averageRevenuePerUser: Math.round(averageRevenuePerUser * 100) / 100
       };
     } catch (error) {
       logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
@@ -3193,51 +3225,39 @@ export class DatabaseStorage implements IStorage {
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const yearStart = new Date(now.getFullYear(), 0, 1);
 
-      // Get companies created this month
-      const thisMonthCompanies = await db
-        .select()
-        .from(companies)
+      // Get actual revenue from payment transactions this month
+      const thisMonthResult = await db
+        .select({ total: sql<number>`COALESCE(SUM(amount), 0)` })
+        .from(paymentTransactions)
         .where(and(
-          gte(companies.createdAt, thisMonth),
-          eq(companies.isTrialActive, false)
+          eq(paymentTransactions.status, 'success'),
+          gte(paymentTransactions.createdAt, thisMonth)
         ));
 
-      // Get companies created last month
-      const lastMonthCompanies = await db
-        .select()
-        .from(companies)
+      // Get actual revenue from payment transactions last month
+      const lastMonthResult = await db
+        .select({ total: sql<number>`COALESCE(SUM(amount), 0)` })
+        .from(paymentTransactions)
         .where(and(
-          gte(companies.createdAt, lastMonth),
-          lt(companies.createdAt, thisMonth),
-          eq(companies.isTrialActive, false)
+          eq(paymentTransactions.status, 'success'),
+          gte(paymentTransactions.createdAt, lastMonth),
+          lt(paymentTransactions.createdAt, thisMonth)
         ));
 
-      // Get all companies created this year
-      const yearToDateCompanies = await db
-        .select()
-        .from(companies)
+      // Get actual revenue from payment transactions this year
+      const yearToDateResult = await db
+        .select({ total: sql<number>`COALESCE(SUM(amount), 0)` })
+        .from(paymentTransactions)
         .where(and(
-          gte(companies.createdAt, yearStart),
-          eq(companies.isTrialActive, false)
+          eq(paymentTransactions.status, 'success'),
+          gte(paymentTransactions.createdAt, yearStart)
         ));
 
-      // Calculate revenue based on subscription plans
-      const calculateRevenue = (companies: any[]) => {
-        return companies.reduce((sum, company) => {
-          const planRevenue: Record<string, number> = {
-            'starter': 49,
-            'pro': 79,
-            'agency': 149
-          };
-          return sum + (planRevenue[company.plan] || 0);
-        }, 0);
-      };
+      const thisMonthRevenue = Number(thisMonthResult[0]?.total) || 0;
+      const lastMonthRevenue = Number(lastMonthResult[0]?.total) || 0;
+      const yearToDateRevenue = Number(yearToDateResult[0]?.total) || 0;
 
-      const thisMonthRevenue = calculateRevenue(thisMonthCompanies);
-      const lastMonthRevenue = calculateRevenue(lastMonthCompanies);
-      const yearToDateRevenue = calculateRevenue(yearToDateCompanies);
-
-      // Calculate growth percentage
+      // Calculate growth percentage based on actual payments
       const growth = lastMonthRevenue > 0 ? 
         ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 
         thisMonthRevenue > 0 ? 100 : 0;
