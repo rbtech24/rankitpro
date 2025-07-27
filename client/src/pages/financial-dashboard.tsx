@@ -122,18 +122,24 @@ export default function FinancialDashboard() {
   });
 
   // Fetch recent payments
-  const { data: payments, isLoading: paymentsLoading } = useQuery({
+  const { data: paymentsResponse, isLoading: paymentsLoading } = useQuery({
     queryKey: ['/api/admin/financial/payments'],
     queryFn: () => fetch('/api/admin/financial/payments?limit=50')
       .then(res => res.json())
   });
 
+  // Ensure payments is always an array
+  const payments = Array.isArray(paymentsResponse) ? paymentsResponse : [];
+
   // Fetch subscription breakdown
-  const { data: subscriptionBreakdown, isLoading: subscriptionLoading } = useQuery({
+  const { data: subscriptionBreakdownResponse, isLoading: subscriptionLoading } = useQuery({
     queryKey: ['/api/admin/financial/subscription-breakdown'],
     queryFn: () => fetch('/api/admin/financial/subscription-breakdown')
       .then(res => res.json())
   });
+
+  // Ensure subscriptionBreakdown is always an array
+  const subscriptionBreakdown = Array.isArray(subscriptionBreakdownResponse) ? subscriptionBreakdownResponse : [];
 
   const handleExportData = () => {
     window.open(`/api/admin/financial/export?period=${selectedPeriod}`, '_blank');
@@ -141,7 +147,7 @@ export default function FinancialDashboard() {
 
   if (metricsLoading) {
     return (
-      <AdminLayout currentPath="/financial-dashboard">
+      <AdminLayout>
         <div className="flex justify-center items-center h-96">
           <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
         </div>
@@ -164,7 +170,7 @@ export default function FinancialDashboard() {
   };
 
   return (
-    <AdminLayout currentPath="/financial-dashboard">
+    <AdminLayout>
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex justify-between items-center">
             <div>

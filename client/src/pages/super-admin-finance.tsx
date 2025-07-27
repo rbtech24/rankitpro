@@ -152,7 +152,7 @@ export default function SuperAdminFinance() {
 
   if (metricsLoading) {
     return (
-      <AdminLayout currentPath="/financial-dashboard">
+      <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <RefreshCw className="h-8 w-8 animate-spin" />
         </div>
@@ -161,7 +161,7 @@ export default function SuperAdminFinance() {
   }
 
   return (
-    <AdminLayout currentPath="/financial-dashboard">
+    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">

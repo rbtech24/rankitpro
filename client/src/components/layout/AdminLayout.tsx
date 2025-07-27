@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "../ui/button";
 import { useLocation } from "wouter";
-import { apiRequest } from "../../lib/queryClient";
+import { apiRequest, queryClient } from "../../lib/queryClient";
 import { 
   Users, 
   Building2, 

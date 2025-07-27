@@ -82,7 +82,7 @@ export default function SystemOverview() {
 
   if (statsLoading || chartLoading) {
     return (
-      <AdminLayout currentPath="/system-overview">
+      <AdminLayout>
         <div className="text-center py-12">
           <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" />
           <p>Loading system data...</p>
@@ -97,7 +97,7 @@ export default function SystemOverview() {
   // Don't render if no data available
   if (!stats) {
     return (
-      <AdminLayout currentPath="/system-overview">
+      <AdminLayout>
         <div className="text-center py-12">
           <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" />
           <p>Loading system statistics...</p>
@@ -114,7 +114,7 @@ export default function SystemOverview() {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   return (
-    <AdminLayout currentPath="/system-overview">
+    <AdminLayout>
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">System Overview</h1>
@@ -313,7 +313,7 @@ export default function SystemOverview() {
                   <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{healthMetrics?.avgResponseTime || healthMetrics?.averageResponseTime || 0}ms</div>
+                  <div className="text-2xl font-bold">{(healthMetrics as any)?.avgResponseTime || (healthMetrics as any)?.averageResponseTime || 0}ms</div>
                   <p className="text-xs text-muted-foreground">
                     Average response time
                   </p>
@@ -326,9 +326,9 @@ export default function SystemOverview() {
                   <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{healthMetrics?.errorRate || 0}%</div>
+                  <div className="text-2xl font-bold">{(healthMetrics as any)?.errorRate || 0}%</div>
                   <p className="text-xs text-muted-foreground">
-                    {healthMetrics?.requestsPerMinute || 0} req/min
+                    {(healthMetrics as any)?.requestsPerMinute || 0} req/min
                   </p>
                 </CardContent>
               </Card>
@@ -341,14 +341,14 @@ export default function SystemOverview() {
                   <CardTitle>OpenAI Usage</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{healthMetrics?.openaiUsageToday || 0}</div>
+                  <div className="text-2xl font-bold">{(healthMetrics as any)?.openaiUsageToday || 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    of {healthMetrics?.openaiQuota || 1000} daily quota
+                    of {(healthMetrics as any)?.openaiQuota || 1000} daily quota
                   </p>
                   <div className="w-full bg-secondary rounded-full h-2 mt-2">
                     <div 
                       className="bg-primary h-2 rounded-full" 
-                      style={{ width: `${Math.min(100, ((healthMetrics?.openaiUsageToday || 0) / (healthMetrics?.openaiQuota || 1000)) * 100)}%` }}
+                      style={{ width: `${Math.min(100, (((healthMetrics as any)?.openaiUsageToday || 0) / ((healthMetrics as any)?.openaiQuota || 1000)) * 100)}%` }}
                     ></div>
                   </div>
                 </CardContent>
@@ -359,14 +359,14 @@ export default function SystemOverview() {
                   <CardTitle>Anthropic Usage</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{healthMetrics?.anthropicUsageToday || 0}</div>
+                  <div className="text-2xl font-bold">{(healthMetrics as any)?.anthropicUsageToday || 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    of {healthMetrics?.anthropicQuota || 1000} daily quota
+                    of {(healthMetrics as any)?.anthropicQuota || 1000} daily quota
                   </p>
                   <div className="w-full bg-secondary rounded-full h-2 mt-2">
                     <div 
                       className="bg-primary h-2 rounded-full" 
-                      style={{ width: `${Math.min(100, ((healthMetrics?.anthropicUsageToday || 0) / (healthMetrics?.anthropicQuota || 1000)) * 100)}%` }}
+                      style={{ width: `${Math.min(100, (((healthMetrics as any)?.anthropicUsageToday || 0) / ((healthMetrics as any)?.anthropicQuota || 1000)) * 100)}%` }}
                     ></div>
                   </div>
                 </CardContent>
@@ -377,7 +377,7 @@ export default function SystemOverview() {
                   <CardTitle>Active Sessions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{healthMetrics?.activeConnections || 0}</div>
+                  <div className="text-2xl font-bold">{(healthMetrics as any)?.activeConnections || 0}</div>
                   <p className="text-xs text-muted-foreground">
                     Current active connections
                   </p>

@@ -105,17 +105,25 @@ export interface SessionRequest extends Request {
   session: session.Session & Partial<session.SessionData>;
   user?: {
     id: number;
+    role: "super_admin" | "company_admin" | "technician" | "sales_staff";
     email: string;
-    role: string;
+    password: string;
+    username: string;
+    createdAt: Date | null;
+    stripeCustomerId: string | null;
     companyId: number | null;
+    active: boolean;
+    emailVerified: boolean;
+    lastLogin: Date | null;
+    appearancePreferences: unknown;
   };
 }
 
 export default function registerRoutes(app: Express) {
   // Apply security middleware
-  app.use(enforceSessionTimeout);
-  app.use(enforceConcurrentSessions);
-  app.use(sessionMonitoring);
+  app.use(enforceSessionTimeout as any);
+  app.use(enforceConcurrentSessions as any);
+  app.use(sessionMonitoring as any);
 
   // Register all route modules
   app.use("/api/auth", authRoutes);

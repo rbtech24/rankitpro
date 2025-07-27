@@ -42,7 +42,7 @@ const planFormSchema = z.object({
   maxTechnicians: z.number().min(1, "Must allow at least 1 technician"),
   maxCheckIns: z.number().min(1, "Must allow at least 1 submission"),
   features: z.string().min(1, "Features are required"),
-  isActive: z.boolean().default(true),
+  isActive: z.boolean(),
 });
 
 type PlanFormData = z.infer<typeof planFormSchema>;
@@ -534,8 +534,8 @@ export default function SubscriptionPlansManagement() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => syncWithStripeMutation.mutate(plan.id)}
-                              disabled={syncWithStripeMutation.isPending}
+                              onClick={() => syncAllWithStripeMutation.mutate()}
+                              disabled={syncAllWithStripeMutation.isPending}
                             >
                               Sync
                             </Button>
