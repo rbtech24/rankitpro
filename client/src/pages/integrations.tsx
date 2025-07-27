@@ -1681,14 +1681,6 @@ function rankitpro_shortcode($atts) {
                       });
                     }
                   }}
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    
-                    toast({
-                      title: "Plugin Downloaded Successfully!",
-                      description: "Upload to WordPress: Plugins → Add New → Upload Plugin",
-                    });
-                  }}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">

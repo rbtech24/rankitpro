@@ -648,4 +648,260 @@ router.post('/subscription/complete-development', isAuthenticated, isCompanyAdmi
   }
 });
 
+/**
+ * Stripe webhook handler for payment completion
+ */
+router.post('/webhook', async (req: Request, res: Response) => {
+  try {
+    const event = req.body;
+    
+    logger.info("Stripe webhook received", { 
+      eventType: event.type,
+      eventId: event.id,
+      paymentIntentId: event.data?.object?.id
+    });
+
+    // Handle successful payment completion
+    if (event.type === 'payment_intent.succeeded') {
+      const paymentIntent = event.data.object;
+      const metadata = paymentIntent.metadata;
+      
+      const companyId = parseInt(metadata.companyId);
+      const planId = parseInt(metadata.planId);
+      const billingPeriod = metadata.billingPeriod;
+      const planName = metadata.planName;
+      
+      logger.info("Processing successful payment", {
+        companyId,
+        planId,
+        planName,
+        billingPeriod,
+        amount: paymentIntent.amount / 100,
+        paymentIntentId: paymentIntent.id
+      });
+
+      // Record payment transaction
+      const transactionData = {
+        companyId,
+        subscriptionPlanId: planId,
+        amount: paymentIntent.amount / 100,
+        currency: paymentIntent.currency,
+        status: 'completed',
+        stripePaymentIntentId: paymentIntent.id,
+        stripeChargeId: paymentIntent.latest_charge,
+        paymentMethod: 'card',
+        billingPeriod,
+        metadata: {
+          planName,
+          originalAmount: paymentIntent.amount / 100,
+          customerEmail: metadata.customerEmail
+        }
+      };
+
+      try {
+        await storage.createPaymentTransaction(transactionData);
+        logger.info("Payment transaction recorded", { paymentIntentId: paymentIntent.id });
+      } catch (error) {
+        logger.error("Failed to record payment transaction", { 
+          error: error instanceof Error ? error.message : String(error),
+          paymentIntentId: paymentIntent.id 
+        });
+      }
+
+      // Update company subscription status
+      try {
+        const company = await storage.getCompany(companyId);
+        if (company) {
+          // Calculate new trial end date (add billing period to current date)
+          const now = new Date();
+          const newTrialEndDate = new Date();
+          if (billingPeriod === 'yearly') {
+            newTrialEndDate.setFullYear(now.getFullYear() + 1);
+          } else {
+            newTrialEndDate.setMonth(now.getMonth() + 1);
+          }
+
+          await storage.updateCompany(companyId, {
+            plan: planName.toLowerCase() as any,
+            subscriptionPlanId: planId,
+            isTrialActive: false,
+            trialEndDate: newTrialEndDate,
+            stripeCustomerId: paymentIntent.customer,
+            stripeSubscriptionId: paymentIntent.id
+          });
+
+          logger.info("Company subscription updated successfully", {
+            companyId,
+            planName,
+            newTrialEndDate,
+            stripeCustomerId: paymentIntent.customer
+          });
+
+          // Send confirmation notification if needed
+          // await emailService.sendPaymentConfirmation(company.email, transactionData);
+          
+        } else {
+          logger.error("Company not found for payment completion", { companyId });
+        }
+      } catch (error) {
+        logger.error("Failed to update company subscription", {
+          error: error instanceof Error ? error.message : String(error),
+          companyId,
+          paymentIntentId: paymentIntent.id
+        });
+      }
+    }
+
+    res.status(200).json({ received: true });
+  } catch (error: any) {
+    logger.error("Webhook processing failed", {
+      errorMessage: error instanceof Error ? error.message : String(error)
+    });
+    res.status(400).json({ error: 'Webhook processing failed' });
+  }
+});
+
+/**
+ * Manual payment completion for development testing
+ */
+router.post('/complete-payment', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const { paymentIntentId, planId, billingPeriod } = req.body;
+    const user = req.user as any;
+    const companyId = user.companyId;
+
+    if (!paymentIntentId || !planId || !billingPeriod) {
+      return res.status(400).json({ error: 'Missing required payment completion data' });
+    }
+
+    // Get plan details
+    const planDetails = await storage.getSubscriptionPlan(planId);
+    if (!planDetails) {
+      return res.status(404).json({ error: 'Subscription plan not found' });
+    }
+
+    // Record the payment transaction
+    const transactionData = {
+      companyId,
+      subscriptionPlanId: planId,
+      amount: billingPeriod === 'yearly' ? 
+        (planDetails.yearlyPrice || planDetails.price * 12) : 
+        planDetails.price,
+      currency: 'usd',
+      status: 'completed',
+      stripePaymentIntentId: paymentIntentId,
+      paymentMethod: 'card',
+      billingPeriod,
+      metadata: {
+        planName: planDetails.name,
+        manualCompletion: true
+      }
+    };
+
+    await storage.createPaymentTransaction(transactionData);
+
+    // Update company status
+    const now = new Date();
+    const newTrialEndDate = new Date();
+    if (billingPeriod === 'yearly') {
+      newTrialEndDate.setFullYear(now.getFullYear() + 1);
+    } else {
+      newTrialEndDate.setMonth(now.getMonth() + 1);
+    }
+
+    await storage.updateCompany(companyId, {
+      plan: planDetails.name.toLowerCase() as any,
+      subscriptionPlanId: planId,
+      isTrialActive: false,
+      trialEndDate: newTrialEndDate,
+      stripeCustomerId: `cus_manual_${companyId}`,
+      stripeSubscriptionId: paymentIntentId
+    });
+
+    logger.info("Manual payment completion successful", {
+      companyId,
+      planId,
+      planName: planDetails.name,
+      amount: transactionData.amount,
+      billingPeriod
+    });
+
+    res.json({
+      success: true,
+      message: 'Payment completed and service restored',
+      planName: planDetails.name,
+      amount: transactionData.amount,
+      billingPeriod,
+      newTrialEndDate
+    });
+
+  } catch (error: any) {
+    logger.error("Manual payment completion failed", {
+      errorMessage: error instanceof Error ? error.message : String(error)
+    });
+    res.status(500).json({ 
+      error: 'Failed to complete payment',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * Get payment status for current user's company
+ */
+router.get('/payment-status', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const user = req.user as any;
+    const companyId = user.companyId;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID not found in session' });
+    }
+
+    const company = await storage.getCompany(companyId);
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    // Get payment transactions
+    const transactions = await storage.getPaymentTransactionsByCompany ? 
+      await storage.getPaymentTransactionsByCompany(companyId) : [];
+    
+    const lastTransaction = transactions.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )[0];
+
+    res.json({
+      success: true,
+      company: {
+        id: company.id,
+        name: company.name,
+        plan: company.plan,
+        isTrialActive: company.isTrialActive,
+        trialEndDate: company.trialEndDate,
+        subscriptionPlanId: company.subscriptionPlanId,
+        hasActiveSubscription: !company.isTrialActive && company.subscriptionPlanId !== null
+      },
+      lastPayment: lastTransaction ? {
+        amount: lastTransaction.amount,
+        status: lastTransaction.status,
+        billingPeriod: lastTransaction.billingPeriod,
+        date: lastTransaction.createdAt,
+        planName: lastTransaction.metadata?.planName || 'Unknown'
+      } : null,
+      totalTransactions: transactions.length
+    });
+
+  } catch (error: any) {
+    logger.error("Failed to get payment status", {
+      errorMessage: error instanceof Error ? error.message : String(error)
+    });
+    
+    res.status(500).json({ 
+      error: 'Failed to get payment status',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 export default router;
