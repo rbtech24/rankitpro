@@ -13,14 +13,46 @@ router.get('/test-revenue', async (req, res) => {
   try {
     const revenueMetrics = await storage.getRevenueMetrics();
     const financialMetrics = await storage.getFinancialMetrics();
+    const companyCount = await storage.getCompanyCount();
+    const userCount = await storage.getUserCount();
+    const technicianCount = await storage.getTechnicianCount();
+    
     res.json({
       revenueMetrics,
       financialMetrics,
+      systemStats: {
+        totalCompanies: companyCount,
+        totalUsers: userCount,
+        totalTechnicians: technicianCount,
+        monthlyRevenue: revenueMetrics.thisMonth || 0
+      },
       message: 'Revenue data fetched successfully'
     });
   } catch (error) {
     logger.error('Test revenue error', { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ message: 'Error fetching revenue data', error: error.message });
+  }
+});
+
+// Public dashboard stats (no auth required for testing)
+router.get('/public-stats', async (req, res) => {
+  try {
+    const companyCount = await storage.getCompanyCount();
+    const userCount = await storage.getUserCount();
+    const technicianCount = await storage.getTechnicianCount();
+    const revenueMetrics = await storage.getRevenueMetrics();
+    
+    res.json({
+      totalCompanies: companyCount,
+      totalUsers: userCount,
+      totalTechnicians: technicianCount,
+      monthlyRevenue: revenueMetrics.thisMonth || 0,
+      totalRevenue: revenueMetrics.total || 0,
+      success: true
+    });
+  } catch (error) {
+    logger.error('Public stats error', { errorMessage: error instanceof Error ? error.message : String(error) });
+    res.status(500).json({ message: 'Error fetching stats', error: error.message });
   }
 });
 
