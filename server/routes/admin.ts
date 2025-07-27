@@ -653,7 +653,9 @@ router.get('/system-stats', isSuperAdmin, async (req, res) => {
     const totalUsers = await storage.getUserCount();
     const totalTechnicians = await storage.getTechnicianCount();
     const totalCheckIns = await storage.getCheckInCount();
+    const todayCheckIns = await storage.getTodayCheckInCount();
     const reviewStats = await storage.getSystemReviewStats();
+    const revenueMetrics = await storage.getRevenueMetrics();
 
     const stats = {
       totalCompanies,
@@ -661,8 +663,11 @@ router.get('/system-stats', isSuperAdmin, async (req, res) => {
       totalUsers,
       totalTechnicians,
       totalCheckIns,
+      todayCheckIns,
       avgRating: reviewStats.averageRating || 0,
-      totalReviews: reviewStats.totalReviews || 0
+      totalReviews: reviewStats.totalReviews || 0,
+      monthlyRevenue: revenueMetrics.thisMonth || 0,
+      totalRevenue: revenueMetrics.yearToDate || 0
     };
 
     res.json(stats);
