@@ -8,6 +8,22 @@ import { Request, Response } from 'express';
 import { logger } from '../services/logger';
 const router = Router();
 
+// Test revenue endpoint (temporary for debugging)
+router.get('/test-revenue', async (req, res) => {
+  try {
+    const revenueMetrics = await storage.getRevenueMetrics();
+    const financialMetrics = await storage.getFinancialMetrics();
+    res.json({
+      revenueMetrics,
+      financialMetrics,
+      message: 'Revenue data fetched successfully'
+    });
+  } catch (error) {
+    logger.error('Test revenue error', { errorMessage: error instanceof Error ? error.message : String(error) });
+    res.status(500).json({ message: 'Error fetching revenue data', error: error.message });
+  }
+});
+
 // System health endpoint
 router.get('/system-health', isSuperAdmin, async (req, res) => {
   try {

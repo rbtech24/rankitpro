@@ -56,6 +56,16 @@ export default function SuperAdminDashboard() {
     refetchInterval: 30000 // Refresh every 30 seconds
   });
 
+  // Fetch actual revenue data (temporary test endpoint)
+  const { data: revenueData } = useQuery({
+    queryKey: ['/api/admin/test-revenue'],
+    queryFn: async () => {
+      const response = await fetch('/api/admin/test-revenue');
+      return response.json();
+    },
+    refetchInterval: 30000
+  });
+
   // Fetch companies data with detailed metrics
   const { data: companies = [] } = useQuery<Company[]>({
     queryKey: ['/api/admin/companies/detailed'],
@@ -72,6 +82,13 @@ export default function SuperAdminDashboard() {
   const chartData = dashboardData?.chartData || {};
   const subscriptionBreakdown = dashboardData?.subscriptionBreakdown || [];
   const systemHealth = dashboardData?.systemHealth;
+
+  // Use actual revenue data from test endpoint as fallback
+  const actualRevenue = revenueData?.revenueMetrics;
+  const displayRevenue = {
+    monthlyRecurringRevenue: actualRevenue?.thisMonth || financialMetrics?.monthlyRecurringRevenue || 0,
+    totalRevenue: revenueData?.financialMetrics?.totalRevenue || financialMetrics?.totalRevenue || 0
+  };
 
   if (isLoading) {
     return (
@@ -119,10 +136,10 @@ export default function SuperAdminDashboard() {
             <div>
               <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
               <p className="text-2xl font-bold">
-                ${(financialMetrics?.monthlyRecurringRevenue || 0).toLocaleString()}
+                ${(displayRevenue.monthlyRecurringRevenue || 0).toLocaleString()}
               </p>
               <p className="text-xs text-gray-500">
-                ${(financialMetrics?.totalRevenue || 0).toLocaleString()} total
+                ${(displayRevenue.totalRevenue || 0).toLocaleString()} total
               </p>
             </div>
             <DollarSign className="h-8 w-8 text-purple-500" />
