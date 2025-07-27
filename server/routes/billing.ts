@@ -200,7 +200,7 @@ router.post('/plans/sync', isAuthenticated, isSuperAdmin, async (req: Request, r
       results: syncResults
     });
   } catch (error: any) {
-    logger.error("Stripe sync operation failed", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Stripe sync operation failed", { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to sync plans with Stripe',
       message: error.message
@@ -222,7 +222,7 @@ router.get('/subscription', isAuthenticated, isCompanyAdmin, async (req: Request
     // Return subscription data
     res.json(subscriptionData);
   } catch (error: any) {
-    logger.error("Failed to retrieve subscription information", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Failed to retrieve subscription information", { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to retrieve subscription information',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -314,6 +314,8 @@ router.post('/subscription', isAuthenticated, async (req: Request, res: Response
       planId, 
       planName: planDetails.name,
       billingPeriod,
+      price,
+      priceInCents: Math.round(price * 100),
       stripeAvailable: stripeService.isStripeAvailable()
     });
 
@@ -582,7 +584,7 @@ router.post('/plans/:id/sync-stripe', isAuthenticated, isSuperAdmin, async (req:
 
     res.json(updatedPlan);
   } catch (error: any) {
-    logger.error("Stripe sync error", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("Stripe sync error", { errorMessage: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ 
       error: 'Failed to sync with Stripe',
       message: error.message

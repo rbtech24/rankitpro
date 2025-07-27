@@ -1,0 +1,120 @@
+2025-07-26T23:57:26.113407411Z 📁 Final build structure:
+2025-07-26T23:57:26.115612975Z total 5632
+2025-07-26T23:57:26.115623285Z drwxr-sr-x  3 render render    4096 Jul 26 23:57 .
+2025-07-26T23:57:26.115626435Z drwxr-sr-x 17 render render    4096 Jul 26 23:57 ..
+2025-07-26T23:57:26.115629225Z -rw-r--r--  1 render render      41 Jul 26 23:57 index.js
+2025-07-26T23:57:26.115631705Z -rw-r--r--  1 render render     154 Jul 26 23:57 package.json
+2025-07-26T23:57:26.115634895Z drwxr-sr-x  3 render render    4096 Jul 26 23:57 public
+2025-07-26T23:57:26.115637736Z -rw-r--r--  1 render render 5746572 Jul 26 23:57 server.js
+2025-07-26T23:57:30.816640475Z ==> Uploading build...
+2025-07-26T23:57:56.747249723Z ==> Uploaded in 5.6s. Compression took 20.3s
+2025-07-26T23:57:56.789915819Z ==> Build successful 🎉
+2025-07-26T23:57:58.708235516Z ==> Deploying...
+2025-07-26T23:58:16.035964227Z ==> Running 'npm start'
+2025-07-26T23:58:16.324123061Z 
+2025-07-26T23:58:16.324150032Z > workspace@1.0.0 start
+2025-07-26T23:58:16.324153792Z > node dist/index.js
+2025-07-26T23:58:16.324156092Z 
+2025-07-26T23:58:16.924008688Z [2025-07-26T23:58:16.922Z] INFO  Parameter processed
+2025-07-26T23:58:16.927402036Z [2025-07-26T23:58:16.927Z] INFO  ✅ Database connection initialized
+2025-07-26T23:58:17.008913254Z [2025-07-26T23:58:17.008Z] WARN  Resend API key not configured. Email functionality will be disabled.
+2025-07-26T23:58:17.023721017Z [2025-07-26T23:58:17.021Z] INFO  ✅ Environment validation completed
+2025-07-26T23:58:17.023736408Z [2025-07-26T23:58:17.020Z] WARN  
+2025-07-26T23:58:17.023754738Z [2025-07-26T23:58:17.021Z] INFO  🚀 Starting Rank It Pro SaaS Platform
+2025-07-26T23:58:17.023758978Z [2025-07-26T23:58:17.021Z] INFO  Features enabled: none
+2025-07-26T23:58:17.023762268Z [2025-07-26T23:58:17.021Z] INFO  Database connection attempt 1/5
+2025-07-26T23:58:17.023769739Z ⚠️  ENVIRONMENT CONFIGURATION WARNINGS:
+2025-07-26T23:58:17.023772199Z [2025-07-26T23:58:17.020Z] WARN  Configuration warning
+2025-07-26T23:58:17.023774359Z [2025-07-26T23:58:17.020Z] WARN  Configuration warning
+2025-07-26T23:58:17.023776529Z [2025-07-26T23:58:17.020Z] WARN  Configuration warning
+2025-07-26T23:58:17.023778869Z [2025-07-26T23:58:17.020Z] WARN  
+2025-07-26T23:58:17.023781169Z Application will start with limited functionality.
+2025-07-26T23:58:17.023783229Z 
+2025-07-26T23:58:17.469599221Z [2025-07-26T23:58:17.469Z] INFO  New database client connected
+2025-07-26T23:58:17.51208019Z [2025-07-26T23:58:17.511Z] INFO  ✅ Database connection test successful
+2025-07-26T23:58:17.512303915Z Email service initialization failed - notifications will be disabled warn
+2025-07-26T23:58:17.512718576Z [2025-07-26T23:58:17.512Z] INFO  🧹 Memory optimization service initialized
+2025-07-26T23:58:18.016953659Z [2025-07-26T23:58:18.016Z] WARN  Missing Stripe price environment variables: STRIPE_STARTER_PRICE_ID, STRIPE_PRO_PRICE_ID, STRIPE_AGENCY_PRICE_ID
+2025-07-26T23:58:18.01697331Z [2025-07-26T23:58:18.016Z] WARN  Using fallback price IDs - payments may fail in production
+2025-07-26T23:58:18.024259138Z ✅ All routes registered successfully
+2025-07-26T23:58:18.026169877Z [2025-07-26T23:58:18.026Z] INFO  🚀 Server is running
+2025-07-26T23:58:18.026181308Z [2025-07-26T23:58:18.026Z] INFO  📱 Ready to accept connections
+2025-07-26T23:58:20.519391159Z ==> Your service is live 🎉
+2025-07-26T23:58:20.584722089Z ==> 
+2025-07-26T23:58:20.613886735Z ==> ///////////////////////////////////////////////////////////
+2025-07-26T23:58:20.653356789Z ==> 
+2025-07-26T23:58:20.692396663Z ==> Available at your primary URL https://rankitpro.com + 2 more domains
+2025-07-26T23:58:20.721414919Z ==> 
+2025-07-26T23:58:20.750749625Z ==> ///////////////////////////////////////////////////////////
+2025-07-26T23:58:44.934980658Z GET /api/auth/me - 401 - 2ms - Response: {"message":"Not authenticated"}
+2025-07-26T23:58:47.516243132Z [2025-07-26T23:58:47.516Z] INFO  Database client removed from pool
+2025-07-26T23:58:58.232984539Z GET /api/auth/me - 401 - 1ms - Response: {"message":"Not authenticated"}
+2025-07-26T23:59:01.94465574Z GET /api/auth/me - 401 - 1ms - Response: {"message":"Not authenticated"}
+2025-07-26T23:59:02.125712224Z GET /api/auth/me - 401 - 1ms - Response: {"message":"Not authenticated"}
+2025-07-26T23:59:10.897472454Z [2025-07-26T23:59:10.897Z] INFO  Login attempt initiated
+2025-07-26T23:59:10.93285747Z [2025-07-26T23:59:10.932Z] INFO  New database client connected
+2025-07-26T23:59:11.327535851Z [2025-07-26T23:59:11.327Z] INFO  Session saved successfully
+2025-07-26T23:59:11.327588952Z [2025-07-26T23:59:11.327Z] INFO  User logged in successfully
+2025-07-26T23:59:11.328787693Z POST /api/auth/login - 200 - 433ms - Response: {"user":{"id":25,"email":"rodbar…
+2025-07-26T23:59:11.496484262Z [2025-07-26T23:59:11.496Z] INFO  Session activity userId=25 method=GET url=/api/companies/16 ip=172.68.7.161 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.500482825Z [2025-07-26T23:59:11.500Z] INFO  GET userId=25 companyId=16 ip=172.68.7.161
+2025-07-26T23:59:11.51383834Z [2025-07-26T23:59:11.513Z] INFO  Company details retrieved
+2025-07-26T23:59:11.515205586Z GET /api/companies/16 - 200 - 19ms - Response: {"id":16,"name":"Carrollton Spri…
+2025-07-26T23:59:11.723668489Z [2025-07-26T23:59:11.723Z] INFO  Session activity userId=25 method=GET url=/rank%20it%20pro%20logo.png ip=172.68.175.31 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.725769103Z [2025-07-26T23:59:11.725Z] INFO  Session activity userId=25 method=GET url=/api/onboarding/progress ip=172.68.175.43 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.725933647Z [2025-07-26T23:59:11.725Z] INFO  API request received: GET /api/onboarding/progress
+2025-07-26T23:59:11.727877178Z [2025-07-26T23:59:11.727Z] INFO  Session activity userId=25 method=GET url=/api/billing/plans ip=172.68.7.161 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.731506252Z GET /api/onboarding/progress - 200 - 6ms
+2025-07-26T23:59:11.740998157Z [2025-07-26T23:59:11.740Z] INFO  Session activity userId=25 method=GET url=/api/company-stats ip=172.68.175.35 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.741020918Z [2025-07-26T23:59:11.740Z] INFO  API request received: GET /api/company-stats
+2025-07-26T23:59:11.744336064Z GET /api/company-stats - 200 - 2ms
+2025-07-26T23:59:11.744353854Z [2025-07-26T23:59:11.743Z] INFO  Session activity userId=25 method=GET url=/api/companies/current ip=172.68.174.11 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.748890921Z GET /api/billing/plans - 200 - 21ms - Response: [{"id":19,"name":"Essential","p…
+2025-07-26T23:59:11.749240881Z [2025-07-26T23:59:11.749Z] INFO  Session activity userId=25 method=GET url=/api/trial/status ip=172.68.7.161 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.751115639Z [2025-07-26T23:59:11.751Z] INFO  Session activity userId=25 method=GET url=/api/technicians ip=172.68.175.49 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.751487499Z [2025-07-26T23:59:11.751Z] INFO  API request received: GET /api/technicians
+2025-07-26T23:59:11.753752777Z [2025-07-26T23:59:11.753Z] INFO  Session activity userId=25 method=GET url=/api/testimonials/company/16 ip=172.68.174.206 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.753972313Z [2025-07-26T23:59:11.753Z] INFO  API request received: GET /api/testimonials/company/16
+2025-07-26T23:59:11.757706329Z [2025-07-26T23:59:11.757Z] INFO  Session activity userId=25 method=GET url=/api/review-response/stats/16 ip=172.68.175.79 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.758133471Z [2025-07-26T23:59:11.757Z] INFO  API request received: GET /api/review-response/stats/16
+2025-07-26T23:59:11.761614781Z [2025-07-26T23:59:11.761Z] INFO  Session activity userId=25 method=GET url=/api/check-ins?limit=10 ip=172.68.175.82 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.767437451Z GET /api/technicians - 200 - 17ms
+2025-07-26T23:59:11.768340175Z GET /api/trial/status - 200 - 18ms - Response: {"expired":true,"daysLeft":0,"su…
+2025-07-26T23:59:11.768368145Z [2025-07-26T23:59:11.768Z] INFO  Session activity userId=25 method=GET url=/api/review-response/company/16 ip=172.68.174.88 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.768371365Z [2025-07-26T23:59:11.768Z] INFO  API request received: GET /api/review-response/company/16
+2025-07-26T23:59:11.770386838Z GET /api/testimonials/company/16 - 200 - 17ms
+2025-07-26T23:59:11.773372415Z GET /api/review-response/stats/16 - 200 - 14ms
+2025-07-26T23:59:11.773389525Z [2025-07-26T23:59:11.772Z] INFO  Session activity userId=25 method=GET url=/api/visits?limit=5 ip=172.68.174.194 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.773393085Z [2025-07-26T23:59:11.772Z] INFO  API request received: GET /api/visits?limit=5
+2025-07-26T23:59:11.774272928Z GET /api/review-response/company/16 - 200 - 7ms
+2025-07-26T23:59:11.776324581Z GET /api/visits - 200 - 4ms
+2025-07-26T23:59:11.806492312Z [2025-07-26T23:59:11.805Z] INFO  Session activity userId=25 method=GET url=/assets/icon-32x32.png ip=172.68.175.109 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:11.855316055Z [2025-07-26T23:59:11.854Z] INFO  New database client connected
+2025-07-26T23:59:11.858691432Z [2025-07-26T23:59:11.858Z] INFO  GET userId=25 companyId=NaN ip=172.68.174.11
+2025-07-26T23:59:11.861917506Z [2025-07-26T23:59:11.861Z] WARN  Unauthorized company access attempt
+2025-07-26T23:59:11.863076715Z GET /api/companies/current - 403 - 119ms - Response: {"message":"Access denied"}
+2025-07-26T23:59:12.065876562Z [2025-07-26T23:59:12.065Z] INFO  Session activity userId=25 method=GET url=/assets/icon-16x16.png ip=172.68.175.72 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:13.832982229Z [2025-07-26T23:59:13.832Z] INFO  New database client connected
+2025-07-26T23:59:13.873088307Z GET /api/check-ins - 200 - 2111ms - Response: [{"id":34,"jobType":"Sprinkler Re…
+2025-07-26T23:59:14.345501729Z [2025-07-26T23:59:14.345Z] INFO  Session activity userId=25 method=GET url=/ws ip=172.56.25.121 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:14.767470726Z [2025-07-26T23:59:14.767Z] INFO  Session activity userId=25 method=GET url=/ws ip=172.58.52.74 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:16.242413634Z [2025-07-26T23:59:16.242Z] INFO  Session activity userId=25 method=POST url=/api/billing/subscription ip=172.68.7.161 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:16.245842383Z [2025-07-26T23:59:16.245Z] INFO  Billing subscription request received
+2025-07-26T23:59:16.252039833Z [2025-07-26T23:59:16.251Z] INFO  Creating Stripe payment intent
+2025-07-26T23:59:16.252189117Z [2025-07-26T23:59:16.252Z] INFO  Creating Stripe payment intent
+2025-07-26T23:59:16.399869778Z [2025-07-26T23:59:16.399Z] ERROR  Failed to create payment intent
+2025-07-26T23:59:16.399896688Z {"errorMessage":"This API call cannot be made with a publishable API key. Please use a secret API key. You can find a list of your API keys at https://dashboard.stripe.com/account/apikeys.","amount":9700,"currency":"usd","stripeErrorCode":"secret_key_required","stripeErrorType":"StripePermissionError"}
+2025-07-26T23:59:16.399911279Z [2025-07-26T23:59:16.399Z] ERROR  Stripe payment intent creation failed
+2025-07-26T23:59:16.399931629Z {"errorMessage":"This API call cannot be made with a publishable API key. Please use a secret API key. You can find a list of your API keys at https://dashboard.stripe.com/account/apikeys.","companyId":16,"planId":19,"planName":"Essential","stripeAvailable":true}
+2025-07-26T23:59:16.400712009Z POST /api/billing/subscription - 500 - 158ms - Response: {"error":"Payment proc…
+2025-07-26T23:59:17.015912665Z [2025-07-26T23:59:17.015Z] INFO  Session activity userId=25 method=GET url=/ws ip=172.56.25.121 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:18.856425252Z [2025-07-26T23:59:18.856Z] INFO  Session activity userId=25 method=GET url=/ws ip=172.56.25.121 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:19.389530374Z [2025-07-26T23:59:19.389Z] INFO  Session activity userId=25 method=GET url=/ws ip=172.56.25.121 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:22.029816603Z [2025-07-26T23:59:22.029Z] INFO  Session activity userId=25 method=GET url=/ws ip=172.56.25.121 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:26.985077316Z [2025-07-26T23:59:26.984Z] INFO  Session activity userId=25 method=GET url=/api/trial/status ip=172.68.7.161 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:26.991246185Z GET /api/trial/status - 200 - 7ms - Response: {"expired":true,"daysLeft":0,"sub…
+2025-07-26T23:59:27.048611409Z [2025-07-26T23:59:27.048Z] INFO  Session activity userId=25 method=GET url=/ws ip=172.56.25.121 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:27.531148914Z [2025-07-26T23:59:27.530Z] INFO  Session activity userId=25 method=GET url=/ws ip=172.56.25.121 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:28.041111547Z [2025-07-26T23:59:28.040Z] INFO  Session activity userId=25 method=GET url=/ws ip=172.56.25.121 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:32.622725855Z [2025-07-26T23:59:32.622Z] INFO  Session activity userId=25 method=GET url=/ws ip=172.56.25.121 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+2025-07-26T23:59:37.648595098Z [2025-07-26T23:59:37.648Z] INFO  Session activity userId=25 method=GET url=/ws ip=172.56.25.121 userAgent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36

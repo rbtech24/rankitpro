@@ -1,0 +1,351 @@
+Loading Stripe with key: pk_live_51Q1IJKABx6O...
+main-0gWu4eCt.js:57  GET https://rankitpro.com/api/auth/me 401 (Unauthorized)
+ie @ main-0gWu4eCt.js:57
+Nr @ main-0gWu4eCt.js:752
+i @ main-0gWu4eCt.js:57
+b @ main-0gWu4eCt.js:57
+start @ main-0gWu4eCt.js:57
+fetch @ main-0gWu4eCt.js:57
+fetchQuery @ main-0gWu4eCt.js:57
+prefetchQuery @ main-0gWu4eCt.js:57
+(anonymous) @ main-0gWu4eCt.js:2410
+Th @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+BE @ main-0gWu4eCt.js:48
+(anonymous) @ main-0gWu4eCt.js:48
+U @ main-0gWu4eCt.js:17Understand this error
+main-0gWu4eCt.js:752 Auth check failed, clearing cache: Error: 401: Not authenticated
+    at fI (main-0gWu4eCt.js:57:44046)
+    at async ie (main-0gWu4eCt.js:57:44247)
+    at async Nr (main-0gWu4eCt.js:752:62114)
+Nr @ main-0gWu4eCt.js:752
+await in Nr
+i @ main-0gWu4eCt.js:57
+b @ main-0gWu4eCt.js:57
+start @ main-0gWu4eCt.js:57
+fetch @ main-0gWu4eCt.js:57
+fetchQuery @ main-0gWu4eCt.js:57
+prefetchQuery @ main-0gWu4eCt.js:57
+(anonymous) @ main-0gWu4eCt.js:2410
+Th @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+BE @ main-0gWu4eCt.js:48
+(anonymous) @ main-0gWu4eCt.js:48
+U @ main-0gWu4eCt.js:17Understand this warning
+main-0gWu4eCt.js:57  GET https://rankitpro.com/api/auth/me 401 (Unauthorized)
+ie @ main-0gWu4eCt.js:57
+Nr @ main-0gWu4eCt.js:752
+i @ main-0gWu4eCt.js:57
+b @ main-0gWu4eCt.js:57
+start @ main-0gWu4eCt.js:57
+fetch @ main-0gWu4eCt.js:57
+xx @ main-0gWu4eCt.js:57
+onSubscribe @ main-0gWu4eCt.js:57
+subscribe @ main-0gWu4eCt.js:57
+(anonymous) @ main-0gWu4eCt.js:57
+nA @ main-0gWu4eCt.js:48
+Th @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+BE @ main-0gWu4eCt.js:48
+kp @ main-0gWu4eCt.js:48
+HE @ main-0gWu4eCt.js:48
+Lh @ main-0gWu4eCt.js:48
+$E @ main-0gWu4eCt.js:48
+DE @ main-0gWu4eCt.js:48
+EE @ main-0gWu4eCt.js:48
+AE @ main-0gWu4eCt.js:48
+KE @ main-0gWu4eCt.js:48
+U @ main-0gWu4eCt.js:17Understand this error
+main-0gWu4eCt.js:752 Auth check failed, clearing cache: Error: 401: Not authenticated
+    at fI (main-0gWu4eCt.js:57:44046)
+    at async ie (main-0gWu4eCt.js:57:44247)
+    at async Nr (main-0gWu4eCt.js:752:62114)
+Nr @ main-0gWu4eCt.js:752
+await in Nr
+i @ main-0gWu4eCt.js:57
+b @ main-0gWu4eCt.js:57
+start @ main-0gWu4eCt.js:57
+fetch @ main-0gWu4eCt.js:57
+xx @ main-0gWu4eCt.js:57
+onSubscribe @ main-0gWu4eCt.js:57
+subscribe @ main-0gWu4eCt.js:57
+(anonymous) @ main-0gWu4eCt.js:57
+nA @ main-0gWu4eCt.js:48
+Th @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+BE @ main-0gWu4eCt.js:48
+kp @ main-0gWu4eCt.js:48
+HE @ main-0gWu4eCt.js:48
+Lh @ main-0gWu4eCt.js:48
+$E @ main-0gWu4eCt.js:48
+DE @ main-0gWu4eCt.js:48
+EE @ main-0gWu4eCt.js:48
+AE @ main-0gWu4eCt.js:48
+KE @ main-0gWu4eCt.js:48
+U @ main-0gWu4eCt.js:17Understand this warning
+rankitpro.com/:1 <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes">Understand this warning
+main-0gWu4eCt.js:752 Attempting login for: rodbartrufftech@gmail.com
+main-0gWu4eCt.js:752 Login response received: {user: {…}}
+main-0gWu4eCt.js:752 WebSocket disabled for notifications - using API polling instead
+main-0gWu4eCt.js:802 Dashboard: Fetching testimonials for company: 16
+main-0gWu4eCt.js:802 Loaded subscription plans: (3) [{…}, {…}, {…}]
+main-0gWu4eCt.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: WebSocket is closed before the connection is established.
+(anonymous) @ main-0gWu4eCt.js:802
+oo @ main-0gWu4eCt.js:48
+CE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+BE @ main-0gWu4eCt.js:48
+kp @ main-0gWu4eCt.js:48
+HE @ main-0gWu4eCt.js:48
+Lh @ main-0gWu4eCt.js:48
+$E @ main-0gWu4eCt.js:48
+DE @ main-0gWu4eCt.js:48
+EE @ main-0gWu4eCt.js:48
+AE @ main-0gWu4eCt.js:48
+KE @ main-0gWu4eCt.js:48
+U @ main-0gWu4eCt.js:17Understand this warning
+main-0gWu4eCt.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: WebSocket is closed before the connection is established.
+(anonymous) @ main-0gWu4eCt.js:802
+oo @ main-0gWu4eCt.js:48
+CE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+Mh @ main-0gWu4eCt.js:48
+SE @ main-0gWu4eCt.js:48
+BE @ main-0gWu4eCt.js:48
+kp @ main-0gWu4eCt.js:48
+HE @ main-0gWu4eCt.js:48
+Lh @ main-0gWu4eCt.js:48
+$E @ main-0gWu4eCt.js:48
+DE @ main-0gWu4eCt.js:48
+EE @ main-0gWu4eCt.js:48
+AE @ main-0gWu4eCt.js:48
+KE @ main-0gWu4eCt.js:48
+U @ main-0gWu4eCt.js:17Understand this warning
+main-0gWu4eCt.js:57  GET https://rankitpro.com/api/companies/current 403 (Forbidden)
+(anonymous) @ main-0gWu4eCt.js:57
+i @ main-0gWu4eCt.js:57
+b @ main-0gWu4eCt.js:57
+start @ main-0gWu4eCt.js:57
+fetch @ main-0gWu4eCt.js:57
+xx @ main-0gWu4eCt.js:57
+setOptions @ main-0gWu4eCt.js:57
+(anonymous) @ main-0gWu4eCt.js:57
+Th @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+$i @ main-0gWu4eCt.js:48
+bE @ main-0gWu4eCt.js:48
+BE @ main-0gWu4eCt.js:48
+kp @ main-0gWu4eCt.js:48
+$E @ main-0gWu4eCt.js:48
+DE @ main-0gWu4eCt.js:48
+EE @ main-0gWu4eCt.js:48
+AE @ main-0gWu4eCt.js:48
+HE @ main-0gWu4eCt.js:48
+Lh @ main-0gWu4eCt.js:48
+WE @ main-0gWu4eCt.js:48
+(anonymous) @ main-0gWu4eCt.js:48
+setTimeout
+KK @ main-0gWu4eCt.js:57
+o @ main-0gWu4eCt.js:57
+batch @ main-0gWu4eCt.js:57
+Cl @ main-0gWu4eCt.js:57
+setData @ main-0gWu4eCt.js:57
+setQueryData @ main-0gWu4eCt.js:57
+see @ main-0gWu4eCt.js:752
+await in see
+mutationFn @ main-0gWu4eCt.js:802
+await in mutationFn
+fn @ main-0gWu4eCt.js:57
+b @ main-0gWu4eCt.js:57
+start @ main-0gWu4eCt.js:57
+execute @ main-0gWu4eCt.js:57
+await in execute
+mutate @ main-0gWu4eCt.js:57
+(anonymous) @ main-0gWu4eCt.js:57
+y @ main-0gWu4eCt.js:802
+(anonymous) @ main-0gWu4eCt.js:802
+await in (anonymous)
+QE @ main-0gWu4eCt.js:48
+(anonymous) @ main-0gWu4eCt.js:48
+rP @ main-0gWu4eCt.js:48
+wb @ main-0gWu4eCt.js:48
+Ib @ main-0gWu4eCt.js:49
+sK @ main-0gWu4eCt.js:49Understand this error
+main-0gWu4eCt.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-0gWu4eCt.js:802
+(anonymous) @ main-0gWu4eCt.js:802Understand this error
+main-0gWu4eCt.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-0gWu4eCt.js:802
+(anonymous) @ main-0gWu4eCt.js:802Understand this error
+main-0gWu4eCt.js:802 Quick restore plan: {plan: {…}, planId: 19, planIdType: 'number', billing: 'monthly'}
+main-0gWu4eCt.js:802 Sending subscription request: {planId: 19, planIdType: 'number', billingPeriod: 'monthly'}
+main-0gWu4eCt.js:802  POST https://rankitpro.com/api/billing/subscription 500 (Internal Server Error)
+window.fetch @ main-0gWu4eCt.js:802
+ie @ main-0gWu4eCt.js:57
+mutationFn @ main-0gWu4eCt.js:802
+fn @ main-0gWu4eCt.js:57
+b @ main-0gWu4eCt.js:57
+start @ main-0gWu4eCt.js:57
+execute @ main-0gWu4eCt.js:57
+await in execute
+mutate @ main-0gWu4eCt.js:57
+(anonymous) @ main-0gWu4eCt.js:57
+S @ main-0gWu4eCt.js:802
+onClick @ main-0gWu4eCt.js:802
+QE @ main-0gWu4eCt.js:48
+(anonymous) @ main-0gWu4eCt.js:48
+rP @ main-0gWu4eCt.js:48
+wb @ main-0gWu4eCt.js:48
+Ib @ main-0gWu4eCt.js:49
+sK @ main-0gWu4eCt.js:49Understand this error
+main-0gWu4eCt.js:802 Subscription creation error: Error: 500: Unable to process payment. Please try again or contact support.
+    at fI (main-0gWu4eCt.js:57:44046)
+    at async ie (main-0gWu4eCt.js:57:44247)
+    at async Object.mutationFn (main-0gWu4eCt.js:802:13087)
+onError @ main-0gWu4eCt.js:802
+execute @ main-0gWu4eCt.js:57
+await in execute
+mutate @ main-0gWu4eCt.js:57
+(anonymous) @ main-0gWu4eCt.js:57
+S @ main-0gWu4eCt.js:802
+onClick @ main-0gWu4eCt.js:802
+QE @ main-0gWu4eCt.js:48
+(anonymous) @ main-0gWu4eCt.js:48
+rP @ main-0gWu4eCt.js:48
+wb @ main-0gWu4eCt.js:48
+Ib @ main-0gWu4eCt.js:49
+sK @ main-0gWu4eCt.js:49Understand this error
+main-0gWu4eCt.js:752 Attempting to reconnect WebSocket...
+main-0gWu4eCt.js:752 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
+(anonymous) @ main-0gWu4eCt.js:752Understand this error
+main-0gWu4eCt.js:802 WebSocket connection to 'wss://rankitpro.com/ws' failed: 
