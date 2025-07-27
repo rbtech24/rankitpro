@@ -1694,37 +1694,73 @@ export class DatabaseStorage implements IStorage {
 
   async getRecentActivity(): Promise<Array<{ success: true }>> {
     try {
+      const activities: any[] = [];
+      
+      // Get recent check-ins with user and company information
+      const recentCheckIns = await db.select({
+        id: checkIns.id,
+        customerName: checkIns.customerName,
+        location: checkIns.location,
+        jobType: checkIns.jobType,
+        createdAt: checkIns.createdAt,
+        companyId: checkIns.companyId,
+        technicianId: checkIns.technicianId,
+        companyName: companies.name,
+        technicianName: users.name
+      }).from(checkIns)
+      .leftJoin(companies, eq(checkIns.companyId, companies.id))
+      .leftJoin(users, eq(checkIns.technicianId, users.id))
+      .orderBy(desc(checkIns.createdAt))
+      .limit(5);
+
+      recentCheckIns.forEach(checkIn => {
+        activities.push({
+          type: 'check_in_completed',
+          description: `${checkIn.technicianName || 'Staff member'} completed ${checkIn.jobType || 'service'} for ${checkIn.customerName || 'customer'}`,
+          timestamp: checkIn.createdAt
+        });
+      });
+
+      // Get recent user logins
+      const recentLogins = await db.select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        lastLoginAt: users.lastLoginAt
+      }).from(users)
+      .where(isNotNull(users.lastLoginAt))
+      .orderBy(desc(users.lastLoginAt))
+      .limit(3);
+
+      recentLogins.forEach(user => {
+        activities.push({
+          type: 'user_login',
+          description: `${user.name || user.email} logged in (${user.role})`,
+          timestamp: user.lastLoginAt
+        });
+      });
+
+      // Get recent company registrations
       const recentCompanies = await db.select({
         id: companies.id,
         name: companies.name,
         createdAt: companies.createdAt
-      })
-      .from(companies)
+      }).from(companies)
       .orderBy(desc(companies.createdAt))
-      .limit(5);
+      .limit(3);
 
-      const recentCheckIns = await db.select({
-        id: checkIns.id,
-        createdAt: checkIns.createdAt
-      })
-      .from(checkIns)
-      .orderBy(desc(checkIns.createdAt))
-      .limit(5);
-
-      const activities = [
-        ...recentCompanies.map(company => ({
-          type: 'company_created',
+      recentCompanies.forEach(company => {
+        activities.push({
+          type: 'company_registered',
           description: `New company registered: ${company.name}`,
-          timestamp: company.createdAt || new Date()
-        })),
-        ...recentCheckIns.map(checkIn => ({
-          type: 'check_in_created',
-          description: `New check-in completed (ID: ${checkIn.id})`,
-          timestamp: checkIn.createdAt || new Date()
-        }))
-      ];
+          timestamp: company.createdAt
+        });
+      });
 
-      return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 10);
+      return activities
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 10);
     } catch (error) {
       logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return [];
@@ -1867,6 +1903,22 @@ export class DatabaseStorage implements IStorage {
       const totalTechnicians = await this.getTechnicianCount();
       const totalCheckIns = await this.getCheckInCount();
       const reviewStats = await this.getSystemReviewStats();
+      
+      // Get today's check-ins count
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const todayCheckInsResult = await db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(checkIns)
+        .where(and(
+          gte(checkIns.createdAt, today),
+          lt(checkIns.createdAt, tomorrow)
+        ));
+      
+      const todayCheckIns = Number(todayCheckInsResult[0]?.count) || 0;
 
       return {
         totalCompanies,
@@ -1874,6 +1926,7 @@ export class DatabaseStorage implements IStorage {
         totalUsers,
         totalTechnicians,
         totalCheckIns,
+        todayCheckIns,
         avgRating: reviewStats.averageRating || 0,
         totalReviews: reviewStats.totalReviews || 0
       };
@@ -1885,6 +1938,7 @@ export class DatabaseStorage implements IStorage {
         totalUsers: 0,
         totalTechnicians: 0,
         totalCheckIns: 0,
+        todayCheckIns: 0,
         avgRating: 0,
         totalReviews: 0
       };

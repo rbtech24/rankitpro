@@ -183,9 +183,9 @@ export default function SystemOverview() {
                   <CheckSquare className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{(stats as any)?.totalCheckIns || 0}</div>
+                  <div className="text-2xl font-bold">{(stats as any)?.todayCheckIns || 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    Total system check-ins
+                    {(stats as any)?.totalCheckIns || 0} total system check-ins
                   </p>
                 </CardContent>
               </Card>
