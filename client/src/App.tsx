@@ -143,8 +143,8 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
     const logoutParam = urlParams.get('logout') || urlParams.get('force');
     
     if (logoutParam) {
-      // Force immediate redirect to login if logout parameter present
-      setLocation("/login");
+      // Force immediate redirect to home page if logout parameter present
+      setLocation("/");
       return;
     }
   }, [setLocation]);
@@ -157,7 +157,7 @@ function PrivateRoute({ component: Component, role, ...rest }: { component: Reac
   
   // Handle authentication errors or missing user
   if (error || !auth?.user) {
-    setTimeout(() => setLocation("/login"), 100);
+    setTimeout(() => setLocation("/"), 100);
     return null;
   }
   
@@ -197,11 +197,11 @@ function Router() {
   const urlParams = new URLSearchParams(window.location.search);
   const isLoggedOut = urlParams.has('logout') || urlParams.has('force') || urlParams.has('cleared');
   
-  // Force redirect to login if logout parameter is present
+  // Force redirect to home page if logout parameter is present
   useEffect(() => {
     if (isLoggedOut) {
       queryClient.setQueryData(["/api/auth/me"], { user: null, company: null });
-      setLocation("/login");
+      setLocation("/");
     }
   }, [isLoggedOut, setLocation]);
   
@@ -226,7 +226,7 @@ function Router() {
   if (isLoggedOut || !auth?.user) {
     return (
       <Switch>
-        <Route path="/login"><Login /></Route>
+        <Route path="/login"><Redirect to="/" /></Route>
         <Route path="/logout"><LogoutHandler /></Route>
         <Route path="/force-logout"><ForceLogout /></Route>
         <Route path="/forgot-password"><ForgotPassword /></Route>
@@ -273,15 +273,15 @@ function Router() {
            auth.user.role === "super_admin" ? <Redirect to="/admin" /> :
            auth.user.role === "sales_staff" ? <Redirect to="/sales-dashboard" /> :
            <Redirect to="/dashboard" />) 
-          : <Login />}
+          : <Redirect to="/" />}
       </Route>
       
-      {/* Admin setup redirect to login */}
+      {/* Admin setup redirect to home */}
       <Route path="/admin/setup">
-        <Redirect to="/login" />
+        <Redirect to="/" />
       </Route>
       <Route path="/admin-access">
-        <Redirect to="/login" />
+        <Redirect to="/" />
       </Route>
       <Route path="/forgot-password">
         <ForgotPassword />

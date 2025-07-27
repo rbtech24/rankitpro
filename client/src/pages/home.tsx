@@ -42,6 +42,17 @@ const Home = () => {
   const isMobile = useIsMobile();
   const [showLoginModal, setShowLoginModal] = useState(false);
   
+  // Check if user came from login URL and auto-open modal
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromLogin = window.location.pathname === '/login' || urlParams.get('login') === 'true';
+    if (fromLogin) {
+      setShowLoginModal(true);
+      // Clean up URL without page reload
+      window.history.replaceState({}, '', '/');
+    }
+  }, []);
+  
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
