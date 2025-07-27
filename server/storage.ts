@@ -117,6 +117,7 @@ export interface IStorage {
   
   // Testimonials operations (new table)
   getTestimonialsByCompany(companyId: number): Promise<Testimonial[]>;
+  getAllTestimonials(): Promise<Testimonial[]>;
   
   // Analytics operations - CRITICAL FOR DASHBOARD
   getAllCheckIns(): Promise<CheckIn[]>;
@@ -5272,6 +5273,15 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
       return false;
+    }
+  }
+  // Add getAllTestimonials method for API endpoint
+  async getAllTestimonials(): Promise<Testimonial[]> {
+    try {
+      return await db.select().from(testimonials).orderBy(desc(testimonials.createdAt));
+    } catch (error) {
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
+      return [];
     }
   }
 }

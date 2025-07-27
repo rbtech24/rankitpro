@@ -148,6 +148,37 @@ export default function registerRoutes(app: Express) {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
+  // Add missing core business endpoints with real data
+  app.get('/api/testimonials', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const testimonials = await storage.getAllTestimonials();
+      res.json(testimonials);
+    } catch (error) {
+      logger.error('Error fetching testimonials', { errorMessage: error instanceof Error ? error.message : String(error) });
+      res.status(500).json({ message: 'Error fetching testimonials' });
+    }
+  });
+
+  app.get('/api/blog-posts', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const blogPosts = await storage.getAllBlogPosts();
+      res.json(blogPosts);
+    } catch (error) {
+      logger.error('Error fetching blog posts', { errorMessage: error instanceof Error ? error.message : String(error) });
+      res.status(500).json({ message: 'Error fetching blog posts' });
+    }
+  });
+
+  app.get('/api/check-ins', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const checkIns = await storage.getAllCheckIns();
+      res.json(checkIns);
+    } catch (error) {
+      logger.error('Error fetching check-ins', { errorMessage: error instanceof Error ? error.message : String(error) });
+      res.status(500).json({ message: 'Error fetching check-ins' });
+    }
+  });
+
   // Trial status endpoint for TrialGuard component (must be authenticated)
   app.get("/api/trial/status", isAuthenticated, async (req: Request, res: Response) => {
     try {
