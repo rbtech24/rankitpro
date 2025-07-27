@@ -15,9 +15,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Loader2 } from "lucide-react";
 import StripeConfigNotice from "../components/billing/stripe-config-notice";
 
-// Initialize Stripe with hardcoded public key to avoid environment variable issues
+// Initialize Stripe with correct public key from user
 const getStripePromise = () => {
-  // Use hardcoded public key from user's dashboard to bypass environment variable conflicts
+  // Use the provided public key from user's Stripe dashboard
   const publicKey = "pk_live_51Q1IJKABx6OzSP6kA2eNndSD5luY9WJPP6HSuQ9QFZOFGIlTQaT0YeHAQCIuTlHXEZ0eV04wBl3WdjBtCf4gXi2W00jdezk2mo";
   if (!publicKey || !publicKey.startsWith('pk_')) {
     console.warn('Stripe public key not configured or invalid');
