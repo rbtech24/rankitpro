@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { Logo } from '../ui/logo';
+import { LoginModal } from '../auth/LoginModal';
 
 interface InfoPageLayoutProps {
   title: string;
@@ -13,6 +14,8 @@ export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({
   description, 
   children 
 }) => {
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header/Nav */}
@@ -32,7 +35,12 @@ export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({
               <Link href="/testimonials"><span className="text-slate-600 hover:text-[#0088d2] cursor-pointer">Testimonials</span></Link>
               <Link href="/resources"><span className="text-slate-600 hover:text-[#0088d2] cursor-pointer">Resources</span></Link>
               <Link href="/about"><span className="text-slate-600 hover:text-[#0088d2] cursor-pointer">About</span></Link>
-              <Link href="/login"><span className="text-slate-600 hover:text-[#0088d2] cursor-pointer">Login</span></Link>
+              <span 
+                className="text-slate-600 hover:text-[#0088d2] cursor-pointer"
+                onClick={() => setShowLoginModal(true)}
+              >
+                Login
+              </span>
             </nav>
             <div className="flex space-x-4">
               <Link href="/register">
@@ -109,31 +117,43 @@ export const InfoPageLayout: React.FC<InfoPageLayoutProps> = ({
               <div className="mt-4 md:mt-0 flex items-center">
                 <Link href="/privacy-policy"><span className="text-slate-400 hover:text-primary mr-4 cursor-pointer">Privacy Policy</span></Link>
                 <Link href="/terms-of-service"><span className="text-slate-400 hover:text-primary mr-4 cursor-pointer">Terms of Service</span></Link>
-                <Link href="/login?admin=true" className="text-xs text-slate-600 hover:text-primary transition-colors duration-200 ml-2">
-                  <span className="flex items-center cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    Admin
-                  </span>
-                </Link>
-                <Link href="/login?sales=true" className="text-xs text-slate-600 hover:text-primary transition-colors duration-200 ml-2">
-                  <span className="flex items-center cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    Sales Staff
-                  </span>
-                </Link>
+                <span 
+                  className="text-xs text-slate-600 hover:text-primary transition-colors duration-200 ml-2 flex items-center cursor-pointer"
+                  onClick={() => setShowLoginModal(true)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  Admin
+                </span>
+                <span 
+                  className="text-xs text-slate-600 hover:text-primary transition-colors duration-200 ml-2 flex items-center cursor-pointer"
+                  onClick={() => setShowLoginModal(true)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  Sales Staff
+                </span>
               </div>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* Login Modal */}
+      <LoginModal
+        open={showLoginModal}
+        onOpenChange={setShowLoginModal}
+        onSuccess={() => {
+          // Redirect to dashboard after successful login
+          window.location.href = '/dashboard';
+        }}
+      />
     </div>
   );
 };
