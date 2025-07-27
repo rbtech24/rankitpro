@@ -7,8 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge';
 import { ArrowRight, TrendingUp, Search, Globe, CheckCircle } from 'lucide-react';
 import { Logo } from '../components/ui/logo';
+import { LoginModal } from '../components/auth/LoginModal';
 
 const ROICalculatorFresh = () => {
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  
   // User inputs
   const [currentLeads, setCurrentLeads] = useState(12);
   const [conversionRate, setConversionRate] = useState(25);
@@ -120,9 +123,13 @@ const ROICalculatorFresh = () => {
             <a href="/#benefits" className="text-sm font-medium hover:text-blue-600 transition-colors">Benefits</a>
             <a href="/#testimonials" className="text-sm font-medium hover:text-blue-600 transition-colors">Success Stories</a>
             <a href="/#pricing" className="text-sm font-medium hover:text-blue-600 transition-colors">Pricing</a>
-            <Link to="/login">
-              <Button variant="outline" size="sm">Sign In</Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowLoginModal(true)}
+            >
+              Sign In
+            </Button>
             <Link to="/register">
               <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Start Free Trial</Button>
             </Link>
@@ -482,6 +489,16 @@ const ROICalculatorFresh = () => {
           </div>
         </div>
       </footer>
+
+      {/* Login Modal */}
+      <LoginModal
+        open={showLoginModal}
+        onOpenChange={setShowLoginModal}
+        onSuccess={() => {
+          // Redirect to dashboard after successful login
+          window.location.href = '/dashboard';
+        }}
+      />
     </div>
   );
 };

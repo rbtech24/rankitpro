@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "../components/ui/button";
+import { LoginModal } from "../components/auth/LoginModal";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { 
@@ -39,6 +40,7 @@ import { Logo } from "../components/ui/logo";
 
 const Home = () => {
   const isMobile = useIsMobile();
+  const [showLoginModal, setShowLoginModal] = useState(false);
   
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -53,9 +55,13 @@ const Home = () => {
             <a href="#benefits" className="text-sm font-medium hover:text-blue-600 transition-colors">Benefits</a>
             <a href="#testimonials" className="text-sm font-medium hover:text-blue-600 transition-colors">Success Stories</a>
             <a href="#pricing" className="text-sm font-medium hover:text-blue-600 transition-colors">Pricing</a>
-            <Link to="/login">
-              <Button variant="outline" size="sm">Sign In</Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowLoginModal(true)}
+            >
+              Sign In
+            </Button>
             <Link to="/register">
               <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Start Free Trial</Button>
             </Link>
@@ -732,6 +738,16 @@ const Home = () => {
           </div>
         </div>
       </footer>
+
+      {/* Login Modal */}
+      <LoginModal
+        open={showLoginModal}
+        onOpenChange={setShowLoginModal}
+        onSuccess={() => {
+          // Redirect to dashboard after successful login
+          window.location.href = '/dashboard';
+        }}
+      />
     </div>
   );
 };
