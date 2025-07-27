@@ -120,6 +120,11 @@ export default function SuperAdminFinance() {
   });
 
   const handleExportData = () => {
+    if (!Array.isArray(transactions) || transactions.length === 0) {
+      console.warn('No transaction data available for export');
+      return;
+    }
+    
     const csvData = transactions.map(t => ({
       Date: new Date(t.date).toLocaleDateString(),
       Company: t.companyName,
@@ -129,6 +134,8 @@ export default function SuperAdminFinance() {
       Type: t.type,
       'Stripe ID': t.stripeTransactionId
     }));
+    
+    if (csvData.length === 0) return;
     
     const csv = [
       Object.keys(csvData[0]).join(','),
@@ -146,7 +153,7 @@ export default function SuperAdminFinance() {
   const formatCurrency = (amount: number) => `$${amount.toLocaleString()}`;
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();
 
-  const filteredTransactions = transactions.filter(t => 
+  const filteredTransactions = (Array.isArray(transactions) ? transactions : []).filter(t => 
     transactionFilter === 'all' || t.type === transactionFilter
   );
 
@@ -277,7 +284,7 @@ export default function SuperAdminFinance() {
               <CardContent>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={revenueTrends}>
+                    <LineChart data={Array.isArray(revenueTrends) ? revenueTrends : []}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
@@ -299,7 +306,7 @@ export default function SuperAdminFinance() {
               <CardContent>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={signupMetrics}>
+                    <BarChart data={Array.isArray(signupMetrics) ? signupMetrics : []}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
@@ -324,7 +331,7 @@ export default function SuperAdminFinance() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={subscriptionBreakdown}
+                          data={Array.isArray(subscriptionBreakdown) ? subscriptionBreakdown : []}
                           cx="50%"
                           cy="50%"
                           labelLine={false}
@@ -333,7 +340,7 @@ export default function SuperAdminFinance() {
                           fill="#8884d8"
                           dataKey="revenue"
                         >
-                          {subscriptionBreakdown.map((entry, index) => (
+                          {(Array.isArray(subscriptionBreakdown) ? subscriptionBreakdown : []).map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={PLAN_COLORS[entry.plan as keyof typeof PLAN_COLORS] || '#8884d8'} />
                           ))}
                         </Pie>
@@ -351,7 +358,7 @@ export default function SuperAdminFinance() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {subscriptionBreakdown.map((plan) => (
+                    {(Array.isArray(subscriptionBreakdown) ? subscriptionBreakdown : []).map((plan) => (
                       <div key={plan.plan} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center space-x-3">
                           <div 

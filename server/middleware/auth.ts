@@ -64,7 +64,7 @@ export const isAuthenticated = asyncHandler(async (req: Request, res: Response, 
 // Check if user is super admin
 export const isSuperAdmin = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   if (!req.session || !req.session.userId) {
-    logger.security('Super admin access denied - no session', 'warn' as any, {
+    logger.info('Super admin access denied - no session', {
       method: req.method,
       url: req.originalUrl,
       ip: req.ip
@@ -74,7 +74,7 @@ export const isSuperAdmin = asyncHandler(async (req: Request, res: Response, nex
 
   const user = await storage.getUser(req.session.userId);
   if (!user) {
-    logger.security('Super admin access denied - user not found', 'warn' as any, {
+    logger.info('Super admin access denied - user not found', {
       userId: req.session.userId,
       method: req.method,
       url: req.originalUrl,
@@ -84,14 +84,14 @@ export const isSuperAdmin = asyncHandler(async (req: Request, res: Response, nex
   }
 
   if (user.role !== "super_admin") {
-    logger.security('Super admin access denied - insufficient privileges', 'warn' as any, {
+    logger.info('Super admin access denied - insufficient privileges', {
       userId: user.id,
       userRole: user.role,
       method: req.method,
       url: req.originalUrl,
       ip: req.ip
     });
-    return res.status(403).json({ success: true });
+    return res.status(403).json({ message: "Access denied" });
   }
 
   req.user = user;

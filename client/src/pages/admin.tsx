@@ -102,7 +102,7 @@ export default function AdminPage() {
   const quickStats = [
     { 
       title: "Total Companies", 
-      value: companies.length || 0, 
+      value: (companies && companies.length) || 0, 
       icon: Building2, 
       color: "bg-blue-500",
       change: "+12%"
