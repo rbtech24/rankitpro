@@ -18,19 +18,22 @@ if (process.env.STRIPE_SECRET_KEY) {
   if (!secretKey.startsWith('sk_')) {
     logger.error("Invalid Stripe key format - must start with 'sk_'", { 
       keyPrefix: secretKey.substring(0, 10),
+      keyLength: secretKey.length,
+      fullKey: secretKey
+    });
+    // In production, don't crash the server - just disable Stripe functionality
+    logger.warn("Disabling Stripe functionality due to invalid secret key");
+    stripe = null;
+  } else {
+    logger.info("Initializing Stripe with secret key", { 
+      keyPrefix: secretKey.substring(0, 15),
       keyLength: secretKey.length
     });
-    throw new Error('STRIPE_SECRET_KEY must be a secret key starting with sk_');
+    
+    stripe = new Stripe(secretKey, {
+      apiVersion: "2023-10-16" as any,
+    });
   }
-  
-  logger.info("Initializing Stripe with secret key", { 
-    keyPrefix: secretKey.substring(0, 15),
-    keyLength: secretKey.length
-  });
-  
-  stripe = new Stripe(secretKey, {
-    apiVersion: "2023-10-16" as any,
-  });
 }
 
 // Define price IDs for different subscription plans (monthly and yearly)
