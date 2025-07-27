@@ -5238,6 +5238,10 @@ export class DatabaseStorage implements IStorage {
       if (updates.features) updateData.features = JSON.stringify(updates.features);
       if (updates.isActive !== undefined) updateData.isActive = updates.isActive;
       
+      // Handle Stripe fields
+      if (updates.stripePriceId !== undefined) updateData.stripePriceId = updates.stripePriceId;
+      if (updates.stripeProductId !== undefined) updateData.stripeProductId = updates.stripeProductId;
+      
       const [updatedPlan] = await db.update(subscriptionPlans)
         .set(updateData)
         .where(eq(subscriptionPlans.id, id))
