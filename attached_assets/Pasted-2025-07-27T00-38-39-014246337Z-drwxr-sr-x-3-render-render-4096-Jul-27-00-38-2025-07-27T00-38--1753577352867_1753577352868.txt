@@ -1,0 +1,57 @@
+2025-07-27T00:38:39.014246337Z drwxr-sr-x  3 render render    4096 Jul 27 00:38 .
+2025-07-27T00:38:39.014249167Z drwxr-sr-x 17 render render    4096 Jul 27 00:38 ..
+2025-07-27T00:38:39.014251717Z -rw-r--r--  1 render render      41 Jul 27 00:38 index.js
+2025-07-27T00:38:39.014254328Z -rw-r--r--  1 render render     154 Jul 27 00:38 package.json
+2025-07-27T00:38:39.014257217Z drwxr-sr-x  3 render render    4096 Jul 27 00:38 public
+2025-07-27T00:38:39.014259797Z -rw-r--r--  1 render render 5747663 Jul 27 00:38 server.js
+2025-07-27T00:38:43.434857327Z ==> Uploading build...
+2025-07-27T00:39:07.423558633Z ==> Uploaded in 5.9s. Compression took 18.1s
+2025-07-27T00:39:07.460751892Z ==> Build successful 🎉
+2025-07-27T00:39:09.676577687Z ==> Deploying...
+2025-07-27T00:39:31.406044955Z ==> Running 'npm start'
+2025-07-27T00:39:31.655270737Z 
+2025-07-27T00:39:31.655290028Z > workspace@1.0.0 start
+2025-07-27T00:39:31.655295738Z > node dist/index.js
+2025-07-27T00:39:31.655298338Z 
+2025-07-27T00:39:32.339297077Z [2025-07-27T00:39:32.338Z] INFO  Parameter processed
+2025-07-27T00:39:32.341658402Z [2025-07-27T00:39:32.341Z] INFO  ✅ Database connection initialized
+2025-07-27T00:39:32.357023341Z [2025-07-27T00:39:32.356Z] WARN  Resend API key not configured. Email functionality will be disabled.
+2025-07-27T00:39:32.427846115Z [2025-07-27T00:39:32.427Z] WARN  
+2025-07-27T00:39:32.427862475Z ⚠️  ENVIRONMENT CONFIGURATION WARNINGS:
+2025-07-27T00:39:32.427866025Z [2025-07-27T00:39:32.427Z] WARN  Configuration warning
+2025-07-27T00:39:32.42801771Z [2025-07-27T00:39:32.427Z] WARN  Configuration warning
+2025-07-27T00:39:32.428059922Z [2025-07-27T00:39:32.427Z] WARN  Configuration warning
+2025-07-27T00:39:32.428151874Z [2025-07-27T00:39:32.428Z] WARN  
+2025-07-27T00:39:32.428157435Z Application will start with limited functionality.
+2025-07-27T00:39:32.428159995Z 
+2025-07-27T00:39:32.428592268Z [2025-07-27T00:39:32.428Z] INFO  ✅ Environment validation completed
+2025-07-27T00:39:32.428724923Z [2025-07-27T00:39:32.428Z] INFO  🚀 Starting Rank It Pro SaaS Platform
+2025-07-27T00:39:32.428805435Z [2025-07-27T00:39:32.428Z] INFO  Features enabled: none
+2025-07-27T00:39:32.428898198Z [2025-07-27T00:39:32.428Z] INFO  Database connection attempt 1/5
+2025-07-27T00:39:34.90461998Z [2025-07-27T00:39:34.904Z] INFO  New database client connected
+2025-07-27T00:39:34.958574847Z [2025-07-27T00:39:34.958Z] INFO  ✅ Database connection test successful
+2025-07-27T00:39:34.958802014Z Email service initialization failed - notifications will be disabled warn
+2025-07-27T00:39:34.959205417Z [2025-07-27T00:39:34.959Z] INFO  🧹 Memory optimization service initialized
+2025-07-27T00:39:35.5349317Z [2025-07-27T00:39:35.534Z] ERROR  Unhandled Promise Rejection
+2025-07-27T00:39:35.535010822Z Error: Missing required Stripe secret: STRIPE_SECRET_KEY
+2025-07-27T00:39:35.535014812Z     at server/routes/admin.ts (/opt/render/project/src/dist/server.js:136982:13)
+2025-07-27T00:39:35.535017303Z     at __init (/opt/render/project/src/dist/server.js:9:59)
+2025-07-27T00:39:35.535019732Z     at server/routes.ts (/opt/render/project/src/dist/server.js:141209:5)
+2025-07-27T00:39:35.535021883Z     at __init (/opt/render/project/src/dist/server.js:9:59)
+2025-07-27T00:39:35.535023943Z     at /opt/render/project/src/dist/server.js:143014:64
+2025-07-27T00:39:35.535026743Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-07-27T00:39:35.535028893Z     at async /opt/render/project/src/dist/server.js:143014:28
+2025-07-27T00:40:04.975982856Z [2025-07-27T00:40:04.975Z] INFO  Database client removed from pool
+2025-07-27T00:40:13.476654822Z ==> No open ports detected, continuing to scan...
+2025-07-27T00:40:13.581173142Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-07-27T00:41:14.155213061Z ==> No open ports detected, continuing to scan...
+2025-07-27T00:41:14.236610462Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-07-27T00:42:14.767054637Z ==> No open ports detected, continuing to scan...
+2025-07-27T00:42:14.839141229Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-07-27T00:43:15.490527186Z ==> No open ports detected, continuing to scan...
+2025-07-27T00:43:15.554582945Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-07-27T00:44:16.316991766Z ==> No open ports detected, continuing to scan...
+2025-07-27T00:44:16.596462457Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-07-27T00:44:31.957783629Z ==> Port scan timeout reached, no open ports detected. Bind your service to at least one port. If you don't need to receive traffic on any port, create a background worker instead.
+2025-07-27T00:44:32.020257395Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-07-27T00:44:34.989324368Z [2025-07-27T00:44:34.989Z] INFO  Parameter processed

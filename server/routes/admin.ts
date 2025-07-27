@@ -288,12 +288,15 @@ router.get('/financial/export', isSuperAdmin, async (req, res) => {
   }
 });
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+// Initialize Stripe conditionally
+let stripe: Stripe | null = null;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2023-10-16",
+  });
+} else {
+  logger.warn('Stripe secret key not configured - subscription management will be disabled');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: "2023-10-16",
-});
 
 // Subscription Plan Management Routes
 
@@ -411,27 +414,39 @@ router.post('/subscription-plans', isSuperAdmin, async (req, res) => {
     const validatedData = insertSubscriptionPlanSchema.parse(requestData);
     logger.info('Validated data:', { validatedData });
 
-    // Create Stripe product and price
-    const stripeProduct = await stripe.products.create({
-      name: validatedData.name,
-      description: `${baseUrl}/review/${reviewRequest.id}`,
-    });
+    // Create Stripe product and price if Stripe is configured
+    let stripeProductId = null;
+    let stripePriceId = null;
+    
+    if (stripe) {
+      try {
+        const stripeProduct = await stripe.products.create({
+          name: validatedData.name,
+          description: `Subscription plan: ${validatedData.name}`,
+        });
 
-    const stripePrice = await stripe.prices.create({
-      product: stripeProduct.id,
-      unit_amount: Math.round(Number(validatedData.price) * 100), // Convert to cents
-      currency: 'usd',
-      recurring: {
-        interval: validatedData.billingPeriod === 'yearly' ? 'year' : 'month',
-      },
-    });
+        const stripePrice = await stripe.prices.create({
+          product: stripeProduct.id,
+          unit_amount: Math.round(Number(validatedData.price) * 100), // Convert to cents
+          currency: 'usd',
+          recurring: {
+            interval: validatedData.billingPeriod === 'yearly' ? 'year' : 'month',
+          },
+        });
+        
+        stripeProductId = stripeProduct.id;
+        stripePriceId = stripePrice.id;
+      } catch (stripeError) {
+        logger.warn('Failed to create Stripe product/price', { errorMessage: stripeError instanceof Error ? stripeError.message : String(stripeError) });
+      }
+    }
 
     // Create subscription plan in database
     const plan = await storage.createSubscriptionPlan({
       ...validatedData,
       price: validatedData.price.toString(), // Ensure price is string for database
-      stripeProductId: stripeProduct.id,
-      stripePriceId: stripePrice.id
+      stripeProductId,
+      stripePriceId
     });
 
     logger.info('Created plan:', { plan });
