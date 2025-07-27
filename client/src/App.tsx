@@ -66,7 +66,7 @@ import SuperAdminFinance from "./pages/super-admin-finance";
 import TechniciansManagement from "./pages/technicians-management";
 import SubscriptionPlansManagement from "./pages/subscription-plans-management";
 import SystemSettings from "./pages/system-settings";
-import SystemOverview from "./pages/system-overview";
+
 import SalesDashboard from "./pages/sales-dashboard";
 import SalesManagement from "./pages/sales-management";
 import SetupGuide from "./pages/setup-guide";
@@ -1186,9 +1186,7 @@ function Router() {
           <PrivateRoute component={Dashboard} path="/dashboard" />
         }
       </Route>
-      <Route path="/system-overview">
-        <PrivateRoute component={SystemOverview} path="/system-overview" role="super_admin" />
-      </Route>
+
       <Route path="/setup">
         <PrivateRoute component={SetupGuide} path="/setup" role="company_admin" />
       </Route>
@@ -1307,9 +1305,6 @@ function Router() {
       </Route>
       <Route path="/api-testing">
         <PrivateRoute component={APITesting} path="/api-testing" role="super_admin" />
-      </Route>
-      <Route path="/system-overview">
-        <PrivateRoute component={SystemOverview} path="/system-overview" role="super_admin" />
       </Route>
       <Route path="/sales-dashboard">
         <PrivateRoute component={SalesDashboard} path="/sales-dashboard" role="sales_staff" />

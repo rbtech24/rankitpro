@@ -55,7 +55,7 @@ function AdminLayout({ children }: AdminLayoutProps) {
     {
       section: "Dashboard",
       items: [
-        { name: "System Overview", path: "/system-overview", icon: BarChart3, description: "Platform metrics and analytics" },
+
         { name: "Admin Dashboard", path: "/admin", icon: Server, description: "Main admin interface" },
         { name: "Financial Dashboard", path: "/financial-dashboard", icon: DollarSign, description: "Revenue and financial metrics" },
       ]

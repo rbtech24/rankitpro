@@ -37,7 +37,7 @@ export default function Dashboard() {
   // Redirect super admins to system overview
   useEffect(() => {
     if (isSuperAdmin) {
-      setLocation("/system-overview");
+      setLocation("/admin");
     }
   }, [isSuperAdmin, setLocation]);
   

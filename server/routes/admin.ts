@@ -738,27 +738,7 @@ router.get('/system-stats', isSuperAdmin, async (req, res) => {
   }
 });
 
-// Get chart data for system overview
-router.get('/chart-data', isSuperAdmin, async (req, res) => {
-  try {
-    const checkIns = await storage.getCheckInChartData();
-    const reviews = await storage.getReviewChartData();
-    const companyGrowth = await storage.getCompanyGrowthData();
-    const revenue = await storage.getRevenueChartData();
 
-    const chartData = {
-      checkIns,
-      reviews,
-      companyGrowth,
-      revenue
-    };
-
-    res.json(chartData);
-  } catch (error) {
-    logger.error("Unhandled error occurred");
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
 // Get system health metrics
 router.get('/system-health', isSuperAdmin, async (req, res) => {

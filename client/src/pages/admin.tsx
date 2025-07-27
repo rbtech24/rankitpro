@@ -127,7 +127,7 @@ export default function AdminPage() {
     {
       section: "Dashboard",
       items: [
-        { name: "System Overview", path: "/system-overview", icon: BarChart3, description: "Platform metrics and analytics" },
+
         { name: "Admin Dashboard", path: "/admin", icon: Server, description: "Main admin interface", active: true },
       ]
     },
