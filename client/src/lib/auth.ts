@@ -35,7 +35,7 @@ export interface AuthState {
   company: Company | null;
 }
 
-export async function getCurrentUser(): Promise<AuthState | null> {
+export async function getCurrentUser(): Promise<AuthState> {
   try {
     // Always use API for fresh session data, don't rely on cache
     const response = await apiRequest("GET", "/api/auth/me");
@@ -46,7 +46,7 @@ export async function getCurrentUser(): Promise<AuthState | null> {
       localStorage.removeItem('authUser');
       localStorage.removeItem('authCompany');
       localStorage.removeItem('isAuthenticated');
-      return null;
+      return { user: null, company: null };
     }
     
     const data = await response.json();
@@ -63,14 +63,14 @@ export async function getCurrentUser(): Promise<AuthState | null> {
       return { user: data.user, company: data.company || null };
     }
     
-    return null;
+    return { user: null, company: null };
   } catch (error) {
     console.error("Auth check failed:", error);
     // Clear cached auth data on error
     localStorage.removeItem('authUser');
     localStorage.removeItem('authCompany');
     localStorage.removeItem('isAuthenticated');
-    return null;
+    return { user: null, company: null };
   }
 }
 

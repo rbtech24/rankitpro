@@ -71,7 +71,6 @@ import SalesDashboard from "./pages/sales-dashboard";
 import SalesManagement from "./pages/sales-management";
 import SetupGuide from "./pages/setup-guide";
 import AIContentGenerator from "./pages/ai-content-generator";
-import AdminUserManagement from "./pages/admin-user-management";
 import SupportPage from "./pages/support";
 import DocsPage from "./pages/docs";
 import AdminFeatures from "./pages/admin-features";

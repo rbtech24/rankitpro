@@ -154,7 +154,7 @@ export default function registerRoutes(app: Express) {
       const testimonials = await storage.getAllTestimonials();
       res.json(testimonials);
     } catch (error) {
-      logger.error('Error fetching testimonials', { errorMessage: error instanceof Error ? error.message : String(error) });
+      logger.error('Error fetching testimonials', { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Error fetching testimonials' });
     }
   });
@@ -164,7 +164,7 @@ export default function registerRoutes(app: Express) {
       const blogPosts = await storage.getAllBlogPosts();
       res.json(blogPosts);
     } catch (error) {
-      logger.error('Error fetching blog posts', { errorMessage: error instanceof Error ? error.message : String(error) });
+      logger.error('Error fetching blog posts', { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Error fetching blog posts' });
     }
   });
@@ -174,7 +174,7 @@ export default function registerRoutes(app: Express) {
       const checkIns = await storage.getAllCheckIns();
       res.json(checkIns);
     } catch (error) {
-      logger.error('Error fetching check-ins', { errorMessage: error instanceof Error ? error.message : String(error) });
+      logger.error('Error fetching check-ins', { error: error instanceof Error ? error.message : String(error) });
       res.status(500).json({ message: 'Error fetching check-ins' });
     }
   });
