@@ -3910,6 +3910,20 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Payment transactions for subscription management
+  async getPaymentTransactionsByCompany(companyId: number): Promise<any[]> {
+    try {
+      return await db
+        .select()
+        .from(paymentTransactions)
+        .where(eq(paymentTransactions.companyId, companyId))
+        .orderBy(desc(paymentTransactions.createdAt));
+    } catch (error) {
+      logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
+      return [];
+    }
+  }
+
   // CRITICAL MISSING METHODS FOR ANALYTICS DASHBOARD
   async getAllCheckIns(): Promise<CheckIn[]> {
     try {

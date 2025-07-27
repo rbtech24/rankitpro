@@ -78,6 +78,7 @@ export const companies = pgTable("companies", {
   salesPersonId: integer("sales_person_id"),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
   businessType: text("business_type").notNull().default("field_service"), // 'field_service' or 'marketing_focused'
   industry: text("industry"),
   email: text("email"),

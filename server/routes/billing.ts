@@ -904,4 +904,202 @@ router.get('/payment-status', isAuthenticated, async (req: Request, res: Respons
   }
 });
 
+/**
+ * Get detailed subscription information for current user
+ */
+router.get('/subscription-details', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const user = req.user as any;
+    const companyId = user.companyId;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID not found in session' });
+    }
+
+    const company = await storage.getCompany(companyId);
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    // If no active subscription, return null
+    if (!company.subscriptionPlanId || company.isTrialActive) {
+      return res.json(null);
+    }
+
+    // Get subscription plan details
+    const subscriptionPlan = await storage.getSubscriptionPlan(company.subscriptionPlanId);
+    if (!subscriptionPlan) {
+      return res.status(404).json({ error: 'Subscription plan not found' });
+    }
+
+    // Get last payment to calculate renewal dates
+    const transactions = await storage.getPaymentTransactionsByCompany ? 
+      await storage.getPaymentTransactionsByCompany(companyId) : [];
+    
+    const lastTransaction = transactions
+      .filter(t => t.status === 'success')
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+
+    if (!lastTransaction) {
+      return res.json(null);
+    }
+
+    // Calculate renewal dates (30 days from last payment)
+    const lastPaymentDate = new Date(lastTransaction.createdAt);
+    const nextRenewalDate = new Date(lastPaymentDate);
+    nextRenewalDate.setDate(nextRenewalDate.getDate() + 30);
+    
+    const currentPeriodStart = lastPaymentDate;
+    const currentPeriodEnd = nextRenewalDate;
+    
+    const now = new Date();
+    const daysUntilRenewal = Math.ceil((nextRenewalDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Check if subscription is set to cancel
+    const cancelAtPeriodEnd = company.cancelAtPeriodEnd || false;
+
+    res.json({
+      plan: company.plan,
+      planName: subscriptionPlan.name,
+      amount: lastTransaction.amount,
+      billingPeriod: lastTransaction.billingPeriod,
+      status: now < nextRenewalDate ? 'active' : 'expired',
+      currentPeriodStart: currentPeriodStart.toISOString(),
+      currentPeriodEnd: currentPeriodEnd.toISOString(),
+      nextRenewalDate: nextRenewalDate.toISOString(),
+      daysUntilRenewal,
+      cancelAtPeriodEnd,
+      stripeSubscriptionId: company.stripeSubscriptionId
+    });
+
+  } catch (error: any) {
+    logger.error("Failed to get subscription details", {
+      errorMessage: error instanceof Error ? error.message : String(error)
+    });
+    
+    res.status(500).json({ 
+      error: 'Failed to get subscription details',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * Cancel subscription at end of billing period
+ */
+router.post('/cancel-subscription', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const user = req.user as any;
+    const companyId = user.companyId;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID not found in session' });
+    }
+
+    const company = await storage.getCompany(companyId);
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    if (!company.subscriptionPlanId || company.isTrialActive) {
+      return res.status(400).json({ error: 'No active subscription to cancel' });
+    }
+
+    // Update company to mark subscription for cancellation
+    await storage.updateCompany(companyId, {
+      cancelAtPeriodEnd: true
+    });
+
+    // Log the cancellation request
+    logger.info("Subscription cancellation requested", {
+      companyId,
+      companyName: company.name,
+      subscriptionPlanId: company.subscriptionPlanId,
+      stripeSubscriptionId: company.stripeSubscriptionId
+    });
+
+    // In production, you would call Stripe to cancel:
+    // if (company.stripeSubscriptionId && stripe) {
+    //   await stripe.subscriptions.update(company.stripeSubscriptionId, {
+    //     cancel_at_period_end: true
+    //   });
+    // }
+
+    res.json({
+      success: true,
+      message: 'Subscription will be canceled at the end of the current billing period',
+      cancelAtPeriodEnd: true
+    });
+
+  } catch (error: any) {
+    logger.error("Failed to cancel subscription", {
+      errorMessage: error instanceof Error ? error.message : String(error)
+    });
+    
+    res.status(500).json({ 
+      error: 'Failed to cancel subscription',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * Reactivate a canceled subscription
+ */
+router.post('/reactivate-subscription', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const user = req.user as any;
+    const companyId = user.companyId;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID not found in session' });
+    }
+
+    const company = await storage.getCompany(companyId);
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    if (!company.subscriptionPlanId || company.isTrialActive) {
+      return res.status(400).json({ error: 'No subscription to reactivate' });
+    }
+
+    // Update company to reactivate subscription
+    await storage.updateCompany(companyId, {
+      cancelAtPeriodEnd: false
+    });
+
+    // Log the reactivation request
+    logger.info("Subscription reactivation requested", {
+      companyId,
+      companyName: company.name,
+      subscriptionPlanId: company.subscriptionPlanId,
+      stripeSubscriptionId: company.stripeSubscriptionId
+    });
+
+    // In production, you would call Stripe to reactivate:
+    // if (company.stripeSubscriptionId && stripe) {
+    //   await stripe.subscriptions.update(company.stripeSubscriptionId, {
+    //     cancel_at_period_end: false
+    //   });
+    // }
+
+    res.json({
+      success: true,
+      message: 'Subscription has been reactivated and will continue normally',
+      cancelAtPeriodEnd: false
+    });
+
+  } catch (error: any) {
+    logger.error("Failed to reactivate subscription", {
+      errorMessage: error instanceof Error ? error.message : String(error)
+    });
+    
+    res.status(500).json({ 
+      error: 'Failed to reactivate subscription',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 export default router;

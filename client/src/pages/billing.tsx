@@ -14,6 +14,7 @@ import PaymentForm from "../components/billing/payment-form";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import StripeConfigNotice from "../components/billing/stripe-config-notice";
+import { SubscriptionManager } from "../components/SubscriptionManager";
 
 // Initialize Stripe with correct public key from user
 const getStripePromise = () => {
@@ -486,6 +487,9 @@ export default function Billing() {
             {subscriptionError && (
               <StripeConfigNotice error={subscriptionError} />
             )}
+            
+            {/* Subscription Management */}
+            <SubscriptionManager />
             
             {/* Current Plan Card */}
             <Card>
