@@ -20,6 +20,7 @@ import {
 } from "../components/ui/form";
 import { Input } from "../components/ui/input";
 import { InfoPageLayout } from "../components/layouts/InfoPageLayout";
+import { LoginModal } from "../components/auth/LoginModal";
 
 const formSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -43,6 +44,7 @@ export default function Onboarding() {
   const [currentStep, setCurrentStep] = useState(1);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -189,11 +191,14 @@ export default function Onboarding() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                    <Link href="/login" className="flex-1">
-                      <Button type="button" variant="outline" className="w-full">
-                        Already have an account? Sign In
-                      </Button>
-                    </Link>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => setShowLoginModal(true)}
+                    >
+                      Already have an account? Sign In
+                    </Button>
                     <Button 
                       type="submit" 
                       className="flex-1"
@@ -271,6 +276,16 @@ export default function Onboarding() {
         )}
         </div>
       </div>
+
+      {/* Login Modal */}
+      <LoginModal
+        open={showLoginModal}
+        onOpenChange={setShowLoginModal}
+        onSuccess={() => {
+          // Redirect to dashboard after successful login
+          window.location.href = '/dashboard';
+        }}
+      />
     </InfoPageLayout>
   );
 }
