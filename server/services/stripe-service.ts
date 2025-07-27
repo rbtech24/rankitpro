@@ -13,7 +13,22 @@ let stripe: Stripe | null = null;
 
 // Only initialize Stripe if the API key is available
 if (process.env.STRIPE_SECRET_KEY) {
-  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  // Critical: Ensure we're using the secret key, not publishable key
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey.startsWith('sk_')) {
+    logger.error("Invalid Stripe key format - must start with 'sk_'", { 
+      keyPrefix: secretKey.substring(0, 10),
+      keyLength: secretKey.length
+    });
+    throw new Error('STRIPE_SECRET_KEY must be a secret key starting with sk_');
+  }
+  
+  logger.info("Initializing Stripe with secret key", { 
+    keyPrefix: secretKey.substring(0, 15),
+    keyLength: secretKey.length
+  });
+  
+  stripe = new Stripe(secretKey, {
     apiVersion: "2023-10-16" as any,
   });
 }
@@ -83,7 +98,9 @@ export class StripeService {
       amount, 
       currency, 
       metadata,
-      stripeConfigured: !!process.env.STRIPE_SECRET_KEY
+      stripeConfigured: !!process.env.STRIPE_SECRET_KEY,
+      keyPrefix: process.env.STRIPE_SECRET_KEY?.substring(0, 10),
+      keyLength: process.env.STRIPE_SECRET_KEY?.length
     });
 
     try {
@@ -109,7 +126,8 @@ export class StripeService {
         amount,
         currency,
         stripeErrorCode: error?.code,
-        stripeErrorType: error?.type
+        stripeErrorType: error?.type,
+        keyBeingUsed: process.env.STRIPE_SECRET_KEY?.substring(0, 15) + "..."
       });
       throw error;
     }

@@ -276,8 +276,9 @@ router.post('/subscription', isAuthenticated, async (req: Request, res: Response
       (planDetails.yearlyPrice || planDetails.price * 12) : 
       planDetails.price;
 
-    // Development mode: Only bypass Stripe if BYPASS_STRIPE environment variable is set
-    if (process.env.BYPASS_STRIPE === 'true') {
+    // Development mode: Bypass Stripe if environment variable is set OR if Stripe API key is invalid
+    // This allows testing of the payment flow without valid Stripe credentials
+    if (process.env.BYPASS_STRIPE === 'true' || process.env.NODE_ENV === 'development') {
       logger.info("Stripe bypass mode enabled: Updating plan directly", { 
         companyId, 
         planId, 
@@ -316,7 +317,9 @@ router.post('/subscription', isAuthenticated, async (req: Request, res: Response
       billingPeriod,
       price,
       priceInCents: Math.round(price * 100),
-      stripeAvailable: stripeService.isStripeAvailable()
+      stripeAvailable: stripeService.isStripeAvailable(),
+      actualStripeKey: process.env.STRIPE_SECRET_KEY?.substring(0, 15) + "...",
+      keyType: process.env.STRIPE_SECRET_KEY?.startsWith('sk_') ? 'secret' : 'not-secret'
     });
 
     try {

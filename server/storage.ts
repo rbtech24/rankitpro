@@ -820,7 +820,7 @@ export class DatabaseStorage implements IStorage {
       // Test Stripe if configured
       if (process.env.STRIPE_SECRET_KEY) {
         try {
-          const stripe = await import('stripe').then(Stripe => new Stripe.default(process.env.STRIPE_SECRET_KEY!));
+          const stripe = await import('stripe').then(Stripe => new Stripe.default(process.env.STRIPE_SECRET_KEY || ''));
           await stripe.prices.list({ limit: 1 });
         } catch (error) {
           servicesOk = false;
@@ -1926,7 +1926,7 @@ export class DatabaseStorage implements IStorage {
       // If Stripe is configured, try to get real financial data
       if (process.env.STRIPE_SECRET_KEY) {
         try {
-          const stripe = await import('stripe').then(Stripe => new Stripe.default(process.env.STRIPE_SECRET_KEY!));
+          const stripe = await import('stripe').then(Stripe => new Stripe.default(process.env.STRIPE_SECRET_KEY || ''));
 
           // Get active subscriptions from Stripe
           const subscriptions = await stripe.subscriptions.list({
