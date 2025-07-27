@@ -2119,34 +2119,32 @@ export class DatabaseStorage implements IStorage {
 
   async getRecentTransactions(limit: number = 50): Promise<any[]> {
     try {
-      // Get recent company creations as "transactions"
-      const recentSignups = await db.select({
-        id: companies.id,
+      // Get actual payment transactions from payment_transactions table
+      const recentPayments = await db.select({
+        id: paymentTransactions.id,
+        companyId: paymentTransactions.companyId,
+        amount: paymentTransactions.amount,
+        status: paymentTransactions.status,
+        subscriptionPlanId: paymentTransactions.subscriptionPlanId,
+        createdAt: paymentTransactions.createdAt,
+        stripePaymentId: paymentTransactions.stripePaymentId,
         companyName: companies.name,
-        plan: companies.plan,
-        amount: sql<number>`CASE 
-          WHEN $2 = 'starter' THEN 29
-          WHEN $2 = 'pro' THEN 79
-          WHEN $2 = 'agency' THEN 149
-          ELSE 29
-        END`,
-        status: sql<string>`'completed'`,
-        type: sql<string>`'subscription'`,
-        createdAt: companies.createdAt
-      }).from(companies)
-        .where(eq(companies.isTrialActive, true))
-        .orderBy(desc(companies.createdAt))
+        planName: subscriptionPlans.name
+      }).from(paymentTransactions)
+        .leftJoin(companies, eq(paymentTransactions.companyId, companies.id))
+        .leftJoin(subscriptionPlans, eq(paymentTransactions.subscriptionPlanId, subscriptionPlans.id))
+        .orderBy(desc(paymentTransactions.createdAt))
         .limit(limit);
 
-      return recentSignups.map(transaction => ({
-        id: `transaction-${transaction.id}`,
-        companyName: transaction.companyName,
-        plan: transaction.plan,
-        amount: transaction.amount,
-        status: transaction.status,
-        type: transaction.type,
-        date: transaction.createdAt,
-        transactionId: transaction.id
+      return recentPayments.map(payment => ({
+        id: payment.id,
+        companyName: payment.companyName || 'Unknown Company',
+        amount: Number(payment.amount),
+        status: payment.status,
+        paymentMethod: 'Stripe',
+        date: payment.createdAt,
+        subscriptionPlan: payment.planName || 'Unknown Plan',
+        stripePaymentId: payment.stripePaymentId
       }));
     } catch (error) {
       logger.error("Storage operation error", { errorMessage: error instanceof Error ? error.message : "Unknown error" });
