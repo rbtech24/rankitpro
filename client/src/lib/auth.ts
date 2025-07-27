@@ -37,36 +37,36 @@ export interface AuthState {
 
 export async function getCurrentUser(): Promise<AuthState | null> {
   try {
-    // First try localStorage cache to prevent 404 redirects
-    const cachedUser = localStorage.getItem('authUser');
-    const cachedCompany = localStorage.getItem('authCompany');
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    // Always use API for fresh session data, don't rely on cache
+    const response = await apiRequest("GET", "/api/auth/me");
     
-    if (isAuthenticated === 'true' && cachedUser) {
-      const user = JSON.parse(cachedUser);
-      const company = cachedCompany ? JSON.parse(cachedCompany) : null;
-      
-      // Return cached data immediately to prevent 404 redirects
-      return { user, company };
+    if (!response.ok) {
+      console.log('Auth API failed:', response.status, response.statusText);
+      // Clear any cached auth data on failure
+      localStorage.removeItem('authUser');
+      localStorage.removeItem('authCompany');
+      localStorage.removeItem('isAuthenticated');
+      return null;
     }
     
-    // If no cache, try API but handle failures gracefully
-    const response = await apiRequest("GET", "/api/auth/me");
     const data = await response.json();
+    console.log('Auth API response:', data);
     
     if (data.user) {
-      // Update cache
+      // Update cache only after successful API call
       localStorage.setItem('authUser', JSON.stringify(data.user));
-      localStorage.setItem('authCompany', JSON.stringify(data.company));
+      if (data.company) {
+        localStorage.setItem('authCompany', JSON.stringify(data.company));
+      }
       localStorage.setItem('isAuthenticated', 'true');
       
-      return { user: data.user, company: data.company };
+      return { user: data.user, company: data.company || null };
     }
     
     return null;
   } catch (error) {
-    // Silently handle auth failures to prevent 404 redirects
-    console.warn("Auth check failed, clearing cache:", error);
+    console.error("Auth check failed:", error);
+    // Clear cached auth data on error
     localStorage.removeItem('authUser');
     localStorage.removeItem('authCompany');
     localStorage.removeItem('isAuthenticated');
